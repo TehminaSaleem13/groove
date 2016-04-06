@@ -373,7 +373,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               '<span><strong>Date: </strong>' + date + '</span><br/>' +
               '<span><strong>Daily Speed Score: </strong>' + scope.get_speed(data_points.data[i][1]) + '% </span><br/>' +
               '<span><strong>Avg. Time/Item: </strong>' + data_points.data[i][1] + ' sec</span>' +
-              '</div><hr>';
+              '</div>';
             }
           } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
             for (var i = data_points.data.length - 1; i >= 0; i--) {
@@ -381,49 +381,33 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
               single_tooltip = data_points.data[i][1] + ' items packed for ' + data_points.data[i][2] + ' orders on ' + date;
               tooltipText += '<div class=col-sm-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
               '">' + data_points.user[i][0] + '</h4>' +
-              '<span>' + single_tooltip + '</span></div><hr>';
+              '<span>' + single_tooltip + '</span></div>';
             }
           }
           return tooltipText;
         }
 
         scope.get_datapoints_data = function(date, y) {
-          data_points = {}
+          data_points = {};
           data_points.data = [];
           data_points.user = [];
+          dashboard_data = {};
           if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
-            console.log("scope.dashboard.packing_stats:", scope.dashboard.packing_stats);
-            for (var i = scope.dashboard.packing_stats.length - 1; i >= 0; i--) {
-              for (var j = scope.dashboard.packing_stats[i].values.length - 1; j >= 0; j--) {
-                if (scope.dashboard.packing_stats[i].values[j][0] == date &&
-                  scope.dashboard.packing_stats[i].values[j][1] == y) {
-                  data_points.data.push(scope.dashboard.packing_stats[i].values[j]);
-                  data_points.user.push([scope.dashboard.packing_stats[i].key, scope.dashboard.packing_stats[i].color]);
-                };
-              };
-            };
+            dashboard_data = scope.dashboard.packing_stats;
           } else if (scope.charts.type === 'packing_speed_stats' || scope.charts.type === 'packing_time_stats') {
-            for (var i = scope.dashboard.packing_speed_stats.length - 1; i >= 0; i--) {
-              console.log(scope.dashboard.packing_speed_stats[i]);
-              for (var j = scope.dashboard.packing_speed_stats[i].values.length - 1; j >= 0; j--) {
-                if (scope.dashboard.packing_speed_stats[i].values[j][0] === date &&
-                  scope.dashboard.packing_speed_stats[i].values[j][1] === y) {
-                  data_points.data.push(scope.dashboard.packing_speed_stats[i].values[j]);
-                  data_points.user.push([scope.dashboard.packing_speed_stats[i].key, scope.dashboard.packing_speed_stats[i].color]);
-                };
-              };
-            };
+            dashboard_data = scope.dashboard.packing_speed_stats;
           } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
-            for (var i = scope.dashboard.packed_item_stats.length - 1; i >= 0; i--) {
-              for (var j = scope.dashboard.packed_item_stats[i].values.length - 1; j >= 0; j--) {
-                if (scope.dashboard.packed_item_stats[i].values[j][0] == date &&
-                  scope.dashboard.packed_item_stats[i].values[j][1] == y) {
-                  data_points.data.push(scope.dashboard.packed_item_stats[i].values[j]);
-                  data_points.user.push([scope.dashboard.packed_item_stats[i].key, scope.dashboard.packed_item_stats[i].color]);
-                };
+            dashboard_data = scope.dashboard.packed_item_stats;
+          }
+          for (var i = dashboard_data.length - 1; i >= 0; i--) {
+            for (var j = dashboard_data[i].values.length - 1; j >= 0; j--) {
+              if (dashboard_data[i].values[j][0] == date &&
+                dashboard_data[i].values[j][1] == y) {
+                data_points.data.push(dashboard_data[i].values[j]);
+                data_points.user.push([dashboard_data[i].key, dashboard_data[i].color]);
               };
             };
-          }
+          };
           return data_points;
         }
 
