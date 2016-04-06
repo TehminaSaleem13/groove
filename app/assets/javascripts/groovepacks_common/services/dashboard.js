@@ -102,6 +102,73 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     });
   };
 
+  var get_datapoints_data = function(dashboard, charts, date, y) {
+    data_points = {};
+    data_points.data = [];
+    data_points.user = [];
+    dashboard_data = {};
+    if (charts.type === 'packing_stats' || charts.type === 'packing_error') {
+      dashboard_data = dashboard.packing_stats;
+    } else if (charts.type === 'packing_speed_stats' || charts.type === 'packing_time_stats') {
+      dashboard_data = dashboard.packing_speed_stats;
+    } else if (charts.type === 'packed_item_stats' || charts.type === 'packed_order_stats') {
+      dashboard_data = dashboard.packed_item_stats;
+    }
+    for (var i = dashboard_data.length - 1; i >= 0; i--) {
+      for (var j = dashboard_data[i].values.length - 1; j >= 0; j--) {
+        if (dashboard_data[i].values[j][0] == date &&
+          dashboard_data[i].values[j][1] == y) {
+          data_points.data.push(dashboard_data[i].values[j]);
+          data_points.user.push([dashboard_data[i].key, dashboard_data[i].color]);
+        };
+      };
+    };
+    return data_points;
+  }
+
+  var get_tool_tip = function(data_points, charts, dashboard) {
+    var tooltipText = '';
+    for (var i = data_points.data.length - 1; i >= 0; i--) {
+        date = d3.time.format('%b %e, %Y')(moment.unix(data_points.data[i][0]).toDate());
+        col_sm = Math.floor(12/data_points.data.length);
+        tooltipText += '<div class=col-sm-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
+        '">' + data_points.user[i][0] + '</h4>';
+      if (charts.type === 'packing_stats' || charts.type === 'packing_error') {
+        tooltipText += 
+        '<span><strong>Date: </strong>' + date + '</span><br/>' +
+        '<span><strong>Accuracy: </strong>' + data_points.data[i][1] + '% </span><br/>' +
+        '<span><strong>Period Accuracy: </strong>' + data_points.data[i][5] + '% </span><br/>' +
+        '<span><strong>' + data_points.data[i][2] + ' Orders Scanned</strong></span><br/>' +
+        '<span><strong>' + data_points.data[i][3] + ' Items Packed </strong></span><br/>' +
+        '<span><strong>' + data_points.data[i][4] + ' Exceptions Recorded</strong></span>' +
+        '</div>';
+      } else if (charts.type === 'packing_speed_stats' || charts.type === 'packing_time_stats') {
+        tooltipText +=
+        '<span><strong>Period Speed Score: </strong>' + get_speed(data_points.data[i][2], dashboard) + '% </span><br/>' +
+        '<span><strong>Date: </strong>' + date + '</span><br/>' +
+        '<span><strong>Daily Speed Score: </strong>' + get_speed(data_points.data[i][1], dashboard) + '% </span><br/>' +
+        '<span><strong>Avg. Time/Item: </strong>' + data_points.data[i][1] + ' sec</span>' +
+        '</div>';
+      } else if (charts.type === 'packed_item_stats' || charts.type === 'packed_order_stats') {
+        single_tooltip = data_points.data[i][1] + ' items packed for ' + data_points.data[i][2] + ' orders on ' + date;
+        tooltipText += '<span>' + single_tooltip + '</span></div>';
+      }
+    }
+    return tooltipText;
+  }
+
+  var get_speed = function(avg, dashboard) {
+    if (avg === 0) {
+      return 0;
+    };
+    var speed = dashboard.max_time_per_item - avg;
+    if (speed < 0) {
+      return (100 + speed).toFixed(2);
+    } else {
+      return 100;
+    }
+  };
+
   return {
     model: {
       get: get_default,
@@ -110,7 +177,10 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     },
     stats: {
       exceptions: exceptions,
-      dashboard_stat: get_dashboard_data
+      dashboard_stat: get_dashboard_data,
+      points_data: get_datapoints_data,
+      tooltip: get_tool_tip,
+      speed: get_speed
     }
   };
 }]);

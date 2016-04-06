@@ -339,96 +339,17 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
         scope.toolTipContentFunction = function () {
-          console.log('toolTipContentFunction...');
           return function (key, x, y, e, graph) {
-            data = scope.get_datapoints_data((Date.parse(x) + 34200000)/1000, y);
-            return scope.get_tool_tip(data);
+            data = dashboard.stats.points_data(scope.dashboard, scope.charts, Date.parse(x)/1000, y);
+            return dashboard.stats.tooltip(data, scope.charts, scope.dashboard);
           };
         };
-
-        scope.get_tool_tip = function(data_points) {
-          var tooltipText = '';
-          col_sm = 12/(data_points.data.length);
-          if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
-            for (var i = data_points.data.length - 1; i >= 0; i--) {
-              date = d3.time.format('%b %e, %Y')(moment.unix(data_points.data[i][0]).toDate());
-              tooltipText += 
-              '<div class=col-sm-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
-              '">' + data_points.user[i][0] + '</h4>' +
-              '<span><strong>Date: </strong>' + date + '</span><br/>' +
-              '<span><strong>Accuracy: </strong>' + data_points.data[i][1] + '% </span><br/>' +
-              '<span><strong>Period Accuracy: </strong>' + data_points.data[i][5] + '% </span><br/>' +
-              '<span><strong>' + data_points.data[i][2] + ' Orders Scanned</strong></span><br/>' +
-              '<span><strong>' + data_points.data[i][3] + ' Items Packed </strong></span><br/>' +
-              '<span><strong>' + data_points.data[i][4] + ' Exceptions Recorded</strong></span>' +
-              '</div>';
-            }
-          } else if (scope.charts.type === 'packing_speed_stats' || scope.charts.type === 'packing_time_stats') {
-            for (var i = data_points.data.length - 1; i >= 0; i--) {
-              date = d3.time.format('%b %e, %Y')(moment.unix(data_points.data[i][0]).toDate());
-              tooltipText +=
-              '<div class=col-sm-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
-              '">' + data_points.user[i][0] + '</h4>' +
-              '<span><strong>Period Speed Score: </strong>' + scope.get_speed(data_points.data[i][2]) + '% </span><br/>' +
-              '<span><strong>Date: </strong>' + date + '</span><br/>' +
-              '<span><strong>Daily Speed Score: </strong>' + scope.get_speed(data_points.data[i][1]) + '% </span><br/>' +
-              '<span><strong>Avg. Time/Item: </strong>' + data_points.data[i][1] + ' sec</span>' +
-              '</div>';
-            }
-          } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
-            for (var i = data_points.data.length - 1; i >= 0; i--) {
-              date = d3.time.format('%b %e, %Y')(moment.unix(data_points.data[i][0]).toDate());
-              single_tooltip = data_points.data[i][1] + ' items packed for ' + data_points.data[i][2] + ' orders on ' + date;
-              tooltipText += '<div class=col-sm-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
-              '">' + data_points.user[i][0] + '</h4>' +
-              '<span>' + single_tooltip + '</span></div>';
-            }
-          }
-          return tooltipText;
-        }
-
-        scope.get_datapoints_data = function(date, y) {
-          data_points = {};
-          data_points.data = [];
-          data_points.user = [];
-          dashboard_data = {};
-          if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
-            dashboard_data = scope.dashboard.packing_stats;
-          } else if (scope.charts.type === 'packing_speed_stats' || scope.charts.type === 'packing_time_stats') {
-            dashboard_data = scope.dashboard.packing_speed_stats;
-          } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
-            dashboard_data = scope.dashboard.packed_item_stats;
-          }
-          for (var i = dashboard_data.length - 1; i >= 0; i--) {
-            for (var j = dashboard_data[i].values.length - 1; j >= 0; j--) {
-              if (dashboard_data[i].values[j][0] == date &&
-                dashboard_data[i].values[j][1] == y) {
-                data_points.data.push(dashboard_data[i].values[j]);
-                data_points.user.push([dashboard_data[i].key, dashboard_data[i].color]);
-              };
-            };
-          };
-          return data_points;
-        }
 
         scope.get_avg_time = function(time, items) {
           if (parseInt(items) === 0) {
             return 0;
           } else {
             return (parseInt(time) / parseFloat(items)).toFixed(2);
-          }
-        };
-
-        scope.get_speed = function(avg) {
-          console.log('avg', avg);
-          if (avg === 0) {
-            return 0;
-          };
-          var speed = scope.dashboard.max_time_per_item - avg;
-          if (speed < 0) {
-            return (100 + speed).toFixed(2);
-          } else {
-            return 100;
           }
         };
 
@@ -451,8 +372,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                 scope.dashboard.packing_time_summary.current_period = current_period_avg
                 scope.dashboard.packing_time_summary.previous_period = previous_period_avg
                 scope.dashboard.packing_time_summary.delta = (current_period_avg - previous_period_avg).toFixed(2);
-                scope.dashboard.packing_speed_summary.current_period = scope.get_speed(current_period_avg);
-                scope.dashboard.packing_speed_summary.previous_period = scope.get_speed(previous_period_avg);
+                scope.dashboard.packing_speed_summary.current_period = dashboard.stats.speed(current_period_avg, scope.dashboard);
+                scope.dashboard.packing_speed_summary.previous_period = dashboard.stats.speed(previous_period_avg, scope.dashboard);
                 scope.dashboard.packing_speed_summary.delta =
                   (scope.dashboard.packing_speed_summary.current_period - scope.dashboard.packing_speed_summary.previous_period).toFixed(2);
                 console.log(scope.dashboard);
