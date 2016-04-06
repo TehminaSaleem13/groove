@@ -455,7 +455,7 @@ class ExportSetting < ActiveRecord::Base
             single_row[:order_date] = order.order_placed_time
             single_row[:scanned_date] = order.scanned_on
             packing_user = nil
-            packing_user = User.find(order.packing_user_id) unless order.packing_user_id.blank?
+            packing_user = User.find_by_id(order.packing_user_id) unless order.packing_user_id.blank?
             unless packing_user.nil?
               single_row[:packing_user] = packing_user.name + ' ('+packing_user.username+')'
             end
