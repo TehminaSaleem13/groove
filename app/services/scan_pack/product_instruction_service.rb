@@ -21,7 +21,7 @@ module ScanPack
         set_error_messages('Order id, Item id and confirmation code required')
       elsif @order.blank?
         set_error_messages("Could not find order with id: #{id}")
-      elsif @general_setting.strict_cc || @current_user.confirmation_code != code
+      elsif @general_setting.strict_cc && @current_user.confirmation_code != code
         set_error_messages('Confirmation code doesn\'t match')
       end
       @result['status']
