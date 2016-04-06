@@ -82,7 +82,7 @@
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null"
                       bo-text="row[field] | cut:false:(25*options.no_of_lines)" tooltip="{{row[field]}}" class="grid-text">
                 </span>
-                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
+                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].toString().length)"
                   class="grid-text">
                   &nbsp;{{row[field]}}</span>
               </div>
