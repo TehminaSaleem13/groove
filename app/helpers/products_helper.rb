@@ -431,6 +431,7 @@ module ProductsHelper
   end
 
   def self.products_csv(products, csv, bulk_actions_id = nil)
+    # ProductsService::GenerateCSV.call(products, csv, bulk_actions_id)
     @bulk_action = GrooveBulkActions.find(bulk_actions_id) if bulk_actions_id
     headers = []
     headers.push('ID', 'Name', 'SKU 1', 'Barcode 1', 'BinLocation 1', 'QOH', 'Primary Image', 'Weight', 'Primary Category',

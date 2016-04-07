@@ -1,17 +1,19 @@
 module ProductsService
   class AmazonImport < ProductsService::ServiceInit
+    attr_accessor :product_hash
 
     def initialize(*args)
       @store_id, @product_sku, @product_id = args
       @store = Store.find(@store_id)
-      @amazon_credentials = AmazonCredentials.where(:store_id => @store_id)
+      @amazon_credentials = AmazonCredentials.where(store_id: @store_id)
       @credential = @amazon_credentials.first
+      @product_hash = {}
     end
 
     def call
-      return if amazon_credentials_blank?
-      product_hash = do_get_matching_products
-      do_find_update_product(product_hash)
+      return false if amazon_credentials_blank?
+      do_get_matching_products
+      do_find_update_product
     rescue => e
       puts e.inspect
     end
@@ -36,10 +38,11 @@ module ProductsService
       )
 
       require 'active_support/core_ext/hash/conversions'
-      Hash.from_xml(products_xml.to_s)
+
+      @product_hash = Hash.from_xml(products_xml.to_s)
     end
 
-    def do_find_update_product(product_hash)
+    def do_find_update_product
       product = Product.find(@product_id)
       product_from_hash = product_hash['GetMatchingProductForIdResult']['Products']['Product']
       product_attributes = product_from_hash['AttributeSets']['ItemAttributes']
@@ -50,7 +53,7 @@ module ProductsService
 
       product.store_product_id = product_from_hash['Identifiers']['MarketplaceASIN']['ASIN']
 
-      do_import_images_and_category(product_attributes)
+      do_import_images_and_category(product, product_attributes)
 
       add_inventory_warehouse(product)
 
@@ -71,7 +74,7 @@ module ProductsService
       product.product_inventory_warehousess << inv_wh
     end
 
-    def do_import_images_and_category(product_attributes)
+    def do_import_images_and_category(product, product_attributes)
       if @credential.import_images
         image = ProductImage.new
         image.image = product_attributes['SmallImage']['URL']
