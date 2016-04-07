@@ -1,5 +1,6 @@
 class BigCommerceController < ApplicationController
   before_filter :groovepacker_authorize!, :only => [:check_connection, :disconnect]
+  before_filter :find_store, :only => [:check_connection, :disconnect]
 
   def setup
     # redirect to admin page with the big-commerce and with groove-solo plan
@@ -17,12 +18,7 @@ class BigCommerceController < ApplicationController
       update_bc_credentials
       redirect_to big_commerce_complete_path
     else
-      store_user_email = @auth_hash['user']['email'] rescue ""  
-      store_access_token = @auth_hash["access_token"] rescue ""
-      store_context = @auth_hash["context"] rescue ""
-      cookies[:store_user_email] = {:value => store_user_email , :domain => :all, :expires => Time.now+15.minutes}
-      cookies[:store_access_token] = {:value => store_access_token , :domain => :all, :expires => Time.now+15.minutes}
-      cookies[:store_context] = {:value => store_context , :domain => :all, :expires => Time.now+15.minutes}
+      store_auth_values_in_cookies
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
     end
   end
@@ -43,9 +39,7 @@ class BigCommerceController < ApplicationController
   end
 
   def check_connection
-    store = Store.find_by_id(params[:store_id])
-    bc_service = BigCommerce::BigCommerceService.new(store: store)
-    response = bc_service.check_connection
+    response = BigCommerce::BigCommerceService.new(store: @store).check_connection
 
     render json: response
   end
@@ -54,8 +48,7 @@ class BigCommerceController < ApplicationController
   end
 
   def disconnect
-    store = Store.find_by_id(params[:store_id])
-    store_credentials = store.big_commerce_credential
+    store_credentials = @store.big_commerce_credential
     if store_credentials.update_attributes(:store_hash => nil, :access_token => nil)
       render status: 200, json: 'disconnected'
     else
@@ -92,5 +85,18 @@ class BigCommerceController < ApplicationController
       #cookies.delete(:store_id)
       cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
       cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+    end
+
+    def store_auth_values_in_cookies
+      store_user_email = @auth_hash['user']['email'] rescue ""  
+      store_access_token = @auth_hash["access_token"] rescue ""
+      store_context = @auth_hash["context"] rescue ""
+      cookies[:store_user_email] = {:value => store_user_email , :domain => :all, :expires => Time.now+15.minutes}
+      cookies[:store_access_token] = {:value => store_access_token , :domain => :all, :expires => Time.now+15.minutes}
+      cookies[:store_context] = {:value => store_context , :domain => :all, :expires => Time.now+15.minutes}
+    end
+
+    def find_store
+      @store = Store.find_by_id(params[:store_id])
     end
 end
