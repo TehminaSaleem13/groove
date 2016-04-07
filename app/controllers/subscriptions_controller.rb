@@ -135,9 +135,8 @@ class SubscriptionsController < ApplicationController
   end
 
   def create_BigCommerce_credential(store_id)
-    bc_auth = cookies[:bc_auth]
-    access_token = bc_auth['access_token'] rescue nil
-    store_hash = bc_auth['context'] rescue nil
+    access_token = cookies[:store_access_token] rescue nil
+    store_hash = cookies[:store_context] rescue nil
     BigCommerceCredential.create(
       shop_name: params[:shop_name],
       store_id: store_id,
@@ -145,7 +144,8 @@ class SubscriptionsController < ApplicationController
       store_hash: store_hash
     )
     # cookies.delete(:bc_auth)
-    cookies[:bc_auth] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
+    cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
+    cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
     return response_for_successful_subscription
   end
 

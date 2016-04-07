@@ -12,15 +12,17 @@ class BigCommerceController < ApplicationController
 
   def bigcommerce
     @auth_hash = generate_access_token
-    
     unless cookies[:tenant_name].blank?
       Apartment::Tenant.switch(cookies[:tenant_name])
       update_bc_credentials
       redirect_to big_commerce_complete_path
     else
       store_user_email = @auth_hash['user']['email'] rescue ""  
+      store_access_token = @auth_hash["access_token"] rescue ""
+      store_context = @auth_hash["context"] rescue ""
       cookies[:store_user_email] = {:value => store_user_email , :domain => :all, :expires => Time.now+15.minutes}
-      cookies[:bc_auth] = {:value => @auth_hash , :domain => :all, :expires => Time.now+15.minutes}
+      cookies[:store_access_token] = {:value => store_access_token , :domain => :all, :expires => Time.now+15.minutes}
+      cookies[:store_context] = {:value => store_context , :domain => :all, :expires => Time.now+15.minutes}
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
     end
   end
