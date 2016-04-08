@@ -32,7 +32,7 @@ module ProductsService
     end
 
     def item_from_ebay
-      @item = ebay.getItem(ItemID: @itemID).item
+      @item = @ebay.getItem(ItemID: @itemID).item
     end
 
     def create_new_db_product

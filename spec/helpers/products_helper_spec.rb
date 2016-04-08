@@ -1,3 +1,4 @@
+require 'eBayAPI'
 require 'rails_helper'
 
 RSpec.describe ProductsHelper, type: :helper do
@@ -97,6 +98,25 @@ RSpec.describe ProductsHelper, type: :helper do
       product.primary_warehouse.destroy
       helper.updatelist(product.reload, 'qty_on_hand', 124)
       expect(product.primary_warehouse.quantity_on_hand).to eq 124
+    end
+  end
+
+  context 'Ebay Import' do
+    it 'Imports product detail from ebay' do
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
+                   :inventory_warehouse_id =>@inv_wh.id, :available_inv => 25)
+      @ebay_credentials = FactoryGirl.create(:ebay_credential, :store_id=>@store.id, productauth_token: 'test')
+
+      @ebay = EBay::API.new(@ebay_credentials.productauth_token,
+                            ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
+                            ENV['EBAY_CERT_ID'])
+
+      result = helper.import_ebay_product('ABCD', product_sku.sku, @ebay, @ebay_credential)
+      expect(result).to eq product.id
+
     end
   end
 end
