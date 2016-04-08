@@ -34,7 +34,7 @@ class Order < ActiveRecord::Base
 
   def self.before_ninty_days(tenant)
     Apartment::Tenant.switch(tenant)
-    orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day ) }
+    orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
     return orders
   end
 
