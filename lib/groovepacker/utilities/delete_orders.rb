@@ -10,8 +10,7 @@ class DeleteOrders
     tenants.each do |tenant|
       begin
         Apartment::Tenant.switch(tenant.name)
-        updated_time = (DateTime.now.utc - 90.days).beginning_of_day
-        @orders = Order.where('updated_at < ?', updated_time)
+        @orders = Order.before_ninty_days(tenant.name)
         next if @orders.empty?
         take_backup(tenant.name)
         delete_orders
