@@ -22,10 +22,10 @@ RSpec.describe ProductsHelper, type: :helper do
 
     it 'updates the product' do
       product = FactoryGirl.create(:product)
-      product_sku = FactoryGirl.create(:product_sku, :product=> product)
-      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
-      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
-                   :inventory_warehouse_id =>@inv_wh.id, :available_inv => 25)
+      product_sku = FactoryGirl.create(:product_sku, product: product)
+      product_barcode = FactoryGirl.create(:product_barcode, product: product)
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, product: product,
+                   inventory_warehouse_id: @inv_wh.id, available_inv: 25)
       amazon_produt_details = {
         'GetMatchingProductForIdResult' => {
           'Products' => {
@@ -62,10 +62,10 @@ RSpec.describe ProductsHelper, type: :helper do
   context 'Update Product List' do
     it 'Updates Editable products from product list' do
       product = FactoryGirl.create(:product)
-      product_sku = FactoryGirl.create(:product_sku, :product=> product)
-      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
-      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
-                   :inventory_warehouse_id =>@inv_wh.id, :available_inv => 25)
+      product_sku = FactoryGirl.create(:product_sku, product: product)
+      product_barcode = FactoryGirl.create(:product_barcode, product: product)
+      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, product: product,
+                   inventory_warehouse_id: @inv_wh.id, available_inv: 25)
 
       editables = {
         name: 'test', status: 'inactive', is_skippable: true,
@@ -104,11 +104,15 @@ RSpec.describe ProductsHelper, type: :helper do
   context 'Ebay Import' do
     it 'Imports product detail from ebay' do
       product = FactoryGirl.create(:product)
-      product_sku = FactoryGirl.create(:product_sku, :product=> product)
-      product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
-      product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product,
-                   :inventory_warehouse_id =>@inv_wh.id, :available_inv => 25)
-      @ebay_credentials = FactoryGirl.create(:ebay_credential, :store_id=>@store.id, productauth_token: 'test')
+      product_sku = FactoryGirl.create(:product_sku, product: product)
+      product_barcode = FactoryGirl.create(:product_barcode, product: product)
+      product_inv_wh = FactoryGirl.create(
+        :product_inventory_warehouse, product: product,
+        inventory_warehouse_id: @inv_wh.id, available_inv: 25
+      )
+      @ebay_credentials = FactoryGirl.create(
+        :ebay_credential, store_id: @store.id, productauth_token: 'test'
+      )
 
       @ebay = EBay::API.new(@ebay_credentials.productauth_token,
                             ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
@@ -117,6 +121,8 @@ RSpec.describe ProductsHelper, type: :helper do
       result = helper.import_ebay_product('ABCD', product_sku.sku, @ebay, @ebay_credential)
       expect(result).to eq product.id
 
+      result = helper.import_ebay_product('ABCD', 'NEW', @ebay, @ebay_credential)
+      expect(result).to eq product.id
     end
   end
 end
