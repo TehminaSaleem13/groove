@@ -51,20 +51,25 @@ class ImportOrders < Groovepacker::Utilities::Base
   def import_order_by_store(params, result = {})
     Apartment::Tenant.switch(params[:tenant])
     if OrderImportSummary.where(status: 'in_progress').empty?
-      #delete existing completed and cancelled order import summaries
-      delete_existing_order_import_summaries
-      #add a new import summary
-      import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
-      #add import item for the store
-      ImportItem.where(store_id: params[:store].id).destroy_all
-      import_summary.import_items.create( store: params[:store], import_type: params[:import_type], days: params[:days])
-      #start importing using delayed job (ImportJob is defined in base class)
-      Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
+      run_import_for_single_store(params)
     else
       #import is already running. back off from importing
       result.merge({:status => false, :messages => "An import is already running."})
     end
     result
+  end
+
+  def run_import_for_single_store(params)
+    Apartment::Tenant.switch(params[:tenant])
+    #delete existing completed and cancelled order import summaries
+    delete_existing_order_import_summaries
+    #add a new import summary
+    import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
+    #add import item for the store
+    ImportItem.where(store_id: params[:store].id).destroy_all
+    import_summary.import_items.create( store: params[:store], import_type: params[:import_type], days: params[:days])
+    #start importing using delayed job (ImportJob is defined in base class)
+    Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
   end
 
   def reschedule_job(type, tenant)
