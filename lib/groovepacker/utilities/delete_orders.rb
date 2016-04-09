@@ -5,21 +5,35 @@ class DeleteOrders
   timezone 'US/Pacific'
   queue 'delete orders'
   priority 10
+
+  def initialize(attrs={})
+    @tenant = attrs[:tenant]
+  end
+
   def perform
-    tenants = Tenant.all
-    tenants.each do |tenant|
-      begin
-        Apartment::Tenant.switch(tenant.name)
-        @orders = Order.before_ninty_days(tenant.name)
-        next if @orders.empty?
-        take_backup(tenant.name)
-        delete_orders
-      rescue Exception => e
-        puts e.message
-        puts e.backtrace.join("\n")
+    unless @tenant.blank?
+      tenant = Tenant.find_by_name(@tenant)
+      perform_for_single_tenant(tenant)
+    else
+      tenants = Tenant.all
+      tenants.each do |tenant|
+        perform_for_single_tenant(tenant)
       end
     end
   end
+
+  def perform_for_single_tenant(tenant)
+      begin
+      Apartment::Tenant.switch(tenant.name)
+      @orders = Order.before_ninty_days(tenant.name)
+      return if @orders.empty?
+      take_backup(tenant.name)
+      delete_orders
+    rescue Exception => e
+      puts e.message
+      puts e.backtrace.join("\n")
+    end
+   end
 
   def take_backup(tenant)
     back_hash = []
@@ -70,15 +84,15 @@ class DeleteOrders
       columns = User.column_names
       items = User.all
     end
-    
+   
     items.each do |item|
       item_hash = {}
       columns.each do |column|
         item_hash[column] = item[column].to_s
       end
       result[key].push(item_hash)
-    end    
-    
+    end   
+   
     result
   end
 
@@ -90,7 +104,7 @@ class DeleteOrders
     build_shipping_hash(order)
     build_activity_hash(order)
     build_serial_hash(order)
-    
+   
     @order_items = order.order_items
     build_order_item_hash(@order_items)
     build_product_hash(@order_items)
@@ -210,3 +224,4 @@ class DeleteOrders
     }
   end
 end
+
