@@ -32,12 +32,6 @@ class Order < ActiveRecord::Base
     !self.store.nil? && self.store.ensure_warehouse?
   end
 
-  def self.before_ninty_days(tenant)
-    Apartment::Tenant.switch(tenant)
-    orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
-    return orders
-  end
-
   def addactivity(order_activity_message, username='', activity_type ='regular')
     @activity = OrderActivity.new
     @activity.order_id = self.id
