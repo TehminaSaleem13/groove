@@ -163,8 +163,7 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   def initiate_import_for(store, import_item, handler)
     import_item.update_attributes(status: 'in_progress')
-    context = Groovepacker::Stores::Context.new(handler)
-    result = context.import_orders
+    result = Groovepacker::Stores::Context.new(handler).import_orders
     import_item.reload
     import_item.previous_imported = result[:previous_imported]
     import_item.success_imported = result[:success_imported]
@@ -182,11 +181,5 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_item_message = "Import failed: #{e.message}" if e.message.strip != "Error: 302"
     import_item.update_attributes(status: 'failed', message: import_item_message)
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
-  end
-
-  def build_data(map,store)
-    data = {:flag => "ftp_download", :type => "order", :store_id => store.id}
-    common_data_attributes.each { |attr| data[attr.to_sym] = map[:map][attr.to_sym] }
-    return data
   end
 end

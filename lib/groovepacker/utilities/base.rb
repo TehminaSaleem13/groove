@@ -39,6 +39,12 @@ module Groovepacker
               ]
       end
 
+      def build_data(map,store)
+        data = {:flag => "ftp_download", :type => "order", :store_id => store.id}
+        common_data_attributes.each { |attr| data[attr.to_sym] = map[:map][attr.to_sym] }
+        return data
+      end
+
       def get_order_import_summary
         return nil unless OrderImportSummary.where(status: 'in_progress').empty?
         return nil if order_import_summaries.empty?
