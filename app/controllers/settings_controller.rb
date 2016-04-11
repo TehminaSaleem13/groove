@@ -557,7 +557,7 @@ class SettingsController < ApplicationController
         general_setting.conf_req_on_notes_to_packer = params[:conf_req_on_notes_to_packer]
         general_setting.email_address_for_packer_notes = params[:email_address_for_packer_notes]
         general_setting.hold_orders_due_to_inventory = params[:hold_orders_due_to_inventory]
-        general_setting.inventory_tracking = params[:inventory_tracking] if params[:inventory_tracking]
+        general_setting.inventory_tracking = params[:inventory_tracking] if [true, false].include?(params[:inventory_tracking])
         general_setting.low_inventory_alert_email = params[:low_inventory_alert_email]
         general_setting.low_inventory_email_address = params[:low_inventory_email_address]
         general_setting.send_email_for_packer_notes = params[:send_email_for_packer_notes]
