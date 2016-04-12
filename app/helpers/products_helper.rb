@@ -51,7 +51,7 @@ module ProductsHelper
   def make_product_intangible(product)
     scan_pack_settings = ScanPackSetting.all.first
     return unless scan_pack_settings.intangible_setting_enabled &&
-                  scan_pack_settings.intangible_string.blank?
+                  scan_pack_settings.intangible_string.present?
     intangible_strings = scan_pack_settings.intangible_string.strip.split(',')
     intangible_strings.each do |string|
       next unless (product.name.include?(string)) ||

@@ -42,7 +42,7 @@ Groovepacks::Application.configure do
 
   config.action_mailer.smtp_settings = {
     :address => "smtp.mandrillapp.com",
-    :port => 587,  
+    :port => 587,
     :authentication => "plain",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',
@@ -63,14 +63,14 @@ Groovepacks::Application.configure do
   ENV['HOST_NAME'] = 'testpacker.com'
   ENV['ONE_TIME_PAYMENT'] = '50000'
   ENV['BC_ONE_TIME_PAYMENT'] = '0'
-  
+
 
   #S3 access details
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAJ4RBSXRA6F7VW3ZA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
   ENV['S3_BUCKET_NAME'] = 'groove-dev'
   ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
-  
+
   #Shipstation rest API test api_key and api_secret
   ENV['SHIPSTATION_REST_API_KEY'] = "45893449eae24f2e8bc7992904016ca6"
   ENV['SHIPSTATION_REST_API_SECRET'] = "ddefa497b0fc48c0b162a533920ce990"
