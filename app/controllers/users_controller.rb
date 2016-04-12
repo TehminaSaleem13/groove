@@ -18,9 +18,11 @@ class UsersController < ApplicationController
     result['messages'] = []
 
     if current_user.can? 'add_edit_users'
+      new_user = false
       if params[:id].nil?
         if User.can_create_new?
           @user = User.new
+          new_user = true
         else
           result['status'] = false
           result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
@@ -93,6 +95,11 @@ class UsersController < ApplicationController
           result['user'] = @user.attributes
           result['user']['role'] = @user.role.attributes
           result['user']['current_user'] = current_user
+          # send user data to groovelytics server if the user is newly created.
+          if new_user
+            send_user_info_obj = SendUsersInfo.new()
+            send_user_info_obj.build_send_users_stream(Apartment::Tenant.current)
+          end
         else
           result['status'] = false
           result['messages'] = @user.errors.full_messages
