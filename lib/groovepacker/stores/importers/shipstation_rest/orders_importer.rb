@@ -162,8 +162,13 @@ module Groovepacker
                     if shipstation_order.save
                       shipstation_order.addactivity("Order Import", credential.store.name+" Import")
                       shipstation_order.order_items.each do |item|
+                        if item.qty.blank? || item.qty<1
+                          shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{credential.store.name} Import")
+                          item.destroy
+                          next
+                        end
                         unless item.product.nil? || item.product.primary_sku.nil?
-                          shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                          shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} Added", "#{credential.store.name} Import")
                         end
                       end
                       shipstation_order.store = credential.store
