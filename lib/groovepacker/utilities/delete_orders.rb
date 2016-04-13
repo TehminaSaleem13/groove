@@ -8,6 +8,7 @@ class DeleteOrders
 
   def initialize(attrs={})
     @tenant = attrs[:tenant]
+    @delete_count = attrs[:delete_count]
   end
 
   def perform
@@ -27,6 +28,7 @@ class DeleteOrders
       Apartment::Tenant.switch(tenant.name)
       #@orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
       @orders = Order.find(:all, :conditions => ["updated_at < ?", 90.days.ago])
+      @orders = @orders.first(@delete_count) unless @delete_count.blank?
       return if @orders.empty?
       take_backup(tenant.name)
       delete_orders
