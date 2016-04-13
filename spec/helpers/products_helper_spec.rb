@@ -48,7 +48,7 @@ RSpec.describe ProductsHelper, type: :helper do
       }
 
       # If valid Data
-      ProductsService::AmazonImport.any_instance.stub(:product_hash).and_return(amazon_produt_details)
+      allow_any_instance_of(ProductsService::AmazonImport).to receive(:product_hash).and_return(amazon_produt_details)
       result = helper.import_amazon_product_details(@store.id, product_sku.sku, product.id)
       expect(result).to eq true
 
@@ -111,26 +111,64 @@ RSpec.describe ProductsHelper, type: :helper do
         inventory_warehouse_id: @inv_wh.id, available_inv: 25
       )
       @ebay_credentials = FactoryGirl.create(
-        :ebay_credential, store_id: @store.id, productauth_token: 'test'
+        :ebay_credential, store_id: @store.id, productauth_token: 'test',
+        import_images: true, import_products: true
       )
 
       @ebay = EBay::API.new(@ebay_credentials.productauth_token,
                             ENV['EBAY_DEV_ID'], ENV['EBAY_APP_ID'],
                             ENV['EBAY_CERT_ID'])
-      # class Item
-      #   def initialize(hash)
-      #     hash.each { |k, v| instance_variable_set("@#{k}", v) }
-      #   end
-      # end
-      # item = Item.new(ebay_dummy_return_object)
-      #
-      # ProductsService::EbayImport.any_instance.stub(:item_from_ebay).and_return(item)
+      class Item
+        def initialize(hash)
+          hash.each do |k, v|
+            instance_variable_set("@#{k}", v)
+            singleton_class.class_eval { attr_accessor "#{k}" }
+          end
+        end
 
-      # result = helper.import_ebay_product('ABCD', product_sku.sku, @ebay, @ebay_credential)
-      # expect(result).to eq product.id
-      #
-      # result = helper.import_ebay_product('ABCD', 'NEW', @ebay, @ebay_credential)
-      # expect(result).to eq product.id
+        def shippingDetails
+        end
+
+        def pictureDetails
+        end
+
+        def primaryCategory
+          'pC'
+        end
+
+        def secondaryCategory
+          'sC'
+        end
+      end
+      ebay_dummy_return_object = {
+        title: 'any', itemID: 'ABCD', sKU: 'SKU'
+      }
+      item = Item.new(ebay_dummy_return_object)
+
+      allow_any_instance_of(ProductsService::EbayImport).to receive(:item_from_ebay).and_return(item)
+      allow_any_instance_of(Item).to receive_message_chain(
+        "shippingDetails.calculatedShippingRate.weightMajor"
+      ).and_return(10)
+      allow_any_instance_of(Item).to receive_message_chain(
+        "shippingDetails.calculatedShippingRate.weightMinor"
+      ).and_return(5)
+      allow_any_instance_of(Item).to receive_message_chain(
+        "pictureDetails.pictureURL.first.request_uri"
+      ).and_return('image')
+      allow_any_instance_of(Item).to receive_message_chain(
+        "primaryCategory.categoryName"
+      ).and_return('CN1')
+      allow_any_instance_of(Item).to receive_message_chain(
+        "secondaryCategory.categoryName"
+      ).and_return('CN2')
+
+      result = helper.import_ebay_product('ABCD', product_sku.sku, @ebay, @ebay_credentials)
+      expect(result).to eq product.id
+
+      result = helper.import_ebay_product('ABCD', 'NEW', @ebay, @ebay_credentials)
+      product = Product.find(result)
+      # As the item has been stubed with default sku as SKU
+      expect(product.primary_sku).to eq 'SKU'
     end
   end
 end
