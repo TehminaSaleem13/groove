@@ -39,6 +39,8 @@ module Groovepacker
           credential = ShipworksCredential.find_by_auth_token(auth_token)
           status = create_or_update_item(credential, status)
         rescue Exception => e
+          tenant = Apartment::Tenant.current
+          ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver rescue nil
           @import_item.status = 'failed'
           @import_item.message = e.message
           @import_item.save
