@@ -3,6 +3,7 @@ module ProductsService
     def initialize(*args)
       @itemID, @sku, @ebay, @credential = args
       @product_id = 0
+      @store = Store.find(@credential.store_id)
       @product_sku = ProductSku.where(sku: @sku).first
     end
 
@@ -21,7 +22,7 @@ module ProductsService
     private
 
     def import_ebay_product
-      item_from_ebay
+      @item = item_from_ebay
       create_new_db_product
       set_product_sku
       add_sku_to_db_product
@@ -32,7 +33,7 @@ module ProductsService
     end
 
     def item_from_ebay
-      @item = @ebay.getItem(ItemID: @itemID).item
+      @ebay.getItem(ItemID: @itemID).item
     end
 
     def create_new_db_product
@@ -76,7 +77,7 @@ module ProductsService
     end
 
     def can_import_images?
-      credential.import_images && item_picture_url_valid?
+      @credential.import_images && item_picture_url_valid?
     end
 
     def item_picture_url_valid?
@@ -88,7 +89,7 @@ module ProductsService
     end
 
     def product_categories
-      return unless credential.import_products
+      return unless @credential.import_products
       %w(primary secondary).each { |type| create_category(type) }
     end
 
