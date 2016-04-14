@@ -129,6 +129,9 @@ module Groovepacker
                 import_item.status = "failed"
                 import_item.message = e.message
                 import_item.save
+                import_item.reload
+                tenant = Apartment::Tenant.current
+                ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
               end
               import_item.reload
               if import_item.status != 'cancelled' and import_item.status!="failed"
