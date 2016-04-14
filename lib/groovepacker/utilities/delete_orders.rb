@@ -37,42 +37,72 @@ class DeleteOrders
    end
 
   def take_backup(tenant)
-    back_hash = []
-    back_hash.push(build_store_user_hash('stores'))
-    back_hash.push(build_store_user_hash('users'))
-    @orders.each do |order|
-      back_hash.push(build_hash(order.id))
-    end
-    puts back_hash.inspect
-    file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
+    file_name = "#{tenant}-#{Date.today.to_s}"
+    system "mysqldump #{tenant} -uroot -proot > public/delete_orders/#{file_name}.sql"
+    data = File.read("public/delete_orders/#{file_name}.sql")
+    GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
+    system "rm public/delete_orders/#{file_name}.sql"
+
+
+    #back_hash = []
+    #back_hash.push(build_store_user_hash('stores'))
+    #back_hash.push(build_store_user_hash('users'))
+    #@orders.each do |order|
+    #  back_hash.push(build_hash(order.id))
+    #end
+    #puts back_hash.inspect
+    #file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    #GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
   end
 
   def delete_orders
-    @orders.each do |order|
-      delete_order_data(order)
+    tenant = Apartment::Tenant.current
+    count = 1
+    @orders.each_slice(500) do |orders|
+      puts "================#{count}==================="
+      orders_ids = orders.map(&:id)
+      delete_order_data(orders_ids, tenant)
+      Order.delete_all(["id IN (?)", orders_ids])
+      count = count+1
     end
   end
 
-  def delete_order_data(order)
-    delete_items(order.id)
-    order.order_activities.destroy_all unless order.order_activities.empty?
-    order.order_exception.destroy if order.order_exception
-    order.order_serials.destroy_all unless order.order_serials.empty?
-    order.order_shipping.destroy if order.order_shipping
-    order.destroy
+  def delete_order_data(orders_ids, tenant)
+    delete_items(tenant, orders_ids)
+    OrderActivity.delete_all(["order_id IN (?)", orders_ids])
+    OrderException.delete_all(["order_id IN (?)", orders_ids])
+    OrderSerial.delete_all(["order_id IN (?)", orders_ids])
+    OrderShipping.delete_all(["order_id IN (?)", orders_ids])
+    # delete('order_activities', 'order_id', tenant, orders_ids)
+    # delete('order_exceptions', 'order_id', tenant, orders_ids)
+    # delete('order_serials', 'order_id', tenant, orders_ids)
+    # delete('order_shippings', 'order_id', tenant, orders_ids)
+
+    #delete_items(order.id)
+    #order.order_activities.destroy_all unless order.order_activities.empty?
+    #order.order_exception.destroy if order.order_exception
+    #order.order_serials.destroy_all unless order.order_serials.empty?
+    #order.order_shipping.destroy if order.order_shipping
+    #order.destroy
   end
 
-  def delete_items(id)
-    order = Order.find(id)
-    order_items = order.order_items
-    return if order_items.empty?
-    order_items.each do |item|
-      item.order_item_kit_products.destroy_all unless item.order_item_kit_products.empty?
-      item.order_item_order_serial_product_lots. destroy_all unless item.order_item_order_serial_product_lots.empty?
-      item.order_item_scan_times.destroy_all unless item.order_item_scan_times.empty?
-      item.destroy
-    end
+  def delete_items(tenant, orders_ids)
+    order_items = OrderItem.where("order_id IN (?)", orders_ids)
+    order_items_ids = order_items.map(&:id)
+    OrderItemKitProduct.delete_all(["order_item_id IN (?)", order_items_ids])
+    OrderItemOrderSerialProductLot.delete_all(["order_item_id IN (?)", order_items_ids])
+    OrderItemScanTime.delete_all(["order_item_id IN (?)", order_items_ids])
+    order_items.destroy_all
+
+    # order = Order.find(id)
+    # order_items = order.order_items
+    # return if order_items.empty?
+    # order_items.each do |item|
+    #   item.order_item_kit_products.destroy_all unless item.order_item_kit_products.empty?
+    #   item.order_item_order_serial_product_lots. destroy_all unless item.order_item_order_serial_product_lots.empty?
+    #   item.order_item_scan_times.destroy_all unless item.order_item_scan_times.empty?
+    #   item.destroy
+    # end
   end
 
   def build_store_user_hash(key)

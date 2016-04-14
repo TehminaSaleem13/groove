@@ -67,7 +67,7 @@ class GroovS3
     end
 
     def create_order_backup(tenant, file_name, data)
-      object = self.create(tenant, "deleted_orders/#{file_name}", 'application/json', :private)
+      object = self.create(tenant, "deleted_orders/#{file_name}", 'text/sql', :private)
       self.save(object, data)
     end
 
