@@ -12,6 +12,10 @@ RSpec.describe ProductsHelper, type: :helper do
     )
   end
 
+  def random_string
+    "#{5.times.reduce(''){|str, t| str += (65 + rand(25)).chr}}"
+  end
+
   context 'Update Product with Amazon Product Details' do
     before(:each) do
       @amazon_credentials = FactoryGirl.create(
@@ -169,6 +173,64 @@ RSpec.describe ProductsHelper, type: :helper do
       product = Product.find(result)
       # As the item has been stubed with default sku as SKU
       expect(product.primary_sku).to eq 'SKU'
+    end
+  end
+
+  context 'Generate Barcode' do
+    it 'Generates Barcode image file' do
+      image_name = helper.generate_barcode('ABCD')
+      expect(File.exist?("#{Rails.root}/public/images/#{image_name}.png")).to eq true
+    end
+  end
+
+  context 'Gives Weight format' do
+    it 'gets weight format' do
+      result = helper.get_weight_format('Any')
+      expect(result).to eq result
+
+      allow(GeneralSetting).to receive(:get_product_weight_format).and_return('ABCD')
+      result = helper.get_weight_format(nil)
+      expect(result).to eq 'ABCD'
+    end
+  end
+
+  context 'GEt Product list' do
+    it 'Gets Products list' do
+      10.times do |n|
+        product = FactoryGirl.create(:product)
+        product_sku = FactoryGirl.create(:product_sku, sku: random_string, product: product)
+        product_barcode = FactoryGirl.create(:product_barcode, barcode: random_string, product: product)
+        product_inv_wh = FactoryGirl.create(
+          :product_inventory_warehouse, product: product,
+          inventory_warehouse_id: @inv_wh.id, available_inv: 25
+        )
+      end
+      params = {filter: "active", sort: "sku", order: "DESC", is_kit: 0, limit: 20, offset: 0}
+      result = helper.do_getproducts(params)
+      expect(
+        ProductSku.all.sort{|a,b| a.sku <=> b.sku}.reverse.map &:sku
+        ).to eq result.map &:primary_sku
+
+      params = {filter: "active", sort: "", order: "DESC", is_kit: 0, limit: 20, offset: 0}
+      result = helper.do_getproducts(params)
+      expect(result.count).to eq Product.count
+    end
+  end
+
+  context 'Search Product list' do
+    it 'Search Products list' do
+      10.times do |n|
+        product = FactoryGirl.create(:product)
+        product_sku = FactoryGirl.create(:product_sku, sku: random_string, product: product)
+        product_barcode = FactoryGirl.create(:product_barcode, barcode: random_string, product: product)
+        product_inv_wh = FactoryGirl.create(
+          :product_inventory_warehouse, product: product,
+          inventory_warehouse_id: @inv_wh.id, available_inv: 25
+        )
+      end
+      params = {search: ProductSku.first.sku, sort: "", order: "DESC", is_kit: 0, limit: 20, offset: 0}
+      result = helper.do_search(params, false)
+      expect(result['products'].map &:primary_sku).to include ProductSku.first.sku
     end
   end
 end
