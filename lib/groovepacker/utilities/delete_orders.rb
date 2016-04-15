@@ -15,7 +15,7 @@ class DeleteOrders
       tenant = Tenant.find_by_name(@tenant)
       perform_for_single_tenant(tenant)
     else
-      tenants = Tenant.all
+      tenants = Tenant.order(:name) rescue Tenant.all
       tenants.each do |tenant|
         perform_for_single_tenant(tenant)
       end
@@ -38,7 +38,8 @@ class DeleteOrders
 
   def take_backup(tenant)
     file_name = "#{tenant}-#{Date.today.to_s}"
-    system "mysqldump #{tenant} -uroot -proot > public/delete_orders/#{file_name}.sql"
+    crds = get_credentials
+    system "mysqldump #{tenant} -h#{crds["host"]} -u#{crds["username"]} -p#{crds["password"]} > public/delete_orders/#{file_name}.sql"
     data = File.read("public/delete_orders/#{file_name}.sql")
     GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
     system "rm public/delete_orders/#{file_name}.sql"
@@ -253,6 +254,13 @@ class DeleteOrders
       "order_item_scan_times" => [],
       "products" => []
     }
+  end
+
+  def get_credentials
+    info = YAML::load(IO.read("config/database.yml"))
+    credentials = info[Rails.env]
+    credentials["host"] = "localhost" if credentials["host"].blank?
+    return credentials
   end
 end
 
