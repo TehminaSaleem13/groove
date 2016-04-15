@@ -8,6 +8,10 @@ class Order < ActiveRecord::Base
                   :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
                   :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change
 
+  #===========================================================================================
+  #please update the delete_orders library if adding before_destroy or after_destroy callback
+  # or adding dependent destroy for associated models
+  #===========================================================================================
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
   has_one :order_exception, :dependent => :destroy

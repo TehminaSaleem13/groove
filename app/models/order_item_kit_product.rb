@@ -3,7 +3,10 @@ class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :product_kit_skus
   has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
-
+  #===========================================================================================
+  #please update the delete_orders library if adding before_destroy or after_destroy callback
+  # or adding dependent destroy for associated models
+  #===========================================================================================
   SCANNED_STATUS = 'scanned'
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
