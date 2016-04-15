@@ -34,8 +34,8 @@ module Groovepacker
                 @order = Order.find_or_create_by_increment_id(inc_id)
                 @order.store_id = params[:store_id]
                 @order_required = %w(qty sku increment_id price)
+                @order.addactivity("Order Import", @order.store.name+" Import")
                 import_order_data(order_map, single_row)
-
                 update_result(result, single_row)
                 import_item_failed_result(result, index) unless result[:status]
               else
@@ -164,6 +164,7 @@ module Groovepacker
           end
 
           def save_order_item(order_item)
+            @order.addactivity("Item with SKU: #{order_item.product.primary_sku} Added", "#{@order.store.name} Import")
             @order_required.delete('qty')
             @order_required.delete('price')
             @order.order_items << order_item
