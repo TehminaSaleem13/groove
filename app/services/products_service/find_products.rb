@@ -29,12 +29,15 @@ module ProductsService
 
     def setup_query_params
       # Get passed in parameter variables if they are valid.
-      set_sort_key
-      set_sort_order
       set_limit
       set_offset
-      set_is_kit
+      set_sort_key
+      set_sort_order
       set_status_filter
+      set_is_kit
+      set_kit_query
+      set_query_add
+      set_status_filter_text
     end
 
     def expected_sort_keys
@@ -120,9 +123,9 @@ module ProductsService
     end
 
     def set_status_filter_text
-      return if status_filter == 'all'
-      @status_filter_text = is_kit == '-1' ? ' WHERE ' : ' AND '
-      @status_filter_text += " products.status='" + status_filter + "'"
+      return if @status_filter == 'all'
+      @status_filter_text = @is_kit == '-1' ? ' WHERE ' : ' AND '
+      @status_filter_text += " products.status='" + @status_filter + "'"
     end
 
     def sorting_with_expected_sort_keys
