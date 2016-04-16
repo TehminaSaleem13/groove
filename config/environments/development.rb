@@ -78,13 +78,13 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
   config.action_mailer.smtp_settings = {
-    :address => "smtp.mandrillapp.com",
+    :address => "smtp.api.createsend.com",
     :port => 587,  
     :authentication => "plain",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',
-    :user_name => 'groovepacker@gmail.com',
-    :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
+    :user_name => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
+    :password => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
     :openssl_verify_mode  => 'none'
   }
 
