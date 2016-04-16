@@ -57,7 +57,8 @@ groovepacks_controllers.
       };
 
       $scope.handlesort = function (predicate) {
-        myscope.common_setup_opt('sort', predicate, 'product');
+        // Bug fixed for GROOV-1054
+        myscope.common_setup_opt('sort', predicate, $scope.product_type/*'product'*/);
       };
 
       $scope.product_change_status = function (status) {
@@ -113,6 +114,8 @@ groovepacks_controllers.
       };
 
       $scope.setup_child = function (childStateParams) {
+        $scope.product_type = childStateParams['type'];
+
         if (typeof childStateParams['type'] == 'undefined') {
           childStateParams['type'] = 'product';
         }
