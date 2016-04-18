@@ -19,7 +19,7 @@ module Groovepacker
                     import_item.save
                     ship_address = get_ship_address(order)
                     tracking_num = nil
-                    tracking_num = order["Shipment"]["TrackingNumber"] unless order["Shipment"].blank?
+                    tracking_num = order["Shipment"]["TrackingNumber"]  if order["Shipment"].class==Hash
                     notes_internal = get_internal_notes(order) unless order["Note"].nil?
 
                     order_m = Order.create(
