@@ -34,10 +34,12 @@ module Groovepacker
 
           def import_single_order(single_row, index, inc_id, order_map, result)
             if @helper.not_imported?(@imported_orders, inc_id)
-              @order = Order.find_or_create_by_increment_id(inc_id)
+              @order = Order.find_or_initialize_by_increment_id(inc_id)
+              order_persisted = @order.persisted? ? true : false
               @order.store_id = params[:store_id]
               @order_required = %w(qty sku increment_id price)
-              @order.addactivity("Order Import", @order.store.name+" Import")
+              @order.save
+              @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
               import_order_data(order_map, single_row)
               update_result(result, single_row)
               import_item_failed_result(result, index) unless result[:status]
@@ -50,10 +52,7 @@ module Groovepacker
 
           def import_item_failed_result(result, index)
             @import_item.status = 'failed'
-            @import_item.message = 'Import halted because of errors, ' \
-              'the last imported row was ' +
-              index.to_s + 'Errors: ' +
-              result[:messages].join(',')
+            @import_item.message = "Import halted because of errors, the last imported row was #{index.to_s} Errors: #{result[:messages].join(',')}"
             @import_item.save
           end
 
@@ -116,8 +115,7 @@ module Groovepacker
               elsif @helper.import_unique_items?(single_map)
                 import_for_unique_order_items(single_row)
               else
-                @order[single_map] =
-                  @helper.get_row_data(single_row, single_map)
+                @order[single_map] = @helper.get_row_data(single_row, single_map)
               end
               @order_required.delete(single_map) if @order_required.include? single_map
             end
