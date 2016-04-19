@@ -2,7 +2,10 @@ groovepacks_controllers.
   controller('appCtrl', ['$http', '$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
     function ($http, $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
       $scope.import_store_id = null;
-
+      $scope.bc_deep_import_days = 1;
+      $scope.se_deep_import_days = 1;
+      $scope.ss_deep_import_days = 1;
+      $scope.tp_deep_import_days = 1;
       $scope.$on("user-data-reloaded", function () {
         $scope.current_user = auth;
       });
@@ -255,9 +258,11 @@ groovepacks_controllers.
       };
 
       $scope.show_days_select = function (store, show) {
-        if(store.days ==undefined) {
-          store.days=1;
-        }
+        store.days = $scope.get_deep_import_days_for_store(store);
+        
+        // if(store.days ==undefined) {
+        //   store.days=1;
+        // }
         if(show==true) {
           $('[data-import='+store.id+']').css('display', 'block');
         } else {
@@ -270,7 +275,40 @@ groovepacks_controllers.
         if(element_val>30) {
           store.days=30;
         }
+        $scope.set_deep_import_days_for_store(store);
       };
+
+      $scope.get_deep_import_days_for_store = function(store){
+        var days = 1;
+        if(store.store_type=="BigCommerce"){
+          days = $scope.bc_deep_import_days;
+        }
+        if(store.store_type=="ShippingEasy"){
+          days = $scope.se_deep_import_days;
+        }
+        if(store.store_type=="Shipstation API 2"){
+          days = $scope.ss_deep_import_days;
+        }
+        if(store.store_type=="Teapplix"){
+          days = $scope.tp_deep_import_days;
+        }
+        return days;
+      }
+
+      $scope.set_deep_import_days_for_store = function(store){
+        if(store.store_type=="BigCommerce"){
+          $scope.bc_deep_import_days = store.days;
+        }
+        if(store.store_type=="ShippingEasy"){
+          days = $scope.se_deep_import_days = store.days;
+        }
+        if(store.store_type=="Shipstation API 2"){
+          days = $scope.ss_deep_import_days = store.days;
+        }
+        if(store.store_type=="Teapplix"){
+          days = $scope.tp_deep_import_days = store.days;
+        }
+      }
 
       $scope.show_logout_box = false;
       groovIO.on('ask_logout', function (msg) {
