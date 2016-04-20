@@ -72,33 +72,28 @@ module Groovepacker
                         import_item.save
                         product_id = nil
                         
-                        @order_item = OrderItem.new
-                        @order_item.price = line_items[:item][:price]
-                        @order_item.qty = line_items[:item][:qty_ordered]
-                        @order_item.row_total= line_items[:item][:row_total]
-                        @order_item.name = line_items[:item][:name]
-                        @order_item.sku = line_items[:item][:sku]
-
                         if line_items[:item][:product_type] == 'simple'
+                          @order_item = OrderItem.new
+                          @order_item.price = line_items[:item][:price]
+                          @order_item.qty = line_items[:item][:qty_ordered]
+                          @order_item.row_total= line_items[:item][:row_total]
+                          @order_item.name = line_items[:item][:name] || "Un-named Magento Product"
+                          @order_item.sku = line_items[:item][:sku]
                           if ProductSku.where(:sku => @order_item.sku).length == 0
                             #import other product details
                             product_id = Groovepacker::Stores::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({
-                                                                              sku: @order_item.sku})
+                                ProductsImporter.new(handler).import_single({ product_id: line_items[:item][:product_id] })
                           else
                             product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
                           end
+                          @order_item.product_id = product_id
+                          @order.order_items << @order_item
                         else
                           if ProductSku.where(:sku => line_items[:item][:sku]).length == 0
-                            product_id = Groovepacker::Stores::Importers::Magento::
-                                ProductsImporter.new(handler).import_single({
-                                                                              sku: line_items[:item][:sku]})
-                          else
-                            product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
+                            Groovepacker::Stores::Importers::Magento::
+                                ProductsImporter.new(handler).import_single({ product_id: line_items[:item][:product_id] })
                           end
                         end
-                        @order_item.product_id = product_id
-                        @order.order_items << @order_item
                         
                         import_item.current_order_imported_item = 1
                         import_item.save
@@ -107,33 +102,27 @@ module Groovepacker
                         import_item.current_order_imported_item = 0
                         import_item.save
                         line_items[:item].each do |line_item|
-                          @order_item = OrderItem.new
-                          @order_item.price = line_item[:price]
-                          @order_item.qty = line_item[:qty_ordered]
-                          @order_item.row_total= line_item[:row_total]
-                          @order_item.name = line_item[:name]
-                          @order_item.sku = line_item[:sku]
-                          
                           if line_item[:product_type] == 'simple'
+                            @order_item = OrderItem.new
+                            @order_item.price = line_item[:price]
+                            @order_item.qty = line_item[:qty_ordered]
+                            @order_item.row_total= line_item[:row_total]
+                            @order_item.name = line_item[:name] || "Un-named Magento Product"
+                            @order_item.sku = line_item[:sku]
                             if ProductSku.where(:sku => @order_item.sku).length == 0
                               product_id = Groovepacker::Stores::Importers::Magento::
-                                  ProductsImporter.new(handler).import_single({
-                                                                                sku: @order_item.sku})
+                                  ProductsImporter.new(handler).import_single({ product_id: line_item[:product_id] })
                             else
                               product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
                             end
+                            @order_item.product_id = product_id
+                            @order.order_items << @order_item
                           else
                             if ProductSku.where(:sku => line_item[:sku]).length == 0
-                              product_id = Groovepacker::Stores::Importers::Magento::
-                                  ProductsImporter.new(handler).import_single({
-                                                                                sku: line_item[:sku]})
-                            else
-                              product_id = ProductSku.where(:sku => @order_item.sku).first.product_id
+                              Groovepacker::Stores::Importers::Magento::
+                                  ProductsImporter.new(handler).import_single({ product_id: line_item[:product_id] })
                             end
                           end
-                          @order_item.product_id = product_id
-                          @order.order_items << @order_item
-                          
                           import_item.current_order_imported_item = import_item.current_order_imported_item + 1
                           import_item.save
                         end
@@ -177,6 +166,8 @@ module Groovepacker
               result[:messages].push(e.message)
               import_item.message = e.message
               import_item.save
+              tenant = Apartment::Tenant.current
+              ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
             end
             import_item.reload
             if import_item.status != 'cancelled'
