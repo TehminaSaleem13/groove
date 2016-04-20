@@ -436,7 +436,7 @@ class Product < ActiveRecord::Base
 
   def create_or_update_productkitsku(kit_product)
     actual_product = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product["option_product_id"], self.id)
-    return unless actual_product  
+    return unless actual_product
     actual_product.qty = kit_product["qty"]
     actual_product.packing_order = kit_product["packing_order"]
     actual_product.save
@@ -455,7 +455,7 @@ class Product < ActiveRecord::Base
 
   def create_or_update_productbarcode(barcode, order, status=nil)
     product_barcode = status=='new' ? ProductBarcode.new : ProductBarcode.find(barcode["id"])
-    
+
     product_barcode.barcode = barcode["barcode"]
     product_barcode.product_id = self.id unless product_barcode.persisted?
     product_barcode.order = order
