@@ -5,7 +5,7 @@ class ExportOrder < ActionMailer::Base
     Apartment::Tenant.switch(tenant)
     export_settings = ExportSetting.first
     
-    @counts = get_order_counts if export_settings.export_orders_option == 'on_same_day'
+    @counts = get_order_counts(export_settings) if export_settings.export_orders_option == 'on_same_day'
     
     filename = export_settings.export_data
     @tenant_name = tenant
@@ -28,9 +28,10 @@ class ExportOrder < ActionMailer::Base
     File.delete(file_locatin)
   end
 
-  def get_order_counts
+  def get_order_counts(export_settings)
     result = {}
-    day_begin = Time.now.beginning_of_day
+    day_begin, end_time = export_settings.get_start_and_end_time
+    #day_begin = Time.zone.now.beginning_of_day
     result['imported'] = Order.where("created_at >= ?", day_begin).size
     result['scanned'] = Order.where("scanned_on >= ?", day_begin).size
     result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_by_status_change = ?", day_begin, true).size
