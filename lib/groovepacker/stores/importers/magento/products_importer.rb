@@ -52,13 +52,13 @@ module Groovepacker
 
             begin
               response = client.call(:catalog_product_info,
-                                     message: {session: session, productId: product_id})
+                                     message: {session: session, id: product_id})
 
               if response.success?
                 @product = response.body[:catalog_product_info_response][:info]
                 #add product to the database
                 @productdb = Product.new
-                @productdb.name = @product[:name]
+                @productdb.name = @product[:name] || "Un-named Magento Product"
                 @productdb.store_product_id = @product[:product_id]
                 @productdb.product_type = @product[:type]
                 @productdb.store = credential.store
