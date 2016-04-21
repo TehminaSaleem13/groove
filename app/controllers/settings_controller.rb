@@ -744,6 +744,8 @@ class SettingsController < ApplicationController
         scan_pack_setting.scan_by_tracking_number = params[:scan_by_tracking_number]
         scan_pack_setting.intangible_setting_enabled = params[:intangible_setting_enabled]
         scan_pack_setting.intangible_string = params[:intangible_string]
+        scan_pack_setting.post_scan_pause_enabled = params[:post_scan_pause_enabled]
+        scan_pack_setting.post_scan_pause_time = params[:post_scan_pause_time]
 
         if scan_pack_setting.save
           @result['success_messages'].push('Settings updated successfully.')

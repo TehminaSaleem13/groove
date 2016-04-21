@@ -76,6 +76,16 @@ groovepacks_controllers.
 
       $scope.input_enter = function (event) {
         if (event.which != '13') return;
+        if ($scope.current_state == 'scanpack.rfp.default' && $scope.scan_pack.settings.post_scan_pause_enabled) {
+          window.setTimeout(function() {
+            myscope.start_scanning(event);
+          }, $scope.scan_pack.settings.post_scan_pause_time*1000);
+        } else {
+          myscope.start_scanning(event);
+        }
+      };
+
+      myscope.start_scanning = function(event) {
         if (!myscope.callback()) return;
         var id = null;
         if (typeof $scope.data.order.id !== "undefined") {

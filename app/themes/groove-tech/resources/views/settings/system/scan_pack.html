@@ -172,6 +172,29 @@
                  groov-popover="{{translations.tooltips.intanginle_setting}}"></i>
             </div>
           </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3"
+                   style="padding-top: 0px;">Post Scan Pause</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.post_scan_pause_enabled"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 ng-hide="scan_pack.settings.post_scan_pause_enabled" popover-trigger="mouseenter"
+                 groov-popover="This option should only be enabled if GroovePacker indicates the barcodes being scanned are incorrect and the incorrect value submitted would be right except that it's missing the last digit or two."></i>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.post_scan_pause_enabled">
+              <label class="control-label col-sm-5 col-md-4" style="padding-top: 0px;">Seconds</label>
+
+              <div class="col-sm-7 col-md-8">
+                <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()" ng-model="scan_pack.settings.post_scan_pause_time"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+            </div>
+          </div>
+
         </fieldset>
       </div>
     </div>
