@@ -1,4 +1,5 @@
 groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 'settings', 'hotkeys' , 'editable', 'notification', function ($timeout, $http, $sce, settings, hotkeys, editable, notification) {
+  $sce.editable_loaded = false;
   var default_options = function () {
     return {
       identifier: 'datagrid',
@@ -145,6 +146,17 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         myscope.make_theads(scope.theads);
         settings.column_preferences.save(scope.options.identifier, scope.theads);
       };
+
+      scope.load_editable = function (ind, field) {
+        if (typeof scope.editable[field] == "undefined") {
+          if($sce.editable_loaded==true) return;
+          scope.compile(ind, field);
+          $sce.editable_loaded = true;
+          window.setTimeout(function() {
+            editable.force_exit();
+          }, 1000);
+        }
+      }
 
       scope.compile = function (ind, field) {
         if (typeof scope.editable[field] == "undefined") {
