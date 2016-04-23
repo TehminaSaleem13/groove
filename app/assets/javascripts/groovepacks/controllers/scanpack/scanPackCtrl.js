@@ -10,7 +10,9 @@ groovepacks_controllers.
           return true;
         };
         if (myscope.check_reload_settings()) {
+          var last_scanned_item = myscope.last_scanned_barcode;
           myscope.init();
+          myscope.last_scanned_barcode = last_scanned_item;
         }
         myscope.callbacks = {};
         $scope.current_state = $state.current.name;
@@ -94,7 +96,7 @@ groovepacks_controllers.
         if ($scope.current_state == 'scanpack.rfp.default') {
           scanPack.input_scan_happend = true
         }
-        if ($scope.data.input!='' || $scope.data.input!=undefined) {
+        if ($scope.data.input!=undefined && $scope.data.input!='') {
           myscope.last_scanned_barcode = $scope.data.input;
         }
         $window.increment_id = $scope.data.order.increment_id;
