@@ -271,7 +271,7 @@ groovepacks_controllers.
       };
 
       $scope.check_days_value = function (store) {
-        element_val = parseInt(store.days);
+        var element_val = parseInt(store.days);
         if(element_val>30) {
           store.days=30;
         }
