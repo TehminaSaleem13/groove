@@ -140,7 +140,7 @@ module Groovepacker
 
         def create_or_update_single_sku(sku, index, status)
           db_sku = ProductSku.find_by_sku(sku["sku"])
-          if sku["id"].present? and db_sku.blank?
+          if sku["id"].present?
             status = @product.create_or_update_productsku(sku, index)
           elsif sku["sku"].present? && db_sku.blank?
             status = @product.create_or_update_productsku(sku, index, 'new')
@@ -163,7 +163,7 @@ module Groovepacker
         def create_or_update_single_barcode(barcode, index, status)
           db_barcode = ProductBarcode.find_by_barcode(barcode["barcode"])
           case true
-          when barcode["id"].present? && db_barcode.blank?
+          when barcode["id"].present?
             status = @product.create_or_update_productbarcode(barcode, index)
           when barcode["barcode"].present? && db_barcode.blank?
             status = @product.create_or_update_productbarcode(barcode, index, 'new')
