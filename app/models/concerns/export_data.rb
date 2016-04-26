@@ -146,7 +146,16 @@ module ExportData
   end
 
   def do_export_with_orders(orders, filename)
-    row_map = {
+    row_map = generate_default_row_map
+    order_hash_array = []
+    order_hash = generate_header
+    order_hash_array.push(order_hash)
+    fetch_orders_hash_array(orders, row_map, order_hash_array)
+    push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
+  end
+
+  def generate_default_row_map
+    {
       order_date: '',
       order_number: '',
       scan_order: '',
@@ -170,11 +179,6 @@ module ExportData
       scanned_date: '',
       warehouse_name: ''
     }
-    order_hash_array = []
-    order_hash = generate_header
-    order_hash_array.push(order_hash)
-    fetch_orders_hash_array(orders, row_map, order_hash_array)
-    push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
   end
 
   def sort_by_scan_order(order_hash_item_array)
