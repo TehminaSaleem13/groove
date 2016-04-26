@@ -155,30 +155,7 @@ module ExportData
   end
 
   def generate_default_row_map
-    {
-      order_date: '',
-      order_number: '',
-      scan_order: '',
-      barcode_with_lot: '',
-      barcode: '',
-      lot_number: '',
-      primary_sku: '',
-      part_sku: '',
-      serial_number: '',
-      product_name: '',
-      kit_name: '',
-      item_sale_price: '',
-      customer_name: '',
-      address1: '',
-      address2: '',
-      city: '',
-      state: '',
-      zip: '',
-      packing_user: '',
-      order_item_count: '',
-      scanned_date: '',
-      warehouse_name: ''
-    }
+    generate_header.reduce({}){|h, (k, v)| h[k] = ''; h}
   end
 
   def sort_by_scan_order(order_hash_item_array)
