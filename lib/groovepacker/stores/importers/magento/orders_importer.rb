@@ -37,7 +37,7 @@ module Groovepacker
                                                         {sessionId: session, filters: @filters_array})
 
               if response.success?
-                if !response.body[:sales_order_list_response][:result][:item].nil?
+                unless response.body[:sales_order_list_response][:result][:item].blank?
                   result[:total_imported] = response.body[:sales_order_list_response][:result][:item].length
                   import_item.current_increment_id = ''
                   import_item.success_imported = 0
