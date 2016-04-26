@@ -131,7 +131,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     for (var i = data_points.data.length - 1; i >= 0; i--) {
         date = d3.time.format('%b %e, %Y')(moment.unix(data_points.data[i][0]).toDate());
         col_sm = Math.floor(12/data_points.data.length);
-        tooltipText += '<div class=col-sm-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
+        tooltipText += '<div class=col-sm-' + col_sm + ' col-md-' + col_sm + ' col-lg-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
         '">' + data_points.user[i][0] + '</h4>';
       if (charts.type === 'packing_stats' || charts.type === 'packing_error') {
         tooltipText += 
