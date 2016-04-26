@@ -5,7 +5,7 @@ RSpec.describe ExportSetting, :type => :model do
     @export_setting = FactoryGirl.build(
       :export_setting,
       send_export_email_on_mon: true,
-      time_to_send_export_email: Time.zone.now.since(10.days),
+      time_to_send_export_email: Time.zone.now.since(rand(1..999).days),
       order_export_email: 'test@gmail.com'
     )
 
@@ -15,6 +15,7 @@ RSpec.describe ExportSetting, :type => :model do
   context 'Schedules Export' do
     it 'when time to export is changed' do
       Delayed::Worker.delay_jobs = true
+      sleep(5)
       expect { @export_setting.save }
         .to change { Delayed::Backend::ActiveRecord::Job.count }.by(1)
 
@@ -49,24 +50,63 @@ RSpec.describe ExportSetting, :type => :model do
                                   :store => store, scanned_on: DateTime.now,
                                   packing_user_id: user.id
                                   )
-      product1 = FactoryGirl.create(:product, is_kit: 1)
+
+      product = FactoryGirl.create(:product)
+      product_sku = FactoryGirl.create(:product_sku, :product=> product)
+      product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode=>"987654321")
+      order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
       product2 = FactoryGirl.create(:product)
-      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product1.name, :inv_status=>'allocated')
       order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product2.name, :inv_status=>'allocated')
       product_inv_wh1 = FactoryGirl.create(
-        :product_inventory_warehouse, :product=> product1,
+        :product_inventory_warehouse, :product=> product,
         :inventory_warehouse_id =>inv_wh.id,
         :available_inv => 25, :allocated_inv => 5)
       product_inv_wh2 = FactoryGirl.create(
         :product_inventory_warehouse, :product=> product2,
         :inventory_warehouse_id =>inv_wh.id,
         :available_inv => 25, :allocated_inv => 5)
+
+      scan_pack_setting = ScanPackSetting.new
+      scan_pack_setting.escape_string = ''
+      scan_pack_setting.save
+
+      order_serial = FactoryGirl.create(:order_serial, order_id: order.id, serial: '5', product_id: product.id)
+      product_lot = FactoryGirl.create(:product_lot, product_id: product.id, lot_number: 'LOT')
+      FactoryGirl.create(
+        :order_item_order_serial_product_lot,
+        order_item: order_item,
+        order_serial: order_serial,
+        product_lot: product_lot
+        )
     end
 
-    it 'should export Data' do
-      @export_setting.update_attributes(start_time: DateTime.now.ago(5.days), end_time: DateTime.now)
+    it 'should export Data without orders' do
+      @export_setting.update_attributes(
+        start_time: DateTime.now.ago(5.days), end_time: DateTime.now,
+        order_export_type: 'do_not_include'
+        )
+      @export_setting.save
+      filename = @export_setting.export_data
+      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%e').to_s}/)
+    end
+
+    it 'should export Data including all orders' do
+      @export_setting.update_attributes(
+        start_time: DateTime.now.ago(5.days), end_time: DateTime.now,
+        order_export_type: 'include_all'
+        )
+      @export_setting.save
+      filename = @export_setting.export_data
+      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%e').to_s}/)
+    end
+
+    it 'should export Data including orders with serial and lot' do
+      @export_setting.update_attributes(
+        start_time: DateTime.now.ago(5.days), end_time: DateTime.now,
+        order_export_type: 'order_with_serial_lot'
+        )
       @export_setting.save
       filename = @export_setting.export_data
       expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%e').to_s}/)
