@@ -140,14 +140,17 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         '<span><strong>Day\'s Accuracy: ' + data_points.data[i][1] + '% </strong></span><br/>' +
         '<span><strong>' + data_points.data[i][2] + ' Orders Scanned</strong></span><br/>' +
         '<span><strong>' + data_points.data[i][3] + ' Items Packed </strong></span><br/>' +
-        '<span><strong>' + data_points.data[i][4] + ' Exceptions Recordeddd</strong></span>' +
-        '<legend style="border-bottom: 2px solid rgba(0,0,1,.86)"></legend>';
+        '<span><strong>' + data_points.data[i][4] + ' Exceptions Recorded</strong></span>';
 
-        if (data_points.data[i][6] != null) {
+        if (data_points.data[i][6] != null && data_points.data[i][7] != null) {
           var orders = data_points.data[i][6].split(' ')
+          var dates = data_points.data[i][7].split(' ')
+          tooltipText += '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>'
           for (var j = 0; j < orders.length - 1; j++) {
-            tooltipText += '<span style="text-transform: capitalize; color:' + data_points.user[i][1] +
-        '"><strong>#' + orders[j] + '</strong></span><br/>'
+            tooltipText +=
+            '<span><span style="margin-bottom: -4px; text-transform: capitalize; color:' + data_points.user[i][1] +
+            '"><strong>#' + orders[j] + '</strong></span><br/>' +
+            '<span style="margin-top: -4px;"><strong>Recorded: ' + d3.time.format('%b %e, %Y')(moment.unix(dates[j]).toDate()) + '</strong></span></span><br/>';
           };
         }
         tooltipText += '</div>';

@@ -57,6 +57,7 @@ module Groovepacker
           if @exception
             result[:exception_description] = @exception.description
             result[:exception_reason] = @exception.reason
+            result[:exception_recorded_date] = @exception.created_at
           end
         end
 
