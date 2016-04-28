@@ -69,6 +69,8 @@ module Groovepacker
             general_setting = GeneralSetting.all.first
             general_setting.update_column(:inventory_tracking, false)
             GeneralSetting.unset_setting
+            bulk_action.status = 'completed'
+            bulk_action.save
           end
         rescue Exception => e
           bulk_action.status = 'failed'
