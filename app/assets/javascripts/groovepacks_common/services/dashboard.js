@@ -135,13 +135,22 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         '">' + data_points.user[i][0] + '</h4>';
       if (charts.type === 'packing_stats' || charts.type === 'packing_error') {
         tooltipText += 
-        '<span><strong>Date: </strong>' + date + '</span><br/>' +
-        '<span><strong>Accuracy: </strong>' + data_points.data[i][1] + '% </span><br/>' +
-        '<span><strong>Period Accuracy: </strong>' + data_points.data[i][5] + '% </span><br/>' +
+        '<span><strong>' + date + '</strong></span><br/>' +
+        '<span><strong>Period Accuracy: ' + data_points.data[i][5] + '% </strong></span><br/>' +
+        '<span><strong>Day\'s Accuracy: ' + data_points.data[i][1] + '% </strong></span><br/>' +
         '<span><strong>' + data_points.data[i][2] + ' Orders Scanned</strong></span><br/>' +
         '<span><strong>' + data_points.data[i][3] + ' Items Packed </strong></span><br/>' +
-        '<span><strong>' + data_points.data[i][4] + ' Exceptions Recorded</strong></span>' +
-        '</div>';
+        '<span><strong>' + data_points.data[i][4] + ' Exceptions Recordeddd</strong></span>' +
+        '<legend style="border-bottom: 2px solid rgba(0,0,1,.86)"></legend>';
+
+        if (data_points.data[i][6] != null) {
+          var orders = data_points.data[i][6].split(' ')
+          for (var j = 0; j < orders.length - 1; j++) {
+            tooltipText += '<span style="text-transform: capitalize; color:' + data_points.user[i][1] +
+        '"><strong>#' + orders[j] + '</strong></span><br/>'
+          };
+        }
+        tooltipText += '</div>';
       } else if (charts.type === 'packing_speed_stats' || charts.type === 'packing_time_stats') {
         tooltipText +=
         '<span><strong>Period Speed Score: </strong>' + get_speed(data_points.data[i][2], dashboard) + '% </span><br/>' +
