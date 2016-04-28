@@ -3,7 +3,7 @@ module Groovepacker
     module Importers
       module Ebay
         class ProductsImporter < Groovepacker::Stores::Importers::Importer
-          import productsHelper
+          include ProductsHelper
 
           def import
             #do ebay connect.
