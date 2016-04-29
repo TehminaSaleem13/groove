@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160421105605) do
+ActiveRecord::Schema.define(:version => 20160429065453) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -719,49 +719,50 @@ ActiveRecord::Schema.define(:version => 20160421105605) do
   end
 
   create_table "scan_pack_settings", :force => true do |t|
-    t.boolean  "enable_click_sku",              :default => true
-    t.boolean  "ask_tracking_number",           :default => false
-    t.datetime "created_at",                                                                          :null => false
-    t.datetime "updated_at",                                                                          :null => false
-    t.boolean  "show_success_image",            :default => true
-    t.string   "success_image_src",             :default => "/assets/images/scan_success.png"
-    t.float    "success_image_time",            :default => 0.5
-    t.boolean  "show_fail_image",               :default => true
-    t.string   "fail_image_src",                :default => "/assets/images/scan_fail.png"
-    t.float    "fail_image_time",               :default => 1.0
-    t.boolean  "play_success_sound",            :default => true
-    t.string   "success_sound_url",             :default => "/assets/sounds/scan_success.mp3"
-    t.float    "success_sound_vol",             :default => 0.75
-    t.boolean  "play_fail_sound",               :default => true
-    t.string   "fail_sound_url",                :default => "/assets/sounds/scan_fail.mp3"
-    t.float    "fail_sound_vol",                :default => 0.75
-    t.boolean  "skip_code_enabled",             :default => true
-    t.string   "skip_code",                     :default => "SKIP"
-    t.boolean  "note_from_packer_code_enabled", :default => true
-    t.string   "note_from_packer_code",         :default => "NOTE"
-    t.boolean  "service_issue_code_enabled",    :default => true
-    t.string   "service_issue_code",            :default => "ISSUE"
-    t.boolean  "restart_code_enabled",          :default => true
-    t.string   "restart_code",                  :default => "RESTART"
-    t.boolean  "show_order_complete_image",     :default => true
-    t.string   "order_complete_image_src",      :default => "/assets/images/scan_order_complete.png"
-    t.float    "order_complete_image_time",     :default => 1.0
-    t.boolean  "play_order_complete_sound",     :default => true
-    t.string   "order_complete_sound_url",      :default => "/assets/sounds/scan_order_complete.mp3"
-    t.float    "order_complete_sound_vol",      :default => 0.75
-    t.boolean  "type_scan_code_enabled",        :default => true
-    t.string   "type_scan_code",                :default => "*"
-    t.string   "post_scanning_option",          :default => "None"
-    t.string   "escape_string",                 :default => " - "
-    t.boolean  "escape_string_enabled",         :default => false
-    t.boolean  "record_lot_number",             :default => false
-    t.boolean  "show_customer_notes",           :default => false
-    t.boolean  "show_internal_notes",           :default => false
-    t.boolean  "scan_by_tracking_number",       :default => false
-    t.boolean  "intangible_setting_enabled",    :default => false
-    t.string   "intangible_string",             :default => ""
-    t.boolean  "post_scan_pause_enabled",       :default => false
-    t.float    "post_scan_pause_time",          :default => 4.0
+    t.boolean  "enable_click_sku",                        :default => true
+    t.boolean  "ask_tracking_number",                     :default => false
+    t.datetime "created_at",                                                                                    :null => false
+    t.datetime "updated_at",                                                                                    :null => false
+    t.boolean  "show_success_image",                      :default => true
+    t.string   "success_image_src",                       :default => "/assets/images/scan_success.png"
+    t.float    "success_image_time",                      :default => 0.5
+    t.boolean  "show_fail_image",                         :default => true
+    t.string   "fail_image_src",                          :default => "/assets/images/scan_fail.png"
+    t.float    "fail_image_time",                         :default => 1.0
+    t.boolean  "play_success_sound",                      :default => true
+    t.string   "success_sound_url",                       :default => "/assets/sounds/scan_success.mp3"
+    t.float    "success_sound_vol",                       :default => 0.75
+    t.boolean  "play_fail_sound",                         :default => true
+    t.string   "fail_sound_url",                          :default => "/assets/sounds/scan_fail.mp3"
+    t.float    "fail_sound_vol",                          :default => 0.75
+    t.boolean  "skip_code_enabled",                       :default => true
+    t.string   "skip_code",                               :default => "SKIP"
+    t.boolean  "note_from_packer_code_enabled",           :default => true
+    t.string   "note_from_packer_code",                   :default => "NOTE"
+    t.boolean  "service_issue_code_enabled",              :default => true
+    t.string   "service_issue_code",                      :default => "ISSUE"
+    t.boolean  "restart_code_enabled",                    :default => true
+    t.string   "restart_code",                            :default => "RESTART"
+    t.boolean  "show_order_complete_image",               :default => true
+    t.string   "order_complete_image_src",                :default => "/assets/images/scan_order_complete.png"
+    t.float    "order_complete_image_time",               :default => 1.0
+    t.boolean  "play_order_complete_sound",               :default => true
+    t.string   "order_complete_sound_url",                :default => "/assets/sounds/scan_order_complete.mp3"
+    t.float    "order_complete_sound_vol",                :default => 0.75
+    t.boolean  "type_scan_code_enabled",                  :default => true
+    t.string   "type_scan_code",                          :default => "*"
+    t.string   "post_scanning_option",                    :default => "None"
+    t.string   "escape_string",                           :default => " - "
+    t.boolean  "escape_string_enabled",                   :default => false
+    t.boolean  "record_lot_number",                       :default => false
+    t.boolean  "show_customer_notes",                     :default => false
+    t.boolean  "show_internal_notes",                     :default => false
+    t.boolean  "scan_by_tracking_number",                 :default => false
+    t.boolean  "intangible_setting_enabled",              :default => false
+    t.string   "intangible_string",                       :default => ""
+    t.boolean  "post_scan_pause_enabled",                 :default => false
+    t.float    "post_scan_pause_time",                    :default => 4.0
+    t.boolean  "intangible_setting_gen_barcode_from_sku", :default => false
   end
 
   create_table "shipping_easy_credentials", :force => true do |t|
