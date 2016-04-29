@@ -238,6 +238,10 @@ groovepacks_controllers.
         importOrders.issue_import(store_id, days, import_type);
       };
 
+      $scope.update_popup_display_setting = function (flag) {
+        importOrders.update_popup_display_setting(flag);
+      };
+
       $scope.cancel_import = function (store_id) {
         //alert("cancel import" + store_id)
         importOrders.cancel_import(store_id);
