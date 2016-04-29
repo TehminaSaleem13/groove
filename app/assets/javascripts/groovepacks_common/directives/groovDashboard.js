@@ -159,7 +159,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           init: {
             users: function () {
-              scope.exceptions.users.push({id: '-1', username: 'All User'});
+              scope.exceptions.users.push({id: '-1', username: 'All Users'});
               users.list.get(null).then(function (response) {
                 response.data.forEach(function(element) {
                   if (element.active) {
@@ -178,8 +178,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     ordernum: scope.handle_click_fn
                   },
                   all_fields: {
-                    created_at: {
+                    recorded_at: {
                       name: "Date Recorded",
+                      editable: false,
+                      transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+                    },
+                    created_at: {
+                      name: "Order Date",
                       editable: false,
                       transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
                     },
@@ -191,6 +196,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                       name: "Order Number",
                       editable: false,
                       transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
+                    },
+                    reason: {
+                      name: "Exception Reason",
+                      editable: false
                     },
                     frequency: {
                       name: "Frequency",
@@ -209,8 +218,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     ordernum: scope.handle_click_fn
                   }, 
                   all_fields: {
-                    created_at: {
+                    recorded_at: {
                       name: "Date Recorded",
+                      editable: false,
+                      transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+                    },
+                    created_at: {
+                      name: "Order Date",
                       editable: false,
                       transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
                     },
@@ -222,6 +236,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                       name: "Order Number",
                       editable: false,
                       transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
+                    },
+                    reason: {
+                      name: "Exception Reason",
+                      editable: false
                     },
                     frequency: {
                       name: "Frequency",

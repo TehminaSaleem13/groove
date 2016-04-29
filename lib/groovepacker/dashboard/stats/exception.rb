@@ -24,15 +24,18 @@ module Groovepacker
 
           exceptions.each do |exception|
             except = {}
-            except[:created_at] = exception.created_at
+            except[:recorded_at] = exception.created_at
             except[:description] = exception.description
             except[:increment_id] = exception.order.increment_id
             except[:order_id] = exception.order_id
+            except[:reason] = exception.reason
             except[:frequency] = percentages[exception.reason]
+            order = Order.find(exception.order_id)
+            except[:created_at] = order.order_placed_time
             results << except
           end
 
-          results
+          results.reverse
         end
 
         def by_frequency
@@ -50,11 +53,14 @@ module Groovepacker
 
           exceptions.each do |exception|
             except = {}
-            except[:created_at] = exception.created_at
+            except[:recorded_at] = exception.created_at
             except[:description] = exception.description
             except[:increment_id] = exception.order.increment_id
             except[:order_id] = exception.order_id
+            except[:reason] = exception.reason
             except[:frequency] = percentages[exception.reason]
+            order = Order.find(exception.order_id)
+            except[:created_at] = order.order_placed_time
             results << except
           end
 
