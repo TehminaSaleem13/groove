@@ -168,23 +168,19 @@
             <div class="info col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" ng-show="scan_pack.settings.intangible_setting_enabled" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intanginle_setting}}"></i>
             </div>
-            <div class="controls col-sm-2 form-inline" ng-show="scan_pack.settings.intangible_setting_enabled">
-              <div toggle-switch ng-model="scan_pack.settings.intangible_setting_gen_barcode_from_sku" groov-click="update_settings()"></div>
-              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="This option should only be enabled if you want to generate barcode for intangible items from their SKU."></i>
-            </div>
           </div>
 
-          <div class="form-group">
+          <div class="form-group" ng-show="scan_pack.settings.intangible_setting_enabled">
             <label class="control-label col-sm-3"
-                   style="padding-top: 0px;">Post Scan Pause</label>
+                   style="padding-top: 0px;">Auto-Generate Barcode</label>
 
             <div class="controls col-sm-2 form-inline">
-              <div toggle-switch ng-model="scan_pack.settings.post_scan_pause_enabled" groov-click="update_settings()"></div>
-              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
-                 ng-hide="scan_pack.settings.post_scan_pause_enabled" popover-trigger="mouseenter"
-                 groov-popover=""></i>
+              <div toggle-switch ng-model="scan_pack.settings.intangible_setting_gen_barcode_from_sku" groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="Coupon codes and other intangible items are often imported without barcodes and set to "New".  When enabled, this option will generate a barcode from the sku for any intangible items found during an order import. Enable this option of you find orders are being set to 'Action Required' due to intangible items."></i>
             </div>
           </div>
+
+          
 
           <div class="form-group">
             <label class="control-label col-sm-3"

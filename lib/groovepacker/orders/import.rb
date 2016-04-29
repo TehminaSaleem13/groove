@@ -51,7 +51,7 @@ module Groovepacker
 
       private
         def add_import_to_delayed_job(order_summary)
-          order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started')
+          order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started', display_summary: true)
           # call delayed job
           tenant = Apartment::Tenant.current
           import_orders_obj = ImportOrders.new

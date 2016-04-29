@@ -23,6 +23,14 @@ class ProductSku < ActiveRecord::Base
     next_sku
   end
 
+  def gen_barcode_from_sku_if_intangible_product
+    scanpack_settings = ScanPackSetting.last
+    return unless scanpack_settings
+    if scanpack_settings.intangible_setting_enabled && scanpack_settings.intangible_setting_gen_barcode_from_sku
+      ProductBarcode.generate_barcode_from_sku(self)
+    end
+  end
+
   private
 
   def self.get_last_temp_sku_token(temp_skus)
@@ -31,14 +39,6 @@ class ProductSku < ActiveRecord::Base
       sku_tokens << sku.sku.split('-').last.to_i
     end
     sku_tokens.sort.last
-  end
-
-  def gen_barcode_from_sku_if_intangible_product
-    scanpack_settings = ScanPackSetting.last
-    return unless scanpack_settings
-    if scanpack_settings.intangible_setting_enabled && scanpack_settings.intangible_setting_gen_barcode_from_sku
-      ProductBarcode.generate_barcode_from_sku(self)
-    end
   end
 
 end
