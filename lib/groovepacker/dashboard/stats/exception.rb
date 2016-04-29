@@ -25,7 +25,7 @@ module Groovepacker
           exceptions.each do |exception|
             except = {}
             except[:recorded_at] = exception.created_at
-            except[:description] = exception.description
+            except[:description] = exception.description.strip
             except[:increment_id] = exception.order.increment_id
             except[:order_id] = exception.order_id
             except[:reason] = exception.reason
@@ -54,7 +54,7 @@ module Groovepacker
           exceptions.each do |exception|
             except = {}
             except[:recorded_at] = exception.created_at
-            except[:description] = exception.description
+            except[:description] = exception.description.strip
             except[:increment_id] = exception.order.increment_id
             except[:order_id] = exception.order_id
             except[:reason] = exception.reason
