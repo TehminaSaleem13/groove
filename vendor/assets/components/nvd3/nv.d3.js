@@ -4914,21 +4914,21 @@ nv.models.indentedTree = function() {
                   disabled: data.map(function(d) { return !!d.disabled })
                });
             }
-          })
-          .on('dblclick', function(d,i) {
-            dispatch.legendDblclick(d,i);
-            if (updateState) {
-                //the default behavior of NVD3 legends, when double clicking one,
-                // is to set all other series' to false, and make the double clicked series enabled.
-                data.forEach(function(series) {
-                   series.disabled = true;
-                });
-                d.disabled = false;
-                dispatch.stateChange({
-                    disabled: data.map(function(d) { return !!d.disabled })
-                });
-            }
           });
+          // .on('dblclick', function(d,i) {
+          //   dispatch.legendDblclick(d,i);
+          //   if (updateState) {
+          //       //the default behavior of NVD3 legends, when double clicking one,
+          //       // is to set all other series' to false, and make the double clicked series enabled.
+          //       data.forEach(function(series) {
+          //          series.disabled = true;
+          //       });
+          //       d.disabled = false;
+          //       dispatch.stateChange({
+          //           disabled: data.map(function(d) { return !!d.disabled })
+          //       });
+          //   }
+          // });
       seriesEnter.append('circle')
           .style('stroke-width', 2)
           .attr('class','nv-legend-symbol')
