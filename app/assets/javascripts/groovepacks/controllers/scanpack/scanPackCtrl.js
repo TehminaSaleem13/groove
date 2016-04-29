@@ -20,6 +20,7 @@ groovepacks_controllers.
           $scope.data = {};
         }
         $scope.data.input = "";
+        window.scope = $scope;
         //console.log($scope.current_state);
       };
 

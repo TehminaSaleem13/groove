@@ -31,6 +31,7 @@ Groovepacks::Application.routes.draw do
   get "magento_rest/redirect" => "magento_rest#redirect"
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
+  put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
 
