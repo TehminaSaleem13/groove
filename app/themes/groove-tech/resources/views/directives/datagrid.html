@@ -79,7 +79,7 @@
                 <span bo-if="options.all_fields[field].transclude != '' "
                       ng-bind-html="options.all_fields[field].transclude" compile-template></span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null"
-                      bo-text="row[field] | cut:false:(25)" tooltip="{{row[field]}}" class="grid-text">
+                      bo-text="row[field].toString() | cut:false:(25)" tooltip="{{row[field]}}" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].toString().length)"
                   class="grid-text">
