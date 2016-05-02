@@ -156,8 +156,8 @@ module Groovepacker
                         make_product_intangible(order_item.product)
                         shipstation_order.order_items << order_item
                         import_item.current_order_imported_item = import_item.current_order_imported_item + 1
-                        import_item.save
                       end
+                      import_item.save
                     end
                     if shipstation_order.save
                       shipstation_order.addactivity("Order Import", credential.store.name+" Import")
@@ -183,10 +183,12 @@ module Groovepacker
                         client.add_tag_to_order(order["orderId"], gp_imported_tag_id) if gp_imported_tag_id != -1
                       end
                     end
+                    sleep 2
                   else
                     import_item.previous_imported = import_item.previous_imported + 1
                     import_item.save
                     result[:previous_imported] = result[:previous_imported] + 1
+                    sleep 1
                   end
                 end
               end
