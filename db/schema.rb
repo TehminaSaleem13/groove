@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160429123842) do
+ActiveRecord::Schema.define(:version => 20160502122842) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -817,6 +817,7 @@ ActiveRecord::Schema.define(:version => 20160429123842) do
     t.boolean  "shall_import_shipped",      :default => false
     t.boolean  "shall_import_no_status",    :default => false
     t.boolean  "import_store_order_number", :default => false
+    t.boolean  "gen_barcode_from_sku",      :default => false
   end
 
   create_table "shopify_credentials", :force => true do |t|

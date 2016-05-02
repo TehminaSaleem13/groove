@@ -402,7 +402,8 @@ class StoresController < ApplicationController
                   shall_import_new_order: params[:shall_import_new_order],
                   shall_import_not_shipped: params[:shall_import_not_shipped],
                   shall_import_shipped: params[:shall_import_shipped],
-                  shall_import_no_status: params[:shall_import_no_status])
+                  shall_import_no_status: params[:shall_import_no_status],
+                  gen_barcode_from_sku: params[:gen_barcode_from_sku])
                 new_record = true
               else
                 @shipworks.update_attributes(
@@ -411,7 +412,8 @@ class StoresController < ApplicationController
                   shall_import_new_order: params[:shall_import_new_order],
                   shall_import_not_shipped: params[:shall_import_not_shipped],
                   shall_import_shipped: params[:shall_import_shipped],
-                  shall_import_no_status: params[:shall_import_no_status])
+                  shall_import_no_status: params[:shall_import_no_status],
+                  gen_barcode_from_sku: params[:gen_barcode_from_sku])
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e

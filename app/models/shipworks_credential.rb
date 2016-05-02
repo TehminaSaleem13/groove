@@ -8,7 +8,7 @@ class ShipworksCredential < ActiveRecord::Base
 
   attr_accessible :auth_token, :store, :shall_import_in_process,
                   :shall_import_new_order, :shall_import_not_shipped, :shall_import_shipped,
-                  :shall_import_no_status, :import_store_order_number
+                  :shall_import_no_status, :import_store_order_number, :gen_barcode_from_sku
 
   belongs_to :store
 

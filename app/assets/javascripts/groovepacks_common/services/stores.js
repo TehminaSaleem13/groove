@@ -231,6 +231,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shall_import_not_shipped = data.credentials.shipworks_credentials.shall_import_not_shipped;
             stores.single.shall_import_shipped = data.credentials.shipworks_credentials.shall_import_shipped;
             stores.single.shall_import_no_status = data.credentials.shipworks_credentials.shall_import_no_status;
+            stores.single.gen_barcode_from_sku = data.credentials.shipworks_credentials.gen_barcode_from_sku;
             stores.single.request_url = data.credentials.shipworks_hook_url;
           } else if (data.store.store_type == 'Shopify') {
             stores.single.shop_name = data.credentials.shopify_credentials.shop_name;

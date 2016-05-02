@@ -174,9 +174,15 @@ module Groovepacker
             end
 
             #Barcodes
-            product.product_barcodes.create(
-              barcode: item["UPC"]
-            ) unless item["UPC"].nil?
+            if store.shipworks_credential.gen_barcode_from_sku && item["SKU"].present? && ProductBarcode.where(barcode: sku).empty?
+              product.product_barcodes.create(
+                barcode: item["SKU"]
+              )
+            elsif item["UPC"].present?
+              product.product_barcodes.create(
+                barcode: item["UPC"]
+              )
+            end
 
             #Images
             product.product_images.create(
