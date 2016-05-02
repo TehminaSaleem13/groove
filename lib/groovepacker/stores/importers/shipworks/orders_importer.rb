@@ -174,13 +174,13 @@ module Groovepacker
             end
 
             #Barcodes
-            if store.shipworks_credential.gen_barcode_from_sku && item["SKU"].present? && ProductBarcode.where(barcode: sku).empty?
-              product.product_barcodes.create(
-                barcode: item["SKU"]
-              )
-            elsif item["UPC"].present?
+            if item["UPC"].present?
               product.product_barcodes.create(
                 barcode: item["UPC"]
+              )
+            elsif store.shipworks_credential.gen_barcode_from_sku && item["SKU"].present? && ProductBarcode.where(barcode: item["SKU"]).empty?
+              product.product_barcodes.create(
+                barcode: item["SKU"]
               )
             end
 
