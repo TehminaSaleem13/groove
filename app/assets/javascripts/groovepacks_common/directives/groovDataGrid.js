@@ -165,10 +165,11 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
 
         if (typeof scope.editable[field][ind] == "undefined") {
           scope.editable[field][ind] = $sce.trustAsHtml(
-            '<div ng-class="{\'grid-editable-field\': !editable_modal.status()}" ' + 
-                'ng-style="{\'min-width\' : (row[field].length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length) + 1) : (row[field].length || 5) + 1) + \'rem\'}"' + 
+            '<div ng-class="{\'grid-editable-field\': !editable_modal.status(),' +
+                           ' \'grid-editing-mode\': editable_modal.status()}" ' +
+                'ng-style="{\'min-width\' : (row[field].length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length) + 1) : (row[field].length || 5) + 1) + \'rem\'}"' +
                 //'ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})"' +
-                //'ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (row.show_action_icon={})" ' + 
+                //'ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (row.show_action_icon={})" ' +
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
                 scope.options.all_fields[field].model + '" identifier="' +
                 scope.options.identifier + '_list-' + field + '-' + ind + '">' +
@@ -261,9 +262,9 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
           $.each($('#' + scope.custom_identifier).parents('.table-parent').find('th'), function(){
             targetWidth += $(this).width()
           });
-          
+
           //console.log({target: targetWidth, parent: $('#' + scope.custom_identifier).parents('.table-parent').width()});
-          
+
           if(targetWidth > $('#' + scope.custom_identifier).parents('.table-parent').width()){
             $('#' + scope.custom_identifier).parents('.table-parent').doubleScroll({
               width: targetWidth
