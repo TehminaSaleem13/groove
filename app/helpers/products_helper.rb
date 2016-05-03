@@ -434,11 +434,13 @@ module ProductsHelper
     end
     csv << headers
     products.each do |item|
-      @bulk_action.reload
-      if @bulk_action.cancel == true
-        @bulk_action.status = 'cancelled'
-        @bulk_action.save
-        return true
+      if @bulk_action
+        @bulk_action.reload
+        if @bulk_action.cancel == true
+          @bulk_action.status = 'cancelled'
+          @bulk_action.save
+          return true
+        end
       end
       data = []
       inventory_wh = ProductInventoryWarehouses.where(:product_id => item.id, :inventory_warehouse_id => InventoryWarehouse.where(:is_default => true).first.id).first
