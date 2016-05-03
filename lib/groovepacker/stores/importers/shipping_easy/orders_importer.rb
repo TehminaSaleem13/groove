@@ -165,17 +165,6 @@ module Groovepacker
               end
             end
 
-            def update_success_import_count
-              if @order_to_update
-                @import_item.updated_orders_import += 1
-                @import_item.save
-              else
-                @import_item.success_imported += 1
-                @import_item.save
-                @result[:success_imported] += 1
-              end
-            end
-
             def destroy_cleared_orders(response)
               orders_to_clear = Order.where("store_id=? and status!=? and increment_id in (?)", @credential.store_id, "scanned", response["cleared_orders_ids"])
               orders_to_clear.destroy_all
