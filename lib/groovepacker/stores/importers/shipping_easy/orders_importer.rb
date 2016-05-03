@@ -18,6 +18,7 @@ module Groovepacker
             update_import_item_obj_values
             
             response["orders"].each do |order|
+              @order_to_update = false
               @import_item.reload
               break if @import_item.status == 'cancelled'
               import_single_order(order)
@@ -30,14 +31,13 @@ module Groovepacker
 
           private
             def import_single_order(order)
-              @import_item.reload
-              return unless @import_item.status != 'cancelled'
               update_current_import_item(order)
               
               shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
               shiping_easy_order ||= Order.new
 
               return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
+              @order_to_update = true if shiping_easy_order.persisted?
               shiping_easy_order.order_items.destroy_all
               shiping_easy_order.store_id = @credential.store_id
 
@@ -108,6 +108,7 @@ module Groovepacker
               @credential = handler[:credential]
               @client = handler[:store_handle]
               @import_item = handler[:import_item]
+              @import_item.update_attributes(updated_orders_import: 0)
               @result = self.build_result
               @statuses = get_statuses
             end
@@ -120,32 +121,23 @@ module Groovepacker
             end
 
             def update_import_item_obj_values
-              @import_item.update_attributes( current_increment_id: '',
-                                              success_imported: 0,
-                                              previous_imported: 0,
-                                              current_order_items: -1,
-                                              current_order_imported_item: -1,
-                                              to_import: @result[:total_imported]
+              @import_item.update_attributes( current_increment_id: '', success_imported: 0, previous_imported: 0,
+                                              current_order_items: -1, current_order_imported_item: -1, to_import: @result[:total_imported]
                                             )
             end
 
             def update_shipping_address(shiping_easy_order, order)
               return shiping_easy_order if order["recipients"].blank?
               ship_addr = order["recipients"][0]
-              shiping_easy_order.assign_attributes( lastname: ship_addr["last_name"],
-                                                    firstname: ship_addr["first_name"],
-                                                    address_1: ship_addr["address"],
-                                                    address_2: ship_addr["address2"],
-                                                    city: ship_addr["city"],
-                                                    state: ship_addr["state"],
-                                                    postcode: ship_addr["postal_code"],
-                                                    country: ship_addr["country"]
+              shiping_easy_order.assign_attributes( lastname: ship_addr["last_name"], firstname: ship_addr["first_name"], address_1: ship_addr["address"],
+                                                    address_2: ship_addr["address2"], city: ship_addr["city"], state: ship_addr["state"],
+                                                    postcode: ship_addr["postal_code"], country: ship_addr["country"]
                                                   )
               shiping_easy_order
             end
 
             def update_current_import_item(order)
-              @import_item.update_attributes( current_increment_id: order["id"],
+              @import_item.update_attributes( current_increment_id: order["external_order_identifier"],
                                               current_order_items: -1,
                                               current_order_imported_item: -1 )
             end
@@ -174,9 +166,14 @@ module Groovepacker
             end
 
             def update_success_import_count
-              @import_item.success_imported += 1
-              @import_item.save
-              @result[:success_imported] += 1
+              if @order_to_update
+                @import_item.updated_orders_import += 1
+                @import_item.save
+              else
+                @import_item.success_imported += 1
+                @import_item.save
+                @result[:success_imported] += 1
+              end
             end
 
             def destroy_cleared_orders(response)
