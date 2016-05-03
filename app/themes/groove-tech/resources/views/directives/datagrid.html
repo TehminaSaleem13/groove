@@ -43,7 +43,7 @@
           <td ng-repeat="field in theads"
             ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})"
             ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (show_action_icon={})"
-            style="padding: 2px;">
+            style="padding: 8px;">
             <div style="display:inline-block;"
               bo-if="options.editable != false && options.all_fields[field].editable == true"
               hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)" ng-init="load_editable($parent.$parent.$index,field);">
