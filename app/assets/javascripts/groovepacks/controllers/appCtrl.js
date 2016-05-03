@@ -23,7 +23,7 @@ groovepacks_controllers.
             } else {
               return ("Import");
             }
-          }
+          };
 
           var get_import_type_past = function () {
             if ($scope.import_summary.import_info.import_summary_type === 'update_locations') {
@@ -31,7 +31,8 @@ groovepacks_controllers.
             } else {
               return ("Imported");
             }
-          }
+          };
+          
           if ($scope.import_summary.import_info.status === 'completed') {
             $scope.import_groov_popover.title = 'Last ' + get_import_type() + ': ' +
               $filter('date')($scope.import_summary.import_info.updated_at,
@@ -316,13 +317,13 @@ groovepacks_controllers.
           $scope.bc_deep_import_days = store.days;
         }
         if(store.store_type==="ShippingEasy"){
-          days = $scope.se_deep_import_days = store.days;
+          $scope.se_deep_import_days = store.days;
         }
         if(store.store_type==="Shipstation API 2"){
-          days = $scope.ss_deep_import_days = store.days;
+          $scope.ss_deep_import_days = store.days;
         }
         if(store.store_type==="Teapplix"){
-          days = $scope.tp_deep_import_days = store.days;
+          $scope.tp_deep_import_days = store.days;
         }
       };
 
