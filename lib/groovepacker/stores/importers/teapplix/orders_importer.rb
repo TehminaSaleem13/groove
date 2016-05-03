@@ -145,17 +145,6 @@ module Groovepacker
             end
           end
 
-          def update_success_import_count
-            if @order_to_update
-              @import_item.updated_orders_import += 1
-              @import_item.save
-            else
-              @import_item.success_imported += 1
-              @import_item.save
-              @result[:success_imported] += 1
-            end
-          end
-
           def delete_order_if_exists(order)
             existing_order = Order.find_by_increment_id(order["txn_id"])
             if existing_order && existing_order.status!="scanned"
