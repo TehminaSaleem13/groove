@@ -326,11 +326,19 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
 
       scope.$on('groove_socket:pnotif', function (event, messages) {
         // Saving original bulk action ids for later use.
-        if(messages[0] && messages[0].type === 'groove_bulk_actions') {
-          scope.bulk_action_ids = [];
-          angular.forEach(messages, function(item){
-            scope.bulk_action_ids.push(item.data.id);
-          });
+        // if(messages[0] && messages[0].type === 'groove_bulk_actions') {
+        //   scope.bulk_action_ids = [];
+        //   angular.forEach(messages, function(item){
+        //     scope.bulk_action_ids.push(item.data.id);
+        //   });
+        // }
+        if(messages && messages.type === 'groove_bulk_actions') {
+          if (typeof scope.bulk_action_ids == 'undefined') {
+            scope.bulk_action_ids = [];
+          };
+          if (scope.bulk_action_ids.indexOf(messages.data.id) == -1) {
+            scope.bulk_action_ids.push(messages.data.id);
+          };
         }
         if (messages instanceof Array === false) {
           messages = [messages];
