@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160429123842) do
+ActiveRecord::Schema.define(:version => 20160504092915) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -38,6 +38,7 @@ ActiveRecord::Schema.define(:version => 20160429123842) do
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
     t.boolean  "show_shipping_weight_only",    :default => false
+    t.string   "mws_auth_token"
   end
 
   create_table "big_commerce_credentials", :force => true do |t|
