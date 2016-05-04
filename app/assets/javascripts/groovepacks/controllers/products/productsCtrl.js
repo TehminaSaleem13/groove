@@ -410,6 +410,7 @@ groovepacks_controllers.
               $scope.gridOptions.paginate.current_page = page;
             }
             myscope.update_selected_count();
+            myscope.update_table_accordian_width();
             $scope._can_load_products = true;
           }).error(function () {
             $scope._can_load_products = true;
@@ -421,6 +422,13 @@ groovepacks_controllers.
           return req.promise;
         }
       };
+
+      myscope.update_table_accordian_width = function () {
+        if($('.accordion-parent').width() > 200){
+          $('.table-parent').width($('.table-parent').first().width() + $('.accordion-parent').width() - 170);
+          $('.accordion-parent').width(170)
+        }
+      }
 
       myscope.update_selected_count = function () {
         if ($scope.products.setup.inverted && $scope.gridOptions.paginate.show) {

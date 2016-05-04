@@ -194,6 +194,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           } else if (data.store.store_type == 'Amazon') {
             stores.single.marketplace_id = data.credentials.amazon_credentials.marketplace_id;
             stores.single.merchant_id = data.credentials.amazon_credentials.merchant_id;
+            stores.single.mws_auth_token = data.credentials.amazon_credentials.mws_auth_token;
 
             stores.single.productmarketplace_id = data.credentials.amazon_credentials.productmarketplace_id;
             stores.single.productmerchant_id = data.credentials.amazon_credentials.productmerchant_id;
