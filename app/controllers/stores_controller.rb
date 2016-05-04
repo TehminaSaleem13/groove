@@ -210,6 +210,7 @@ class StoresController < ApplicationController
             end
             @amazon.marketplace_id = params[:marketplace_id]
             @amazon.merchant_id = params[:merchant_id]
+            @amazon.mws_auth_token = params[:mws_auth_token]
 
             @amazon.import_products = params[:import_products]
             @amazon.import_images = params[:import_images]
