@@ -254,4 +254,17 @@ module OrdersHelper
                           'custom_field_two' => order.custom_field_two
                         })
   end
+
+  def avg_time_per_item(username)
+    user = User.where('username = ?', username).first
+
+    orders = Order.where('status = ? AND packing_user_id = ? AND scanned_on > ?', 'scanned', user.id, DateTime.now - 30.days)
+    tscan_time = 0
+    tscan_count = 0
+    orders.each do |order|
+      tscan_count += order.total_scan_count
+      tscan_time += order.total_scan_time
+    end
+    tscan_time/tscan_count
+  end
 end

@@ -147,10 +147,18 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
           var dates = data_points.data[i][7].split(' ')
           tooltipText += '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>'
           for (var j = 0; j < orders.length - 1; j++) {
-            tooltipText +=
-            '<span><span style="margin-bottom: -4px; text-transform: capitalize; color:' + data_points.user[i][1] +
-            '"><strong>#' + orders[j] + '</strong></span><br/>' +
-            '<span style="margin-top: -4px;"><strong>Recorded: ' + d3.time.format('%b %e, %Y')(moment.unix(dates[j]).toDate()) + '</strong></span></span><br/>';
+            if (dates[j] == '') {
+              tooltipText +=
+              '<span><span style="margin-bottom: -4px; text-transform: capitalize; color:' + data_points.user[i][1] +
+              '"><strong>#' + orders[j] + '</strong></span><br/>' +
+              '<span style="margin-top: -4px;"><strong>Recorded: </strong></span></span><br/>';
+            } else{
+              tooltipText +=
+              '<span><span style="margin-bottom: -4px; text-transform: capitalize; color:' + data_points.user[i][1] +
+              '"><strong>#' + orders[j] + '</strong></span><br/>' +
+              '<span style="margin-top: -4px;"><strong>Recorded: ' + d3.time.format('%b %e, %Y')(moment.unix(dates[j]).toDate()) + '</strong></span></span><br/>';
+            };
+            
           };
         }
         tooltipText += '</div>';

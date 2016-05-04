@@ -3,6 +3,8 @@ class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :product_kit_skus
   has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
+
+  include OrdersHelper
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
@@ -39,9 +41,12 @@ class OrderItemKitProduct < ActiveRecord::Base
       scan_time = self.order_item_kit_product_scan_times.create(
         scan_start: self.order_item.order.last_suggested_at,
         scan_end: DateTime.now)
-
-      self.order_item.order.total_scan_time = self.order_item.order.total_scan_time +
-        (scan_time.scan_end - scan_time.scan_start).to_i
+      if typein_count > 0
+        self.order_item.order.total_scan_time += (avg_time_per_item(username) * typein_count).to_i
+      else
+        self.order_item.order.total_scan_time = self.order_item.order.total_scan_time +
+          (scan_time.scan_end - scan_time.scan_start).to_i
+      end
       self.order_item.order.total_scan_count = self.order_item.order.total_scan_count + 1
       self.order_item.order.save
 
@@ -96,4 +101,5 @@ class OrderItemKitProduct < ActiveRecord::Base
     self.scanned_qty = 0
     self.save
   end
+  
 end
