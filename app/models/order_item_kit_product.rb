@@ -42,7 +42,12 @@ class OrderItemKitProduct < ActiveRecord::Base
         scan_start: self.order_item.order.last_suggested_at,
         scan_end: DateTime.now)
       if typein_count > 0
-        self.order_item.order.total_scan_time += (avg_time_per_item(username) * typein_count).to_i
+        avg_time = avg_time_per_item(username)
+        if avg_time
+          self.order.total_scan_time += (avg_time * typein_count).to_i
+        else
+          self.order.total_scan_time += (scan_time.scan_end - scan_time.scan_start).to_i * typein_count
+        end
       else
         self.order_item.order.total_scan_time = self.order_item.order.total_scan_time +
           (scan_time.scan_end - scan_time.scan_start).to_i

@@ -265,6 +265,6 @@ module OrdersHelper
       tscan_count += order.total_scan_count
       tscan_time += order.total_scan_time
     end
-    tscan_time/tscan_count
+    (tscan_time == 0 || tscan_count == 0) ? nil : tscan_time/tscan_count
   end
 end
