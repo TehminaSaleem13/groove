@@ -1,6 +1,6 @@
 <div class="container-fluid">
   <div class="row bottom-well">
-    <div class="col-lg-2 col-md-2">
+    <div class="col-lg-2 col-md-2 accordion-parent">
       <div class="row">
         <accordion>
           <accordion-group is-open="tabs[0].open">
@@ -19,7 +19,7 @@
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 0}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})" 
+              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})"
               ui-sref-opts="{reload: true}">Active Products
             </li>
             <li
