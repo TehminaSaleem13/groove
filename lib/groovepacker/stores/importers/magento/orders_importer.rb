@@ -53,6 +53,7 @@ module Groovepacker
                     response.body[:sales_order_list_response][:result][:item].each do |item|
                       import_item.reload
                       break if import_item.status == 'cancelled'
+                      next unless item.class.to_s.include?("Hash")
                       import_single_order(item, import_item, client, response, credential, session, result)
                     end
                   end
