@@ -7,7 +7,8 @@ groovepacks_directives.directive('groovEditable', ['$timeout', 'editable', '$roo
       ngModel: "=",
       prop: "@",
       identifier: "@",
-      groovEditable: "="
+      groovEditable: "=",
+      position: "@"
     },
     link: function (scope, el, attrs, ctrl, transclude) {
       var myscope = {};

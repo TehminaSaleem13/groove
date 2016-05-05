@@ -85,6 +85,10 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         scope.update();
       };
 
+      scope.set_position = function (row, rows) {
+        return rows.indexOf(row) === 0 ? 'bottom' : 'top'
+      }
+
       scope.check_uncheck = function (row, index, event) {
         //If target is a link
         if(event.target.tagName == 'A'){return};
@@ -172,7 +176,7 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
                 //'ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (row.show_action_icon={})" ' +
                 'groov-editable="options.editable" prop="{{field}}" ng-model="' +
                 scope.options.all_fields[field].model + '" identifier="' +
-                scope.options.identifier + '_list-' + field + '-' + ind + '">' +
+                scope.options.identifier + '_list-' + field + '-' + ind +'"'+ 'position="bottom"' + '>' +
               '<span class="pull-right fa datagrid-pencil fa-pencil pointer" ' +
                 'ng-show="row.show_action_icon[field]" groov-click="compile(' + ind + ',\'' +field+ '\')">' +
               '</span>' +

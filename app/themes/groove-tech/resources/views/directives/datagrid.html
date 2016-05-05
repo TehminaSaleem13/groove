@@ -54,14 +54,15 @@
                     ng-show="row.show_action_icon[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length > 25"
                       bo-text="row[field] | cut:false:(25*options.no_of_lines)"
-                      tooltip='{{row[field].join(" ")}}'
+                      tooltip='{{row[field]}}'
+                      tooltip-placement='{{set_position(row, rows)}}'
                       class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
                       bo-text="row[field] | cut:false:(25*options.no_of_lines)" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
-                    tooltip="{{'Edit ' + options.all_fields[field].name}}" class="grid-text">
+                    tooltip="{{'Edit ' + options.all_fields[field].name}}" tooltip-placement='{{set_position(row, rows)}}' class="grid-text">
                   &nbsp;{{row[field]}}</span>
                 <span bo-if="options.all_fields[field].transclude != ''"
                       ng-bind-html="options.all_fields[field].transclude" class="grid-text" compile-template>&nbsp;</span>
@@ -79,7 +80,7 @@
                 <span bo-if="options.all_fields[field].transclude != '' "
                       ng-bind-html="options.all_fields[field].transclude" compile-template></span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null"
-                      bo-text="row[field].toString() | cut:false:(25)" tooltip="{{row[field]}}" class="grid-text">
+                      bo-text="row[field].toString() | cut:false:(25)" tooltip="{{row[field]}}" tooltip-placement='{{set_position(row, rows)}}'" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].toString().length)"
                   class="grid-text">
