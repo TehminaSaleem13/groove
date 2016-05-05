@@ -1,10 +1,42 @@
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-8">
+    <legend>Import Orders with following statuses</legend>
+    <div class="form-group">
+      <label class="control-label col-md-3">Processing</label>
+      <div class="controls col-md-6">
+        <div toggle-switch ng-model="stores.single.shall_import_processing" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-3">Pending</label>
+      <div class="controls col-md-6">
+        <div toggle-switch ng-model="stores.single.shall_import_pending" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-3">Closed</label>
+      <div class="controls col-md-6">
+        <div toggle-switch ng-model="stores.single.shall_import_closed" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-3">Complete</label>
+      <div class="controls col-md-6">
+        <div toggle-switch ng-model="stores.single.shall_import_complete" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-3">Suspected Fraud</label>
+      <div class="controls col-md-6">
+        <div toggle-switch ng-model="stores.single.shall_import_fraud" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+    
     <legend>Magento Credentials</legend>
     <div class="form-group">
-      <label class="control-label col-md-4">URL</label>
+      <label class="control-label col-md-3">URL</label>
 
-      <div class="controls col-md-8">
+      <div class="controls col-md-6">
         <input name="host" ng-blur="update_single_store(true)" ng-model="stores.single.host"
                class="form-control input-style" placeholder="http://www.domain.com/store" type="text" value=""
                required/><span>Please use https if the store is hosted at a secure URL.</span>
@@ -12,9 +44,9 @@
     </div>
 
     <div class="form-group">
-      <label class="control-label col-md-4">Username</label>
+      <label class="control-label col-md-3">Username</label>
 
-      <div class="controls col-md-8">
+      <div class="controls col-md-6">
         <input name="username" ng-blur="update_single_store(true)" ng-model="stores.single.username"
                class="form-control input-style" type="text" value="" required/>
       </div>
@@ -29,9 +61,9 @@
     -->
 
     <div class="form-group">
-      <label class="control-label col-md-4">API Key</label>
+      <label class="control-label col-md-3">API Key</label>
 
-      <div class="controls col-md-8">
+      <div class="controls col-md-6">
         <input name="apikey" ng-blur="update_single_store(true)" ng-model="stores.single.api_key"
                class="form-control input-style" type="text" value="" required/>
       </div>
@@ -39,8 +71,9 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-md-6">
+  <div class="col-md-8">
     <legend>Store Settings</legend>
+    
     <label class="checkbox">
       <input type="checkbox" ng-change="update_single_store(true)"
              ng-model="stores.single.import_images"
@@ -51,6 +84,29 @@
              ng-model="stores.single.import_products"
              name="import_products"/> Import Product Categories<br/>
     </label>
+
+    <div class="form-group">
+      <label class="control-label col-md-6">Enable/Disable Orders Status Update on Magento</label>
+      <div class="controls col-md-2">
+        <div toggle-switch ng-model="stores.single.enable_status_update" groov-click="update_single_store(true)"></div>
+      </div>
+      <div class="controls col-md-4">
+        <div class="controls col-md-9" ng-show="stores.single.enable_status_update" dropdown>
+          <button class="dropdown-toggle groove-button">
+            <span>{{stores.single.status_to_update}}</span>
+            <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li>
+              <a class="dropdown-toggle" ng-click="change_value_of_status_to_update('complete')">Complete</a>
+            </li>
+            <li>
+              <a class="dropdown-toggle" ng-click="change_value_of_status_to_update('closed')">Closed</a>
+            </li>
+          </ul>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 <div class="row" ng-hide="true">
@@ -86,4 +142,3 @@
     </div>
   </div>
 </div>
-

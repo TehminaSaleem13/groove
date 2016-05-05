@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160504092915) do
+ActiveRecord::Schema.define(:version => 20160505091411) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -299,16 +299,23 @@ ActiveRecord::Schema.define(:version => 20160504092915) do
   end
 
   create_table "magento_credentials", :force => true do |t|
-    t.string   "host",                                :null => false
-    t.string   "username",                            :null => false
-    t.string   "password",         :default => ""
-    t.integer  "store_id",                            :null => false
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
-    t.string   "api_key",          :default => "",    :null => false
-    t.boolean  "import_products",  :default => false, :null => false
-    t.boolean  "import_images",    :default => false, :null => false
+    t.string   "host",                                       :null => false
+    t.string   "username",                                   :null => false
+    t.string   "password",                :default => ""
+    t.integer  "store_id",                                   :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
+    t.string   "api_key",                 :default => "",    :null => false
+    t.boolean  "import_products",         :default => false, :null => false
+    t.boolean  "import_images",           :default => false, :null => false
     t.datetime "last_imported_at"
+    t.boolean  "shall_import_processing", :default => false
+    t.boolean  "shall_import_pending",    :default => false
+    t.boolean  "shall_import_closed",     :default => false
+    t.boolean  "shall_import_complete",   :default => false
+    t.boolean  "shall_import_fraud",      :default => false
+    t.boolean  "enable_status_update",    :default => false
+    t.string   "status_to_update"
   end
 
   create_table "magento_rest_credentials", :force => true do |t|

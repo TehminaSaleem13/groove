@@ -217,6 +217,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.update_single_store(true);
     };
 
+    scope.change_value_of_status_to_update = function (value) {
+      scope.stores.single.status_to_update = value;
+      scope.update_single_store(true);
+    };
+
     myscope.store_single_details = function (id, new_rollback) {
       for (var i = 0; i < scope.stores.list.length; i++) {
         if (scope.stores.list[i].id == id) {

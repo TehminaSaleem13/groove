@@ -152,6 +152,14 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.password = data.credentials.magento_credentials.password;
             stores.single.api_key = data.credentials.magento_credentials.api_key;
 
+            stores.single.shall_import_processing = data.credentials.magento_credentials.shall_import_processing;
+            stores.single.shall_import_pending = data.credentials.magento_credentials.shall_import_pending;
+            stores.single.shall_import_closed = data.credentials.magento_credentials.shall_import_closed;
+            stores.single.shall_import_complete = data.credentials.magento_credentials.shall_import_complete;
+            stores.single.shall_import_fraud = data.credentials.magento_credentials.shall_import_fraud;
+            stores.single.enable_status_update = data.credentials.magento_credentials.enable_status_update;
+            stores.single.status_to_update = data.credentials.magento_credentials.status_to_update;
+
             stores.single.producthost = data.credentials.magento_credentials.producthost;
             stores.single.productusername = data.credentials.magento_credentials.productusername;
             stores.single.productpassword = data.credentials.magento_credentials.productpassword;

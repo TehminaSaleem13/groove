@@ -143,6 +143,13 @@ class StoresController < ApplicationController
             # We do not need password GROOV-168
             #@magento.password = params[:password]
             @magento.api_key = params[:api_key]
+            @magento.shall_import_processing = params[:shall_import_processing]
+            @magento.shall_import_pending = params[:shall_import_pending]
+            @magento.shall_import_closed = params[:shall_import_closed]
+            @magento.shall_import_complete = params[:shall_import_complete]
+            @magento.shall_import_fraud = params[:shall_import_fraud]
+            @magento.enable_status_update = params[:enable_status_update]
+            @magento.status_to_update = params[:status_to_update]
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
