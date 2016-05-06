@@ -248,7 +248,7 @@ module Groovepacker
 
         def add_single_item_to_list(order_item, inv_warehouse_id)
           product = order_item.product
-          return if product.nil? && product.is_intangible
+          return if product.nil? || product.is_intangible
           
           # for single products which are not kit
           if product.is_kit == 0 || product.kit_parsing == 'single'
