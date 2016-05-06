@@ -120,7 +120,7 @@ module Groovepacker
                   import_item.save
                   product_id = nil
                   
-                  if line_items[:item][:product_type] == 'simple'
+                  if line_items[:item][:product_type] != 'configurable'
                     
                     @order_item = OrderItem.new
                     @order_item.price = line_items[:item][:price]
@@ -151,7 +151,7 @@ module Groovepacker
                   import_item.current_order_imported_item = 0
                   import_item.save
                   line_items[:item].each do |line_item|
-                    if line_item[:product_type] == 'simple'
+                    if line_item[:product_type] != 'configurable'
                       @order_item = OrderItem.new
                       @order_item.price = line_item[:price]
                       @order_item.qty = line_item[:qty_ordered]
