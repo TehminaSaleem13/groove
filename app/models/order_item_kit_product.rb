@@ -53,7 +53,7 @@ class OrderItemKitProduct < ActiveRecord::Base
       #   self.order_item.order.total_scan_time = self.order_item.order.total_scan_time +
       #     (scan_time.scan_end - scan_time.scan_start).to_i
       # end
-      self.order_item.order.total_scan_count += 1
+      self.order_item.order.total_scan_count += typein_count
       self.order_item.order.save
 
       #need to update order item quantity,
