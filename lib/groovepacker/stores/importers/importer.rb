@@ -56,10 +56,23 @@ module Groovepacker
           @import_item.update_attributes( :current_increment_id => '', 
                                             :success_imported => 0, 
                                             :previous_imported => 0, 
+                                            :updated_orders_import => 0,
                                             :current_order_items => -1, 
                                             :current_order_imported_item => -1, 
                                             :to_import => @result[:total_imported])
         end
+
+        def update_success_import_count
+          if @order_to_update
+            @import_item.updated_orders_import += 1
+            @import_item.save
+          else
+            @import_item.success_imported += 1
+            @import_item.save
+            @result[:success_imported] += 1
+          end
+        end
+
         protected
         attr_accessor :handler
 

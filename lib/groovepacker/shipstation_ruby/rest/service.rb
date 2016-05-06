@@ -24,7 +24,7 @@ module Groovepacker
               next
             end
             handle_response(response, trial_count) ? break : trial_count += 1
-            break if trial_count >= 3
+            break if trial_count >= 5
           end
           handle_exceptions(response)
           response

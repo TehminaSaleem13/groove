@@ -23,6 +23,20 @@ class GroovS3
       self.save(object, data)
     end
 
+    def create_teapplix_csv(dir, name, data, privacy = :public_read)
+      object = self.create(dir, "#{name}.csv", 'text/csv', privacy)
+      self.save(object, data)
+    end
+
+    def find_teapplix_csv(dir, name)
+      begin
+        object = self.bucket.objects.find(dir+"/#{name}.csv")
+        return object
+      rescue S3::Error::NoSuchKey => e
+        return nil
+      end
+    end
+
     def find_csv(tenant, type, store_id)
       begin
         object = self.bucket.objects.find(tenant+"/csv/#{type}.#{store_id}.csv")
@@ -53,7 +67,7 @@ class GroovS3
     end
 
     def create_order_backup(tenant, file_name, data)
-      object = self.create(tenant, "deleted_orders/#{file_name}", 'application/json', :private)
+      object = self.create(tenant, "deleted_orders/#{file_name}", 'text/sql', :private)
       self.save(object, data)
     end
 

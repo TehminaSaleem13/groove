@@ -11,15 +11,15 @@ class SubscriptionsController < ApplicationController
       position = split_position(plan_id)
       @annually_amount = Stripe::Plan.retrieve('an-' + plan_id[0..position - 1]).amount
     rescue Stripe::InvalidRequestError => e
-      @plan = 'Please Select A Plan From The List'
-      @plans_info = fetch_plans_info
+      @plan_error = 'Please Select A Plan From The List'
+      @plans = fetch_plans_info
       render :select_plan
     end
   end
 
   def select_plan
-    @plan ||= ''
-    @plans_info = fetch_plans_info
+    @plan_error ||= ''
+    @plans = fetch_plans_info
   end
 
   def confirm_payment
@@ -135,9 +135,8 @@ class SubscriptionsController < ApplicationController
   end
 
   def create_BigCommerce_credential(store_id)
-    bc_auth = cookies[:bc_auth]
-    access_token = bc_auth['access_token'] rescue nil
-    store_hash = bc_auth['context'] rescue nil
+    access_token = cookies[:store_access_token] rescue nil
+    store_hash = cookies[:store_context] rescue nil
     BigCommerceCredential.create(
       shop_name: params[:shop_name],
       store_id: store_id,
@@ -145,7 +144,8 @@ class SubscriptionsController < ApplicationController
       store_hash: store_hash
     )
     # cookies.delete(:bc_auth)
-    cookies[:bc_auth] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
+    cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
+    cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
     return response_for_successful_subscription
   end
 
@@ -177,44 +177,44 @@ class SubscriptionsController < ApplicationController
 
   def fetch_plans_info
     [
-      { 'plan_name' => 'Duo',
+      { 'name' => 'Duo',
         'plan_id' => 'groove-duo-60',
-        'plan_amount' => '60',
+        'amount' => '60',
         'users' => '2',
         'stores' => '2',
         'shipments' => '2,200'
       },
-      { 'plan_name' => 'Trio',
+      { 'name' => 'Trio',
         'plan_id' => 'groove-trio-90',
-        'plan_amount' => '90',
+        'amount' => '90',
         'users' => '3',
         'stores' => '3',
         'shipments' => '4,500'
       },
-      { 'plan_name' => 'Quartet',
+      { 'name' => 'Quartet',
         'plan_id' => 'groove-quartet-120',
-        'plan_amount' => '120',
+        'amount' => '120',
         'users' => '4',
         'stores' => '4',
         'shipments' => '6,700'
       },
-      { 'plan_name' => 'Quintet',
+      { 'name' => 'Quintet',
         'plan_id' => 'groove-quintet-150',
-        'plan_amount' => '150',
+        'amount' => '150',
         'users' => '5',
         'stores' => '5',
         'shipments' => '9,000'
       },
-      { 'plan_name' => 'Big Band',
+      { 'name' => 'Big Band',
         'plan_id' => 'groove-bigband-210',
-        'plan_amount' => '210',
+        'amount' => '210',
         'users' => '7',
         'stores' => '7',
         'shipments' => '14,000'
       },
-      { 'plan_name' => 'Symphony',
+      { 'name' => 'Symphony',
         'plan_id' => 'groove-symphony-300',
-        'plan_amount' => '300',
+        'amount' => '300',
         'users' => '10',
         'stores' => 'Unlimited',
         'shipments' => '20,000'

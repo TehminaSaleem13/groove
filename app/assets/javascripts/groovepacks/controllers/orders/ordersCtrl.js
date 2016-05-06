@@ -244,6 +244,7 @@ groovepacks_controllers.
           return orders.list.get($scope.orders, page).success(function (data) {
             $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
             myscope.update_selected_count();
+            myscope.update_table_accordian_width();
             $scope._can_load_orders = true;
           }).error(function () {
             $scope._can_load_orders = true;
@@ -256,6 +257,13 @@ groovepacks_controllers.
         }
 
       };
+
+      myscope.update_table_accordian_width = function () {
+        if($('.accordion-parent').width() > 200){
+          $('.table-parent').width($('.table-parent').first().width() + $('.accordion-parent').width() - 170);
+          $('.accordion-parent').width(170)
+        }
+      }
 
       myscope.invert = function (val) {
         $scope.orders.setup.inverted = !!val;
@@ -374,8 +382,8 @@ groovepacks_controllers.
             },
             order_date: {
               name: "Order Date",
-              col_length: 25,
-              transclude: "<span>{{row[field] | date:'EEE MM/dd/yyyy hh:mm:ss a'}}</span>"
+              col_length: 12,
+              transclude: '<span tooltip="{{row[field] | date:\'EEE MM/dd/yyyy hh:mm:ss a\'}}" tooltip-placement="{{set_position(row, rows)}}">{{row[field] | date:"EEE MM/dd/yyyy"}}</span>'
             },
             itemslength: {
               name: "Items",

@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160322054822) do
+ActiveRecord::Schema.define(:version => 20160505091411) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",               :default => 0,     :null => false
@@ -23,6 +23,7 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.boolean  "allow_bc_inv_push",       :default => false
     t.boolean  "allow_mg_rest_inv_push",  :default => false
     t.boolean  "allow_shopify_inv_push",  :default => false
+    t.boolean  "allow_teapplix_inv_push", :default => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
@@ -37,6 +38,7 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.string   "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
     t.boolean  "show_shipping_weight_only",    :default => false
+    t.string   "mws_auth_token"
   end
 
   create_table "big_commerce_credentials", :force => true do |t|
@@ -257,6 +259,7 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.string   "message",                     :default => ""
     t.string   "import_type",                 :default => "regular"
     t.integer  "days"
+    t.integer  "updated_orders_import"
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -296,16 +299,23 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
   end
 
   create_table "magento_credentials", :force => true do |t|
-    t.string   "host",                                :null => false
-    t.string   "username",                            :null => false
-    t.string   "password",         :default => ""
-    t.integer  "store_id",                            :null => false
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
-    t.string   "api_key",          :default => "",    :null => false
-    t.boolean  "import_products",  :default => false, :null => false
-    t.boolean  "import_images",    :default => false, :null => false
+    t.string   "host",                                       :null => false
+    t.string   "username",                                   :null => false
+    t.string   "password",                :default => ""
+    t.integer  "store_id",                                   :null => false
+    t.datetime "created_at",                                 :null => false
+    t.datetime "updated_at",                                 :null => false
+    t.string   "api_key",                 :default => "",    :null => false
+    t.boolean  "import_products",         :default => false, :null => false
+    t.boolean  "import_images",           :default => false, :null => false
     t.datetime "last_imported_at"
+    t.boolean  "shall_import_processing", :default => false
+    t.boolean  "shall_import_pending",    :default => false
+    t.boolean  "shall_import_closed",     :default => false
+    t.boolean  "shall_import_complete",   :default => false
+    t.boolean  "shall_import_fraud",      :default => false
+    t.boolean  "enable_status_update",    :default => false
+    t.string   "status_to_update"
   end
 
   create_table "magento_rest_credentials", :force => true do |t|
@@ -399,6 +409,7 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.datetime "created_at",                                       :null => false
     t.datetime "updated_at",                                       :null => false
     t.string   "import_summary_type", :default => "import_orders"
+    t.boolean  "display_summary",     :default => false
   end
 
   create_table "order_item_kit_product_scan_times", :force => true do |t|
@@ -541,22 +552,23 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.integer  "seller_id"
     t.integer  "order_status_id"
     t.string   "ship_name"
-    t.decimal  "shipping_amount",         :precision => 9,  :scale => 2, :default => 0.0
-    t.decimal  "order_total",             :precision => 9,  :scale => 2, :default => 0.0
+    t.decimal  "shipping_amount",          :precision => 9,  :scale => 2, :default => 0.0
+    t.decimal  "order_total",              :precision => 9,  :scale => 2, :default => 0.0
     t.string   "notes_from_buyer"
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                       :default => false
     t.integer  "inaccurate_scan_count",                                   :default => 0
     t.datetime "scan_start_time"
-    t.boolean  "reallocate_inventory",                                   :default => false
+    t.boolean  "reallocate_inventory",                                    :default => false
     t.datetime "last_suggested_at"
-    t.integer  "total_scan_time",                                        :default => 0
-    t.integer  "total_scan_count",                                       :default => 0
-    t.decimal  "packing_score",           :precision => 10, :scale => 0, :default => 0
+    t.integer  "total_scan_time",                                         :default => 0
+    t.integer  "total_scan_count",                                        :default => 0
+    t.decimal  "packing_score",            :precision => 10, :scale => 0, :default => 0
     t.string   "custom_field_one"
     t.string   "custom_field_two"
-    t.boolean  "traced_in_dashboard",                                    :default => false
+    t.boolean  "traced_in_dashboard",                                     :default => false
+    t.boolean  "scanned_by_status_change",                                :default => false
   end
 
   create_table "product_barcodes", :force => true do |t|
@@ -716,47 +728,50 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
   end
 
   create_table "scan_pack_settings", :force => true do |t|
-    t.boolean  "enable_click_sku",              :default => true
-    t.boolean  "ask_tracking_number",           :default => false
-    t.datetime "created_at",                                                                          :null => false
-    t.datetime "updated_at",                                                                          :null => false
-    t.boolean  "show_success_image",            :default => true
-    t.string   "success_image_src",             :default => "/assets/images/scan_success.png"
-    t.float    "success_image_time",            :default => 0.5
-    t.boolean  "show_fail_image",               :default => true
-    t.string   "fail_image_src",                :default => "/assets/images/scan_fail.png"
-    t.float    "fail_image_time",               :default => 1.0
-    t.boolean  "play_success_sound",            :default => true
-    t.string   "success_sound_url",             :default => "/assets/sounds/scan_success.mp3"
-    t.float    "success_sound_vol",             :default => 0.75
-    t.boolean  "play_fail_sound",               :default => true
-    t.string   "fail_sound_url",                :default => "/assets/sounds/scan_fail.mp3"
-    t.float    "fail_sound_vol",                :default => 0.75
-    t.boolean  "skip_code_enabled",             :default => true
-    t.string   "skip_code",                     :default => "SKIP"
-    t.boolean  "note_from_packer_code_enabled", :default => true
-    t.string   "note_from_packer_code",         :default => "NOTE"
-    t.boolean  "service_issue_code_enabled",    :default => true
-    t.string   "service_issue_code",            :default => "ISSUE"
-    t.boolean  "restart_code_enabled",          :default => true
-    t.string   "restart_code",                  :default => "RESTART"
-    t.boolean  "show_order_complete_image",     :default => true
-    t.string   "order_complete_image_src",      :default => "/assets/images/scan_order_complete.png"
-    t.float    "order_complete_image_time",     :default => 1.0
-    t.boolean  "play_order_complete_sound",     :default => true
-    t.string   "order_complete_sound_url",      :default => "/assets/sounds/scan_order_complete.mp3"
-    t.float    "order_complete_sound_vol",      :default => 0.75
-    t.boolean  "type_scan_code_enabled",        :default => true
-    t.string   "type_scan_code",                :default => "*"
-    t.string   "escape_string",                 :default => " - "
-    t.boolean  "escape_string_enabled",         :default => false
-    t.string   "post_scanning_option",          :default => "None"
-    t.boolean  "record_lot_number",             :default => false
-    t.boolean  "show_customer_notes",           :default => false
-    t.boolean  "show_internal_notes",           :default => false
-    t.boolean  "scan_by_tracking_number",       :default => false
-    t.boolean  "intangible_setting_enabled",    :default => false
-    t.string   "intangible_string",             :default => ""
+    t.boolean  "enable_click_sku",                        :default => true
+    t.boolean  "ask_tracking_number",                     :default => false
+    t.datetime "created_at",                                                                                    :null => false
+    t.datetime "updated_at",                                                                                    :null => false
+    t.boolean  "show_success_image",                      :default => true
+    t.string   "success_image_src",                       :default => "/assets/images/scan_success.png"
+    t.float    "success_image_time",                      :default => 0.5
+    t.boolean  "show_fail_image",                         :default => true
+    t.string   "fail_image_src",                          :default => "/assets/images/scan_fail.png"
+    t.float    "fail_image_time",                         :default => 1.0
+    t.boolean  "play_success_sound",                      :default => true
+    t.string   "success_sound_url",                       :default => "/assets/sounds/scan_success.mp3"
+    t.float    "success_sound_vol",                       :default => 0.75
+    t.boolean  "play_fail_sound",                         :default => true
+    t.string   "fail_sound_url",                          :default => "/assets/sounds/scan_fail.mp3"
+    t.float    "fail_sound_vol",                          :default => 0.75
+    t.boolean  "skip_code_enabled",                       :default => true
+    t.string   "skip_code",                               :default => "SKIP"
+    t.boolean  "note_from_packer_code_enabled",           :default => true
+    t.string   "note_from_packer_code",                   :default => "NOTE"
+    t.boolean  "service_issue_code_enabled",              :default => true
+    t.string   "service_issue_code",                      :default => "ISSUE"
+    t.boolean  "restart_code_enabled",                    :default => true
+    t.string   "restart_code",                            :default => "RESTART"
+    t.boolean  "show_order_complete_image",               :default => true
+    t.string   "order_complete_image_src",                :default => "/assets/images/scan_order_complete.png"
+    t.float    "order_complete_image_time",               :default => 1.0
+    t.boolean  "play_order_complete_sound",               :default => true
+    t.string   "order_complete_sound_url",                :default => "/assets/sounds/scan_order_complete.mp3"
+    t.float    "order_complete_sound_vol",                :default => 0.75
+    t.boolean  "type_scan_code_enabled",                  :default => true
+    t.string   "type_scan_code",                          :default => "*"
+    t.string   "post_scanning_option",                    :default => "None"
+    t.string   "escape_string",                           :default => " - "
+    t.boolean  "escape_string_enabled",                   :default => false
+    t.boolean  "record_lot_number",                       :default => false
+    t.boolean  "show_customer_notes",                     :default => false
+    t.boolean  "show_internal_notes",                     :default => false
+    t.boolean  "scan_by_tracking_number",                 :default => false
+    t.boolean  "intangible_setting_enabled",              :default => false
+    t.string   "intangible_string",                       :default => ""
+    t.boolean  "post_scan_pause_enabled",                 :default => false
+    t.float    "post_scan_pause_time",                    :default => 4.0
+    t.boolean  "intangible_setting_gen_barcode_from_sku", :default => false
   end
 
   create_table "shipping_easy_credentials", :force => true do |t|
@@ -781,21 +796,22 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
   end
 
   create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",                                             :null => false
-    t.string   "api_secret",                                          :null => false
+    t.string   "api_key",                                                 :null => false
+    t.string   "api_secret",                                              :null => false
     t.date     "last_imported_at"
-    t.integer  "store_id",                                            :null => false
-    t.datetime "created_at",                                          :null => false
-    t.datetime "updated_at",                                          :null => false
-    t.boolean  "shall_import_awaiting_shipment",   :default => true
-    t.boolean  "shall_import_shipped",             :default => false
-    t.boolean  "warehouse_location_update",        :default => false
-    t.boolean  "shall_import_customer_notes",      :default => false
-    t.boolean  "shall_import_internal_notes",      :default => false
-    t.integer  "regular_import_range",             :default => 3
-    t.boolean  "gen_barcode_from_sku",             :default => false
-    t.boolean  "shall_import_pending_fulfillment", :default => false
+    t.integer  "store_id",                                                :null => false
+    t.datetime "created_at",                                              :null => false
+    t.datetime "updated_at",                                              :null => false
+    t.boolean  "shall_import_awaiting_shipment",       :default => true
+    t.boolean  "shall_import_shipped",                 :default => false
+    t.boolean  "warehouse_location_update",            :default => false
+    t.boolean  "shall_import_customer_notes",          :default => false
+    t.boolean  "shall_import_internal_notes",          :default => false
+    t.integer  "regular_import_range",                 :default => 3
+    t.boolean  "gen_barcode_from_sku",                 :default => false
+    t.boolean  "shall_import_pending_fulfillment",     :default => false
     t.datetime "quick_import_last_modified"
+    t.boolean  "import_notestobuyer_in_notestopacker", :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|
@@ -809,6 +825,7 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.boolean  "shall_import_shipped",      :default => false
     t.boolean  "shall_import_no_status",    :default => false
     t.boolean  "import_store_order_number", :default => false
+    t.boolean  "gen_barcode_from_sku",      :default => false
   end
 
   create_table "shopify_credentials", :force => true do |t|
@@ -865,6 +882,8 @@ ActiveRecord::Schema.define(:version => 20160322054822) do
     t.boolean  "sync_with_shopify",          :default => false
     t.string   "shopify_product_variant_id"
     t.string   "mg_rest_product_sku"
+    t.boolean  "sync_with_teapplix",         :default => false
+    t.string   "teapplix_product_sku"
   end
 
   create_table "tenants", :force => true do |t|

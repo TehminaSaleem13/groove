@@ -6,25 +6,7 @@ module ExportData
     result = Hash.new
     result['status'] = true
     result['messages'] = []
-    start_time = nil
-    end_time = nil
-    unless self.manual_export
-      if self.export_orders_option == 'on_same_day'
-        start_time = Time.zone.now.beginning_of_day
-        end_time = Time.zone.now
-      else
-        unless self.last_exported.nil?
-          start_time = self.last_exported
-          end_time = Time.zone.now
-        else
-          start_time = '2000-01-01 00:00:00'
-          end_time = Time.zone.now
-        end
-      end
-    else
-      start_time = self.start_time.beginning_of_day
-      end_time = self.end_time.end_of_day
-    end
+    start_time, end_time = get_start_and_end_time  
 
     if start_time.nil?
       result['status'] = false
@@ -400,6 +382,29 @@ module ExportData
       filename = 'error.csv'
     end
     filename
+  end
+
+  def get_start_and_end_time
+    start_time = nil
+    end_time = nil
+    unless self.manual_export
+      if self.export_orders_option == 'on_same_day'
+        start_time = Time.zone.now.beginning_of_day
+        end_time = Time.zone.now
+      else
+        unless self.last_exported.nil?
+          start_time = self.last_exported
+          end_time = Time.zone.now
+        else
+          start_time = '2000-01-01 00:00:00'
+          end_time = Time.zone.now
+        end
+      end
+    else
+      start_time = self.start_time.beginning_of_day
+      end_time = self.end_time.end_of_day
+    end
+    return start_time, end_time
   end
 
 end

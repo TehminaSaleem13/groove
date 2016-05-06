@@ -35,7 +35,9 @@
 <div ng-if="!editable.array" class="text-center">
   <div ng-show="editing != 1 || disabled == true">
     <span ng-transclude></span>
-    <span ng-hide="is_transcluded" class="grid-text" tooltip="{{ngModel[prop]}}" ng-bind="ngModel[prop].toString().chunk(25).join(' ') | cut:false:(25*options.no_of_lines)"></span>
+    <span ng-hide="is_transcluded" class="grid-text" tooltip="{{ngModel[prop]}}"
+     tooltip-placement='{{position}}'
+     ng-bind="ngModel[prop].toString() | cut:false:(25)"></span>
     &nbsp;
   </div>
   <div ng-show="editing == 1 && disabled == false" ng-class="tag_class">
@@ -58,7 +60,7 @@
                </span>
                <span bo-switch-default class='form-group'>
                     <textarea bo-id="single_editable_id" class="form-control col-xs-12" ng-model="ngModel[prop]"
-                       ng-focus="focus_event()" rows="{{ngModel[prop].length/25 || 1}}"  cols="30" 
+                       ng-focus="focus_event()" rows="{{parseInt(ngModel[prop].length/25) + 3}}"  cols="30"
                        ng-blur="blur_event()" ng-keydown="handle_key_event($event)" type="text"
                        placeholder="Edit..."/ >
                </span>

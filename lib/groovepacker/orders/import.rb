@@ -39,6 +39,8 @@ module Groovepacker
           credential = ShipworksCredential.find_by_auth_token(auth_token)
           status = create_or_update_item(credential, status)
         rescue Exception => e
+          tenant = Apartment::Tenant.current
+          ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver rescue nil
           @import_item.status = 'failed'
           @import_item.message = e.message
           @import_item.save
@@ -49,7 +51,7 @@ module Groovepacker
 
       private
         def add_import_to_delayed_job(order_summary)
-          order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started')
+          order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started', display_summary: true)
           # call delayed job
           tenant = Apartment::Tenant.current
           import_orders_obj = ImportOrders.new

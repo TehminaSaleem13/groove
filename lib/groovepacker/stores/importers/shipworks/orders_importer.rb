@@ -19,7 +19,7 @@ module Groovepacker
                     import_item.save
                     ship_address = get_ship_address(order)
                     tracking_num = nil
-                    tracking_num = order["Shipment"]["TrackingNumber"] unless order["Shipment"].nil?
+                    tracking_num = order["Shipment"]["TrackingNumber"]  if order["Shipment"].class.to_s.include?("Hash")
                     notes_internal = get_internal_notes(order) unless order["Note"].nil?
 
                     order_m = Order.create(
@@ -174,9 +174,15 @@ module Groovepacker
             end
 
             #Barcodes
-            product.product_barcodes.create(
-              barcode: item["UPC"]
-            ) unless item["UPC"].nil?
+            if item["UPC"].present?
+              product.product_barcodes.create(
+                barcode: item["UPC"]
+              )
+            elsif store.shipworks_credential.gen_barcode_from_sku && item["SKU"].present? && ProductBarcode.where(barcode: item["SKU"]).empty?
+              product.product_barcodes.create(
+                barcode: item["SKU"]
+              )
+            end
 
             #Images
             product.product_images.create(

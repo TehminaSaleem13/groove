@@ -243,14 +243,14 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     return $http.get('/products/' + id + '.json').success(function (data) {
       if (data.product) {
         if (!auto) {
-          if (basicinfo_changed(products.single['basicinfo'], data.product.basicinfo) &&
-            products.single['barcodes'].length == data.product.barcodes.length &&
-            products.single['cats'].length == data.product.cats.length &&
-            products.single['inventory_warehouses'].length == data.product.inventory_warehouses.length &&
-            products.single['skus'].length == data.product.skus.length) {
+          //if (basicinfo_changed(products.single['basicinfo'], data.product.basicinfo) &&
+          //  products.single['barcodes'].length == data.product.barcodes.length &&
+          //  products.single['cats'].length == data.product.cats.length &&
+          //  products.single['inventory_warehouses'].length == data.product.inventory_warehouses.length &&
+          //  products.single['skus'].length == data.product.skus.length) {
             products.signle = {};
             products.single = data.product;
-          }
+          //}
         }else {
           if (typeof products.single['basicinfo'] != "undefined" && data.product.basicinfo.id == products.single.basicinfo.id) {
             angular.extend(products.single, data.product);

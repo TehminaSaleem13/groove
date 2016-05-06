@@ -9,11 +9,11 @@
           <div class="form-group">
             <label class="control-label col-sm-3">{{translations.labels.inventory_tracking}}</label>
 
-            <div class="controls col-sm-2 form-inline">
+            <div class="controls col-sm-1 form-inline">
               <div toggle-switch ng-model="confirmation_hash.inventory_tracking"
                    groov-click="confirm_and_update('inventory_tracking')"></div>
             </div>
-            <div class="info col-sm-2">
+            <div class="info col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.inventory_tracking}}"></i>
             </div>
@@ -22,11 +22,11 @@
             <div class="form-group">
               <label class="control-label col-sm-3">{{translations.labels.low_inventory_alert_email}}</label>
 
-              <div class="controls col-sm-2 form-inline">
+              <div class="controls col-sm-1 form-inline">
                 <div toggle-switch ng-model="general_settings.single.low_inventory_alert_email"
                      groov-click="update_settings()"></div>
               </div>
-              <div class="info col-sm-2">
+              <div class="info col-sm-1">
                 <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                   groov-popover="{{translations.tooltips.low_inventory_alert_email}}"></i>
               </div>
@@ -92,12 +92,12 @@
             <div class="form-group" ng-show="general_settings.single.low_inventory_alert_email== '1'">
               <label class="control-label col-sm-3">{{translations.labels.default_low_inventory_alert_limit}}</label>
 
-              <div class="controls col-sm-2">
+              <div class="controls col-sm-1">
                 <input class="form-control input-style" type="number" min="1"
                        ng-model="general_settings.single.default_low_inventory_alert_limit"
                        placeholder="Default low inventory alert limit" ng-blur="update_settings()"/>
               </div>
-              <div class="info col-sm-2">
+              <div class="info col-sm-1">
                 <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                   groov-popover="{{translations.tooltips.default_low_inventory_alert_limit}}"></i>
               </div>
@@ -118,10 +118,10 @@
           <div class="form-group">
             <label class="control-label col-sm-3">{{translations.labels.strict_cc}}</label>
 
-            <div class="controls col-sm-2 form-inline">
+            <div class="controls col-sm-1 form-inline">
               <div toggle-switch ng-model="general_settings.single.strict_cc" groov-click="update_settings()"></div>
             </div>
-            <div class="info col-sm-2">
+            <div class="info col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.strict_cc}}"></i>
             </div>
@@ -129,7 +129,7 @@
           <div class="form-group">
             <label class="control-label col-sm-3">{{translations.labels.conf_req_on_notes_to_packer}}</label>
 
-            <div class="controls col-sm-3 well-main " dropdown>
+            <div class="controls col-sm-2 well-main " dropdown>
               <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':general_settings.single.conf_req_on_notes_to_packer=='always',
                             'label-warning':general_settings.single.conf_req_on_notes_to_packer=='optional'}">
                 <span ng-show="general_settings.single.conf_req_on_notes_to_packer=='always'"
@@ -148,7 +148,7 @@
                 </li>
               </ul>
             </div>
-            <div class="info well-main col-sm-2">
+            <div class="info well-main col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.conf_req_on_notes_to_packer}}"></i>
             </div>
@@ -156,7 +156,7 @@
           <div class="form-group">
             <label class="control-label col-sm-3">{{translations.labels.conf_code_product_instruction}}</label>
 
-            <div class="controls col-sm-3 well-main " dropdown>
+            <div class="controls col-sm-2 well-main " dropdown>
               <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':general_settings.single.conf_code_product_instruction=='always',
                             'label-warning':general_settings.single.conf_code_product_instruction=='optional'}">
                 <span ng-show="general_settings.single.conf_code_product_instruction=='always'"
@@ -175,7 +175,7 @@
                 </li>
               </ul>
             </div>
-            <div class="info well-main col-sm-2">
+            <div class="info well-main col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.conf_code_product_instruction}}"></i>
             </div>
@@ -184,7 +184,7 @@
           <div class="form-group">
             <label class="control-label col-sm-3">{{translations.labels.send_email_for_packer_notes}}</label>
 
-            <div class="controls col-sm-3 well-main " dropdown>
+            <div class="controls col-sm-2 well-main " dropdown>
               <button class="dropdown-toggle groove-button label label-default"
                       ng-class="{'label-success':general_settings.single.send_email_for_packer_notes=='always','label-warning':general_settings.single.send_email_for_packer_notes=='optional'}">
                 <span ng-show="general_settings.single.send_email_for_packer_notes=='always'"
@@ -203,7 +203,7 @@
                 </li>
               </ul>
             </div>
-            <div class="info well-main col-sm-2">
+            <div class="info well-main col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.send_email_for_packer_notes}}"></i>
             </div>
@@ -234,7 +234,7 @@
           <div class="form-group">
             <label class="control-label col-sm-3">{{translations.labels.packing_slip_size}}</label>
 
-            <div class="controls col-sm-2" dropdown>
+            <div class="controls col-sm-1" dropdown>
               <button class="dropdown-toggle groove-button">
                 {{general_settings.single.packing_slip_size}}
                 <span class="caret"></span>
@@ -244,7 +244,7 @@
                 <li><a class="dropdown-toggle" ng-click="change_opt('packing_slip_size','8.5 x 11')">8.5" x 11"</a></li>
               </ul>
             </div>
-            <div class="info col-sm-2">
+            <div class="info col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.packing_slip_size}}"></i>
             </div>
@@ -274,7 +274,7 @@
                      ng-blur="update_settings()"></div>
               </div>
             </div>
-            <div class="info col-sm-2">
+            <div class="info col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.packing_slip_message_to_customer}}"></i>
             </div>
@@ -294,7 +294,7 @@
           <div class="form-group">
             <label class="control-label col-sm-3">Order Item Export</label>
 
-            <div class="controls col-sm-2" dropdown>
+            <div class="controls col-sm-3" dropdown>
               <button class="dropdown-toggle groove-button">
                 <span ng-show="general_settings.single.export_items =='disabled'">Disabled</span>
                 <span
@@ -312,7 +312,7 @@
               </ul>
             </div>
 
-            <div class="info col-sm-2">
+            <div class="info col-sm-1">
               <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
                 groov-popover="{{translations.tooltips.order_item_export_message}}"></i>
             </div>

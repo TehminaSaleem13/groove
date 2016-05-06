@@ -11,7 +11,8 @@ module Groovepacker
             mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
                           :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
                           :seller_id => amazon_credential.merchant_id,
-                          :marketplace_id => amazon_credential.marketplace_id)
+                          :marketplace_id => amazon_credential.marketplace_id,
+                          :MWS_auth_token => amazon_credential.mws_auth_token)
 
             mws_alternate = Mws.connect(
               merchant: amazon_credential.merchant_id,

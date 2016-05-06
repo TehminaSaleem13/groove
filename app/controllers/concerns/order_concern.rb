@@ -1,6 +1,6 @@
 module OrderConcern
   extend ActiveSupport::Concern
-  
+
   included do
     before_filter :groovepacker_authorize!, except: [:import_shipworks]
     prepend_before_filter :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip]
@@ -13,7 +13,7 @@ module OrderConcern
     include ApplicationHelper
     include Groovepacker::Orders::ResponseMessage
   end
-  
+
   private
     def list_selected_orders(sort_by_order_number = false)
       result = get_orders_list_for_selected(sort_by_order_number)
@@ -63,7 +63,7 @@ module OrderConcern
       not_in, result_rows = [], []
 
       params[:orderArray].each {|order| not_in.push(order['id']) }
-      
+
       result.each do |single_order|
         result_rows.push(single_order) unless not_in.include? single_order['id']
       end
@@ -118,15 +118,44 @@ module OrderConcern
         @result['error_messages'].push('This status change is not permitted.')
         return
       end
+
+      return if order_has_inactive_or_new_products(order)
+
       order.status = params[:status]
       order.reallocate_inventory = params[:reallocate_inventory]
+      order.scanned_by_status_change = false
+      if params[:status] == 'scanned'
+        update_status_and_add_activity(order)
+      end
       return if order.save
       set_status_and_message(false, order.errors.full_messages)
     end
 
+    def order_has_inactive_or_new_products(order)
+      return false unless order.has_inactive_or_new_products && params[:status].in?(%w(awaiting scanned))
+      # Put on hold if order status not in serviceissue
+      unless order.status.eql?('serviceissue')
+        order.status = 'onhold'
+        order.save
+      end
+
+      @result['notice_messages'][0] = 'One or more of the selected orders contains'\
+          ' New or Inactive items so they can not be changed to Awaiting.'\
+          ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
+          'More Info</a>.'
+      true
+    end
+
+    def update_status_and_add_activity(order)
+      order.scanned_on = Time.now
+      order.packing_user_id = current_user
+      order.scanned_by_status_change = true
+      order.addactivity('Order Manually Moved To Scanned Status', current_user.username)
+    end
+
     def update_order_attrs
       return if @order.status == 'scanned'
-      
+
       update_order_notes #Everyone can create notes from Packer
 
       if current_user.can?('add_edit_order_items')
@@ -138,7 +167,7 @@ module OrderConcern
 
     def update_order_notes
       @order.notes_fromPacker = params[:order]['notes_fromPacker']
-      
+
       if current_user.can?('create_edit_notes')
         @order.notes_internal = params[:order]['notes_internal']
         @order.notes_toPacker = params[:order]['notes_toPacker']
@@ -183,7 +212,7 @@ module OrderConcern
       set_user_permissions #setting user permissions for add and remove items permitted
       set_unacknowledged_activities #Retrieve Unacknowledged activities
       add_a_nobody_user  #Add nobody user info if user info not available
-      
+
       @result['order']['tags'] = @order.order_tags
     end
 
@@ -228,7 +257,7 @@ module OrderConcern
         return
       end
       @result = gp_orders_exception.add_edit_order_items(order)
-      @result = gp_orders_exception.edit_packing_execptions(order)
+      @result = gp_orders_exception.edit_packing_execptions(order, Apartment::Tenant.current)
     end
 
     def generate_barcode_for_packingslip

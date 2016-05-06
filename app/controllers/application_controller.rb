@@ -27,6 +27,9 @@ class ApplicationController < ActionController::Base
   def after_sign_in_path_for(resource_or_scope)
     #store session to redis
     if current_user
+      user = current_user
+      user.last_sign_in_at=DateTime.now
+      user.save
       save_bc_auth_if_present
       # an unique MD5 key
       cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")

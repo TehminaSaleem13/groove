@@ -26,32 +26,33 @@ module Groovepacker
               @import_item.reload
               break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)
-
               @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id')
               update_import_item(-1, -1)
+              import_single_order(single_row, index, inc_id, order_map, result)
+            end
+          end
 
-              if @helper.not_imported?(@imported_orders, inc_id)
-                @order = Order.find_or_create_by_increment_id(inc_id)
-                @order.store_id = params[:store_id]
-                @order_required = %w(qty sku increment_id price)
-                import_order_data(order_map, single_row)
-
-                update_result(result, single_row)
-                import_item_failed_result(result, index) unless result[:status]
-              else
-                @import_item.previous_imported += 1
-                @import_item.save
-                # Skipped because of duplicate order
-              end
+          def import_single_order(single_row, index, inc_id, order_map, result)
+            if @helper.not_imported?(@imported_orders, inc_id)
+              @order = Order.find_or_initialize_by_increment_id(inc_id)
+              order_persisted = @order.persisted? ? true : false
+              @order.store_id = params[:store_id]
+              @order_required = %w(qty sku increment_id price)
+              @order.save
+              @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
+              import_order_data(order_map, single_row)
+              update_result(result, single_row)
+              import_item_failed_result(result, index) unless result[:status]
+            else
+              @import_item.previous_imported += 1
+              @import_item.save
+              # Skipped because of duplicate order
             end
           end
 
           def import_item_failed_result(result, index)
             @import_item.status = 'failed'
-            @import_item.message = 'Import halted because of errors, ' \
-              'the last imported row was ' +
-              index.to_s + 'Errors: ' +
-              result[:messages].join(',')
+            @import_item.message = "Import halted because of errors, the last imported row was #{index.to_s} Errors: #{result[:messages].join(',')}"
             @import_item.save
           end
 
@@ -114,10 +115,8 @@ module Groovepacker
               elsif @helper.import_unique_items?(single_map)
                 import_for_unique_order_items(single_row)
               else
-                @order[single_map] =
-                  @helper.get_row_data(single_row, single_map)
+                @order[single_map] = @helper.get_row_data(single_row, single_map)
               end
-
               @order_required.delete(single_map) if @order_required.include? single_map
             end
           end
@@ -135,8 +134,7 @@ module Groovepacker
             single_sku = @helper.get_row_data(single_row, 'sku')
             update_import_item(1, 0)
             @order_increment_sku = single_inc_id + '-' + single_sku.strip
-            product_skus = ProductSku.where(
-              ['sku like (?)', @order_increment_sku + '%'])
+            product_skus = ProductSku.where(['sku like (?)', @order_increment_sku + '%'])
             if product_skus
               @product_helper.check_and_update_prod_sku(product_skus, @order_increment_sku)
               update_order_increment_sku(product_skus)
@@ -147,23 +145,23 @@ module Groovepacker
           end
 
           def update_order_increment_sku(product_skus)
-            @order_increment_sku =  @order_increment_sku + '-' +
-                                    (product_skus.length + 1).to_s
+            @order_increment_sku =  "#{@order_increment_sku}-#{(product_skus.length + 1).to_s}"
           end
 
           def set_product_info(product, single_row, unique_order_item = false)
             @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
-            order_item = @order_item_helper.import_new_order_item(
-              single_row, product,
-              @helper.get_sku(single_row, @order_increment_sku, unique_order_item))
+            order_item = @order_item_helper.import_new_order_item( single_row,
+                                                                   product,
+                                                                   @helper.get_sku(single_row, @order_increment_sku, unique_order_item)
+                                                                  )
             @order_required.delete('sku')
             save_order_item(order_item)
-
             @import_item.current_order_imported_item = 1
             @import_item.save
           end
 
           def save_order_item(order_item)
+            @order.addactivity("Item with SKU: #{order_item.product.primary_sku} Added", "#{@order.store.name} Import")
             @order_required.delete('qty')
             @order_required.delete('price')
             @order.order_items << order_item

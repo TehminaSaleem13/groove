@@ -317,7 +317,7 @@ groovepacks_controllers.
               name: "Item Name",
               hideable: false,
               col_length: 20,
-              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}">{{row[field].chunk(25).join(" ") | cut:true:(25*options.no_of_lines)}}</a>'
+              transclude: '<a href="" ng-click="options.editable.functions.name(row,$event)" tooltip="{{row[field]}}" tooltip-placement="{{set_position(row, rows)}}">{{row[field] | cut:true:(25*options.no_of_lines)}}</a>'
             },
             sku: {
               name: "SKU",
@@ -325,7 +325,7 @@ groovepacks_controllers.
             },
             status: {
               name: "Status",
-              col_length: 10,
+              col_length: 5,
               transclude: "<span class='label label-default' ng-class=\"{" +
               "'label-success': row[field] == 'active', " +
               "'label-info': row[field] == 'new' }\">" +
@@ -410,6 +410,7 @@ groovepacks_controllers.
               $scope.gridOptions.paginate.current_page = page;
             }
             myscope.update_selected_count();
+            myscope.update_table_accordian_width();
             $scope._can_load_products = true;
           }).error(function () {
             $scope._can_load_products = true;
@@ -421,6 +422,13 @@ groovepacks_controllers.
           return req.promise;
         }
       };
+
+      myscope.update_table_accordian_width = function () {
+        if($('.accordion-parent').width() > 200){
+          $('.table-parent').width($('.table-parent').first().width() + $('.accordion-parent').width() - 170);
+          $('.accordion-parent').width(170)
+        }
+      }
 
       myscope.update_selected_count = function () {
         if ($scope.products.setup.inverted && $scope.gridOptions.paginate.show) {

@@ -159,7 +159,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           },
           init: {
             users: function () {
-              scope.exceptions.users.push({id: '-1', username: 'All User'});
+              scope.exceptions.users.push({id: '-1', username: 'All Users'});
               users.list.get(null).then(function (response) {
                 response.data.forEach(function(element) {
                   if (element.active) {
@@ -178,8 +178,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     ordernum: scope.handle_click_fn
                   },
                   all_fields: {
-                    created_at: {
+                    recorded_at: {
                       name: "Date Recorded",
+                      editable: false,
+                      transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+                    },
+                    created_at: {
+                      name: "Order Date",
                       editable: false,
                       transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
                     },
@@ -191,6 +196,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                       name: "Order Number",
                       editable: false,
                       transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
+                    },
+                    reason: {
+                      name: "Exception Reason",
+                      editable: false
                     },
                     frequency: {
                       name: "Frequency",
@@ -209,8 +218,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                     ordernum: scope.handle_click_fn
                   }, 
                   all_fields: {
-                    created_at: {
+                    recorded_at: {
                       name: "Date Recorded",
+                      editable: false,
+                      transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
+                    },
+                    created_at: {
+                      name: "Order Date",
                       editable: false,
                       transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy'}}</span>"
                     },
@@ -222,6 +236,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                       name: "Order Number",
                       editable: false,
                       transclude: '<a href="" ng-click="options.functions.ordernum(row,$event)" >{{row[field]}}</a>'
+                    },
+                    reason: {
+                      name: "Exception Reason",
+                      editable: false
                     },
                     frequency: {
                       name: "Frequency",
@@ -288,6 +306,40 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           };
         };
 
+        scope.yAxisTickValuesFunction = function (floating) {
+          return function(d){
+            var tickVals = [];
+            var vals = [];
+            dlen = d.length;
+            for (var i = dlen - 1; i >= 0; i--) {
+              ilen = d[i].values.length;
+              for (var j = ilen - 1; j >= 0; j--) {
+                if (d[i].disabled) {
+                  break;
+                } else {
+                  vals.push(d[i].values[j][1]);
+                }
+              };
+            };
+            vals.sort();
+            max = Math.max.apply(Math,vals);
+            min = Math.min.apply(Math,vals);
+            div_range = (max - min) / 5;
+            tickVals.push(min);
+            temp = min;
+            while (temp + div_range < max) {
+              temp += div_range;
+              if (temp.toFixed(2) % 1 == '0.00' || !floating) {
+                tickVals.push(Math.round( temp ));
+              } else{
+                tickVals.push(temp.toFixed(2));
+              };
+            };
+            tickVals.push(max);
+            return tickVals;
+          };
+        };
+
         scope.xAxisTickFormatFunction = function () {
           return function (d) {
             return d3.time.format('%b %e, %Y')(moment.unix(d).toDate());
@@ -306,51 +358,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         };
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
-            var tooltipText = '';
-            if (scope.charts.type === 'packing_stats' || scope.charts.type === 'packing_error') {
-
-              var average_packing_accuracy = "-";
-              for (idx = 0; idx < scope.dashboard.avg_packing_accuracy_stats.length;
-                   idx++) {
-                if (scope.dashboard.avg_packing_accuracy_stats[idx].key === key) {
-                  average_packing_accuracy = scope.dashboard.avg_packing_accuracy_stats[idx].
-                    avg_packing_accuracy;
-                  break;
-                }
-              }
-              return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
-              '">' + key + '</h4>' +
-              '<span><strong>Date: </strong>' + x + '</span><br/>' +
-              '<span><strong>Accuracy: </strong>' + e.point[1] + '% </span><br/>' +
-              '<span><strong>Period Accuracy: </strong>' + e.point[5] + '% </span><br/>' +
-              '<span><strong>' + e.point[2] + ' Orders Scanned</strong></span><br/>' +
-              '<span><strong>' + e.point[3] + ' Items Packed </strong></span><br/>' +
-              '<span><strong>' + e.point[4] + ' Exceptions Recorded</strong></span>' +
-              '</div>');
-            } else if (scope.charts.type === 'packing_speed_stats' || scope.charts.type === 'packing_time_stats') {
-              avg_period_score = "-";
-              for (idx = 0; idx < scope.dashboard.avg_packing_speed_stats.length;
-                   idx++) {
-                if (scope.dashboard.avg_packing_speed_stats[idx].key === key) {
-                  avg_period_score = scope.dashboard.avg_packing_speed_stats[idx].
-                    avg_period_score;
-                  break;
-                }
-              }
-              return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
-              '">' + key + '</h4>' +
-              '<span><strong>Period Speed Score: </strong>' + e.point[2] + '% </span><br/>' +
-              '<span><strong>Date: </strong>' + x + '</span><br/>' +
-              '<span><strong>Daily Speed Score: </strong>' + y + '% </span><br/>' +
-              '<span><strong>Avg. Time/Item: </strong>' + e.point[2] + ' sec</span>' +
-              '</div>');
-            } else if (scope.charts.type === 'packed_item_stats' || scope.charts.type === 'packed_order_stats') {
-              tooltipText = y + ' items packed for ' + e.point[2] + ' orders on ' + x;
-              return ('<div><h4 style="text-transform: capitalize; color:' + e.series.color +
-              '">' + key + '</h4>' +
-              '<span>' + tooltipText + '</span></div>');
-            }
-
+            data = dashboard.stats.points_data(scope.dashboard, scope.charts, Date.parse(x)/1000, y);
+            return dashboard.stats.tooltip(data, scope.charts, scope.dashboard);
           };
         };
 
@@ -359,19 +368,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             return 0;
           } else {
             return (parseInt(time) / parseFloat(items)).toFixed(2);
-          }
-        };
-
-        scope.get_speed = function(avg) {
-          console.log('avg', avg);
-          if (avg === 0) {
-            return 0;
-          };
-          var speed = scope.dashboard.max_time_per_item - avg;
-          if (speed < 0) {
-            return (100 + speed).toFixed(2);
-          } else {
-            return 100;
           }
         };
 
@@ -394,8 +390,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                 scope.dashboard.packing_time_summary.current_period = current_period_avg
                 scope.dashboard.packing_time_summary.previous_period = previous_period_avg
                 scope.dashboard.packing_time_summary.delta = (current_period_avg - previous_period_avg).toFixed(2);
-                scope.dashboard.packing_speed_summary.current_period = scope.get_speed(current_period_avg);
-                scope.dashboard.packing_speed_summary.previous_period = scope.get_speed(previous_period_avg);
+                scope.dashboard.packing_speed_summary.current_period = dashboard.stats.speed(current_period_avg, scope.dashboard);
+                scope.dashboard.packing_speed_summary.previous_period = dashboard.stats.speed(previous_period_avg, scope.dashboard);
                 scope.dashboard.packing_speed_summary.delta =
                   (scope.dashboard.packing_speed_summary.current_period - scope.dashboard.packing_speed_summary.previous_period).toFixed(2);
                 console.log(scope.dashboard);

@@ -12,11 +12,11 @@ RSpec.describe ScanPackController, :type => :controller do
     @generalsetting.update_column(:inventory_tracking, true)
 
     #@user_role =FactoryGirl.create(:role, :name=>'scan_pack', :import_orders=>true)
-    @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user', 
+    @user = FactoryGirl.create(:user, :username=>"scan_pack_spec_user", :name=>'Scan Pack user',
       :role => Role.find_by_name('Scan & Pack User'))
     # sign_in @user
     request.env["devise.mapping"] = Devise.mappings[:user]
-    sign_in :user, @user 
+    sign_in :user, @user
 
     #@request.env["devise.mapping"] = Devise.mappings[:user]
 
@@ -272,7 +272,7 @@ RSpec.describe ScanPackController, :type => :controller do
       # expect(result["data"]["order"]["increment_id"]).to eq order1.increment_id
       # expect(result['data']['next_state']).to eq 'scanpack.rfo'
       # expect(GenerateBarcode.last.current_increment_id).to eq order1.increment_id
-      
+
       # For NONE
       check_none = FactoryGirl.create(:order, increment_id: '#none')
       @scanpacksetting.post_scanning_option = 'None'
@@ -355,7 +355,7 @@ RSpec.describe ScanPackController, :type => :controller do
         expect(result["data"]["order"]["increment_id"]).to eq order.increment_id
         expect(result["data"]["matched_orders"].count).to eq 4
         expect(
-          result["data"]["matched_orders"].map{|e| e['increment_id']} - 
+          result["data"]["matched_orders"].map{|e| e['increment_id']} -
           [
             orders[0].increment_id, orders[1].increment_id,
             orders[2].increment_id, orders[3].increment_id
@@ -668,7 +668,7 @@ RSpec.describe ScanPackController, :type => :controller do
     expect(response.status).to eq(200)
     result = JSON.parse(response.body)
     expect(result['error_messages']).to include "Could not find order with id: invalid_id"
-    
+
     # If Email not present
     @generalsetting.update_attribute(:email_address_for_packer_notes, nil)
     get :add_note, {:id => order.id, note: 'Hello'}
@@ -683,7 +683,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
     @generalsetting.update_attribute(:email_address_for_packer_notes, 'groovetest123456@gmail.com')
     @user.update_attribute(:confirmation_code, 'Hello')
-    
+
     inv_wh = FactoryGirl.create(:inventory_warehouse)
     store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
     order = FactoryGirl.create(:order, :status=>'awaiting', store: store)
@@ -711,7 +711,7 @@ RSpec.describe ScanPackController, :type => :controller do
     expect(response.status).to eq(200)
     result = JSON.parse(response.body)
     expect(result['error_messages']).to include "Could not find order with id: invalid_id"
-    
+
     # If only order_item_id is invalid
     get :product_instruction, {:id => order.id, code: 'Hello', next_item: {order_item_id: 23232, name: 'Test'}}
     expect(response.status).to eq(200)
@@ -745,7 +745,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for confirmation code when order status is on hold" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+      @other_user = FactoryGirl.create(:user, :username=>'test_user',
         :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
       # @other_user.confirmation_code = '12345678902'
@@ -789,7 +789,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, 
+      @other_user = FactoryGirl.create(:user,
         :username => 'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
       # @other_user.confirmation_code = '1234567890'
@@ -810,7 +810,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+      @other_user = FactoryGirl.create(:user, :username=>'test_user',
         :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
       # @other_user.confirmation_code = '1234567890'
@@ -830,8 +830,8 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should check for  when order status is on hold and has inactive or new products" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, 
-        :username=>'test_user', 
+      @other_user = FactoryGirl.create(:user,
+        :username=>'test_user',
         :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
       add_edit_products = @other_user.role.add_edit_products
       @other_user.role.update_attribute(:add_edit_products, true)
@@ -856,7 +856,7 @@ RSpec.describe ScanPackController, :type => :controller do
 
   it "should not check for product confirmation code when order status is not on hold" do
       request.accept = "application/json"
-      @other_user = FactoryGirl.create(:user, :username=>'test_user', 
+      @other_user = FactoryGirl.create(:user, :username=>'test_user',
         :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
       # @other_user.confirmation_code = '1234567890'
@@ -879,7 +879,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when confirmation code does not match" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, 
+      @other_user = FactoryGirl.create(:user,
         :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
       # @other_user.confirmation_code = '1234567890'
@@ -901,7 +901,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should not set session variable when user does not have enough permissions" do
       request.accept = "application/json"
 
-      @other_user = FactoryGirl.create(:user, 
+      @other_user = FactoryGirl.create(:user,
         :username=>'test_user', :role => Role.find_by_name('Scan & Pack User'), :confirmation_code => '12345678902')
 
       @other_user.confirmation_code = '12345678902'
@@ -1159,8 +1159,8 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(false)
-      expect(result['error_messages']).to include("Barcode '1234' doesn't match any item on this order")
-      
+      expect(result['error_messages']).to include("Barcode '1234' doesn't match any item remaining on this order")
+
       # If Barcode found
       get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '1234567890', :id => order.id }
       expect(response.status).to eq(200)
@@ -2001,7 +2001,7 @@ RSpec.describe ScanPackController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
       expect(result['error_messages']).to include("The order is not in awaiting state. Cannot scan the tracking number")
-      
+
       #IF id nil
       put :scan_barcode, {:state => 'scanpack.rfp.recording', :id => nil, :input=>'1234567890' }
       expect(response.status).to eq(200)
@@ -2064,7 +2064,7 @@ RSpec.describe ScanPackController, :type => :controller do
     #   result = @get_response_l.call(response)
 
     #   expected_result = @expected_result_l.call(order,kit_product_barcode)
-      
+
     #   unscanned_item = @unscanned_item_l.call('iPhone Protection Kit', 'single', [],
     #           'IPROTO', 2, 0, 50, product_kit.product_barcodes,
     #           product_kit.id, order_item_kit.id, nil,nil,false)
@@ -3869,10 +3869,10 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(kit_product2_inv_wh.allocated_inv).to eq(2)
 
       #scanned barcode: BARCODE1
-      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+      get :scan_barcode, {:state => 'scanpack.rfp.default',
         :input => 'BARCODE1', :id => order.id }
 
-      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+      get :scan_barcode, {:state => 'scanpack.rfp.default',
         :input => 'KITITEM1', :id => order.id }
 
       product_kit_inv_wh.reload
@@ -3887,7 +3887,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(kit_product2_inv_wh.available_inv).to eq(23)
       expect(kit_product2_inv_wh.allocated_inv).to eq(2)
 
-      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+      get :scan_barcode, {:state => 'scanpack.rfp.default',
         :input => 'KITITEM2', :id => order.id }
 
       product_kit_inv_wh.reload
@@ -3903,7 +3903,7 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(kit_product2_inv_wh.allocated_inv).to eq(2)
 
 
-      get :scan_barcode, {:state => 'scanpack.rfp.default', 
+      get :scan_barcode, {:state => 'scanpack.rfp.default',
         :input => 'IPROTOBAR', :id => order.id }
 
       product_kit_inv_wh.reload
@@ -4180,4 +4180,3 @@ RSpec.describe ScanPackController, :type => :controller do
 
   end
 end
-

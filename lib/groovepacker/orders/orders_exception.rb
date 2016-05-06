@@ -2,8 +2,9 @@ module Groovepacker
   module Orders
     class OrdersException < Groovepacker::Orders::Base
 
-      def record_exception(order)
+      def record_exception(order, tenant)
         @order = order
+        @tenant = tenant
         if (@current_user.can?('create_packing_ex') && @order.order_exception.nil?) ||
           (@current_user.can?('edit_packing_ex') && !@order.order_exception.nil?)
           create_or_update_exception
@@ -33,13 +34,13 @@ module Groovepacker
         return @result
       end
 
-      def edit_packing_execptions(order)
+      def edit_packing_execptions(order, tenant)
         unless @current_user.can? 'edit_packing_ex'
           set_status_and_message(false, 'Couldn\'t rollback because you can not edit packing exceptions', ['push'])
           return @result
         end
         #exception
-        edit_order_exceptions(order)
+        edit_order_exceptions(order, tenant)
         return @result
       end
 
@@ -51,6 +52,7 @@ module Groovepacker
           if @exception.save
             username = @params[:assoc][:name] rescue ""
             @order.addactivity("Order Exception Associated with #{username} - Recorded", @current_user.name)
+            send_exception_data(@order.id, @tenant)
           else
             set_status_and_message(false, 'Could not save order with exception', ['&', ['push']])
           end
@@ -68,13 +70,14 @@ module Groovepacker
           @exception
         end
 
-        def edit_order_exceptions(order)
+        def edit_order_exceptions(order, tenant)
           if @params[:single]['exception'].nil? && order.order_exception.present?
               order.order_exception.destroy
           elsif @params[:single]['exception'].present?
             exception = OrderException.find_or_create_by_order_id(order.id)
             assign_values_to(exception, @params[:single]['exception'], 'exception')
           end
+          send_exception_data(order.id, tenant)
         end
 
         def assign_values_to(single_item_or_ex, current_obj, type=nil)
@@ -131,6 +134,11 @@ module Groovepacker
           values_to_update.each do |key, value|
             updatelist(current_product, "#{key.to_s}", value)
           end
+        end
+
+        def send_exception_data(order_id, tenant)
+          stat_stream_obj = SendStatStream.new()
+          stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_order_exception_#{@order.id}').send_order_exception(order_id, tenant)
         end
     end
   end

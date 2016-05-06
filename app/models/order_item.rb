@@ -8,11 +8,16 @@ class OrderItem < ActiveRecord::Base
   has_one :product_barcode
   has_one :product_sku
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name
-
+  #===========================================================================================
+  #please update the delete_orders library if adding before_destroy or after_destroy callback
+  # or adding dependent destroy for associated models
+  #===========================================================================================
   after_create :add_kit_products
   before_destroy :delete_inventory
   after_create :create_inventory
   after_update :update_inventory_levels
+
+  include OrdersHelper
 
   # Move to enum when possible
   # :inv_status
@@ -216,8 +221,17 @@ class OrderItem < ActiveRecord::Base
       scan_time = self.order_item_scan_times.create(
         scan_start: self.order.last_suggested_at,
         scan_end: DateTime.now)
-      self.order.total_scan_time = self.order.total_scan_time +
-        (scan_time.scan_end - scan_time.scan_start).to_i
+      if typein_count > 0
+        avg_time = avg_time_per_item(username)
+        if avg_time
+          self.order.total_scan_time += (avg_time * typein_count).to_i
+        else
+          self.order.total_scan_time += (scan_time.scan_end - scan_time.scan_start).to_i * typein_count
+        end
+      else
+        self.order.total_scan_time = self.order.total_scan_time +
+          (scan_time.scan_end - scan_time.scan_start).to_i
+      end
       self.order.total_scan_count = self.order.total_scan_count + typein_count
       self.order.save
       if self.scanned_qty == self.qty

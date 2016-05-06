@@ -122,7 +122,7 @@ module ScanPack
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
         @result['status'] &= false
-        @result['error_messages'].push("Barcode '"+clean_input+"' doesn't match any item on this order")
+        @result['error_messages'].push("Barcode '"+clean_input+"' doesn't match any item remaining on this order")
       end
     end
 

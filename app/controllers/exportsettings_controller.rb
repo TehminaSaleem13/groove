@@ -2,23 +2,18 @@ class ExportsettingsController < ApplicationController
   before_filter :groovepacker_authorize!
 
   def get_export_settings
-    @result = Hash.new
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-    @result['data'] = Hash.new
+    @result = build_result_hash
 
-    export_setting = ExportSetting.all.first unless ExportSetting.all.empty?
-    if export_setting.order_export_email.nil?
-      export_setting.order_export_email = GeneralSetting.all.first.admin_email
-      export_setting.save
-    end
-    unless export_setting.nil?
-      @result['data']['settings'] = export_setting
+    @export_setting = ExportSetting.first
+    
+    if @export_setting
+      if @export_setting.order_export_email.nil?
+        @export_setting.order_export_email = GeneralSetting.first.admin_email
+        @export_setting.save
+      end
+      @result['data']['settings'] = @export_setting
     else
-      @result['status'] &= false
-      @result['error_messages'].push('No export settings available for the system. Contact administrator.')
+      update_false_status(@result, 'No export settings available for the system. Contact administrator.')
     end
 
     respond_to do |format|
@@ -28,43 +23,36 @@ class ExportsettingsController < ApplicationController
   end
 
   def update_export_settings
-    @result = Hash.new
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
+    @result = build_result_hash
 
-    export_setting = ExportSetting.all.first
+    @export_setting = ExportSetting.first
 
-    if !export_setting.nil?
+    if @export_setting
       if current_user.can? 'edit_general_prefs'
-        export_setting.auto_email_export = params[:auto_email_export]
-        export_setting.time_to_send_export_email = params[:time_to_send_export_email]
-        export_setting.last_exported = params[:last_exported]
-        export_setting.export_orders_option = params[:export_orders_option]
-        export_setting.order_export_type = params[:order_export_type]
-        export_setting.order_export_email = params[:order_export_email]
-        export_setting.send_export_email_on_mon = params[:send_export_email_on_mon]
-        export_setting.send_export_email_on_tue = params[:send_export_email_on_tue]
-        export_setting.send_export_email_on_wed = params[:send_export_email_on_wed]
-        export_setting.send_export_email_on_thu = params[:send_export_email_on_thu]
-        export_setting.send_export_email_on_fri = params[:send_export_email_on_fri]
-        export_setting.send_export_email_on_sat = params[:send_export_email_on_sat]
-        export_setting.send_export_email_on_sun = params[:send_export_email_on_sun]
-
-        if export_setting.save
-          @result['success_messages'].push('Export settings updated successfully.')
-        else
-          @result['status'] &= false
-          @result['error_messages'].push('Error saving export settings.')
-        end
+        @export_setting.update_attributes(
+          auto_email_export: params[:auto_email_export],
+          time_to_send_export_email: params[:time_to_send_export_email],
+          last_exported: params[:last_exported],
+          export_orders_option: params[:export_orders_option],
+          order_export_type: params[:order_export_type],
+          order_export_email: params[:order_export_email],
+          send_export_email_on_mon: params[:send_export_email_on_mon],
+          send_export_email_on_tue: params[:send_export_email_on_tue],
+          send_export_email_on_wed: params[:send_export_email_on_wed],
+          send_export_email_on_thu: params[:send_export_email_on_thu],
+          send_export_email_on_fri: params[:send_export_email_on_fri],
+          send_export_email_on_sat: params[:send_export_email_on_sat],
+          send_export_email_on_sun: params[:send_export_email_on_sun]
+        )
+        @result['success_messages'].push('Export settings updated successfully.')
+        # else
+        #   update_false_status(@result, 'Error saving export settings.')
+        # end
       else
-        @result['status'] &= false
-        @result['error_messages'].push('You are not authorized to update export preferences.')
+        update_false_status(@result, 'You are not authorized to update export preferences.')
       end
     else
-      @result['status'] &= false
-      @result['error_messages'].push('No export settings available for the system. Contact administrator.')
+      update_false_status(@result, 'No export settings available for the system. Contact administrator.')
     end
 
     respond_to do |format|
@@ -75,30 +63,44 @@ class ExportsettingsController < ApplicationController
 
   def order_exports
     require 'csv'
-    result = Hash.new
-    result['status'] = true
-    result['messages'] = []
+    result = build_result_hash
     if current_user.can? 'view_packing_ex'
-      if params[:start].nil? || params[:end].nil?
-        result['status'] = false
-        result['messages'].push('We need a start and an end time')
+      if params[:start] && params[:end]
+        export_setting = ExportSetting.first
+        export_setting.update_attributes(
+          start_time: Time.parse(params[:start]),
+          end_time: Time.parse(params[:end]),
+          manual_export: true
+        )
+        filename = "#{Rails.root}/public/csv/" + export_setting.export_data
+        export_setting.update_attributes(manual_export: false)
       else
-        export_setting = ExportSetting.all.first
-        export_setting.start_time = Time.parse(params[:start])
-        export_setting.end_time = Time.parse(params[:end])
-        export_setting.manual_export = true
-        export_setting.save
-        filename = "#{Rails.root}/public/csv/"+export_setting.export_data
-        export_setting.manual_export = false
-        export_setting.save
+        update_false_status(result, 'We need a start and an end time')
       end
     end
     unless result['status']
-      data = CSV.generate do |csv|
-        csv << result['messages']
+      CSV.generate do |csv|
+        csv << result['error_messages']
       end
       filename = 'error.csv'
     end
     send_file filename, :type => 'text/csv'
+  end
+
+  private
+
+  def update_false_status(result, message)
+    result['status'] = false
+    result['error_messages'].push(message)
+  end
+
+  def build_result_hash
+    {
+      'status' => true,
+      'error_messages' => [],
+      'success_messages' => [],
+      'notice_messages' => [],
+      'data' => {}
+    }
   end
 end

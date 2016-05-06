@@ -10,7 +10,9 @@ groovepacks_controllers.
           return true;
         };
         if (myscope.check_reload_settings()) {
+          var last_scanned_item = myscope.last_scanned_barcode;
           myscope.init();
+          myscope.last_scanned_barcode = last_scanned_item;
         }
         myscope.callbacks = {};
         $scope.current_state = $state.current.name;
@@ -18,6 +20,7 @@ groovepacks_controllers.
           $scope.data = {};
         }
         $scope.data.input = "";
+        window.scope = $scope;
         //console.log($scope.current_state);
       };
 
@@ -76,6 +79,16 @@ groovepacks_controllers.
 
       $scope.input_enter = function (event) {
         if (event.which != '13') return;
+        if ($scope.current_state == 'scanpack.rfp.default' && $scope.scan_pack.settings.post_scan_pause_enabled) {
+          window.setTimeout(function() {
+            myscope.start_scanning(event);
+          }, $scope.scan_pack.settings.post_scan_pause_time*1000);
+        } else {
+          myscope.start_scanning(event);
+        }
+      };
+
+      myscope.start_scanning = function(event) {
         if (!myscope.callback()) return;
         var id = null;
         if (typeof $scope.data.order.id !== "undefined") {
@@ -84,7 +97,9 @@ groovepacks_controllers.
         if ($scope.current_state == 'scanpack.rfp.default') {
           scanPack.input_scan_happend = true
         }
-        myscope.last_scanned_barcode = $scope.data.input;
+        if ($scope.data.input!=undefined && $scope.data.input!='') {
+          myscope.last_scanned_barcode = $scope.data.input;
+        }
         $window.increment_id = $scope.data.order.increment_id;
         scanPack.input($scope.data.input, $scope.current_state, id).success($scope.handle_scan_return);
       };

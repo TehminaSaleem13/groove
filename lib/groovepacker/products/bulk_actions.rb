@@ -274,6 +274,12 @@ module Groovepacker
           bulk_action.status = 'not_started'
           bulk_action.save
           tables.each do |ident, model|
+            bulk_action.reload
+            if bulk_action.cancel == true
+              bulk_action.status = 'cancelled'
+              bulk_action.save
+              return true
+            end
             bulk_action.total = model.all.count
             bulk_action.status = 'in_progress'
             bulk_action.current = ident.to_s.camelize
@@ -290,6 +296,12 @@ module Groovepacker
                 csv << headers
 
                 model.all.each do |item|
+                  bulk_action.reload
+                  if bulk_action.cancel == true
+                    bulk_action.status = 'cancelled'
+                    bulk_action.save
+                    return true
+                  end
                   bulk_action.completed = bulk_action.completed + 1
                   bulk_action.save
                   data = []

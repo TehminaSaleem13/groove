@@ -1,11 +1,11 @@
 <div class="container-fluid">
   <div class="row bottom-well">
-    <div class="col-lg-2 col-md-2">
+    <div class="col-lg-2 col-md-2 accordion-parent">
       <div class="row">
         <accordion>
           <accordion-group is-open="tabs[0].open">
             <accordion-heading>
-              <!-- <i></i> -->
+              <i></i>
               <a ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})"
                  ng-click="products.setup.search=''">Products</a>
             </accordion-heading>
@@ -19,7 +19,7 @@
             <li
               ng-class="{active: products.setup.search=='' && products.setup.filter=='active' && products.setup.is_kit == 0}"
               ng-click="products.setup.search=''"
-              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})" 
+              ui-sref="products.type.filter.page({type:'product',filter:'active',page:1})"
               ui-sref-opts="{reload: true}">Active Products
             </li>
             <li
@@ -89,6 +89,10 @@
           </button>
           <ul class="dropdown-menu" role="menu">
             <li class="dropdown-toggle" ng-if="gridOptions.selections.show_delete"><a ng-click="product_delete()">Delete<span
+              class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
+            </li>
+            <li class="dropdown-toggle disabled" ng-if="!gridOptions.selections.show_delete">
+              <a tooltip="Inactive Products can be deleted from the Inactive products list.">Delete<span
               class="pull-right badge badge-important">{{products.setup.select_all? gridOptions.paginate.total_items: gridOptions.selections.selected_count}}</span></a>
             </li>
             <li class="dropdown-toggle"><a ng-click="product_duplicate()">Duplicate <span

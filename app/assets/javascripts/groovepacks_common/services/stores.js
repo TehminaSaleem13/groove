@@ -142,6 +142,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.single.allow_bc_inv_push = data.access_restrictions.allow_bc_inv_push;
           stores.single.allow_mg_rest_inv_push = data.access_restrictions.allow_mg_rest_inv_push;
           stores.single.allow_shopify_inv_push = data.access_restrictions.allow_shopify_inv_push;
+          stores.single.allow_teapplix_inv_push = data.access_restrictions.allow_teapplix_inv_push;
           stores.general_settings = data.general_settings;
           stores.current_tenant = data.current_tenant;
           stores.host_url = data.host_url;
@@ -150,6 +151,14 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.username = data.credentials.magento_credentials.username;
             stores.single.password = data.credentials.magento_credentials.password;
             stores.single.api_key = data.credentials.magento_credentials.api_key;
+
+            stores.single.shall_import_processing = data.credentials.magento_credentials.shall_import_processing;
+            stores.single.shall_import_pending = data.credentials.magento_credentials.shall_import_pending;
+            stores.single.shall_import_closed = data.credentials.magento_credentials.shall_import_closed;
+            stores.single.shall_import_complete = data.credentials.magento_credentials.shall_import_complete;
+            stores.single.shall_import_fraud = data.credentials.magento_credentials.shall_import_fraud;
+            stores.single.enable_status_update = data.credentials.magento_credentials.enable_status_update;
+            stores.single.status_to_update = data.credentials.magento_credentials.status_to_update;
 
             stores.single.producthost = data.credentials.magento_credentials.producthost;
             stores.single.productusername = data.credentials.magento_credentials.productusername;
@@ -193,6 +202,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           } else if (data.store.store_type == 'Amazon') {
             stores.single.marketplace_id = data.credentials.amazon_credentials.marketplace_id;
             stores.single.merchant_id = data.credentials.amazon_credentials.merchant_id;
+            stores.single.mws_auth_token = data.credentials.amazon_credentials.mws_auth_token;
 
             stores.single.productmarketplace_id = data.credentials.amazon_credentials.productmarketplace_id;
             stores.single.productmerchant_id = data.credentials.amazon_credentials.productmerchant_id;
@@ -230,6 +240,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shall_import_not_shipped = data.credentials.shipworks_credentials.shall_import_not_shipped;
             stores.single.shall_import_shipped = data.credentials.shipworks_credentials.shall_import_shipped;
             stores.single.shall_import_no_status = data.credentials.shipworks_credentials.shall_import_no_status;
+            stores.single.gen_barcode_from_sku = data.credentials.shipworks_credentials.gen_barcode_from_sku;
             stores.single.request_url = data.credentials.shipworks_hook_url;
           } else if (data.store.store_type == 'Shopify') {
             stores.single.shop_name = data.credentials.shopify_credentials.shop_name;

@@ -2,18 +2,11 @@ class ScanPackController < ApplicationController
   before_filter :groovepacker_authorize!, :set_result_instance
   include ScanPackHelper
 
-  def set_result_instance
-    @result = {
-      "status" => true, "error_messages" => [], "success_messages" => [],
-      "notice_messages" => [], 'data' => {}
-    }
-  end
-
   def scan_barcode
     scan_barcode_obj = ScanPack::ScanBarcodeService.new(
       current_user, session, params
     )
-    render json: scan_barcode_obj.run
+    render json: scan_barcode_obj.run.merge('awaiting' => get_awaiting_orders_count)
   end
 
   # takes order_id as input and resets scan status if it is partially scanned.
@@ -85,7 +78,7 @@ class ScanPackController < ApplicationController
         {
           clicked: true, current_user: current_user, session: session
         }
-      )
+      ).merge('awaiting' => get_awaiting_orders_count)
   end
 
   def confirmation_code
@@ -105,5 +98,18 @@ class ScanPackController < ApplicationController
       current_user, session, params
     )
     render json: product_instruction_obj.run
+  end
+
+  private
+
+  def set_result_instance
+    @result = {
+      "status" => true, "error_messages" => [], "success_messages" => [],
+      "notice_messages" => [], 'data' => {}, 'awaiting' => get_awaiting_orders_count
+    }
+  end
+
+  def get_awaiting_orders_count
+    Order.where(status: 'awaiting').count
   end
 end

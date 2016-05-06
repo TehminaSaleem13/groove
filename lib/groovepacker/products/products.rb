@@ -11,7 +11,7 @@ module Groovepacker
           return @result
         end
         
-        unless @current_user.can?('add_edit_products') || (session[:product_edit_matched_for_current_user] && session[:product_edit_matched_for_products].include?(@product.id))
+        unless @current_user.can?('add_edit_products') || (@session[:product_edit_matched_for_current_user] && @session[:product_edit_matched_for_products].include?(@product.id))
           @result.merge({ 'status' => false, 'message' => 'You do not have enough permissions to update a product' })
           return @result
         end
@@ -139,11 +139,12 @@ module Groovepacker
         end
 
         def create_or_update_single_sku(sku, index, status)
+          db_sku = ProductSku.find_by_sku(sku["sku"])
           if sku["id"].present?
             status = @product.create_or_update_productsku(sku, index)
-          elsif sku["sku"].present? && ProductSku.where(:sku => sku["sku"]).blank?
+          elsif sku["sku"].present? && db_sku.blank?
             status = @product.create_or_update_productsku(sku, index, 'new')
-          elsif sku["sku"].present?
+          elsif sku["sku"].present? && db_sku.present?
             @result['status'] = false
             @result['message'] = "Sku "+sku["sku"]+" already exists"
           end
@@ -160,12 +161,13 @@ module Groovepacker
         end
 
         def create_or_update_single_barcode(barcode, index, status)
+          db_barcode = ProductBarcode.find_by_barcode(barcode["barcode"])
           case true
           when barcode["id"].present?
             status = @product.create_or_update_productbarcode(barcode, index)
-          when barcode["barcode"].present? && ProductBarcode.where(:barcode => barcode["barcode"]).blank?
+          when barcode["barcode"].present? && db_barcode.blank?
             status = @product.create_or_update_productbarcode(barcode, index, 'new')
-          when barcode["barcode"].present?
+          when barcode["barcode"].present? && db_barcode.present?
             @result['status'] = false
             @result['message'] = "Barcode #{barcode['barcode']} already exists"
             status = false

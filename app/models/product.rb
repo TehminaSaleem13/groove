@@ -34,6 +34,7 @@ class Product < ActiveRecord::Base
   has_one :sync_option
 
   after_save :check_inventory_warehouses
+  after_save :gen_barcode_from_sku_if_intangible
 
   SINGLE_KIT_PARSING = 'single'
   DEPENDS_KIT_PARSING = 'depends'
@@ -544,6 +545,14 @@ class Product < ActiveRecord::Base
       result = result.merge({'status' => false, 'error_msg' => errors}) if errors
     end
     return result
+  end
+
+  def gen_barcode_from_sku_if_intangible
+    return unless self.is_intangible
+    sku_for_barcode = self.product_skus.find_by_purpose("primary")
+    sku_for_barcode = self.product_skus.first unless sku_for_barcode
+    #method will not generate barcode if already exists
+    sku_for_barcode.gen_barcode_from_sku_if_intangible_product if sku_for_barcode.present?
   end
 
 end

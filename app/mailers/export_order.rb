@@ -3,36 +3,41 @@ class ExportOrder < ActionMailer::Base
 
   def export(tenant)
     Apartment::Tenant.switch(tenant)
-    export_settings = ExportSetting.all.first
-    if export_settings.export_orders_option == 'on_same_day'
-      @counts = get_order_counts
-    else
-      @counts = nil
-    end
+    export_settings = ExportSetting.first
+    
+    @counts = get_order_counts(export_settings) if export_settings.export_orders_option == 'on_same_day'
+    
     filename = export_settings.export_data
     @tenant_name = tenant
-    @csv_data = CSV.read("#{Rails.root}/public/csv/#{filename}")
+    file_locatin = "#{Rails.root}/public/csv/#{filename}"
+    @csv_data = CSV.read(file_locatin)
     @csv_data.first.each_with_index do |value, index|
-      if value == 'order_number'
+      case value
+      when 'order_number'
         @order_number = index
+      when 'scanned_by_status_change'
+        @scanned_by_status_change = index
       end
     end
 
-    attachments["#{filename}"] = File.read("#{Rails.root}/public/csv/#{filename}")
+    attachments["#{filename}"] = File.read(file_locatin)
     mail to: export_settings.order_export_email,
          subject: "GroovePacker Order Export Report"
     import_orders_obj = ImportOrders.new
     import_orders_obj.reschedule_job('export_order', tenant)
-    File.delete("#{Rails.root}/public/csv/#{filename}")
+    File.delete(file_locatin)
   end
 
-  def get_order_counts
-    result = Hash.new
-    result['imported'] = Order.where("created_at >= ?", Time.now.beginning_of_day).size
-    result['scanned'] = Order.where("scanned_on >= ?", Time.now.beginning_of_day).size
-    result['awaiting'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'awaiting').size
-    result['onhold'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'onhold').size
-    result['cancelled'] = Order.where("created_at >= ? and status = ?", Time.now.beginning_of_day, 'cancelled').size
+  def get_order_counts(export_settings)
+    result = {}
+    day_begin, end_time = export_settings.get_start_and_end_time
+    #day_begin = Time.zone.now.beginning_of_day
+    result['imported'] = Order.where("created_at >= ?", day_begin).size
+    result['scanned'] = Order.where("scanned_on >= ?", day_begin).size
+    result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_by_status_change = ?", day_begin, true).size
+    result['awaiting'] = Order.where("created_at >= ? and status = ?", day_begin, 'awaiting').size
+    result['onhold'] = Order.where("created_at >= ? and status = ?", day_begin, 'onhold').size
+    result['cancelled'] = Order.where("created_at >= ? and status = ?", day_begin, 'cancelled').size
     result['total'] = result['imported'] + result['scanned']
     result
   end

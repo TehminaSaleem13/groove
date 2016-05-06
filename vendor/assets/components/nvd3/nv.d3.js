@@ -821,7 +821,8 @@ window.nv.tooltip.* also has various helper methods.
                 var tLeft = tooltipLeft(container);
                 var tTop = tooltipTop(container);
                 if (tLeft < scrollLeft) left = scrollLeft + 5;
-                if (tLeft + width > windowWidth) left = left - width/2 + 5;
+                // if (tLeft + width > windowWidth) left = left - width/2 + 5;
+                if (tLeft + width + 300 > windowWidth) left = left - width/3;
                 if (scrollTop > tTop) top = scrollTop;
                 break;
               case 'none':
@@ -4903,11 +4904,11 @@ nv.models.indentedTree = function() {
                }
                else {
                    d.disabled = !d.disabled;
-                   if (data.every(function(series) { return series.disabled})) {
-                       //the default behavior of NVD3 legends is, if every single series
-                       // is disabled, turn all series' back on.
-                       data.forEach(function(series) { series.disabled = false});
-                   }
+                   // if (data.every(function(series) { return series.disabled})) {
+                   //     //the default behavior of NVD3 legends is, if every single series
+                   //     // is disabled, turn all series' back on.
+                   //     data.forEach(function(series) { series.disabled = false});
+                   // }
                }
                dispatch.stateChange({
                   disabled: data.map(function(d) { return !!d.disabled })
@@ -11187,7 +11188,7 @@ nv.models.scatter = function() {
           pointPaths.exit().remove();
           pointPaths
               .attr('d', function(d) {
-                if (d.data.length === 0)
+                if (typeof(d) === 'undefined' || d.data.length === 0)
                     return 'M 0 0'
                 else
                     return 'M' + d.data.join('L') + 'Z';

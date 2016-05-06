@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   include UsersHelper
 
   def index
-    @users = User.where('username != ?', 'gpadmin')
+    @users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -18,9 +18,11 @@ class UsersController < ApplicationController
     result['messages'] = []
 
     if current_user.can? 'add_edit_users'
+      new_user = false
       if params[:id].nil?
         if User.can_create_new?
           @user = User.new
+          new_user = true
         else
           result['status'] = false
           result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
@@ -93,6 +95,12 @@ class UsersController < ApplicationController
           result['user'] = @user.attributes
           result['user']['role'] = @user.role.attributes
           result['user']['current_user'] = current_user
+          # send user data to groovelytics server if the user is newly created.
+          if new_user && !Rails.env.test?
+            tenant_name = Apartment::Tenant.current
+            send_user_info_obj = SendUsersInfo.new()
+            send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
+          end
         else
           result['status'] = false
           result['messages'] = @user.errors.full_messages
@@ -305,9 +313,10 @@ class UsersController < ApplicationController
       params['_json'].each do |user|
         unless user['id'] == current_user.id
           @user = User.find(user['id'])
-          if !@user.destroy
-            result['status'] = false
-          end
+          @user.username += '-' + Random.rand(10000000..99999999).to_s
+          @user.is_deleted = true
+          @user.active = false
+          @user.save
         end
       end
     else

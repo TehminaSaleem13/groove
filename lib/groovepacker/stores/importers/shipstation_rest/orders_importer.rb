@@ -79,6 +79,7 @@ module Groovepacker
                 import_item.current_order_imported_item = -1
                 import_item.to_import = result[:total_imported]
                 import_item.save
+                sleep 0.5
                 response["orders"].each do |order|
                   import_item.reload
                   break if import_item.status == 'cancelled'
@@ -86,6 +87,7 @@ module Groovepacker
                   import_item.current_order_items = -1
                   import_item.current_order_imported_item = -1
                   import_item.save
+                  sleep 0.5
 
                   shipstation_order = Order.find_by_store_id_and_increment_id(credential.store_id, order["orderNumber"])
                   if import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
@@ -114,6 +116,7 @@ module Groovepacker
                       import_item.current_order_items = order["items"].length
                       import_item.current_order_imported_item = 0
                       import_item.save
+                      sleep 0.5
                       order["items"].each do |item|
                         order_item = OrderItem.new
 
@@ -156,14 +159,20 @@ module Groovepacker
                         make_product_intangible(order_item.product)
                         shipstation_order.order_items << order_item
                         import_item.current_order_imported_item = import_item.current_order_imported_item + 1
-                        import_item.save
                       end
+                      import_item.save
+                      sleep 0.5
                     end
                     if shipstation_order.save
                       shipstation_order.addactivity("Order Import", credential.store.name+" Import")
                       shipstation_order.order_items.each do |item|
+                        if item.qty.blank? || item.qty<1
+                          shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{credential.store.name} Import")
+                          item.destroy
+                          next
+                        end
                         unless item.product.nil? || item.product.primary_sku.nil?
-                          shipstation_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", credential.store.name+" Import")
+                          shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} Added", "#{credential.store.name} Import")
                         end
                       end
                       shipstation_order.store = credential.store
@@ -172,6 +181,7 @@ module Groovepacker
                       result[:success_imported] = result[:success_imported] + 1
                       import_item.success_imported = result[:success_imported]
                       import_item.save
+                      sleep 0.5
                       if gp_ready_tag_id != -1 && !order["tagIds"].nil? &&
                         order["tagIds"].include?(gp_ready_tag_id)
                         client.remove_tag_from_order(order["orderId"], gp_ready_tag_id)
@@ -182,6 +192,7 @@ module Groovepacker
                     import_item.previous_imported = import_item.previous_imported + 1
                     import_item.save
                     result[:previous_imported] = result[:previous_imported] + 1
+                    sleep 0.5
                   end
                 end
               end

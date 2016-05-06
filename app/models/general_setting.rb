@@ -55,12 +55,12 @@ class GeneralSetting < ActiveRecord::Base
       groove_bulk_actions.activity = 'enable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at => 10.seconds.from_now).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 2.seconds.from_now).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
     else
       groove_bulk_actions.activity = 'disable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at => 10.seconds.from_now).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 2.seconds.from_now).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
     end
     true
   end
@@ -168,8 +168,9 @@ class GeneralSetting < ActiveRecord::Base
     run_at_date = date.getutc
     run_at_date = run_at_date.change({:hour => time.hour,
                                       :min => time.min, :sec => time.sec})
-    time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i
-    time_diff += 3600 if (Time.now + time_diff).dst?
+    time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i + Random.rand(120)
+    time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
+    time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'

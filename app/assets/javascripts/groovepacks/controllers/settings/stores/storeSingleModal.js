@@ -217,6 +217,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       scope.update_single_store(true);
     };
 
+    scope.change_value_of_status_to_update = function (value) {
+      scope.stores.single.status_to_update = value;
+      scope.update_single_store(true);
+    };
+
     myscope.store_single_details = function (id, new_rollback) {
       for (var i = 0; i < scope.stores.list.length; i++) {
         if (scope.stores.list[i].id == id) {
@@ -294,10 +299,6 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       }
       if (scope.edit_status || stores.single.validate_create(scope.stores)) {
         return stores.single.update(scope.stores, auto).success(function (data) {
-          if(scope.stores.single.store_type=="BigCommerce"){
-            notification.notify("This integration is currently being tested. Please refrain from depending on it in a production environment.",0);
-          }
-
           if (data.status && data.store_id) {
             if (scope.stores.single['id'] != 0) {
               myscope.store_single_details(data.store_id);

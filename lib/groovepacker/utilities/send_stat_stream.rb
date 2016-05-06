@@ -2,7 +2,8 @@ class SendStatStream
 
   def build_send_stream(tenant, order_id)
     stat_stream = build_stream(tenant, order_id)
-    send_stream(tenant, stat_stream, order_id)
+    path = 'dashboard'
+    send_stream(tenant, stat_stream, order_id, path)
   end
 
   def build_stream(tenant, order_id)
@@ -11,11 +12,11 @@ class SendStatStream
     stat_stream_obj.get_order_stream(tenant, order_id)
   end
 
-  def send_stream(tenant, stat_stream, order_id)
+  def send_stream(tenant, stat_stream, order_id, path)
     begin
       HTTParty::Basement.default_options.update(verify: false)
-      # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/dashboard",
-      response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard",
+      # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/#{path}",
+      response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}",
         query: {tenant_name: tenant},
         body: stat_stream.to_json,
         headers: { 'Content-Type' => 'application/json' })
@@ -32,5 +33,11 @@ class SendStatStream
     ensure
       HTTParty::Basement.default_options.update(verify: true)
     end
+  end
+
+  def send_order_exception(order_id, tenant)
+    stat_stream = build_stream(tenant, order_id)
+    path = 'dashboard/update_order_data'
+    send_stream(tenant, stat_stream, order_id, path)
   end
 end

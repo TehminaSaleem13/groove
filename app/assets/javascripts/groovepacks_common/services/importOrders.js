@@ -30,6 +30,17 @@ groovepacks_services.factory("importOrders", ['$http', 'notification', function 
               notification.notify(data.error_messages);
             }
           }).error(notification.server_error);
+      },
+
+      update_popup_display_setting: function(flag) {
+        $http.put('/order_import_summary/update_display_setting',
+          {flag: flag}).success(function (data) {
+            // if (data.status) {
+            //   notification.notify(data.success_messages, 1);
+            // } else {
+            //   notification.notify(data.error_messages);
+            // }
+          });
       }
       // do_import: function(scope) {
 

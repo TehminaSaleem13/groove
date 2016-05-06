@@ -7,6 +7,8 @@ class Subscription < ActiveRecord::Base
   has_many :transactions
   include PaymentsHelper
 
+  after_create :add_subscriber_to_campaignmonitor
+
   def save_with_payment(one_time_payment)
     begin
       if valid?
@@ -153,6 +155,14 @@ class Subscription < ActiveRecord::Base
     else
       ''
     end
+  end
+
+  def add_subscriber_to_campaignmonitor
+    initialize_campaingmonitor.add_subscriber_to_lists
+  end
+
+  def initialize_campaingmonitor
+    @cm ||= Groovepacker::CampaignMonitor::CampaignMonitor.new(subscriber: self)
   end
 
 end

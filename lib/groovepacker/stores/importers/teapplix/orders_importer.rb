@@ -11,11 +11,12 @@ module Groovepacker
             last_imported_date = Time.now
             
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
-            @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
+            initialize_import_item
             (response["orders"]||[]).each do |order|
+              @order_to_update = false
               @import_item.reload
               break if @import_item.status == 'cancelled'
-              @import_item.update_attributes(:current_increment_id => order[:txn_id], :current_order_items => -1, :current_order_imported_item => -1)
+              @import_item.update_attributes(:current_increment_id => order["txn_id"], :current_order_items => -1, :current_order_imported_item => -1)
               import_single_order(order)
             end
             @credential.update_attributes( :last_imported_at => last_imported_date ) if @import_item.status != 'cancelled'
@@ -54,26 +55,26 @@ module Groovepacker
           end
 
           def import_order(teapplix_order, order)
-            teapplix_order.increment_id = order[:txn_id]
-            teapplix_order.store_order_id = order[:txn_id]
-            teapplix_order.order_placed_time = order[:date].try(:to_datetime)
+            teapplix_order.increment_id = order["txn_id"]
+            teapplix_order.store_order_id = order["txn_id"]
+            teapplix_order.order_placed_time = order["date"].try(:to_datetime)
             #add order shipping address using separate method
             teapplix_order = add_customer_info(teapplix_order, order)
             #add order shipping address using separate method
             teapplix_order = add_order_shipping_address(teapplix_order, order)
             
             #teapplix_order.customer_comments = order["customer_message"]
-            teapplix_order.qty = order[:num_order_lines]
+            teapplix_order.qty = order["num_order_lines"]
             return teapplix_order
           end
 
           def import_order_items(teapplix_order, order)
-            return teapplix_order if order[:items].nil?
+            return teapplix_order if order["items"].nil?
             
             #order["products"] = @client.order_products(order["products"]["url"])
-            @import_item.update_attributes(:current_order_items => order[:items].length, :current_order_imported_item => 0 )
+            @import_item.update_attributes(:current_order_items => order["items"].length, :current_order_imported_item => 0 )
 
-            (order[:items]||[]).each do |item|
+            (order["items"]||[]).each do |item|
               order_item = OrderItem.new
               import_order_item(order_item, item)
               @import_item.current_order_imported_item += 1
@@ -88,18 +89,18 @@ module Groovepacker
           end
 
           def import_order_item(order_item, line_item)
-            order_item.sku = line_item[:item_sku]
-            order_item.name = line_item[:item_name]
-            order_item.qty = line_item[:quantity]
-            order_item.price = line_item[:subtotal].to_f / line_item[:quantity].to_i
-            order_item.row_total = line_item[:subtotal].to_f *
-              line_item[:quantity].to_f
+            order_item.sku = line_item["item_sku"]
+            order_item.name = line_item["item_name"]
+            order_item.qty = line_item["quantity"]
+            order_item.price = line_item["subtotal"].to_f / line_item["quantity"].to_i
+            order_item.row_total = line_item["subtotal"].to_f *
+              line_item["quantity"].to_f
             order_item
           end
 
           def add_customer_info(teapplix_order, order)
-            teapplix_order.email = order[:payer_email]
-            customer_name = get_firstname_lastname(order[:name])
+            teapplix_order.email = order["payer_email"]
+            customer_name = get_firstname_lastname(order["name"])
             teapplix_order.firstname = customer_name[1]
             teapplix_order.lastname = customer_name[0]
             return teapplix_order
@@ -114,12 +115,12 @@ module Groovepacker
 					end
 
           def add_order_shipping_address(teapplix_order, order)
-            teapplix_order.address_1 = order[:address_street]
-            teapplix_order.address_2 = order[:address_street2]
-            teapplix_order.city = order[:address_city]
-            teapplix_order.state = order[:address_state]
-            teapplix_order.postcode = order[:address_zip]
-            teapplix_order.country = order[:address_country]
+            teapplix_order.address_1 = order["address_street"]
+            teapplix_order.address_2 = order["address_street2"]
+            teapplix_order.city = order["address_city"]
+            teapplix_order.state = order["address_state"]
+            teapplix_order.postcode = order["address_zip"]
+            teapplix_order.country = order["address_country"]
             return teapplix_order
           end
 
@@ -144,16 +145,11 @@ module Groovepacker
             end
           end
 
-          def update_success_import_count
-            @import_item.success_imported += 1
-            @import_item.save
-            @result[:success_imported] += 1
-          end
-
           def delete_order_if_exists(order)
-            existing_order = Order.find_by_increment_id(order[:txn_id])
+            existing_order = Order.find_by_increment_id(order["txn_id"])
             if existing_order && existing_order.status!="scanned"
               existing_order.destroy
+              @order_to_update = true
               return true
             else
               return_val = existing_order ? false : true

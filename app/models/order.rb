@@ -6,8 +6,12 @@ class Order < ActiveRecord::Base
                   :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
                   :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
                   :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
-                  :custom_field_one, :custom_field_two, :traced_in_dashboard
+                  :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change
 
+  #===========================================================================================
+  #please update the delete_orders library if adding before_destroy or after_destroy callback
+  # or adding dependent destroy for associated models
+  #===========================================================================================
   has_many :order_items, :dependent => :destroy
   has_one :order_shipping, :dependent => :destroy
   has_one :order_exception, :dependent => :destroy
@@ -18,6 +22,7 @@ class Order < ActiveRecord::Base
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
   validates_uniqueness_of :increment_id
+
 
   include ProductsHelper
   include OrdersHelper
@@ -691,9 +696,11 @@ class Order < ActiveRecord::Base
     self.update_order_status
   end
 
-  def destroy_exceptions(result, current_user)
+  def destroy_exceptions(result, current_user, tenant)
     if order_exception.destroy
       addactivity("Order Exception Cleared", current_user.name)
+      stat_stream_obj = SendStatStream.new()
+      stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'clear_order_exception_#{self.id}').send_order_exception(self.id, tenant)
     else
       result['status'] &= false
       result['messages'].push('Error clearing exceptions')

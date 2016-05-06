@@ -18,8 +18,9 @@ module ScanPack
 
     def scan_barcode
       do_set_state_matcher
-      do_scan_now
       do_check_state_and_status_to_add_activity
+      do_scan_now
+      
     end
 
     def do_set_state_matcher

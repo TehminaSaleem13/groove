@@ -40,26 +40,29 @@
         <tbody>
         <tr ng-click="check_uncheck(row,$index,$event)" ng-repeat="row in rows"
             ng-class="{selected: row.checked, inverted:options.setup.inverted}">
-          <td ng-repeat="field in theads" ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})" ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (show_action_icon={})">
+          <td ng-repeat="field in theads"
+            ng-mouseover="row.show_action_icon ? (row.show_action_icon[field]=true) : (row.show_action_icon={})"
+            ng-mouseleave="row.show_action_icon ? (row.show_action_icon[field]=false) : (show_action_icon={})"
+            style="padding: 7px;">
             <div style="display:inline-block;"
               bo-if="options.editable != false && options.all_fields[field].editable == true"
-              hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)"
-              >
-              <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index]}'
+              hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)" ng-init="load_editable($parent.$parent.$index,field);">
+              <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index], "grid-editing-mode": editable[field][$parent.$parent.$index]}'
                 ng-hide="editable[field][$parent.$parent.$index]"
                 ng-style="{'min-width' : (row[field].length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length) + 1) : (row[field].length || 5) + 1) + 'rem'}">
                 <span class='fa fa-pencil datagrid-pencil pull-right'
                     ng-show="row.show_action_icon[field] && !editable[field][$parent.$parent.$index]" groov-click="compile($parent.$parent.$index,field)"></span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length > 25"
-                      bo-text="row[field].chunk(25).join(' ') | cut:false:(25*options.no_of_lines)"
-                      tooltip='{{row[field].chunk(25).join(" ")}}'
+                      bo-text="row[field] | cut:false:(25*options.no_of_lines)"
+                      tooltip='{{row[field]}}'
+                      tooltip-placement='{{set_position(row, rows)}}'
                       class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
-                      bo-text="row[field].chunk(25).join(' ') | cut:false:(25*options.no_of_lines)" class="grid-text">
+                      bo-text="row[field] | cut:false:(25*options.no_of_lines)" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
-                    tooltip="{{'Edit ' + options.all_fields[field].name}}" class="grid-text">
+                    tooltip="{{'Edit ' + options.all_fields[field].name}}" tooltip-placement='{{set_position(row, rows)}}' class="grid-text">
                   &nbsp;{{row[field]}}</span>
                 <span bo-if="options.all_fields[field].transclude != ''"
                       ng-bind-html="options.all_fields[field].transclude" class="grid-text" compile-template>&nbsp;</span>
@@ -69,19 +72,19 @@
             <div style="display:inline-block;"
               bo-if="options.editable == false || options.all_fields[field].editable == false"
               >
-              <div ng-class='{"grid-editable-field": options.all_fields[field].copyable}'
-                ng-style="{'min-width': options.all_fields[field].col_length ? options.all_fields[field].col_length : row[field].length + (options.all_fields[field].copyable ? 3 : 0) + 'rem'}">
+              <div ng-class='{"grid-copyable-field": options.all_fields[field].copyable, "grid-simple-text": !options.all_fields[field].copyable}'
+                ng-style="{'min-width' : (row[field].length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length)) : (row[field].length || 5)) + 'rem'}">
                 <span class='fa fa-copy datagrid-copy pull-right'
                       ng-show="row.show_action_icon[field] && options.all_fields[field].copyable"
                       clip-copy="row[field]" groov-click="copied(row[field])"></span>
                 <span bo-if="options.all_fields[field].transclude != '' "
                       ng-bind-html="options.all_fields[field].transclude" compile-template></span>
-                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
-                      bo-text="row[field].chunk(25).join(' ') | cut:false:(25*options.no_of_lines)" class="grid-text">
+                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null"
+                      bo-text="row[field].toString() | cut:false:(25)" tooltip="{{row[field]}}" tooltip-placement='{{set_position(row, rows)}}'" class="grid-text">
                 </span>
-                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
+                <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].toString().length)"
                   class="grid-text">
-                  &nbsp;{{row[field]}}</span>
+                  &nbsp;{{row[field] | cut:false:(25)}}</span>
               </div>
             </div>
           </td>
@@ -110,5 +113,5 @@
       </div>
     </div>
   </div>
-  
+
 </div>

@@ -143,6 +143,13 @@ class StoresController < ApplicationController
             # We do not need password GROOV-168
             #@magento.password = params[:password]
             @magento.api_key = params[:api_key]
+            @magento.shall_import_processing = params[:shall_import_processing]
+            @magento.shall_import_pending = params[:shall_import_pending]
+            @magento.shall_import_closed = params[:shall_import_closed]
+            @magento.shall_import_complete = params[:shall_import_complete]
+            @magento.shall_import_fraud = params[:shall_import_fraud]
+            @magento.enable_status_update = params[:enable_status_update]
+            @magento.status_to_update = params[:status_to_update]
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
@@ -177,7 +184,7 @@ class StoresController < ApplicationController
               @magento_rest.oauth_token_secret=nil
             end
             @magento_rest.store_version = params[:store_version]
-            @magento_rest.store_token = Store.get_sucure_random_token if @magento_rest.store_token.blank?
+            @magento_rest.store_token = Store.get_sucure_random_token(20).gsub("=","").gsub("/","") if @magento_rest.store_token.blank?
             @magento_rest.api_key = params[:api_key]
             @magento_rest.api_secret = params[:api_secret]
 
@@ -210,6 +217,7 @@ class StoresController < ApplicationController
             end
             @amazon.marketplace_id = params[:marketplace_id]
             @amazon.merchant_id = params[:merchant_id]
+            @amazon.mws_auth_token = params[:mws_auth_token]
 
             @amazon.import_products = params[:import_products]
             @amazon.import_images = params[:import_images]
@@ -402,7 +410,8 @@ class StoresController < ApplicationController
                   shall_import_new_order: params[:shall_import_new_order],
                   shall_import_not_shipped: params[:shall_import_not_shipped],
                   shall_import_shipped: params[:shall_import_shipped],
-                  shall_import_no_status: params[:shall_import_no_status])
+                  shall_import_no_status: params[:shall_import_no_status],
+                  gen_barcode_from_sku: params[:gen_barcode_from_sku])
                 new_record = true
               else
                 @shipworks.update_attributes(
@@ -411,7 +420,8 @@ class StoresController < ApplicationController
                   shall_import_new_order: params[:shall_import_new_order],
                   shall_import_not_shipped: params[:shall_import_not_shipped],
                   shall_import_shipped: params[:shall_import_shipped],
-                  shall_import_no_status: params[:shall_import_no_status])
+                  shall_import_no_status: params[:shall_import_no_status],
+                  gen_barcode_from_sku: params[:gen_barcode_from_sku])
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
@@ -775,8 +785,10 @@ class StoresController < ApplicationController
     end
 
     unless @store.status
-      @result['status'] = false
-      @result['messages'].push('Store is not active')
+      if params["flag"]=="ftp_download"
+        @result['status'] = false
+        @result['messages'].push('Store is not active')
+      end
     end
 
     if params[:type].nil? || !['order', 'product', 'kit'].include?(params[:type])
@@ -1439,6 +1451,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
       when "Shopify"
         handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      when "Teapplix"
+        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
       end
 
       context = Groovepacker::Stores::Context.new(handler)
@@ -1471,6 +1485,8 @@ class StoresController < ApplicationController
         handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
       when "Shopify"
         handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      when "Teapplix"
+        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
       end
 
       context = Groovepacker::Stores::Context.new(handler)

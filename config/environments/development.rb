@@ -78,13 +78,13 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
   config.action_mailer.smtp_settings = {
-    :address => "smtp.mandrillapp.com",
+    :address => "smtp.api.createsend.com",
     :port => 587,  
     :authentication => "plain",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',
-    :user_name => 'groovepacker@gmail.com',
-    :password => 'ckWnOifHhLOJRiqZQ-ZRKA',
+    :user_name => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
+    :password => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
     :openssl_verify_mode  => 'none'
   }
 
@@ -152,4 +152,14 @@ Groovepacks::Application.configure do
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = ""
   ENV["PRODUCTS_IMPORT_EMAILS"] = ""
   ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = ""
+
+  #Campaign-Monitoring API_KEY and CLIENT_ID
+  ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
+  ENV['CAMPAIGN_MONITOR_CLIENT_ID'] = "1c1a38f864c174b42eb2ebcd613b6969"
+  #List Name - Dev All Leads
+  ENV['CAMPAIGN_MONITOR_LEADS_LIST_ID'] = "f56496637a0ba321d130137d61145305"
+  #List Name - Dev New Customers
+  ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "78a4f2ed6ed69cc395f886950cf761bc"
+  #List Name - Dev All Customers
+  ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "98cf23f2620ae5062d9657ed991e3466"
 end

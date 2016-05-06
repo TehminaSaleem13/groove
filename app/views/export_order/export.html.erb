@@ -60,6 +60,8 @@
       <p>Order imported today: <%= @counts['imported'] %></p>
 
       <p>Order scanned today: <%= @counts['scanned'] %></p>
+
+      <p>Order manually changed to scanned without scanning today: <%= @counts['scanned_manually'] %></p>
       <% if @counts['imported'] > 0 %>
         <p>Today's Order Remaining Awaiting: <%= @counts['awaiting'] %></p>
 

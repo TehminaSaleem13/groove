@@ -84,7 +84,7 @@
           <div class="col-md-6 col-lg-6">
             <span class="fa fa-tachometer fa-dash"></span>
 
-            <h3 ng-hide="charts.type=='packing_time_stats'">PACKING SPEED</h3>
+            <h3 ng-hide="charts.type=='packing_time_stats'">SPEED SCORE</h3>
             <h3 ng-show="charts.type=='packing_time_stats'">PACKING TIME</h3>
             <span class="no-padding font-12"><span class="col-md-3 col-lg-3 no-padding remove-margin-left">Max</span><span class="col-md-4 col-lg-4 no-padding top-margin-2p"><input type="number" class="col-md-12 col-lg-12 no-padding dashboard-input" ng-model="dashboard.max_time_per_item" ng-blur="update_max()"></span><span class="col-md-5 col-lg-5 no-padding">Sec/Item</span></span>
           </div>
@@ -230,56 +230,59 @@
     <div class="col-md-12 col-lg-12" ng-class="{'dash-home-container-left': charts.type=='packing_stats' || charts.type=='packing_error', 'dash-home-container': charts.type=='packing_speed_stats' || charts.type=='packing_time_stats', 'dash-home-container-right': charts.type=='packed_item_stats' || charts.type=='packed_order_stats'}">
       <nvd3-line-chart
         data="dashboard.packing_stats"
-        width="1030"
         height="310"
         xAxisTickValues="xAxisTickValuesFunction()"
         xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickValues="yAxisTickValuesFunction(true)"
         yAxisTickFormat="yAxisTickFormatFunction()"
         showXAxis="true"
         showYAxis="true"
         interactive="true"
+        forceY
         tooltips="true"
-        tooltipcontent="toolTipContentFunction()"
+        tooltipContent="toolTipContentFunction()"
         showLegend="true"
         color="legendColorFunction()"
         legendRightAlign="false"
-        legendColor="legendColorFunction()" ng-show="charts.type=='packing_stats' || charts.type=='packing_error'">
+        legendColor="legendColorFunction()" ng-if="charts.type=='packing_stats' || charts.type=='packing_error'">
         <svg></svg>
       </nvd3-line-chart>
       <nvd3-line-chart
         data="dashboard.packing_speed_stats"
-        width="1030"
         height="310"
         xAxisTickValues="xAxisTickValuesFunction()"
         xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickValues="yAxisTickValuesFunction(true)"
         yAxisTickFormat="yAxisTickFormatFunction()"
         showXAxis="true"
         showYAxis="true"
         interactive="true"
+        forceY
         tooltips="true"
-        tooltipcontent="toolTipContentFunction()"
+        tooltipContent="toolTipContentFunction()"
         showLegend="true"
         color="legendColorFunction()"
         legendRightAlign="false"
-        legendColor="legendColorFunction()" ng-show="charts.type=='packing_speed_stats' || charts.type=='packing_time_stats'">
+        legendColor="legendColorFunction()" ng-if="charts.type=='packing_speed_stats' || charts.type=='packing_time_stats'">
         <svg></svg>
       </nvd3-line-chart>
       <nvd3-line-chart
         data="dashboard.packed_item_stats"
-        width="1030"
         height="310"
         xAxisTickValues="xAxisTickValuesFunction()"
         xAxisTickFormat="xAxisTickFormatFunction()"
+        yAxisTickValues="yAxisTickValuesFunction(false)"
         yAxisTickFormat="yAxisTickFormatFunction()"
         showXAxis="true"
         showYAxis="true"
         interactive="true"
+        forceY
         tooltips="true"
-        tooltipcontent="toolTipContentFunction()"
+        tooltipContent="toolTipContentFunction()"
         showLegend="true"
         color="legendColorFunction()"
         legendRightAlign="false"
-        legendColor="legendColorFunction()" ng-show="charts.type=='packed_item_stats' || charts.type=='packed_order_stats'">
+        legendColor="legendColorFunction()" ng-if="charts.type=='packed_item_stats' || charts.type=='packed_order_stats'">
         <svg></svg>
       </nvd3-line-chart>
     </div>
