@@ -37,6 +37,27 @@ class ExportSetting < ActiveRecord::Base
     single_row
   end
 
+  def export_data
+    require 'csv'
+    # result = set_result_hash
+    start_time, end_time = set_start_and_end_time
+    return with_error_filename if start_time.blank?
+
+    orders = Order.where(scanned_on: start_time..end_time)
+    self.last_exported = Time.zone.now
+    save
+
+    filename = generate_file_name
+
+    if order_export_type == 'do_not_include'
+      do_export_if_orders_not_included(orders, filename)
+    else
+      do_export_with_orders(orders, filename)
+    end
+
+    filename
+  end
+
   private
 
   def auto_email_export_with_changed_hash
@@ -84,7 +105,6 @@ class ExportSetting < ActiveRecord::Base
     single_row[:warehouse_name] = order_item.product.primary_warehouse
                                   .try(:inventory_warehouse).try(:name)
   end
-
   def update_single_row_for_product_info(single_row, order_item)
     product = order_item.product
     single_row[:barcode] = product.primary_barcode
@@ -97,5 +117,84 @@ class ExportSetting < ActiveRecord::Base
 
     single_row[:primary_sku] = product.primary_sku
     single_row[:item_sale_price] = order_item.price
+  end
+
+  def set_start_and_end_time
+    start_time = self.start_time.beginning_of_day
+    end_time = self.end_time.end_of_day
+    return [start_time, end_time] if manual_export
+
+    start_time = same_day_or_last_exported(start_time)
+    end_time = Time.zone.now
+
+    [start_time, end_time]
+  end
+
+  def same_day_or_last_exported(start_time)
+    if export_orders_option.eql? 'on_same_day'
+      start_time
+    else
+      last_exported || '2000-01-01 00:00:00'
+    end
+  end
+
+  def with_error_filename
+    # result['status'] = false
+    # result['messages'].push('We need a start and an end time')
+    CSV.generate do |csv|
+      csv << result['messages']
+    end
+    'error.csv'
+  end
+
+  def generate_file_name
+    "groove-order-export-#{Time.now}.csv"
+  end
+
+  def file_path(filename)
+    "#{Rails.root}/public/csv/#{filename}"
+  end
+
+  def do_export_if_orders_not_included(orders, filename)
+    row_map = generate_row_mapping
+    CSV.open(file_path(filename), 'w') do |csv|
+      csv << row_map.keys
+      orders.each do |order|
+        single_row = update_single_row_with_order_data(row_map, order)
+        assign_packing_user(single_row, order)
+        single_row[:click_scanned_qty] = calculate_clicked_qty(order)
+        csv << single_row.values
+      end
+    end
+  end
+
+  def generate_row_mapping
+    {
+      order_date: '',
+      order_number: '',
+      scanned_qty: '',
+      packing_user: '',
+      scanned_date: '',
+      click_scanned_qty: ''
+    }
+  end
+
+  def update_single_row_with_order_data(row_map, order)
+    single_row = row_map.dup
+    single_row[:order_number] = order.increment_id
+    single_row[:scanned_qty] = order.scanned_items_count
+    single_row[:order_date] = order.order_placed_time
+    single_row[:scanned_date] = order.scanned_on
+    single_row
+  end
+
+  def assign_packing_user(single_row, order)
+    packing_user = User.where(id: order.packing_user_id).first
+    return unless packing_user
+    single_row[:packing_user] = "#{packing_user.name} ( #{packing_user.username} )"
+  end
+
+  def calculate_clicked_qty(order)
+    order.order_items.map(&:clicked_qty).sum
   end
 end
