@@ -1,6 +1,6 @@
 module ExportData
   extend ActiveSupport::Concern
-  
+
   private
 
   def generate_header
@@ -221,5 +221,4 @@ module ExportData
       end
     end
   end
->>>>>>> GROOV-943
 end

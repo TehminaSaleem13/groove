@@ -89,7 +89,7 @@ RSpec.describe ExportSetting, :type => :model do
         )
       @export_setting.save
       filename = @export_setting.export_data
-      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%e').to_s}/)
+      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%d').to_s}/)
     end
 
     it 'should export Data including all orders' do
@@ -99,7 +99,7 @@ RSpec.describe ExportSetting, :type => :model do
         )
       @export_setting.save
       filename = @export_setting.export_data
-      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%e').to_s}/)
+      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%d').to_s}/)
     end
 
     it 'should export Data including orders with serial and lot' do
@@ -109,7 +109,7 @@ RSpec.describe ExportSetting, :type => :model do
         )
       @export_setting.save
       filename = @export_setting.export_data
-      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%e').to_s}/)
+      expect(filename).to match(/groove-order-export-#{Time.now.strftime('%Y-%m-%d').to_s}/)
     end
   end
 end
