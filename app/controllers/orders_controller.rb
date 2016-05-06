@@ -1,6 +1,6 @@
 class OrdersController < ApplicationController
   include OrderConcern
-  
+
   # Import orders from store based on store id
   def importorders
     if check_user_permissions('import_orders')
@@ -12,7 +12,7 @@ class OrdersController < ApplicationController
 
   def import_shipworks
     status = gp_orders_import.import_shipworks(params[:auth_token], request)
-    
+
     render status: status, nothing: true
   end
 
@@ -23,7 +23,7 @@ class OrdersController < ApplicationController
       set_status_and_message(false, 'You do not have the permissions to edit notes', ['push'])
     end
     update_order_attrs
-    
+
     if @result['status'] && @order.save
       @result['messages'].push(@order.errors.full_messages)
     end
@@ -160,7 +160,7 @@ class OrdersController < ApplicationController
   end
 
   def generate_pick_list
-    @result, @pick_list, @depends_pick_list  = 
+    @result, @pick_list, @depends_pick_list  =
                             gp_orders_module.generate_pick_list( list_selected_orders )
 
     file_name = 'pick_list_'+Time.now.strftime('%d_%b_%Y')
@@ -181,7 +181,7 @@ class OrdersController < ApplicationController
     settings_to_generate_packing_slip
     @orders = []
     list_selected_orders.each { |order| @orders.push({id: order.id, increment_id: order.increment_id}) }
-    
+
     unless @orders.empty?
       generate_barcode_for_packingslip
       @result['status'] = true
@@ -253,4 +253,3 @@ class OrdersController < ApplicationController
   # end
 
 end
-

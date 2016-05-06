@@ -1,6 +1,6 @@
 <div class="notifications">
   <alert ng-show="notif.show" class="slide" ng-repeat="notif in notifs" type="{{notif.alert}}" close="notif.show=false">
     &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
-    {{notif.msg}}
+    <span ng-bind-html="notif.msg"></span>
   </alert>
 </div>
