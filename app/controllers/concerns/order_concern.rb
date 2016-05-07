@@ -119,6 +119,11 @@ module OrderConcern
         return
       end
 
+      if order.status.eql?('serviceissue') && params[:status].eql?('scanned')
+        @result['notice_messages'].push 'Service Issue Orders cannot be changed to scanned'
+        return
+      end
+
       return if order_has_inactive_or_new_products(order)
 
       order.status = params[:status]
@@ -134,12 +139,12 @@ module OrderConcern
     def order_has_inactive_or_new_products(order)
       return false unless order.has_inactive_or_new_products && params[:status].in?(%w(awaiting scanned))
       # Put on hold if order status not in serviceissue
-      unless order.status.eql?('serviceissue')
+      if params[:status].eql? 'awaiting'
         order.status = 'onhold'
         order.save
       end
 
-      @result['notice_messages'][0] = 'One or more of the selected orders contains'\
+      @result['notice_messages'].push 'One or more of the selected orders contains'\
           ' New or Inactive items so they can not be changed to Awaiting.'\
           ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
           'More Info</a>.'
