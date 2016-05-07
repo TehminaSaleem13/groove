@@ -170,17 +170,17 @@
               </div>
             </div>
             <div class="info col-sm-1">
-              <i class="icon-large glyphicon glyphicon-info-sign" ng-show="scan_pack.settings.intangible_setting_enabled" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intanginle_setting}}"></i>
+              <i class="icon-large glyphicon glyphicon-info-sign" ng-show="scan_pack.settings.intangible_setting_enabled" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_setting}}"></i>
             </div>
           </div>
 
           <div class="form-group" ng-show="scan_pack.settings.intangible_setting_enabled">
             <label class="control-label col-sm-3"
-                   style="padding-top: 0px;">Auto-Generate Barcode</label>
+                   style="padding-top: 0px;">Auto-Generate Barcode for Intangible Items</label>
 
             <div class="controls col-sm-2 form-inline">
               <div toggle-switch ng-model="scan_pack.settings.intangible_setting_gen_barcode_from_sku" groov-click="update_settings()"></div>
-              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="Coupon codes and other intangible items are often imported without barcodes and set to "New".  When enabled, this option will generate a barcode from the sku for any intangible items found during an order import. Enable this option of you find orders are being set to 'Action Required' due to intangible items."></i>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_setting_gen_barcode_from_sku}}"></i>
             </div>
           </div>
 
@@ -195,7 +195,7 @@
                    groov-click="update_settings()"></div>
               <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
                  ng-if="!scan_pack.settings.post_scan_pause_enabled" popover-trigger="mouseenter"
-                 groov-popover="This option should only be enabled if GroovePacker indicates the barcodes being scanned are incorrect and the incorrect value submitted would be right except that it's missing the last digit or two."></i>
+                 groov-popover="{{translations.tooltips.post_scan_pause}}"></i>
             </div>
             <div class="col-sm-4" ng-show="scan_pack.settings.post_scan_pause_enabled">
               <label class="col-sm-4 col-md-3" style="padding-top: 0px;">Seconds</label>
