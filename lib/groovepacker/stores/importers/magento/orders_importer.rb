@@ -39,7 +39,11 @@ module Groovepacker
               ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
             end
             import_item.reload
-            if import_item.status != 'cancelled'
+            if get_statuses_to_import(credential).blank?
+              result[:status] = false
+              import_item.message = 'All import statuses are disabled. Import skipped.'
+              import_item.save
+            elsif import_item.status != 'cancelled'
               credential.last_imported_at = import_time
               credential.save
             end
