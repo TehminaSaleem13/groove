@@ -63,7 +63,7 @@ module Groovepacker
             bigcommerce_order = add_customer_info(bigcommerce_order, order)
             #add order shipping address using separate method
             bigcommerce_order = add_order_shipping_address(bigcommerce_order, order)
-            
+            bigcommerce_order.notes_internal = order["staff_notes"]
             bigcommerce_order.customer_comments = order["customer_message"]
             bigcommerce_order.qty = order["items_total"]
             return bigcommerce_order
