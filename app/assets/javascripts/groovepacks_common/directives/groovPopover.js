@@ -3,7 +3,8 @@ groovepacks_directives.provider('$groovTooltip', function () {
   var defaultOptions = {
     placement: 'top',
     animation: true,
-    popupDelay: "750"
+    popupDelay: "750",
+    popupHide: "500"
   };
 
 // Default hide triggers for each show trigger
@@ -146,7 +147,7 @@ groovepacks_directives.provider('$groovTooltip', function () {
               if (override) {
                 scope.tt_timeout = $timeout(function () {
                   scope.tt_hide();
-                }, 500);
+                }, scope.tt_popupHide);
               } else {
                 scope.$apply(function () {
                   hide();
@@ -263,6 +264,11 @@ groovepacks_directives.provider('$groovTooltip', function () {
             attrs.$observe(prefix + 'PopupDelay', function (val) {
               var delay = parseInt(val, 10);
               scope.tt_popupDelay = !isNaN(delay) ? delay : options.popupDelay;
+            });
+
+            attrs.$observe(prefix + 'PopupHide', function (val) {
+              var hide = parseInt(val, 10);
+              scope.tt_popupHide = !isNaN(hide) ? hide : options.popupHide;
             });
 
             attrs.$observe('ngModel', function (val) {
