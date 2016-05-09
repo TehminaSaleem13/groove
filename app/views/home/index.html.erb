@@ -77,7 +77,7 @@
                   Import Orders<br/>
                 </a>
                 <p style="margin-bottom:0;">
-                  <a href="" ng-click='import_all_orders()' ng-show="import_summary.import_info.status !='in_progress'" style="padding:0;" groov-popover="test description" popover-title="test title" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10">
+                  <a href="" ng-click='import_all_orders()' ng-show="import_summary.import_info.status !='in_progress'" style="padding:0;" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10">
                     <img class="icons" src="/assets/images/cloud.png">
                   </a>
                 </p>
@@ -86,7 +86,7 @@
                   Cancel Import<br/>                  
                 </a>
                 <p style="margin-bottom:0;">
-                  <a href="" ng-click='cancel_import()' ng-show="import_summary.import_info.status =='in_progress'" style="padding:0;" groov-popover="test description" popover-title="test title" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10">
+                  <a href="" ng-click='cancel_import()' ng-show="import_summary.import_info.status =='in_progress'" style="padding:0;" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10">
                     <img class="icons" src="/assets/images/cloud.png">
                   </a>
                 </p>
