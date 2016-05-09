@@ -58,7 +58,7 @@
                       tooltip-placement='{{set_position(row, rows)}}'
                       class="grid-text">
                 </span>
-                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
+                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length <= 25"
                       bo-text="row[field] | cut:false:(25*options.no_of_lines)" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"
