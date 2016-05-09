@@ -72,15 +72,15 @@
               </li>-->
 
               <!-- <li class="nav-li" ng-mouseenter="update_popup_display_setting(true);" ng-mouseleave="update_popup_display_setting(false);" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom"> -->
-              <li class="nav-li" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom">
+              <li class="nav-li">
                 <a href="" ng-click='import_all_orders()' ng-show="import_summary.import_info.status !='in_progress'">
                   Import Orders<br/>
-                  <img class="icons" src="/assets/images/cloud.png">
+                  <img class="icons" src="/assets/images/cloud.png" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0">
                 </a>
                 <a href="" ng-click='cancel_import()' ng-show="import_summary.import_info.status =='in_progress'">
                   <i class="glyphicon glyphicon-refresh groov-refresh-spin"></i>
                   Cancel Import<br/>
-                  <img class="icons" src="/assets/images/cloud.png">
+                  <img class="icons" src="/assets/images/cloud.png" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0">
                 </a>
                 <span class="place_select">
                   <div class="popover left fade in deep_import_popup" style="position: fixed; display: none; width: 125px; max-width: 125px; min-width: 125px;">

@@ -185,7 +185,7 @@ groovepacks_controllers.
               $scope.import_groov_popover.data.push(single_data);
             }
           }
-          $scope.popover_summary_content =
+          $scope.import_groov_popover.content = 
             '<table style="font-size: 12px;width:100%;">' +
               '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
                 '<td width="60px;" style="white-space: nowrap;">' +
@@ -232,17 +232,6 @@ groovepacks_controllers.
                 '</td>' +
               '</tr>' +
             '</table>';
-
-          if ($(".nav-li.ng-scope").is(":hover")){
-            $scope.import_groov_popover.content = $scope.popover_summary_content;
-          }
-          if ($(".popover.bottom.fade.in").length>0){
-            $scope.import_groov_popover.content = $scope.popover_summary_content;
-          }
-          if($scope.add_popup_summary_on_load) {
-            $scope.import_groov_popover.content = $scope.popover_summary_content;
-            $scope.add_popup_summary_on_load = false;
-          }
         }
       });
 
