@@ -221,7 +221,16 @@
           <label class="control-label col-md-3"></label>
           <div class="controls col-md-9">
             <!--Connection message will display here on clicking 'Check Connection'-->
-            {{stores.single.message}}
+            <span ng-if="stores.single.message=='API not responding'">
+              <p style="margin-top: 10px;">
+                The REST API of the Magento store provided is not responding as expected. Please visit the URL below in your browser. When the API responds properly you should receive an XML page with a 403 response.
+                <br/><br/>
+                TEST URL: <a href="{{stores.single.host}}/api/rest/orders" target="_blank">{{stores.single.host}}/api/rest/orders</a>
+              </p>
+            </span>
+            <span ng-if="stores.single.message!='API not responding'">
+              {{stores.single.message}}
+            </span>
           </div>
         </div>
       </div>
