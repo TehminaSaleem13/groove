@@ -22,7 +22,7 @@
               <span class="caret"></span>
             </button>
             <ul class="dropdown-menu" role="menu">
-              
+
 
               <li ng-if="stores.single.store_version=='2.x' && !!stores.single.access_token">
                 <a class="dropdown-toggle" confirm-click="Are you sure? This action will delete the access_token for current store version." ng-click="change_magento_store_version('1.x')">1.x</a>
@@ -30,7 +30,7 @@
               <li ng-if="stores.single.store_version!='2.x' || !stores.single.access_token">
                 <a class="dropdown-toggle" ng-click="change_magento_store_version('1.x')">1.x</a>
               </li>
-              
+
               <li ng-if="stores.single.store_version=='1.x' && !!stores.single.access_token">
                 <a class="dropdown-toggle" confirm-click="Are you sure? This action will delete the access_token for current store version." ng-click="change_magento_store_version('2.x')">2.x</a>
               </li>
@@ -43,7 +43,7 @@
           </div>
         </div>
       </div>
-      
+
       <div ng-show="stores.single.store_version=='1.x'">
         <div class="form-group">
     			<label class="control-label col-md-3">Store Admin URL</label>
@@ -78,14 +78,14 @@
           </div>
         </div>
 
-        
+
         <div ng-if="!stores.single.access_token">
           <div class="form-group">
-            <label class="control-label col-md-3">Oauth Varifier</label>
+            <label class="control-label col-md-3">Oauth Verifier</label>
 
             <div class="controls col-md-9">
-              <input name="oauthvarifier" ng-model="stores.single.oauth_varifier" class="form-control input-style" type="text" value="" placeholder="Oauth Varifier" required/>
-              <span>You will get 'Oauth Varifier' on 'Aurthorization'. Provide it here to get access to store.</span>
+              <input name="oauthvarifier" ng-model="stores.single.oauth_varifier" class="form-control input-style" type="text" value="" placeholder="Oauth Verifier" required/>
+              <span>You will get 'Oauth Verifier' on 'Aurthorization'. Provide it here to get access to store.</span>
             </div>
           </div>
           <div class="form-group">
@@ -149,7 +149,7 @@
               </p>
 
               <p class="list-group-item-text">
-                Redirect URL: 
+                Redirect URL:
                 <strong ng-show="edit_status">{{stores.host_url}}/magento_rest/redirect?store_token={{stores.single.store_token}}</strong>
               </p>
               <p class="list-group-item-text" ng-show="edit_status">
@@ -190,7 +190,7 @@
               <p class="list-group-item-text">
                 You can verify the connection in GroovePacker by clicking the Save & Close button at the bottom of this window. Re-open the new store by clicking it in the stores list and click the "Check Connection" button.
             </li>
-            
+
           </ol>
         </div>
       </div>
