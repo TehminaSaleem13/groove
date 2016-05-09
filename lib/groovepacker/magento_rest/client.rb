@@ -133,7 +133,7 @@ module Groovepacker
         def filter_resp_orders_for_last_imported_at(response, last_import, credential)
           orders_to_return = {}
           if response.code==404 && response["messages"].blank?
-            response = {"messages"=>{"error"=>[{"code"=>404, "message"=>"Connection Failed, click <a href='#/settings/stores/#{credential.store_id}'>here</a> for more info"}]}}
+            response = {"messages"=>{"error"=>[{"code"=>404, "message"=>"Connection Failed, Please check store settings for more info"}]}}
           end
           return response if response["messages"].present?
           return orders_to_return if response.blank?
