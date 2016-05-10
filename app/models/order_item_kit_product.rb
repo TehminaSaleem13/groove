@@ -14,8 +14,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
   def process_item(clicked, username, typein_count=1)
-    total_qty = calculate_total_item
-    total_product_kit_skus = total_qty * self.product_kit_skus.qty
+    total_product_kit_skus = calculate_total_product_kit_skus
     if self.scanned_qty < total_product_kit_skus
       self.scanned_qty += typein_count
       set_clicked_qty(clicked, username, typein_count)
@@ -43,12 +42,14 @@ class OrderItemKitProduct < ActiveRecord::Base
 
   private
 
-  def calculate_total_item
+  def calculate_total_product_kit_skus
+    total_qty = 0
     if self.order_item.product.kit_parsing == 'depends'
-      self.order_item.kit_split_qty
+      total_qty = self.order_item.kit_split_qty
     else
-      self.order_item.qty
+      total_qty = self.order_item.qty
     end
+    total_qty * self.product_kit_skus.qty
   end
 
   def set_clicked_qty(clicked, username, typein_count)
@@ -68,29 +69,36 @@ class OrderItemKitProduct < ActiveRecord::Base
   end
 
   def calculate_scan_time(typein_count, username)
-    scan_time = self.order_item_kit_product_scan_times.create(
-      scan_start: self.order_item.order.last_suggested_at,
-      scan_end: DateTime.now)
+    scan_time_per_item = calc_scan_time_for_first_item
     total_scan_time_for_order = self.order_item.order.total_scan_time
-    scan_duration_per_item = (scan_time.scan_end - scan_time.scan_start).to_i
+    
     if typein_count > 0
       avg_time = avg_time_per_item(username)
       if avg_time
         total_scan_time_for_order += (avg_time * typein_count).to_i
       else
-        total_scan_time_for_order += scan_duration_per_item * typein_count
+        total_scan_time_for_order += scan_time_per_item * typein_count
       end
     else
-      total_scan_time_for_order += scan_duration_per_item
+      total_scan_time_for_order += scan_time_per_item
     end
     self.order_item.order.total_scan_time = total_scan_time_for_order
   end
 
+  def calc_scan_time_for_first_item
+    scan_time = self.order_item_kit_product_scan_times.create(
+      scan_start: self.order_item.order.last_suggested_at,
+      scan_end: DateTime.now)
+    (scan_time.scan_end - scan_time.scan_start).to_i
+  end
+
   def set_min_value
-    product_kit_skus_qty = self.order_item.order_item_kit_products.first.product_kit_skus.qty
+    order_item_kit_products = self.order_item.order_item_kit_products
+    order_item_kit_product = order_item_kit_products.first
+    product_kit_skus_qty = order_item_kit_product.product_kit_skus.qty
     min = 0
-    min = self.order_item.order_item_kit_products.first.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
-    self.order_item.order_item_kit_products.each do |kit_product|
+    min = order_item_kit_product.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
+    order_item_kit_products.each do |kit_product|
       kit_product.reload
       temp = kit_product.scanned_qty / kit_product.product_kit_skus.qty
       min = temp if (temp) < min
