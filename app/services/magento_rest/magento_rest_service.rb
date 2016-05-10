@@ -13,24 +13,17 @@ module MagentoRest
       
       begin
         response = check_availability
-        err_msg = response["messages"]["error"].first["message"] rescue nil
-        if err_msg
-          return { status: false, message: err_msg }
-        elsif response && (response["messages"].try(:class)==String || response["message"].try(:class)==String)
-          return {status: false, message: response["messages"] || response["message"]}
-        end
-        return {status: true, message: "Connection tested successfully"}
+        return get_connection_message(response)
       rescue Exception => ex
         return {status: false, message: ex}
       end
-      
     end
 
     private
       def check_availability
         response = magento_rest_client.check_connection
         if response.code==404 && response["messages"].blank?
-          response = {"messages"=>{"error"=>[{"code"=>404, "message"=>"API not responding"}]}}
+          return default_404_response
         end
         parsed_json = JSON.parse(response) rescue response
       end
@@ -41,6 +34,28 @@ module MagentoRest
         else
           return Groovepacker::MagentoRest::Client.new(@credential)
         end
+      end
+      
+      def default_404_response
+        response = {}
+        response["messages"] = {"error"=>[
+                                           {
+                                             "code"=>404,
+                                             "message"=>"API not responding"
+                                           }
+                                         ]
+                                       }
+        return response
+      end
+      
+      def get_connection_message(response)
+        err_msg = response["messages"]["error"].first["message"] rescue nil
+        if err_msg
+          return { status: false, message: err_msg }
+        elsif response && (response["messages"].try(:class)==String || response["message"].try(:class)==String)
+          return {status: false, message: response["messages"] || response["message"]}
+        end
+        return {status: true, message: "Connection tested successfully"}
       end
   end
 end
