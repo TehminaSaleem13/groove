@@ -32,6 +32,10 @@ class Order < ActiveRecord::Base
   UNALLOCATE_STATUSES = ['cancelled']
   SOLD_STATUSES = ['scanned']
 
+  def customer_name
+    [firstname, lastname].join(' ')
+  end
+
   def has_store_and_warehouse?
     !self.store.nil? && self.store.ensure_warehouse?
   end
@@ -707,7 +711,7 @@ class Order < ActiveRecord::Base
   def self.duplicate_selected_orders(orders, current_user, result)
     orders.each do |order|
       neworder = order.duplicate_single_order(current_user, result)
-      
+
       unless neworder.persisted?
         result['status'] = false
         result['error_messages'] = neworder.errors.full_messages

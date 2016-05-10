@@ -1,6 +1,6 @@
 class ImportOrders < Groovepacker::Utilities::Base
   include Connection
-  
+
   def import_orders(tenant)
     Apartment::Tenant.switch(tenant)
     # we will remove all the jobs pertaining to import which are not started
@@ -147,7 +147,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       update_import_item_and_send_mail(e, import_item, tenant)
     end
   end
-  
+
   def initiate_csv_import(tenant, store_type, store, import_item)
     mapping = CsvMapping.find_by_store_id(store.id)
     return unless check_connection_for_csv_import(mapping, store, import_item)
@@ -172,7 +172,7 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   def update_status(import_item, result)
     return if import_item.status == 'cancelled'
-    status = result[:status] ? 'completed' : 'failed' 
+    status = result[:status] ? 'completed' : 'failed'
     import_item.update_attributes(status: status)
   end
 

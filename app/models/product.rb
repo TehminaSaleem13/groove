@@ -437,7 +437,7 @@ class Product < ActiveRecord::Base
 
   def create_or_update_productkitsku(kit_product)
     actual_product = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product["option_product_id"], self.id)
-    return unless actual_product  
+    return unless actual_product
     actual_product.qty = kit_product["qty"]
     actual_product.packing_order = kit_product["packing_order"]
     actual_product.save
@@ -456,7 +456,7 @@ class Product < ActiveRecord::Base
 
   def create_or_update_productbarcode(barcode, order, status=nil)
     product_barcode = status=='new' ? ProductBarcode.new : ProductBarcode.find(barcode["id"])
-    
+
     product_barcode.barcode = barcode["barcode"]
     product_barcode.product_id = self.id unless product_barcode.persisted?
     product_barcode.order = order
@@ -471,7 +471,81 @@ class Product < ActiveRecord::Base
     intangible_string = scan_pack_setting.intangible_string
     action_intangible.delay(:run_at => 1.seconds.from_now).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
     # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
-  end    
+  end
+
+  def self.create_new_product(result, current_user)
+    if current_user.can?('add_edit_products')
+      product = Product.new
+      product.name = "New Product"
+      product.store_id = Store.where(:store_type => 'system').first.id
+      product.save
+      product.store_product_id = product.id
+      product.save
+      result['product'] = product
+    else
+      result['status'] = false
+      result['messages'].push('You do not have enough permissions to create a product')
+    end
+    return result
+  end
+
+  def self.get_count(params)
+    is_kit = 0
+    supported_kit_params = ['0', '1', '-1']
+    is_kit = params[:is_kit] if supported_kit_params.include?(params[:is_kit])
+    conditions = {:status => ['active', 'inactive', 'new']}
+    conditions[:is_kit] = is_kit.to_s unless is_kit == '-1'
+    counts = Product.select('status,count(*) as count').where(conditions).group(:status)
+    return counts
+  end
+
+  def generate_barcode(result)
+    if product_barcodes.blank?
+      sku = product_skus.first
+      unless sku.nil?
+        barcode = product_barcodes.new
+        barcode.barcode = sku.sku
+        unless barcode.save
+          result['status'] &= false
+          result['messages'].push(barcode.errors.full_messages)
+        end
+      end
+    end
+    update_product_status
+    return result
+  end
+
+  def generate_barcode_from_sku(sku)
+    barcode = product_barcodes.new(:barcode => sku.sku)
+    barcode.save
+    return barcode
+  end
+
+  def add_new_image(params)
+    image = self.product_images.build
+    #image_directory = "public/images"
+    current_tenant = Apartment::Tenant.current
+    file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image].original_filename
+    GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
+    #path = File.join(image_directory, file_name )
+    #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+    image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
+    image.caption = params[:caption]  unless params[:caption].blank?
+    response = image.save ? true : false
+    return response
+  end
+
+  def self.update_product_list(params, result)
+    product = Product.find_by_id(params[:id])
+    if product.nil?
+      result = result.merge({'status' => false, 'error_msg' => "Cannot find Product"})
+    else
+      response = product.updatelist(product, params[:var], params[:value])
+      errors = response.errors.full_messages rescue nil
+      result = result.merge({'status' => false, 'error_msg' => errors}) if errors
+    end
+    return result
+  end
 
   def gen_barcode_from_sku_if_intangible
     return unless self.is_intangible

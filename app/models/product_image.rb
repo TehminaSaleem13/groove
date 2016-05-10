@@ -11,10 +11,15 @@ class ProductImage < ActiveRecord::Base
   end
 
   def self.update_image(params)
-    image = ProductImage.find(params[:image][:id])
-    image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
-    image.image_note = params[:image][:image_note]
-    image.save
+    begin
+      image = ProductImage.find(params[:image][:id])
+      image.added_to_receiving_instructions = params[:image][:added_to_receiving_instructions]
+      image.image_note = params[:image][:image_note]
+      return_val = image.save ? true : false
+      return return_val
+    rescue
+      return false
+    end
   end
 
 end

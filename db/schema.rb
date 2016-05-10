@@ -886,19 +886,6 @@ ActiveRecord::Schema.define(:version => 20160505091411) do
     t.string   "teapplix_product_sku"
   end
 
-  create_table "teapplix_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "account_name"
-    t.string   "username"
-    t.string   "password"
-    t.boolean  "import_shipped",       :default => false
-    t.boolean  "import_open_orders",   :default => false
-    t.datetime "last_imported_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.boolean  "gen_barcode_from_sku", :default => false
-  end
-
   create_table "tenants", :force => true do |t|
     t.string   "name"
     t.datetime "created_at",          :null => false
@@ -950,7 +937,6 @@ ActiveRecord::Schema.define(:version => 20160505091411) do
     t.boolean  "view_dashboard",         :default => false
     t.boolean  "is_deleted",             :default => false
   end
-
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"
