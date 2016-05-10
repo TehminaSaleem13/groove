@@ -17,6 +17,7 @@ module Groovepacker
               teapplix_product = get_reformatted_json(teapplix_product)
               @result[:total_imported] = @result[:total_imported] + 1
               teapplix_product[:item_title] = teapplix_product[:sku] if teapplix_product[:item_title].blank?
+              teapplix_product = teapplix_product.stringify_keys
               create_single_product(teapplix_product) rescue nil
             end
             send_products_import_complete_email(import_products_count)
