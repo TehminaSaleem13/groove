@@ -123,7 +123,7 @@ module ProductsService
     def find_other_skus_barcodes(item, title, attribute)
       collection = item.send("product_#{attribute}s")
       index = title.gsub(/[^\d]/, '').to_i
-      collection.length > 1 ? collection[index - 1].send(attribute) : ''
+      collection.length > 1 ? collection[index - 2].send(attribute) : ''
     end
 
     def do_if_bulk_action
