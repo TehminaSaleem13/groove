@@ -1,7 +1,7 @@
 module Groovepacker
   module PackingSlip
     class PdfMerger
-      def merge(result, file_name)
+      def merge(result, orientation, size, file_name)
         packing_slip_file_paths = result['data']['packing_slip_file_paths']
         if packing_slip_file_paths.any?
           input = result['data']['destination']
