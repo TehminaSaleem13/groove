@@ -52,7 +52,12 @@ module Groovepacker
         page_index = 1
         while page_index
           puts "=======================Fetching page #{page_index}======================="
-          filters = {"page" => "#{page_index}", "limit" => "100", "order" => "entity_id", "dir" => "dsc"}
+          filters = {
+                      "filter%5B0%5D%5Battribute%5D" => "status",
+                      "filter%5B0%5D%5Bin%5D%5B0%5D" => "1",
+                      "page" => "#{page_index}", "limit" => "100", "order" => "entity_id", "dir" => "dsc"
+                    }
+          #filters = {"page" => "#{page_index}", "limit" => "100", "order" => "entity_id", "dir" => "dsc", "status" => "1"}
           response = fetch(method, uri, parameters, filters)
           products = products.merge(response)
           response_length = response.length rescue 0

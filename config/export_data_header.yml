@@ -1,0 +1,23 @@
+---
+:order_date: order_date
+:order_number: order_number
+:scan_order: scan_order
+:barcode_with_lot: barcode_with_lot
+:barcode: barcode
+:lot_number: lot_number
+:primary_sku: primary_sku
+:part_sku: part_sku
+:serial_number: serial_number
+:product_name: product_name
+:packing_user: packing_user
+:order_item_count: order_item_count
+:scanned_date: scanned_date
+:warehouse_name: warehouse_name
+:item_sale_price: item_sale_price
+:kit_name: kit_name
+:customer_name: customer_name
+:address1: address1
+:address2: address2
+:city: city
+:state: state
+:zip: zip
