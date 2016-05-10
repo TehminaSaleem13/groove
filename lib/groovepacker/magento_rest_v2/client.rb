@@ -33,7 +33,7 @@ module Groovepacker
             break
           end
           mg_response = {"items"=>[]} if previous_response == mg_response["items"]
-          orders = orders.push(mg_response["items"]).flatten
+          orders = orders.push(mg_response["items"]||[]).flatten
           response_length = mg_response["items"].length rescue 0
           previous_response = mg_response["items"]
           break if response_length<100

@@ -28,13 +28,19 @@ module MagentoRest
 
     private
       def check_availability
-        if @credential.store_version=='2.x'
-					client = Groovepacker::MagentoRestV2::Client.new(@credential)
-				else
-					client = Groovepacker::MagentoRest::Client.new(@credential)
-				end
-        response = client.check_connection
+        response = magento_rest_client.check_connection
+        if response.code==404 && response["messages"].blank?
+          response = {"messages"=>{"error"=>[{"code"=>404, "message"=>"API not responding"}]}}
+        end
         parsed_json = JSON.parse(response) rescue response
+      end
+
+      def magento_rest_client
+        if @credential.store_version=='2.x'
+          return Groovepacker::MagentoRestV2::Client.new(@credential)
+        else
+          return Groovepacker::MagentoRest::Client.new(@credential)
+        end
       end
   end
 end

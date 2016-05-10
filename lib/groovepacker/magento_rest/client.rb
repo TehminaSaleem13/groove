@@ -19,7 +19,7 @@ module Groovepacker
           puts "=======================Fetching page #{page_index}======================="
           filters = {"page" => "#{page_index}", "limit" => "10", "order" => "created_at", "dir" => "dsc"}
           response = fetch(method, uri, parameters, filters)
-          response = filter_resp_orders_for_last_imported_at(response, last_import)
+          response = filter_resp_orders_for_last_imported_at(response, last_import, credential)
           
           orders = orders.merge(response)
           response_length = response.length rescue 0
@@ -130,10 +130,13 @@ module Groovepacker
           response = request_update_data(header_string, uri, method, data)
         end
 
-        def filter_resp_orders_for_last_imported_at(response, last_import)
+        def filter_resp_orders_for_last_imported_at(response, last_import, credential)
           orders_to_return = {}
+          if response.code==404 && response["messages"].blank?
+            response = {"messages"=>{"error"=>[{"code"=>404, "message"=>"Connection Failed, Please check store settings for more info"}]}}
+          end
           return response if response["messages"].present?
-
+          return orders_to_return if response.blank?
           response.each { |key, value| orders_to_return[key] = value if value["created_at"].to_datetime > last_import }
           return orders_to_return
         end
