@@ -43,7 +43,7 @@ class GeneratePackingSlipPdf
         result['data']['merged_packing_slip_url'] = '/pdfs/'+ file_name + '_packing_slip.pdf'
 
         #merge the packing-slips
-        packing_slip_obj.merge(result, orientation, size, file_name)
+        packing_slip_obj.merge(result, file_name)
         base_file_name = File.basename(result['data']['destination'])
         pdf_file = File.open(result['data']['destination'], 'rb')
         GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
