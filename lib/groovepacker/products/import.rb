@@ -1,19 +1,11 @@
 module Groovepacker
   module Products
-    class Import
+    class Import < Groovepacker::Products::Base
       include ProductsHelper
       require 'csv'
 
-      def initialize(attrs={})
-        @result = attrs[:result]
-        @params = attrs[:params]
-        @current_user = attrs[:current_user]
-        @store = attrs[:store]
-      end
-
       def import_products
-      	current_tenant = Apartment::Tenant.current
-    
+        current_tenant = Apartment::Tenant.current
         unless @current_user.can?('import_products')
           @result['status'] = false
           @result['messages'].push('You can not import products')
@@ -21,7 +13,7 @@ module Groovepacker
         end
         init_import(current_tenant)
         
-      	return @result
+        return @result
       end
 
       private
@@ -30,11 +22,7 @@ module Groovepacker
           begin
             #import if magento products
             if @store.store_type != 'Amazon'
-              context = Groovepacker::Stores::Context.new(get_handler)
-              import_orders_obj = ImportOrders.new
-              import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
-              context.delay(:run_at => 1.seconds.from_now).import_products
-              #context.import_products
+              run_import_for_other_than_amazon(current_tenant)
             else
               run_import_for_amazon
             end
@@ -42,6 +30,14 @@ module Groovepacker
             @result['status'] = false
             @result['messages'].push(e.message)
           end
+        end
+
+        def run_import_for_other_than_amazon(current_tenant)
+          context = Groovepacker::Stores::Context.new(get_handler)
+          import_orders_obj = ImportOrders.new
+          import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
+          context.delay(:run_at => 1.seconds.from_now).import_products
+          #context.import_products
         end
 
         def get_handler
@@ -67,7 +63,7 @@ module Groovepacker
           return handler
         end
 
-      	def run_import_for_amazon
+        def run_import_for_amazon
           # @credential = AmazonCredentials.find_by_store_id(@store.id)
           # return if @credential.blank?
           
