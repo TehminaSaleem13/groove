@@ -10,11 +10,7 @@ module Groovepacker
           `pdftk #{packing_slip_file_paths.join(' ')} cat output #{input.to_s}`
 
           raise "Problem combining PDF files" unless $?.success?
-
           rearrange_pdfs(result, file_name, input) if size == '8.5 x 11' && orientation == 'landscape'
-
-          #delete the perviously generated merged pdf
-          File.delete(input)
         end
       end
 
@@ -24,6 +20,8 @@ module Groovepacker
 
         #render the merged pdf into a separate pdf as two packing_slips per page
         `pdfjam --nup 2x1 #{input} --outfile #{result['data']['destination'].to_s} --papersize '{11in,8.5in}'`
+        #delete the perviously generated merged pdf
+        File.delete(input)
       end
     end
   end
