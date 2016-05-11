@@ -15,8 +15,10 @@ module ProductsService
       set_data_mapping
       csv << headers
       products.each do |item|
-        @bulk_action.reload
-        return true if bulk_action_cancelled?
+        if @bulk_action
+          @bulk_action.reload
+          return true if bulk_action_cancelled?
+        end
         csv << process_data(item)
       end
       csv
@@ -72,13 +74,13 @@ module ProductsService
           'Barcode 1' => 'primary_barcode',
           'Primary Image' => 'primary_image',
           'Weight' => 'weight',
-          'Primary Category' => 'primary_category',
+          'Primary Category' => 'primary_category'
         },
         'item_other_skus_barcodes' => {
           'SKU 2' => 'sku',
           'SKU 3' => 'sku',
           'Barcode 2' => 'barcode',
-          'Barcode 3' => 'barcode',
+          'Barcode 3' => 'barcode'
         },
         'inventory_wh' => {
           'BinLocation 1' => 'location_primary',
