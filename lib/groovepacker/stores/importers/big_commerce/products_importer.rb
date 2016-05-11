@@ -12,10 +12,7 @@ module Groovepacker
             
             import_products_count = response["products"].nil? ? 0 : response["products"].length
             send_products_import_email(import_products_count) if import_products_count>20000
-            response["products"].each do |bc_product|
-              @result[:total_imported] = @result[:total_imported] + 1
-              create_single_product(bc_product) rescue nil
-            end
+            iterate_product_response_array(response)
             send_products_import_complete_email(import_products_count)
             @result
           end
@@ -27,6 +24,33 @@ module Groovepacker
           end
 
           private
+            def iterate_product_response_array(response)
+              response["products"].each do |bc_product|
+                skus = @client.product_skus(bc_product["skus"]["url"])
+                if skus
+                  create_single_product_from_product_sku(bc_product, skus) rescue nil
+                  next
+                end
+                @result[:total_imported] = @result[:total_imported] + 1
+                create_single_product(bc_product) rescue nil
+              end
+            end
+
+            def create_single_product_from_product_sku(bc_product, skus)
+              skus.each do |bc_sku_product|
+                @result[:total_imported] = @result[:total_imported] + 1
+                bc_sku_product = update_product_attrs_for_product_sku(bc_product, bc_sku_product)
+                create_single_product(bc_sku_product)
+              end
+            end
+
+            def update_product_attrs_for_product_sku(bc_product, bc_sku_product)
+              bc_sku_product.delete("weight") if bc_sku_product["weight"].blank?
+              bc_sku_product.each {|key, val| bc_product[key] = val}
+              bc_product["primary_image"]["standard_url"] = bc_sku_product["image_file"] unless bc_sku_product["image_file"].blank?
+              bc_product
+            end
+
             def initialize_objects
               handler = self.get_handler
               @credential = handler[:credential]
@@ -92,7 +116,7 @@ module Groovepacker
                 get_product_categories(product, bc_product)
                 
                 #Product skus are variants in BigCommerce
-                create_barcodes_and_images_from_variants(product, bc_product, sku)
+                #create_barcodes_and_images_from_variants(product, bc_product, sku)
                 
                 # if product images are empty then import product image
                 import_pimary_image(product, bc_product)
@@ -111,11 +135,14 @@ module Groovepacker
             def get_product_categories(product, bc_product)
               return if bc_product["categories"].blank?
               tags = []
-              categories = @client.product_categories("https://api.bigcommerce.com/#{@client.as_json["store_hash"]}/v2/categories")
-              categories.select {|cat| tags << cat["name"] if bc_product["categories"].include?(cat["id"])}
+              product_categories.select {|cat| tags << cat["name"] if bc_product["categories"].include?(cat["id"])}
               tags.each do |tag|
                 product.product_cats.create(category: tag)
               end
+            end
+
+            def product_categories
+              @categories ||= @client.product_categories("https://api.bigcommerce.com/#{@client.as_json["store_hash"]}/v2/categories")
             end
 
             def create_barcodes_and_images_from_variants(product, bc_product, sku)
