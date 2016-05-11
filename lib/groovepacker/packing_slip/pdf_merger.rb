@@ -11,14 +11,14 @@ module Groovepacker
 
           raise "Problem combining PDF files" unless $?.success?
 
-          rearrange_pdfs(result, file_name) if size == '8.5 x 11' && orientation == 'landscape'
+          rearrange_pdfs(result, file_name, input) if size == '8.5 x 11' && orientation == 'landscape'
 
           #delete the perviously generated merged pdf
           File.delete(input)
         end
       end
 
-      def rearrange_pdfs(result, file_name)
+      def rearrange_pdfs(result, file_name, input)
         result['data']['destination'] = Rails.root.join('public', 'pdfs', "#{file_name}_packing_slip_landscape.pdf")
         result['data']['merged_packing_slip_url'] = '/pdfs/'+ file_name + '_packing_slip_landscape.pdf'
 
