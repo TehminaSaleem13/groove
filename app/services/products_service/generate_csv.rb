@@ -15,6 +15,8 @@ module ProductsService
       set_data_mapping
       csv << headers
       products.each do |item|
+        @bulk_action.reload
+        return true if bulk_action_cancelled?
         csv << process_data(item)
       end
       csv
@@ -130,6 +132,16 @@ module ProductsService
       return unless @bulk_action
       @bulk_action.completed += 1
       @bulk_action.save
+    end
+
+    def bulk_action_cancelled?
+      result = false
+      if @bulk_action.cancel == true
+        @bulk_action.status = 'cancelled'
+        @bulk_action.save
+        result = true
+      end
+      result
     end
   end
 end
