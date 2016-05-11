@@ -1,5 +1,5 @@
 module ProductsService
-  class ListSelectedProducts < ProductsService::ServiceInit
+  class ListSelectedProducts < ProductsService::Base
     include ProductsHelper
 
     attr_accessor :params

@@ -1,5 +1,5 @@
 module ProductsService
-  class GenerateCSV < ProductsService::ServiceInit
+  class GenerateCSV < ProductsService::Base
     attr_accessor :products, :csv, :bulk_actions_id, :headers
 
     def initialize(*args)
