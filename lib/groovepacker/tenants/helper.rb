@@ -159,7 +159,7 @@ module Groovepacker
               users.first.destroy unless users.first.nil?
             end
             subscription = tenant.subscription if tenant.subscription
-            CreateTenant.apply_restrictions(subscription.subscription_plan_id) unless subscription.nil?
+            CreateTenant.new.apply_restrictions_and_seed(subscription)
           end
         rescue Exception => e
           result['status'] = false
