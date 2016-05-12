@@ -35,7 +35,6 @@ module Groovepacker
           def import_single_order(order)
             #Delete if order exists and is not scanned so modified order can be saved with new changes
             return unless delete_order_if_exists(order)
-
             #create new order
             teapplix_order = Order.new(store_id: @credential.store_id)
             teapplix_order = import_order(teapplix_order, order)
@@ -73,8 +72,8 @@ module Groovepacker
             
             #order["products"] = @client.order_products(order["products"]["url"])
             @import_item.update_attributes(:current_order_items => order["items"].length, :current_order_imported_item => 0 )
-
             (order["items"]||[]).each do |item|
+              next if item["quantity"].to_i<1
               order_item = OrderItem.new
               import_order_item(order_item, item)
               @import_item.current_order_imported_item += 1
