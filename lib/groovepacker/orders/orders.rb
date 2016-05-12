@@ -10,6 +10,8 @@ module Groovepacker
 
         if @params[:var] == 'status'
           order.status = @params[:value]
+        elsif @params[:var] == 'ordernum'
+          order.increment_id = @params[:value]
         elsif @params[:var] == 'notes' && @current_user.can?('create_edit_notes')
           order.notes_internal = @params[:value]
         elsif order.status != 'scanned'

@@ -100,7 +100,7 @@ module Groovepacker
 
         def accepted_data
           return {
-            #"ordernum" => "increment_id",
+            "ordernum" => "increment_id",
             "order_date" => "order_placed_time",
             "recipient" => 1,
             "notes" => "notes_internal",
