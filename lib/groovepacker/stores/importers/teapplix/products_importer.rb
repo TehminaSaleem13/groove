@@ -21,7 +21,7 @@ module Groovepacker
           def import_teapplix_single_product(teapplix_product)
             initialize_objects
             @bulk_import = false
-            teapplix_product["item_title"] = teapplix_product.delete("item_name")
+            teapplix_product["item_title"] = teapplix_product.delete("item_name") || "Product Created by Teapplix Import"
             teapplix_product["sku"] = teapplix_product.delete("item_sku")
             product = create_single_product(teapplix_product)
             return product
@@ -69,7 +69,7 @@ module Groovepacker
             end
 
             def add_sku_for_existing_product(teapplix_product, products)
-              product contains_temp_skus(products) ? get_product_with_temp_skus(products) : 
+              product = contains_temp_skus(products) ? get_product_with_temp_skus(products) : 
                                                     create_new_product(teapplix_product, ProductSku.get_temp_sku)
               return product
             end
