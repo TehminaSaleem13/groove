@@ -1,6 +1,7 @@
 module SettingsService
   class Restore < SettingsService::Base
-    attr_reader :current_user, :params, :products_to_check_later
+    attr_reader :current_user, :params, :products_to_check_later,
+                :result
 
     def initialize(current_user: nil, params: nil)
       @current_user = current_user
@@ -43,6 +44,7 @@ module SettingsService
         zipfile.each do |file|
           # Remove .csv extension to check if we have mapping defined for it
           current_mapping = file.name.chomp('.csv')
+
           next unless mapping.key?(current_mapping)
           # Parse the file by it's data
           parse_csv_file(file, zipfile, mapping, default_warehouse_map, current_mapping)
@@ -88,7 +90,7 @@ module SettingsService
           current_mapping, mapping, csv_row, single_row, create_new
         )
 
-        single_row.save
+        #single_row.save
         if current_mapping == 'products'
           single_row.attributes = csv_row.as_json(
             only: %w(primary_sku primary_barcode primary_category primary_image)
@@ -124,7 +126,7 @@ module SettingsService
       elsif current_mapping == 'product_skus'
         { sku: csv_row['sku'].strip }
       elsif current_mapping == 'product_cats'
-        { category: csv_row['category'].strip }
+        { category: csv_row['category'].try(:strip) }
       elsif current_mapping == 'product_images'
         { image: csv_row['image'] }
       elsif current_mapping == 'product_inventory_warehouses'
@@ -136,20 +138,22 @@ module SettingsService
       current_mapping, mapping, csv_row, single_row, create_new
     )
       mapping[current_mapping][:map].each do |column|
-        if current_mapping == 'product_skus' && column[1] == 'id' && !create_new
+        column_first = column[0]
+        column_second = column[1]
+        csv_row_first_column = csv_row[column_first]
+        if current_mapping == 'product_skus' && column_second == 'id' && !create_new
           break
         end
+
         # If mapping's CSV index is present, update row
-        if csv_row[column[0]].blank?
-          if current_mapping == 'products' && column[1] == 'name'
-            single_row['name'] = 'Product from Restore'
-          end
-        elsif !(current_mapping != 'products' && column[1] == 'id')
-          if %w(barcode sku category).include? column[0]
-            single_row[column[1]] = csv_row[column[0]].strip
-          else
-            single_row[column[1]] = csv_row[column[0]]
-          end
+        if csv_row_first_column.blank?
+          do_if_first_column_blank(current_mapping, column_second, single_row)
+        elsif current_mapping == 'products' && column_second != 'id'
+          single_row[column_second] = if in_list?(column_first)
+                                        csv_row_first_column.strip
+                                      else
+                                        csv_row_first_column
+                                      end
         end
         # Add special mapping rules here. current_mapping is
         # the key of mapping variable above
@@ -158,6 +162,15 @@ module SettingsService
         # column[0] is csv_header column[1] is db_table_header
         # happy coding!
       end
+    end
+
+    def do_if_first_column_blank(current_mapping, column_second, single_row)
+      return unless current_mapping == 'products' && column_second == 'name'
+      single_row['name'] = 'Product from Restore'
+    end
+
+    def in_list?(column_first)
+      column_first.in? %w(barcode sku category)
     end
 
     def find_or_create_product_inventory(
