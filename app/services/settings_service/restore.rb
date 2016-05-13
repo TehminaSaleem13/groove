@@ -90,7 +90,8 @@ module SettingsService
           current_mapping, mapping, csv_row, single_row, create_new
         )
 
-        #single_row.save
+        single_row.save
+
         if current_mapping == 'products'
           single_row.attributes = csv_row.as_json(
             only: %w(primary_sku primary_barcode primary_category primary_image)
