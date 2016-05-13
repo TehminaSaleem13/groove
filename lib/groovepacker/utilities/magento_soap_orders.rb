@@ -43,7 +43,7 @@ class MagentoSoapOrders
     @orders.each do |order|
       begin
         update_order_status(client, session, order, credential)
-        update_order_tracking_number(client, session, order, credential)
+        update_order_tracking_number(client, session, order, credential) if credential.push_tracking_number
       rescue Exception => ex
       end
     end
