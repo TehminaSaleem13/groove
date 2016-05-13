@@ -159,6 +159,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shall_import_fraud = data.credentials.magento_credentials.shall_import_fraud;
             stores.single.enable_status_update = data.credentials.magento_credentials.enable_status_update;
             stores.single.status_to_update = data.credentials.magento_credentials.status_to_update;
+            stores.single.push_tracking_number = data.credentials.magento_credentials.push_tracking_number;
 
             stores.single.producthost = data.credentials.magento_credentials.producthost;
             stores.single.productusername = data.credentials.magento_credentials.productusername;
