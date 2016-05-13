@@ -7,12 +7,12 @@ module Groovepacker
         return combined_response if @account_name.blank? || @username.blank? || @password.blank?
         status_to_import = ""
         if @credential.import_open_orders
-          status_to_import = "&not_shipped=1"
+          status_to_import = "&start_date=#{start_date}&not_shipped=1"
         elsif @credential.import_shipped
-          status_to_import = "&shipped=1"
+          status_to_import = "&ship_date_s=#{start_date}"
         end
         return combined_response if status_to_import.blank?
-				order_url = "https://www.teapplix.com/h/#{@account_name}/ea/admin.php?User=#{@username}&Passwd=#{@password}&Action=Report&Subaction=OrderRun&combine=combine&start_date=#{start_date}"
+				order_url = "https://www.teapplix.com/h/#{@account_name}/ea/admin.php?User=#{@username}&Passwd=#{@password}&Action=Report&Subaction=OrderRun&combine=combine"
         order_url = order_url+status_to_import
         response = get(order_url, true)
         combined_response["orders"] = response
@@ -74,7 +74,7 @@ module Groovepacker
         end
 
         def get_import_start_date(credential, import_item)
-          if import_item.import_type=='regular'
+          if import_item.import_type=='deep'
             days_back_to_import = import_item.days.to_i.days rescue 4.days
             last_import =  DateTime.now - days_back_to_import
           else
