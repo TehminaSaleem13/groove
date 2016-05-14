@@ -40,10 +40,11 @@ class MagentoSoapOrders
     credential = handler[:credential]
     client = handler[:store_handle][:handle]
     session = handler[:store_handle][:session]
+    access_restrictions = AccessRestriction.last
     @orders.each do |order|
       begin
         update_order_status(client, session, order, credential)
-        update_order_tracking_number(client, session, order, credential) if credential.push_tracking_number
+        update_order_tracking_number(client, session, order, credential) if credential.push_tracking_number && access_restrictions.allow_magento_soap_tracking_no_push
       rescue Exception => ex
       end
     end
@@ -57,7 +58,7 @@ class MagentoSoapOrders
   end
 
   def update_order_tracking_number(client, session, order, credential)
-    return if return if order.store_order_id.blank?
+    return if order.store_order_id.blank?
     shipment = client.call(:sales_order_shipment_list, message: {sessionId: session, filters: get_filters(order)})
     shipment = shipment.body[:sales_order_shipment_list_response][:result][:item]
     shipment_info = find_or_create_shipment(client, session, shipment, order)
