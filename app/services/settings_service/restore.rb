@@ -50,6 +50,7 @@ module SettingsService
           parse_csv_file(file, zipfile, mapping, default_warehouse_map, current_mapping)
         end
       end
+
       products_to_check_later.each(&:update_product_status)
     end
 
@@ -93,7 +94,7 @@ module SettingsService
         single_row.save
 
         if current_mapping == 'products'
-          single_row.attributes = csv_row.as_json(
+          single_row.attributes = Hash[csv_row.as_json].as_json(
             only: %w(primary_sku primary_barcode primary_category primary_image)
           )
 
@@ -149,7 +150,7 @@ module SettingsService
         # If mapping's CSV index is present, update row
         if csv_row_first_column.blank?
           do_if_first_column_blank(current_mapping, column_second, single_row)
-        elsif current_mapping == 'products' && column_second != 'id'
+        elsif !(current_mapping != 'products' && column_second == 'id')
           single_row[column_second] = if in_list?(column_first)
                                         csv_row_first_column.strip
                                       else
