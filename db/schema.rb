@@ -11,19 +11,20 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160512094305) do
+ActiveRecord::Schema.define(:version => 20160514061953) do
 
   create_table "access_restrictions", :force => true do |t|
-    t.integer  "num_users",               :default => 0,     :null => false
-    t.integer  "num_shipments",           :default => 0,     :null => false
-    t.integer  "num_import_sources",      :default => 0,     :null => false
-    t.datetime "created_at",                                 :null => false
-    t.datetime "updated_at",                                 :null => false
-    t.integer  "total_scanned_shipments", :default => 0,     :null => false
-    t.boolean  "allow_bc_inv_push",       :default => false
-    t.boolean  "allow_mg_rest_inv_push",  :default => false
-    t.boolean  "allow_shopify_inv_push",  :default => false
-    t.boolean  "allow_teapplix_inv_push", :default => false
+    t.integer  "num_users",                           :default => 0,     :null => false
+    t.integer  "num_shipments",                       :default => 0,     :null => false
+    t.integer  "num_import_sources",                  :default => 0,     :null => false
+    t.datetime "created_at",                                             :null => false
+    t.datetime "updated_at",                                             :null => false
+    t.integer  "total_scanned_shipments",             :default => 0,     :null => false
+    t.boolean  "allow_bc_inv_push",                   :default => false
+    t.boolean  "allow_mg_rest_inv_push",              :default => false
+    t.boolean  "allow_shopify_inv_push",              :default => false
+    t.boolean  "allow_teapplix_inv_push",             :default => false
+    t.boolean  "allow_magento_soap_tracking_no_push", :default => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
@@ -797,22 +798,21 @@ ActiveRecord::Schema.define(:version => 20160512094305) do
   end
 
   create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",                                                 :null => false
-    t.string   "api_secret",                                              :null => false
+    t.string   "api_key",                                             :null => false
+    t.string   "api_secret",                                          :null => false
     t.date     "last_imported_at"
-    t.integer  "store_id",                                                :null => false
-    t.datetime "created_at",                                              :null => false
-    t.datetime "updated_at",                                              :null => false
-    t.boolean  "shall_import_awaiting_shipment",       :default => true
-    t.boolean  "shall_import_shipped",                 :default => false
-    t.boolean  "warehouse_location_update",            :default => false
-    t.boolean  "shall_import_customer_notes",          :default => false
-    t.boolean  "shall_import_internal_notes",          :default => false
-    t.integer  "regular_import_range",                 :default => 3
-    t.boolean  "gen_barcode_from_sku",                 :default => false
-    t.boolean  "shall_import_pending_fulfillment",     :default => false
+    t.integer  "store_id",                                            :null => false
+    t.datetime "created_at",                                          :null => false
+    t.datetime "updated_at",                                          :null => false
+    t.boolean  "shall_import_awaiting_shipment",   :default => true
+    t.boolean  "shall_import_shipped",             :default => false
+    t.boolean  "warehouse_location_update",        :default => false
+    t.boolean  "shall_import_customer_notes",      :default => false
+    t.boolean  "shall_import_internal_notes",      :default => false
+    t.integer  "regular_import_range",             :default => 3
+    t.boolean  "gen_barcode_from_sku",             :default => false
+    t.boolean  "shall_import_pending_fulfillment", :default => false
     t.datetime "quick_import_last_modified"
-    t.boolean  "import_notestobuyer_in_notestopacker", :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|

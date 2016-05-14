@@ -28,6 +28,7 @@ module Groovepacker
                 shipping_result['allow_mg_rest_inv_push'] = @access_restrictions[data_length-1].allow_mg_rest_inv_push
                 shipping_result['allow_shopify_inv_push'] = @access_restrictions[data_length-1].allow_shopify_inv_push
                 shipping_result['allow_teapplix_inv_push'] = @access_restrictions[data_length-1].allow_teapplix_inv_push
+                shipping_result['allow_magento_soap_tracking_no_push'] = @access_restrictions[data_length-1].allow_magento_soap_tracking_no_push
                 if avg_data
                   shipping_result['average_shipped'] = get_avg_shipped('current')
                   shipping_result['average_shipped_last'] = get_avg_shipped('last')
