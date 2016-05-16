@@ -11,19 +11,20 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160505091411) do
+ActiveRecord::Schema.define(:version => 20160514061953) do
 
   create_table "access_restrictions", :force => true do |t|
-    t.integer  "num_users",               :default => 0,     :null => false
-    t.integer  "num_shipments",           :default => 0,     :null => false
-    t.integer  "num_import_sources",      :default => 0,     :null => false
-    t.datetime "created_at",                                 :null => false
-    t.datetime "updated_at",                                 :null => false
-    t.integer  "total_scanned_shipments", :default => 0,     :null => false
-    t.boolean  "allow_bc_inv_push",       :default => false
-    t.boolean  "allow_mg_rest_inv_push",  :default => false
-    t.boolean  "allow_shopify_inv_push",  :default => false
-    t.boolean  "allow_teapplix_inv_push", :default => false
+    t.integer  "num_users",                           :default => 0,     :null => false
+    t.integer  "num_shipments",                       :default => 0,     :null => false
+    t.integer  "num_import_sources",                  :default => 0,     :null => false
+    t.datetime "created_at",                                             :null => false
+    t.datetime "updated_at",                                             :null => false
+    t.integer  "total_scanned_shipments",             :default => 0,     :null => false
+    t.boolean  "allow_bc_inv_push",                   :default => false
+    t.boolean  "allow_mg_rest_inv_push",              :default => false
+    t.boolean  "allow_shopify_inv_push",              :default => false
+    t.boolean  "allow_teapplix_inv_push",             :default => false
+    t.boolean  "allow_magento_soap_tracking_no_push", :default => false
   end
 
   create_table "amazon_credentials", :force => true do |t|
@@ -316,6 +317,7 @@ ActiveRecord::Schema.define(:version => 20160505091411) do
     t.boolean  "shall_import_fraud",      :default => false
     t.boolean  "enable_status_update",    :default => false
     t.string   "status_to_update"
+    t.boolean  "push_tracking_number",    :default => false
   end
 
   create_table "magento_rest_credentials", :force => true do |t|
@@ -796,22 +798,21 @@ ActiveRecord::Schema.define(:version => 20160505091411) do
   end
 
   create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",                                                 :null => false
-    t.string   "api_secret",                                              :null => false
+    t.string   "api_key",                                             :null => false
+    t.string   "api_secret",                                          :null => false
     t.date     "last_imported_at"
-    t.integer  "store_id",                                                :null => false
-    t.datetime "created_at",                                              :null => false
-    t.datetime "updated_at",                                              :null => false
-    t.boolean  "shall_import_awaiting_shipment",       :default => true
-    t.boolean  "shall_import_shipped",                 :default => false
-    t.boolean  "warehouse_location_update",            :default => false
-    t.boolean  "shall_import_customer_notes",          :default => false
-    t.boolean  "shall_import_internal_notes",          :default => false
-    t.integer  "regular_import_range",                 :default => 3
-    t.boolean  "gen_barcode_from_sku",                 :default => false
-    t.boolean  "shall_import_pending_fulfillment",     :default => false
+    t.integer  "store_id",                                            :null => false
+    t.datetime "created_at",                                          :null => false
+    t.datetime "updated_at",                                          :null => false
+    t.boolean  "shall_import_awaiting_shipment",   :default => true
+    t.boolean  "shall_import_shipped",             :default => false
+    t.boolean  "warehouse_location_update",        :default => false
+    t.boolean  "shall_import_customer_notes",      :default => false
+    t.boolean  "shall_import_internal_notes",      :default => false
+    t.integer  "regular_import_range",             :default => 3
+    t.boolean  "gen_barcode_from_sku",             :default => false
+    t.boolean  "shall_import_pending_fulfillment", :default => false
     t.datetime "quick_import_last_modified"
-    t.boolean  "import_notestobuyer_in_notestopacker", :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|
@@ -886,6 +887,19 @@ ActiveRecord::Schema.define(:version => 20160505091411) do
     t.string   "teapplix_product_sku"
   end
 
+  create_table "teapplix_credentials", :force => true do |t|
+    t.integer  "store_id"
+    t.string   "account_name"
+    t.string   "username"
+    t.string   "password"
+    t.boolean  "import_shipped",       :default => false
+    t.boolean  "import_open_orders",   :default => false
+    t.datetime "last_imported_at"
+    t.datetime "created_at",                              :null => false
+    t.datetime "updated_at",                              :null => false
+    t.boolean  "gen_barcode_from_sku", :default => false
+  end
+
   create_table "tenants", :force => true do |t|
     t.string   "name"
     t.datetime "created_at",          :null => false
@@ -937,6 +951,7 @@ ActiveRecord::Schema.define(:version => 20160505091411) do
     t.boolean  "view_dashboard",         :default => false
     t.boolean  "is_deleted",             :default => false
   end
+
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
   add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
   add_index "users", ["role_id"], :name => "index_users_on_role_id"

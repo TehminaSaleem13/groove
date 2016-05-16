@@ -113,6 +113,7 @@ module Groovepacker
               if Order.where(:increment_id => item[:increment_id]).length == 0
                 @order = Order.new
                 @order.increment_id = item[:increment_id]
+                @order.store_order_id = order_info[:order_id]
                 @order.status = 'awaiting'
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]

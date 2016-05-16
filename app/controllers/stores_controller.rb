@@ -150,6 +150,7 @@ class StoresController < ApplicationController
             @magento.shall_import_fraud = params[:shall_import_fraud]
             @magento.enable_status_update = params[:enable_status_update]
             @magento.status_to_update = params[:status_to_update]
+            @magento.push_tracking_number = params[:push_tracking_number]
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
