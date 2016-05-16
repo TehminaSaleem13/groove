@@ -44,6 +44,11 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           }, 300);
         };
 
+        scope.update_table_accordian_width = function () {
+          $('.table-parent').width($('.table-parent').first().width() - $('.accordion-parent').width());
+          $('.accordion-parent').width(0);
+        };
+
         scope.switch_tab = function (tab) {
           if (tab.heading === "Most Recent Exceptions") {
             scope.exceptions.type = "most_recent";
@@ -52,6 +57,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             scope.exceptions.type = "by_frequency";
             scope.exceptions.retrieve.exceptions_by_frequency();
           }
+          scope.update_table_accordian_width();
         }
 
         scope.update_max = function () {
