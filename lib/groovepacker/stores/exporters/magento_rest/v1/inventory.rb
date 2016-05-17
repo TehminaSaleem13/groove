@@ -17,7 +17,7 @@ module Groovepacker
               products.each do |product|
                 inv_wh = product.product_inventory_warehousess.first
                 @sync_optn = product.sync_option
-                mg_rest_product_id = (@sync_optn.mg_rest_product_id rescue nil) || product.mg_rest_product_id
+                mg_rest_product_id = (@sync_optn.mg_rest_product_id rescue nil) || product.store_product_id
                 update_mg_rest_product_inv_for_sync_option(product, mg_rest_product_id, inv_wh)
               end
             end
