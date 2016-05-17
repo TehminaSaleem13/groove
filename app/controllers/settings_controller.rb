@@ -46,66 +46,16 @@ class SettingsController < ApplicationController
   end
 
   def order_exceptions
-    require 'csv'
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-    if current_user.can? 'view_packing_ex'
-      if params[:start].nil? || params[:end].nil?
-        result['status'] = false
-        result['messages'].push('We need a start and an end time')
-      else
-        exceptions = OrderException.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
-        filename = 'groove-order-exceptions-' + Time.now.to_s + '.csv'
-        row_map = {
-          order_number: '',
-          order_date: '',
-          scanned_date: '',
-          packing_user: '',
-          reason: '',
-          description: '',
-          associated_user: '',
-          total_packed_items: '',
-          total_clicked_items: ''
-        }
-        data = CSV.generate do |csv|
-          csv << row_map.keys
-
-          exceptions.each do |exception|
-            single_row = row_map.dup
-            single_row[:order_number] = exception.order.increment_id
-            single_row[:order_date] = exception.order.order_placed_time
-            single_row[:scanned_date] = exception.order.scanned_on
-            packing_user = nil
-            packing_user = User.find(exception.order.packing_user_id) unless exception.order.packing_user_id.blank?
-            unless packing_user.nil?
-              single_row[:packing_user] = packing_user.name + ' (' + packing_user.username + ')'
-            end
-            single_row[:reason] = exception.reason
-            single_row[:description] = exception.description
-            single_row[:associated_user] = exception.user.name + ' (' + exception.user.username + ')' unless exception.user.nil?
-            single_row[:order_item_count] = exception.order.scanned_items_count
-            single_row[:click_scanned_items] = exception.order.clicked_items_count
-            csv << single_row.values
-          end
-        end
-
-      end
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to view packing exceptions')
-    end
-
-    unless result['status']
-      data = CSV.generate do |csv|
-        csv << result['messages']
-      end
-      filename = 'error.csv'
-    end
+    result = SettingsService::OrderExceptionService.call(
+      current_user: current_user, params: params
+    ).result
 
     respond_to do |format|
-      format.html # show.html.erb
-      format.csv { send_data data, type: 'text/csv', filename: filename }
+      format.csv do
+        send_data result['data'], type: 'text/csv',
+                                  filename: result['filename'],
+                                  nothing: true
+      end
     end
   end
 
@@ -304,9 +254,9 @@ class SettingsController < ApplicationController
 
   def cancel_bulk_action
     result = {
-      "status"=>true, "success_messages"=>[],
-      "notice_messages"=>[], "error_messages"=>[],
-      "bulk_action_cancelled_ids"=>[]
+      'status' => true, 'success_messages' => [],
+      'notice_messages' => [], 'error_messages' => [],
+      'bulk_action_cancelled_ids' => []
     }
 
     if params[:id].nil?
