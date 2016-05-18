@@ -97,7 +97,7 @@ module Groovepacker
           
           objects_array.each do |object|
             found_obj = false
-            found_obj = true if ids.include?(object.id)
+            found_obj = true unless ids.include?(object.id)
             object.destroy if found_obj
           end
         end
