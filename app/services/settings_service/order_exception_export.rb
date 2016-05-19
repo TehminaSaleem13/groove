@@ -1,6 +1,8 @@
 module SettingsService
-  class OrderExceptionService < SettingsService::Base
+  class OrderExceptionExport < SettingsService::Base
     attr_reader :current_user, :params, :result, :row_map, :exceptions
+
+    include SettingsService::Utils
 
     def initialize(current_user: nil, params: nil)
       @current_user = current_user
@@ -37,24 +39,7 @@ module SettingsService
 
     private
 
-    def validate_params
-      if params[:start].nil? || params[:end].nil?
-        result['status'] = false
-        result['messages'].push('We need a start and an end time')
-      end
-    end
-
-    def do_if_status_false
-      unless result['status']
-        @result['data'] = CSV.generate do |csv|
-          csv << result['messages']
-        end
-        @result['filename'] = 'error.csv'
-      end
-    end
-
     def generate_csv
-      require 'csv'
       @result['data'] = CSV.generate do |csv|
         csv << row_map.keys
         exceptions.each do |exception|

@@ -20,8 +20,8 @@ class SettingsController < ApplicationController
     if current_user.can?('create_backups')
       GrooveBulkActions.execute_groove_bulk_action('export', params, current_user)
     else
-      @result['status'] = false
-      @result['messages'].push('You do not have enough permissions to backup and restore')
+      @result['status'] &= false
+      @result['messages'] = ['You do not have enough permissions to backup and restore']
     end
     # if current_user.can? 'create_backups'
     #   dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
@@ -46,129 +46,28 @@ class SettingsController < ApplicationController
   end
 
   def order_exceptions
-    result = SettingsService::OrderExceptionService.call(
+    result = SettingsService::OrderExceptionExport.call(
       current_user: current_user, params: params
     ).result
-
-    respond_to do |format|
-      format.csv do
-        send_data result['data'], type: 'text/csv',
-                                  filename: result['filename'],
-                                  nothing: true
-      end
-    end
+    send_csv_data(result)
   end
 
   def order_serials
-    require 'csv'
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-    if current_user.can? 'view_packing_ex'
-      if params[:start].nil? || params[:end].nil?
-        result['status'] = false
-        result['messages'].push('We need a start and an end time')
-      else
-        serials = OrderSerial.where(updated_at: Time.parse(params[:start])..Time.parse(params[:end]))
-        filename = 'groove-order-serials-' + Time.now.to_s + '.csv'
-        row_map = {
-          order_date: '',
-          order_number: '',
-          serial: '',
-          primary_sku: '',
-          primary_barcode: '',
-          product_name: '',
-          item_sale_price: '',
-          kit_name: '',
-          scan_order: 0,
-          customer_name: '',
-          address1: '',
-          address2: '',
-          city: '',
-          state: '',
-          zip: '',
-          packing_user: '',
-          order_item_count: '',
-          scanned_date: '',
-          warehouse_name: ''
-        }
-        data = CSV.generate do |csv|
-          csv << row_map.keys
-          order_number = ''
-          scan_order = 0
-          serials.each do |serial|
-            single_row = row_map.dup
-            if order_number == serial.order.increment_id
-              scan_order += 1
-            else
-              order_number = serial.order.increment_id
-              scan_order = 1
-            end
-            single_row[:scan_order] = scan_order
-            single_row[:order_number] = serial.order.increment_id
-            single_row[:order_date] = serial.order.order_placed_time
-            single_row[:scanned_date] = serial.order.scanned_on
-            packing_user = nil
-            packing_user = User.find(serial.order.packing_user_id) unless serial.order.packing_user_id.blank?
-            unless packing_user.nil?
-              single_row[:packing_user] = packing_user.name + ' (' + packing_user.username + ')'
-              single_row[:warehouse_name] = serial.product.primary_warehouse.inventory_warehouse.name unless serial.product.primary_warehouse.nil? || serial.product.primary_warehouse.inventory_warehouse.nil?
-            end
-            single_row[:serial] = serial.serial
-            if serial.product.is_kit == 1
-              single_row[:kit_name] = serial.product.name
-            else
-              single_row[:product_name] = serial.product.name
-            end
-            single_row[:customer_name] = [serial.order.firstname, serial.order.lastname].join(' ')
-            single_row[:address1] = serial.order.address_1
-            single_row[:address2] = serial.order.address_2
-            single_row[:city] = serial.order.city
-            single_row[:state] = serial.order.state
-            single_row[:zip] = serial.order.postcode
-            single_row[:primary_sku] = serial.product.primary_sku
-            single_row[:primary_barcode] = serial.product.primary_barcode
-            single_row[:order_item_count] = serial.order.get_items_count
-            # item sale price
-            order_items = serial.order.order_items.where(product_id: serial.product.id)
-            if order_items.empty?
-              single_row[:item_sale_price] = ''
-            else
-              single_row[:item_sale_price] = order_items.first.price
-            end
-            csv << single_row.values
-          end
-        end
-
-      end
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to view order serials')
-    end
-
-    unless result['status']
-      data = CSV.generate do |csv|
-        csv << result['messages']
-      end
-      filename = 'error.csv'
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.csv { send_data data, type: 'text/csv', filename: filename }
-    end
+    result = SettingsService::OrderSerialExport.call(
+      current_user: current_user, params: params
+    ).result
+    send_csv_data(result)
   end
 
   def get_columns_state
     @result = {}
     @result['status'] = true
-    @result['messages'] = []
-    if params[:identifier].nil?
-      @result['messages'].push('No Identifier for state preference given')
-      @result['status'] = false
+    if params[:identifier].blank?
+      @result['messages'] = ['No Identifier for state preference given']
+      @result['status'] &= false
     else
       preference = ColumnPreference.find_by_user_id_and_identifier(current_user.id, params[:identifier])
-      @result['data'] = preference unless preference.nil?
+      @result['data'] = preference if preference.present?
     end
     respond_to do |format|
       format.html # show.html.erb
@@ -177,12 +76,10 @@ class SettingsController < ApplicationController
   end
 
   def save_columns_state
-    @result = {}
-    @result['status'] = true
-    @result['messages'] = []
-    if params[:identifier].nil?
-      @result['messages'].push('No Identifier for state preference given')
-      @result['status'] = false
+    @result = { 'status' => true }
+    if params[:identifier].blank?
+      @result['messages'] = ['No Identifier for state preference given']
+      @result['status'] &= false
     else
       preference = ColumnPreference.find_or_create_by_user_id_and_identifier(current_user.id, params[:identifier])
       preference.theads = params[:theads]
@@ -208,9 +105,9 @@ class SettingsController < ApplicationController
       @result['data']['settings'] = general_setting
     else
       @result['status'] &= false
-      @result['error_messages'].push(
+      @result['error_messages'] = [
         'No general settings available for the system. Contact administrator.'
-      )
+      ]
     end
 
     respond_to do |format|
@@ -228,22 +125,22 @@ class SettingsController < ApplicationController
 
     general_setting = GeneralSetting.all.first
 
-    if !general_setting.nil?
+    if general_setting.present?
       if current_user.can? 'edit_general_prefs'
         general_setting.attributes = permit_general_setting_params
         if general_setting.save
-          @result['success_messages'].push('Settings updated successfully.')
+          @result['success_messages'] = ['Settings updated successfully.']
         else
           @result['status'] &= false
-          @result['error_messages'].push('Error saving general settings.')
+          @result['error_messages'] = ['Error saving general settings.']
         end
       else
         @result['status'] &= false
-        @result['error_messages'].push('You are not authorized to update general preferences.')
+        @result['error_messages'] = ['You are not authorized to update general preferences.']
       end
     else
       @result['status'] &= false
-      @result['error_messages'].push('No general settings available for the system. Contact administrator.')
+      @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
 
     respond_to do |format|
@@ -259,25 +156,13 @@ class SettingsController < ApplicationController
       'bulk_action_cancelled_ids' => []
     }
 
-    if params[:id].nil?
-      result['status'] = false
-      result['error_messages'].push('no id bulk action id provided')
-    else
+    if params[:id].present?
       params[:id].each do |bulk_action_id|
-        bulk_action = GrooveBulkActions.find_by_id(bulk_action_id)
-        if bulk_action.nil?
-          result['error_messages'].push('No bulk action found with the id.')
-        else
-          bulk_action.cancel = true
-          bulk_action.status = 'cancelled'
-          if bulk_action.save
-            result['bulk_action_cancelled_ids'].push(bulk_action_id)
-            puts 'We saved the bulk action objects'
-          else
-            puts 'Error occurred while saving bulk action object'
-          end
-        end
+        update_bulk_action(bulk_action_id, result)
       end
+    else
+      result['status'] &= false
+      result['error_messages'] = ['no id bulk action id provided']
     end
 
     respond_to do |format|
@@ -296,11 +181,11 @@ class SettingsController < ApplicationController
 
     scan_pack_setting = ScanPackSetting.all.first
 
-    if !scan_pack_setting.nil?
+    if scan_pack_setting.present?
       @result['settings'] = scan_pack_setting
     else
       @result['status'] &= false
-      @result['error_messages'].push('No Scan Pack settings available for the system. Contact administrator.')
+      @result['error_messages'] = ['No Scan Pack settings available for the system. Contact administrator.']
     end
 
     respond_to do |format|
@@ -341,21 +226,21 @@ class SettingsController < ApplicationController
 
     scan_pack_setting = ScanPackSetting.all.first
 
-    if !scan_pack_setting.nil?
+    if scan_pack_setting.present?
       if current_user.can? 'edit_scanning_prefs'
         if scan_pack_setting.update_attributes(permit_scan_pack_setting_params)
-          @result['success_messages'].push('Settings updated successfully.')
+          @result['success_messages'] = ['Settings updated successfully.']
         else
           @result['status'] &= false
-          @result['error_messages'].push('Error saving Scan Pack settings.')
+          @result['error_messages'] = ['Error saving Scan Pack settings.']
         end
       else
         @result['status'] &= false
-        @result['error_messages'].push('You are not authorized to update scan pack preferences.')
+        @result['error_messages'] = ['You are not authorized to update scan pack preferences.']
       end
     else
       @result['status'] &= false
-      @result['error_messages'].push('No Scan pack settings available for the system. Contact administrator.')
+      @result['error_messages'] = ['No Scan pack settings available for the system. Contact administrator.']
     end
 
     respond_to do |format|
@@ -369,22 +254,22 @@ class SettingsController < ApplicationController
     render json: 'ok'
   end
 
-  def execute_in_bulk_action(activity)
-    result = {}
-    result['status'] = true
-    result['messages'] = []
-    if current_user.can?('create_backups')
-      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
-    else
-      result['status'] = false
-      result['messages'].push('You do not have enough permissions to backup and restore')
-    end
-    result
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: result }
-    # end
-  end
+  # def execute_in_bulk_action(activity)
+  #   result = {}
+  #   result['status'] = true
+  #   result['messages'] = []
+  #   if current_user.can?('create_backups')
+  #     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
+  #   else
+  #     result['status'] = false
+  #     result['messages'] = ['You do not have enough permissions to backup and restore']
+  #   end
+  #   result
+  #   # respond_to do |format|
+  #   #   format.html # show.html.erb
+  #   #   format.json { render json: result }
+  #   # end
+  # end
 
   private
 
@@ -434,5 +319,15 @@ class SettingsController < ApplicationController
         :custom_field_two, :export_csv_email
       ]
     )
+  end
+
+  def send_csv_data(result)
+    respond_to do |format|
+      format.csv do
+        send_data result['data'], type: 'text/csv',
+                                  filename: result['filename'],
+                                  nothing: true
+      end
+    end
   end
 end

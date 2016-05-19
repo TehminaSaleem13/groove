@@ -33,4 +33,18 @@ module SettingsHelper
       import_orders_obj.reschedule_job('import_orders', tenant)
     end
   end
+
+  def update_bulk_action(bulk_action_id, result)
+    bulk_action = GrooveBulkActions.find_by_id(bulk_action_id)
+    if bulk_action.present?
+      bulk_action.cancel = true
+      bulk_action.status = 'cancelled'
+      bulk_action.save && result['bulk_action_cancelled_ids']
+                          .push(bulk_action_id)
+      # puts 'We saved the bulk action objects'
+      # puts 'Error occurred while saving bulk action object'
+    else
+      result['error_messages'] = ['No bulk action found with the id.']
+    end
+  end
 end
