@@ -190,4 +190,8 @@ module PaymentsHelper
       'an-symphony' => 'an-groove-symphony'
     }
   end
+
+  def get_plan_name(plan_id)
+    return Stripe::Plan.retrieve(plan_id).name
+  end
 end

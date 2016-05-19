@@ -132,7 +132,7 @@ module Groovepacker
           subscription_result['transaction_errors'] = ''
           unless tenant.subscription.nil?
             subscription = tenant.subscription
-            subscription_result['plan'] = construct_plan_hash.key(subscription.subscription_plan_id)
+            subscription_result['plan'] = construct_plan_hash.key(subscription.subscription_plan_id) || get_plan_name(subscription.subscription_plan_id)
             subscription_result['plan_id'] = subscription.subscription_plan_id
             subscription_result['amount'] = '%.2f' % [(subscription.amount * 100).round / 100.0 / 100.0] if subscription.amount
             subscription_result['start_day'] = subscription.created_at.strftime("%d %b") unless subscription.created_at.nil?
@@ -283,21 +283,22 @@ module Groovepacker
       def update_subscription_plan(tenant, params, result)
         @subscription = tenant.subscription
         if @subscription
-          if @subscription.amount != params[:subscription_info][:amont]
+          if @subscription.amount.to_i != (params[:subscription_info][:amount].to_i * 100)
             plan_info = new_plan_info(tenant)
             existing_plan = Stripe::Plan.retrieve(params[:subscription_info][:plan_id])
             Stripe::Plan.create(
-              :amount => (params[:subscription_info][:amount] * 100).to_i,
+              :amount => params[:subscription_info][:amount].to_i * 100,
               :interval => existing_plan.interval,
               :name => plan_info['plan_name'],
               :currency => existing_plan.currency,
               :id => plan_info['plan_id']
             )
-            stripe_subscription = Stripe::Subscription.retrieve(@subscription.customer_subscription_id)
+            stripe_customer = Stripe::Customer.retrieve(@subscription.stripe_customer_id)
+            stripe_subscription = stripe_customer.subscriptions.retrieve(@subscription.customer_subscription_id)
             stripe_subscription.plan = plan_info['plan_id']
             stripe_subscription.save
             @subscription.subscription_plan_id = plan_info['plan_id']
-            @subscription.amount = params[:subscription_info][:amount] * 100
+            @subscription.amount = params[:subscription_info][:amount].to_i * 100
             @subscription.save
             unless construct_plan_hash[params[:subscription_info][:plan]]
               # existing_plan.delete
@@ -305,7 +306,7 @@ module Groovepacker
           end
         else
           result['status'] = false
-          result['error_messages'].push(e.message);
+          result['error_messages'].push('Couldn\'t find a valid subscription for the tenant.');
         end
       end
 
@@ -349,11 +350,11 @@ module Groovepacker
       end
 
       def new_plan_info(tenant)
-        rand_value = Random.new().rand(999)
+        rand_value = Random.new().rand(999).to_s
         time_now = Time.now.strftime('%y-%m-%d')
         return {
-          'plan_id': time_now + '-' + tenant + '-' + rand_value,
-          'plan_name': time_now + ' ' + tenant + ' ' + rand_value
+          'plan_id' => time_now + '-' + tenant.name + '-' + rand_value,
+          'plan_name' => time_now + ' ' + tenant.name + ' ' + rand_value
         }
       end
     end
