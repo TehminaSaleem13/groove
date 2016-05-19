@@ -64,7 +64,7 @@
         <div class="col-sm-2">
           <br/><br/>
           <center>
-            <div class='btn btn-lg btn-info' ng-class="{'btn-primary': tenants.single.subscription_info.plan != 'modified' }">{{tenants.single.subscription_info.plan}}</div><br/><br/>
+            <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}</div><br/><br/>
 
             <div ng-show="tenants.single.basicinfo.is_modified == true">Modified</div>
             <div ng-hide="tenants.single.basicinfo.is_modified == true">Unmodified</div>
@@ -82,7 +82,7 @@
         <div class="col-sm-offset-1 col-sm-6">
           <h4 class="control-label" style="width: 100%; text-align: left;">Plan Notes: </h4>
           <textarea class="form-control input-style"
-            rows="5"></textarea>
+            rows="5" ng-model="tenants.single.basicinfo.addon_notes" placeholder="Unfocus will save data..." ng-blur="update_access_restrictions()"></textarea>
         </div>
         <div class="col-sm-4">
           <button ng-click="update_access_restrictions()"

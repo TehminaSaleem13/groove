@@ -263,7 +263,7 @@ module Groovepacker
             access_restrictions[data_length-1].allow_magento_soap_tracking_no_push = params[:access_restrictions_info][:allow_magento_soap_tracking_no_push] unless params[:access_restrictions_info][:allow_magento_soap_tracking_no_push].nil?
             access_restrictions[data_length-1].save
           end
-        rescue Exception => e
+        rescue => e
           result['status'] = false
           result['error_messages'].push(e.message);
         end
@@ -272,8 +272,38 @@ module Groovepacker
       def update_tenant(tenant, params, result)
         begin
           tenant.note = params[:basicinfo][:note] unless params[:basicinfo][:note].nil?
-          tenant.save!
-        rescue Exception => e
+          tenant.addon_notes = params[:basicinfo][:addon_notes] unless params[:basicinfo][:addon_notes].nil?
+          tenant.save
+        rescue => e
+          result['status'] = false
+          result['error_messages'].push(e.message);
+        end
+      end
+
+      def update_subscription_plan(tenant, params, result)
+        @subscription = tenant.subscription
+        if @subscription
+          if @subscription.amount != params[:subscription_info][:amont]
+            plan_info = new_plan_info(tenant)
+            existing_plan = Stripe::Plan.retrieve(params[:subscription_info][:plan_id])
+            Stripe::Plan.create(
+              :amount => (params[:subscription_info][:amount] * 100).to_i,
+              :interval => existing_plan.interval,
+              :name => plan_info['plan_name'],
+              :currency => existing_plan.currency,
+              :id => plan_info['plan_id']
+            )
+            stripe_subscription = Stripe::Subscription.retrieve(@subscription.customer_subscription_id)
+            stripe_subscription.plan = plan_info['plan_id']
+            stripe_subscription.save
+            @subscription.subscription_plan_id = plan_info['plan_id']
+            @subscription.amount = params[:subscription_info][:amount] * 100
+            @subscription.save
+            unless construct_plan_hash[params[:subscription_info][:plan]]
+              # existing_plan.delete
+            end
+          end
+        else
           result['status'] = false
           result['error_messages'].push(e.message);
         end
@@ -316,6 +346,15 @@ module Groovepacker
           result['status'] = false
           result['error_messages'].push(e.message)
         end
+      end
+
+      def new_plan_info(tenant)
+        rand_value = Random.new().rand(999)
+        time_now = Time.now.strftime('%y-%m-%d')
+        return {
+          'plan_id': time_now + '-' + tenant + '-' + rand_value,
+          'plan_name': time_now + ' ' + tenant + ' ' + rand_value
+        }
       end
     end
   end

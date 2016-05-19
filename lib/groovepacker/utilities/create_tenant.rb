@@ -2,7 +2,7 @@ class CreateTenant
   def create_tenant(subscription)
     tenant_name = subscription.tenant_name
     Apartment::Tenant.create(tenant_name)
-    tenant = Tenant.create(name: tenant_name)
+    tenant = Tenant.create(name: tenant_name, initial_plan_id: subscription.subscription_plan_id)
     subscription.tenant = tenant
     Apartment::Tenant.switch(tenant_name)
     self.apply_restrictions_and_seed(subscription)

@@ -77,6 +77,8 @@ class TenantsController < ApplicationController
     unless tenant.nil?
       helper = Groovepacker::Tenants::Helper.new
       helper.update_restrictions(tenant, params, result)
+      helper.update_tenant(tenant, params, result)
+      helper.update_subscription_plan(tenant, params, result)
     else
       result['status'] = false
     end
