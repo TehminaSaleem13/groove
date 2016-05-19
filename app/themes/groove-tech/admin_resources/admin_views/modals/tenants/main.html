@@ -57,20 +57,22 @@
             <div>Amount</div>
           </center>
           <div class="col-sm-offset-1 col-sm-10">
-            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+            <input type="text" ng-model="tenants.single.subscription_info.amount"
                    class="form-control input-style"/>
           </div>
         </div>
         <div class="col-sm-2">
+          <br/><br/>
           <center>
-            <i class="groove-fa fa fa-cloud-download fa-5x"></i>
+            <div class='btn btn-lg btn-info' ng-class="{'btn-primary': tenants.single.subscription_info.plan != 'modified' }">{{tenants.single.subscription_info.plan}}</div><br/><br/>
 
-            <div>Sources</div>
+            <div ng-show="tenants.single.basicinfo.is_modified == true">Modified</div>
+            <div ng-hide="tenants.single.basicinfo.is_modified == true">Unmodified</div>
           </center>
-          <div class="col-sm-offset-1 col-sm-10">
+          <!-- <div class="col-sm-offset-1 col-sm-10">
             <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
                    class="form-control input-style"/>
-          </div>
+          </div> -->
         </div>
         <div class="col-sm-1"></div>
       </div>
@@ -89,12 +91,12 @@
           <div style="clear:both;"></div>
           <div>
             <h4>Stripe Customer</h4>
-            <span>abc@zyx.com</span>
+            <span><a href="https://dashboard.stripe.com/test/customers/{{tenants.single.subscription_info.customer_id}}" target="_blank">{{tenants.single.subscription_info.email}}</a></span>
           </div>
           <div style="clear:both;"></div>
           <div>
             <h4 class="control-label">Stripe Plan</h4>
-            <span>Groove Duo</span>
+            <span><a href="https://dashboard.stripe.com/test/plans/{{tenants.single.subscription_info.plan_id}}" target="_blank">{{tenants.single.subscription_info.plan}}</a></span>
           </div>
         </div>
         <div class="col-sm-1"></div>

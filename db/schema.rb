@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160514061953) do
+ActiveRecord::Schema.define(:version => 20160519072456) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -902,10 +902,11 @@ ActiveRecord::Schema.define(:version => 20160514061953) do
 
   create_table "tenants", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at",          :null => false
-    t.datetime "updated_at",          :null => false
+    t.datetime "created_at",                             :null => false
+    t.datetime "updated_at",                             :null => false
     t.integer  "duplicate_tenant_id"
     t.text     "note"
+    t.boolean  "is_modified",         :default => false
   end
 
   create_table "transactions", :force => true do |t|

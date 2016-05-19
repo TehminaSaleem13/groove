@@ -44,6 +44,7 @@ module Groovepacker
             plan_data = get_subscription_data(tenant.name)
             tenant_hash['start_day'] = plan_data['start_day']
             tenant_hash['plan'] = plan_data['plan']
+            tenant_hash['amount'] = plan_data['amount']
             tenant_hash['progress'] = plan_data['progress']
             tenant_hash['transaction_errors'] = plan_data['transaction_errors']
             tenant_hash['stripe_url'] = plan_data['customer_id']
@@ -124,14 +125,19 @@ module Groovepacker
         tenant = Tenant.where(name: name).first unless Tenant.where(name: name).empty?
         unless tenant.nil?
           subscription_result['plan'] = ""
+          subscription_result['plan_id'] = ""
+          subscription_result['amount'] = 0
           subscription_result['customer_id'] = ''
           subscription_result['progress'] = ''
           subscription_result['transaction_errors'] = ''
           unless tenant.subscription.nil?
             subscription = tenant.subscription
             subscription_result['plan'] = construct_plan_hash.key(subscription.subscription_plan_id)
+            subscription_result['plan_id'] = subscription.subscription_plan_id
+            subscription_result['amount'] = '%.2f' % [(subscription.amount * 100).round / 100.0 / 100.0] if subscription.amount
             subscription_result['start_day'] = subscription.created_at.strftime("%d %b") unless subscription.created_at.nil?
             subscription_result['customer_id'] = subscription.stripe_customer_id unless subscription.stripe_customer_id.nil?
+            subscription_result['email'] = subscription.email unless subscription.email.nil?
             subscription_result['progress'] = subscription.progress unless subscription.progress.nil?
             subscription_result['transaction_errors'] =subscription.transaction_errors unless subscription.transaction_errors.nil?
           end
