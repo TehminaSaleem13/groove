@@ -43,7 +43,13 @@ module Groovepacker
 
         def get_order(orderId)
           Rails.logger.info 'Getting orders with orderId: ' + orderId
-          @service.query("/Orders/" + orderId, nil, "get")
+          @service.query("/orders/" + orderId, nil, "get")
+        end
+
+        def get_order_by_increment_id(orderId)
+          Rails.logger.info 'Getting orders with orderId: ' + orderId
+          status_to_fetch = "awaiting_shipment"
+          @service.query("/orders?orderNumber=#{orderId}&orderStatus=#{status_to_fetch}", nil, "get")
         end
 
         def get_tags_list

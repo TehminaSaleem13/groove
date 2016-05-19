@@ -57,6 +57,10 @@ module Groovepacker
         self.handler.import_single_product(product)
       end
 
+      def import_single_order_from(order_no)
+        self.handler.import_single_order_from(order_no)
+      end
+
       attr_accessor :handler
     end
   end
