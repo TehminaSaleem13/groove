@@ -21,7 +21,8 @@ module ScanPack
       do_check_state_and_status_to_add_activity
       do_scan_now
       if @result["data"]["next_state"]=="scanpack.rfo" and @result["matched"]==false
-       run_import_for_not_found_order
+       stores = Store.where("status=? and on_demand_import=?", true, true)
+       run_import_for_not_found_order if stores.present?
       end
     end
 
