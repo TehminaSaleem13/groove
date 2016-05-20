@@ -71,7 +71,7 @@ module Groovepacker
         end
 
         def on_demand_logger
-          @costom_logger ||= Logger.new("#{Rails.root}/log/on_demand_import.log")
+          @costom_logger ||= Logger.new("#{Rails.root}/log/on_demand_import_#{Apartment::Tenant.current}.log")
         end
 
         def get_tags_list

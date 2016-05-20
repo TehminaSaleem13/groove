@@ -93,12 +93,11 @@ module Groovepacker
             import_item = init_import_item(result)
             @scan_settings = ScanPackSetting.last
             current_tenant = Apartment::Tenant.current
-            on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import.log")
-            on_demand_logger.info("============#{current_tenant}============")
+            on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{current_tenant}.log")
+            on_demand_logger.info("=========================================")
             on_demand_logger.info("StoreId: #{credential.store.id}")
             response = client.get_order_on_demand(order_no)
             response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
-            on_demand_logger.info("=========================================")
             import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
           end
 
