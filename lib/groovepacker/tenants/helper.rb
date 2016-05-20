@@ -41,6 +41,7 @@ module Groovepacker
             tenant_hash['id'] = tenant.id
             tenant_hash['name'] = tenant.name
             tenant_hash['note'] = tenant.note
+            tenant_hash['is_modified'] = tenant.is_modified
             plan_data = get_subscription_data(tenant.name)
             tenant_hash['start_day'] = plan_data['start_day']
             tenant_hash['plan'] = plan_data['plan']
@@ -253,15 +254,23 @@ module Groovepacker
           unless AccessRestriction.all.first.nil?
             access_restrictions = AccessRestriction.all
             data_length = access_restrictions.length
-            access_restrictions[data_length - 1].num_shipments = params[:access_restrictions_info][:max_allowed]
-            access_restrictions[data_length-1].num_users = params[:access_restrictions_info][:max_users]
-            access_restrictions[data_length-1].num_import_sources = params[:access_restrictions_info][:max_import_sources]
-            access_restrictions[data_length-1].allow_bc_inv_push = params[:access_restrictions_info][:allow_bc_inv_push] unless params[:access_restrictions_info][:allow_bc_inv_push].nil?
-            access_restrictions[data_length-1].allow_mg_rest_inv_push = params[:access_restrictions_info][:allow_mg_rest_inv_push] unless params[:access_restrictions_info][:allow_mg_rest_inv_push].nil?
-            access_restrictions[data_length-1].allow_shopify_inv_push = params[:access_restrictions_info][:allow_shopify_inv_push] unless params[:access_restrictions_info][:allow_shopify_inv_push].nil?
-            access_restrictions[data_length-1].allow_teapplix_inv_push = params[:access_restrictions_info][:allow_teapplix_inv_push] unless params[:access_restrictions_info][:allow_teapplix_inv_push].nil?
-            access_restrictions[data_length-1].allow_magento_soap_tracking_no_push = params[:access_restrictions_info][:allow_magento_soap_tracking_no_push] unless params[:access_restrictions_info][:allow_magento_soap_tracking_no_push].nil?
-            access_restrictions[data_length-1].save
+            recent_ar = access_restrictions[data_length - 1]
+            access_params = params[:access_restrictions_info]
+            puts "access_params: " + access_params.inspect
+            ar_status = false
+            ar_status = true if (recent_ar.num_users != access_params[:max_users]) ||
+              recent_ar.num_shipments != access_params[:max_allowed] ||
+              recent_ar.num_import_sources != access_params[:max_import_sources]
+            recent_ar.num_shipments = access_params[:max_allowed]
+            recent_ar.num_users = access_params[:max_users]
+            recent_ar.num_import_sources = access_params[:max_import_sources]
+            recent_ar.allow_bc_inv_push = access_params[:allow_bc_inv_push] unless access_params[:allow_bc_inv_push].nil?
+            recent_ar.allow_mg_rest_inv_push = access_params[:allow_mg_rest_inv_push] unless access_params[:allow_mg_rest_inv_push].nil?
+            recent_ar.allow_shopify_inv_push = access_params[:allow_shopify_inv_push] unless access_params[:allow_shopify_inv_push].nil?
+            recent_ar.allow_teapplix_inv_push = access_params[:allow_teapplix_inv_push] unless access_params[:allow_teapplix_inv_push].nil?
+            recent_ar.allow_magento_soap_tracking_no_push = access_params[:allow_magento_soap_tracking_no_push] unless access_params[:allow_magento_soap_tracking_no_push].nil?
+            recent_ar.save
+            update_modification_status(tenant) if ar_status
           end
         rescue => e
           result['status'] = false
@@ -300,9 +309,8 @@ module Groovepacker
             @subscription.subscription_plan_id = plan_info['plan_id']
             @subscription.amount = params[:subscription_info][:amount].to_i * 100
             @subscription.save
-            unless construct_plan_hash[params[:subscription_info][:plan]]
-              # existing_plan.delete
-            end
+            existing_plan.delete unless construct_plan_hash[params[:subscription_info][:plan]]
+            update_modification_status(tenant)
           end
         else
           result['status'] = false
@@ -356,6 +364,12 @@ module Groovepacker
           'plan_id' => time_now + '-' + tenant.name + '-' + rand_value,
           'plan_name' => time_now + ' ' + tenant.name + ' ' + rand_value
         }
+      end
+
+      def update_modification_status(tenant)
+        return if tenant.is_modified
+        tenant.is_modified = true
+        tenant.save
       end
     end
   end
