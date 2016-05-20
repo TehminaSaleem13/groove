@@ -86,7 +86,8 @@
 
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.on_demand_import" groov-click="update_single_store(true)"></div>
-   
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="When enabled, scanned orders that have not been previously imported will be queued for import in the background while the packer continues to scan other orders."/>
       </div>
     </div>
   </div>
