@@ -46,10 +46,32 @@ module Groovepacker
           @service.query("/orders/" + orderId, nil, "get")
         end
 
-        def get_order_by_increment_id(orderId)
+        def get_order_on_demand(orderId, using_tracking_number=false)
           Rails.logger.info 'Getting orders with orderId: ' + orderId
           status_to_fetch = "awaiting_shipment"
-          @service.query("/orders?orderNumber=#{orderId}&orderStatus=#{status_to_fetch}", nil, "get")
+          response = @service.query("/orders?orderNumber=#{orderId}&orderStatus=#{status_to_fetch}", nil, "get")
+          log_on_demand_order_import(orderId, response, using_tracking_number)
+          return response
+        end
+
+        def get_order_by_tracking_number(tracking_number)
+          on_demand_logger.info("********")
+          response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")
+          return {"orders" => []} if response["shipments"].blank?
+          response = response["shipments"].first
+          return get_order_on_demand(response["orderNumber"], true)
+        end
+
+        def log_on_demand_order_import(orderId, response, using_tracking_number)
+          import_time = Time.now
+          on_demand_logger.info("OrderNumber: #{orderId}")
+          on_demand_logger.info("ImportTime: #{import_time}")
+          on_demand_logger.info("Using Tracking Number: #{using_tracking_number}")
+          on_demand_logger.info("Response: #{response}")
+        end
+
+        def on_demand_logger
+          @costom_logger ||= Logger.new("#{Rails.root}/log/on_demand_import.log")
         end
 
         def get_tags_list

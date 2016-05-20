@@ -7,10 +7,6 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            handler = self.get_handler
-            credential = handler[:credential]
-            client = handler[:store_handle]
-            import_item = handler[:import_item]
             result = self.build_result
 
             statuses = []
@@ -72,14 +68,7 @@ module Groovepacker
               unless response["orders"].blank?
                 shipments_response = client.get_shipments(import_from-1.days)
                 result[:total_imported] = response["orders"].length
-                import_item.current_increment_id = ''
-                import_item.success_imported = 0
-                import_item.previous_imported = 0
-                import_item.current_order_items = -1
-                import_item.current_order_imported_item = -1
-                import_item.to_import = result[:total_imported]
-                import_item.save
-                sleep 0.5
+                import_item = init_import_item(result)
                 import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
               end
             else
@@ -98,26 +87,30 @@ module Groovepacker
           end
 
           def import_single_order(order_no)
-            handler = self.get_handler
-            credential = handler[:credential]
-            client = handler[:store_handle]
-            import_item = handler[:import_item]
             result = self.build_result
             ss_tags_list = client.get_tags_list
             gp_ready_tag_id = ss_tags_list[credential.gp_ready_tag_name] || -1
-            import_item = init_import_item(import_item)
-            response = client.get_order_by_increment_id(order_no)
+            import_item = init_import_item(result)
+            @scan_settings = ScanPackSetting.last
+            current_tenant = Apartment::Tenant.current
+            on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import.log")
+            on_demand_logger.info("============#{current_tenant}============")
+            on_demand_logger.info("StoreId: #{credential.store.id}")
+            response = client.get_order_on_demand(order_no)
+            response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
+            on_demand_logger.info("=========================================")
             import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
           end
 
-          def init_import_item(import_item)
+          def init_import_item(result)
             import_item.current_increment_id = ''
             import_item.success_imported = 0
             import_item.previous_imported = 0
             import_item.current_order_items = -1
             import_item.current_order_imported_item = -1
-            import_item.to_import = 1
+            import_item.to_import = result[:total_imported] || 1
             import_item.save
+            sleep 0.5
             import_item.reload
             return import_item
           end
@@ -330,6 +323,23 @@ module Groovepacker
             status_response["orders"].each { |order| orders_hash["orders"].push(order) if order["modifyDate"].to_datetime.utc >= import_from }
             return orders_hash
           end
+
+          def handler
+            @handler ||= self.get_handler
+          end
+
+          def credential
+            @credential ||= handler[:credential]
+          end
+          
+          def client
+            @client ||= handler[:store_handle]
+          end
+
+          def import_item
+            @import_item ||= handler[:import_item]
+          end
+
         end
       end
     end
