@@ -48,8 +48,7 @@ module Groovepacker
 
         def get_order_on_demand(orderId, using_tracking_number=false)
           Rails.logger.info 'Getting orders with orderId: ' + orderId
-          status_to_fetch = "awaiting_shipment"
-          response = @service.query("/orders?orderNumber=#{orderId}&orderStatus=#{status_to_fetch}", nil, "get")
+          response = @service.query("/orders?orderNumber=#{orderId}", nil, "get")
           log_on_demand_order_import(orderId, response, using_tracking_number)
           return response
         end
