@@ -99,6 +99,7 @@ module Groovepacker
             response = client.get_order_on_demand(order_no)
             response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
+            Order.emit_data_for_on_demand_import(response, order_no)
           end
 
           def init_import_item(result)

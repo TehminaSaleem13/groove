@@ -316,6 +316,10 @@ groovepacks_controllers.
         }
       };
 
+      groovIO.on('popup_display_for_on_demand_import', function (resp) {
+        notification.notify(resp.message);
+      });
+
       $scope.show_logout_box = false;
       groovIO.on('ask_logout', function (msg) {
         if (!$scope.show_logout_box) {
