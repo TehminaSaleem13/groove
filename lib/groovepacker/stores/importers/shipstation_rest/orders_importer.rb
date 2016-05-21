@@ -69,7 +69,7 @@ module Groovepacker
                 shipments_response = client.get_shipments(import_from-1.days)
                 result[:total_imported] = response["orders"].length
                 import_item = init_import_item(result)
-                import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
+                import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
               end
             else
               result[:status] = false
@@ -96,9 +96,9 @@ module Groovepacker
             on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{current_tenant}.log")
             on_demand_logger.info("=========================================")
             on_demand_logger.info("StoreId: #{credential.store.id}")
-            response = client.get_order_on_demand(order_no)
-            response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
-            import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
+            response, shipments_response = client.get_order_on_demand(order_no)
+            response, shipments_response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
+            import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
             Order.emit_data_for_on_demand_import(response, order_no)
           end
 
@@ -115,7 +115,7 @@ module Groovepacker
             return import_item
           end
 
-          def import_orders_from_response(response, client, import_item, credential, result, gp_ready_tag_id)
+          def import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
             response["orders"].each do |order|
               import_item.reload
               break if import_item.status == 'cancelled'
@@ -144,7 +144,6 @@ module Groovepacker
               if shipstation_order.present? && !shipstation_order.persisted?
                 ship_to = order["shipTo"]["name"].split(" ")
                 import_order(shipstation_order, order, credential)
-                
                 tracking_number = shipments_response.select {|shipment| shipment["orderId"]==order["orderId"]}.first["trackingNumber"] rescue nil
                 #tracking_number = client.get_tracking_number(order["orderId"]) if tracking_number.blank?
                 shipstation_order.tracking_num = tracking_number

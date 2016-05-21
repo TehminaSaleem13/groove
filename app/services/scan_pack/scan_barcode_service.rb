@@ -76,7 +76,7 @@ module ScanPack
         current_tenant = Apartment::Tenant.current
         order_no_input = @params["input"]
         order_importer = Groovepacker::Stores::Importers::OrdersImporter.new(nil)
-        order_importer.delay.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
+        order_importer.delay(:run_at => 1.seconds.from_now).search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
         @result["notice_messages"]="It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."
       end
     end

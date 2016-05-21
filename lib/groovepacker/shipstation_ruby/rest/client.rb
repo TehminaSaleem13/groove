@@ -46,27 +46,36 @@ module Groovepacker
           @service.query("/orders/" + orderId, nil, "get")
         end
 
-        def get_order_on_demand(orderId, using_tracking_number=false)
-          Rails.logger.info 'Getting orders with orderId: ' + orderId
-          response = @service.query("/orders?orderNumber=#{orderId}", nil, "get")
-          log_on_demand_order_import(orderId, response, using_tracking_number)
-          return response
+        def get_order_on_demand(orderno, using_tracking_number=false)
+          Rails.logger.info 'Getting orders with order No: ' + orderno
+          response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
+          log_on_demand_order_import(orderno, response, using_tracking_number)
+          if using_tracking_number
+            return response
+          else
+            return response, get_shipments_by_orderno(orderno)
+          end
         end
 
         def get_order_by_tracking_number(tracking_number)
           on_demand_logger.info("********")
           response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")
           return {"orders" => []} if response["shipments"].blank?
-          response = response["shipments"].first
-          return get_order_on_demand(response["orderNumber"], true)
+          shipment = response["shipments"].first
+          return get_order_on_demand(shipment["orderNumber"], true), response["shipments"]
         end
 
-        def log_on_demand_order_import(orderId, response, using_tracking_number)
+        def log_on_demand_order_import(orderno, response, using_tracking_number)
           import_time = Time.now
-          on_demand_logger.info("OrderNumber: #{orderId}")
+          on_demand_logger.info("OrderNumber: #{orderno}")
           on_demand_logger.info("ImportTime: #{import_time}")
           on_demand_logger.info("Using Tracking Number: #{using_tracking_number}")
           on_demand_logger.info("Response: #{response}")
+        end
+
+        def get_shipments_by_orderno(orderno)
+          response = @service.query("/shipments?orderNumber=#{orderno}", nil, "get")
+          response["shipments"]
         end
 
         def on_demand_logger
