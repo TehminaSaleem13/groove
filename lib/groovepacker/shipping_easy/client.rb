@@ -25,6 +25,7 @@ module Groovepacker
 
         return combined_response if @api_key.blank? || @api_secret.blank?
         while page_index
+          filters[:page] = page_index
           response = fetch_orders(filters)
           combined_response["orders"] += response["orders"]
           break if response["orders"].length < 100
