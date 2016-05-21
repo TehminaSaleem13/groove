@@ -82,6 +82,7 @@ class MagentoSoapOrders
 
   def update_order_tracking_info_on_magento(client, session, shipment_info, order)
     return if order.tracking_num.blank?
+    binding.pry
     client.call(:sales_order_shipment_add_track, message: { sessionId: session,
                                                             shipmentIncrementId: shipment_info[:increment_id],
                                                             carrier: 'custom' ,
