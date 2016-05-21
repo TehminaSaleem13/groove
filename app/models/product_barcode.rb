@@ -6,15 +6,13 @@ class ProductBarcode < ActiveRecord::Base
   after_save :delete_empty
 
   def delete_empty
-    if self.barcode.blank?
-      self.destroy
-    end
+    destroy if barcode.blank?
   end
 
   def self.generate_barcode_from_sku(sku)
     product = sku.product
-    return if product.product_barcodes.present?
-    if product.is_intangible
+    return if product.try(:product_barcodes).present?
+    if product.try :is_intangible
       product_barcode = product.product_barcodes.new
       product_barcode.barcode = product.primary_sku
       product_barcode.save

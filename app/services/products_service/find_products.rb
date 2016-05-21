@@ -1,5 +1,5 @@
 module ProductsService
-  class FindProducts < ProductsService::ServiceInit
+  class FindProducts < ProductsService::Base
     attr_accessor :params
 
     def initialize(*args)
