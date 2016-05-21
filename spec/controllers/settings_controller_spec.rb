@@ -61,4 +61,104 @@ RSpec.describe SettingsController, type: :controller do
       expect(match_array - first_record).to eql []
     end
   end
+
+  context 'Export backup CSV' do
+    it 'must export CSV' do
+      general_setting = FactoryGirl.create :general_setting, admin_email: 'test@gmail.com',
+                                           export_csv_email: 'test@gmail.com'
+      xhr :get, :export_csv, {}
+      result = JSON.parse response.body
+      expect(result['status']).to eql true
+    end
+  end
+
+  context 'column State' do
+    it 'get column state' do
+      FactoryGirl.create :column_preference, user: @user, identifier: 'testing'
+      xhr :get, :get_columns_state, {identifier: 'testing'}
+      result = JSON.parse response.body
+      expect(result['status']).to eql true
+
+      xhr :get, :get_columns_state, {identifier: 'nomatch'}
+      result = JSON.parse response.body
+      expect(result['data']).to eql nil
+
+      xhr :get, :get_columns_state, {identifier: nil}
+      result = JSON.parse response.body
+      expect(result['status']).to eql false
+    end
+
+    it 'set column state' do
+      xhr :post, :save_columns_state, {identifier: 'testing'}
+      result = JSON.parse response.body
+      expect(result['status']).to eql true
+
+      xhr :post, :save_columns_state, {identifier: nil}
+      result = JSON.parse response.body
+      expect(result['status']).to eql false
+    end
+  end
+
+  context 'General Settings' do
+    it 'get settings' do
+      xhr :get, :get_settings
+      result = JSON.parse response.body
+      expect(result['data']['settings'].present?).to eql false
+
+      general_setting = FactoryGirl.create :general_setting
+      xhr :get, :get_settings
+      result = JSON.parse response.body
+      expect(result['data']['settings'].present?).to eql true
+    end
+
+    it 'update settings' do
+      general_setting = GeneralSetting.create
+      attributes = FactoryGirl.build(:general_setting).as_json(except: :id)
+      xhr :post, :update_settings, attributes
+      result = JSON.parse response.body
+      expect(result['status']).to eql true
+      expect(attributes.values - general_setting.reload.as_json.values).to eql []
+    end
+  end
+
+  context 'ScanPackSetting' do
+    it 'get ScanPackSetting' do
+      xhr :get, :get_scan_pack_settings
+      result = JSON.parse response.body
+      expect(result['settings'].present?).to eql false
+
+      scan_pack_setting = ScanPackSetting.create
+      xhr :get, :get_scan_pack_settings
+      result = JSON.parse response.body
+      expect(result['settings'].present?).to eql true
+    end
+
+    it 'update ScanPackSetting' do
+      # no scan pack setting
+      attributes = {enable_click_sku: true}
+      xhr :post, :update_scan_pack_settings, attributes
+      result = JSON.parse response.body
+      expect(result['status']).to eql false
+
+      scan_pack_setting = ScanPackSetting.create
+      attributes = {enable_click_sku: true}
+      xhr :post, :update_scan_pack_settings, attributes
+      result = JSON.parse response.body
+      expect(result['status']).to eql true
+      expect(attributes.values - scan_pack_setting.reload.as_json.values).to eql []
+    end
+  end
+
+  context 'Bulk Action' do
+    it 'Cancel' do
+      groove_bulk_action = FactoryGirl.create :groove_bulk_action, activity: 'any', identifier: 'any'
+      xhr :post, :cancel_bulk_action, {id: [groove_bulk_action.id]}
+      result = JSON.parse response.body
+      expect(result['status']).to eql true
+
+      xhr :post, :cancel_bulk_action, {id: nil}
+      result = JSON.parse response.body
+      expect(result['status']).to eql false
+    end
+  end
 end

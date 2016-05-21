@@ -39,10 +39,7 @@ class SettingsController < ApplicationController
     # end
     puts '@result: ' + @result.inspect
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def order_exceptions
@@ -69,10 +66,7 @@ class SettingsController < ApplicationController
       preference = ColumnPreference.find_by_user_id_and_identifier(current_user.id, params[:identifier])
       @result['data'] = preference if preference.present?
     end
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def save_columns_state
@@ -85,10 +79,8 @@ class SettingsController < ApplicationController
       preference.theads = params[:theads]
       preference.save!
     end
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+
+    render json: @result
   end
 
   def get_settings
@@ -110,10 +102,7 @@ class SettingsController < ApplicationController
       ]
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def update_settings
@@ -143,10 +132,7 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def cancel_bulk_action
@@ -165,10 +151,7 @@ class SettingsController < ApplicationController
       result['error_messages'] = ['no id bulk action id provided']
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: result }
-    end
+    render json: result
   end
 
   def get_scan_pack_settings
@@ -188,10 +171,7 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No Scan Pack settings available for the system. Contact administrator.']
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def print_action_barcode
@@ -233,10 +213,7 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No Scan pack settings available for the system. Contact administrator.']
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def send_test_mail
