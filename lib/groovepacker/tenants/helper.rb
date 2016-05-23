@@ -33,10 +33,10 @@ module Groovepacker
         tenants_result
       end
 
-      def do_search
+      def do_search(params)
         query_add = ''
-        sort_key = %w(updated_at name).include?(sort) ? params[:sort].to_s : 'updated_at'
-        sort_order = %w(ASC DESC).include?(order) ? params[:order].to_s : 'DESC'
+        sort_key = %w(updated_at name).include?(params[:sort]) ? params[:sort].to_s : 'updated_at'
+        sort_order = %w(ASC DESC).include?(params[:order]) ? params[:order].to_s : 'DESC'
 
         # Get passed in parameter variables if they are valid.
         limit = params[:limit].to_i || 10
@@ -59,7 +59,7 @@ module Groovepacker
         subscription_result
       end
 
-      def delete_data(tenant, params, result, current_user)
+      def delete_data(params, current_user)
         result = result_hash
         begin
           tenant = Tenant.find(params[:id])
