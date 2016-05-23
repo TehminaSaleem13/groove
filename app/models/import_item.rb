@@ -16,7 +16,7 @@ class ImportItem < ActiveRecord::Base
       summary = self.order_import_summary
     end
     unless summary.nil?
-      summary.emit_data_to_user if eligible_to_update_ui
+      summary.emit_data_to_user(true) if eligible_to_update_ui
     end
   end
 
