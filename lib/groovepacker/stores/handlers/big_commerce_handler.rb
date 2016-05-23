@@ -39,6 +39,11 @@ module Groovepacker
           Groovepacker::Stores::Importers::BigCommerce::ProductsImporter.new(
             self.build_handle).import_bc_single_product(product, pull_inv)
         end
+
+        def import_single_order_from(order_no)
+          Groovepacker::Stores::Importers::BigCommerce::OrdersImporter.new(
+            self.build_handle).fetch_order_on_demand(order_no)
+        end
       end
     end
   end

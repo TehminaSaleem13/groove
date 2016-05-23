@@ -14,7 +14,8 @@ class OrderImportSummary < ActiveRecord::Base
     summary
   end
 
-  def emit_data_to_user
+  def emit_data_to_user(send_data=false)
+    return true unless (self.changes["status"].present? || send_data)
     result = Hash.new
     result['import_info'] = self.reload
     result['import_items'] = []
@@ -42,4 +43,5 @@ class OrderImportSummary < ActiveRecord::Base
       false
     end
   end
+  
 end
