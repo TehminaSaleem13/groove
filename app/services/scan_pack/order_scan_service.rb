@@ -128,6 +128,7 @@ module ScanPack
         'Order with number '+ @input +
         ' cannot be found. It may not have been imported yet'
       end
+      @result['matched'] = false
       @result['notice_messages'].push(message)
     end
 

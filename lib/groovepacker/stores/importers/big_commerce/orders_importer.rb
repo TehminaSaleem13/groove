@@ -24,6 +24,15 @@ module Groovepacker
             @result
           end
 
+          def fetch_order_on_demand(orderno)
+            init_common_objects
+            @import_item = ImportItem.create
+            response = @client.order_on_demand(orderno)
+            import_single_order(response) unless response.blank?
+            Order.emit_data_for_on_demand_import(response, orderno)
+            @import_item.destroy
+          end
+
           private
           def init_common_objects
             handler = self.get_handler
@@ -71,7 +80,6 @@ module Groovepacker
 
           def import_order_items(bigcommerce_order, order)
             return bigcommerce_order if order["products"].nil?
-            
             order["products"] = @client.order_products(order["products"]["url"])
             @import_item.update_attributes(:current_order_items => order["products"].length, :current_order_imported_item => 0 )
 

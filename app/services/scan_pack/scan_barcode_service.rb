@@ -20,7 +20,10 @@ module ScanPack
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
       do_scan_now
-      
+      if @result["data"]["next_state"]=="scanpack.rfo" and @result["matched"]==false
+       stores = Store.where("status=? and on_demand_import=?", true, true)
+       run_import_for_not_found_order if stores.present?
+      end
     end
 
     def do_set_state_matcher
@@ -64,6 +67,18 @@ module ScanPack
     def do_check_state_and_status_to_add_activity
       if @params[:state] == "scanpack.rfp.default" && @result['status'] == true
         Order.find(@params[:id]).addactivity("Product with barcode: #{@params[:input]} scanned", @current_user.name)
+      end
+    end
+
+    def run_import_for_not_found_order
+      stores = Store.where("status=? and store_type NOT IN (?)", true, ['CSV', 'system'])
+      if stores.present?
+        current_tenant = Apartment::Tenant.current
+        order_no_input = @params["input"]
+        order_importer = Groovepacker::Stores::Importers::OrdersImporter.new(nil)
+        order_importer.delay(:run_at => 1.seconds.from_now).search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
+        #order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
+        @result["notice_messages"]="It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."
       end
     end
   end

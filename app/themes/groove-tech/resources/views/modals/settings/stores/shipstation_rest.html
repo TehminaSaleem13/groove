@@ -48,7 +48,12 @@
         <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store(true)"></div>
       </div>
     </div>
+  </div>
+</div>
 
+<div class="row">
+  <div class="col-md-6">
+    <legend>Import Options</legend>
     <div class="form-group">
       <label class="control-label col-md-4">Regular Import Range</label>
 
@@ -74,6 +79,15 @@
         <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store(true)"></div>
         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
            groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">On Demand Import</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.on_demand_import" groov-click="update_single_store(true)"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="When enabled, scanned orders that have not been previously imported will be queued for import in the background while the packer continues to scan other orders."/>
       </div>
     </div>
   </div>

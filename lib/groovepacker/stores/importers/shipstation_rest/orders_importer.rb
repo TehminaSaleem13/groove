@@ -7,10 +7,6 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            handler = self.get_handler
-            credential = handler[:credential]
-            client = handler[:store_handle]
-            import_item = handler[:import_item]
             result = self.build_result
 
             statuses = []
@@ -72,129 +68,8 @@ module Groovepacker
               unless response["orders"].blank?
                 shipments_response = client.get_shipments(import_from-1.days)
                 result[:total_imported] = response["orders"].length
-                import_item.current_increment_id = ''
-                import_item.success_imported = 0
-                import_item.previous_imported = 0
-                import_item.current_order_items = -1
-                import_item.current_order_imported_item = -1
-                import_item.to_import = result[:total_imported]
-                import_item.save
-                sleep 0.5
-                response["orders"].each do |order|
-                  import_item.reload
-                  break if import_item.status == 'cancelled'
-                  import_item.current_increment_id = order["orderNumber"]
-                  import_item.current_order_items = -1
-                  import_item.current_order_imported_item = -1
-                  import_item.save
-                  sleep 0.5
-
-                  shipstation_order = Order.find_by_store_id_and_increment_id(credential.store_id, order["orderNumber"])
-                  if import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
-                    shipstation_order.destroy
-                    shipstation_order = nil
-                  end
-                  
-                  if shipstation_order.blank?
-                    shipstation_order = Order.new
-                  elsif order["tagIds"].present? && order["tagIds"].include?(gp_ready_tag_id)
-                    # in order to adjust inventory on deletion of order assign order status as 'cancelled'
-                    shipstation_order.status = 'cancelled'
-                    shipstation_order.save
-                    shipstation_order.destroy
-                    shipstation_order = Order.new
-                  end
-
-                  if shipstation_order.present? && !shipstation_order.persisted?
-                    ship_to = order["shipTo"]["name"].split(" ")
-                    import_order(shipstation_order, order, credential)
-                    
-                    tracking_number = shipments_response.select {|shipment| shipment["orderId"]==order["orderId"]}.first["trackingNumber"] rescue nil
-                    #tracking_number = client.get_tracking_number(order["orderId"]) if tracking_number.blank?
-                    shipstation_order.tracking_num = tracking_number
-                    unless order["items"].nil?
-                      import_item.current_order_items = order["items"].length
-                      import_item.current_order_imported_item = 0
-                      import_item.save
-                      sleep 0.5
-                      order["items"].each do |item|
-                        order_item = OrderItem.new
-
-                        import_order_item(order_item, item)
-
-                        Rails.logger.info("SKU Product Id: " + item.to_s)
-
-                        if item["sku"].nil? or item["sku"] == ''
-                          # if sku is nil or empty
-                          if Product.find_by_name(item["name"]).nil?
-                            # if item is not found by name then create the item
-                            order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
-                          else
-                            # product exists add temp sku if it does not exist
-                            products = Product.where(name: item["name"])
-                            unless contains_temp_skus(products)
-                              order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
-                            else
-                              order_item.product = get_product_with_temp_skus(products)
-                            end
-                          end
-                        elsif ProductSku.where(sku: item["sku"]).length == 0
-                          # if non-nil sku is not found
-                          product = create_new_product_from_order(item, credential.store, item["sku"])
-                          order_item.product = product
-                        else
-                          order_item_product = ProductSku.where(sku: item["sku"]).
-                            first.product
-
-                          unless item["imageUrl"].nil?
-                            if order_item_product.product_images.length == 0
-                              image = ProductImage.new
-                              image.image = item["imageUrl"]
-                              order_item_product.product_images << image
-                            end
-                          end
-                          order_item_product.save
-                          order_item.product = order_item_product
-                        end
-                        make_product_intangible(order_item.product)
-                        shipstation_order.order_items << order_item
-                        import_item.current_order_imported_item = import_item.current_order_imported_item + 1
-                      end
-                      import_item.save
-                      sleep 0.5
-                    end
-                    if shipstation_order.save
-                      shipstation_order.addactivity("Order Import", credential.store.name+" Import")
-                      shipstation_order.order_items.each do |item|
-                        if item.qty.blank? || item.qty<1
-                          shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{credential.store.name} Import")
-                          item.destroy
-                          next
-                        end
-                        unless item.product.nil? || item.product.primary_sku.nil?
-                          shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} Added", "#{credential.store.name} Import")
-                        end
-                      end
-                      shipstation_order.store = credential.store
-                      shipstation_order.save
-                      shipstation_order.set_order_status
-                      result[:success_imported] = result[:success_imported] + 1
-                      import_item.success_imported = result[:success_imported]
-                      import_item.save
-                      sleep 0.5
-                      if gp_ready_tag_id != -1 && !order["tagIds"].nil? &&
-                        order["tagIds"].include?(gp_ready_tag_id)
-                        client.remove_tag_from_order(order["orderId"], gp_ready_tag_id)
-                        client.add_tag_to_order(order["orderId"], gp_imported_tag_id) if gp_imported_tag_id != -1
-                      end
-                    end
-                  else
-                    import_item.previous_imported = import_item.previous_imported + 1
-                    import_item.save
-                    result[:previous_imported] = result[:previous_imported] + 1
-                    sleep 0.5
-                  end
-                end
+                import_item = init_import_item(result)
+                import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
               end
             else
               result[:status] = false
@@ -209,6 +84,152 @@ module Groovepacker
               credential.save
             end
             result
+          end
+
+          def import_single_order(order_no)
+            result = self.build_result
+            ss_tags_list = client.get_tags_list
+            gp_ready_tag_id = ss_tags_list[credential.gp_ready_tag_name] || -1
+            import_item = init_import_item(result)
+            @scan_settings = ScanPackSetting.last
+            current_tenant = Apartment::Tenant.current
+            on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{current_tenant}.log")
+            on_demand_logger.info("=========================================")
+            on_demand_logger.info("StoreId: #{credential.store.id}")
+            response, shipments_response = client.get_order_on_demand(order_no)
+            response, shipments_response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
+            import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
+            Order.emit_data_for_on_demand_import(response, order_no)
+          end
+
+          def init_import_item(result)
+            import_item.current_increment_id = ''
+            import_item.success_imported = 0
+            import_item.previous_imported = 0
+            import_item.current_order_items = -1
+            import_item.current_order_imported_item = -1
+            import_item.to_import = result[:total_imported] || 1
+            import_item.save
+            sleep 0.5
+            import_item.reload
+            return import_item
+          end
+
+          def import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
+            response["orders"].each do |order|
+              import_item.reload
+              break if import_item.status == 'cancelled'
+              import_item.current_increment_id = order["orderNumber"]
+              import_item.current_order_items = -1
+              import_item.current_order_imported_item = -1
+              import_item.save
+              sleep 0.5
+
+              shipstation_order = Order.find_by_store_id_and_increment_id(credential.store_id, order["orderNumber"])
+              if import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
+                shipstation_order.destroy
+                shipstation_order = nil
+              end
+              
+              if shipstation_order.blank?
+                shipstation_order = Order.new
+              elsif order["tagIds"].present? && order["tagIds"].include?(gp_ready_tag_id)
+                # in order to adjust inventory on deletion of order assign order status as 'cancelled'
+                shipstation_order.status = 'cancelled'
+                shipstation_order.save
+                shipstation_order.destroy
+                shipstation_order = Order.new
+              end
+
+              if shipstation_order.present? && !shipstation_order.persisted?
+                ship_to = order["shipTo"]["name"].split(" ")
+                import_order(shipstation_order, order, credential)
+                tracking_number = shipments_response.select {|shipment| shipment["orderId"]==order["orderId"]}.first["trackingNumber"] rescue nil
+                #tracking_number = client.get_tracking_number(order["orderId"]) if tracking_number.blank?
+                shipstation_order.tracking_num = tracking_number
+                unless order["items"].nil?
+                  import_item.current_order_items = order["items"].length
+                  import_item.current_order_imported_item = 0
+                  import_item.save
+                  sleep 0.5
+                  order["items"].each do |item|
+                    order_item = OrderItem.new
+
+                    import_order_item(order_item, item)
+
+                    Rails.logger.info("SKU Product Id: " + item.to_s)
+
+                    if item["sku"].nil? or item["sku"] == ''
+                      # if sku is nil or empty
+                      if Product.find_by_name(item["name"]).nil?
+                        # if item is not found by name then create the item
+                        order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                      else
+                        # product exists add temp sku if it does not exist
+                        products = Product.where(name: item["name"])
+                        unless contains_temp_skus(products)
+                          order_item.product = create_new_product_from_order(item, credential.store, ProductSku.get_temp_sku)
+                        else
+                          order_item.product = get_product_with_temp_skus(products)
+                        end
+                      end
+                    elsif ProductSku.where(sku: item["sku"]).length == 0
+                      # if non-nil sku is not found
+                      product = create_new_product_from_order(item, credential.store, item["sku"])
+                      order_item.product = product
+                    else
+                      order_item_product = ProductSku.where(sku: item["sku"]).
+                        first.product
+
+                      unless item["imageUrl"].nil?
+                        if order_item_product.product_images.length == 0
+                          image = ProductImage.new
+                          image.image = item["imageUrl"]
+                          order_item_product.product_images << image
+                        end
+                      end
+                      order_item_product.save
+                      order_item.product = order_item_product
+                    end
+                    make_product_intangible(order_item.product)
+                    shipstation_order.order_items << order_item
+                    import_item.current_order_imported_item = import_item.current_order_imported_item + 1
+                  end
+                  import_item.save
+                  sleep 0.5
+                end
+                if shipstation_order.save
+                  shipstation_order.addactivity("Order Import", credential.store.name+" Import")
+                  shipstation_order.order_items.each do |item|
+                    if item.qty.blank? || item.qty<1
+                      shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{credential.store.name} Import")
+                      item.destroy
+                      next
+                    end
+                    unless item.product.nil? || item.product.primary_sku.nil?
+                      shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} Added", "#{credential.store.name} Import")
+                    end
+                  end
+                  shipstation_order.store = credential.store
+                  shipstation_order.save
+                  shipstation_order.set_order_status
+                  result[:success_imported] = result[:success_imported] + 1
+                  import_item.success_imported = result[:success_imported]
+                  import_item.save
+                  sleep 0.5
+                  if gp_ready_tag_id != -1 && !order["tagIds"].nil? &&
+                    order["tagIds"].include?(gp_ready_tag_id)
+                    client.remove_tag_from_order(order["orderId"], gp_ready_tag_id)
+                    client.add_tag_to_order(order["orderId"], gp_imported_tag_id) if gp_imported_tag_id != -1
+                  end
+                end
+              else
+                import_item.previous_imported = import_item.previous_imported + 1
+                import_item.save
+                result[:previous_imported] = result[:previous_imported] + 1
+                sleep 0.5
+              end
+            end
           end
 
           def import_order(shipstation_order, order, credential)
@@ -301,6 +322,23 @@ module Groovepacker
             status_response["orders"].each { |order| orders_hash["orders"].push(order) if order["modifyDate"].to_datetime.utc >= import_from }
             return orders_hash
           end
+
+          def handler
+            @handler ||= self.get_handler
+          end
+
+          def credential
+            @credential ||= handler[:credential]
+          end
+          
+          def client
+            @client ||= handler[:store_handle]
+          end
+
+          def import_item
+            @import_item ||= handler[:import_item]
+          end
+
         end
       end
     end

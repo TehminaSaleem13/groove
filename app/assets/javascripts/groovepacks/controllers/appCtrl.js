@@ -194,7 +194,7 @@ groovepacks_controllers.
                 '<td style="white-space: nowrap;">{{store.name}}</td>' +
                 '<td style="width:62%;padding:3px;">' +
                   '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 75}}</progressbar>' +
-                  '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
+                  // '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                 '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
@@ -315,6 +315,10 @@ groovepacks_controllers.
           $scope.tp_deep_import_days = store.days;
         }
       };
+
+      groovIO.on('popup_display_for_on_demand_import', function (resp) {
+        notification.notify(resp.message);
+      });
 
       $scope.show_logout_box = false;
       groovIO.on('ask_logout', function (msg) {
