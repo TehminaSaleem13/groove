@@ -1,4 +1,19 @@
 <div class="row">
+  <div class="col-md-6">
+    <legend>Import Options</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">On Demand Import</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.on_demand_import" groov-click="update_single_store(true)"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="When enabled, scanned orders that have not been previously imported will be queued for import in the background while the packer continues to scan other orders."/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
   <div class="col-md-8">
     <legend>BigCommerce Information</legend>
     <div ng-show="stores.single.store_hash == null || stores.single.store_hash == 'null' || stores.single.access_token == null || stores.single.access_token == 'null'">
