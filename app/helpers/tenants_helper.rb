@@ -31,6 +31,7 @@ module TenantsHelper
   end
 
   def admin_single_update
+    result = result_hash
     @tenant = find_tenant(params[:id])
     if @tenant
       helper = Groovepacker::Tenants::Helper.new
@@ -38,6 +39,7 @@ module TenantsHelper
     else
       update_fail_status(result, 'Could not find tenant')
     end
+    result
   end
 
   def update_plan_ar(type)
