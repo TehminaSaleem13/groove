@@ -213,12 +213,10 @@ groovepacks_admin_controllers.
 
       myscope.show_popover = function (tenant) {
         $scope.popover_is_visible = true;
-        console.log($scope.popover_is_visible);
       }
 
       myscope.hide_popover = function() {
         $scope.popover_is_visible = false;
-        console.log($scope.popover_is_visible);
       }
 
       myscope.init = function () {

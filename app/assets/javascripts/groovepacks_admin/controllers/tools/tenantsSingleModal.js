@@ -168,7 +168,6 @@ groovepacks_admin_controllers.
         }
         ;
         $modalInstance.result.then($scope.update, $scope.update);
-        console.log($scope.tenants.single);
       };
 
       myscope.init();

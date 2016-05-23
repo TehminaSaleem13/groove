@@ -379,7 +379,6 @@ module Groovepacker
         plan_info = new_plan_info(tenant)
         plan_id = plan_info['plan_id']
         existing_plan = get_plan_info(@subscription_info[:plan_id])['plan_info']
-        puts "existing_plan: " + existing_plan.inspect
         amount = @subscription_info[:amount].to_i * 100
         create_plan(amount,
                     existing_plan.interval,
