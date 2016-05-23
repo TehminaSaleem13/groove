@@ -71,7 +71,7 @@ module PaymentsHelper
     begin
       subscription = @tenant.subscription
       return nil if subscription.nil? || subscription.stripe_customer_id.nil?
-      @customer_info = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+      @customer_info = get_stripe_customer(subscription.stripe_customer_id)
       if (defined?(@customer_info.deleted).nil?)
         return @customer_info
       else
@@ -91,7 +91,7 @@ module PaymentsHelper
   end
 
   def delete_customer(customer_id)
-    customer = Stripe::Customer.retrieve(customer_id)
+    customer = get_stripe_customer(customer_id)
     if (defined?(customer.deleted).nil?)
       customer.delete()
     end
@@ -112,13 +112,14 @@ module PaymentsHelper
       @result['status'] = false
       @result['messages'].push(e.message)
     end
+    @result
   end
 
   def get_next_payment_date(subscription)
     create_result_hash
     @result['next_date'] = nil
     if subscription && subscription.stripe_customer_id
-      customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+      customer = get_stripe_customer(subscription.stripe_customer_id)
       subscriptions_data = customer.subscriptions.data
       @result['next_date'] = (Time.at(subscriptions_data.first.current_period_end).to_datetime).strftime "%B %d %Y" unless subscriptions_data.empty?
     end
@@ -149,7 +150,7 @@ module PaymentsHelper
   end
 
   def update_subcription_plan(subscription, plan_id)
-    customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
+    customer = get_stripe_customer(subscription.stripe_customer_id)
     customer_subscription = customer.subscriptions.retrieve(subscription.customer_subscription_id)
     customer_subscription.plan = plan_id
     customer_subscription.save
@@ -189,5 +190,28 @@ module PaymentsHelper
       'an-bigband' => 'an-groove-bigband',
       'an-symphony' => 'an-groove-symphony'
     }
+  end
+
+  def create_plan(amount, interval, name, currency, id)
+    Stripe::Plan.create(
+      amount: amount,
+      interval: interval,
+      name: name,
+      currency: currency,
+      id: id
+    )
+  end
+
+  def get_plan_name(plan_id)
+    Stripe::Plan.retrieve(plan_id).name
+  end
+
+  def get_stripe_customer(customer_id)
+    Stripe::Customer.retrieve(customer_id)
+  end
+
+  def get_subscription(customer_id, subscription_id)
+    customer = get_stripe_customer(customer_id)
+    return customer.subscriptions.retrieve(subscription_id)
   end
 end

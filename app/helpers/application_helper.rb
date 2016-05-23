@@ -87,4 +87,21 @@ module ApplicationHelper
     @header = ''
     @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
   end
+
+  def update_fail_status(result, message)
+    result['status'] &= false
+    result['error_messages'].push(message)
+  end
+
+  def result_hash
+    {
+      'status' => true,
+      'error_messages' => [],
+      'success_messages' => []
+    }
+  end
+
+  def find_tenant(id)
+    Tenant.find(id)
+  end
 end

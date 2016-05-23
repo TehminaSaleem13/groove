@@ -16,56 +16,93 @@
         <br/>
       </div>
       <div class="col-sm-12">
-        <div class="col-sm-2"></div>
-        <div class="col-sm-8">
-          <div class="col-sm-4">
-            <center>
-              <i class="groove-fa fa fa-dropbox fa-5x"></i>
+        <div class="col-sm-1"></div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-dropbox fa-5x"></i>
 
-              <div>Shipments</div>
-            </center>
-            <div class="col-sm-offset-2 col-sm-8">
-              <input type="number" ng-model="tenants.single.access_restrictions_info.max_allowed"
-                     class="form-control input-style"/>
-            </div>
-          </div>
-          <div class="col-sm-4">
-            <center>
-              <i class="groove-fa fa fa-users fa-5x"></i>
-
-              <div>Users</div>
-            </center>
-            <div class="col-sm-offset-2 col-sm-8">
-              <input type="number" ng-model="tenants.single.access_restrictions_info.max_users"
-                     class="form-control input-style"/>
-            </div>
-          </div>
-          <div class="col-sm-4">
-            <center>
-              <i class="groove-fa fa fa-cloud-download fa-5x"></i>
-
-              <div>Sources</div>
-            </center>
-            <div class="col-sm-offset-2 col-sm-8">
-              <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
-                     class="form-control input-style"/>
-            </div>
+            <div>Shipments</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_allowed"
+                   class="form-control input-style"/>
           </div>
         </div>
-        <div class="col-sm-2"></div>
-      </div>
-      <br/>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-users fa-5x"></i>
 
-      <div class="col-sm-12">
-        <br/>
-        <center>
-          <button ng-click="update_access_restrictions()"
-                  class="dropdown-toggle groove-button label label-default label-success" translate>Update
-          </button>
-        </center>
-        <hr>
-        <br/>
+            <div>Users</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_users"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-cloud-download fa-5x"></i>
+
+            <div>Sources</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-usd fa-5x"></i>
+
+            <div>Amount</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="text" ng-model="tenants.single.subscription_info.amount"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <br/><br/>
+          <center>
+            <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}</div><br/><br/>
+
+            <div ng-show="tenants.single.basicinfo.is_modified == true">Modified</div>
+            <div ng-hide="tenants.single.basicinfo.is_modified == true">Unmodified</div>
+          </center>
+          <!-- <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+                   class="form-control input-style"/>
+          </div> -->
+        </div>
+        <div class="col-sm-1"></div>
       </div>
+      <div style="clear:both;"><br/></div>
+      
+      <div class="col-sm-12">
+        <div class="col-sm-offset-1 col-sm-6">
+          <h4 class="control-label" style="width: 100%; text-align: left;">Plan Notes: </h4>
+          <textarea class="form-control input-style"
+            rows="5" ng-model="tenants.single.basicinfo.addon_notes" placeholder="Unfocus will save data..." ng-blur="update_access_restrictions()"></textarea>
+        </div>
+        <div class="col-sm-4">
+          <button ng-click="update_access_restrictions()"
+                  class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
+          </button>
+          <div style="clear:both;"></div>
+          <div>
+            <h4>Stripe Customer</h4>
+            <span><a href="https://dashboard.stripe.com/test/customers/{{tenants.single.subscription_info.customer_id}}" target="_blank">{{tenants.single.subscription_info.email}}</a></span>
+          </div>
+          <div style="clear:both;"></div>
+          <div>
+            <h4 class="control-label">Stripe Plan</h4>
+            <span><a href="https://dashboard.stripe.com/test/plans/{{tenants.single.subscription_info.plan_id}}" target="_blank">{{tenants.single.subscription_info.plan}}</a></span>
+          </div>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+      <div style="clear:both;"></div>
+      <hr>
       <div>
         <div class="col-sm-1"></div>
         <div class="col-sm-10">
