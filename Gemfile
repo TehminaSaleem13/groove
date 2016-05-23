@@ -40,6 +40,7 @@ group :development,:test do
   gem 'protractor-rails'
   gem "rubycritic", :require => false
   gem 'pry'
+  gem 'parallel_tests'
 end
 
 group :test do

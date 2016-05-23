@@ -4,7 +4,7 @@ module ExportData
   private
 
   def generate_header
-    YAML::load_file("config/export_data_header.yml")
+    YAML.load_file('config/data_mappings/export_data_header.yml')
   end
 
   # def set_result_hash
