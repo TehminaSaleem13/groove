@@ -221,7 +221,7 @@ class OrderItem < ActiveRecord::Base
       scan_time = self.order_item_scan_times.create(
         scan_start: self.order.last_suggested_at,
         scan_end: DateTime.now)
-      if typein_count > 0
+      if typein_count > 1
         avg_time = avg_time_per_item(username)
         if avg_time
           self.order.total_scan_time += (avg_time * typein_count).to_i

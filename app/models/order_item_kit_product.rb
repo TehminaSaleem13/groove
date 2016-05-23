@@ -72,7 +72,7 @@ class OrderItemKitProduct < ActiveRecord::Base
     scan_time_per_item = calc_scan_time_for_first_item
     total_scan_time_for_order = self.order_item.order.total_scan_time
     
-    if typein_count > 0
+    if typein_count > 1
       avg_time = avg_time_per_item(username)
       if avg_time
         total_scan_time_for_order += (avg_time * typein_count).to_i
