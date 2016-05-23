@@ -161,14 +161,23 @@ module OrderConcern
   end
 
   def update_order_attrs
-    return if @order.status == 'scanned'
-
+    status = @order.status
+    return if status == 'scanned'
+    check_inactive_or_new_products
     update_order_notes # Everyone can create notes from Packer
 
     if current_user.can?('add_edit_order_items')
       update_attrs_from_params
     elsif check_update_permissions
       set_status_and_message(false, 'You do not have enough permissions to edit the order', ['push'])
+    end
+  end
+
+  def check_inactive_or_new_products
+    if !@order.has_inactive_or_new_products
+      @order.status = 'awaiting'
+    elsif @order.status.eql? 'awaiting'
+      @order.status = 'onhold'
     end
   end
 

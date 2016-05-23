@@ -83,6 +83,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   //list related functions
   var get_list = function (object, page) {
+    window.obj = object;
     var url = '';
     var setup = object.setup;
     if (typeof page != 'undefined' && page > 0) {

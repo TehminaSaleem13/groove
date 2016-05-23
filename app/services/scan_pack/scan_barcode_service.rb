@@ -1,7 +1,7 @@
 module ScanPack
   class ScanBarcodeService < ScanPack::Base
     include ScanPackHelper
-    
+
     def initialize(current_user, session, params)
       set_scan_pack_action_instances(current_user, session, params)
     end

@@ -71,8 +71,8 @@ groovepacks_controllers.
               if (data.data.order_complete) {
                 $scope.trigger_scan_message('order_complete');
               }
-              $state.go(data.data.next_state, data.data);
             }
+            $state.go(data.data.next_state, data.data);
           }
         }
       };
