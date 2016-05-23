@@ -16,7 +16,7 @@ class ImportItem < ActiveRecord::Base
       summary = self.order_import_summary
     end
     unless summary.nil?
-      summary.emit_data_to_user
+      summary.emit_data_to_user if eligible_to_update_ui
     end
   end
 
@@ -34,5 +34,13 @@ class ImportItem < ActiveRecord::Base
     import_item.to_import = 1
     import_item.save
     return import_item
+  end
+
+  def eligible_to_update_ui
+    status_changed = self.changes["status"].present?
+    remainder = ((self.success_imported || 0) + (self.previous_imported || 0) + (self.updated_orders_import || 0))%10
+    eligible = remainder==0 ? true : false
+    next_order = self.changes["success_imported"].present? || self.changes["previous_imported"].present? ||self.changes["updated_orders_import"].present?
+    return status_changed || (eligible && next_order)
   end
 end

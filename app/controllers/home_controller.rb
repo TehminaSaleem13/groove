@@ -40,7 +40,7 @@ class HomeController < ApplicationController
     end
     import_summary = OrderImportSummary.top_summary
     unless import_summary.nil?
-      import_summary.emit_data_to_user
+      import_summary.emit_data_to_user(true)
     end
     render json: {status: true}
   end
