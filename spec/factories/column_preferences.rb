@@ -4,7 +4,5 @@ FactoryGirl.define do
   factory :column_preference do
     user nil
     identifier "MyString"
-    shown "MyText"
-    order "MyText"
   end
 end

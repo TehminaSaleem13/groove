@@ -134,6 +134,9 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.boolean  "import_products",      :default => false, :null => false
     t.boolean  "import_images",        :default => false, :null => false
     t.date     "ebay_auth_expiration"
+    t.string   "productdev_id",        :default => "",    :null => false
+    t.string   "productapp_id",        :default => "",    :null => false
+    t.string   "productcert_id",       :default => "",    :null => false
     t.text     "productauth_token"
     t.text     "auth_token"
   end
@@ -160,7 +163,7 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
   end
 
   create_table "ftp_credentials", :force => true do |t|
-    t.string   "host"
+    t.string   "host",                   :default => ""
     t.integer  "port",                   :default => 21
     t.string   "username",               :default => ""
     t.string   "password",               :default => ""
@@ -192,7 +195,7 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.boolean  "send_email_on_sun",                 :default => false
     t.datetime "time_to_send_email",                :default => '2000-01-01 00:00:00'
     t.string   "product_weight_format"
-    t.string   "packing_slip_size",                 :default => "4 x 6"
+    t.string   "packing_slip_size"
     t.string   "packing_slip_orientation"
     t.text     "packing_slip_message_to_customer"
     t.boolean  "import_orders_on_mon",              :default => false
@@ -210,6 +213,7 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.string   "conf_code_product_instruction",     :default => "optional"
     t.string   "admin_email"
     t.string   "export_items",                      :default => "disabled"
+    t.boolean  "inventory_auto_allocation",         :default => false
     t.string   "custom_field_one",                  :default => "Custom 1"
     t.string   "custom_field_two",                  :default => "Custom 2"
     t.integer  "max_time_per_item",                 :default => 10
@@ -539,7 +543,6 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.string   "method"
     t.datetime "created_at",                                                                 :null => false
     t.datetime "updated_at",                                                                 :null => false
-    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -560,6 +563,7 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                       :default => false
+    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                   :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                    :default => false
@@ -613,7 +617,6 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.integer  "product_id"
     t.datetime "created_at",                                               :null => false
     t.datetime "updated_at",                                               :null => false
-    t.string   "alert"
     t.string   "location_primary",        :limit => 50
     t.string   "location_secondary",      :limit => 50
     t.string   "name"
@@ -685,7 +688,6 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.integer  "packing_placement",                                             :default => 50
     t.integer  "pack_time_adj"
     t.string   "kit_parsing",                                                   :default => "individual"
-    t.integer  "is_kit",                                                        :default => 0
     t.boolean  "disable_conf_req",                                              :default => false
     t.integer  "total_avail_ext",                                               :default => 0,            :null => false
     t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,          :null => false
@@ -697,6 +699,7 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.boolean  "add_to_any_order",                                              :default => false
     t.string   "base_sku"
     t.boolean  "is_intangible",                                                 :default => false
+    t.integer  "is_kit",                                                        :default => 0
     t.text     "product_receiving_instructions"
   end
 
@@ -798,22 +801,21 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
   end
 
   create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",                                                 :null => false
-    t.string   "api_secret",                                              :null => false
+    t.string   "api_key",                                             :null => false
+    t.string   "api_secret",                                          :null => false
     t.date     "last_imported_at"
-    t.integer  "store_id",                                                :null => false
-    t.datetime "created_at",                                              :null => false
-    t.datetime "updated_at",                                              :null => false
-    t.boolean  "shall_import_awaiting_shipment",       :default => true
-    t.boolean  "shall_import_shipped",                 :default => false
-    t.boolean  "warehouse_location_update",            :default => false
-    t.boolean  "shall_import_customer_notes",          :default => false
-    t.boolean  "shall_import_internal_notes",          :default => false
-    t.integer  "regular_import_range",                 :default => 3
-    t.boolean  "gen_barcode_from_sku",                 :default => false
-    t.boolean  "shall_import_pending_fulfillment",     :default => false
+    t.integer  "store_id",                                            :null => false
+    t.datetime "created_at",                                          :null => false
+    t.datetime "updated_at",                                          :null => false
+    t.boolean  "shall_import_awaiting_shipment",   :default => true
+    t.boolean  "shall_import_shipped",             :default => false
+    t.boolean  "warehouse_location_update",        :default => false
+    t.boolean  "shall_import_customer_notes",      :default => false
+    t.boolean  "shall_import_internal_notes",      :default => false
+    t.integer  "regular_import_range",             :default => 3
+    t.boolean  "gen_barcode_from_sku",             :default => false
+    t.boolean  "shall_import_pending_fulfillment", :default => false
     t.datetime "quick_import_last_modified"
-    t.boolean  "import_notestobuyer_in_notestopacker", :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|
@@ -935,26 +937,30 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
   add_index "user_inventory_permissions", ["user_id", "inventory_warehouse_id"], :name => "index_user_inventory_permissions_user_inventory", :unique => true
 
   create_table "users", :force => true do |t|
-    t.string   "encrypted_password",     :default => "",    :null => false
+    t.string   "encrypted_password",             :default => "",    :null => false
     t.string   "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          :default => 0
+    t.integer  "sign_in_count",                  :default => 0
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
     t.string   "current_sign_in_ip"
     t.string   "last_sign_in_ip"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
-    t.string   "username",               :default => "",    :null => false
-    t.boolean  "active",                 :default => false, :null => false
+    t.datetime "created_at",                                        :null => false
+    t.datetime "updated_at",                                        :null => false
+    t.string   "username",                       :default => "",    :null => false
+    t.boolean  "active",                         :default => false, :null => false
     t.string   "other"
     t.string   "name"
-    t.string   "confirmation_code",      :default => "",    :null => false
+    t.string   "confirmation_code",              :default => "",    :null => false
     t.integer  "inventory_warehouse_id"
     t.integer  "role_id"
-    t.boolean  "view_dashboard",         :default => false
-    t.boolean  "is_deleted",             :default => false
+    t.boolean  "edit_user_status",               :default => false, :null => false
+    t.boolean  "add_order_items_ALL",            :default => false, :null => false
+    t.string   "order_edit_confirmation_code",   :default => ""
+    t.string   "product_edit_confirmation_code", :default => ""
+    t.boolean  "view_dashboard",                 :default => false
+    t.boolean  "is_deleted",                     :default => false
   end
 
   add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
