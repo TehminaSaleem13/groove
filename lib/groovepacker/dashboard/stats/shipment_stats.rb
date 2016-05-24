@@ -32,6 +32,7 @@ module Groovepacker
         end
 
         def get_days(month)
+          return 0 if @access_record_count == 0
           date_diff = 0
           last_created = @access_restrictions.last.created_at
           if month == 'current'
