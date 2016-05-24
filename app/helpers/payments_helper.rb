@@ -203,7 +203,11 @@ module PaymentsHelper
   end
 
   def get_plan_name(plan_id)
-    Stripe::Plan.retrieve(plan_id).name
+    begin
+      Stripe::Plan.retrieve(plan_id).name
+    rescue
+      ''
+    end
   end
 
   def get_stripe_customer(customer_id)
@@ -211,7 +215,7 @@ module PaymentsHelper
   end
 
   def get_subscription(customer_id, subscription_id)
-    customer = get_stripe_customer(customer_id)
-    return customer.subscriptions.retrieve(subscription_id)
+    @customer = get_stripe_customer(customer_id)
+    return @customer.subscriptions.retrieve(subscription_id) if @customer
   end
 end
