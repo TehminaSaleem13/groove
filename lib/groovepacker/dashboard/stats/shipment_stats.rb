@@ -2,11 +2,14 @@ module Groovepacker
   module Dashboard
     module Stats
       class ShipmentStats
+        include ApplicationHelper
+        
         def get_shipment_stats(name, avg_data = false)
           shipping_result = default_result
           @tenant = Tenant.where(name: name).first
           current_tenant = Apartment::Tenant.current_tenant
           if @tenant
+            return shipping_result unless switch_tenant(@tenant.name)
             Apartment::Tenant.switch(@tenant.name)
             @access_restrictions = AccessRestriction.order('created_at')
             @access_record_count = @access_restrictions.length
