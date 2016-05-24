@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160520140453) do
+ActiveRecord::Schema.define(:version => 20160524102139) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -576,6 +576,9 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.boolean  "traced_in_dashboard",                                     :default => false
     t.boolean  "scanned_by_status_change",                                :default => false
   end
+
+  add_index "orders", ["increment_id"], :name => "index_orders_on_increment_id"
+  add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"

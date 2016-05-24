@@ -59,7 +59,7 @@ class Order < ActiveRecord::Base
       result = {"status" => false, "message" => "Order #{order_no} could not be found and downloaded. Please check your order source to verify this order exists."}
       GroovRealtime::emit('popup_display_for_on_demand_import', result, :tenant)
     end
-    
+
   end
 
   def process_unprocessed_orders
@@ -229,7 +229,7 @@ class Order < ActiveRecord::Base
   def has_unscanned_items
     result = false
     self.reload
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       unless order_item.product.try(:is_intangible)
         if order_item.scanned_status != 'scanned'
           result |= true
@@ -374,19 +374,34 @@ class Order < ActiveRecord::Base
     unscanned_list = []
     #Order.connection.clear_query_cache
     self.reload
-    self.order_items.each do |order_item|
+    self.order_items
+      .includes(
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      ).each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.product.is_kit == 1
+          option_products = order_item.option_products
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
           elsif order_item.product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
-            unscanned_list.push(order_item.build_unscanned_individual_kit)
+            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
           elsif order_item.product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > order_item.kit_split_scanned_qty
-                unscanned_list.push(order_item.build_unscanned_individual_kit(true))
+                unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
               end
               if order_item.qty > order_item.kit_split_qty
                 unscanned_item = order_item.build_unscanned_single_item(true)
@@ -442,20 +457,36 @@ class Order < ActiveRecord::Base
   def get_scanned_items
     scanned_list = []
 
-    self.order_items.each do |order_item|
+    self.order_items
+    self.order_items
+      .includes(
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      ).each do |order_item|
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.product.is_kit == 1
+          option_products = order_item.option_products
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
           elsif order_item.product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
-            scanned_list.push(order_item.build_scanned_individual_kit)
+            scanned_list.push(order_item.build_scanned_individual_kit(option_products))
           elsif order_item.product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > 0
-                scanned_list.push(order_item.build_scanned_individual_kit(true))
+                scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
               end
               if order_item.single_scanned_qty != 0
                 scanned_list.push(order_item.build_scanned_single_item(true))
