@@ -81,7 +81,8 @@ module Groovepacker
             'allow_bc_inv_push' => 'allow_bc_inv_push',
             'allow_mg_rest_inv_push' => 'allow_mg_rest_inv_push',
             'allow_shopify_inv_push' => 'allow_shopify_inv_push',
-            'allow_teapplix_inv_push' => 'allow_teapplix_inv_push'
+            'allow_teapplix_inv_push' => 'allow_teapplix_inv_push',
+            'allow_magento_soap_tracking_no_push' => 'allow_magento_soap_tracking_no_push'
           }
         end
 
