@@ -146,6 +146,10 @@ See README.md or https://github.com/fraywing/textAngular/wiki for requirements a
   margin-top: 10px;
 }
 
+.remove_popup_margin .popover.bottom {
+  margin-top: 0;
+}
+
 .popover-title {
   padding: 8px 14px;
   margin: 0;

@@ -36,7 +36,7 @@
         <div class="box-outer top-nav-bar">
           <div class="box"></div>
           <div class="col-lg-10 col-md-11 col-sm-10">
-            <ul class="nav">
+            <ul class="nav remove_popup_margin">
               <li class="navbar-brand nav-li col-lg-5 col-md-4">
                 <a href="#/home"><img src="/assets/images/logo.png" alt="GroovePacker"/></a>
               </li>
@@ -72,15 +72,15 @@
               </li>-->
 
               <!-- <li class="nav-li" ng-mouseenter="update_popup_display_setting(true);" ng-mouseleave="update_popup_display_setting(false);" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom"> -->
-              <li class="nav-li" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10">
+              <li class="nav-li" id="import_tab">
                 <a href="" ng-click='import_all_orders()' ng-show="import_summary.import_info.status !='in_progress'">
                   Import Orders<br/>
-                  <img class="icons" src="/assets/images/cloud.png">
+                  <img class="icons" src="/assets/images/cloud.png" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10" popover-popup-trigger="#import_tab">
                 </a>
                 <a href="" ng-click='cancel_import()' ng-show="import_summary.import_info.status =='in_progress'">
                   <i class="glyphicon glyphicon-refresh groov-refresh-spin"></i>
                   Cancel Import<br/>
-                  <img class="icons" src="/assets/images/cloud.png">
+                  <img class="icons" src="/assets/images/cloud.png" groov-popover="{{import_groov_popover.content}}" popover-title="{{import_groov_popover.title}}" popover-placement="bottom" popover-popup-delay="0" popover-popup-hide="10" popover-popup-trigger="#import_tab">
                 </a>
               </li>
             </ul>
