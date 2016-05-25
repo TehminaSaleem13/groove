@@ -383,6 +383,9 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   var single_record_exception = function (orders) {
+    if(orders.single.exception.assoc==undefined) {
+      orders.single.exception.assoc = orders.single.users[0];
+    }
     return $http.post(
       '/orders/'+orders.single.basicinfo.id+'/record_exception.json',
       {
