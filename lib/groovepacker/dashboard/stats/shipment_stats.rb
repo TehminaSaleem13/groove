@@ -2,11 +2,14 @@ module Groovepacker
   module Dashboard
     module Stats
       class ShipmentStats
+        include ApplicationHelper
+        
         def get_shipment_stats(name, avg_data = false)
           shipping_result = default_result
           @tenant = Tenant.where(name: name).first
           current_tenant = Apartment::Tenant.current_tenant
           if @tenant
+            return shipping_result unless switch_tenant(@tenant.name)
             Apartment::Tenant.switch(@tenant.name)
             @access_restrictions = AccessRestriction.order('created_at')
             @access_record_count = @access_restrictions.length
@@ -29,6 +32,7 @@ module Groovepacker
         end
 
         def get_days(month)
+          return 0 if @access_record_count == 0
           date_diff = 0
           last_created = @access_restrictions.last.created_at
           if month == 'current'
@@ -78,7 +82,8 @@ module Groovepacker
             'allow_bc_inv_push' => 'allow_bc_inv_push',
             'allow_mg_rest_inv_push' => 'allow_mg_rest_inv_push',
             'allow_shopify_inv_push' => 'allow_shopify_inv_push',
-            'allow_teapplix_inv_push' => 'allow_teapplix_inv_push'
+            'allow_teapplix_inv_push' => 'allow_teapplix_inv_push',
+            'allow_magento_soap_tracking_no_push' => 'allow_magento_soap_tracking_no_push'
           }
         end
 

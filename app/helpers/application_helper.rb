@@ -104,4 +104,13 @@ module ApplicationHelper
   def find_tenant(id)
     Tenant.find(id)
   end
+
+  def switch_tenant(tenant)
+    begin
+      Apartment::Tenant.switch(tenant)
+      true
+    rescue => e
+      false
+    end
+  end
 end

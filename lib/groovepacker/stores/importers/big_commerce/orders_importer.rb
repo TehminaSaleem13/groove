@@ -29,7 +29,9 @@ module Groovepacker
             @import_item = ImportItem.create
             response = @client.order_on_demand(orderno)
             import_single_order(response) unless response.blank?
-            Order.emit_data_for_on_demand_import(response, orderno)
+            resp_hash = {"orders" => []}
+            resp_hash["orders"] << response if response.present?
+            Order.emit_data_for_on_demand_import(resp_hash, orderno)
             @import_item.destroy
           end
 
