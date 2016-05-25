@@ -286,7 +286,7 @@ class Product < ActiveRecord::Base
 
   # provides primary image if exists
   def primary_image
-    self.product_images.order('product_images.order ASC').first.image unless self.product_images.order('product_images.order ASC').first.nil?
+    self.product_images.order('product_images.order ASC').last.image unless self.product_images.order('product_images.order ASC').last.nil?
   end
 
   def primary_image=(value)
