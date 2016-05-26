@@ -7,6 +7,10 @@ module Groovepacker
           include ProductsHelper
 
           def import
+            handler = self.get_handler
+            credential = handler[:credential]
+            client = handler[:store_handle]
+            import_item = handler[:import_item]
             result = self.build_result
 
             statuses = []
@@ -68,8 +72,8 @@ module Groovepacker
               unless response["orders"].blank?
                 shipments_response = client.get_shipments(import_from-1.days)
                 result[:total_imported] = response["orders"].length
-                import_item = init_import_item(result)
-                import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
+                import_item = init_import_item(import_item, result)
+                import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id, gp_imported_tag_id)
               end
             else
               result[:status] = false
@@ -87,10 +91,15 @@ module Groovepacker
           end
 
           def import_single_order(order_no)
+            handler = self.get_handler
+            credential = handler[:credential]
+            client = handler[:store_handle]
+            import_item = handler[:import_item]
             result = self.build_result
             ss_tags_list = client.get_tags_list
             gp_ready_tag_id = ss_tags_list[credential.gp_ready_tag_name] || -1
-            import_item = init_import_item(result)
+            gp_imported_tag_id = ss_tags_list[credential.gp_imported_tag_name] || -1
+            import_item = init_import_item(import_item, result)
             @scan_settings = ScanPackSetting.last
             current_tenant = Apartment::Tenant.current
             on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{current_tenant}.log")
@@ -98,11 +107,11 @@ module Groovepacker
             on_demand_logger.info("StoreId: #{credential.store.id}")
             response, shipments_response = client.get_order_on_demand(order_no)
             response, shipments_response = client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
-            import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
+            import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id, gp_imported_tag_id)
             Order.emit_data_for_on_demand_import(response, order_no)
           end
 
-          def init_import_item(result)
+          def init_import_item(import_item, result)
             import_item.current_increment_id = ''
             import_item.success_imported = 0
             import_item.previous_imported = 0
@@ -115,7 +124,7 @@ module Groovepacker
             return import_item
           end
 
-          def import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id)
+          def import_orders_from_response(response, shipments_response, client, import_item, credential, result, gp_ready_tag_id, gp_imported_tag_id)
             response["orders"].each do |order|
               import_item.reload
               break if import_item.status == 'cancelled'
@@ -323,21 +332,21 @@ module Groovepacker
             return orders_hash
           end
 
-          def handler
-            @handler ||= self.get_handler
-          end
-
-          def credential
-            @credential ||= handler[:credential]
-          end
-          
-          def client
-            @client ||= handler[:store_handle]
-          end
-
-          def import_item
-            @import_item ||= handler[:import_item]
-          end
+          #def handler
+          #  @handler ||= self.get_handler
+          #end
+#
+#          def credential
+#            @credential ||= handler[:credential]
+#          end
+#          
+#          def client
+#            @client ||= handler[:store_handle]
+#          end
+#
+#          def import_item
+#            @import_item ||= handler[:import_item]
+#          end
 
         end
       end
