@@ -12,10 +12,12 @@ module Groovepacker
             result = build_result
             order_map = @helper.create_order_map
             @imported_orders = {}
+            @created_order_items = []
             @import_item = @helper.initialize_import_item
             final_records = @helper.build_final_records
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
+            OrderItem.import @created_order_items
             @import_item.status = 'completed'
             @import_item.save
             result
@@ -94,8 +96,10 @@ module Groovepacker
               sku: single_sku.strip)
             if !product_skus.empty?
               product = product_skus.first.product
-              order_item = @order_item_helper.create_update_order_item(single_row, product, single_sku, @order)
-              save_order_item(order_item)
+              order_item = @order_item_helper.create_update_order_item(single_row, product.id, single_sku, @order.id)
+              @created_order_items << order_item
+              # save_order_item(order_item)
+              addactivity_and_delete_required(order_item)
               @product_helper.update_product(product, single_row)
             else # no sku is found
               product = Product.new
@@ -150,21 +154,24 @@ module Groovepacker
 
           def set_product_info(product, single_row, unique_order_item = false)
             @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
-            order_item = @order_item_helper.import_new_order_item( single_row,
-                                                                   product,
-                                                                   @helper.get_sku(single_row, @order_increment_sku, unique_order_item)
+            order_item = @order_item_helper.create_new_order_item( single_row,
+                                                                   product.id,
+                                                                   @helper.get_sku(single_row, @order_increment_sku, unique_order_item),
+                                                                   @order.id
                                                                   )
+            @created_order_items << order_item
             @order_required.delete('sku')
-            save_order_item(order_item)
+            # save_order_item(order_item)
+            addactivity_and_delete_required(order_item)
             @import_item.current_order_imported_item = 1
             @import_item.save
           end
 
-          def save_order_item(order_item)
+          def addactivity_and_delete_required(order_item)
             @order.addactivity("Item with SKU: #{order_item.product.primary_sku} Added", "#{@order.store.name} Import")
             @order_required.delete('qty')
             @order_required.delete('price')
-            @order.order_items << order_item
+            # @order.order_items << order_item
           end
 
           def save_order_and_update_count(result)
