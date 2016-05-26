@@ -8,8 +8,24 @@ groovepacks_controllers.
        * Public methods
        */
 
+      myscope.datagrid_features = function(){
+        msg = "<p><strong>There are a number of handy features in the order and product lists:</strong></p>" +
+          "<p>Send to Scan and Pack - Ctrl-Click the order number in the orders list to send it to Scan and Pack</p>" +
+          "<p>Right-Click to Edit - Right click fields directly in the grid to edit them.</p>" +
+          "<p>Shift-Click to Select - Click a row in the grid to select it, then shift click another row to select it and all in between.</p>" +
+          "<p>Show and Hide Columns - Right-Click the column header to select which columns should be visible</p>" +
+          "<p>Sort by column - Click most columns to sort the data by that column</p>" +
+          "<p>Sort by last modified - This is the default sort mode. To return to it just Shift-Click the column header.</p>" +
+          "<p>Re-Order columns - Click and hold on a column header to pick it up and drag it to a new location.</p>"
+        return msg;
+      }
 
       $scope.handlesort = function (value) {
+        if(event.shiftKey){
+          value = '';
+          // To get the new orders always in DESC
+          $scope.orders.setup.order = 'ASC';
+        }
         myscope.order_setup_opt('sort', value);
       };
 
@@ -304,6 +320,7 @@ groovepacks_controllers.
           select_all: $scope.select_all_toggle,
           invert: myscope.invert,
           disable_global_edit: $scope.disable_global_edit,
+          features: myscope.datagrid_features(),
           selections: {
             show_dropdown: true,
             single_callback: myscope.select_single,
