@@ -22,6 +22,8 @@
                 class="pagination-sm" rotate="false"></pagination>
   </div>
   <div class="container-fluid">
+
+    <i ng-if='options.features' class="pull-right icon-large glyphicon glyphicon-info-sign ng-scope" popover-trigger="mouseenter" popover-placement='left' groov-popover="{{options.features}}" style="font-size"></i>
     <div class="table-parent col-xs-12 col-md-12 col-lg-12 col-sm-12">
       <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads"
              id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
@@ -34,6 +36,8 @@
                  bo-text="options.all_fields[field].name" ng-class="options.setup.order"></div>
             <div bo-if="!options.all_fields[field].sortable" bo-text="options.all_fields[field].name"></div>
             <span class="holder" ng-show="!$last"></span>
+            <!-- <i ng-if="options.setup.sort == field" tooltip="Click for default Sort Order: Last modified Date/Time" tooltip-placement='right' class='fa fa-refresh middle' ng-click='options.sort_func(" ")'>
+            </i> -->
           </th>
         </tr>
         </thead>
