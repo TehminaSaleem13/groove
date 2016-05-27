@@ -19,7 +19,7 @@ module Groovepacker
               base_product = update_base_product(base_skus.first, single_row)
             end
             base_product.save
-            make_product_intangible(base_product)
+            base_product
           end
 
           def import_product_info(product, single_row, prop, prop_type)
@@ -161,14 +161,12 @@ module Groovepacker
             import_product_category(product, single_row)
             if unique_order_item
               product.base_sku = @helper.get_row_data(single_row, 'sku').strip
-              product.save
             else
               import_sec_ter_sku(product, single_row)
               import_sec_ter_barcode(product, single_row)
-              make_product_intangible(product) if product.save!
             end
-            product.reload
-            product.update_product_status
+            product.save!
+            product
           end
 
           def import_product_barcode(product, single_row, order_increment_sku, unique_order_item = false)

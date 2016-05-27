@@ -170,27 +170,27 @@ describe StoresController do
       expect(@ftp_credential.username).to eq("TEST1")
     end
 
-    it "Should connect and retrieve using ftp credentials of a store" do
-      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_store_inv_warehouse')
-      @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type => 'CSV', :inventory_warehouse=>@inv_wh)
-      FactoryGirl.create(:ftp_credential, :host => "ftp.groovepacker.com/orders", :username => "test@groovepacker.com", :password => "1gpacker", :store_id => @store.id)
-      request.accept = "application/json"
-      get :connect_and_retrieve, {:id => @store.id}
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['connection']['status']).to eq(false)
-      expect(result['connection']['error_messages']).to_not be_blank
-      expect(result['connection']['success_messages']).to be_blank
+    # it "Should connect and retrieve using ftp credentials of a store" do
+    #   @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'csv_store_inv_warehouse')
+    #   @store = FactoryGirl.create(:store, :name=>'csv_store', :store_type => 'CSV', :inventory_warehouse=>@inv_wh)
+    #   FactoryGirl.create(:ftp_credential, :host => "ftp.groovepacker.com/orders", :username => "test@groovepacker.com", :password => "1gpacker", :store_id => @store.id)
+    #   request.accept = "application/json"
+    #   get :connect_and_retrieve, {:id => @store.id}
+    #   expect(response.status).to eq(200)
+    #   result = JSON.parse(response.body)
+    #   expect(result['connection']['status']).to eq(false)
+    #   expect(result['connection']['error_messages']).to_not be_blank
+    #   expect(result['connection']['success_messages']).to be_blank
 
-      @store1 = FactoryGirl.create(:store, :name=>'csv_store1', :store_type => 'CSV', :inventory_warehouse=>@inv_wh)
-      FactoryGirl.create(:ftp_credential, :host => "ftp.groovepacker.com/orders", :username => "test@groovepacker.com", :password => "1gpacker!", :store_id => @store1.id)
-      request.accept = "application/json"
-      get :connect_and_retrieve, {:id => @store1.id}
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['connection']['status']).to eq(true)
-      expect(result['connection']['error_messages']).to be_blank
-      expect(result['connection']['success_messages']).to_not be_blank
-    end
+    #   @store1 = FactoryGirl.create(:store, :name=>'csv_store1', :store_type => 'CSV', :inventory_warehouse=>@inv_wh)
+    #   FactoryGirl.create(:ftp_credential, :host => "ftp.groovepacker.com/orders", :username => "test@groovepacker.com", :password => "1gpacker!", :store_id => @store1.id)
+    #   request.accept = "application/json"
+    #   get :connect_and_retrieve, {:id => @store1.id}
+    #   expect(response.status).to eq(200)
+    #   result = JSON.parse(response.body)
+    #   expect(result['connection']['status']).to eq(true)
+    #   expect(result['connection']['error_messages']).to be_blank
+    #   expect(result['connection']['success_messages']).to_not be_blank
+    # end
   end
 end
