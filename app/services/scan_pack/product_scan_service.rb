@@ -118,6 +118,7 @@ module ScanPack
       barcode_found = do_if_barcode_not_found(clean_input, serial_added, clicked) unless barcode_found
 
       if barcode_found
+        @single_order.addactivity("Type-In count Scanned for product #{@input.to_s}", @current_user.username) if @typein_count > 1
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1

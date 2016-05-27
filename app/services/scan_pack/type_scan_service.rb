@@ -36,7 +36,7 @@ module ScanPack
               current_user: @current_user, session: @session
             }
           )
-        @order.addactivity("Type-In count Scanned for product #{next_item[:sku].to_s}", @current_user.username)
+        # @order.addactivity("Type-In count Scanned for product #{next_item[:sku].to_s}", @current_user.username)
       end
 
     end

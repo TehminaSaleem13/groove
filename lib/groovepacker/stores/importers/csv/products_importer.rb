@@ -445,20 +445,38 @@ module Groovepacker
               #end
               #if self.mapping['product_images'][:action] == 'add' || self.mapping['product_images'][:action] == 'overwrite'
               all_found_images = ProductImage.where(product_id: duplicate_product.id)
-              to_not_add_images = []
-              all_found_images.each do |single_found_dup_image|
-                if record[:images].include? single_found_dup_image.image
-                  to_not_add_images << single_found_dup_image.image
+              if record[:images].first == "[DELETE]"
+                delete_existing_images(all_found_images)
+              else
+                to_not_add_images = []
+                all_found_images.each do |single_found_dup_image|
+                  if record[:images].include? single_found_dup_image.image
+                    to_not_add_images << single_found_dup_image.image
+                  end
                 end
-              end
-              record[:images].each_with_index do |single_to_add_image, index|
-                unless to_not_add_images.include?(single_to_add_image)
-                  to_add_image = ProductImage.new
-                  to_add_image.image = single_to_add_image
-                  to_add_image.order = index
-                  to_add_image.product_id = duplicate_product.id
-                  @import_product_images << to_add_image
+                to_add_images = record[:images] - to_not_add_images
+                unless to_add_images.empty?
+                  to_add_images.each_with_index do |single_to_add_image, index|
+                    if index == 0
+                      duplicate_product.primary_image = single_to_add_image
+                    else
+                      to_add_image = ProductImage.new
+                      to_add_image.image = single_to_add_image
+                      to_add_image.order = index
+                      to_add_image.product_id = duplicate_product.id
+                      @import_product_images << to_add_image
+                    end
+                  end
                 end
+                # record[:images].each_with_index do |single_to_add_image, index|
+                #   unless to_not_add_images.include?(single_to_add_image)
+                #     to_add_image = ProductImage.new
+                #     to_add_image.image = single_to_add_image
+                #     to_add_image.order = index
+                #     to_add_image.product_id = duplicate_product.id
+                #     @import_product_images << to_add_image
+                #   end
+                # end
               end
               #end
             end
@@ -675,6 +693,12 @@ module Groovepacker
               return 50
             end
             return 100
+          end
+
+          def delete_existing_images(images)
+            images.each do |image|
+              image.destroy
+            end
           end
 
         end

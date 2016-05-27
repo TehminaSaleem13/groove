@@ -532,14 +532,28 @@ class Product < ActiveRecord::Base
     image = product_images.build
     # image_directory = "public/images"
     current_tenant = Apartment::Tenant.current
-    file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image].original_filename
-    GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
-    # path = File.join(image_directory, file_name )
-    # File.open(path, "wb") { |f| f.write(params[:product_image].read) }
-    image.image = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
-    image.caption = params[:caption] unless params[:caption].blank?
+    file_name = create_image_from_req(params, current_tenant)
+
+    #path = File.join(image_directory, file_name )
+    #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+    image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
+    image.caption = params[:caption]  unless params[:caption].blank?
     response = image.save ? true : false
     response
+  end
+
+  def create_image_from_req(params, current_tenant)
+    unless params[:base_64_img_upload]
+      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image].original_filename
+      GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
+      return file_name
+    else
+      image_content = Base64.decode64(params[:product_image][:image].to_s)
+      content_type = params[:product_image][:content_type]
+      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image][:original_filename]
+      GroovS3.create_image(current_tenant, file_name, image_content, content_type)
+      return file_name
+    end
   end
 
   def self.update_product_list(params, result)

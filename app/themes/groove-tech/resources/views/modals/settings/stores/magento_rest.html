@@ -73,7 +73,7 @@
           <label class="control-label col-md-3"></label>
           <div class="controls col-md-9">
             <button ng-disabled="(!stores.single.store_admin_url || stores.single.store_admin_url==null || stores.single.store_admin_url=='null') || (stores.single.host==null || stores.single.host=='null') || (stores.single.api_key==null || stores.single.api_key=='null') || (stores.single.api_secret==null || stores.single.api_secret=='null')" class="btn btn-success" ng-click="launch_magento_aurthorize_popup()">
-              Aurthorize
+              Authorize
             </button>
           </div>
         </div>
@@ -85,7 +85,7 @@
 
             <div class="controls col-md-9">
               <input name="oauthvarifier" ng-model="stores.single.oauth_varifier" class="form-control input-style" type="text" value="" placeholder="Oauth Verifier" required/>
-              <span>You will get 'Oauth Verifier' on 'Aurthorization'. Provide it here to get access to store.</span>
+              <span>You will get 'Oauth Verifier' on 'Authorization'. Provide it here to get access to store.</span>
             </div>
           </div>
           <div class="form-group">
