@@ -19,7 +19,7 @@ module Groovepacker
             final_records = @helper.build_final_records
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
-            Product.import @imported_products
+            # Product.import @imported_products
             OrderItem.import @created_order_items
             make_intangible
             @import_item.status = 'completed'
@@ -157,7 +157,8 @@ module Groovepacker
 
           def set_product_info(product, single_row, unique_order_item = false)
             @imported_products << @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
-            order_item = @order_item_helper.create_new_order_item( product,
+            order_item = @order_item_helper.create_new_order_item( single_row,
+                                                                   product,
                                                                    @helper.get_sku(single_row, @order_increment_sku, unique_order_item),
                                                                    @order
                                                                   )
@@ -193,7 +194,8 @@ module Groovepacker
           def make_intangible
             [@base_products, @imported_products].each do |products|
               products.each do |product|
-                make_product_intangible(product)
+                make_product_intangible(product) unless product.base_sku
+                product.update_product_status
               end
             end
           end
