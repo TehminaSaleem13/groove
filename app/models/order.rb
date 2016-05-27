@@ -222,7 +222,7 @@ class Order < ActiveRecord::Base
 
     self.update_column(:status, status)
     self.update_column(:scan_start_time, nil)
-    
+
     #self.apply_and_update_predefined_tags
   end
 
@@ -629,7 +629,7 @@ class Order < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_items
-    changed_hash = self.reload.changes
+    changed_hash = self.changes
     #TODO: remove this from here as soon as possible.
     # Very slow way to ensure inventory always gets allocated
     Groovepacker::Inventory::Orders.allocate(self)
