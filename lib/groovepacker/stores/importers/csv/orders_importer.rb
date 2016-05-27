@@ -157,8 +157,7 @@ module Groovepacker
 
           def set_product_info(product, single_row, unique_order_item = false)
             @imported_products << @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
-            order_item = @order_item_helper.create_new_order_item( single_row,
-                                                                   product,
+            order_item = @order_item_helper.create_new_order_item( product,
                                                                    @helper.get_sku(single_row, @order_increment_sku, unique_order_item),
                                                                    @order
                                                                   )
@@ -193,7 +192,7 @@ module Groovepacker
 
           def make_intangible
             [@base_products, @imported_products].each do |products|
-              @imported_products.each do |product|
+              products.each do |product|
                 make_product_intangible(product)
               end
             end

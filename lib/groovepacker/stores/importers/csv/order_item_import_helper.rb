@@ -9,7 +9,7 @@ module Groovepacker
             @product_helper.initiate_helper
           end
 
-          def create_new_order_item(single_row, product, single_sku, order)
+          def create_new_order_item(product, single_sku, order)
             order_item = OrderItem.new
             order_item.product = product
             order_item.order = order
@@ -24,7 +24,7 @@ module Groovepacker
               product_id: product.id,
               order_id: order.id)
             if order_items.empty?
-              order_item = create_new_order_item(single_row, product, single_sku, order)
+              order_item = create_new_order_item(product, single_sku, order)
             else
               order_item = order_items.first
             end
