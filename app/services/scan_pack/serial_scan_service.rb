@@ -1,13 +1,13 @@
 module ScanPack
   class SerialScanService < ScanPack::Base
     include ScanPackHelper
-    
+
     def initialize(current_user, session, params)
       set_scan_pack_action_instances(current_user, session, params)
       @order = Order.where(id: params[:order_id]).first
       @product = Product.where(id: params[:product_id]).first
     end
-  
+
     def run
       serial_scan if data_is_valid
       @result
@@ -17,7 +17,7 @@ module ScanPack
       order_id = @params[:order_id]
       product_id = @params[:product_id]
       serial = @params[:serial]
-      
+
       case true
       when !(order_id.present? && product_id.present?)
         set_error_messages('Order id and Product id are required')
@@ -31,7 +31,7 @@ module ScanPack
           "confirmation code, one of the action codes or any product barcode"
         )
       end
-      
+
       @result['status']
     end
 
@@ -61,7 +61,7 @@ module ScanPack
       order_serials = OrderSerial.where(
         order_id: @order.id, product_id: @product.id, serial: @params[:serial]
       )
-      
+
       order_serial =  unless order_serials.empty?
         order_serials.first
       else
@@ -77,7 +77,7 @@ module ScanPack
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
         order_serial_id: order_serial.id
       )
-      
+
       if order_item_serial_lots.empty?
         OrderItemOrderSerialProductLot.create!(
           order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
@@ -94,7 +94,7 @@ module ScanPack
       order_item_serial_lots = OrderItemOrderSerialProductLot.where(
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id]
         )
-      
+
       unless order_item_serial_lots.empty?
         existing_serials = order_item_serial_lots.where(order_serial_id: order_serial.id)
         if existing_serials.empty?
@@ -119,12 +119,12 @@ module ScanPack
           current_user: @current_user, session: @session
         }
       )
-      
+
       @order.addactivity(
         "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
         @current_user.name
       )
-      
+
       @result
     end
 
