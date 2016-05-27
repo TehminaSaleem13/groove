@@ -13,11 +13,15 @@ module Groovepacker
             order_map = @helper.create_order_map
             @imported_orders = {}
             @created_order_items = []
+            @imported_products = []
+            @base_products = []
             @import_item = @helper.initialize_import_item
             final_records = @helper.build_final_records
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
+            Product.import @imported_products
             OrderItem.import @created_order_items
+            make_intangible
             @import_item.status = 'completed'
             @import_item.save
             result
@@ -96,9 +100,8 @@ module Groovepacker
               sku: single_sku.strip)
             if !product_skus.empty?
               product = product_skus.first.product
-              order_item = @order_item_helper.create_update_order_item(single_row, product.id, single_sku, @order.id)
+              order_item = @order_item_helper.create_update_order_item(single_row, product, single_sku, @order)
               @created_order_items << order_item
-              # save_order_item(order_item)
               addactivity_and_delete_required(order_item)
               @product_helper.update_product(product, single_row)
             else # no sku is found
@@ -143,7 +146,7 @@ module Groovepacker
               @product_helper.check_and_update_prod_sku(product_skus, @order_increment_sku)
               update_order_increment_sku(product_skus)
             end
-            @product_helper.create_update_base_prod(single_row, single_sku)
+            @base_products << @product_helper.create_update_base_prod(single_row, single_sku)
             product = Product.new
             set_product_info(product, single_row, true)
           end
@@ -153,15 +156,14 @@ module Groovepacker
           end
 
           def set_product_info(product, single_row, unique_order_item = false)
-            @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
+            @imported_products << @product_helper.import_product_data(product, single_row, @order_increment_sku, unique_order_item)
             order_item = @order_item_helper.create_new_order_item( single_row,
-                                                                   product.id,
+                                                                   product,
                                                                    @helper.get_sku(single_row, @order_increment_sku, unique_order_item),
-                                                                   @order.id
+                                                                   @order
                                                                   )
             @created_order_items << order_item
             @order_required.delete('sku')
-            # save_order_item(order_item)
             addactivity_and_delete_required(order_item)
             @import_item.current_order_imported_item = 1
             @import_item.save
@@ -187,6 +189,14 @@ module Groovepacker
               result = @helper.update_count_error_result(result, e.messages)
             end
             result
+          end
+
+          def make_intangible
+            [@base_products, @imported_products].each do |products|
+              @imported_products.each do |product|
+                make_product_intangible(product)
+              end
+            end
           end
 
           def initialize_helpers
