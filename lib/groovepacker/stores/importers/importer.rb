@@ -53,13 +53,16 @@ module Groovepacker
         end
 
         def initialize_import_item
+          total_imported = @result[:total_imported] || 1
           @import_item.update_attributes( :current_increment_id => '', 
                                             :success_imported => 0, 
                                             :previous_imported => 0, 
                                             :updated_orders_import => 0,
                                             :current_order_items => -1, 
                                             :current_order_imported_item => -1, 
-                                            :to_import => @result[:total_imported])
+                                            :to_import => total_imported)
+          sleep 0.5
+          @import_item.reload
         end
 
         def update_success_import_count
@@ -71,6 +74,14 @@ module Groovepacker
             @import_item.save
             @result[:success_imported] += 1
           end
+        end
+
+        def init_common_objects
+          handler = self.get_handler
+          @credential = handler[:credential]
+          @client = handler[:store_handle]
+          @import_item = handler[:import_item]
+          @result = self.build_result
         end
 
         protected

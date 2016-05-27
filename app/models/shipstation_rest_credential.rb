@@ -72,5 +72,13 @@ class ShipstationRestCredential < ActiveRecord::Base
       order_import_summary.save
     end
   end
+
+  def get_active_statuses
+    statuses = []
+    statuses.push('awaiting_shipment') if self.shall_import_awaiting_shipment?
+    statuses.push('shipped') if self.shall_import_shipped?
+    statuses.push('pending_fulfillment') if self.shall_import_pending_fulfillment?
+    return statuses
+  end
 end
 
