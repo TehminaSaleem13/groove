@@ -3,9 +3,9 @@ module ScanPack
     def initialize(current_user, session, params)
       set_scan_pack_action_instances(current_user, session, params)
       @order = Order.where(id: @params[:id]).first
-      @general_settings = GeneralSetting.all.first
+      @general_settings = GeneralSetting.first
     end
-    
+
     def run
       add_note if data_and_params_valid
       @result
