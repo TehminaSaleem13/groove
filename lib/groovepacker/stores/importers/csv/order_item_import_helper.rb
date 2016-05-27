@@ -9,13 +9,14 @@ module Groovepacker
             @product_helper.initiate_helper
           end
 
-          def create_new_order_item(product, single_sku, order)
+          def create_new_order_item(single_row, product, single_sku, order)
             order_item = OrderItem.new
             order_item.product = product
             order_item.order = order
             order_item.sku = single_sku.strip
             order_item.qty = 0
             order_item.price = 0.0
+            initialize_or_update_order_item(single_row, order_item)
             order_item
           end
 
@@ -24,12 +25,13 @@ module Groovepacker
               product_id: product.id,
               order_id: order.id)
             if order_items.empty?
-              order_item = create_new_order_item(product, single_sku, order)
+              order_item = create_new_order_item(single_row, product, single_sku, order)
             else
               order_item = order_items.first
+              initialize_or_update_order_item(single_row, order_item)
             end
             @product_helper.import_image(product, single_row, true)
-            initialize_or_update_order_item(single_row, order_item)
+            
             order_item
           end
 

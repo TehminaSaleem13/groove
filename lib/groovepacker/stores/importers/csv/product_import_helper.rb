@@ -164,8 +164,8 @@ module Groovepacker
             else
               import_sec_ter_sku(product, single_row)
               import_sec_ter_barcode(product, single_row)
-              product.save!
             end
+            product.save!
             product
           end
 
