@@ -626,7 +626,7 @@ class Order < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_items
-    changed_hash = self.changes
+    changed_hash = self.reload.changes
     #TODO: remove this from here as soon as possible.
     # Very slow way to ensure inventory always gets allocated
     Groovepacker::Inventory::Orders.allocate(self)
