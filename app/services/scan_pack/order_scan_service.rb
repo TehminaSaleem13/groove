@@ -160,12 +160,12 @@ module ScanPack
       #PROCESS based on Order Status
       #-----------------------------
       #search in orders that have status of Scanned
-      do_if_already_been_scanned if single_order_status.eql?('scanned')
+      return do_if_already_been_scanned if single_order_status.eql?('scanned')
       do_if_single_order_status_on_hold if single_order_status.eql?('onhold')
       #process orders that have status of Service Issue
       do_if_single_order_status_serviceissue if single_order_status.eql?('serviceissue')
       #search in orders that have status of Cancelled
-      do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
+      return do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
       #if order has status of Awaiting Scanning
       do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
       #----------------------------

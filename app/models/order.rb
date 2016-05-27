@@ -221,14 +221,13 @@ class Order < ActiveRecord::Base
     status = result ? 'awaiting' : 'onhold'
     self.update_column(:status, status)
     self.update_column(:scan_start_time, nil)
-
     #self.apply_and_update_predefined_tags
   end
 
   def has_unscanned_items
     result = false
     self.reload
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       unless order_item.product.try(:is_intangible)
         if order_item.scanned_status != 'scanned'
           result |= true
@@ -242,7 +241,7 @@ class Order < ActiveRecord::Base
 
   def contains_kit
     result = false
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       if order_item.product.is_kit == 1
         result = true
         break
@@ -253,7 +252,7 @@ class Order < ActiveRecord::Base
 
   def contains_splittable_kit
     result = false
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       if order_item.product.is_kit == 1 &&
         order_item.product.kit_parsing == 'depends'
         result = true
@@ -314,7 +313,7 @@ class Order < ActiveRecord::Base
     end
     #check if barcode is present in a kit which has kitparsing of depends
     if !product_barcode.nil?
-      self.order_items.each do |order_item|
+      self.order_items.includes(:product).each do |order_item|
         if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' &&
           order_item.scanned_status != 'scanned'
           order_item.product.product_kit_skuss.each do |kit_product|
@@ -333,7 +332,7 @@ class Order < ActiveRecord::Base
     #if barcode is present and the matched product is also present in other non-kit
     #and unscanned order items, then the kit need not be split.
     if product_inside_splittable_kit
-      self.order_items.each do |order_item|
+      self.order_items.includes(:product).each do |order_item|
         if order_item.product.is_kit == 0 && order_item.scanned_status != 'scanned'
           if order_item.product_id == matched_product_id
             product_available_as_single_item = true
@@ -542,7 +541,6 @@ class Order < ActiveRecord::Base
 
     self.order_serials.destroy_all
     self.set_order_status
-    self.update_column(:scan_start_time, nil)
   end
 
   def addtag(tag_id)
@@ -629,7 +627,7 @@ class Order < ActiveRecord::Base
   end
 
   def update_inventory_levels_for_items
-    changed_hash = self.changes
+    changed_hash = self.reload.changes
     #TODO: remove this from here as soon as possible.
     # Very slow way to ensure inventory always gets allocated
     Groovepacker::Inventory::Orders.allocate(self)
