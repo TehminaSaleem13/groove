@@ -11,7 +11,8 @@ class ScanPackController < ApplicationController
 
   # takes order_id as input and resets scan status if it is partially scanned.
   def reset_order_scan
-    @order = Order.where(id: params[:order_id]).first
+    @order = Order.where(id: params[:order_id])
+                  .includes(:order_serials, order_items: :product).first
     order_id = params[:order_id]
 
     if !@order.blank?
@@ -82,7 +83,7 @@ class ScanPackController < ApplicationController
   end
 
   def confirmation_code
-    general_setting = GeneralSetting.all.first
+    general_setting = GeneralSetting.first
     render json: {confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code])}
   end
 

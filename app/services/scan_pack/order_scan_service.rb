@@ -53,14 +53,14 @@ module ScanPack
       @orders = Order.where(
         "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
         "^\#*#{input_with_special_char}$", "^\#*#{input_without_special_char}$"
-        ).includes(:order_items)
+        )
 
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
           @input, @input)
       end
-      @single_order = @orders.first
+      @single_order = @orders.includes(:order_items).first
     end
 
     def get_single_order_with_result
@@ -160,12 +160,12 @@ module ScanPack
       #PROCESS based on Order Status
       #-----------------------------
       #search in orders that have status of Scanned
-      do_if_already_been_scanned if single_order_status.eql?('scanned')
+      return do_if_already_been_scanned if single_order_status.eql?('scanned')
       do_if_single_order_status_on_hold if single_order_status.eql?('onhold')
       #process orders that have status of Service Issue
       do_if_single_order_status_serviceissue if single_order_status.eql?('serviceissue')
       #search in orders that have status of Cancelled
-      do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
+      return do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
       #if order has status of Awaiting Scanning
       do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
       #----------------------------
