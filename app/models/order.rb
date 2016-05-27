@@ -219,7 +219,10 @@ class Order < ActiveRecord::Base
     result &= false if self.unacknowledged_activities.length > 0
 
     status = result ? 'awaiting' : 'onhold'
-    self.update_attributes(status: status, scan_start_time: nil)
+
+    self.update_column(:status, status)
+    self.update_column(:scan_start_time, nil)
+    
     #self.apply_and_update_predefined_tags
   end
 
