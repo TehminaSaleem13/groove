@@ -10,7 +10,7 @@ module TenantsHelper
       search_result = helper.do_search(params)
       tenants = search_result['tenants']
       result['tenants_count'] = {}
-      result['tenants_count']['search'] = tenants['count']
+      result['tenants_count']['search'] = search_result['count']
     else
       tenants = helper.do_gettenants(params)
     end
