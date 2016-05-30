@@ -391,9 +391,12 @@ module Groovepacker
       end
 
       def update_stripe_subscription(plan_id)
-        stripe_subscription = get_subscription(@subscription.stripe_customer_id, @subscription.customer_subscription_id)
-        stripe_subscription.plan = plan_id
-        stripe_subscription.save
+        @customer = get_stripe_customer(@subscription.stripe_customer_id)
+        if @customer
+          subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
+          trial_end_time = subscription.current_period_end
+          @customer.update_subscription(plan: plan_id, trial_end: trial_end_time, prorate: false)
+        end
       end
 
       def update_app_subscription(plan_id, amount)
