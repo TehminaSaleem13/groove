@@ -32,7 +32,7 @@ module Groovepacker
               @import_item.reload
               break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)
-              @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id')
+              @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id').strip
               update_import_item(-1, -1)
               import_single_order(single_row, index, inc_id, order_map, result)
             end
