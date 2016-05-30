@@ -341,9 +341,9 @@ module OrderConcern
       (Order::UNALLOCATE_STATUSES.include?(order.status) && Order::SOLD_STATUSES.include?(params[:status]))
   end
 
-  def change_status_to_cancel(order_summary)
+  def change_status_to_cancel
     if params[:store_id].present?
-      import_item = order_summary.import_items.find_by_store_id(params[:store_id])
+      import_item = order_summary_to_cancel.import_items.find_by_store_id(params[:store_id])
       import_item = ImportItem.where(store_id: params[:store_id]).last if import_item.blank?
       begin
           import_item.update_attributes(status: 'cancelled')
@@ -351,8 +351,8 @@ module OrderConcern
           nil
         end
     else
-      order_summary.import_items.update_all(status: 'cancelled')
-      order_summary.update_attributes(status: 'completed')
+      ImportItem.where(status: 'in_progress').update_all(status: 'cancelled')
+      order_summary_to_cancel.update_attributes(status: 'completed')
     end
   end
 
