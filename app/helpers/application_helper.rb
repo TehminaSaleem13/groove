@@ -75,6 +75,10 @@ module ApplicationHelper
     OrderImportSummary.where(status: 'in_progress').first
   end
 
+  def order_summary_to_cancel
+    OrderImportSummary.first
+  end
+
   def settings_to_generate_packing_slip
     @page_height, @page_width = '11', '8.5'
     
