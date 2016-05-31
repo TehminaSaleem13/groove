@@ -20,7 +20,7 @@ module ScanPack
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
       do_scan_now
-      if @result["data"]["next_state"]=="scanpack.rfo" and @result["matched"]==false
+      if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
        stores = Store.where("status=? and on_demand_import=?", true, true)
        run_import_for_not_found_order if stores.present?
       end
@@ -62,6 +62,7 @@ module ScanPack
       @result['status'] = output['status']
       @result['data'] = output['data']
       @result['matched'] = output['matched']
+      @result['do_on_demand_import'] = output['do_on_demand_import']
     end
 
     def do_check_state_and_status_to_add_activity

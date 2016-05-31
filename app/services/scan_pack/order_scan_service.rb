@@ -8,6 +8,7 @@ module ScanPack
       @result = {
         "status" => true,
         "matched" => true,
+        "do_on_demand_import" => false,
         "error_messages" => [],
         "success_messages" => [],
         "notice_messages" => [],
@@ -129,6 +130,7 @@ module ScanPack
         ' cannot be found. It may not have been imported yet'
       end
       @result['matched'] = false
+      @result['do_on_demand_import'] = true
       @result['notice_messages'].push(message)
     end
 
