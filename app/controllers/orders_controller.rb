@@ -233,7 +233,7 @@ class OrdersController < ApplicationController
     if order_summary_to_cancel.nil?   #order_summary defined in application helper
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
-      change_status_to_cancel(order_summary)
+      change_status_to_cancel
     end
     render json: @result
   end
