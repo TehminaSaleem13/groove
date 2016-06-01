@@ -87,7 +87,7 @@ class ProductKitSkus < ActiveRecord::Base
       result['status'] &= false
       return result
     end
-    
+
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, kit.id)
     if product_kit_sku.nil?
       @productkitsku = ProductKitSkus.new
@@ -101,7 +101,7 @@ class ProductKitSkus < ActiveRecord::Base
       result['messages'].push("The product with id #{item.id} has already been added to the kit")
       result['status'] &= false
     end
-    
+
     item.update_product_status
     return result
   end

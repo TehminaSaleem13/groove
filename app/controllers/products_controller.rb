@@ -155,13 +155,13 @@ class ProductsController < ApplicationController
 
   def create
     @result = Product.create_new_product(@result, current_user)
-    
+
     render json: @result
   end
 
   def print_receiving_label
     @products = list_selected_products(params)
-    
+
     respond_to do |format|
       format.html # show.html.erb
       format.json {
@@ -235,7 +235,7 @@ class ProductsController < ApplicationController
   def show
     service_obj = ProductService::ProductInfo.new(params: params, current_user: current_user, result: @result)
     @result = service_obj.get_product_info
-    
+
     render json: @result
   end
 
@@ -249,13 +249,13 @@ class ProductsController < ApplicationController
   def remove_products_from_kit
     #@kit is coming from find_kit_product method of products concern
     @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result) if check_if_not_a_kit
-    
+
     render json: @result
   end
 
   def update
     @result = gp_products_module.update_product_attributes
-    
+
     render json: @result
   end
 
@@ -297,7 +297,7 @@ class ProductsController < ApplicationController
   def add_image
     product = Product.find(params[:id])
     add_new_image(product)
-    
+
     render json: @result
   end
 
@@ -326,7 +326,7 @@ class ProductsController < ApplicationController
       @result['messages'].push('You do not have enough permissions to create backup csv')
     end
     @result = generate_error_csv(@result) unless @result['status']
-    
+
     render json: @result
   end
 

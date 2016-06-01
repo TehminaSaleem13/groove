@@ -37,6 +37,7 @@ module ProductsService
       result_rows = result_rows.blank? ? [] : result_rows
       p_ids = result_rows.map { |p| p['id'] }
       products = Product.where('id IN (?)', p_ids)
+      preload_associations(products)
       products
     end
 

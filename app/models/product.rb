@@ -42,7 +42,6 @@ class Product < ActiveRecord::Base
 
   SINGLE_SCAN_STATUSES = [SINGLE_KIT_PARSING, DEPENDS_KIT_PARSING].freeze
   INDIVIDUAL_SCAN_STATUSES = [INDIVIDUAL_KIT_PARSING].freeze
-  DEFAULT_INVENTORY_WAREHOUSE_ID = InventoryWarehouse.where(is_default: true).first.id
 
   def self.to_csv(folder, options = {})
     require 'csv'
@@ -351,8 +350,9 @@ class Product < ActiveRecord::Base
   end
 
   def primary_warehouse
+    default_inv_id = InventoryWarehouse.where(is_default: true).first.try :id
     product_inventory_warehousess.find do |p_inv|
-      p_inv.inventory_warehouse_id.eql?(DEFAULT_INVENTORY_WAREHOUSE_ID)
+      p_inv.inventory_warehouse_id.eql?(default_inv_id)
     end
   end
 

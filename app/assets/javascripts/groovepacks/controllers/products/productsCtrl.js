@@ -400,10 +400,15 @@ groovepacks_controllers.
 
         //Register watchers
         $scope.$watch('products.setup.search', function () {
+          if ($scope.productFilterTimeout) $timeout.cancel($scope.productFilterTimeout);
+
           if ($scope.products.setup.select_all) {
             $scope.select_all_toggle(false);
           }
-          myscope.get_products(1);
+          $scope.productFilterTimeout = $timeout(function() {
+            myscope.get_products(1);
+          }, 500); // delay 500 ms
+
         });
         $scope.$watch('_can_load_products', myscope.can_do_load_products);
 

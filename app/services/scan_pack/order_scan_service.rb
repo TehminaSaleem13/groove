@@ -54,7 +54,6 @@ module ScanPack
         "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
         "^\#*#{input_with_special_char}$", "^\#*#{input_without_special_char}$"
         )
-        
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',

@@ -13,6 +13,7 @@ module Groovepacker
         base_query = get_base_query(search, sort_key, sort_order)
         query_add = get_query_limit_offset(limit, offset)
         result_rows = Order.find_by_sql(base_query+query_add)
+        ActiveRecord::Associations::Preloader.new(result_rows, [:order_items, :store, :order_tags]).run
 
         return get_search_result(results_only, result_rows, base_query)
       end

@@ -8,7 +8,7 @@ describe Order do
   end
    	it "should not split kits" do
       order = FactoryGirl.create(:order, :status=>'awaiting')
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
@@ -16,7 +16,7 @@ describe Order do
       order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
-      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit',
                         :kit_parsing=>'depends')
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
@@ -28,7 +28,7 @@ describe Order do
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
       product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
-      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,
             :product_kit_skus=> product_kit_sku)
 
       kit_product2 = FactoryGirl.create(:product)
@@ -36,7 +36,7 @@ describe Order do
       kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
 
       product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
-      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,
             :product_kit_skus => product_kit_sku2)
 
 	  order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
@@ -48,7 +48,7 @@ describe Order do
 
    it "should split kits" do
       order = FactoryGirl.create(:order, :status=>'awaiting')
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
@@ -56,7 +56,7 @@ describe Order do
       order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
                     :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name)
 
-      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit',
                         :kit_parsing=>'depends')
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
@@ -68,7 +68,7 @@ describe Order do
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
       product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
-      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,
             :product_kit_skus=> product_kit_sku)
 
       kit_product2 = FactoryGirl.create(:product)
@@ -76,7 +76,7 @@ describe Order do
       kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
 
       product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
-      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,
             :product_kit_skus => product_kit_sku2)
 
 	  order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
@@ -96,16 +96,16 @@ describe Order do
 
    it "should reset scanned status of kits" do
       order = FactoryGirl.create(:order, :status=>'scanned')
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product, :barcode => 'BARCODE1')
 
       order_item = FactoryGirl.create(:order_item, :product_id=>product.id,
-                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name, 
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>product.name,
                     :scanned_status=>'scanned', :scanned_qty => 1)
 
-      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit', 
+      product_kit = FactoryGirl.create(:product, :is_kit => 1, :name=>'iPhone Protection Kit',
                         :kit_parsing=>'depends')
       product_kit_sku = FactoryGirl.create(:product_sku, :product=> product_kit, :sku=> 'IPROTO')
       product_kit_barcode = FactoryGirl.create(:product_barcode, :product=> product_kit, :barcode => 'IPROTOBAR')
@@ -117,7 +117,7 @@ describe Order do
       kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode => 'KITITEM1')
 
       product_kit_sku = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product.id)
-      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+      order_item_kit_product = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,
             :product_kit_skus=> product_kit_sku, :scanned_status=>'scanned', :scanned_qty=>1)
 
       kit_product2 = FactoryGirl.create(:product)
@@ -125,7 +125,7 @@ describe Order do
       kit_product2_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product2, :barcode => 'KITITEM2')
 
       product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product => product_kit, :option_product_id=>kit_product2.id)
-      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,   
+      order_item_kit_product2 = FactoryGirl.create(:order_item_kit_product, :order_item => order_item_kit,
             :product_kit_skus => product_kit_sku2, :scanned_status=>'scanned', :scanned_qty=>1)
 
       order_item2 = FactoryGirl.create(:order_item, :product_id=>kit_product2.id,
@@ -144,14 +144,14 @@ describe Order do
       order_item2.reload
       expect(order_item2.scanned_status).to eq('unscanned')
       expect(order_item2.scanned_qty).to eq(0)
-      
+
       order_item_kit_product.reload
       expect(order_item_kit_product.scanned_status).to eq('unscanned')
-      expect(order_item_kit_product.scanned_qty).to eq(0)     
+      expect(order_item_kit_product.scanned_qty).to eq(0)
 
       order_item_kit_product2.reload
       expect(order_item_kit_product2.scanned_status).to eq('unscanned')
-      expect(order_item_kit_product2.scanned_qty).to eq(0)     
+      expect(order_item_kit_product2.scanned_qty).to eq(0)
    end
 
    it "should add tag to the orders" do
@@ -174,13 +174,13 @@ describe Order do
       expect(order.order_tags.length).to eq(0)
    end
 
-    it "should create order and update available inventory count" do      
+    it "should create order and update available inventory count" do
       inv_wh = FactoryGirl.create(:inventory_warehouse)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
       order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
@@ -195,14 +195,14 @@ describe Order do
       expect(product_inv_wh.allocated_inv).to eq(2)
     end
 
-    it "should create order then delete order and update allocated inventory count" do      
+    it "should create order then delete order and update allocated inventory count" do
       inv_wh = FactoryGirl.create(:inventory_warehouse)
       general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
       order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
@@ -226,7 +226,7 @@ describe Order do
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
       order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
@@ -247,14 +247,14 @@ describe Order do
       expect(product_inv_wh.allocated_inv).to eq(2)
     end
 
-    it "should create order which has a kit with single with status awaiting change it to onhold and update allocated inventory count" do      
+    it "should create order which has a kit with single with status awaiting change it to onhold and update allocated inventory count" do
       inv_wh = FactoryGirl.create(:inventory_warehouse)
       general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
       order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
-      
+
       product = FactoryGirl.create(:product, :is_kit => 1, :kit_parsing => 'single')
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
@@ -290,14 +290,14 @@ describe Order do
 
     end
 
-    it "should create order which has a kit with individual status awaiting change it to onhold and update allocated inventory count" do      
+    it "should create order which has a kit with individual status awaiting change it to onhold and update allocated inventory count" do
       inv_wh = FactoryGirl.create(:inventory_warehouse)
       general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
       order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
-      
+
       product = FactoryGirl.create(:product, :is_kit => 1, :kit_parsing => 'individual')
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
@@ -326,13 +326,13 @@ describe Order do
       expect(kit_product_inv_wh.allocated_inv).to eq(6)
     end
 
-    it "should create order with status awaiting change it to scanned and update sold inventory count" do      
+    it "should create order with status awaiting change it to scanned and update sold inventory count" do
       inv_wh = FactoryGirl.create(:inventory_warehouse)
 
       store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
 
       order = FactoryGirl.create(:order, :status=>'awaiting', :store => store)
-      
+
       product = FactoryGirl.create(:product)
       product_sku = FactoryGirl.create(:product_sku, :product=> product)
       product_barcode = FactoryGirl.create(:product_barcode, :product=> product)

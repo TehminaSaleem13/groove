@@ -1,12 +1,12 @@
 module Groovepacker
   module Orders
     class Orders < Groovepacker::Orders::Base
-      
+
       def update_orders_list(order)
         unless accepted_data.has_key?(@params[:var])
           set_status_and_message(false, 'Unknown field', ['&', 'error_msg'])
           return @result
-        end   
+        end
 
         if @params[:var] == 'status'
           order.status = @params[:value]
@@ -24,16 +24,16 @@ module Groovepacker
         end
         return @result
       end
-      
+
       def generate_pick_list(orders)
         @orders, @pick_list, @depends_pick_list = orders, [], []
-        
+
         @orders.each do |order|
           add_order_items_to_pick_list(order, order.store)
         end
         sort_pick_list
         sort_depends_pick_list
-        
+
         return @result, @pick_list, @depends_pick_list
       end
 
@@ -82,7 +82,7 @@ module Groovepacker
         status_filter = get('status_filter', 'awaiting')
         status_filter_text = ""
         query_add = get_query_limit_offset(limit, offset)
-        
+
         #overrides
         sort_key = set_final_sort_key(sort_order, sort_key)
 
@@ -100,14 +100,20 @@ module Groovepacker
           #sort_key = 'updated_at' if sort_key == 'sku'
           if sort_key == 'store_name'
             orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id #{status_filter_text} ORDER BY stores.name #{sort_order} #{query_add}")
+            preloader(orders)
           elsif sort_key == 'itemslength'
             orders = Order.find_by_sql("SELECT orders.*, sum(order_items.qty) AS count FROM orders LEFT JOIN order_items ON (order_items.order_id = orders.id) #{status_filter_text} GROUP BY orders.id ORDER BY count #{sort_order} #{query_add}")
+            preloader(orders)
           else
-            orders = Order.order("#{sort_key} #{sort_order}")
+            orders = Order.includes(:order_items, :store, :order_tags).order("#{sort_key} #{sort_order}")
             orders = orders.where(:status => status_filter) unless status_filter == "all"
             orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
           end
           return orders
+        end
+
+        def preloader(orders)
+          ActiveRecord::Associations::Preloader.new(orders, [:order_items, :store, :order_tags]).run
         end
 
         def update_list_for_not_scanned(order)
@@ -131,7 +137,7 @@ module Groovepacker
             @orderitem.qty = @params[:qty]
           end
           return if @orderitem.save
-          
+
           set_status_and_message(false, "Could not update order item ", ['&', 'push'])
         end
 
@@ -142,9 +148,9 @@ module Groovepacker
             return
           end
           all_printed = @orderitem.order.order_items.map(&:is_barcode_printed).include?(false) ? false : true
-          
+
           return unless all_printed
-          
+
           @result['messages'].push('All item barcodes have now been printed. This order should now be ready to ship.')
         end
 
@@ -161,7 +167,7 @@ module Groovepacker
         def remove_single_item(item)
           product = item.product
           sku = product.product_skus.first.sku rescue nil
-          
+
           if item.remove_order_item_kit_products && item.destroy
             item.order.update_order_status
             item.order.addactivity("Item with sku " + sku.to_s + " removed", @current_user.name)
@@ -175,7 +181,7 @@ module Groovepacker
             set_status_and_message(false, "Could not find any Item", ['&', 'push'])
             return
           end
-          
+
           @products.each do |product|
             add_single_item(product)
           end
@@ -197,7 +203,7 @@ module Groovepacker
         def init_order_item(product)
           qty = 1
           qty = @params[:qty] unless @params[:qty].blank? && @params[:qty].to_i > -1
-          
+
           orderitem = OrderItem.new
           orderitem.name = product.name
           orderitem.price = @params[:price]
@@ -242,7 +248,7 @@ module Groovepacker
           @single_pick_list_obj = Groovepacker::PickList::SinglePickListBuilder.new
           @individual_pick_list_obj = Groovepacker::PickList::IndividualPickListBuilder.new
           @depends_pick_list_obj = Groovepacker::PickList::DependsPickListBuilder.new
-          
+
           order.order_items.each do |order_item|
             add_single_item_to_list(order_item, inventory_warehouse_id)
           end
@@ -251,7 +257,7 @@ module Groovepacker
         def add_single_item_to_list(order_item, inv_warehouse_id)
           product = order_item.product
           return if product.nil? || product.is_intangible
-          
+
           # for single products which are not kit
           if product.is_kit == 0 || product.kit_parsing == 'single'
             @pick_list = @single_pick_list_obj.build(

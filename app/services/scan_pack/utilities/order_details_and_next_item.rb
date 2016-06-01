@@ -74,7 +74,7 @@ module ScanPack
         end
       end
       #--------END of ORDER DETAILS AND NEXT ITEM-----------------------------
-    
+
     end
   end
 end

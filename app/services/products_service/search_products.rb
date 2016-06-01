@@ -10,6 +10,7 @@ module ProductsService
       setup_query_params
       base_query = generate_base_query
       result_rows = Product.find_by_sql("#{base_query} #{@query_add}")
+      preload_associations(result_rows)
       return result_rows if @result_only
       generate_result(result_rows, base_query)
     end
