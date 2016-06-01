@@ -7,7 +7,7 @@ class OrderItem < ActiveRecord::Base
   has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
-  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name
+  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
