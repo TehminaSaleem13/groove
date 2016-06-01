@@ -42,6 +42,17 @@ module Groovepacker
           Groovepacker::Stores::Utilities::ShipstationRest::Utilities.new(
             self.build_handle).verify_tags(tags)
         end
+
+        def import_single_order_from(order_no)
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
+            self.build_handle).import_single_order(order_no)
+        end
+
+        def find_or_create_product(item)
+          Groovepacker::Stores::Importers::ShipstationRest::OrderProductImporter.new(
+            self.build_handle).find_or_create_product(item)
+        end
+        
       end
     end
   end

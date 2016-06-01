@@ -4,6 +4,7 @@ module Groovepacker
       module BigCommerce
         class ProductsImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
+          include Groovepacker::Stores::Importers::ImporterCommonMethods
 
           def import
             initialize_objects
@@ -36,39 +37,8 @@ module Groovepacker
             end
 
             def create_single_product(bc_product, import_inv=true)
-              if bc_product["sku"].blank?
-                # if sku is nil or empty
-                create_product_with_temp_sku(bc_product)
-              elsif ProductSku.where(sku: bc_product["sku"]).length == 0
-                # if non-nil sku is not found
-                product = create_new_product(bc_product, bc_product["sku"])
-              else
-                product = ProductSku.where(sku: bc_product["sku"]).first.product
-              end
+              product = find_create_product(bc_product) #defined in common module which is included in this importer
               @inv_pull_context.pull_single_product_inventory(product) if import_inv
-              return product
-            end
-
-            def create_product_with_temp_sku(bc_product)
-              product_is_nil = Product.find_by_name(bc_product["name"]).nil?
-              # if sku is nil or empty
-              if product_is_nil
-                # and if product is not found by name then create the product
-                product = create_new_product(bc_product, ProductSku.get_temp_sku)
-              else
-                # product exists add temp sku if it does not exist
-                product = add_sku_for_existing_product(bc_product)
-              end
-              return product
-            end
-
-            def add_sku_for_existing_product(bc_product)
-              products = Product.where(name: bc_product["name"])
-              unless contains_temp_skus(products)
-                product = create_new_product(bc_product, ProductSku.get_temp_sku)
-              else
-                product = get_product_with_temp_skus(products)
-              end
               return product
             end
 

@@ -77,10 +77,10 @@ module Groovepacker
         end
 
         def init_common_objects
-          handler = self.get_handler
-          @credential = handler[:credential]
-          @client = handler[:store_handle]
-          @import_item = handler[:import_item]
+          @handler = self.get_handler
+          @credential = @handler[:credential]
+          @client = @handler[:store_handle]
+          @import_item = @handler[:import_item]
           @result = self.build_result
         end
 
