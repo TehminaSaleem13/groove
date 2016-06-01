@@ -134,7 +134,7 @@ class OrderItem < ActiveRecord::Base
 
   def option_products
     option_product_ids = order_item_kit_products
-      .map(&:product_kit_skus).flatten.map(&:option_product_id)
+      .map(&:product_kit_skus).flatten.compact.map(&:option_product_id)
     Product
       .where(id: option_product_ids)
       .includes(
