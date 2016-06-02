@@ -134,12 +134,13 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    self.order_items.each do |order_item|
-      product = Product.find_by_id(order_item.product_id)
-      unless product.nil?
-        if product.status == "new" or product.status == "inactive"
-          result = true
-        end
+    self.order_items.includes(:product).each do |order_item|
+      product = order_item.product
+      next if product.blank?
+      is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
+      if is_new_or_inactive || order_item.qty.eql?(0)
+        result = true
+        break
       end
     end
 
