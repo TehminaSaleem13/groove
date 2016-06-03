@@ -1,6 +1,6 @@
 module ProductConcern
   extend ActiveSupport::Concern
-  
+
   included do
     prepend_before_filter :groovepacker_authorize!
     prepend_before_filter :init_result_object
@@ -18,7 +18,7 @@ module ProductConcern
       render json: @result and return
     end
   end
-  
+
   private
     def gp_products_module
       Groovepacker::Products::Products.new(result: @result, params_attrs: params, current_user: current_user, session: session)
@@ -42,9 +42,9 @@ module ProductConcern
 
     def init_result_object
       @result = { 'status' => true,
-                  'messages' => [], 
-                  'total_imported' => 0, 
-                  'success_imported' => 0, 
+                  'messages' => [],
+                  'total_imported' => 0,
+                  'success_imported' => 0,
                   'previous_imported' => 0,
                   'error_messages' => [],
                   'success_messages' => [],
@@ -101,7 +101,7 @@ module ProductConcern
 
     def get_warehouse_location(product)
       @product_location = product.primary_warehouse
-      
+
       return if @product_location.nil?
       @product_hash = @product_hash.merge({ 'location_primary' => @product_location.location_primary,
                                             'location_secondary' => @product_location.location_secondary,
@@ -113,7 +113,7 @@ module ProductConcern
     end
 
     def get_product_kit_skus(product)
-      product_kit_skus = ProductKitSkus.where(:product_id => product.id)
+      product_kit_skus = product.product_kit_skuss #ProductKitSkus.where(:product_id => product.id)
       return if product_kit_skus.blank?
       @product_hash['productkitskus'] = []
       product_kit_skus.each { |kitsku| @product_hash['productkitskus'].push(kitsku.id) }
@@ -179,12 +179,12 @@ module ProductConcern
                           "update_product_list" => "to edit product list",
                           "add_image" => "to add image to a product",
                           "update_intangibleness" => "to edit product status",
-                          "change_product_status" => "to edit product status", 
+                          "change_product_status" => "to edit product status",
                           "delete_product" => "to delete a product",
                           "duplicate_product" => " to duplicate a product"
                        }
 
-      return "You do not have enough permissions #{error_messages[params["action"]]}" 
+      return "You do not have enough permissions #{error_messages[params["action"]]}"
     end
 
     def check_if_not_a_kit

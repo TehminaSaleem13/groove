@@ -220,7 +220,13 @@ module OrderConcern
   def retrieve_order_items
     # Retrieve order items
     @result['order']['items'] = []
-    @order.order_items.each do |orderitem|
+    @order.order_items.includes(
+      product: [
+        :product_inventory_warehousess,
+        :product_skus, :product_cats, :product_barcodes,
+        :product_images
+      ]
+    ).each do |orderitem|
       @result['order']['items'].push(retrieve_order_item(orderitem))
     end
     @result['order']['storeinfo'] = @order.store
@@ -234,7 +240,7 @@ module OrderConcern
 
   def retrieve_order_item(orderitem)
     order_item = { 'iteminfo' => orderitem }
-    product = Product.find_by_id(orderitem.product_id)
+    product = orderitem.product
     if product.nil?
       order_item['productinfo'] = nil
       order_item['productimages'] = nil

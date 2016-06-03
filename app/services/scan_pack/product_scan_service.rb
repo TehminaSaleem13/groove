@@ -20,8 +20,8 @@ module ScanPack
         product_edit_matched_for_order: false,
         product_edit_matched_for_products: []
         })
-      @single_order = Order.where(id: @id).last
-      @scanpack_settings = ScanPackSetting.all.first
+      @single_order = Order.where(id: @id).includes(order_items: :product).last
+      @scanpack_settings = ScanPackSetting.first
     end
 
     def run(clicked, serial_added)

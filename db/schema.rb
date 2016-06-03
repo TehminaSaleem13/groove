@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160520140453) do
+ActiveRecord::Schema.define(:version => 20160603075445) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -176,48 +176,49 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
   end
 
   create_table "general_settings", :force => true do |t|
-    t.boolean  "inventory_tracking",                :default => false
-    t.boolean  "low_inventory_alert_email",         :default => false
-    t.string   "low_inventory_email_address",       :default => ""
-    t.boolean  "hold_orders_due_to_inventory",      :default => false
-    t.string   "conf_req_on_notes_to_packer",       :default => "optional"
-    t.string   "send_email_for_packer_notes",       :default => "always"
-    t.string   "email_address_for_packer_notes",    :default => ""
-    t.datetime "created_at",                                                           :null => false
-    t.datetime "updated_at",                                                           :null => false
-    t.integer  "default_low_inventory_alert_limit", :default => 1
-    t.boolean  "send_email_on_mon",                 :default => false
-    t.boolean  "send_email_on_tue",                 :default => false
-    t.boolean  "send_email_on_wed",                 :default => false
-    t.boolean  "send_email_on_thurs",               :default => false
-    t.boolean  "send_email_on_fri",                 :default => false
-    t.boolean  "send_email_on_sat",                 :default => false
-    t.boolean  "send_email_on_sun",                 :default => false
-    t.datetime "time_to_send_email",                :default => '2000-01-01 00:00:00'
+    t.boolean  "inventory_tracking",                  :default => false
+    t.boolean  "low_inventory_alert_email",           :default => false
+    t.string   "low_inventory_email_address",         :default => ""
+    t.boolean  "hold_orders_due_to_inventory",        :default => false
+    t.string   "conf_req_on_notes_to_packer",         :default => "optional"
+    t.string   "send_email_for_packer_notes",         :default => "always"
+    t.string   "email_address_for_packer_notes",      :default => ""
+    t.datetime "created_at",                                                             :null => false
+    t.datetime "updated_at",                                                             :null => false
+    t.integer  "default_low_inventory_alert_limit",   :default => 1
+    t.boolean  "send_email_on_mon",                   :default => false
+    t.boolean  "send_email_on_tue",                   :default => false
+    t.boolean  "send_email_on_wed",                   :default => false
+    t.boolean  "send_email_on_thurs",                 :default => false
+    t.boolean  "send_email_on_fri",                   :default => false
+    t.boolean  "send_email_on_sat",                   :default => false
+    t.boolean  "send_email_on_sun",                   :default => false
+    t.datetime "time_to_send_email",                  :default => '2000-01-01 00:00:00'
     t.string   "product_weight_format"
     t.string   "packing_slip_size"
     t.string   "packing_slip_orientation"
     t.text     "packing_slip_message_to_customer"
-    t.boolean  "import_orders_on_mon",              :default => false
-    t.boolean  "import_orders_on_tue",              :default => false
-    t.boolean  "import_orders_on_wed",              :default => false
-    t.boolean  "import_orders_on_thurs",            :default => false
-    t.boolean  "import_orders_on_fri",              :default => false
-    t.boolean  "import_orders_on_sat",              :default => false
-    t.boolean  "import_orders_on_sun",              :default => false
-    t.datetime "time_to_import_orders",             :default => '2000-01-01 00:00:00'
-    t.boolean  "scheduled_order_import",            :default => true
+    t.boolean  "import_orders_on_mon",                :default => false
+    t.boolean  "import_orders_on_tue",                :default => false
+    t.boolean  "import_orders_on_wed",                :default => false
+    t.boolean  "import_orders_on_thurs",              :default => false
+    t.boolean  "import_orders_on_fri",                :default => false
+    t.boolean  "import_orders_on_sat",                :default => false
+    t.boolean  "import_orders_on_sun",                :default => false
+    t.datetime "time_to_import_orders",               :default => '2000-01-01 00:00:00'
+    t.boolean  "scheduled_order_import",              :default => true
     t.text     "tracking_error_order_not_found"
     t.text     "tracking_error_info_not_found"
-    t.boolean  "strict_cc",                         :default => false
-    t.string   "conf_code_product_instruction",     :default => "optional"
+    t.boolean  "strict_cc",                           :default => false
+    t.string   "conf_code_product_instruction",       :default => "optional"
     t.string   "admin_email"
-    t.string   "export_items",                      :default => "disabled"
-    t.boolean  "inventory_auto_allocation",         :default => false
-    t.string   "custom_field_one",                  :default => "Custom 1"
-    t.string   "custom_field_two",                  :default => "Custom 2"
-    t.integer  "max_time_per_item",                 :default => 10
+    t.string   "export_items",                        :default => "disabled"
+    t.boolean  "inventory_auto_allocation",           :default => false
+    t.string   "custom_field_one",                    :default => "Custom 1"
+    t.string   "custom_field_two",                    :default => "Custom 2"
+    t.integer  "max_time_per_item",                   :default => 10
     t.string   "export_csv_email"
+    t.boolean  "show_primary_bin_loc_in_barcodeslip", :default => false
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -576,6 +577,9 @@ ActiveRecord::Schema.define(:version => 20160520140453) do
     t.boolean  "traced_in_dashboard",                                     :default => false
     t.boolean  "scanned_by_status_change",                                :default => false
   end
+
+  add_index "orders", ["increment_id"], :name => "index_orders_on_increment_id"
+  add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"

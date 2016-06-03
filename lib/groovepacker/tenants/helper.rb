@@ -61,17 +61,32 @@ module Groovepacker
         subscription_result
       end
 
-      def delete_data(params, current_user)
-        result = result_hash
+      def delete_data(tenant, params, result, current_user)
         begin
-          tenant = Tenant.find(params[:id])
-          tenant_name = tenant.name
-          Apartment::Tenant.switch(tenant_name)
-          take_action(params[:action_type], result, current_user, tenant_name)
-        rescue => e
-          update_fail_status(result, e.message)
+          Apartment::Tenant.switch(tenant.name)
+          if params[:action_type] == 'orders'
+            delete_orders(result, current_user)
+          elsif params[:action_type] == 'products'
+            delete_products(current_user)
+          elsif params[:action_type] == 'both'
+            delete_orders(result, current_user)
+            delete_products(current_user)
+          elsif params[:action_type] == 'all'
+            ActiveRecord::Base.connection.tables.each do |table|
+              ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations'
+            end
+            Groovepacker::SeedTenant.new.seed()
+            users = User.where(:name => 'admin')
+            unless users.empty?
+              users.first.destroy unless users.first.nil?
+            end
+            subscription = tenant.subscription if tenant.subscription
+            CreateTenant.new.apply_restrictions_and_seed(subscription)
+          end
+        rescue Exception => e
+          result['status'] = false
+          result['error_messages'].push(e.message);
         end
-        result
       end
 
       def take_action(action_type, result, current_user, tenant_name)
@@ -339,7 +354,7 @@ module Groovepacker
 
       def build_query(search, sort_key, sort_order)
         'SELECT tenants.id as id, tenants.name as name, tenants.note as note, tenants.is_modified as is_modified, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
-          FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id) 
+          FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id)
             WHERE
               (
                 tenants.name like ' + search + ' OR subscriptions.subscription_plan_id like ' + search + '

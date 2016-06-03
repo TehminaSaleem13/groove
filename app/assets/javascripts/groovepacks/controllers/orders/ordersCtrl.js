@@ -470,10 +470,14 @@ groovepacks_controllers.
 
 
         $scope.$watch('orders.setup.search', function () {
+          if ($scope.orderFilterTimeout) $timeout.cancel($scope.orderFilterTimeout);
+
           if ($scope.orders.setup.select_all) {
             $scope.select_all_toggle(false);
           }
-          myscope.get_orders(1);
+          $scope.orderFilterTimeout = $timeout(function() {
+            myscope.get_orders(1);
+          }, 500); // delay 500 ms
         });
 
         $scope.$watch('_can_load_orders', function () {
