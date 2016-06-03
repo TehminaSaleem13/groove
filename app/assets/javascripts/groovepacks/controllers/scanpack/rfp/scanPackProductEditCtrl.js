@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('scanPackProductEditCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'products', 'scanPack',
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, products, scanPack) {
+  controller('scanPackProductEditCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$modal', 'products', 'scanPack', 'orders',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $modal, products, scanPack, orders) {
 
       $scope.editreload = function () {
         return $scope.rfpinit().then(function () {
@@ -8,8 +8,13 @@ groovepacks_controllers.
           if (typeof $scope.data.raw.data != "undefined"
             && typeof $scope.data.raw.data.inactive_or_new_products != "undefined"
             && $scope.data.raw.data.inactive_or_new_products.length > 0) {
+
             $scope.products.list = $scope.data.raw.data.inactive_or_new_products;
             $state.go('scanpack.rfp.product_edit', {order_num: $stateParams.order_num});
+            if (typeof $scope.data.raw.data.zero_qty_product != "undefined") {
+              $scope.order_details($scope.data.order.id);
+            }
+
           } else if ($scope.data.order.status != 'onhold') {
             $state.go('scanpack.rfp.default', {order_num: $stateParams.order_num});
           } else {
@@ -17,6 +22,43 @@ groovepacks_controllers.
             $state.go('scanpack.rfo');
           }
         });
+      };
+
+      $scope.order_details = function (id) {
+        if ($scope.current_user.can('add_edit_orders')) {
+          var item_modal = $modal.open({
+            templateUrl: '/assets/views/modals/order/main.html',
+            controller: 'ordersSingleModal',
+            size: 'lg',
+            resolve: {
+              order_data: function () {
+                return orders.model.get()
+              },
+              load_page: function () {
+                return function () {
+                  var req = $q.defer();
+                  req.reject();
+                  return req.promise;
+                }
+              },
+              order_id: function () {
+                return id;
+              }
+            }
+          });
+          item_modal.result.then(
+            //Get triggers when modal is closed
+            function () {
+              $scope.set('order', {});
+              $scope.editreload();
+            },
+            //gets triggers when modal is dismissed.
+            function () {
+              $scope.set('order', {});
+              $scope.editreload();
+            }
+          );
+        }
       };
 
       $scope.update_product_list = function (product, prop) {
