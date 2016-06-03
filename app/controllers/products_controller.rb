@@ -267,7 +267,7 @@ class ProductsController < ApplicationController
       format.html
       format.pdf {
         render :pdf => "file_name",
-               :template => 'products/generate_barcode_slip.html.erb',
+               :template => "products/#{get_barcode_slip_template}",
                :orientation => 'Portrait',
                :page_height => '1in',
                :page_width => '3in',
