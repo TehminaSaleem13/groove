@@ -7,18 +7,42 @@ module Groovepacker
           require 'mws-connect'
 
           def import
+            init_common_objects
+            handler = self.get_handler
+            requestamazonreport
+            checkamazonreportstatus
+            import_all_products
           end
 
-          #hash expects product_sku, product_id, handler(store handle, credential)
+          def requestamazonreport
+            response = @mws.reports.request_report :report_type => '_GET_MERCHANT_LISTINGS_DATA_'
+            @credential.productreport_id = response.report_request_info.report_request_id
+            @credential.productgenerated_report_id = nil
+            @credential.save
+          end
+
+          def checkamazonreportstatus
+            @report_list = @mws.reports.get_report_request_list
+            @report_list.report_request_info.each do |report_request|
+              report_found = true
+              if report_request.report_processing_status == '_DONE_'
+                @credential.productgenerated_report_id = report_request.generated_report_id
+                @credential.productgenerated_report_date = report_request.completed_date
+                @credential.save
+              end
+            end
+          end
+
           def import_single(import_hash)
-            result = true
+
+            @result = true
             begin
-              credential = import_hash[:handler][:credential]
-              mws = import_hash[:handler][:store_handle][:alternate_handle]
+              @credential = import_hash[:handler][:credential]
+              @mws = import_hash[:handler][:store_handle][:alternate_handle]
 
               #send request to amazon mws get matching product API
-              products_xml = mws.products.get_matching_products_for_id(
-                :marketplace_id => credential.marketplace_id,
+              products_xml = @mws.products.get_matching_products_for_id(
+                :marketplace_id => @credential.marketplace_id,
                 :id_type => 'SellerSKU',
                 :id_list => [import_hash[:product_sku]])
 
@@ -54,7 +78,7 @@ module Groovepacker
                       product_identifiers['MarketplaceASIN']['ASIN']
                   end
 
-                  if credential.import_images &&
+                  if @credential.import_images &&
                     !product_attributes['SmallImage'].nil? &&
                     !product_attributes['SmallImage']['URL'].nil?
                     image = ProductImage.new
@@ -62,7 +86,7 @@ module Groovepacker
                     product.product_images << image
                   end
 
-                  if credential.import_products
+                  if @credential.import_products
                     category = ProductCat.new
                     category.category = product_attributes['ProductGroup']
                     product.product_cats << category
@@ -84,11 +108,73 @@ module Groovepacker
                 Rails.logger.info('No data fetched for SKU: ' + import_hash[:product_sku])
               end
             rescue Exception => e
-              result &= false
+              @result &= false
               Rails.logger.info('Error updating the product sku ' + e.to_s)
             end
-            result
+            @result
           end
+
+
+          def import_all_products
+            response = @mws.reports.get_report :report_id => @credential.productgenerated_report_id
+            response = response.body.split("\n").drop(1)
+            response.each_with_index do |row, index|
+              @product_row = row.split("\t")
+              next if @product_row[3].blank?
+              @result[:total_imported] = @result[:total_imported] + 1
+              generate_products 
+            end
+          end
+
+          def generate_products
+            if ProductSku.where(:sku => @product_row[3]).length == 0
+              add_productdb
+              add_productdb_sku
+              add_inventry_warehouse
+              save_productdb
+            else
+              @result[:previous_imported] = @result[:previous_imported] + 1
+            end
+          end
+
+          def add_productdb
+            @productdb = Product.new(name: @product_row[0], store_product_id: @product_row[2] || 'not_available', product_type: 'not_used', status: 'new')
+            @productdb.store = @credential.store
+          end
+
+          def add_productdb_sku
+            @productdbsku = @productdb.product_skus.build(sku: @product_row[3], purpose: 'primary')
+          end
+
+          def add_inventry_warehouse
+            inv_wh = ProductInventoryWarehouses.new
+            inv_wh.inventory_warehouse_id = @credential.store.inventory_warehouse_id
+            @productdb.product_inventory_warehousess << inv_wh
+          end
+
+          def save_productdb
+            if !ProductSku.where(:sku => @productdbsku.sku).length == 0
+              @result[:messages].push(sku: @product_row[3]) unless @productdbsku.sku.nil?
+              @result[:previous_imported] = @result[:previous_imported] + 1
+            else  
+              @productdb.save
+              @result[:success_imported] = @result[:success_imported] + 1
+            end
+          end
+
+          def import_amazon_product_details(store_id, product_sku, product_id)
+            ProductsService::AmazonImport.call(store_id, product_sku, product_id)
+          end
+
+          private
+            def init_common_objects
+              handler = self.get_handler
+              @mws = handler[:store_handle][:main_handle]
+              @credential = handler[:credential]
+              @import_item = handler[:import_item]
+              @alt_mws = handler[:store_handle][:alternate_handle]
+              @result = self.build_result
+            end
         end
       end
     end
