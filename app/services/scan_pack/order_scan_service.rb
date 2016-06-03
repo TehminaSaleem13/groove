@@ -49,18 +49,17 @@ module ScanPack
     def collect_orders
       input_without_special_char = @input.gsub(/^(\#*)|(\-*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
       input_with_special_char = @input.gsub(/^(\#*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
-      
+
       @orders = Order.where(
         "increment_id REGEXP ? or non_hyphen_increment_id REGEXP ?",
         "^\#*#{input_with_special_char}$", "^\#*#{input_without_special_char}$"
         )
-      
       if @orders.length == 0 && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
           @input, @input)
       end
-      @single_order = @orders.first
+      @single_order = @orders.includes(:order_items).first
     end
 
     def get_single_order_with_result
@@ -71,7 +70,7 @@ module ScanPack
         matched_single_status, matched_single_order_placed_time,
         single_order_status, single_order_order_placed_time,
         order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
-        
+
         do_check_order_status_for_single_and_matched(
           matched_single, single_order_status, matched_single_status,
           order_placed_for_single_before_than_matched_single
@@ -92,7 +91,7 @@ module ScanPack
       single_order_status = @single_order.status
       single_order_order_placed_time = @single_order.order_placed_time || Time.zone.now
       order_placed_for_single_before_than_matched_single = single_order_order_placed_time < matched_single_order_placed_time
-      
+
       return [
         matched_single_status, matched_single_order_placed_time, single_order_status,
         single_order_order_placed_time, order_placed_for_single_before_than_matched_single
@@ -201,6 +200,7 @@ module ScanPack
               'inactive_or_new_products' => @single_order.get_inactive_or_new_products,
               'next_state' => 'scanpack.rfp.product_edit'
             })
+          message = check_for_zero_qty_item
         else
           @session.merge!({
             product_edit_matched_for_current_user: false,
@@ -223,6 +223,23 @@ module ScanPack
          'this order or scan a different order.'
       end
       message && @result['notice_messages'].push(message)
+    end
+
+    def check_for_zero_qty_item
+      contains_zero_qty_order_item = @single_order.contains_zero_qty_order_item?
+      contains_zero_qty_order_kit_item = @single_order.contains_zero_qty_order_kit_item?
+
+      return unless (contains_zero_qty_order_item || contains_zero_qty_order_kit_item)
+
+      @single_order_result.merge!('zero_qty_product' => contains_zero_qty_order_item)
+
+      message = if contains_zero_qty_order_kit_item
+        'The current order has one or more kit items with a qty of 0'
+      else
+        'The current order has one or more items with a qty of 0'
+      end
+
+      message
     end
 
     def do_if_single_order_status_serviceissue

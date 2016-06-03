@@ -10,7 +10,7 @@ module ProductService
 
     def import_images(store)
       @store = store
-      unless current_user.can?('import_products')
+      unless @current_user.can?('import_products')
         @result['status'] = false
         @result['messages'].push('You can not import images')
         return @result

@@ -71,7 +71,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   def calculate_scan_time(typein_count, username)
     scan_time_per_item = calc_scan_time_for_first_item
     total_scan_time_for_order = self.order_item.order.total_scan_time
-    
+
     if typein_count > 1
       avg_time = avg_time_per_item(username)
       if avg_time
@@ -96,10 +96,10 @@ class OrderItemKitProduct < ActiveRecord::Base
     order_item_kit_products = self.order_item.order_item_kit_products
     order_item_kit_product = order_item_kit_products.first
     product_kit_skus_qty = order_item_kit_product.product_kit_skus.qty
-    min = 0
+    min = 1
     min = order_item_kit_product.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
-    order_item_kit_products.each do |kit_product|
-      kit_product.reload
+    order_item_kit_products.reload.includes(:product_kit_skus).each do |kit_product|
+      next if kit_product.product_kit_skus.blank?
       temp = kit_product.scanned_qty / kit_product.product_kit_skus.qty
       min = temp if (temp) < min
     end
@@ -123,5 +123,5 @@ class OrderItemKitProduct < ActiveRecord::Base
       self.order_item.scanned_status = SCANNED_STATUS
     end
   end
-  
+
 end

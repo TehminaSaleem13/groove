@@ -24,14 +24,14 @@ module ScanPack
     def type_scan
       next_item = @params[:next_item]
       return unless do_check_valid_order_item_or_valid_kit_product(next_item)
-      
+
       barcodes = next_item[:barcodes]
       first_barcode = barcodes[0]
-      
+
       unless barcodes.blank? || first_barcode.blank? || first_barcode[:barcode].blank?
         @result['data'] = product_scan(
             first_barcode[:barcode], 'scanpack.rfp.default', @params[:id],
-            { 
+            {
               clicked: false, serial_added: false, typein_count: @params[:count].to_i,
               current_user: @current_user, session: @session
             }
@@ -56,13 +56,13 @@ module ScanPack
       elsif @params[:count] > next_item[:qty]
         set_error_messages('Wrong count has been entered. Please try again')
       end
-      
+
       @result['status']
     end
 
     def do_get_order_item_and_kit_product(next_item, kit_product_id)
       @order_item = OrderItem.where(id: next_item['order_item_id']).first
-      
+
       unless kit_product_id.blank?
         @order_kit_product = OrderItemKitProduct.where(id: kit_product_id).first
       end

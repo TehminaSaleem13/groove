@@ -45,7 +45,8 @@ module Groovepacker
               	  	  import_item.current_order_imported_item = 0
               	  	  import_item.save
               	  	  line_items.each do |line_item|
-              	  	  	line_item_product = client.product(line_item["sku"])
+                        encoded_sku = URI.encode(line_item["sku"])
+                        line_item_product = client.product(encoded_sku)
 	          	  	  	@order_item = OrderItem.new
 	          	  	  	@order_item.price = line_item["price"]
 	          	  	  	@order_item.qty = line_item["qty_ordered"]

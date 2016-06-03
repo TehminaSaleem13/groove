@@ -6,7 +6,8 @@ class Order < ActiveRecord::Base
                   :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
                   :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
                   :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
-                  :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change
+                  :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change,
+                  :status, :scan_start_time
 
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
@@ -59,7 +60,7 @@ class Order < ActiveRecord::Base
       result = {"status" => false, "message" => "Order #{order_no} could not be found and downloaded. Please check your order source to verify this order exists."}
       GroovRealtime::emit('popup_display_for_on_demand_import', result, :tenant)
     end
-    
+
   end
 
   def process_unprocessed_orders
@@ -133,12 +134,15 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    self.order_items.each do |order_item|
-      product = Product.find_by_id(order_item.product_id)
-      unless product.nil?
-        if product.status == "new" or product.status == "inactive"
-          result = true
-        end
+    order_items.includes(product: :product_kit_skuss).each do |order_item|
+      product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
+      next if product.blank?
+      is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
+      # If item has 0 qty
+      if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
+        result = true
+        break
       end
     end
 
@@ -149,24 +153,37 @@ class Order < ActiveRecord::Base
     products_list = []
 
     self.order_items.each do |order_item|
-      product = Product.find_by_id(order_item.product_id)
-      unless product.nil?
-        if product.status == "new" or product.status == "inactive"
-          products_list << product.as_json(
-              include: {
-                product_images: {
-                  only: [:image]
-                }
+      product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
+      next if product.blank?
+      is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
+      if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
+        products_list << product.as_json(
+            include: {
+              product_images: {
+                only: [:image]
               }
-            ).merge({
-              sku: product.primary_sku,
-              barcode: product.primary_barcode
-            })
-        end
+            }
+          ).merge({
+            sku: product.primary_sku,
+            barcode: product.primary_barcode
+          })
       end
     end
 
     products_list
+  end
+
+  def contains_zero_qty_order_item?
+    order_items.find do |order_item|
+      order_item.qty.eql?(0)
+    end.present?
+  end
+
+  def contains_zero_qty_order_kit_item?
+    order_items.find do |order_item|
+      order_item.product.product_kit_skuss.map(&:qty).index(0)
+    end.present?
   end
 
   def update_order_status
@@ -205,7 +222,7 @@ class Order < ActiveRecord::Base
     result = true
 
     self.order_items.each do |order_item|
-      product = Product.find_by_id(order_item.product_id)
+      product = order_item.product
       if !product.nil?
         if product.status == "new" or product.status == "inactive"
           result &= false
@@ -217,11 +234,10 @@ class Order < ActiveRecord::Base
 
     result &= false if self.unacknowledged_activities.length > 0
 
-    if result
-      self.update_column(:status, 'awaiting')
-    else
-      self.update_column(:status, 'onhold')
-    end
+    status = result ? 'awaiting' : 'onhold'
+
+    self.update_column(:status, status)
+    self.update_column(:scan_start_time, nil)
 
     #self.apply_and_update_predefined_tags
   end
@@ -229,7 +245,7 @@ class Order < ActiveRecord::Base
   def has_unscanned_items
     result = false
     self.reload
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       unless order_item.product.try(:is_intangible)
         if order_item.scanned_status != 'scanned'
           result |= true
@@ -243,7 +259,7 @@ class Order < ActiveRecord::Base
 
   def contains_kit
     result = false
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       if order_item.product.is_kit == 1
         result = true
         break
@@ -254,7 +270,7 @@ class Order < ActiveRecord::Base
 
   def contains_splittable_kit
     result = false
-    self.order_items.each do |order_item|
+    self.order_items.includes(:product).each do |order_item|
       if order_item.product.is_kit == 1 &&
         order_item.product.kit_parsing == 'depends'
         result = true
@@ -315,7 +331,7 @@ class Order < ActiveRecord::Base
     end
     #check if barcode is present in a kit which has kitparsing of depends
     if !product_barcode.nil?
-      self.order_items.each do |order_item|
+      self.order_items.includes(:product).each do |order_item|
         if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' &&
           order_item.scanned_status != 'scanned'
           order_item.product.product_kit_skuss.each do |kit_product|
@@ -334,7 +350,7 @@ class Order < ActiveRecord::Base
     #if barcode is present and the matched product is also present in other non-kit
     #and unscanned order items, then the kit need not be split.
     if product_inside_splittable_kit
-      self.order_items.each do |order_item|
+      self.order_items.includes(:product).each do |order_item|
         if order_item.product.is_kit == 0 && order_item.scanned_status != 'scanned'
           if order_item.product_id == matched_product_id
             product_available_as_single_item = true
@@ -374,19 +390,34 @@ class Order < ActiveRecord::Base
     unscanned_list = []
     #Order.connection.clear_query_cache
     self.reload
-    self.order_items.each do |order_item|
+    self.order_items
+      .includes(
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      ).each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.product.is_kit == 1
+          option_products = order_item.option_products
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
           elsif order_item.product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
-            unscanned_list.push(order_item.build_unscanned_individual_kit)
+            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
           elsif order_item.product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > order_item.kit_split_scanned_qty
-                unscanned_list.push(order_item.build_unscanned_individual_kit(true))
+                unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
               end
               if order_item.qty > order_item.kit_split_qty
                 unscanned_item = order_item.build_unscanned_single_item(true)
@@ -442,20 +473,36 @@ class Order < ActiveRecord::Base
   def get_scanned_items
     scanned_list = []
 
-    self.order_items.each do |order_item|
+    self.order_items
+    self.order_items
+      .includes(
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      ).each do |order_item|
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.product.is_kit == 1
+          option_products = order_item.option_products
           if order_item.product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
           elsif order_item.product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
-            scanned_list.push(order_item.build_scanned_individual_kit)
+            scanned_list.push(order_item.build_scanned_individual_kit(option_products))
           elsif order_item.product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > 0
-                scanned_list.push(order_item.build_scanned_individual_kit(true))
+                scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
               end
               if order_item.single_scanned_qty != 0
                 scanned_list.push(order_item.build_scanned_single_item(true))
@@ -512,7 +559,6 @@ class Order < ActiveRecord::Base
 
     self.order_serials.destroy_all
     self.set_order_status
-    self.update_column(:scan_start_time, nil)
   end
 
   def addtag(tag_id)

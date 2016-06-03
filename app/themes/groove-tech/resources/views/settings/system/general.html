@@ -279,6 +279,20 @@
                 groov-popover="{{translations.tooltips.packing_slip_message_to_customer}}"></i>
             </div>
           </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.show_primary_bin_loc_in_barcodeslip}}</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="general_settings.single.show_primary_bin_loc_in_barcodeslip"
+                   groov-click="update_settings()"></div>
+            </div>
+            <div class="info col-sm-1">
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.show_primary_bin_loc_in_barcodeslip}}"></i>
+            </div>
+          </div>
+
         </fieldset>
       </div>
     </div>

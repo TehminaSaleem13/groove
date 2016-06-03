@@ -7,6 +7,19 @@ groovepacks_controllers.
       /*
        * Public methods
        */
+
+      myscope.datagrid_features = function(){
+        msg = "<p><strong>There are a number of handy features in the order and product lists:</strong></p>" +
+         "<p>Send to Scan and Pack - Ctrl-Click the order number in the orders list to send it to Scan and Pack</p>" +
+         "<p>Right-Click to Edit - Right click fields directly in the grid to edit them.</p>" +
+         "<p>Shift-Click to Select - Click a row in the grid to select it, then shift click another row to select it and all in between.</p>" +
+         "<p>Show and Hide Columns - Right-Click the column header to select which columns should be visible</p>" +
+         "<p>Sort by column - Click most columns to sort the data by that column</p>" +
+         "<p>Sort by last modified - This is the default sort mode. To return to it just Shift-Click the column header.</p>" +
+         "<p>Re-Order columns - Click and hold on a column header to pick it up and drag it to a new location.</p>"
+        return msg;
+      }
+
       $scope.load_page = function (direction) {
         var page = parseInt($state.params.page, 10);
         page = (typeof direction == 'undefined' || direction != 'previous') ? page + 1 : page - 1;
@@ -56,9 +69,14 @@ groovepacks_controllers.
         myscope.common_setup_opt(type, value, 'kit');
       };
 
-      $scope.handlesort = function (predicate) {
+      $scope.handlesort = function (value) {
+        if(event.shiftKey){
+          value = '';
+          // To get the new orders always in DESC
+          $scope.products.setup.order = 'ASC';
+        }
         // Bug fixed for GROOV-1054
-        myscope.common_setup_opt('sort', predicate, $scope.product_type/*'product'*/);
+        myscope.common_setup_opt('sort', value, $scope.product_type/*'product'*/);
       };
 
       $scope.product_change_status = function (status) {
@@ -261,6 +279,7 @@ groovepacks_controllers.
           select_all: $scope.select_all_toggle,
           invert: myscope.invert,
           sort_func: $scope.handlesort,
+          features: myscope.datagrid_features(),
           setup: $scope.products.setup,
           scrollbar: true,
           no_of_lines: 3,
@@ -381,10 +400,15 @@ groovepacks_controllers.
 
         //Register watchers
         $scope.$watch('products.setup.search', function () {
+          if ($scope.productFilterTimeout) $timeout.cancel($scope.productFilterTimeout);
+
           if ($scope.products.setup.select_all) {
             $scope.select_all_toggle(false);
           }
-          myscope.get_products(1);
+          $scope.productFilterTimeout = $timeout(function() {
+            myscope.get_products(1);
+          }, 500); // delay 500 ms
+
         });
         $scope.$watch('_can_load_products', myscope.can_do_load_products);
 

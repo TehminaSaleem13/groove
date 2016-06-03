@@ -22,6 +22,9 @@ module ProductsService
       end
 
       query_if_no_products
+
+      preload_associations(@products)
+
       @products
     end
 
