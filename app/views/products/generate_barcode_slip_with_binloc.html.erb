@@ -6,7 +6,7 @@
 <% if !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
 
   <% unless @product.primary_sku.nil? %>
-    <div style="line-height: 70%; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: -5px;"><%= @product.primary_sku %></div>
+    <div style="line-height: 70%; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: -7px;"><%= @product.primary_sku %></div>
     <br/>
   <% end %>
   
@@ -15,7 +15,7 @@
     </div>
   <% end %>
 
-  <div style="font-size: 12px; margin-left: 10px; margin-top:-5px; margin-bottom: 3px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= @product.name %>
+  <div style="font-size: 12px; margin-left: 10px; margin-top:-5px; margin-bottom: 4px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= @product.name %>
   </div>
 
   <% barcode_string = generate_barcode(@product.primary_barcode) %>
