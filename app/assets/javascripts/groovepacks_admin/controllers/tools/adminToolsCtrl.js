@@ -354,7 +354,14 @@ groovepacks_admin_controllers.
             },
             last_activity: {
               name: "Last Activity",
-              editable: false
+              editable: false,
+              transclude: '<span groov-popover="most recent login at' +
+                          ' <strong>{{row[field][\'most_recent_login\'][\'date_time\'] | date:\'EEE MM/dd/yyyy hh:mm:ss a\'}}</strong> by' +
+                          ' <strong>{{row[field][\'most_recent_login\'][\'user\']}}</strong><br/>' +
+                          'most recent scan at' +
+                          ' <strong>{{row[field][\'most_recent_scan\'][\'date_time\'] | date:\'EEE MM/dd/yyyy hh:mm:ss a\'}}</strong> by' +
+                          ' <strong>{{row[field][\'most_recent_scan\'][\'user\']}}</strong><br/>' +
+                          '"> <div>{{row[field][\'most_recent_login\'][\'date_time\'] | date:\'EEE MM/dd/yyyy hh:mm:ss a\'}}</div></span>'
             },
             is_importing: {
               name: "Import Running",

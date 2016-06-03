@@ -91,7 +91,8 @@ module SettingsHelper
         :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
         :import_orders_on_sun, :tracking_error_order_not_found,
         :tracking_error_info_not_found, :custom_field_one,
-        :custom_field_two, :export_csv_email
+        :custom_field_two, :export_csv_email,
+        :show_primary_bin_loc_in_barcodeslip
       ]
     )
   end
@@ -118,5 +119,9 @@ module SettingsHelper
       @result['status'] &= false
       @result['error_messages'] = ['You are not authorized to update scan pack preferences.']
     end
+  end
+
+  def bin_location(product)
+    product.product_inventory_warehousess.first.location_primary rescue nil
   end
 end

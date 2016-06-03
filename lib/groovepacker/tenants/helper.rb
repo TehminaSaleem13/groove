@@ -18,9 +18,11 @@ module Groovepacker
         tenants_result = []
         tenants.each do |tenant|
           tenant_hash = {}
+          tenant_name = tenant.name
           retrieve_tenant_data(tenant, tenant_hash)
-          retrieve_plan_data(tenant.name, tenant_hash)
-          retrieve_shipping_data(tenant.name, tenant_hash)
+          retrieve_plan_data(tenant_name, tenant_hash)
+          retrieve_shipping_data(tenant_name, tenant_hash)
+          retrieve_activity_data(tenant_name, tenant_hash)
 
           tenants_result.push(tenant_hash)
         end
@@ -418,6 +420,34 @@ module Groovepacker
         @subscription.subscription_plan_id = plan_id
         @subscription.amount = amount
         @subscription.save
+      end
+
+      def retrieve_activity_data(tenant_name, tenant_hash)
+        Apartment::Tenant.switch(tenant_name)
+        tenant_hash['last_activity'] = {}
+        tenant_hash['last_activity']['most_recent_login'] = most_recent_login
+        tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan
+        Apartment::Tenant.switch('admintools')
+      end
+
+      def most_recent_login
+        most_recent_login_data = {}
+        @user = User.where('username != ? and current_sign_in_at IS NOT NULL', 'gpadmin').order('current_sign_in_at desc').first
+        if @user
+          most_recent_login_data['date_time'] = @user.current_sign_in_at
+          most_recent_login_data['user'] = @user.username
+        end
+        most_recent_login_data
+      end
+
+      def most_recent_scan
+        most_recent_scan_data = {}
+        @order = Order.where('status = ?', 'scanned').order('scanned_on desc').first
+        if @order
+          most_recent_scan_data['date_time'] = @order.scanned_on
+          most_recent_scan_data['user'] = User.find_by_id(@order.packing_user_id).username rescue nil
+        end
+        most_recent_scan_data
       end
     end
   end
