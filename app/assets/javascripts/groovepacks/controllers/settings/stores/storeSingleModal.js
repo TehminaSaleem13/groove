@@ -72,6 +72,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.disconnect_magento_connection = function(){
       stores.magento.disconnect(scope.stores.single.id).then(function (response) {
+        scope.stores.single.message='';
         myscope.store_single_details(scope.stores.single.id, true);
       });
     }
@@ -587,6 +588,7 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
 
     scope.get_magento_access_token = function () {
       stores.magento.get_access_token(scope.stores.single).then(function (response) {
+        scope.stores.single.message='';
         myscope.store_single_details(scope.stores.single.id, true);
       })
     }

@@ -1,14 +1,15 @@
 class ApplyAccessRestrictions
-  def apply_access_restrictions(tenant_name, plan_id)
-    subscriptions = Subscription.where(tenant_name: tenant_name, is_active: true)
-    unless subscriptions.empty?
-      subscription = subscriptions.first
-      if subscription.tenant
-        Apartment::Tenant.switch(tenant_name)
-        apply(plan_id)
-        Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
-        ApplyAccessRestrictions.new.delay(:run_at => (Time.now + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}").apply_access_restrictions(tenant_name, plan_id)
-      end
+  def apply_access_restrictions(tenant_name)
+    @subscription = Subscription.where(tenant_name: tenant_name, is_active: true).first
+    if @subscription && @subscription.tenant
+      plan_id = @subscription.subscription_plan_id
+      Apartment::Tenant.switch(tenant_name)
+      apply(plan_id)
+      Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
+      ApplyAccessRestrictions.new.delay(
+        run_at: (Time.now + 1.month).beginning_of_day,
+        queue: "reset_access_restrictions_#{tenant_name}"
+      ).apply_access_restrictions(tenant_name)
     end
   end
 

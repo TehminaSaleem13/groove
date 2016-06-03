@@ -5,7 +5,6 @@ module Groovepacker
         include ProductsHelper
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           attr_accessor :importing_time, :quick_importing_time, :import_from, :import_date_type
-
           include ProductsHelper
 
           def import
@@ -13,16 +12,20 @@ module Groovepacker
             init_common_objects
             set_import_date_and_type
             unless statuses.empty? && gp_ready_tag_id == -1
-              response = get_orders_response
-              return @result if response["orders"].blank?
-              shipments_response = @client.get_shipments(import_from-1.days)
-              @result[:total_imported] = response["orders"].length
-              initialize_import_item
-              import_orders_from_response(response, shipments_response)
+              initialize_orders_import
             else
               set_status_and_msg_for_skipping_import
             end
             @result
+          end
+
+          def initialize_orders_import
+            response = get_orders_response
+            return @result if response["orders"].blank?
+            shipments_response = @client.get_shipments(import_from-1.days)
+            @result[:total_imported] = response["orders"].length
+            initialize_import_item
+            import_orders_from_response(response, shipments_response)
           end
 
           def import_single_order(order_no)
@@ -34,9 +37,7 @@ module Groovepacker
             on_demand_logger.info("StoreId: #{@credential.store.id}")
             response, shipments_response = @client.get_order_on_demand(order_no)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
-            ActiveRecord::Base.transaction do
-              import_orders_from_response(response, shipments_response)
-            end
+            import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)
           end
 
@@ -46,9 +47,7 @@ module Groovepacker
               break if @import_item.status == 'cancelled'
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
-              #ActiveRecord::Base.transaction do
-                import_order_form_response(shipstation_order, order)
-              #end
+              ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order) }
             end
           end
 
@@ -79,26 +78,22 @@ module Groovepacker
           end
 
           def import_order_items(shipstation_order, order)
-            s_order_id = shipstation_order.id
             return if order["items"].nil?
             @import_item.update_attributes(current_order_items: order["items"].length, current_order_imported_item: 0)
             order["items"].each do |item|
-              product_id = product_importer_client.find_or_create_product(item)
-              #order_item = shipstation_order.order_items.build(product_id: product.id)
-              order_item = import_order_item(item, s_order_id, product_id)
+              product = product_importer_client.find_or_create_product(item)
+              order_item = import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
+            shipstation_order.save
             @import_item.save
           end
 
-          def import_order_item(item, s_order_id, product_id)
-            order_item = OrderItem.new
+          def import_order_item(item, shipstation_order, product)
+            order_item = shipstation_order.order_items.build(product_id: product.id)
             order_item.qty = item["quantity"]
             order_item.price = item["unitPrice"]
             order_item.row_total = item["unitPrice"].to_f * item["quantity"].to_f
-            order_item.product_id = product_id
-            order_item.order_id = s_order_id
-            order_item.save
           end
 
           private
@@ -199,13 +194,13 @@ module Groovepacker
               end
               
               if shipstation_order.blank?
-                shipstation_order = Order.new(store_id: @credential.store)
+                shipstation_order = Order.new(store_id: @store.id)
               elsif (order["tagIds"]||[]).include?(gp_ready_tag_id)
                 # in order to adjust inventory on deletion of order assign order status as 'cancelled'
                 shipstation_order.status = 'cancelled'
                 shipstation_order.save
                 shipstation_order.destroy
-                shipstation_order = Order.new(store_id: @credential.store)
+                shipstation_order = Order.new(store_id: @store.id)
               end
               return shipstation_order
             end

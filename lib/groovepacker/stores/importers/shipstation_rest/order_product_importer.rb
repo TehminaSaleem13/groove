@@ -9,7 +9,7 @@ module Groovepacker
           def find_or_create_product(item)
             init_common_objects
             product = find_create_product(item) #defined in common module which is included in this importer
-            return product.try(:id)
+            return product
           end
 
           private

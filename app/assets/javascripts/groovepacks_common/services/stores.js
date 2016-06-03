@@ -143,6 +143,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
           stores.single.allow_mg_rest_inv_push = data.access_restrictions.allow_mg_rest_inv_push;
           stores.single.allow_shopify_inv_push = data.access_restrictions.allow_shopify_inv_push;
           stores.single.allow_teapplix_inv_push = data.access_restrictions.allow_teapplix_inv_push;
+          stores.single.allow_magento_soap_tracking_no_push = data.access_restrictions.allow_magento_soap_tracking_no_push;
           stores.general_settings = data.general_settings;
           stores.current_tenant = data.current_tenant;
           stores.host_url = data.host_url;
@@ -159,6 +160,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.shall_import_fraud = data.credentials.magento_credentials.shall_import_fraud;
             stores.single.enable_status_update = data.credentials.magento_credentials.enable_status_update;
             stores.single.status_to_update = data.credentials.magento_credentials.status_to_update;
+            stores.single.push_tracking_number = data.credentials.magento_credentials.push_tracking_number;
 
             stores.single.producthost = data.credentials.magento_credentials.producthost;
             stores.single.productusername = data.credentials.magento_credentials.productusername;

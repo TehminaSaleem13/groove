@@ -1,18 +1,45 @@
 class GeneralSetting < ActiveRecord::Base
   include SettingsHelper
-  attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes, :hold_orders_due_to_inventory,
-                  :inventory_tracking, :low_inventory_alert_email, :low_inventory_email_address, :send_email_for_packer_notes,
-                  :scheduled_order_import, :tracking_error_order_not_found, :tracking_error_info_not_found, :product_weight_format,
-                  :packing_slip_size, :packing_slip_orientation, :time_to_import_orders, :time_to_send_email, :import_orders_on_mon,
-                  :import_orders_on_tue, :import_orders_on_wed, :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
-                  :import_orders_on_sun, :custom_field_one, :custom_field_two
+  attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
+                  :hold_orders_due_to_inventory,
+                  :inventory_tracking, :low_inventory_alert_email,
+                  :low_inventory_email_address, :time_to_send_email,
+                  :packing_slip_message_to_customer, :product_weight_format,
+                  :packing_slip_size, :packing_slip_orientation,
+                  :strict_cc, :conf_code_product_instruction,
+                  :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
+                  :hold_orders_due_to_inventory, :inventory_tracking,
+                  :low_inventory_alert_email, :low_inventory_email_address,
+                  :send_email_for_packer_notes, :default_low_inventory_alert_limit,
+                  :export_items, :max_time_per_item, :send_email_on_mon,
+                  :send_email_on_tue, :send_email_on_wed, :send_email_on_thurs,
+                  :send_email_on_fri, :send_email_on_sat, :send_email_on_sun,
+                  :scheduled_order_import, :time_to_import_orders,
+                  :import_orders_on_mon, :import_orders_on_tue, :import_orders_on_wed,
+                  :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
+                  :import_orders_on_sun, :tracking_error_order_not_found,
+                  :tracking_error_info_not_found, :custom_field_one,
+                  :custom_field_two, :export_csv_email
 
   validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
 
   after_save :send_low_inventory_alert_email
   after_save :scheduled_import
   after_update :inventory_state_change_check
+  before_save :validate_params
   @@all_tenants_settings = {}
+
+  def validate_params
+    if packing_slip_size == '4 x 6'
+      self.packing_slip_orientation = 'portrait'
+    end
+    self.inventory_tracking = inventory_tracking.present?
+    self.default_low_inventory_alert_limit = default_low_inventory_alert_limit.to_i
+    self.default_low_inventory_alert_limit = 1 if default_low_inventory_alert_limit < 1
+    self.max_time_per_item = max_time_per_item_was if max_time_per_item.blank?
+    self.time_to_send_email = time_to_send_email_was if time_to_send_email.blank?
+    self.time_to_import_orders = time_to_import_orders_was if time_to_import_orders.blank?
+  end
 
   def self.get_custom_fields
     GeneralSetting.all.first.as_json(

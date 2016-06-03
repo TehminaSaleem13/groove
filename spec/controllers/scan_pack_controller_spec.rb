@@ -1125,6 +1125,94 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result['error_messages']).to include 'Item doesnt belong to current order'
   end
 
+  it "should scan kit(individual) with typein count" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
+
+      kit_product = FactoryGirl.create(:product, :is_kit=>true, :kit_parsing=>'individual')
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode=>"987654320")
+
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>kit_product.id,
+                    :qty=>30, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product.name)
+
+      product_kit1 = FactoryGirl.create(:product, :is_kit=>true, :kit_parsing=>'individual')
+      product_kit_sku1 = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      product_kit_barcode1 = FactoryGirl.create(:product_barcode, :product=> product_kit1, :barcode=>"987654321")
+      kit_product_kit_sku1 = FactoryGirl.create(:product_kit_sku, :product=> kit_product, :option_product_id=> product_kit1.id)
+
+      product_kit2 = FactoryGirl.create(:product, :is_kit=>true, :kit_parsing=>'individual')
+      product_kit_sku2 = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO2')
+      product_kit_barcode2 = FactoryGirl.create(:product_barcode, :product=> product_kit2, :barcode=>"987654322")
+      kit_product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product=> kit_product, :option_product_id=> product_kit2.id)
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654321', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      get :type_scan, {
+        :state=>'scanpack.rfp.default', :input => '987654321', :id => order.id ,
+        next_item: result['data']['order']['next_item'], count: 29
+      }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654322', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      get :type_scan, {
+        :state=>'scanpack.rfp.default', :input => '987654322', :id => order.id ,
+        next_item: result['data']['order']['next_item'], count: 29
+      }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+      expect(order_item_kit.reload.scanned_qty).to eq(30)
+  end
+
+  it "should scan kit(single) with typein count" do
+      request.accept = "application/json"
+
+      order = FactoryGirl.create(:order, :status=>'awaiting', store: Store.first)
+
+      kit_product = FactoryGirl.create(:product, :is_kit=>true, :kit_parsing=>'single')
+      kit_product_sku = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO')
+      kit_product_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product, :barcode=>"987654320")
+
+      order_item_kit = FactoryGirl.create(:order_item, :product_id=>kit_product.id,
+                    :qty=>30, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product.name)
+
+      product_kit1 = FactoryGirl.create(:product, :is_kit=>true, :kit_parsing=>'single')
+      product_kit_sku1 = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO1')
+      product_kit_barcode1 = FactoryGirl.create(:product_barcode, :product=> product_kit1, :barcode=>"987654321")
+      kit_product_kit_sku1 = FactoryGirl.create(:product_kit_sku, :product=> kit_product, :option_product_id=> product_kit1.id)
+
+      product_kit2 = FactoryGirl.create(:product, :is_kit=>true, :kit_parsing=>'sungle')
+      product_kit_sku2 = FactoryGirl.create(:product_sku, :product=> kit_product, :sku=> 'IPROTO2')
+      product_kit_barcode2 = FactoryGirl.create(:product_barcode, :product=> product_kit2, :barcode=>"987654322")
+      kit_product_kit_sku2 = FactoryGirl.create(:product_kit_sku, :product=> kit_product, :option_product_id=> product_kit2.id)
+
+      get :scan_barcode, {:state=>'scanpack.rfp.default', :input => '987654320', :id => order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      get :type_scan, {
+        :state=>'scanpack.rfp.default', :input => '987654320', :id => order.id ,
+        next_item: result['data']['order']['next_item'], count: 29
+      }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result["status"]).to eq(true)
+
+      expect(order_item_kit.reload.scanned_qty).to eq(30)
+  end
+
   it "should scan product by barcode and order status should still be in awaiting status when there are unscanned items" do
       request.accept = "application/json"
 

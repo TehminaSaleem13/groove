@@ -87,6 +87,7 @@ class StoresController < ApplicationController
     @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
     @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
     @store.auto_update_products = params[:auto_update_products]
+    @store.on_demand_import = params[:on_demand_import]
     @store.update_inv = params[:update_inv]
     @store.save
   end
@@ -150,6 +151,7 @@ class StoresController < ApplicationController
             @magento.shall_import_fraud = params[:shall_import_fraud]
             @magento.enable_status_update = params[:enable_status_update]
             @magento.status_to_update = params[:status_to_update]
+            @magento.push_tracking_number = params[:push_tracking_number]
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]

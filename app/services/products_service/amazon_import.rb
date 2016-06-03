@@ -1,5 +1,5 @@
 module ProductsService
-  class AmazonImport < ProductsService::ServiceInit
+  class AmazonImport < ProductsService::Base
     attr_accessor :product_hash
 
     def initialize(*args)

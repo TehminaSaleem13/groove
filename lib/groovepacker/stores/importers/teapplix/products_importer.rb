@@ -13,12 +13,7 @@ module Groovepacker
             
             import_products_count = response["products"].nil? ? 0 : response["products"].length
             send_products_import_email(import_products_count) if import_products_count>20000
-            response["products"].each do |teapplix_product|
-              teapplix_product = get_reformatted_json(teapplix_product)
-              @result[:total_imported] = @result[:total_imported] + 1
-              teapplix_product[:item_title] = teapplix_product[:sku] if teapplix_product[:item_title].blank?
-              create_single_product(teapplix_product) rescue nil
-            end
+            iterate_products_array(response)
             send_products_import_complete_email(import_products_count)
             @result
           end
@@ -26,13 +21,23 @@ module Groovepacker
           def import_teapplix_single_product(teapplix_product)
             initialize_objects
             @bulk_import = false
-            teapplix_product["item_title"] = teapplix_product.delete("item_name")
+            teapplix_product["item_title"] = teapplix_product.delete("item_name") || "Product Created by Teapplix Import"
             teapplix_product["sku"] = teapplix_product.delete("item_sku")
             product = create_single_product(teapplix_product)
             return product
           end
 
           private
+            def iterate_products_array(response)
+              response["products"].each do |teapplix_product|
+                teapplix_product = get_reformatted_json(teapplix_product)
+                @result[:total_imported] = @result[:total_imported] + 1
+                teapplix_product[:item_title] = teapplix_product[:sku] if teapplix_product[:item_title].blank?
+                teapplix_product = teapplix_product.stringify_keys
+                create_single_product(teapplix_product) rescue nil
+              end
+            end
+
             def initialize_objects
               handler = self.get_handler
               @credential = handler[:credential]
@@ -55,25 +60,17 @@ module Groovepacker
             end
 
             def create_product_with_temp_sku(teapplix_product)
-              product_is_nil = Product.find_by_name(teapplix_product["item_title"]).nil?
-              # if sku is nil or empty
-              if product_is_nil
-                # and if product is not found by name then create the product
-                product = create_new_product(teapplix_product, ProductSku.get_temp_sku)
-              else
-                # product exists add temp sku if it does not exist
-                product = add_sku_for_existing_product(teapplix_product)
-              end
+              products = Product.where(name: teapplix_product["item_title"]) rescue []
+              # if sku is nil or empty, create new product
+              # else if product exists, add temp sku
+              product = products.blank? ? create_new_product(teapplix_product, ProductSku.get_temp_sku) : 
+                                          add_sku_for_existing_product(teapplix_product, products)
               return product
             end
 
-            def add_sku_for_existing_product(teapplix_product)
-              products = Product.where(name: teapplix_product["item_title"])
-              unless contains_temp_skus(products)
-                product = create_new_product(teapplix_product, ProductSku.get_temp_sku)
-              else
-                product = get_product_with_temp_skus(products)
-              end
+            def add_sku_for_existing_product(teapplix_product, products)
+              product = contains_temp_skus(products) ? get_product_with_temp_skus(products) : 
+                                                    create_new_product(teapplix_product, ProductSku.get_temp_sku)
               return product
             end
 

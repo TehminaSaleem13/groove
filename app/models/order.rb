@@ -54,6 +54,14 @@ class Order < ActiveRecord::Base
     end
   end
 
+  def self.emit_data_for_on_demand_import(hash, order_no)
+    if hash["orders"].blank?
+      result = {"status" => false, "message" => "Order #{order_no} could not be found and downloaded. Please check your order source to verify this order exists."}
+      GroovRealtime::emit('popup_display_for_on_demand_import', result, :tenant)
+    end
+    
+  end
+
   def process_unprocessed_orders
     bulkaction = Groovepacker::Inventory::BulkActions.new
     bulkaction.process_unprocessed

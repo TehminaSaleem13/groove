@@ -33,7 +33,7 @@ class StripeController < ApplicationController
     invoice.closed = object.closed
     invoice.forgiven = object.forgiven
     invoice.paid = object.paid
-    @line_data = object.lines.data.first
+    @line_data = object.lines.data.last
     if @line_data
       @plan = @line_data.plan
       invoice.plan_id = @plan.id if @plan && @plan.id

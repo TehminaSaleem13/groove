@@ -3,7 +3,8 @@ groovepacks_directives.provider('$groovTooltip', function () {
   var defaultOptions = {
     placement: 'top',
     animation: true,
-    popupDelay: "750"
+    popupDelay: "750",
+    popupHide: "500"
   };
 
 // Default hide triggers for each show trigger
@@ -97,7 +98,9 @@ groovepacks_directives.provider('$groovTooltip', function () {
             var hasEnableExp = angular.isDefined(attrs[prefix + 'Enable']);
 
             var positionTooltip = function () {
-
+              if(scope.tt_popupTrigger!=undefined) {
+               element = $(scope.tt_popupTrigger);
+              }
               var ttPosition = $position.positionElements(element, tooltip, scope.tt_placement, appendToBody);
               ttPosition.top += 'px';
               ttPosition.left += 'px';
@@ -146,7 +149,7 @@ groovepacks_directives.provider('$groovTooltip', function () {
               if (override) {
                 scope.tt_timeout = $timeout(function () {
                   scope.tt_hide();
-                }, 500);
+                }, scope.tt_popupHide);
               } else {
                 scope.$apply(function () {
                   hide();
@@ -186,7 +189,12 @@ groovepacks_directives.provider('$groovTooltip', function () {
               if (appendToBody) {
                 $document.find('body').append(tooltip);
               } else {
-                element.after(tooltip);
+                //element.after(tooltip);
+                if(scope.tt_popupTrigger!=undefined) {
+                 $(scope.tt_popupTrigger).after(tooltip);
+                } else {
+                  element.after(tooltip);
+                }
               }
 
               positionTooltip();
@@ -265,13 +273,27 @@ groovepacks_directives.provider('$groovTooltip', function () {
               scope.tt_popupDelay = !isNaN(delay) ? delay : options.popupDelay;
             });
 
+            attrs.$observe(prefix + 'PopupTrigger', function (val) {
+              scope.tt_popupTrigger = val;
+            });
+
+            attrs.$observe(prefix + 'PopupHide', function (val) {
+              var hide = parseInt(val, 10);
+              scope.tt_popupHide = !isNaN(hide) ? hide : options.popupHide;
+            });
+
             attrs.$observe('ngModel', function (val) {
               scope.tt_model = val;
             });
 
             var unregisterTriggers = function () {
               element.unbind(triggers.show, showTooltipBind);
-              element.unbind(triggers.hide, hideTooltipBind);
+              if(scope.tt_popupTrigger!=undefined) {
+               new_element = $(scope.tt_popupTrigger);
+               new_element.unbind(triggers.hide, hideTooltipBind);
+              } else {
+                element.unbind(triggers.hide, hideTooltipBind);
+              }
             };
 
             attrs.$observe(prefix + 'Trigger', function (val) {
@@ -283,7 +305,12 @@ groovepacks_directives.provider('$groovTooltip', function () {
                 element.bind(triggers.show, toggleTooltipBind);
               } else {
                 element.bind(triggers.show, showTooltipBind);
-                element.bind(triggers.hide, hideTooltipBind);
+                if(scope.tt_popupTrigger!=undefined) {
+                 new_element = $(scope.tt_popupTrigger);
+                 new_element.bind(triggers.hide, hideTooltipBind);
+                } else {
+                  element.bind(triggers.hide, hideTooltipBind);
+                }
               }
             });
 

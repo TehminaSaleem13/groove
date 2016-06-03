@@ -46,6 +46,15 @@ module Groovepacker
         get("https://api.bigcommerce.com/#{@store_hash}/v2/products/#{product_id}")
       end
 
+      def order_on_demand(order_id)
+        resp = get("https://api.bigcommerce.com/#{@store_hash}/v2/orders/#{order_id}")
+        if resp.to_s.include?("\"id\"")
+          return resp
+        else
+          return {}
+        end
+      end
+
       def order_products(order_products_url)
         get(order_products_url)
       end

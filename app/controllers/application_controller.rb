@@ -16,6 +16,16 @@ class ApplicationController < ActionController::Base
     end
   end
 
+  def verify_authenticity_token
+    begin
+      auth_header = request.headers["Authorization"]
+      return if auth_header && auth_header.include?("Bearer") && !current_user.nil?
+      fail
+    rescue
+      super
+    end
+  end
+
   def set_current_user_id
     if current_user
       GroovRealtime.current_user_id = current_user.id

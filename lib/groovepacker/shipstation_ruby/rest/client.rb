@@ -43,7 +43,44 @@ module Groovepacker
 
         def get_order(orderId)
           Rails.logger.info 'Getting orders with orderId: ' + orderId
-          @service.query("/Orders/" + orderId, nil, "get")
+          @service.query("/orders/" + orderId, nil, "get")
+        end
+
+        def get_order_on_demand(orderno, using_tracking_number=false)
+          Rails.logger.info 'Getting orders with order No: ' + orderno
+          response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
+          response["orders"] = response["orders"].select {|ordr| ordr["orderNumber"]==orderno }
+          log_on_demand_order_import(orderno, response, using_tracking_number)
+          if using_tracking_number
+            return response
+          else
+            return response, get_shipments_by_orderno(orderno)
+          end
+        end
+
+        def get_order_by_tracking_number(tracking_number)
+          on_demand_logger.info("********")
+          response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")
+          return {"orders" => []} if response["shipments"].blank?
+          shipment = response["shipments"].first
+          return get_order_on_demand(shipment["orderNumber"], true), response["shipments"]
+        end
+
+        def log_on_demand_order_import(orderno, response, using_tracking_number)
+          import_time = Time.now
+          on_demand_logger.info("OrderNumber: #{orderno}")
+          on_demand_logger.info("ImportTime: #{import_time}")
+          on_demand_logger.info("Using Tracking Number: #{using_tracking_number}")
+          on_demand_logger.info("Response: #{response}")
+        end
+
+        def get_shipments_by_orderno(orderno)
+          response = @service.query("/shipments?orderNumber=#{orderno}", nil, "get")
+          response["shipments"]
+        end
+
+        def on_demand_logger
+          @costom_logger ||= Logger.new("#{Rails.root}/log/on_demand_import_#{Apartment::Tenant.current}.log")
         end
 
         def get_tags_list

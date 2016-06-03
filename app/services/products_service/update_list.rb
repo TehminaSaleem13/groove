@@ -1,5 +1,5 @@
 module ProductsService
-  class UpdateList < ProductsService::ServiceInit
+  class UpdateList < ProductsService::Base
     def initialize(*args)
       @product, @var, @value = args
     end

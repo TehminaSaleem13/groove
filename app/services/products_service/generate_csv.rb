@@ -1,5 +1,5 @@
 module ProductsService
-  class GenerateCSV < ProductsService::ServiceInit
+  class GenerateCSV < ProductsService::Base
     attr_accessor :products, :csv, :bulk_actions_id, :headers
 
     def initialize(*args)
@@ -15,6 +15,10 @@ module ProductsService
       set_data_mapping
       csv << headers
       products.each do |item|
+        if @bulk_action
+          @bulk_action.reload
+          return true if bulk_action_cancelled?
+        end
         csv << process_data(item)
       end
       csv
@@ -70,13 +74,13 @@ module ProductsService
           'Barcode 1' => 'primary_barcode',
           'Primary Image' => 'primary_image',
           'Weight' => 'weight',
-          'Primary Category' => 'primary_category',
+          'Primary Category' => 'primary_category'
         },
         'item_other_skus_barcodes' => {
           'SKU 2' => 'sku',
           'SKU 3' => 'sku',
           'Barcode 2' => 'barcode',
-          'Barcode 3' => 'barcode',
+          'Barcode 3' => 'barcode'
         },
         'inventory_wh' => {
           'BinLocation 1' => 'location_primary',
@@ -123,13 +127,23 @@ module ProductsService
     def find_other_skus_barcodes(item, title, attribute)
       collection = item.send("product_#{attribute}s")
       index = title.gsub(/[^\d]/, '').to_i
-      collection.length > 1 ? collection[index - 1].send(attribute) : ''
+      collection.length > 1 ? collection[index - 2].send(attribute) : ''
     end
 
     def do_if_bulk_action
       return unless @bulk_action
       @bulk_action.completed += 1
       @bulk_action.save
+    end
+
+    def bulk_action_cancelled?
+      result = false
+      if @bulk_action.cancel == true
+        @bulk_action.status = 'cancelled'
+        @bulk_action.save
+        result = true
+      end
+      result
     end
   end
 end

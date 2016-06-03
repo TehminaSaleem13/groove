@@ -1,5 +1,5 @@
 class Tenant < ActiveRecord::Base
-  attr_accessible :name, :duplicate_tenant_id
+  attr_accessible :name, :duplicate_tenant_id, :initial_plan_id
   validates :name, uniqueness: true
   has_one :subscription
   has_one :access_restriction

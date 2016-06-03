@@ -1,5 +1,5 @@
 module ProductsService
-  class EbayImport < ProductsService::ServiceInit
+  class EbayImport < ProductsService::Base
     def initialize(*args)
       @itemID, @sku, @ebay, @credential = args
       @product_id = 0

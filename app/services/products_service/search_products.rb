@@ -1,5 +1,5 @@
 module ProductsService
-  class SearchProducts < ProductsService::ServiceInit
+  class SearchProducts < ProductsService::Base
     attr_accessor :params, :result_only
 
     def initialize(*args)

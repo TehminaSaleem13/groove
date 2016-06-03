@@ -23,6 +23,7 @@ module Groovepacker
               break if @import_item.status == 'cancelled'
               import_single_order(order)
               #increase_import_count
+              sleep 0.5
             end
 
             @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'

@@ -22,7 +22,7 @@
                 class="pagination-sm" rotate="false"></pagination>
   </div>
   <div class="container-fluid">
-    <div class="table-parent col-xs-12">
+    <div class="table-parent col-xs-12 col-md-12 col-lg-12 col-sm-12">
       <table groov-dragtable="dragOptions" groov-enabled="options.draggable" groov-model="theads"
              id="{{custom_identifier}}" class="well table-well table table-striped table-hover table-alt">
         <thead groov-rt-click="context_menu_event($event)" hm-press="context_menu_event($event)">
@@ -46,7 +46,7 @@
             style="padding: 7px;">
             <div style="display:inline-block;"
               bo-if="options.editable != false && options.all_fields[field].editable == true"
-              hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)" ng-init="load_editable($parent.$parent.$index,field);">
+              hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)">
               <div ng-class='{"grid-editable-field": !editable[field][$parent.$parent.$index], "grid-editing-mode": editable[field][$parent.$parent.$index]}'
                 ng-hide="editable[field][$parent.$parent.$index]"
                 ng-style="{'min-width' : (row[field].length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length) + 1) : (row[field].length || 5) + 1) + 'rem'}">
@@ -58,7 +58,7 @@
                       tooltip-placement='{{set_position(row, rows)}}'
                       class="grid-text">
                 </span>
-                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length < 25"
+                <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].length <= 25"
                       bo-text="row[field] | cut:false:(25*options.no_of_lines)" class="grid-text">
                 </span>
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].length)"

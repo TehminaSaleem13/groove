@@ -14,9 +14,11 @@ groovepacks_controllers.
 
       scope.ok = function () {
         $modalInstance.close("ok-button-click");
+        scope.update_single_order(false);
       };
       scope.cancel = function () {
         $modalInstance.dismiss("cancel-button-click");
+        scope.update_single_order(false);
       };
 
       scope.update = function (reason) {

@@ -19,7 +19,8 @@ module Groovepacker
                   @products = response
                   send_products_import_email(@products.count, credential) if @products.count>20000
                   @products.each do |product|
-                  	product = product.last
+                    product = product.last
+                    next if product["status"]=="2"
                   	result[:total_imported] = result[:total_imported] + 1
 
                   	if Product.where(:store_product_id => product["entity_id"]).length == 0

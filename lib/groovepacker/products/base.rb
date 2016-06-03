@@ -6,9 +6,10 @@ module Groovepacker
 
       def initialize(params={})
         @result = params[:result]
-        @params = params[:params_attrs]
-        @session = params[:session]
+        @params = params[:params_attrs] || params[:params]
         @current_user = params[:current_user]
+        @session = params[:session]
+        @store = params[:store]
       end
 
       private

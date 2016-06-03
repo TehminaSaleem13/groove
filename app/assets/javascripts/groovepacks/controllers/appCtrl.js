@@ -185,7 +185,7 @@ groovepacks_controllers.
               $scope.import_groov_popover.data.push(single_data);
             }
           }
-          $scope.popover_summary_content =
+          $scope.import_groov_popover.content = 
             '<table style="font-size: 12px;width:100%;">' +
               '<tr ng-repeat="store in import_groov_popover.data" ng-hide="!store.status">' +
                 '<td width="60px;" style="white-space: nowrap;">' +
@@ -194,7 +194,7 @@ groovepacks_controllers.
                 '<td style="white-space: nowrap;">{{store.name}}</td>' +
                 '<td style="width:62%;padding:3px;">' +
                   '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 75}}</progressbar>' +
-                  '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
+                  // '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                 '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
@@ -202,14 +202,14 @@ groovepacks_controllers.
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 4, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                       '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
-                        '<input type="number" ng-model="store.days" value="{{$scope.bc_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
+                        '<input type="number" ng-model="store.days" ng-value="{{bc_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'ShippingEasy\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 4, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                       '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
-                        '<input type="number" ng-model="store.days" value="{{$scope.se_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
+                        '<input type="number" ng-model="store.days" ng-value="{{se_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'Shipstation API 2\'" style="display: flex;">' +
@@ -218,13 +218,13 @@ groovepacks_controllers.
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 7, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                       '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
-                        '<input type="number" ng-model="store.days" value="{{$scope.ss_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
+                        '<input type="number" ng-model="store.days" ng-value="{{ss_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'Teapplix\'" style="display: flex;">' +
                       '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
-                        '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'regular\')" style="float: left;"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                        '<input type="number" ng-model="store.days" value="{{$scope.tp_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
+                        '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
+                        '<input type="number" ng-model="store.days" ng-value="{{tp_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
                     '</div>' +
                     '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' +
@@ -232,17 +232,6 @@ groovepacks_controllers.
                 '</td>' +
               '</tr>' +
             '</table>';
-
-          if ($(".nav-li.ng-scope").is(":hover")){
-            $scope.import_groov_popover.content = $scope.popover_summary_content;
-          }
-          if ($(".popover.bottom.fade.in").length>0){
-            $scope.import_groov_popover.content = $scope.popover_summary_content;
-          }
-          if($scope.add_popup_summary_on_load) {
-            $scope.import_groov_popover.content = $scope.popover_summary_content;
-            $scope.add_popup_summary_on_load = false;
-          }
         }
       });
 
@@ -326,6 +315,10 @@ groovepacks_controllers.
           $scope.tp_deep_import_days = store.days;
         }
       };
+
+      groovIO.on('popup_display_for_on_demand_import', function (resp) {
+        notification.notify(resp.message);
+      });
 
       $scope.show_logout_box = false;
       groovIO.on('ask_logout', function (msg) {

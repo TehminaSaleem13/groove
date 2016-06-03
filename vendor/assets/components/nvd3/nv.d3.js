@@ -4918,15 +4918,32 @@ nv.models.indentedTree = function() {
           .on('dblclick', function(d,i) {
             dispatch.legendDblclick(d,i);
             if (updateState) {
-                //the default behavior of NVD3 legends, when double clicking one,
-                // is to set all other series' to false, and make the double clicked series enabled.
+              //the default behavior of NVD3 legends, when double clicking one,
+              // is to set all other series' to false, and make the double clicked series enabled.
+              // data.forEach(function(series) {
+              //    series.disabled = true;
+              // });
+              // d.disabled = false;
+              var disabled = false;
+              data.forEach(function(series) {
+                if (series.disabled == true) {
+                  disabled = true
+                };
+              });
+              if (disabled == true) {
+                console.log('disabled: true');
                 data.forEach(function(series) {
-                   series.disabled = true;
+                  series.disabled = false;
                 });
-                d.disabled = false;
-                dispatch.stateChange({
-                    disabled: data.map(function(d) { return !!d.disabled })
+              } else {
+                console.log('disabled: false');
+                data.forEach(function(series) {
+                  series.disabled = true;
                 });
+              };
+              dispatch.stateChange({
+                  disabled: data.map(function(d) { return !!d.disabled })
+              });
             }
           });
       seriesEnter.append('circle')

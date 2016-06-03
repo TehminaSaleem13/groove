@@ -54,7 +54,9 @@ groovepacks_controllers.
             "show_internal_notes": "",
             "show_customer_notes": "",
             "cue_orders_optons": "",
-            "intanginle_setting": ""
+            "intangible_setting": "",
+            "intangible_setting_gen_barcode_from_sku": "",
+            "post_scan_pause": ""
           }
         };
         groov_translator.translate('settings.system.scan_pack', $scope.translations);

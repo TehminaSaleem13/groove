@@ -46,6 +46,7 @@ module Groovepacker
                       import_item.current_order_imported_item = 0
                       import_item.save
                       line_items.each do |line_item|
+                        next unless line_item["parent_item_id"].nil?
                         product_id=nil
                         @order_item = OrderItem.new
                         @order_item.price = line_item["price"]

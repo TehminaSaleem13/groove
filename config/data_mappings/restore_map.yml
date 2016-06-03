@@ -1,0 +1,88 @@
+---
+products:
+  :model: Product
+  :map:
+    ID: id
+    Name: name
+    store_product_id: store_product_id
+    product_type: product_type
+    store_id: store_id
+    created_at: created_at
+    updated_at: updated_at
+    BinLocation 1: inv_wh1
+    status: status
+    spl_instructions_4_packer: spl_instructions_4_packer
+    spl_instructions_4_confirmation: spl_instructions_4_confirmation
+    Barcode 1: barcode
+    is_skippable: is_skippable
+    packing_placement: packing_placement
+    pack_time_adj: pack_time_adj
+    kit_parsing: kit_parsing
+    is_kit: is_kit
+    disable_conf_req: disable_conf_req
+    total_avail_ext: total_avail_ext
+    Weight: weight
+    shipping_weight: shipping_weight
+product_barcodes:
+  :model: ProductBarcode
+  :map:
+    id: id
+    product_id: product_id
+    barcode: barcode
+    created_at: created_at
+    updated_at: updated_at
+    order: order
+product_images:
+  :model: ProductImage
+  :map:
+    id: id
+    product_id: product_id
+    image: image
+    caption: caption
+    created_at: created_at
+    updated_at: updated_at
+    order: order
+product_skus:
+  :model: ProductSku
+  :map:
+    id: id
+    product_id: product_id
+    sku: sku
+    purpose: purpose
+    created_at: created_at
+    updated_at: updated_at
+    order: order
+product_cats:
+  :model: ProductCat
+  :map:
+    id: id
+    category: category
+    product_id: product_id
+    created_at: created_at
+    updated_at: updated_at
+product_kit_skus:
+  :model: ProductKitSkus
+  :map:
+    id: id
+    option_product_id: option_product_id
+    qty: qty
+    product_id: product_id
+    created_at: created_at
+    updated_at: updated_at
+    packing_order: packing_order
+product_inventory_warehouses:
+  :model: ProductInventoryWarehouses
+  :map:
+    id: id
+    location: location
+    qty: qty
+    product_id: product_id
+    created_at: created_at
+    updated_at: updated_at
+    alert: alert
+    location_primary: location_primary
+    location_secondary: location_secondary
+    name: name
+    inventory_warehouse_id: inventory_warehouse_id
+    available_inv: available_inv
+    allocated_inv: allocated_inv
