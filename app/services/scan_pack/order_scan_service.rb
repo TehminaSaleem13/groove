@@ -227,9 +227,19 @@ module ScanPack
 
     def check_for_zero_qty_item
       contains_zero_qty_order_item = @single_order.contains_zero_qty_order_item?
-      return unless contains_zero_qty_order_item
+      contains_zero_qty_order_kit_item = @single_order.contains_zero_qty_order_kit_item?
+
+      return unless (contains_zero_qty_order_item || contains_zero_qty_order_kit_item)
+
       @single_order_result.merge!('zero_qty_product' => contains_zero_qty_order_item)
-      'The current order has one or more items with a qty of 0'
+
+      message = if contains_zero_qty_order_kit_item
+        'The current order has one or more kit items with a qty of 0'
+      else
+        'The current order has one or more items with a qty of 0'
+      end
+
+      message
     end
 
     def do_if_single_order_status_serviceissue

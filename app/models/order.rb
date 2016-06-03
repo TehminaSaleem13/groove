@@ -134,11 +134,13 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    self.order_items.includes(:product).each do |order_item|
+    order_items.includes(product: :product_kit_skuss).each do |order_item|
       product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
-      if is_new_or_inactive || order_item.qty.eql?(0)
+      # If item has 0 qty
+      if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
         result = true
         break
       end
@@ -152,9 +154,10 @@ class Order < ActiveRecord::Base
 
     self.order_items.each do |order_item|
       product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
-      if is_new_or_inactive || order_item.qty.eql?(0)
+      if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
         products_list << product.as_json(
             include: {
               product_images: {
@@ -172,8 +175,14 @@ class Order < ActiveRecord::Base
   end
 
   def contains_zero_qty_order_item?
-    @contains_zero_qty_order_item ||= order_items.find do |order_item|
+    order_items.find do |order_item|
       order_item.qty.eql?(0)
+    end.present?
+  end
+
+  def contains_zero_qty_order_kit_item?
+    order_items.find do |order_item|
+      order_item.product.product_kit_skuss.map(&:qty).index(0)
     end.present?
   end
 

@@ -99,6 +99,7 @@ class OrderItemKitProduct < ActiveRecord::Base
     min = 0
     min = order_item_kit_product.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
     order_item_kit_products.reload.includes(:product_kit_skus).each do |kit_product|
+      next if kit_product.product_kit_skus.qty.eql?(0)
       temp = kit_product.scanned_qty / kit_product.product_kit_skus.qty
       min = temp if (temp) < min
     end
