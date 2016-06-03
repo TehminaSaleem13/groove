@@ -26,9 +26,9 @@ module Groovepacker
 
           tenants_result.push(tenant_hash)
         end
-        @sort = params[:sort]
+        @sort = sort_param(params)
         if @sort && @sort != ''
-          tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].downcase }
+          tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].to_s.downcase }
           tenants_result.reverse! if params[:order] == 'DESC'
         end
 
@@ -428,8 +428,10 @@ module Groovepacker
           Apartment::Tenant.switch(tenant_name)
           tenant_hash['last_activity']['most_recent_login'] = most_recent_login
           tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan
+          tenant_hash['most_recent_activity'] = most_recent_login['date_time']
           Apartment::Tenant.switch('admintools')
         rescue => e
+          tenant_hash['most_recent_activity'] = nil
           Apartment::Tenant.switch('admintools')
         end
       end
@@ -465,6 +467,11 @@ module Groovepacker
           most_recent_scan_data['user'] = User.find_by_id(@order.packing_user_id).username rescue nil
         end
         most_recent_scan_data
+      end
+
+      def sort_param(params)
+        return 'most_recent_activity' if params[:sort] == 'last_activity'
+        params[:sort]
       end
     end
   end
