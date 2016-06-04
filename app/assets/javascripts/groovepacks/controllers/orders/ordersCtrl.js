@@ -251,9 +251,15 @@ groovepacks_controllers.
       };
 
       myscope.get_orders = function (page) {
+
+        if(typeof page != 'undefined' && myscope.page_exists.toString() === page.toString()){
+          return;
+        }
+
         if (typeof page == 'undefined') {
           page = $state.params.page;
         }
+
         myscope.reset_change_status();
         if ($scope._can_load_orders) {
           $scope._can_load_orders = false;
@@ -262,6 +268,7 @@ groovepacks_controllers.
             myscope.update_selected_count();
             myscope.update_table_accordian_width();
             $scope._can_load_orders = true;
+            myscope.page_exists = page;
           }).error(function () {
             $scope._can_load_orders = true;
           });
@@ -314,6 +321,8 @@ groovepacks_controllers.
         //Private properties
         myscope.do_load_orders = false;
         $scope._can_load_orders = true;
+        //Cache current page
+        myscope.page_exists = -1;
 
         $scope.gridOptions = {
           identifier: 'orders',
