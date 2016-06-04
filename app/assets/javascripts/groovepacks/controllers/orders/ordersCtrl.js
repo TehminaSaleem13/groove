@@ -247,11 +247,12 @@ groovepacks_controllers.
 
       myscope.order_setup_opt = function (type, value) {
         orders.setup.update($scope.orders.setup, type, value);
-        myscope.get_orders(1);
+        myscope.get_orders();
       };
 
       myscope.get_orders = function (page) {
 
+        // Don't send page no to skip cached data
         if(typeof page != 'undefined' && myscope.page_exists.toString() === page.toString()){
           return;
         }
@@ -477,16 +478,21 @@ groovepacks_controllers.
           }
         }
 
+        myscope.initializing = true;
 
         $scope.$watch('orders.setup.search', function () {
-          if ($scope.orderFilterTimeout) $timeout.cancel($scope.orderFilterTimeout);
+          if (myscope.initializing) {
+            $timeout(function() { myscope.initializing = false; });
+          } else {
+            if ($scope.orderFilterTimeout) $timeout.cancel($scope.orderFilterTimeout);
 
-          if ($scope.orders.setup.select_all) {
-            $scope.select_all_toggle(false);
+            if ($scope.orders.setup.select_all) {
+              $scope.select_all_toggle(false);
+            }
+            $scope.orderFilterTimeout = $timeout(function() {
+              myscope.get_orders();
+            }, 500); // delay 500 ms
           }
-          $scope.orderFilterTimeout = $timeout(function() {
-            myscope.get_orders(1);
-          }, 500); // delay 500 ms
         });
 
         $scope.$watch('_can_load_orders', function () {
