@@ -21,23 +21,23 @@ module Groovepacker
         def init_import(current_tenant)
           begin
             #import if magento products
-            if @store.store_type != 'Amazon'
-              run_import_for_other_than_amazon(current_tenant)
-            else
-              run_import_for_amazon
-            end
+            # if @store.store_type != 'Amazon'
+            run_import_for_stores(current_tenant)
+            # else
+            #   run_import_for_amazon
+            # end
           rescue Exception => e
             @result['status'] = false
             @result['messages'].push(e.message)
           end
         end
 
-        def run_import_for_other_than_amazon(current_tenant)
+        def run_import_for_stores(current_tenant)
           context = Groovepacker::Stores::Context.new(get_handler)
           import_orders_obj = ImportOrders.new
           import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
           context.delay(:run_at => 1.seconds.from_now).import_products
-          #context.import_products
+          # context.import_products
         end
 
         def get_handler
@@ -59,6 +59,8 @@ module Groovepacker
             handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
           when 'Teapplix'
             handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+          when 'Amazon'
+            handler = Groovepacker::Stores::Handlers::AmazonHandler.new(@store)
           end
           return handler
         end

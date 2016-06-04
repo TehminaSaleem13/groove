@@ -6,7 +6,6 @@ module Groovepacker
         def build_handle
           amazon_credential = AmazonCredentials.where(:store_id => self.store.id).first
           mws = nil
-
           if !amazon_credential.nil?
             mws = MWS.new(:aws_access_key_id => ENV['AMAZON_MWS_ACCESS_KEY_ID'],
                           :secret_access_key => ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
@@ -17,7 +16,9 @@ module Groovepacker
             mws_alternate = Mws.connect(
               merchant: amazon_credential.merchant_id,
               access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-              secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+              secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+              :marketplace_id => amazon_credential.marketplace_id,
+              :MWS_auth_token => amazon_credential.mws_auth_token
             )
           end
 
