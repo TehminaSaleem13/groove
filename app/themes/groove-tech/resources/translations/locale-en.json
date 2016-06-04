@@ -88,7 +88,8 @@
           "portrait": "Portrait",
           "landscape": "Landscape",
           "system_notifications": "System Notifications",
-          "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores"
+          "packing_slip_message_to_customer": "Custom Packing-Slip Message-All Stores",
+          "show_primary_bin_loc_in_barcodeslip": "Show Primary Bin Location on Product Barcode Slip"
         },
         "tooltips": {
           "inventory_tracking": "If you wish to track inventory you can enable it here. Please be sure to alias duplicate items and create kits beforehand if applicable. Once enabled, inventory will be automatically allocated for open orders. You will then need to set the Quantity On Hand level for each product using the CSV product importer, the recount feature or by manually editing products. The Quantity On Hand count assumes that all items are \"on shelf\" and included in the count. (ie. Items will be allocated for open orders in the system so please include all items in the count, even if they have been, or will be, picked for open orders in the system.)",
@@ -100,7 +101,8 @@
           "conf_code_product_instruction": "Special instructions to Packer can be added for any product from the product detail window. If a confirmation is required the Packer will be prompted to scan their unique confirmation code to proceed when the instructions are shown. If you want to ensure that confirmations are always required or never required for this type of notification you can do that here. Leaving it optional allows this setting to be controlled on a per product basis.",
           "packing_slip_size": "Choose the paper size you use for printing packing slips 4x6 is usually used for thermal printers. Standard 8.5x11 will print two packing slips per page.",
           "packing_slip_message_to_customer": "This is usually used for a thank you message and possibly instructions for receiving support. A store specific message can be set on the store setup page which will override this general message. Leave Blank to disable this general packing slip message",
-          "order_item_export_message": "The Order Item Export allows you to select orders from the orders list and export them  to a CSV file. When this option is enabled, you'll find the export option in the Orders list Edit drop down. Depending on the option selected here the order items will either be grouped together by item (like a pick list) or the items required for each order will be grouped together by order, as they are on a packing slip."
+          "order_item_export_message": "The Order Item Export allows you to select orders from the orders list and export them  to a CSV file. When this option is enabled, you'll find the export option in the Orders list Edit drop down. Depending on the option selected here the order items will either be grouped together by item (like a pick list) or the items required for each order will be grouped together by order, as they are on a packing slip.",
+          "show_primary_bin_loc_in_barcodeslip": "If you wish to display Primary-Bin-Location in product barcode slip you can enable it here."
         }
       },
       "scan_pack": {
