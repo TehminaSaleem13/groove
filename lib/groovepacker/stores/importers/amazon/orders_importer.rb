@@ -11,8 +11,7 @@ module Groovepacker
             result = self.build_result
 
             begin
-              response = mws.orders.list_orders :last_updated_after => 2.months.ago,
-                                                :order_status => ['Unshipped', 'PartiallyShipped']
+              response = mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
 
               @orders = []
               if !response.orders.kind_of?(Array) &&
@@ -45,11 +44,11 @@ module Groovepacker
                     @order.order_placed_time = order.purchase_date
                     @order.store = credential.store
 
-                    order_items =
-                      mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
+                    order_items = mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
                     import_item.current_order_items = order_items.length
                     import_item.current_order_imported_item = 0
                     import_item.save
+                    # next if order_items.order_items[0].blank?
                     order_items.order_items.each do |item|
                       order_item = OrderItem.new
                       unless item.item_price.nil?
@@ -110,9 +109,17 @@ module Groovepacker
                         result[:status] &= false
                         result[:messages].push('Problem adding new items')
                       end
+
                       @order.addactivity("Order Import", credential.store.name+" Import")
                       @order.order_items.each do |item|
-                        @order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                        if item.qty.blank? || item.qty<1
+                        @order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{credential.store.name} Import")
+                        item.destroy
+                          next
+                        end
+                        unless item.product.nil? || item.product.primary_sku.nil?
+                         @order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                        end 
                       end
                       @order.set_order_status
                       result[:success_imported] = result[:success_imported] + 1
