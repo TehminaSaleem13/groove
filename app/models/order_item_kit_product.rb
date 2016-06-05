@@ -94,11 +94,11 @@ class OrderItemKitProduct < ActiveRecord::Base
 
   def set_min_value
     order_item_kit_products = self.order_item.order_item_kit_products
-    order_item_kit_product = order_item_kit_products.first
+    order_item_kit_product = order_item_kit_products.reload.first
     product_kit_skus_qty = order_item_kit_product.product_kit_skus.qty
-    min = 0
+    min = 1
     min = order_item_kit_product.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
-    order_item_kit_products.reload.includes(:product_kit_skus).each do |kit_product|
+    order_item_kit_products.includes(:product_kit_skus).each do |kit_product|
       temp = kit_product.scanned_qty / kit_product.product_kit_skus.qty
       min = temp if (temp) < min
     end

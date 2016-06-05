@@ -273,6 +273,10 @@ groovepacks_controllers.
 
         myscope.do_load_products = false;
         $scope._can_load_products = true;
+
+        //Cache current page
+        myscope.page_exists = -1;
+
         $scope.gridOptions = {
           identifier: 'products',
           dynamic_width: true,
@@ -398,17 +402,22 @@ groovepacks_controllers.
           }
         };
 
+        myscope.initializing = true;
+
         //Register watchers
         $scope.$watch('products.setup.search', function () {
-          if ($scope.productFilterTimeout) $timeout.cancel($scope.productFilterTimeout);
+          if (myscope.initializing) {
+            $timeout(function() { myscope.initializing = false; });
+          } else {
+            if ($scope.productFilterTimeout) $timeout.cancel($scope.productFilterTimeout);
 
-          if ($scope.products.setup.select_all) {
-            $scope.select_all_toggle(false);
+            if ($scope.products.setup.select_all) {
+              $scope.select_all_toggle(false);
+            }
+            $scope.productFilterTimeout = $timeout(function() {
+              myscope.get_products();
+            }, 500); // delay 500 ms
           }
-          $scope.productFilterTimeout = $timeout(function() {
-            myscope.get_products(1);
-          }, 500); // delay 500 ms
-
         });
         $scope.$watch('_can_load_products', myscope.can_do_load_products);
 
@@ -422,9 +431,15 @@ groovepacks_controllers.
 
       myscope.get_products = function (page) {
 
+        // Don't send page no to skip cached data
+        if(typeof page != 'undefined' && myscope.page_exists.toString() === page.toString()){
+          return;
+        }
+
         if (typeof page == 'undefined') {
           page = $state.params.page;
         }
+
         $scope.gridOptions.selections.show_delete = myscope.show_delete();
         if ($scope._can_load_products) {
           $scope._can_load_products = false;
@@ -436,6 +451,7 @@ groovepacks_controllers.
             myscope.update_selected_count();
             myscope.update_table_accordian_width();
             $scope._can_load_products = true;
+            myscope.page_exists = page;
           }).error(function () {
             $scope._can_load_products = true;
           });
@@ -445,6 +461,7 @@ groovepacks_controllers.
           req.resolve();
           return req.promise;
         }
+
       };
 
       myscope.update_table_accordian_width = function () {
@@ -465,7 +482,7 @@ groovepacks_controllers.
       myscope.common_setup_opt = function (type, value, selector) {
         products.setup.update($scope.products.setup, type, value);
         $scope.products.setup.is_kit = (selector == 'kit') ? 1 : 0;
-        myscope.get_products(1);
+        myscope.get_products();
       };
 
       myscope.handle_click_fn = function (row, event) {

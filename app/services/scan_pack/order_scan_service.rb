@@ -202,6 +202,7 @@ module ScanPack
               'inactive_or_new_products' => @single_order.get_inactive_or_new_products,
               'next_state' => 'scanpack.rfp.product_edit'
             })
+          message = check_for_zero_qty_item
         else
           @session.merge!({
             product_edit_matched_for_current_user: false,
@@ -224,6 +225,23 @@ module ScanPack
          'this order or scan a different order.'
       end
       message && @result['notice_messages'].push(message)
+    end
+
+    def check_for_zero_qty_item
+      contains_zero_qty_order_item = @single_order.contains_zero_qty_order_item?
+      contains_zero_qty_order_kit_item = @single_order.contains_zero_qty_order_kit_item?
+
+      return unless (contains_zero_qty_order_item || contains_zero_qty_order_kit_item)
+
+      @single_order_result.merge!('zero_qty_product' => contains_zero_qty_order_item)
+
+      message = if contains_zero_qty_order_kit_item
+        'The current order has one or more kit items with a qty of 0'
+      else
+        'The current order has one or more items with a qty of 0'
+      end
+
+      message
     end
 
     def do_if_single_order_status_serviceissue
