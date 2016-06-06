@@ -1,10 +1,10 @@
 class DeleteOrders
-  include Delayed::RecurringJob
-  run_every 1.day
-  run_at '12:00am'
-  timezone 'US/Pacific'
-  queue 'delete orders'
-  priority 10
+  #include Delayed::RecurringJob
+  #run_every 1.day
+  #run_at '12:00am'
+  #timezone 'US/Pacific'
+  #queue 'delete orders'
+  #priority 10
 
   def initialize(attrs={})
     @tenant = attrs[:tenant]
