@@ -21,6 +21,9 @@ module Groovepacker
             result unless result[:status]
             # Product.import @imported_products
             OrderItem.import @created_order_items
+            @created_order_items.each do |item|
+              item.run_callbacks(:create) { true }
+            end
             make_intangible
             @import_item.status = 'completed'
             @import_item.save
@@ -49,6 +52,7 @@ module Groovepacker
               import_order_data(order_map, single_row)
               update_result(result, single_row)
               import_item_failed_result(result, index) unless result[:status]
+              @order.set_order_status
             else
               @import_item.previous_imported += 1
               @import_item.save
