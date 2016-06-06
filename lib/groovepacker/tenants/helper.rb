@@ -216,11 +216,11 @@ module Groovepacker
         access_restriction.num_shipments = access_restrictions_info["max_allowed"]
         access_restriction.num_users = access_restrictions_info["max_users"]
         access_restriction.num_import_sources = access_restrictions_info["max_import_sources"]
-        access_restriction.allow_bc_inv_push = access_restrictions_info["allow_bc_inv_push"] if access_restrictions_info["allow_bc_inv_push"]
-        access_restriction.allow_mg_rest_inv_push = access_restrictions_info["allow_mg_rest_inv_push"] if access_restrictions_info["allow_mg_rest_inv_push"]
-        access_restriction.allow_shopify_inv_push = access_restrictions_info["allow_shopify_inv_push"] if access_restrictions_info["allow_shopify_inv_push"]
-        access_restriction.allow_teapplix_inv_push = access_restrictions_info["allow_teapplix_inv_push"] if access_restrictions_info["allow_teapplix_inv_push"]
-        access_restriction.allow_magento_soap_tracking_no_push = access_restrictions_info["allow_magento_soap_tracking_no_push"] if access_restrictions_info["allow_magento_soap_tracking_no_push"]
+        access_restriction.allow_bc_inv_push = access_restrictions_info["allow_bc_inv_push"]
+        access_restriction.allow_mg_rest_inv_push = access_restrictions_info["allow_mg_rest_inv_push"]
+        access_restriction.allow_shopify_inv_push = access_restrictions_info["allow_shopify_inv_push"]
+        access_restriction.allow_teapplix_inv_push = access_restrictions_info["allow_teapplix_inv_push"]
+        access_restriction.allow_magento_soap_tracking_no_push = access_restrictions_info["allow_magento_soap_tracking_no_push"]
         access_restriction.save
       end
 
