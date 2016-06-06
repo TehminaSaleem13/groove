@@ -26,9 +26,9 @@ module Groovepacker
 
           tenants_result.push(tenant_hash)
         end
-        @sort = params[:sort]
+        @sort = sort_param(params)
         if @sort && @sort != ''
-          tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].downcase }
+          tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].to_s.downcase }
           tenants_result.reverse! if params[:order] == 'DESC'
         end
 
@@ -204,7 +204,7 @@ module Groovepacker
           Apartment::Tenant.switch(tenant.name)
           @access_restriction = AccessRestriction.all.last
           return result unless @access_restriction
-          access_restrictions_info = params[:access_restrictions_info]
+          access_restrictions_info = params["access_restrictions_info"]
           retrieve_and_save_restrictions(@access_restriction, access_restrictions_info)
         rescue => e
           update_fail_status(result, e.message)
@@ -213,12 +213,14 @@ module Groovepacker
       end
 
       def retrieve_and_save_restrictions(access_restriction, access_restrictions_info)
-        access_restriction.num_shipments = access_restrictions_info[:max_allowed]
-        access_restriction.num_users = access_restrictions_info[:max_users]
-        access_restriction.num_import_sources = access_restrictions_info[:max_import_sources]
-        access_restriction.allow_bc_inv_push = access_restrictions_info[:allow_bc_inv_push] if access_restrictions_info[:allow_bc_inv_push]
-        access_restriction.allow_mg_rest_inv_push = access_restrictions_info[:allow_mg_rest_inv_push] if access_restrictions_info[:allow_mg_rest_inv_push]
-        access_restriction.allow_shopify_inv_push = access_restrictions_info[:allow_shopify_inv_push] if access_restrictions_info[:allow_shopify_inv_push]
+        access_restriction.num_shipments = access_restrictions_info["max_allowed"]
+        access_restriction.num_users = access_restrictions_info["max_users"]
+        access_restriction.num_import_sources = access_restrictions_info["max_import_sources"]
+        access_restriction.allow_bc_inv_push = access_restrictions_info["allow_bc_inv_push"]
+        access_restriction.allow_mg_rest_inv_push = access_restrictions_info["allow_mg_rest_inv_push"]
+        access_restriction.allow_shopify_inv_push = access_restrictions_info["allow_shopify_inv_push"]
+        access_restriction.allow_teapplix_inv_push = access_restrictions_info["allow_teapplix_inv_push"]
+        access_restriction.allow_magento_soap_tracking_no_push = access_restrictions_info["allow_magento_soap_tracking_no_push"]
         access_restriction.save
       end
 
@@ -423,11 +425,30 @@ module Groovepacker
       end
 
       def retrieve_activity_data(tenant_name, tenant_hash)
-        Apartment::Tenant.switch(tenant_name)
-        tenant_hash['last_activity'] = {}
-        tenant_hash['last_activity']['most_recent_login'] = most_recent_login
-        tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan
-        Apartment::Tenant.switch('admintools')
+        tenant_hash['last_activity'] = activity_data_hash
+        begin
+          Apartment::Tenant.switch(tenant_name)
+          tenant_hash['last_activity']['most_recent_login'] = most_recent_login
+          tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan
+          tenant_hash['most_recent_activity'] = most_recent_login['date_time']
+          Apartment::Tenant.switch('admintools')
+        rescue => e
+          tenant_hash['most_recent_activity'] = nil
+          Apartment::Tenant.switch('admintools')
+        end
+      end
+
+      def activity_data_hash
+        {
+          'most_recent_login' => {
+            'date_time' => nil,
+            'user' => ''
+          },
+          'most_recent_scan' => {
+            'date_time' => nil,
+            'user' => ''
+          }
+        }
       end
 
       def most_recent_login
@@ -448,6 +469,11 @@ module Groovepacker
           most_recent_scan_data['user'] = User.find_by_id(@order.packing_user_id).username rescue nil
         end
         most_recent_scan_data
+      end
+
+      def sort_param(params)
+        return 'most_recent_activity' if params[:sort] == 'last_activity'
+        params[:sort]
       end
     end
   end
