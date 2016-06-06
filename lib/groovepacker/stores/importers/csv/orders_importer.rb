@@ -49,6 +49,7 @@ module Groovepacker
               import_order_data(order_map, single_row)
               update_result(result, single_row)
               import_item_failed_result(result, index) unless result[:status]
+              @order.set_order_status
             else
               @import_item.previous_imported += 1
               @import_item.save
