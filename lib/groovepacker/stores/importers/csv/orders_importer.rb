@@ -21,6 +21,9 @@ module Groovepacker
             result unless result[:status]
             # Product.import @imported_products
             OrderItem.import @created_order_items
+            @created_order_items.each do |item|
+              item.run_callbacks(:create) { true }
+            end
             make_intangible
             @import_item.status = 'completed'
             @import_item.save
