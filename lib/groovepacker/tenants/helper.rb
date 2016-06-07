@@ -65,11 +65,11 @@ module Groovepacker
         begin
           Apartment::Tenant.switch(tenant.name)
           if params[:action_type] == 'orders'
-            delete_orders(result, current_user)
+            delete_orders(result)
           elsif params[:action_type] == 'products'
             delete_products(current_user)
           elsif params[:action_type] == 'both'
-            delete_orders(result, current_user)
+            delete_orders(result)
             delete_products(current_user)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
