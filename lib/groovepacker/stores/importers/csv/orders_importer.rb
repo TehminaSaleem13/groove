@@ -104,8 +104,8 @@ module Groovepacker
               sku: single_sku.strip)
             if !product_skus.empty?
               product = product_skus.first.product
-              order_items = @order_item_helper.create_update_order_item(single_row, product, single_sku, @order, @created_order_items)
-              @created_order_items = order_items
+              order_item = @order_item_helper.create_update_order_item(single_row, product, single_sku, @order)
+              @created_order_items << order_item
               addactivity_and_delete_required(product)
               @product_helper.update_product(product, single_row)
             else # no sku is found
