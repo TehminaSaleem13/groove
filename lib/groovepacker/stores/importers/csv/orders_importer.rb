@@ -199,6 +199,7 @@ module Groovepacker
             [@base_products, @imported_products].each do |products|
               products.each do |product|
                 make_product_intangible(product) unless product.base_sku
+                product.reload
                 product.update_product_status
               end
             end
