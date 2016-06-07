@@ -42,6 +42,7 @@ module Groovepacker
           end
 
           def import_orders_from_response(response, shipments_response)
+            check_or_assign_import_item
             response["orders"].each do |order|
               @import_item.reload
               break if @import_item.status == 'cancelled'
@@ -137,11 +138,10 @@ module Groovepacker
               address = order["shipTo"]
               split_name = address["name"].split(' ') rescue ' '
               shipstation_order.attributes = {
-                                    lastname: split_name.pop, firstname: split_name.join(' '),
-                                    address_1: address["street1"], address_2: address["street2"],
-                                    city: address["city"], state: address["state"],
-                                    postcode: address["postalCode"], country: address["country"]
-                                  }
+                      lastname: split_name.pop, firstname: split_name.join(' '),
+                      address_1: address["street1"], address_2: address["street2"],
+                      city: address["city"], state: address["state"],
+                      postcode: address["postalCode"], country: address["country"] }
               return shipstation_order
             end
 
@@ -234,7 +234,6 @@ module Groovepacker
               @product_importer_client ||= Groovepacker::Stores::Context.new(
                               Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@credential.store))
             end
-
 
         end
       end

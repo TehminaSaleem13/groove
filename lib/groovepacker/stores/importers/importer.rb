@@ -85,6 +85,14 @@ module Groovepacker
           @result = self.build_result
         end
 
+        def check_or_assign_import_item
+          return unless ImportItem.find_by_id(@import_item.id).blank?
+          import_item_id = @import_item.id
+          @import_item = @import_item.dup  
+          @import_item.id = import_item_id
+          @import_item.save
+        end
+
         protected
         attr_accessor :handler
 
