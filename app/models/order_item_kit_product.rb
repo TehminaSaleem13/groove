@@ -93,7 +93,15 @@ class OrderItemKitProduct < ActiveRecord::Base
   end
 
   def set_min_value
-    order_item_kit_products = self.order_item.order_item_kit_products.reload
+    order_item_kit_products = order_item.reload
+                                             .order_item_kit_products.includes(
+                                                product_kit_skus: [
+                                                  product: [
+                                                    :product_skus, :product_images,
+                                                    :product_barcodes
+                                                  ]
+                                                ]
+                                              )
     order_item_kit_product = order_item_kit_products.first
     product_kit_skus_qty = order_item_kit_product.product_kit_skus.qty
     min = 1

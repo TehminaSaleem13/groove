@@ -133,7 +133,7 @@ class OrderItem < ActiveRecord::Base
   end
 
   def option_products
-    option_product_ids = order_item_kit_products.reload
+    option_product_ids = order_item_kit_products
       .map(&:product_kit_skus).flatten.compact.map(&:option_product_id)
     Product
       .where(id: option_product_ids)
