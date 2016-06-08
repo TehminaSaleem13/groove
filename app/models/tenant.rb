@@ -1,5 +1,5 @@
 class Tenant < ActiveRecord::Base
-  attr_accessible :name, :duplicate_tenant_id, :initial_plan_id, :is_modified
+  attr_accessible :name, :duplicate_tenant_id, :initial_plan_id, :is_modified, :magento_tracking_push_enabled
   validates :name, uniqueness: true
   has_one :subscription
   has_one :access_restriction
