@@ -1,9 +1,9 @@
 class MagentoSoapOrders
-  include Delayed::RecurringJob
-  run_every 10.minutes    # on changing 'run_every' time please change the time in 
+  #include Delayed::RecurringJob
+  #run_every 10.minutes    # on changing 'run_every' time please change the time in 
                           # orders fetching query as well in the code below
-  queue 'update_magento_orders_status'
-  priority 10
+  #queue 'update_magento_orders_status'
+  #priority 10
 
   def initialize(attrs={})
     @tenant = attrs[:tenant]
@@ -43,8 +43,8 @@ class MagentoSoapOrders
     access_restrictions = AccessRestriction.last
     @orders.each do |order|
       begin
-        update_order_status(client, session, order, credential)
         update_order_tracking_number(client, session, order, credential) if credential.push_tracking_number && access_restrictions.allow_magento_soap_tracking_no_push
+        update_order_status(client, session, order, credential)
       rescue Exception => ex
       end
     end
