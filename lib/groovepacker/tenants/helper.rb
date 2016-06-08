@@ -145,8 +145,13 @@ module Groovepacker
         begin
           @tenant = Tenant.find_by_name(tenant)
           @subscription_data = @tenant.subscription
-          @customer_id = @subscription_data.stripe_customer_id
-          destroy_tenant(@customer_id, @tenant, @subscription_data, result)
+          if @subscription_data
+            @customer_id = @subscription_data.stripe_customer_id
+            destroy_tenant(@customer_id, @tenant, @subscription_data, result)
+          else
+            Apartment::Tenant.drop(tenant) if Apartment::tenant_names.include? (tenant)
+            @tenant.destroy
+          end
         rescue => e
           update_fail_status(result, e.message)
         else
