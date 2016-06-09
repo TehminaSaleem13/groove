@@ -34,7 +34,7 @@ module Groovepacker
           tenants_result.reverse! if params[:order] == 'DESC'
         end
 
-        tenants_result[offset * limit, limit]
+        tenants_result[offset, limit]
       end
 
       def do_search(params)
