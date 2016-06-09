@@ -196,7 +196,7 @@ module Groovepacker
                 shipstation_order.destroy
                 shipstation_order = nil
               end
-              shipstation_order = init_new_order_if_required(shipstation_order, order)
+              init_new_order_if_required(shipstation_order, order)
             end
 
             def init_new_order_if_required(shipstation_order, order)
