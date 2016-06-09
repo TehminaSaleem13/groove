@@ -67,7 +67,7 @@ module TenantsHelper
     if @tenant
       if check_permission(params[:action_type])
         helper = Groovepacker::Tenants::Helper.new
-        result = helper.delete_data(params, current_user)
+        result = helper.delete_data(@tenant, params, result, current_user)
       else
         update_fail_status(result, "You don't have enough permission to delete tenant data")
       end

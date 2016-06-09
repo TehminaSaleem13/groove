@@ -2,7 +2,7 @@ module ScanPack
   class ProductInstructionService < ScanPack::Base
     def initialize(current_user, session, params)
       set_scan_pack_action_instances(current_user, session, params)
-      @general_setting = GeneralSetting.all.first
+      @general_setting = GeneralSetting.first
       @order = Order.where(id: @params[:id]).first
     end
 

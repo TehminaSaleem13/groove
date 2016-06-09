@@ -220,7 +220,13 @@ module OrderConcern
   def retrieve_order_items
     # Retrieve order items
     @result['order']['items'] = []
-    @order.order_items.each do |orderitem|
+    @order.order_items.includes(
+      product: [
+        :product_inventory_warehousess,
+        :product_skus, :product_cats, :product_barcodes,
+        :product_images
+      ]
+    ).each do |orderitem|
       @result['order']['items'].push(retrieve_order_item(orderitem))
     end
     @result['order']['storeinfo'] = @order.store
@@ -234,7 +240,7 @@ module OrderConcern
 
   def retrieve_order_item(orderitem)
     order_item = { 'iteminfo' => orderitem }
-    product = Product.find_by_id(orderitem.product_id)
+    product = orderitem.product
     if product.nil?
       order_item['productinfo'] = nil
       order_item['productimages'] = nil
@@ -341,9 +347,9 @@ module OrderConcern
       (Order::UNALLOCATE_STATUSES.include?(order.status) && Order::SOLD_STATUSES.include?(params[:status]))
   end
 
-  def change_status_to_cancel(order_summary)
+  def change_status_to_cancel
     if params[:store_id].present?
-      import_item = order_summary.import_items.find_by_store_id(params[:store_id])
+      import_item = order_summary_to_cancel.import_items.find_by_store_id(params[:store_id])
       import_item = ImportItem.where(store_id: params[:store_id]).last if import_item.blank?
       begin
           import_item.update_attributes(status: 'cancelled')
@@ -351,8 +357,8 @@ module OrderConcern
           nil
         end
     else
-      order_summary.import_items.update_all(status: 'cancelled')
-      order_summary.update_attributes(status: 'completed')
+      ImportItem.where(status: 'in_progress').update_all(status: 'cancelled')
+      order_summary_to_cancel.update_attributes(status: 'completed')
     end
   end
 

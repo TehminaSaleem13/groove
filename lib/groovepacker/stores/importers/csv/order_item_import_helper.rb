@@ -10,13 +10,14 @@ module Groovepacker
           end
 
           def create_new_order_item(single_row, product, single_sku, order)
-            order_item = OrderItem.new
+            order_item = order.order_items.build
+            # order_item = OrderItem.new
             order_item.product = product
-            order_item.order = order
+            # order_item.order = order
             order_item.sku = single_sku.strip
             order_item.qty = 0
             order_item.price = 0.0
-            initialize_or_update_order_item(single_row, order_item)
+            order_item = initialize_or_update_order_item(single_row, order_item)
             order_item
           end
 
@@ -28,7 +29,7 @@ module Groovepacker
               order_item = create_new_order_item(single_row, product, single_sku, order)
             else
               order_item = order_items.first
-              initialize_or_update_order_item(single_row, order_item)
+              order_item = initialize_or_update_order_item(single_row, order_item)
             end
             @product_helper.import_image(product, single_row, true)
             
@@ -47,6 +48,8 @@ module Groovepacker
                   @helper.get_row_data(single_row, 'item_sale_price')
               end
             end
+            order_item.save
+            return order_item
           end
         end
       end

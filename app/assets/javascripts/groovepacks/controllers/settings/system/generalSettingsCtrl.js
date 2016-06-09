@@ -37,6 +37,7 @@ groovepacks_controllers.
             "portrait": "",
             "landscape": "",
             "packing_slip_message_to_customer": "",
+            "show_primary_bin_loc_in_barcodeslip": "",
             "inventory_auto_allocation": "",
             "custom_field_one": "Custom Field One",
             "custom_field_two": "Custom Field Two"
@@ -51,6 +52,7 @@ groovepacks_controllers.
             "send_email_for_packer_notes": "",
             "packing_slip_size": "",
             "packing_slip_message_to_customer": "",
+            "show_primary_bin_loc_in_barcodeslip": "",
             "order_item_export_message": ""
           }
         };

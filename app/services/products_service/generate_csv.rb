@@ -1,11 +1,13 @@
 module ProductsService
   class GenerateCSV < ProductsService::Base
-    attr_accessor :products, :csv, :bulk_actions_id, :headers
+    attr_accessor :products, :csv, :bulk_actions_id, :headers, :default_inv_id
 
     def initialize(*args)
       @products, @csv, @bulk_actions_id = args
       @headers = []
       @data_mapping = {}
+      @default_inv_id = InventoryWarehouse.where(is_default: true).first.id
+      preload_associations(products)
     end
 
     def call
@@ -56,9 +58,9 @@ module ProductsService
       headers.each do |title|
         data.push(
           find_value([
-            item, inventory_wh, title, item_mapping, inventory_wh_mapping,
-            item_other_skus_barcodes
-          ])
+                       item, inventory_wh, title, item_mapping, inventory_wh_mapping,
+                       item_other_skus_barcodes
+                     ])
         )
       end
       do_if_bulk_action
@@ -116,12 +118,9 @@ module ProductsService
     end
 
     def find_inventory_wh(item)
-      ProductInventoryWarehouses.where(
-        product_id: item.id,
-        inventory_warehouse_id: InventoryWarehouse.where(
-          is_default: true
-        ).first.id
-      ).first
+      item.product_inventory_warehousess.find do |inv|
+        inv.inventory_warehouse_id.eql?(default_inv_id)
+      end
     end
 
     def find_other_skus_barcodes(item, title, attribute)

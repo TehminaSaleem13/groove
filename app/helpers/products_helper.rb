@@ -69,4 +69,10 @@ module ProductsHelper
       return GeneralSetting.get_product_weight_format
     end
   end
+
+  def get_barcode_slip_template
+    g_setting = GeneralSetting.last
+    g_setting.show_primary_bin_loc_in_barcodeslip ? "generate_barcode_slip_with_binloc.html.erb" 
+                                                  : 'generate_barcode_slip.html.erb'
+  end
 end

@@ -18,13 +18,19 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         )
         barcode_found = true
         #process product barcode scan
-        order_item_kit_product = OrderItemKitProduct.find(child_item['kit_product_id'])
+        order_item_kit_product = OrderItemKitProduct.includes(
+          :product_kit_skus,
+          order_item: [
+            :product, :order,
+            order_item_kit_products: :product_kit_skus
+          ]
+        ).find(child_item['kit_product_id'])
         order_item = order_item_kit_product.order_item if order_item_kit_product.order_item.present?
 
         #do_if_serial_not_added(order_item_kit_product) unless serial_added
         # from LotNumber Module
         store_lot_number(order_item, serial_added)
-        
+
         do_if_order_item_kit_product_present(
           [item, child_item, serial_added, clicked, order_item_kit_product]
           ) if order_item_kit_product.present?
@@ -41,7 +47,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   #   if @scanpack_settings.record_lot_number
   #     lot_number = calculate_lot_number
   #     product = order_item.product if order_item.present? || order_item.product.present?
-      
+
   #     # unless lot_number.nil?
   #     #   product_lots = product.product_lots
   #     #   product_lot = product_lots.where(lot_number: lot_number).first || product_lots.create(lot_number: lot_number)
@@ -58,7 +64,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   # end
 
   def do_if_order_item_kit_product_present(params)
-    item, child_item, serial_added, clicked, order_item_kit_product = params
+    item, child_item, _serial_added, clicked, order_item_kit_product = params
     child_item_product_id = child_item['product_id']
     if child_item['record_serial']
       do_if_child_item_record_serial(params.push(child_item_product_id))

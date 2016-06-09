@@ -7,7 +7,7 @@ class OrderItem < ActiveRecord::Base
   has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
-  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name
+  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
@@ -77,12 +77,15 @@ class OrderItem < ActiveRecord::Base
   def build_basic_item(item)
     result = Hash.new
     result['name'] = item.name
+    sort_by_order = Proc.new do |collection|
+      collection.sort{|a,b| a.order <=> b.order}
+    end
     result['instruction'] = item.spl_instructions_4_packer
     result['confirmation'] = item.spl_instructions_4_confirmation
-    result['images'] = item.product_images.order("product_images.order ASC")
-    result['sku'] = item.product_skus.order("product_skus.order ASC").first.sku if item.product_skus.length > 0
+    result['images'] = sort_by_order[item.product_images]
+    result['sku'] = sort_by_order[item.product_skus].first.sku if item.product_skus.length > 0
     result['packing_placement'] = item.packing_placement
-    result['barcodes'] = item.product_barcodes.order("product_barcodes.order ASC")
+    result['barcodes'] = sort_by_order[item.product_barcodes]
     result['product_id'] = item.id
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
@@ -109,9 +112,10 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def build_single_child_item(kit_product, depends_kit)
-    child_item = Hash.new
-    child_item = build_basic_item(kit_product.product_kit_skus.option_product)
+  def build_single_child_item(kit_product, depends_kit, option_products_array)
+    child_item = {}
+    option_product = find_option_product(option_products_array, kit_product)
+    child_item = build_basic_item(option_product)
     #overwrite scanned qty from basic build
     child_item['scanned_qty'] = kit_product.scanned_qty
 
@@ -126,6 +130,18 @@ class OrderItem < ActiveRecord::Base
     child_item['kit_packing_placement'] = kit_product.product_kit_skus.packing_order
     child_item['kit_product_id'] = kit_product.id
     child_item
+  end
+
+  def option_products
+    option_product_ids = order_item_kit_products
+      .map(&:product_kit_skus).flatten.compact.map(&:option_product_id)
+    Product
+      .where(id: option_product_ids)
+      .includes(
+        :product_images,
+        :product_barcodes,
+        :product_skus
+      )
   end
 
   def build_individual_kit(depends_kit)
@@ -151,15 +167,15 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def build_unscanned_individual_kit (depends_kit = false)
-    result = Hash.new
+  def build_unscanned_individual_kit (option_products_array, depends_kit = false)
+    result = {}
     unless self.product.nil?
       result = self.build_individual_kit(depends_kit)
       self.order_item_kit_products.each do |kit_product|
         if !kit_product.product_kit_skus.nil? &&
           !kit_product.product_kit_skus.product.nil? &&
           kit_product.scanned_status != 'scanned'
-          child_item = self.build_single_child_item(kit_product, depends_kit)
+          child_item = self.build_single_child_item(kit_product, depends_kit, option_products_array)
 
           result['child_items'].push(child_item) if child_item['qty_remaining'] != 0
         end
@@ -182,7 +198,7 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def build_scanned_individual_kit(depends_kit = false)
+  def build_scanned_individual_kit(option_products_array, depends_kit = false)
     result = Hash.new
     if !self.product.nil?
       result = self.build_individual_kit(depends_kit)
@@ -194,7 +210,7 @@ class OrderItem < ActiveRecord::Base
           !kit_product.product_kit_skus.product.nil? &&
           (kit_product.scanned_status == SCANNED_STATUS or
             kit_product.scanned_status == PARTIALLY_SCANNED_STATUS)
-          child_item = self.build_single_child_item(kit_product, depends_kit)
+          child_item = self.build_single_child_item(kit_product, depends_kit, option_products_array)
           result['child_items'].push(child_item) if child_item['scanned_qty'] != 0
         end
       end
@@ -354,6 +370,11 @@ class OrderItem < ActiveRecord::Base
       self.order.addactivity("Item with SKU: " +
                                sku + " has been click scanned", username)
     end
+  end
+
+  def find_option_product(option_products_array, kit_product)
+    option_products_array
+      .find { |op| op.id == kit_product.product_kit_skus.option_product_id }
   end
 
 end
