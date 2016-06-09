@@ -19,7 +19,7 @@ module Groovepacker
             final_records = @helper.build_final_records
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
-            # Product.import @imported_products
+
             OrderItem.import @created_order_items
             @created_order_items.each do |item|
               item.run_callbacks(:create) { true }
@@ -106,7 +106,7 @@ module Groovepacker
               product = product_skus.first.product
               order_item = @order_item_helper.create_update_order_item(single_row, product, single_sku, @order)
               @created_order_items << order_item
-              addactivity_and_delete_required(order_item)
+              addactivity_and_delete_required(product)
               @product_helper.update_product(product, single_row)
             else # no sku is found
               product = Product.new
@@ -168,13 +168,13 @@ module Groovepacker
                                                                   )
             @created_order_items << order_item
             @order_required.delete('sku')
-            addactivity_and_delete_required(order_item)
+            addactivity_and_delete_required(product)
             @import_item.current_order_imported_item = 1
             @import_item.save
           end
 
-          def addactivity_and_delete_required(order_item)
-            @order.addactivity("Item with SKU: #{order_item.product.primary_sku} Added", "#{@order.store.name} Import")
+          def addactivity_and_delete_required(product)
+            @order.addactivity("Item with SKU: #{product.primary_sku} Added", "#{@order.store.name} Import")
             @order_required.delete('qty')
             @order_required.delete('price')
             # @order.order_items << order_item
@@ -199,6 +199,7 @@ module Groovepacker
             [@base_products, @imported_products].each do |products|
               products.each do |product|
                 make_product_intangible(product) unless product.base_sku
+                product.reload
                 product.update_product_status
               end
             end

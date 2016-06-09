@@ -414,6 +414,7 @@ groovepacks_admin_controllers.
           page = $state.params.page;
         }
         if ($scope._can_load_tenants) {
+          $scope.gridOptions.paginate.current_page = page;
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
           return tenants.list.get($scope.tenants, page).success(function (data) {

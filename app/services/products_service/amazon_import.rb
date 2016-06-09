@@ -28,7 +28,9 @@ module ProductsService
       mws = Mws.connect(
         merchant: @credential.merchant_id,
         access: ENV['AMAZON_MWS_ACCESS_KEY_ID'],
-        secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY']
+        secret: ENV['AMAZON_MWS_SECRET_ACCESS_KEY'],
+        marketplace_id: @credential.marketplace_id,
+        MWS_auth_token: @credential.mws_auth_token
       )
 
       #send request to amazon mws get matching product API

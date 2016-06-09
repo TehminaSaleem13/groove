@@ -5,16 +5,18 @@ module Groovepacker
       include PaymentsHelper
 
       def do_gettenants(params)
-        offset = params[:offset].to_i || 0
-        limit = params[:limit].to_i || 10
+        # offset = params[:offset].to_i || 0
+        # limit = params[:limit].to_i || 10
         tenants = Tenant.order('')
-        unless params[:select_all] || params[:inverted]
-          tenants = tenants.limit(limit).offset(offset)
-        end
+        # unless params[:select_all] || params[:inverted]
+        #   tenants = tenants.limit(limit).offset(offset)
+        # end
         tenants
       end
 
       def make_tenants_list(tenants, params)
+        offset = params[:offset].to_i || 0
+        limit = params[:limit].to_i || 10
         tenants_result = []
         tenants.each do |tenant|
           tenant_hash = {}
@@ -32,7 +34,7 @@ module Groovepacker
           tenants_result.reverse! if params[:order] == 'DESC'
         end
 
-        tenants_result
+        tenants_result[offset, limit]
       end
 
       def do_search(params)
@@ -65,11 +67,11 @@ module Groovepacker
         begin
           Apartment::Tenant.switch(tenant.name)
           if params[:action_type] == 'orders'
-            delete_orders(result, current_user)
+            delete_orders(result)
           elsif params[:action_type] == 'products'
             delete_products(current_user)
           elsif params[:action_type] == 'both'
-            delete_orders(result, current_user)
+            delete_orders(result)
             delete_products(current_user)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
@@ -145,8 +147,13 @@ module Groovepacker
         begin
           @tenant = Tenant.find_by_name(tenant)
           @subscription_data = @tenant.subscription
-          @customer_id = @subscription_data.stripe_customer_id
-          destroy_tenant(@customer_id, @tenant, @subscription_data, result)
+          if @subscription_data
+            @customer_id = @subscription_data.stripe_customer_id
+            destroy_tenant(@customer_id, @tenant, @subscription_data, result)
+          else
+            Apartment::Tenant.drop(tenant) if Apartment::tenant_names.include? (tenant)
+            @tenant.destroy
+          end
         rescue => e
           update_fail_status(result, e.message)
         else

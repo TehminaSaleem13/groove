@@ -23,6 +23,7 @@ module Groovepacker
 
         private
           def run_for_each_store(stores, order_no)
+            order_no = URI.encode(order_no)
             stores.each do |store|
               break if check_order_exists(order_no)
               next unless store.on_demand_import

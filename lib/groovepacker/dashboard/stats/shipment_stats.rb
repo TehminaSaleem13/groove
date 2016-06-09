@@ -104,6 +104,7 @@ module Groovepacker
             if @access_record_count - i >= 0
               shipped = {}
               access_data = @access_restrictions[-i]
+              next if access_data.created_at.nil?
               shipped['shipping_duration'] =
                 (access_data.created_at - 1.month).strftime('%d %b') +
                 ' - ' + access_data.created_at.strftime('%d %b')
