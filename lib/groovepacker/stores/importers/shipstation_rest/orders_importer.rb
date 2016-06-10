@@ -49,6 +49,7 @@ module Groovepacker
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
               ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
+              sleep 0.5
             end
           end
 
