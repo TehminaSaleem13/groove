@@ -310,7 +310,7 @@ groovepacks_controllers.
           }
         }
 
-        //myscope.arrange_unscanned_items();
+        myscope.arrange_unscanned_items();
 
       };
 
