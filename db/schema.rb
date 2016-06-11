@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160608101435) do
+ActiveRecord::Schema.define(:version => 20160610183611) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -576,8 +576,10 @@ ActiveRecord::Schema.define(:version => 20160608101435) do
   end
 
   add_index "orders", ["increment_id"], :name => "index_orders_on_increment_id"
+  add_index "orders", ["non_hyphen_increment_id"], :name => "index_orders_on_non_hyphen_increment_id"
   add_index "orders", ["status"], :name => "index_orders_on_status"
   add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
+  add_index "orders", ["tracking_num"], :name => "index_orders_on_tracking_num"
 
   create_table "product_barcodes", :force => true do |t|
     t.integer  "product_id"
