@@ -8,7 +8,6 @@ module Groovepacker
 
           def import
             init_common_objects
-            handler = self.get_handler
             requestamazonreport
             checkamazonreportstatus
             import_all_products
@@ -24,7 +23,6 @@ module Groovepacker
           def checkamazonreportstatus
             @report_list = @mws.reports.get_report_request_list
             @report_list.report_request_info.each do |report_request|
-              report_found = true
               if report_request.report_processing_status == '_DONE_'
                 @credential.productgenerated_report_id = report_request.generated_report_id
                 @credential.productgenerated_report_date = report_request.completed_date
@@ -51,7 +49,7 @@ module Groovepacker
           def import_all_products
             response = @mws.reports.get_report :report_id => @credential.productgenerated_report_id
             response = response.body.split("\n").drop(1)
-            response.each_with_index do |row, index|
+            response.each do |row|
               @product_row = row.split("\t")
               next if @product_row[3].blank?
               @result[:total_imported] = @result[:total_imported] + 1
@@ -139,7 +137,8 @@ module Groovepacker
           def add_product_attr
             @product.name = @product_attributes['Title']
             @product.weight = @product_attributes['ItemDimensions']['Weight'].to_f * 16 if !@product_attributes['ItemDimensions'].nil? && !@product_attributes['ItemDimensions']['Weight'].nil?
-            @product.shipping_weight = @product_attributes['PackageDimensions']['Weight'].to_f * 16 if !@product_attributes['PackageDimensions'].nil? && !@product_attributes['PackageDimensions']['Weight'].nil?
+            package_dimentions = @product_attributes['PackageDimensions']
+            @product.shipping_weight = package_dimentions['Weight'].to_f * 16 if !package_dimentions.nil? && !package_dimentions['Weight'].nil?
             @product.store_product_id = @product_identifiers['MarketplaceASIN']['ASIN'] if !@product_identifiers['MarketplaceASIN'].nil?
           end
 
@@ -164,14 +163,14 @@ module Groovepacker
           end
 
           private
-            def init_common_objects
-              handler = self.get_handler
-              @mws = handler[:store_handle][:main_handle]
-              @credential = handler[:credential]
-              @import_item = handler[:import_item]
-              @alt_mws = handler[:store_handle][:alternate_handle]
-              @result = self.build_result
-            end
+            # def init_common_objects
+            #   handler = self.get_handler
+            #   @mws = handler[:store_handle][:main_handle]
+            #   @credential = handler[:credential]
+            #   @import_item = handler[:import_item]
+            #   @alt_mws = handler[:store_handle][:alternate_handle]
+            #   @result = self.build_result
+            # end
         end
       end
     end
