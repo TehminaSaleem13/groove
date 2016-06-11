@@ -62,7 +62,7 @@ module ProductsService
     end
 
     def search?
-      params[:search].blank?
+      params[:search].present?
     end
   end
 end
