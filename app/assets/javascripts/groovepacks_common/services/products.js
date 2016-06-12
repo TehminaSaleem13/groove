@@ -67,7 +67,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     if (setup.search == '') {
       url = '/products.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
     } else {
-      url = '/products/search.json?search=' + setup.search + '&sort=' + setup.sort + '&order=' + setup.order;
+      url = '/products/search.json?' + $.param({search: setup.search, sort: setup.sort, order: setup.order});
     }
     url += '&is_kit=' + setup.is_kit + '&limit=' + setup.limit + '&offset=' + setup.offset;
     return $http.get(url).success(
