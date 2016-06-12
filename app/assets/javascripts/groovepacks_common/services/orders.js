@@ -92,9 +92,9 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     }
     object.setup.offset = page * object.setup.limit;
     if (setup.search == '') {
-      url = '/orders.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
+      url = '/orders.json?' + $.param({filter: setup.filter, sort: setup.sort, order: setup.order});
     } else {
-      url = '/orders/search.json?search=' + setup.search + '&sort=' + setup.sort + '&order=' + setup.order;
+      url = '/orders/search.json?' + $.param({search: setup.search, sort: setup.sort, order: setup.order});
     }
     url += '&limit=' + setup.limit + '&offset=' + setup.offset;
     return $http.get(url).success(
