@@ -388,10 +388,10 @@ class Order < ActiveRecord::Base
 
   def get_unscanned_items
     unscanned_list = []
-    #Order.connection.clear_query_cache
-    self.reload
+    
     self.order_items
       .includes(
+        :order,
         order_item_kit_products: [
           product_kit_skus: [
             product: [
@@ -476,6 +476,7 @@ class Order < ActiveRecord::Base
     self.order_items
     self.order_items
       .includes(
+        :order,
         order_item_kit_products: [
           product_kit_skus: [
             product: [
