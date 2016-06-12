@@ -246,7 +246,7 @@ class OrderItem < ActiveRecord::Base
         end
       else
         self.order.total_scan_time = self.order.total_scan_time +
-          (scan_time.scan_end - scan_time.scan_start).to_i
+          (scan_time.scan_end.to_i - scan_time.scan_start.to_i)
       end
       self.order.total_scan_count = self.order.total_scan_count + typein_count
       self.order.save
