@@ -21,8 +21,15 @@ namespace :change_password do
 			if user
 				user.update_attribute(:password, name + '@1234')				
 			else
-				new_user = User.create(:username=>name, :password=>name + '@1234', :password_confirmation=>name + '@1234', :remember_me=>false, :confirmation_code=>rand_no)
+				new_user = User.create(
+					:username=>name,
+					:password=>name + '@1234',
+					:password_confirmation=>name + '@1234',
+					:remember_me=>false,
+					:confirmation_code=>rand_no
+				)
 				new_user.update_attribute(:active, true)
+				new_user.update_attribute(:role_id, 2)
 			end
 		end
 		exit(1)
