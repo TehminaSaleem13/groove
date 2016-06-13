@@ -56,10 +56,8 @@ module Groovepacker
       def get_subscription_data(name)
         subscription_result = subscription_result_hash
         @tenant = Tenant.where(name: name).first
-        if @tenant
-          @subscription = @tenant.subscription
-          retrieve_subscription_result(subscription_result, @subscription) if @subscription
-        end
+        rec_subscription(@tenant, subscription_result)
+
         subscription_result
       end
 
@@ -147,6 +145,7 @@ module Groovepacker
         begin
           @tenant = Tenant.find_by_name(tenant)
           @subscription_data = @tenant.subscription
+          update_parent(@tenant)
           if @subscription_data
             @customer_id = @subscription_data.stripe_customer_id
             destroy_tenant(@customer_id, @tenant, @subscription_data, result)
@@ -270,7 +269,12 @@ module Groovepacker
             ActiveRecord::Base.connection.execute("CREATE TABLE #{duplicate_name}.#{table_name} LIKE #{current_tenant}.#{table_name}")
             ActiveRecord::Base.connection.execute("INSERT INTO #{duplicate_name}.#{table_name} SELECT * FROM #{current_tenant}.#{table_name}")
           end
-          created_tenant = Tenant.create(name: duplicate_name)
+          created_tenant = Tenant.create(
+            name: duplicate_name,
+            initial_plan_id: @tenant.initial_plan_id,
+            is_modified: @tenant.is_modified
+          )
+          created_tenant.update_attribute(:initial_plan_id, @tenant.initial_plan_id)
           @tenant.duplicate_tenant_id = created_tenant.id
           @tenant.save
         rescue => e
@@ -482,9 +486,26 @@ module Groovepacker
         most_recent_scan_data
       end
 
+      def rec_subscription(tenant, subscription_result)
+        if tenant
+          @subscription = tenant.subscription
+          if @subscription
+            retrieve_subscription_result(subscription_result, @subscription)
+          else
+            parent_tenant = Tenant.find_by_duplicate_tenant_id(tenant.id)
+            rec_subscription(parent_tenant, subscription_result)
+          end
+        end
+      end
+
       def sort_param(params)
         return 'most_recent_activity' if params[:sort] == 'last_activity'
         params[:sort]
+      end
+
+      def update_parent(tenant)
+        parent = Tenant.find_by_duplicate_tenant_id(tenant.id)
+        parent.update_attribute(:duplicate_tenant_id, nil) if parent
       end
     end
   end
