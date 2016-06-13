@@ -18,8 +18,8 @@ class GroovS3
 
     #TODO: refactor csv, pdf, image into their own classes later
 
-    def create_csv(tenant, type, store_id, data)
-      object = self.create(tenant, "csv/#{type}.#{store_id}.csv", 'text/csv', :private)
+    def create_csv(tenant, type, store_id, data, privacy = :private)
+      object = self.create(tenant, "csv/#{type}.#{store_id}.csv", 'text/csv', privacy)
       self.save(object, data)
     end
 

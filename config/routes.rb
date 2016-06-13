@@ -34,7 +34,7 @@ Groovepacks::Application.routes.draw do
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
-
+  post '/amazons/products_import' => 'amazons#products_import'
   # The priority is based upon order of creation:
   # first created -> highest priority.
 

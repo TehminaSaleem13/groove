@@ -8,28 +8,30 @@ module Groovepacker
 
           def import
             init_common_objects
-            requestamazonreport
-            checkamazonreportstatus
+            handler = self.get_handler
+            # requestamazonreport
+            # checkamazonreportstatus
             import_all_products
           end
 
-          def requestamazonreport
-            response = @mws.reports.request_report :report_type => '_GET_MERCHANT_LISTINGS_DATA_BACK_COMPAT_'
-            @credential.productreport_id = response.report_request_info.report_request_id
-            @credential.productgenerated_report_id = nil
-            @credential.save
-          end
+          # def requestamazonreport
+          #   response = @mws.reports.request_report :report_type => '_GET_MERCHANT_LISTINGS_DATA_BACK_COMPAT_'
+          #   @credential.productreport_id = response.report_request_info.report_request_id
+          #   @credential.productgenerated_report_id = nil
+          #   @credential.save
+          # end
 
-          def checkamazonreportstatus
-            @report_list = @mws.reports.get_report_request_list
-            @report_list.report_request_info.each do |report_request|
-              if report_request.report_processing_status == '_DONE_'
-                @credential.productgenerated_report_id = report_request.generated_report_id
-                @credential.productgenerated_report_date = report_request.completed_date
-                @credential.save
-              end
-            end
-          end
+          # def checkamazonreportstatus
+          #   @report_list = @mws.reports.get_report_request_list
+          #   @report_list.report_request_info.each do |report_request|
+          #     report_found = true
+          #     if report_request.report_processing_status == '_DONE_'
+          #       @credential.productgenerated_report_id = report_request.generated_report_id
+          #       @credential.productgenerated_report_date = report_request.completed_date
+          #       @credential.save
+          #     end
+          #   end
+          # end
 
           def import_single(import_hash)
             @result = true
@@ -47,18 +49,20 @@ module Groovepacker
           end
 
           def import_all_products
-            response = @mws.reports.get_report :report_id => @credential.productgenerated_report_id
-            response = response.body.split("\n").drop(1)
+            csv_url = GroovS3.find_csv(Apartment::Tenant.current_tenant, 'amazon_product', @credential.store.id).url rescue nil
+            file_data = open(csv_url).read().split("\n")
+            response = file_data.drop(1)
+            header = file_data.first.split("\t")
             response.each do |row|
-              @product_row = row.split("\t")
-              next if @product_row[3].blank?
-              @result[:total_imported] = @result[:total_imported] + 1
-              generate_products 
+              row = row.split("\t")
+              @product = {}
+              row.each_with_index {|p, i| @product[header[i]] = p}
+              generate_product
             end
           end
 
-          def generate_products
-            if ProductSku.where(:sku => @product_row[3]).length == 0
+          def generate_product
+            if ProductSku.where(:sku => @product["seller-sku"]).length == 0
               add_productdb
               add_productdb_sku
               add_inventry_warehouse
@@ -69,12 +73,13 @@ module Groovepacker
           end
 
           def add_productdb
-            @productdb = Product.new(name: @product_row[0], store_product_id: @product_row[2] || 'not_available', product_type: 'not_used', status: 'new')
+            name = @product["item-name"].blank? ?  "Amazon Product" : @product["item-name"]
+            @productdb = Product.new(name: name, store_product_id: @product["product-id"] || 'not_available', product_type: 'not_used', status: 'new')
             @productdb.store = @credential.store
           end
 
           def add_productdb_sku
-            @productdbsku = @productdb.product_skus.build(sku: @product_row[3], purpose: 'primary')
+            @productdbsku = @productdb.product_skus.build(sku: @product["seller-sku"], purpose: 'primary')
           end
 
           def add_inventry_warehouse
@@ -85,7 +90,7 @@ module Groovepacker
 
           def save_productdb
             if !ProductSku.where(:sku => @productdbsku.sku).length == 0
-              @result[:messages].push(sku: @product_row[3]) unless @productdbsku.sku.nil?
+              @result[:messages].push(sku: @product["seller-sku"]) unless @productdbsku.sku.nil?
               @result[:previous_imported] = @result[:previous_imported] + 1
             else  
               @productdb.save
