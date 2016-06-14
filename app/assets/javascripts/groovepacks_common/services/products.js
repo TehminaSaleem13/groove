@@ -379,7 +379,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
         if (data.status) {
           notification.notify("Successfully Updated", 1);
         } else {
-          notification.notify("Some error Occurred", 0);
+          notification.notify(data.messages, 0);
         }
       }
     ).error(notification.server_error);
