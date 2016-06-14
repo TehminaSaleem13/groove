@@ -23,6 +23,10 @@ class Order < ActiveRecord::Base
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
   validates_uniqueness_of :increment_id
+  after_save :delete_cache
+
+  include CachedMethods
+  cached_methods :order_items
 
 
   include ProductsHelper
@@ -388,33 +392,32 @@ class Order < ActiveRecord::Base
 
   def get_unscanned_items
     unscanned_list = []
-    
+
     self.order_items
       .includes(
-        :order,
-        order_item_kit_products: [
-          product_kit_skus: [
-            product: [
-              :product_skus, :product_images,
-              :product_barcodes
-            ]
-          ]
-        ],
-        product: [
-          :product_skus, :product_images,
-          :product_barcodes
-        ]
+        # order_item_kit_products: [
+        #   product_kit_skus: [
+        #     product: [
+        #       :product_skus, :product_images,
+        #       :product_barcodes
+        #     ]
+        #   ]
+        # ],
+        # product: [
+        #   :product_skus, :product_images,
+        #   :product_barcodes
+        # ]
       ).each do |order_item|
       if order_item.scanned_status != 'scanned'
-        if order_item.product.is_kit == 1
+        if order_item.cached_product.is_kit == 1
           option_products = order_item.option_products
-          if order_item.product.kit_parsing == 'single'
+          if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
-          elsif order_item.product.kit_parsing == 'individual'
+          elsif order_item.cached_product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
             unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
-          elsif order_item.product.kit_parsing == 'depends'
+          elsif order_item.cached_product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > order_item.kit_split_scanned_qty
                 unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
@@ -457,7 +460,7 @@ class Order < ActiveRecord::Base
             end
           end
         else
-          unless order_item.product.is_intangible
+          unless order_item.cached_product.is_intangible
             # add order item to unscanned list
             unscanned_item = order_item.build_unscanned_single_item
             if unscanned_item['qty_remaining'] > 0
@@ -474,33 +477,31 @@ class Order < ActiveRecord::Base
     scanned_list = []
 
     self.order_items
-    self.order_items
       .includes(
-        :order,
-        order_item_kit_products: [
-          product_kit_skus: [
-            product: [
-              :product_skus, :product_images,
-              :product_barcodes
-            ]
-          ]
-        ],
-        product: [
-          :product_skus, :product_images,
-          :product_barcodes
-        ]
+        # order_item_kit_products: [
+        #   product_kit_skus: [
+        #     product: [
+        #       :product_skus, :product_images,
+        #       :product_barcodes
+        #     ]
+        #   ]
+        # ],
+        # product: [
+        #   :product_skus, :product_images,
+        #   :product_barcodes
+        # ]
       ).each do |order_item|
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
-        if order_item.product.is_kit == 1
+        if order_item.cached_product.is_kit == 1
           option_products = order_item.option_products
-          if order_item.product.kit_parsing == 'single'
+          if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
-          elsif order_item.product.kit_parsing == 'individual'
+          elsif order_item.cached_product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
             scanned_list.push(order_item.build_scanned_individual_kit(option_products))
-          elsif order_item.product.kit_parsing == 'depends'
+          elsif order_item.cached_product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > 0
                 scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))

@@ -7,7 +7,8 @@ class OrderItem < ActiveRecord::Base
   has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
-  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id
+  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id,
+                  :cached_methods
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
@@ -16,6 +17,7 @@ class OrderItem < ActiveRecord::Base
   before_destroy :delete_inventory
   after_create :create_inventory
   after_update :update_inventory_levels
+  after_save :delete_cache
 
   include OrdersHelper
 
@@ -30,6 +32,9 @@ class OrderItem < ActiveRecord::Base
   SCANNED_STATUS = 'scanned'
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
+
+  include CachedMethods
+  cached_methods :product
 
   def has_unscanned_kit_items
     result = false
@@ -82,10 +87,10 @@ class OrderItem < ActiveRecord::Base
     end
     result['instruction'] = item.spl_instructions_4_packer
     result['confirmation'] = item.spl_instructions_4_confirmation
-    result['images'] = sort_by_order[item.product_images]
-    result['sku'] = sort_by_order[item.product_skus].first.sku if item.product_skus.length > 0
+    result['images'] = sort_by_order[item.cached_product_images]
+    result['sku'] = sort_by_order[item.cached_product_skus].first.sku if item.cached_product_skus.length > 0
     result['packing_placement'] = item.packing_placement
-    result['barcodes'] = sort_by_order[item.product_barcodes]
+    result['barcodes'] = sort_by_order[item.cached_product_barcodes]
     result['product_id'] = item.id
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
@@ -98,8 +103,8 @@ class OrderItem < ActiveRecord::Base
 
   def build_single_item(depends_kit)
     result = Hash.new
-    if !self.product.nil?
-      result = self.build_basic_item(self.product)
+    if !self.cached_product.nil?
+      result = self.build_basic_item(self.cached_product)
       result['product_type'] = 'single'
       if depends_kit
         result['qty_remaining'] =
@@ -160,7 +165,7 @@ class OrderItem < ActiveRecord::Base
 
   def build_unscanned_single_item(depends_kit = false)
     result = Hash.new
-    unless self.product.nil?
+    unless self.cached_product.nil?
       result = self.build_single_item(depends_kit)
       result['scanned_qty'] = self.scanned_qty
     end
