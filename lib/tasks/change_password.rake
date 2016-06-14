@@ -17,20 +17,20 @@ namespace :change_password do
 		Apartment::Tenant.switch('admintools')
 		%w(dan svisamsetty kalakar kapil ashish).each do |name|
 			rand_no = Random.rand(99999999999)
-			user = User.find_by_name(name)
+			user = User.find_by_username(name)
 			if user
 				user.update_attribute(:password, name + '@1234')				
 			else
-				new_user = User.create(
+				user = User.create(
 					:username=>name,
 					:password=>name + '@1234',
 					:password_confirmation=>name + '@1234',
 					:remember_me=>false,
 					:confirmation_code=>rand_no
 				)
-				new_user.update_attribute(:active, true)
-				new_user.update_attribute(:role_id, 2)
 			end
+			user.update_attribute(:active, true)
+			user.update_attribute(:role_id, 2)
 		end
 		exit(1)
 	end
