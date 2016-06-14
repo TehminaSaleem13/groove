@@ -121,6 +121,31 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
     }).error(notification.server_error);
   };
 
+  var amazon_products_import = function (obj) {
+    return $http({
+                  method: 'POST',
+                  headers: {'Content-Type': undefined},
+                  url: '/amazons/products_import.json',
+                  transformRequest: function (obj) {
+                    var request = new FormData();
+                    for (var key in obj) {
+                      if (obj.hasOwnProperty(key)) {
+                        request.append(key, obj[key]);
+                      }
+                    }
+                    return request;
+                  },
+                  data: obj
+                }).success(function (data) {
+                  if (data.status) {
+                    notification.notify("Your request has been queued successfully", 1);
+                  } else {
+                    notification.notify(data.messages, 0);
+                  }
+                }).error(notification.server_error);
+  };
+
+
 
   //single store related functions
   var get_single = function (id, stores) {
@@ -685,7 +710,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       update_ftp: create_update_ftp_credentials,
       connect: connect_ftp_server,
       pull_inventory: pull_store_inventory,
-      push_inventory: push_store_inventory
+      push_inventory: push_store_inventory,
+      amazon_products_import: amazon_products_import
     },
     ebay: {
       sign_in_url: {

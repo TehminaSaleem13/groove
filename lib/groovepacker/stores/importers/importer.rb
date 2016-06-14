@@ -80,7 +80,12 @@ module Groovepacker
           @handler = self.get_handler
           @credential = @handler[:credential]
           @store = @credential.store
-          @client = @handler[:store_handle]
+          if @store.store_type="Amazon"
+            @mws = handler[:store_handle][:main_handle]
+            @alt_mws = handler[:store_handle][:alternate_handle]
+          else
+            @client = @handler[:store_handle]
+          end
           @import_item = @handler[:import_item]
           @result = self.build_result
         end
