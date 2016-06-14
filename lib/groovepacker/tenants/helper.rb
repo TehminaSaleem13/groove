@@ -420,8 +420,12 @@ module Groovepacker
         @customer = get_stripe_customer(@subscription.stripe_customer_id)
         if @customer
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
-          trial_end_time = subscription.current_period_end
-          @customer.update_subscription(plan: plan_id, trial_end: trial_end_time, prorate: false)
+          @trial_end_time = subscription.trial_end
+          if @trial_end_time && (@trial_end_time > Time.now.to_i)
+            @customer.update_subscription(plan: plan_id, trial_end: @trial_end_time, prorate: false)
+          else
+            @customer.update_subscription(plan: plan_id, prorate: true)
+          end
         end
       end
 

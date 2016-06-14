@@ -39,6 +39,7 @@ module Groovepacker
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)
+            @import_item.destroy
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -49,6 +50,7 @@ module Groovepacker
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
               ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
+              sleep 0.5
             end
           end
 
