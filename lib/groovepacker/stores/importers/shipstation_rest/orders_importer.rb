@@ -110,10 +110,10 @@ module Groovepacker
                 self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'quick'
                 quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-3.days : quick_import_date
+                self.import_from = quick_import_date.blank? ? DateTime.now-1.days : quick_import_date
               else
                 last_imported_at = @credential.last_imported_at
-                self.import_from = last_imported_at.blank? ? DateTime.now-2.weeks : last_imported_at-@credential.regular_import_range.days
+                self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
               end
               set_import_date_type
             end
