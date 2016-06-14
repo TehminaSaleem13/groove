@@ -77,16 +77,16 @@ module Groovepacker
         end
 
         def init_common_objects
-          @handler = self.get_handler
-          @credential = @handler[:credential]
+          handler = self.get_handler
+          @credential = handler[:credential]
           @store = @credential.store
-          if @store.store_type="Amazon"
+          if @store.store_type=="Amazon"
             @mws = handler[:store_handle][:main_handle]
             @alt_mws = handler[:store_handle][:alternate_handle]
           else
-            @client = @handler[:store_handle]
+            @client = handler[:store_handle]
           end
-          @import_item = @handler[:import_item]
+          @import_item = handler[:import_item]
           @result = self.build_result
         end
 
