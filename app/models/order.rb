@@ -138,9 +138,9 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    order_items.includes(product: :product_kit_skuss).each do |order_item|
-      product = order_item.product
-      product_kit_skuss = product.product_kit_skuss
+    order_items.each do |order_item|
+      product = order_item.cached_product
+      product_kit_skuss = product.cached_product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       # If item has 0 qty
@@ -157,8 +157,8 @@ class Order < ActiveRecord::Base
     products_list = []
 
     self.order_items.each do |order_item|
-      product = order_item.product
-      product_kit_skuss = product.product_kit_skuss
+      product = order_item.cached_product
+      product_kit_skuss = product.cached_product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
@@ -393,7 +393,7 @@ class Order < ActiveRecord::Base
   def get_unscanned_items
     unscanned_list = []
 
-    self.order_items
+    self.cached_order_items
       .includes(
         # order_item_kit_products: [
         #   product_kit_skus: [
@@ -476,7 +476,7 @@ class Order < ActiveRecord::Base
   def get_scanned_items
     scanned_list = []
 
-    self.order_items
+    self.cached_order_items
       .includes(
         # order_item_kit_products: [
         #   product_kit_skus: [
@@ -490,7 +490,7 @@ class Order < ActiveRecord::Base
         #   :product_skus, :product_images,
         #   :product_barcodes
         # ]
-      ).each do |order_item|
+    ).each do |order_item|
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.cached_product.is_kit == 1

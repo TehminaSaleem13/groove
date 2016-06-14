@@ -3,9 +3,9 @@ module CachedMethods
   module ClassMethods
     def cached_methods(*methods)
       methods.each do |association|
-        define_method("cached_#{association}".to_sym) do |key = nil, cached = nil|
+        define_method("cached_#{association}") do |key = nil, cached = nil|
           key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
-          cached = Rails.cache.read(key) rescue false
+          cached = Rails.cache.read(key, expires_in: 10.minutes) rescue false
           return cached if cached
           load_assoc = send(association)
           Rails.cache.write(key, load_assoc)

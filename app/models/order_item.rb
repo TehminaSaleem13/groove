@@ -34,7 +34,7 @@ class OrderItem < ActiveRecord::Base
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
   include CachedMethods
-  cached_methods :product
+  cached_methods :product, :order_item_kit_products
 
   def has_unscanned_kit_items
     result = false
@@ -138,15 +138,9 @@ class OrderItem < ActiveRecord::Base
   end
 
   def option_products
-    option_product_ids = order_item_kit_products
-      .map(&:product_kit_skus).flatten.compact.map(&:option_product_id)
-    Product
-      .where(id: option_product_ids)
-      .includes(
-        :product_images,
-        :product_barcodes,
-        :product_skus
-      )
+    option_product_ids = cached_order_item_kit_products
+      .map(&:cached_product_kit_skus).flatten.compact.map(&:option_product_id)
+    Product.where(id: option_product_ids)
   end
 
   def build_individual_kit(depends_kit)
@@ -176,7 +170,7 @@ class OrderItem < ActiveRecord::Base
     result = {}
     unless self.product.nil?
       result = self.build_individual_kit(depends_kit)
-      self.order_item_kit_products.each do |kit_product|
+      self.cached_order_item_kit_products.each do |kit_product|
         if !kit_product.product_kit_skus.nil? &&
           !kit_product.product_kit_skus.product.nil? &&
           kit_product.scanned_status != 'scanned'
@@ -379,7 +373,7 @@ class OrderItem < ActiveRecord::Base
 
   def find_option_product(option_products_array, kit_product)
     option_products_array
-      .find { |op| op.id == kit_product.product_kit_skus.option_product_id }
+      .find { |op| op.id == kit_product.cached_product_kit_skus.option_product_id }
   end
 
 end

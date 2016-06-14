@@ -38,7 +38,7 @@ class Product < ActiveRecord::Base
   after_save :delete_cache
 
   include CachedMethods
-  cached_methods :product_skus, :product_images, :product_images
+  cached_methods :product_skus, :product_images, :product_barcodes, :product_kit_skuss
 
   SINGLE_KIT_PARSING = 'single'.freeze
   DEPENDS_KIT_PARSING = 'depends'.freeze

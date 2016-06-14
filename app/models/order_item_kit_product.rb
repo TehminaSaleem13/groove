@@ -4,6 +4,9 @@ class OrderItemKitProduct < ActiveRecord::Base
   has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
 
+  include CachedMethods
+  cached_methods :product_kit_skus
+
   include OrdersHelper
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
@@ -93,21 +96,13 @@ class OrderItemKitProduct < ActiveRecord::Base
   end
 
   def set_min_value
-    order_item_kit_products = order_item.reload
-                                             .order_item_kit_products.includes(
-                                                product_kit_skus: [
-                                                  product: [
-                                                    :product_skus, :product_images,
-                                                    :product_barcodes
-                                                  ]
-                                                ]
-                                              )
+    order_item_kit_products = order_item.reload.order_item_kit_products
     order_item_kit_product = order_item_kit_products.first
-    product_kit_skus_qty = order_item_kit_product.product_kit_skus.qty
+    product_kit_skus_qty = order_item_kit_product.cached_product_kit_skus.qty
     min = 1
     min = order_item_kit_product.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
     order_item_kit_products.each do |kit_product|
-      temp = kit_product.scanned_qty / kit_product.product_kit_skus.qty
+      temp = kit_product.scanned_qty / kit_product.cached_product_kit_skus.qty
       min = temp if (temp) < min
     end
     min
