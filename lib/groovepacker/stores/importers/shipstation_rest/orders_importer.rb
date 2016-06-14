@@ -107,7 +107,7 @@ module Groovepacker
             def set_import_date_and_type
               case @import_item.import_type
               when 'deep'
-                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 7.days)
+                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'quick'
                 quick_import_date = @credential.quick_import_last_modified
                 self.import_from = quick_import_date.blank? ? DateTime.now-3.days : quick_import_date
@@ -119,8 +119,8 @@ module Groovepacker
             end
 
             def set_import_date_type
-              date_types = {"deep" => "created_at", "quick" => "modified_at"}
-               self.import_date_type = date_types[@import_item.import_type] || "created_at"
+              date_types = {"deep" => "modified_at", "quick" => "modified_at"}
+              self.import_date_type = date_types[@import_item.import_type] || "created_at"
             end
 
             def ss_tags_list
@@ -172,7 +172,7 @@ module Groovepacker
             end
 
             def fetch_tagged_orders(response)
-              return response unless @import_item.import_type != 'quick' && gp_ready_tag_id != -1
+              return response unless gp_ready_tag_id != -1
               tagged_response = @client.get_orders_by_tag(gp_ready_tag_id)
               #perform union of orders
               response = get_orders_from_union(response, tagged_response)

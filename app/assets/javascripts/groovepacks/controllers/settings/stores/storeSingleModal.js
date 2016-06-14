@@ -77,6 +77,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
       });
     }
 
+    scope.fix_import_dates = function(){
+      stores.shipstation.fix_dates(scope.stores.single.id).then(function (response) {
+        scope.stores.single.message='';
+        //myscope.store_single_details(scope.stores.single.id, true);
+      });
+    }
+
     scope.show_hide_images = function(element_class, link_class) {
       $('.'+element_class).toggle('slow');
       if($('.'+link_class).hasClass('fa-caret-down')) {
