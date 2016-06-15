@@ -91,6 +91,8 @@ class Product < ActiveRecord::Base
 
   def update_product_status(force_from_inactive_state = false)
     # original_status = self.status
+    bulkaction = Groovepacker::Inventory::BulkActions.new
+    general_setting = GeneralSetting.setting
     if status != 'inactive' || force_from_inactive_state
       result = true
 
@@ -149,13 +151,16 @@ class Product < ActiveRecord::Base
       @order_items = OrderItem.where(product_id: id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil? || !%w(awaiting onhold).include?(item.order.status)
+        bulkaction.process(item) if general_setting.inventory_tracking?
       end
       # end
     else
       # update order items status from onhold to awaiting
+
       @order_items = OrderItem.where(product_id: id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil? || !%w(awaiting onhold).include?(item.order.status)
+        bulkaction.process(item) if general_setting.inventory_tracking?
       end
     end
     result

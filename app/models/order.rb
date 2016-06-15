@@ -192,26 +192,25 @@ class Order < ActiveRecord::Base
       #Implement hold orders from Groovepacker::Inventory
       self.order_items.each do |order_item|
         product = Product.find_by_id(order_item.product_id)
-        unless product.nil?
-          if product.status == "new" or product.status == "inactive"
+        if product && %w(new inactive).include?(product.status)
+          # if product.status == "new" or product.status == "inactive"
             result &= false
-          end
+            break
+          # end
         end
       end
 
       result &= false if self.unacknowledged_activities.length > 0
-
       if result
         if self.status == "onhold"
-          self.status = "awaiting"
+          self.update_column(:status, "awaiting")
         end
       else
         if self.status == "awaiting"
-          self.status = "onhold"
+          self.update_column(:status, "onhold")
         end
       end
-
-      self.save
+      # self.save
 
       #isn't being used, shouldn't get called
       #self.apply_and_update_predefined_tags
@@ -223,10 +222,10 @@ class Order < ActiveRecord::Base
 
     self.order_items.each do |order_item|
       product = order_item.product
-      if !product.nil?
-        if product.status == "new" or product.status == "inactive"
+      if product && %w(new inactive).include?(product.status)
+        # if product.status == "new" or product.status == "inactive"
           result &= false
-        end
+        # end
       else
         result &= false
       end

@@ -10,14 +10,27 @@ module Groovepacker
         end
         order_items = OrderItem.where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
         order_items.each do |single_order_item|
-          if single_order_item.is_not_ghost?
-            if Order::ALLOCATE_STATUSES.include?(single_order_item.order.status)
-              Groovepacker::Inventory::Orders.allocate_item(single_order_item)
-            elsif Order::SOLD_STATUSES.include?(single_order_item.order.status)
-              Groovepacker::Inventory::Orders.process_sell_item(single_order_item, 1, false)
-            elsif Order::UNALLOCATE_STATUSES.include?(single_order_item.order.status)
-              single_order_item.update_column(:inv_status, OrderItem::UNALLOCATED_INV_STATUS)
-            end
+          process(single_order_item)
+          # if single_order_item.is_not_ghost?
+          #   if Order::ALLOCATE_STATUSES.include?(single_order_item.order.status)
+          #     Groovepacker::Inventory::Orders.allocate_item(single_order_item)
+          #   elsif Order::SOLD_STATUSES.include?(single_order_item.order.status)
+          #     Groovepacker::Inventory::Orders.process_sell_item(single_order_item, 1, false)
+          #   elsif Order::UNALLOCATE_STATUSES.include?(single_order_item.order.status)
+          #     single_order_item.update_column(:inv_status, OrderItem::UNALLOCATED_INV_STATUS)
+          #   end
+          # end
+        end
+      end
+
+      def process(item)
+        if item.is_not_ghost?
+          if Order::ALLOCATE_STATUSES.include?(item.order.status)
+            Groovepacker::Inventory::Orders.allocate_item(item)
+          elsif Order::SOLD_STATUSES.include?(item.order.status)
+            Groovepacker::Inventory::Orders.process_sell_item(item, 1, false)
+          elsif Order::UNALLOCATE_STATUSES.include?(item.order.status)
+            item.update_column(:inv_status, OrderItem::UNALLOCATED_INV_STATUS)
           end
         end
       end
