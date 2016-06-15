@@ -184,6 +184,9 @@ GEM
     docile (1.1.5)
     doorkeeper (2.2.1)
       railties (>= 3.2)
+    dotenv (2.0.1)
+    dotenv-rails (2.0.1)
+      dotenv (= 2.0.1)
     ebay (1.1)
     email_spec (1.5.0)
       launchy (~> 2.1)
@@ -555,6 +558,7 @@ DEPENDENCIES
   delayed_job_recurring
   devise (>= 2.1.2)
   doorkeeper
+  dotenv-rails
   ebay (~> 1.1)
   email_spec (>= 1.4.0)
   excon
