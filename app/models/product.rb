@@ -36,6 +36,11 @@ class Product < ActiveRecord::Base
   after_save :check_inventory_warehouses
   after_save :gen_barcode_from_sku_if_intangible
 
+  cached_methods :product_skus, :product_images,
+                 :product_barcodes, :product_kit_skuss,
+                 :primary_sku
+  after_save :delete_cache
+
   SINGLE_KIT_PARSING = 'single'.freeze
   DEPENDS_KIT_PARSING = 'depends'.freeze
   INDIVIDUAL_KIT_PARSING = 'individual'.freeze

@@ -4,6 +4,9 @@ class OrderItemKitProduct < ActiveRecord::Base
   has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
 
+  cached_methods :product_kit_skus
+  after_save :delete_cache
+
   include OrdersHelper
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
@@ -15,23 +18,23 @@ class OrderItemKitProduct < ActiveRecord::Base
 
   def process_item(clicked, username, typein_count=1)
     total_product_kit_skus = calculate_total_product_kit_skus
-    if self.scanned_qty < total_product_kit_skus
-      self.scanned_qty += typein_count
-      set_clicked_qty(clicked, username, typein_count)
-      set_scanned_status(total_product_kit_skus)
-      self.save
-      calculate_scan_time(typein_count, username)
-      self.order_item.order.total_scan_count += typein_count
-      self.order_item.order.save
+    return unless scanned_qty < total_product_kit_skus
 
-      #need to update order item quantity,
-      # for this calculate minimum of order items
-      #update order item status
-      min = set_min_value
-      set_order_item_scanned_qty(min)
-      set_order_item_scanned_statys
-      self.order_item.save
-    end
+    self.scanned_qty += typein_count
+    set_clicked_qty(clicked, username, typein_count)
+    set_scanned_status(total_product_kit_skus)
+    self.save
+    calculate_scan_time(typein_count, username)
+    self.order_item.order.total_scan_count += typein_count
+    self.order_item.order.save
+
+    #need to update order item quantity,
+    # for this calculate minimum of order items
+    #update order item status
+    min = set_min_value
+    set_order_item_scanned_qty(min)
+    set_order_item_scanned_statys
+    self.order_item.save
   end
 
   def reset_scanned
@@ -49,14 +52,14 @@ class OrderItemKitProduct < ActiveRecord::Base
     else
       total_qty = self.order_item.qty
     end
-    total_qty * self.product_kit_skus.qty
+    total_qty * self.cached_product_kit_skus.qty
   end
 
   def set_clicked_qty(clicked, username, typein_count)
     if clicked
       self.clicked_qty = self.clicked_qty + typein_count
       self.order_item.order.addactivity("Item with SKU: " +
-                                          self.product_kit_skus.option_product.primary_sku + " has been click scanned", username)
+                                          self.cached_product_kit_skus.cached_option_product.cached_primary_sku + " has been click scanned", username)
     end
   end
 
@@ -93,21 +96,13 @@ class OrderItemKitProduct < ActiveRecord::Base
   end
 
   def set_min_value
-    order_item_kit_products = order_item.reload
-                                             .order_item_kit_products.includes(
-                                                product_kit_skus: [
-                                                  product: [
-                                                    :product_skus, :product_images,
-                                                    :product_barcodes
-                                                  ]
-                                                ]
-                                              )
+    order_item_kit_products = order_item.reload.order_item_kit_products
     order_item_kit_product = order_item_kit_products.first
-    product_kit_skus_qty = order_item_kit_product.product_kit_skus.qty
+    product_kit_skus_qty = order_item_kit_product.cached_product_kit_skus.qty
     min = 1
     min = order_item_kit_product.scanned_qty / product_kit_skus_qty if product_kit_skus_qty != 0
     order_item_kit_products.each do |kit_product|
-      temp = kit_product.scanned_qty / kit_product.product_kit_skus.qty
+      temp = kit_product.scanned_qty / kit_product.cached_product_kit_skus.qty
       min = temp if (temp) < min
     end
     min

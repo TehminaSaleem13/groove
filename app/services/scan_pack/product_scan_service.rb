@@ -20,7 +20,7 @@ module ScanPack
         product_edit_matched_for_order: false,
         product_edit_matched_for_products: []
         })
-      @single_order = Order.where(id: @id).includes(order_items: :product).last
+      @single_order = Order.where(id: @id).last
       @scanpack_settings = ScanPackSetting.first
     end
 
@@ -48,7 +48,14 @@ module ScanPack
 
       do_if_single_order_present if @single_order.present?
 
+      update_session
+
       return @result
+    end
+
+    def update_session
+      return unless @result['data']['next_state'].eql?('scanpack.rfo')
+      @session[:most_recent_scanned_products] = []
     end
 
     def do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)

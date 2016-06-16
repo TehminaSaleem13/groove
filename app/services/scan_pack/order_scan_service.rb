@@ -54,7 +54,7 @@ module ScanPack
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
           @input, @input)
       end
-      @single_order = @orders.includes(:order_items).first
+      @single_order = @orders.first
     end
 
     def generate_query
