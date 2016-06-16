@@ -219,25 +219,21 @@ class Order < ActiveRecord::Base
 
   def set_order_status
     result = true
-
     self.order_items.each do |order_item|
       product = order_item.product
-      if product && %w(new inactive).include?(product.status)
-        # if product.status == "new" or product.status == "inactive"
+      if product
+        if %w(new inactive).include?(product.status)
           result &= false
-        # end
+        end
       else
         result &= false
       end
     end
 
     result &= false if self.unacknowledged_activities.length > 0
-
     status = result ? 'awaiting' : 'onhold'
-
     self.update_column(:status, status)
     self.update_column(:scan_start_time, nil)
-
     #self.apply_and_update_predefined_tags
   end
 
