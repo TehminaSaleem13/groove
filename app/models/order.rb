@@ -793,7 +793,7 @@ class Order < ActiveRecord::Base
 
   def order_items_with_eger_load_and_cache
     key = "order_items_#{id}_was_egar_loaded"
-    if order_items.first.product_is_cached?
+    if order_items.first.try(:product_is_cached?)
       order_items
     else
       Rails.cache.write(key, true, expires_in: 30.minutes)
