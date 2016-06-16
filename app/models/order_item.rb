@@ -17,6 +17,8 @@ class OrderItem < ActiveRecord::Base
   before_destroy :delete_inventory
   after_create :create_inventory
   after_update :update_inventory_levels
+
+  cached_methods :product, :order_item_kit_products
   after_save :delete_cache
 
   include OrdersHelper
@@ -33,8 +35,6 @@ class OrderItem < ActiveRecord::Base
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
-  include CachedMethods
-  cached_methods :product, :order_item_kit_products
 
   def has_unscanned_kit_items
     result = false

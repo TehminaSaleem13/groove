@@ -18,13 +18,8 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         )
         barcode_found = true
         #process product barcode scan
-        order_item_kit_product = OrderItemKitProduct.includes(
-          :product_kit_skus,
-          order_item: [
-            :product, :order,
-            order_item_kit_products: :product_kit_skus
-          ]
-        ).find(child_item['kit_product_id'])
+        order_item_kit_product = OrderItemKitProduct.find(child_item['kit_product_id'])
+
         order_item = order_item_kit_product.order_item if order_item_kit_product.order_item.present?
 
         #do_if_serial_not_added(order_item_kit_product) unless serial_added

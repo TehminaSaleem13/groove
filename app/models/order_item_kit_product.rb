@@ -4,8 +4,8 @@ class OrderItemKitProduct < ActiveRecord::Base
   has_many :order_item_kit_product_scan_times
   attr_accessible :scanned_qty, :scanned_status
 
-  include CachedMethods
   cached_methods :product_kit_skus
+  after_save :delete_cache
 
   include OrdersHelper
   #===========================================================================================
@@ -18,23 +18,23 @@ class OrderItemKitProduct < ActiveRecord::Base
 
   def process_item(clicked, username, typein_count=1)
     total_product_kit_skus = calculate_total_product_kit_skus
-    if self.scanned_qty < total_product_kit_skus
-      self.scanned_qty += typein_count
-      set_clicked_qty(clicked, username, typein_count)
-      set_scanned_status(total_product_kit_skus)
-      self.save
-      calculate_scan_time(typein_count, username)
-      self.order_item.order.total_scan_count += typein_count
-      self.order_item.order.save
+    return unless scanned_qty < total_product_kit_skus
 
-      #need to update order item quantity,
-      # for this calculate minimum of order items
-      #update order item status
-      min = set_min_value
-      set_order_item_scanned_qty(min)
-      set_order_item_scanned_statys
-      self.order_item.save
-    end
+    self.scanned_qty += typein_count
+    set_clicked_qty(clicked, username, typein_count)
+    set_scanned_status(total_product_kit_skus)
+    self.save
+    calculate_scan_time(typein_count, username)
+    self.order_item.order.total_scan_count += typein_count
+    self.order_item.order.save
+
+    #need to update order item quantity,
+    # for this calculate minimum of order items
+    #update order item status
+    min = set_min_value
+    set_order_item_scanned_qty(min)
+    set_order_item_scanned_statys
+    self.order_item.save
   end
 
   def reset_scanned

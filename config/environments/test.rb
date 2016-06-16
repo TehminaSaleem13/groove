@@ -38,11 +38,12 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
 
-  $redis = Redis.new(:host => 'localhost', :port=> 6379)
+  $redis = Redis.new(:host => 'localhost', :port=> 6379, password: 'foobared')
+  config.cache_store = :redis_store, $redis.as_json['options']
 
   config.action_mailer.smtp_settings = {
     :address => "smtp.api.createsend.com",
-    :port => 587,  
+    :port => 587,
     :authentication => "plain",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',

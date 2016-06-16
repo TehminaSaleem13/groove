@@ -310,41 +310,107 @@ groovepacks_controllers.
           }
         }
 
-        myscope.arrange_unscanned_items();
+        // Replaced by orederByObject filter
+        //myscope.arrange_unscanned_items();
 
       };
 
-      myscope.arrange_unscanned_items = function () {
-        next_item_index = 0;
-        for (var i = $scope.data.order.unscanned_items.length - 1; i >= 0; i--) {
-          if($scope.data.order.unscanned_items[i].sku == $scope.data.order.next_item.sku){
-            next_item_index = i;
-          };
-        };
+      // $scope.sort_technique = function (filtered, sort_params) {
+      //   var priority = sort_params[0];
+      //   var childs = sort_params[1];
+      //   var child_field = sort_params[2];
+      //
+      //   filtered.sort(function (a, b) {
+      //     if(priority){
+      //       matched = (priority == b) ? 1 : (priority == a) ? -1 : null;
+      //       if(matched){
+      //         return matched;
+      //       }
+      //     }
+      //     if(childs && b[childs]){
+      //       matched = false;
+      //       angular.forEach(b[childs], function(item){
+      //         if(item[child_field] === priority[child_field]){
+      //           matched = true;
+      //         }
+      //       });
+      //       b[childs].sort(function (x, y) {
+      //         order =  (x.packing_placement > y.packing_placement) ? 1 :((x.packing_placement < y.packing_placement) ? -1 : 0);
+      //         if(!order){
+      //           order =  (x.name > y.name) ? 1 :((x.name < y.name) ? -1 : 0);
+      //         }
+      //         return order;
+      //       });
+      //       if(matched){
+      //         return 1;
+      //       }
+      //     }
+      //     else if (childs && a[childs]) {
+      //       matched = false;
+      //       angular.forEach(a[childs], function(item){
+      //         if(item[child_field] === priority[child_field]){
+      //           matched = true;
+      //         }
+      //       });
+      //       a[childs].sort(function (x, y) {
+      //         order =  (x.packing_placement > y.packing_placement) ? 1 :((x.packing_placement < y.packing_placement) ? -1 : 0);
+      //         if(!order){
+      //           order =  (x.name > y.name) ? 1 :((x.name < y.name) ? -1 : 0);
+      //         }
+      //         return order;
+      //       });
+      //       if(matched){
+      //         return -1;
+      //       }
+      //     }
+      //
+      //     order =  (a.packing_placement > b.packing_placement) ? 1 :((a.packing_placement < b.packing_placement) ? -1 : 0);
+      //     if(!order){
+      //       order =  (a.name > b.name) ? 1 :((a.name < b.name) ? -1 : 0);
+      //     }
+      //     return order;
+      //
+      //   });
+      //   return filtered;
+      // };
 
-        first_item = $scope.data.order.unscanned_items[0];
-        $scope.data.order.unscanned_items[0] = $scope.data.order.unscanned_items[next_item_index];
-        $scope.data.order.unscanned_items[next_item_index] = first_item;
-
-        //Check for child items
-        child_items = $scope.data.order.unscanned_items[0].child_items
-        if(child_items && child_items.length){
-          myscope.arrange_child_items();
-        }
-
-      }
-
-      myscope.arrange_child_items = function () {
-        next_item_index = 0;
-        for (var i = $scope.data.order.unscanned_items[0].child_items.length - 1; i >= 0; i--) {
-          if($scope.data.order.unscanned_items[0].child_items[i].sku == $scope.data.order.next_item.sku){
-            next_item_index = i;
-          };
-        };
-        first_item = $scope.data.order.unscanned_items[0].child_items[0];
-        $scope.data.order.unscanned_items[0].child_items[0] = $scope.data.order.unscanned_items[0].child_items[next_item_index];
-        $scope.data.order.unscanned_items[0].child_items[next_item_index] = first_item;
-      }
+      // Replaced by orederByObject filter
+      // myscope.arrange_unscanned_items = function () {
+      //   next_item_index = 0;
+      //   for (var i = $scope.data.order.unscanned_items.length - 1; i >= 0; i--) {
+      //     if($scope.data.order.unscanned_items[i].sku == $scope.data.order.next_item.sku){
+      //       next_item_index = i;
+      //       break;
+      //     };
+      //   };
+      //
+      //   //Check for child items
+      //   child_items = $scope.data.order.unscanned_items[0].child_items
+      //   if(child_items && child_items.length){
+      //     child_match_next_item = myscope.arrange_child_items();
+      //   }
+      //
+      //   first_item = $scope.data.order.unscanned_items[0];
+      //   $scope.data.order.unscanned_items[0] = $scope.data.order.unscanned_items[next_item_index];
+      //   $scope.data.order.unscanned_items[next_item_index] = first_item;
+      //
+      // }
+      //
+      // myscope.arrange_child_items = function () {
+      //   next_item_index = 0;
+      //   child_match_next_item = false;
+      //   for (var i = $scope.data.order.unscanned_items[0].child_items.length - 1; i >= 0; i--) {
+      //     if($scope.data.order.unscanned_items[0].child_items[i].sku == $scope.data.order.next_item.sku){
+      //       next_item_index = i;
+      //       child_match_next_item = true;
+      //       break;
+      //     };
+      //   };
+      //   first_item = $scope.data.order.unscanned_items[0].child_items[0];
+      //   $scope.data.order.unscanned_items[0].child_items[0] = $scope.data.order.unscanned_items[0].child_items[next_item_index];
+      //   $scope.data.order.unscanned_items[0].child_items[next_item_index] = first_item;
+      //   return child_match_next_item;
+      // }
 
       myscope.handle_known_codes = function () {
         if ($scope.scan_pack.settings.note_from_packer_code_enabled && $scope.data.input == $scope.scan_pack.settings.note_from_packer_code) {

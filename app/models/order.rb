@@ -23,11 +23,6 @@ class Order < ActiveRecord::Base
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
   validates_uniqueness_of :increment_id
-  after_save :delete_cache
-
-  include CachedMethods
-  cached_methods :order_items
-
 
   include ProductsHelper
   include OrdersHelper
@@ -393,21 +388,7 @@ class Order < ActiveRecord::Base
   def get_unscanned_items
     unscanned_list = []
 
-    self.cached_order_items
-      .includes(
-        # order_item_kit_products: [
-        #   product_kit_skus: [
-        #     product: [
-        #       :product_skus, :product_images,
-        #       :product_barcodes
-        #     ]
-        #   ]
-        # ],
-        # product: [
-        #   :product_skus, :product_images,
-        #   :product_barcodes
-        # ]
-      ).each do |order_item|
+    self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.cached_product.is_kit == 1
           option_products = order_item.option_products
@@ -470,27 +451,16 @@ class Order < ActiveRecord::Base
         end
       end
     end
-    unscanned_list.sort_by { |hsh| hsh['packing_placement'] }
+    unscanned_list.sort do |a, b|
+      o = (a['packing_placement'] <=> a['packing_placement']);
+      o == 0 ? (a['name'] <=> b['name']) : o
+    end
   end
 
   def get_scanned_items
     scanned_list = []
 
-    self.cached_order_items
-      .includes(
-        # order_item_kit_products: [
-        #   product_kit_skus: [
-        #     product: [
-        #       :product_skus, :product_images,
-        #       :product_barcodes
-        #     ]
-        #   ]
-        # ],
-        # product: [
-        #   :product_skus, :product_images,
-        #   :product_barcodes
-        # ]
-    ).each do |order_item|
+    self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.cached_product.is_kit == 1
@@ -551,7 +521,10 @@ class Order < ActiveRecord::Base
       end
     end
 
-    scanned_list
+    scanned_list.sort do |a, b|
+      o = (b['packing_placement'] <=> a['packing_placement']);
+      o == 0 ? (b['name'] <=> a['name']) : o
+    end
   end
 
   def reset_scanned_status
@@ -816,5 +789,28 @@ class Order < ActiveRecord::Base
   def set_traced_in_dashboard
     self.traced_in_dashboard = true
     self.save!
+  end
+
+  def order_items_with_eger_load_and_cache
+    key = "order_items_#{id}_was_egar_loaded"
+    if order_items.first.product_is_cached?
+      order_items
+    else
+      Rails.cache.write(key, true, expires_in: 30.minutes)
+      order_items.includes(
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      )
+     end
   end
 end

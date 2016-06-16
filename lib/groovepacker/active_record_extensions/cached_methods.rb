@@ -1,16 +1,24 @@
+# creates a cached_method method for Models
+# to eanble caching
 module CachedMethods
   extend ActiveSupport::Concern
+
   module ClassMethods
     def cached_methods(*methods)
       methods.each do |association|
         define_method("cached_#{association}") do |key = nil, cached = nil|
           key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
-          cached = Rails.cache.read(key, expires_in: 10.minutes) rescue false
+          cached = Rails.cache.read(key) rescue false
           return cached if cached
           load_assoc = send(association)
-          Rails.cache.write(key, load_assoc)
+          Rails.cache.write(key, load_assoc, expires_in: 30.minutes)
           update_cache_keys(key)
           load_assoc
+        end
+
+        define_method("#{association}_is_cached?") do
+          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
+          Rails.cache.read(key, expires_in: 30.minutes).present?
         end
       end
     end
