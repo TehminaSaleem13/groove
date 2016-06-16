@@ -125,14 +125,14 @@ class OrderItem < ActiveRecord::Base
     child_item['scanned_qty'] = kit_product.scanned_qty
 
     if depends_kit
-      child_item['qty_remaining'] = self.kit_split_qty * kit_product.product_kit_skus.qty -
+      child_item['qty_remaining'] = self.kit_split_qty * kit_product.cached_product_kit_skus.qty -
         kit_product.scanned_qty
     else
-      child_item['qty_remaining'] = self.qty * kit_product.product_kit_skus.qty -
+      child_item['qty_remaining'] = self.qty * kit_product.cached_product_kit_skus.qty -
         kit_product.scanned_qty
     end
 
-    child_item['kit_packing_placement'] = kit_product.product_kit_skus.packing_order
+    child_item['kit_packing_placement'] = kit_product.cached_product_kit_skus.packing_order
     child_item['kit_product_id'] = kit_product.id
     child_item
   end
@@ -171,8 +171,8 @@ class OrderItem < ActiveRecord::Base
     unless self.product.nil?
       result = self.build_individual_kit(depends_kit)
       self.cached_order_item_kit_products.each do |kit_product|
-        if !kit_product.product_kit_skus.nil? &&
-          !kit_product.product_kit_skus.product.nil? &&
+        if !kit_product.cached_product_kit_skus.nil? &&
+          !kit_product.cached_product_kit_skus.product.nil? &&
           kit_product.scanned_status != 'scanned'
           child_item = self.build_single_child_item(kit_product, depends_kit, option_products_array)
 
@@ -204,9 +204,9 @@ class OrderItem < ActiveRecord::Base
       if depends_kit
         result['scanned_qty'] = self.kit_split_scanned_qty
       end
-      self.order_item_kit_products.each do |kit_product|
-        if !kit_product.product_kit_skus.nil? &&
-          !kit_product.product_kit_skus.product.nil? &&
+      self.cached_order_item_kit_products.each do |kit_product|
+        if !kit_product.cached_product_kit_skus.nil? &&
+          !kit_product.cached_product_kit_skus.product.nil? &&
           (kit_product.scanned_status == SCANNED_STATUS or
             kit_product.scanned_status == PARTIALLY_SCANNED_STATUS)
           child_item = self.build_single_child_item(kit_product, depends_kit, option_products_array)
@@ -267,10 +267,10 @@ class OrderItem < ActiveRecord::Base
       #if no of unscanned items in the kit split qty for the corrseponding item
       #is greater than 0 and the kit split can be increased in the order item,
       #then the quantity should be increased
-      self.order_item_kit_products.each do |kit_product|
-        if kit_product.product_kit_skus.option_product.id == product_id &&
+      self.cached_order_item_kit_products.each do |kit_product|
+        if kit_product.cached_product_kit_skus.cached_option_product.id == product_id &&
           kit_product.scanned_qty != 0 &&
-          (kit_product.scanned_qty % (self.kit_split_qty * kit_product.product_kit_skus.qty) == 0) &&
+          (kit_product.scanned_qty % (self.kit_split_qty * kit_product.cached_product_kit_skus.qty) == 0) &&
           self.scanned_qty < self.qty
           result = true
         end
@@ -295,7 +295,7 @@ class OrderItem < ActiveRecord::Base
   def reset_scanned
     #if item is a kit then make all order item product skus as also unscanned
     if self.product.is_kit == 1
-      self.order_item_kit_products.each do |kit_product|
+      self.cached_order_item_kit_products.each do |kit_product|
         kit_product.reset_scanned
       end
     end

@@ -452,7 +452,7 @@ class Order < ActiveRecord::Base
       end
     end
     unscanned_list.sort do |a, b|
-      o = (a['packing_placement'] <=> a['packing_placement']);
+      o = (a['packing_placement'] <=> b['packing_placement']);
       o == 0 ? (a['name'] <=> b['name']) : o
     end
   end

@@ -52,14 +52,14 @@ class OrderItemKitProduct < ActiveRecord::Base
     else
       total_qty = self.order_item.qty
     end
-    total_qty * self.product_kit_skus.qty
+    total_qty * self.cached_product_kit_skus.qty
   end
 
   def set_clicked_qty(clicked, username, typein_count)
     if clicked
       self.clicked_qty = self.clicked_qty + typein_count
       self.order_item.order.addactivity("Item with SKU: " +
-                                          self.product_kit_skus.option_product.primary_sku + " has been click scanned", username)
+                                          self.cached_product_kit_skus.cached_option_product.cached_primary_sku + " has been click scanned", username)
     end
   end
 
