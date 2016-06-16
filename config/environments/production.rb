@@ -93,9 +93,9 @@ Groovepacks::Application.configure do
     :password => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
     :openssl_verify_mode  => 'none'
   }
-  ENV['REDIS_HOST'] = 'groovelytics-redis'
-  ENV['REDIS_PASSWORD'] = '6t!@D2gA4i8njgz^qut#owyaiJXYfM5q'
-  ENV['REDIS_PORT'] = '7743'
+  # ENV['REDIS_HOST'] = 'groovelytics-redis'
+  # ENV['REDIS_PASSWORD'] = '6t!@D2gA4i8njgz^qut#owyaiJXYfM5q'
+  # ENV['REDIS_PORT'] = '7743'
   $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'])
   # $redis = Redis.new(:host => 'groove-prod-1', :port=> 6379)
