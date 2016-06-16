@@ -55,7 +55,6 @@ group :test do
 end
 
 gem 'redis-session-store'
-gem 'airbrake'
 gem 'devise', '>= 2.1.2'
 gem 'simple_form', '>= 2.0.4'
 gem 'figaro', '>= 0.5.0'

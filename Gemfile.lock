@@ -71,9 +71,6 @@ GEM
       memoizable (~> 0.4.0)
     addressable (2.3.5)
     afm (0.2.0)
-    airbrake (5.4.0)
-      airbrake-ruby (~> 1.4)
-    airbrake-ruby (1.4.3)
     akami (1.2.0)
       gyoku (>= 0.4.0)
       nokogiri (>= 1.4.0)
@@ -532,7 +529,6 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (= 0.3.1)
-  airbrake
   angular-ui-bootstrap-rails
   angularjs-rails (>= 1.2.18)
   apartment (>= 0.25.1)!
