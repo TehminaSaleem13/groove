@@ -39,6 +39,7 @@ module Groovepacker
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)
+            @import_item.destroy
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -48,15 +49,16 @@ module Groovepacker
               break if @import_item.status == 'cancelled'
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
-              ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order) }
+              ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
+              sleep 0.5
             end
           end
 
-          def import_order_form_response(shipstation_order, order)
+          def import_order_form_response(shipstation_order, order, shipments_response)
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
-              tracking_number = shipments_response.select {|shipment| shipment["orderId"]==order["orderId"]}.first["trackingNumber"] rescue nil
-              shipstation_order.tracking_num = tracking_number
+              tracking_info = shipments_response.find {|shipment| shipment["orderId"]==order["orderId"]} || {}
+              shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
               update_order_activity_log(shipstation_order)
@@ -83,7 +85,7 @@ module Groovepacker
             @import_item.update_attributes(current_order_items: order["items"].length, current_order_imported_item: 0)
             order["items"].each do |item|
               product = product_importer_client.find_or_create_product(item)
-              order_item = import_order_item(item, shipstation_order, product)
+              import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
             shipstation_order.save
@@ -162,7 +164,7 @@ module Groovepacker
               return response unless @import_item.import_type != 'tagged'
               statuses.each do |status|
                 status_response = @client.get_orders(status, import_from, import_date_type)
-                response["orders"] = response["orders"].blank? ? status_response["orders"] : (response["orders"] | status_response["orders"])
+                response = get_orders_from_union(response, status_response)
               end
               self.importing_time = DateTime.now - 1.day
               self.quick_importing_time = DateTime.now
@@ -173,8 +175,12 @@ module Groovepacker
               return response unless @import_item.import_type != 'quick' && gp_ready_tag_id != -1
               tagged_response = @client.get_orders_by_tag(gp_ready_tag_id)
               #perform union of orders
-              response["orders"] = response["orders"].blank? ? tagged_response["orders"] :
-                response["orders"] | tagged_response["orders"]
+              response = get_orders_from_union(response, tagged_response)
+              return response
+            end
+
+            def get_orders_from_union(response, tagged_or_status_response)
+              response["orders"] = response["orders"].blank? ? tagged_or_status_response["orders"] : (response["orders"] | tagged_or_status_response["orders"])
               return response
             end
 
@@ -192,7 +198,10 @@ module Groovepacker
                 shipstation_order.destroy
                 shipstation_order = nil
               end
-              
+              init_new_order_if_required(shipstation_order, order)
+            end
+
+            def init_new_order_if_required(shipstation_order, order)
               if shipstation_order.blank?
                 shipstation_order = Order.new(store_id: @store.id)
               elsif (order["tagIds"]||[]).include?(gp_ready_tag_id)
@@ -202,7 +211,7 @@ module Groovepacker
                 shipstation_order.destroy
                 shipstation_order = Order.new(store_id: @store.id)
               end
-              return shipstation_order
+              shipstation_order
             end
 
             def update_order_activity_log(shipstation_order)

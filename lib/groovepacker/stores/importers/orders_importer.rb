@@ -27,7 +27,9 @@ module Groovepacker
             stores.each do |store|
               break if check_order_exists(order_no)
               next unless store.on_demand_import
-              context = Groovepacker::Orders::Base.new.send(:get_context, store)
+              import_item = ImportItem.create(store_id: store.id)
+              handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+              context = Groovepacker::Stores::Context.new(handler)
               context.import_single_order_from(order_no)
             end
           end
