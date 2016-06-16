@@ -29,7 +29,6 @@ groovepacks_controllers.
       myscope.product_single_details = function (id, new_rollback) {
         //console.log(index);
         //console.log(scope.products);
-
         for (var i = 0; i < scope.products.list.length; i++) {
           if (scope.products.list[i].id == id) {
             scope.products.current = parseInt(i);
@@ -181,8 +180,11 @@ groovepacks_controllers.
               myscope.product_single_details(scope.products.single.basicinfo.id, true);
             });
           } else {
-            products.single.alias(scope.products, args.selected).then(function () {
+            products.single.alias(scope.products, args.selected).then(function (data) {
+            if(!!data.data.status) {
               myscope.product_single_details(args.selected[0], true);
+            }
+            
             });
           }
         }

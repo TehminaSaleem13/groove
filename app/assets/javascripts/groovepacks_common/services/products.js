@@ -381,6 +381,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
         } else {
           notification.notify(data.messages, 0);
         }
+        return data;
       }
     ).error(notification.server_error);
   };
