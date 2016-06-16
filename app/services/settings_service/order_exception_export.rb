@@ -44,7 +44,7 @@ module SettingsService
         csv << row_map.keys
         exceptions.each do |exception|
           single_row = row_map.dup
-          generate_single_record(exception, single_row)
+          generate_single_record(exception, single_row) 
           csv << single_row.values
         end
       end
@@ -53,7 +53,8 @@ module SettingsService
     def generate_single_record(exception, single_row)
       order = exception.order
       user = exception.user
-
+      single_row[:total_packed_items] = order.order_items.map(&:scanned_qty).sum rescue nil
+      single_row[:total_clicked_items] = order.order_items.map(&:clicked_qty).sum rescue nil
       push_order_data(single_row, order)
 
       single_row[:reason] = exception.reason
