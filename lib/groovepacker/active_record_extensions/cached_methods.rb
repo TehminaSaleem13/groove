@@ -1,5 +1,22 @@
-# creates a cached_method method for Models
-# to eanble caching
+# ========================================
+#                  USAGE
+# ========================================
+# // Ruby.
+# Class OrderItem
+#   ...
+#   # this code generates some instance methods
+#   # cached_product and cached_order_item_kit_products
+#   # which when called the first time, will cache the ActiveRecord Object,
+#   # and after every call will get the object back from the cache only.
+#   # You can also cache the method results too.
+#   # Also it creates cache check instance methods
+#   # as in this case product_is_cached? And order_item_kit_products_is_cached?
+# => cached_methods :product, :order_item_kit_products
+#   # As the name suggests, this method will clear all the cache related
+#   # to the class.
+# => after_save :delete_cache
+#   ...
+# end
 module CachedMethods
   extend ActiveSupport::Concern
 

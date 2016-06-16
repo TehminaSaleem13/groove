@@ -38,7 +38,7 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
 
-  $redis = Redis.new(:host => 'localhost', :port=> 6379, password: 'foobared')
+  $redis = Redis.new(:host => 'localhost', :port=> 6379)
   config.cache_store = :redis_store, $redis.as_json['options']
 
   config.action_mailer.smtp_settings = {
