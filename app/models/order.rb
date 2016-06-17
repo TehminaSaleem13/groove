@@ -792,11 +792,11 @@ class Order < ActiveRecord::Base
   end
 
   def order_items_with_eger_load_and_cache
-    key = "order_items_#{id}_was_egar_loaded"
-    if order_items.first.try(:product_is_cached?)
+    # key = "order_items_#{id}_was_egar_loaded"
+    if order_items.map(&:product_is_cached?).include? true
       order_items
     else
-      Rails.cache.write(key, true, expires_in: 30.minutes)
+      # Rails.cache.write(key, true, expires_in: 30.minutes)
       order_items.includes(
         order_item_kit_products: [
           product_kit_skus: [
