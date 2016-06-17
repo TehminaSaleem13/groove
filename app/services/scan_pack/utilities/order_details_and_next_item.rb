@@ -14,21 +14,23 @@ module ScanPack
       end
 
       def do_if_unscanned_items_present(data)
-        unless @session[:most_recent_scanned_products].nil?
-          @session[:most_recent_scanned_products].reverse!.each do |scanned_product_id|
-            do_check_unscanned_items_for_next_item(data, scanned_product_id)
-            break if data['next_item'].present?
-          end
+        most_recent_scanned_product = @session[:most_recent_scanned_product]
+        if most_recent_scanned_product.present?
+          do_check_unscanned_items_for_next_item(data, most_recent_scanned_product)
         end
         do_if_next_item_still_not_present(data) unless data['next_item'].present?
         data['next_item']['qty'] = data['next_item']['scanned_qty'] + data['next_item']['qty_remaining']
       end
 
       def do_check_unscanned_items_for_next_item(data, scanned_product_id)
-        data['unscanned_items'].each do |unscanned_item|
+        data['unscanned_items'].each_with_index do |unscanned_item, idx|
           product_type = unscanned_item['product_type']
           data['next_item'] = do_get_next_item(data, scanned_product_id, unscanned_item, product_type)
-          return if data['next_item'].present?
+
+          next unless data['next_item'].present?
+
+          data['unscanned_items'].insert(0, data['unscanned_items'].delete_at(idx))
+          break
         end
       end
 
@@ -39,9 +41,12 @@ module ScanPack
         case
         when session_parent_order_item && session_parent_order_item == unscanned_item['order_item_id']
           @session[:parent_order_item] = false
-          if product_type == 'individual' && !unscanned_item_child_items.empty?
-            return unscanned_item_child_items.first.clone
-          end
+          item = if product_type == 'individual' && !unscanned_item_child_items.empty?
+                   unscanned_item_child_items.first.clone
+                 else
+                   unscanned_item.clone
+                 end
+          return item
         when (
             product_type == 'single' &&
             scanned_product_id == unscanned_item['product_id'] &&

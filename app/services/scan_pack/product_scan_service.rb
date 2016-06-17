@@ -55,7 +55,7 @@ module ScanPack
 
     def update_session
       return unless @result['data']['next_state'].eql?('scanpack.rfo')
-      @session[:most_recent_scanned_products] = []
+      @session[:most_recent_scanned_product] = nil
     end
 
     def do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)

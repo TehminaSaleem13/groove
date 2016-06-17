@@ -811,6 +811,8 @@ class Order < ActiveRecord::Base
           :product_barcodes
         ]
       )
-     end
+    end
+  rescue
+    retry
   end
 end
