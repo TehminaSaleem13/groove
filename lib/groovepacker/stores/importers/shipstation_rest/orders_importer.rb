@@ -194,7 +194,8 @@ module Groovepacker
 
             def find_or_init_new_order(order)
               shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
-              if @import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
+              return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled")
+              if @import_item.import_type == 'quick' && shipstation_order 
                 shipstation_order.destroy
                 shipstation_order = nil
               end
