@@ -38,7 +38,11 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
 
-  $redis = Redis.new(:host => 'localhost', :port=> 6379)
+  ENV['REDIS_HOST'] = 'groovelytics-redis'
+  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
+  ENV['REDIS_PORT'] = '7743'
+  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
+    password: ENV['REDIS_PASSWORD'])
   config.cache_store = :redis_store, $redis.as_json['options']
 
   config.action_mailer.smtp_settings = {
