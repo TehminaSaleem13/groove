@@ -4,7 +4,8 @@ namespace :doo do
     #DeleteOrders.new.schedule!
     #for single tenant run it like this -
     #DeleteOrders.new(tenant: "demo").schedule!
-     DeleteOrders.new.perform
+    #DeleteOrders.new.perform
+    DeleteOrders.new.delay(run_at: 1.seconds.from_now).perform
     exit(1)
   end
 end
