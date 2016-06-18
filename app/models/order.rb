@@ -189,7 +189,7 @@ class Order < ActiveRecord::Base
     result = true
     if true
       #Implement hold orders from Groovepacker::Inventory
-      self.order_items.each do |order_item|
+      self.order_items.includes(:product).each do |order_item|
         product = Product.find_by_id(order_item.product_id)
         unless product.nil?
           if product.status == "new" or product.status == "inactive"
