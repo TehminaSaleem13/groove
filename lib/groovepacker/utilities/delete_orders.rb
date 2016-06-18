@@ -27,9 +27,10 @@ class DeleteOrders
     begin
       Apartment::Tenant.switch(tenant.name)
       #@orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
-      @orders = Order.find(:all, :conditions => ["updated_at < ?", 91.days.ago.beginning_of_day])
-      @orders = @orders.first(@delete_count) unless @delete_count.blank?
-      return if @orders.empty?
+      #@orders = Order.find(:all, :conditions => ["updated_at < ?", 91.days.ago.beginning_of_day])
+      @orders_ids = Order.where("updated_at < ?", 91.days.ago.beginning_of_day).pluck(:id)
+      @orders_ids = @orders_ids.first(@delete_count) unless @delete_count.blank?
+      return if @orders_ids.empty?
       take_backup(tenant.name)
       delete_orders
     rescue Exception => e
@@ -49,7 +50,7 @@ class DeleteOrders
     #back_hash = []
     #back_hash.push(build_store_user_hash('stores'))
     #back_hash.push(build_store_user_hash('users'))
-    #@orders.each do |order|
+    #@orders_ids.each do |order|
     #  back_hash.push(build_hash(order.id))
     #end
     #puts back_hash.inspect
@@ -59,8 +60,8 @@ class DeleteOrders
 
   def delete_orders
     tenant = Apartment::Tenant.current
-    @orders.each_slice(500) do |orders|
-      orders_ids = orders.map(&:id)
+    @orders_ids.each_slice(500) do |orders_ids|
+      # orders_ids = orders.map(&:id)
       delete_order_data(orders_ids, tenant)
       Order.delete_all(["id IN (?)", orders_ids])
     end
@@ -110,15 +111,15 @@ class DeleteOrders
   #     columns = User.column_names
   #     items = User.all
   #   end
-   
+
   #   items.each do |item|
   #     item_hash = {}
   #     columns.each do |column|
   #       item_hash[column] = item[column].to_s
   #     end
   #     result[key].push(item_hash)
-  #   end   
-   
+  #   end
+
   #   result
   # end
 
@@ -130,7 +131,7 @@ class DeleteOrders
   #   build_shipping_hash(order)
   #   build_activity_hash(order)
   #   build_serial_hash(order)
-   
+
   #   @order_items = order.order_items
   #   build_order_item_hash(@order_items)
   #   build_product_hash(@order_items)
@@ -257,4 +258,3 @@ class DeleteOrders
     return credentials
   end
 end
-
