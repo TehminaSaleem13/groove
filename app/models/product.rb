@@ -96,6 +96,10 @@ class Product < ActiveRecord::Base
 
   def update_product_status(force_from_inactive_state = false)
     # original_status = self.status
+    @order_items = OrderItem.where(
+      product_id: id, scanned_status: 'notscanned'
+    ).includes(order: [order_items: :product])
+
     if status != 'inactive' || force_from_inactive_state
       result = true
 
@@ -114,8 +118,10 @@ class Product < ActiveRecord::Base
       # if kit it should contain kit products as well
       if is_kit == 1
         result &= false if product_kit_skuss.empty?
-        product_kit_skuss.each do |kit_product|
-          option_product = Product.find(kit_product.option_product_id)
+        option_products = Product.where(
+          id: product_kit_skuss.collect(&:option_product_id)
+        )
+        option_products.each do |option_product|
           if !option_product.nil? &&
              option_product.status != 'active'
             result &= false
@@ -136,8 +142,8 @@ class Product < ActiveRecord::Base
       # for non kit products, update all kits product statuses where the
       # current product is an item of the kit
       if is_kit == 0
-        @kit_products = ProductKitSkus.where(option_product_id: id)
-        result_kit = true
+        @kit_products = ProductKitSkus.where(option_product_id: id).includes(:product)
+        #result_kit = true
         @kit_products.each do |kit_product|
           if kit_product.product.status != 'inactive'
             kit_product.product.update_product_status
@@ -151,14 +157,12 @@ class Product < ActiveRecord::Base
       end
 
       # update order items status from onhold to awaiting
-      @order_items = OrderItem.where(product_id: id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil? || !%w(awaiting onhold).include?(item.order.status)
       end
       # end
     else
       # update order items status from onhold to awaiting
-      @order_items = OrderItem.where(product_id: id, scanned_status: 'notscanned')
       @order_items.each do |item|
         item.order.update_order_status unless item.order.nil? || !%w(awaiting onhold).include?(item.order.status)
       end
@@ -167,23 +171,30 @@ class Product < ActiveRecord::Base
   end
 
   def update_due_to_inactive_product
-    if status == 'inactive'
-      kit_products = ProductKitSkus.where(option_product_id: id)
-      unless kit_products.empty?
-        kit_products.each do |kit_product|
-          next unless kit_product.product.status != 'inactive'
-          kit_product.product.status = 'new'
-          kit_product.product.save
-          order_items = OrderItem.where(product_id: kit_product.product.id, scanned_status: 'notscanned')
-          order_items.each do |item|
-            item.order.update_order_status unless item.order.nil?
-          end
-        end
-      end
-      @order_items = OrderItem.where(product_id: id, scanned_status: 'notscanned')
-      @order_items.each do |item|
+    return unless status == 'inactive'
+
+    kit_products = ProductKitSkus.where(
+      option_product_id: id
+    ).includes(:product)
+
+    order_items = OrderItem.where(
+      product_id: kit_products.map(&:product_id).push(id),
+      scanned_status: 'notscanned'
+    ).includes(order: [order_items: :product])
+
+    kit_products.each do |kit_product|
+      next unless kit_product.product.status != 'inactive'
+      kit_product.product.status = 'new'
+      kit_product.product.save
+      tmp_order_items = order_items.select { |oi| oi.product_id = kit_product.product_id }
+      tmp_order_items.each do |item|
         item.order.update_order_status unless item.order.nil?
       end
+    end
+
+    order_items = order_items.select { |oi| oi.product_id = id }
+    order_items.each do |item|
+      item.order.update_order_status unless item.order.nil?
     end
   end
 
