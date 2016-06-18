@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160608143620) do
+ActiveRecord::Schema.define(:version => 20160610183611) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -806,22 +806,21 @@ ActiveRecord::Schema.define(:version => 20160608143620) do
   end
 
   create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",                                                 :null => false
-    t.string   "api_secret",                                              :null => false
+    t.string   "api_key",                                             :null => false
+    t.string   "api_secret",                                          :null => false
     t.date     "last_imported_at"
-    t.integer  "store_id",                                                :null => false
-    t.datetime "created_at",                                              :null => false
-    t.datetime "updated_at",                                              :null => false
-    t.boolean  "shall_import_awaiting_shipment",       :default => true
-    t.boolean  "shall_import_shipped",                 :default => false
-    t.boolean  "warehouse_location_update",            :default => false
-    t.boolean  "shall_import_customer_notes",          :default => false
-    t.boolean  "shall_import_internal_notes",          :default => false
-    t.integer  "regular_import_range",                 :default => 3
-    t.boolean  "gen_barcode_from_sku",                 :default => false
-    t.boolean  "shall_import_pending_fulfillment",     :default => false
+    t.integer  "store_id",                                            :null => false
+    t.datetime "created_at",                                          :null => false
+    t.datetime "updated_at",                                          :null => false
+    t.boolean  "shall_import_awaiting_shipment",   :default => true
+    t.boolean  "shall_import_shipped",             :default => false
+    t.boolean  "warehouse_location_update",        :default => false
+    t.boolean  "shall_import_customer_notes",      :default => false
+    t.boolean  "shall_import_internal_notes",      :default => false
+    t.integer  "regular_import_range",             :default => 3
+    t.boolean  "gen_barcode_from_sku",             :default => false
+    t.boolean  "shall_import_pending_fulfillment", :default => false
     t.datetime "quick_import_last_modified"
-    t.boolean  "import_notestobuyer_in_notestopacker", :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|
