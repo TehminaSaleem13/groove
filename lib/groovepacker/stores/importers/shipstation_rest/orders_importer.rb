@@ -26,6 +26,11 @@ module Groovepacker
             @result[:total_imported] = response["orders"].length
             initialize_import_item
             import_orders_from_response(response, shipments_response)
+            if @result[:status]
+              @credential.last_imported_at = importing_time || @credential.last_imported_at
+              @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
+              @credential.save
+            end
           end
 
           def import_single_order(order_no)
@@ -50,7 +55,7 @@ module Groovepacker
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
               ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
-              sleep 0.5
+              sleep 0.3
             end
           end
 
@@ -166,7 +171,7 @@ module Groovepacker
                 status_response = @client.get_orders(status, import_from, import_date_type)
                 response = get_orders_from_union(response, status_response)
               end
-              self.importing_time = DateTime.now - 1.day
+              self.importing_time = DateTime.now
               self.quick_importing_time = DateTime.now
               return response
             end
@@ -195,7 +200,7 @@ module Groovepacker
             def find_or_init_new_order(order)
               shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled")
-              if @import_item.import_type == 'quick' && shipstation_order 
+              if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy
                 shipstation_order = nil
               end
