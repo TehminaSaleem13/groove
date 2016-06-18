@@ -5,12 +5,12 @@ module Groovepacker
       def update_product_attributes
         @product = Product.find_by_id(@params[:basicinfo][:id]) rescue nil
         @result['params'] = @params
-        
+
         if @product.blank?
           @result.merge({'status' => false, 'message' => 'Cannot find product information.'})
           return @result
         end
-        
+
         unless @current_user.can?('add_edit_products') || (@session[:product_edit_matched_for_current_user] && @session[:product_edit_matched_for_products].include?(@product.id))
           @result.merge({ 'status' => false, 'message' => 'You do not have enough permissions to update a product' })
           return @result
@@ -105,7 +105,7 @@ module Groovepacker
           #     end
           #   end
           # end
-          
+
           case @params['post_fn']
           when 'category'
           	create_or_update_product_cats
@@ -150,7 +150,7 @@ module Groovepacker
           end
           return status
         end
-        
+
         def create_or_update_product_barcode
           #Update product barcodes
           #check if a product barcode is defined.

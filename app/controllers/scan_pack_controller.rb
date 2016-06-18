@@ -19,6 +19,7 @@ class ScanPackController < ApplicationController
       if @order.status != 'scanned'
         @order.reset_scanned_status
         @result['data']['next_state'] = 'scanpack.rfo'
+        session[:most_recent_scanned_product] = nil
       else
         @result['status'] = false
         @result['error_messages'].push("Order with id: #{order_id} is already in scanned state")

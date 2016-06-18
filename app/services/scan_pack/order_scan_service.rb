@@ -18,7 +18,7 @@ module ScanPack
       }
       @orders = []
       @scanpack_settings = ScanPackSetting.all.first
-      @session = session.merge(most_recent_scanned_products: [],
+      @session = session.merge(most_recent_scanned_product: nil,
                                parent_order_item: false)
       @single_order = nil
       @single_order_result = { 'matched_orders' => [] }
@@ -54,7 +54,7 @@ module ScanPack
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
           @input, @input)
       end
-      @single_order = @orders.includes(:order_items).first
+      @single_order = @orders.first
     end
 
     def generate_query

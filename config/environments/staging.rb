@@ -65,7 +65,7 @@ Groovepacks::Application.configure do
 
   # config.action_mailer.smtp_settings = {
   #   :address => "smtp.gmail.com",
-  #   :port => 587,  
+  #   :port => 587,
   #   :authentication => "plain",
   #   :enable_starttls_auto => true,
   #   :domain => 'gmail.com',
@@ -75,7 +75,7 @@ Groovepacks::Application.configure do
   # }
   # config.action_mailer.smtp_settings = {
   #   :address => "smtp.gmail.com",
-  #   :port => 587,  
+  #   :port => 587,
   #   :authentication => "plain",
   #   :enable_starttls_auto => true,
   #   :domain => 'gmail.com',
@@ -85,7 +85,7 @@ Groovepacks::Application.configure do
   # }
   config.action_mailer.smtp_settings = {
     :address => "smtp.api.createsend.com",
-    :port => 587,  
+    :port => 587,
     :authentication => "plain",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',
@@ -98,6 +98,7 @@ Groovepacks::Application.configure do
   ENV['REDIS_PORT'] = '7743'
   $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'])
+  config.cache_store = :redis_store, $redis.as_json['options']
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
