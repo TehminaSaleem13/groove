@@ -35,7 +35,7 @@ module CachedMethods
 
         define_method("#{association}_is_cached?") do
           key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
-          Rails.cache.read(key, expires_in: 30.minutes).present?
+          Rails.cache.read(key).present?
         end
       end
     end
