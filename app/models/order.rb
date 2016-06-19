@@ -133,7 +133,7 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    order_items.each do |order_item|
+    order_items.includes(:product).each do |order_item|
       product = order_item.cached_product
       product_kit_skuss = product.cached_product_kit_skuss
       next if product.blank?
@@ -187,56 +187,62 @@ class Order < ActiveRecord::Base
 
   def update_order_status
     result = true
-    if true
-      #Implement hold orders from Groovepacker::Inventory
-      self.order_items.includes(:product).each do |order_item|
-        product = Product.find_by_id(order_item.product_id)
-        unless product.nil?
-          if product.status == "new" or product.status == "inactive"
-            result &= false
-          end
-        end
+    # Implement hold orders from Groovepacker::Inventory
+    products = order_items.includes(:product).map(&:product)
+    result &= products.map(&:status).join
+              .match(/new|inactive/).blank?
+    # self.order_items.includes(:product).each do |order_item|
+    #   product = Product.find_by_id(order_item.product_id)
+    #   unless product.nil?
+    #     if product.status == "new" or product.status == "inactive"
+    #       result &= false
+    #     end
+    #   end
+    # end
+
+    result &= false if unacknowledged_activities.length > 0
+
+    if result
+      if status == 'onhold'
+        self.status = 'awaiting'
+        save
       end
-
-      result &= false if self.unacknowledged_activities.length > 0
-
-      if result
-        if self.status == "onhold"
-          self.status = "awaiting"
-        end
-      else
-        if self.status == "awaiting"
-          self.status = "onhold"
-        end
+    else
+      if status == 'awaiting'
+        self.status = 'onhold'
+        save
       end
-
-      self.save
-
-      #isn't being used, shouldn't get called
-      #self.apply_and_update_predefined_tags
     end
+
+
+    # isn't being used, shouldn't get called
+    # self.apply_and_update_predefined_tags
   end
 
   def set_order_status
     result = true
 
-    self.order_items.each do |order_item|
-      product = order_item.product
-      if !product.nil?
-        if product.status == "new" or product.status == "inactive"
-          result &= false
-        end
-      else
-        result &= false
-      end
-    end
+    products = order_items.includes(:product).map(&:product)
+    result &= products.map(&:status).join
+              .match(/new|inactive/).blank?
+
+    # order_items.each do |order_item|
+    #   product = order_item.product
+    #   if !product.nil?
+    #     if product.status == "new" or product.status == "inactive"
+    #       result &= false
+    #     end
+    #   else
+    #     result &= false
+    #   end
+    # end
 
     result &= false if self.unacknowledged_activities.length > 0
 
     status = result ? 'awaiting' : 'onhold'
 
-    self.update_column(:status, status)
-    self.update_column(:scan_start_time, nil)
+    update_column(:status, status)
+    update_column(:scan_start_time, nil)
 
     #self.apply_and_update_predefined_tags
   end

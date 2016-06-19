@@ -155,17 +155,12 @@ class Product < ActiveRecord::Base
         products = Product.where(base_sku: primary_sku)
         products.each(&:update_product_status) unless products.empty?
       end
-
-      # update order items status from onhold to awaiting
-      @order_items.each do |item|
-        item.order.update_order_status unless item.order.nil? || !%w(awaiting onhold).include?(item.order.status)
-      end
-      # end
-    else
-      # update order items status from onhold to awaiting
-      @order_items.each do |item|
-        item.order.update_order_status unless item.order.nil? || !%w(awaiting onhold).include?(item.order.status)
-      end
+    end
+    # update order items status from onhold to awaiting
+    @order_items.each do |item|
+      item.order.update_order_status unless item.order.nil? ||
+                                            !%w(awaiting onhold)
+                                            .include?(item.order.status)
     end
     result
   end
