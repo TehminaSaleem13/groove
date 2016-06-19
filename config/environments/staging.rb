@@ -93,9 +93,7 @@ Groovepacks::Application.configure do
     :password => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
     :openssl_verify_mode  => 'none'
   }
-  ENV['REDIS_HOST'] = 'groovelytics-redis'
-  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
-  ENV['REDIS_PORT'] = '7743'
+
   $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'])
   # Log the query plan for queries taking more than this (works
