@@ -51,8 +51,8 @@ staging:
   reconnect: false
   database: groovepacks_production
   pool: 5
-  host: groov-staging-db
-  username: root
-  password: password
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
   port: 3306
   #socket: /var/run/mysqld/mysqld.sock
