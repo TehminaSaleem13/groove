@@ -98,7 +98,7 @@ Groovepacks::Application.configure do
   ENV['REDIS_PORT'] = '7743'
   $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'])
-  config.cache_store = :redis_store, $redis.as_json['options']
+  config.cache_store = :redis_store, {host: 'localhost', port: 6379} # $redis.as_json['options']
   # $redis = Redis.new(:host => 'groove-prod-1', :port=> 6379)
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
