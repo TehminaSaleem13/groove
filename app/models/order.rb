@@ -819,6 +819,7 @@ class Order < ActiveRecord::Base
       )
     end
   rescue
+    order_items.map(&:delete_cache)
     retry
   end
 end
