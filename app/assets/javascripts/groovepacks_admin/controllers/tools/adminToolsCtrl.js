@@ -40,7 +40,7 @@ groovepacks_admin_controllers.
           };
         }; 
       };
-
+      
       $scope.handlesort = function (predicate) {
         myscope.common_setup_opt('sort', predicate, 'tenant');
       };
@@ -223,12 +223,13 @@ groovepacks_admin_controllers.
         myscope.do_load_tentants = false;
         $scope._can_load_tentants = true;
         $scope.tenants = tenants.model.get();
-        $scope.current_page = "show_admin_tools";
+        $scope.current_page = 'admin_tools';
+
         $scope.popover_is_visible = false;
         $scope.popover_data = [];
         $scope.tabs = [
           {
-            page: 'show_admin_tools',
+            page: 'admin_tools',
             open: true
           }
         ];

@@ -38,7 +38,9 @@ Groovepacks::Application.routes.draw do
   post '/amazons/products_import' => 'amazons#products_import'
   # The priority is based upon order of creation:
   # first created -> highest priority.
-
+  get '/delayed_jobs' => 'delayed_jobs#index'
+  post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
+  post '/delayed_job_reset' => 'delayed_jobs#reset'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
