@@ -18,7 +18,7 @@ class OrderItem < ActiveRecord::Base
   after_create :create_inventory
   after_update :update_inventory_levels
 
-  cached_methods :product, :order_item_kit_products
+  cached_methods :product, :order_item_kit_products, :option_products
   after_save :delete_cache
 
   include OrdersHelper
