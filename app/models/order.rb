@@ -395,7 +395,7 @@ class Order < ActiveRecord::Base
     self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.cached_product.is_kit == 1
-          option_products = order_item.cached_option_products
+          option_products = option_products_for(order_item)
           if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
@@ -468,7 +468,7 @@ class Order < ActiveRecord::Base
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.cached_product.is_kit == 1
-          option_products = order_item.cached_option_products
+          option_products = option_products_for(order_item)
           if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
@@ -819,5 +819,15 @@ class Order < ActiveRecord::Base
   rescue
     order_items.map(&:delete_cache)
     retry
+  end
+
+  def option_products_for(order_item)
+    @option_products ||= Product.find(
+      order_items_with_eger_load_and_cache
+        .map(&:cached_option_products_ids)
+        .flatten
+    )
+    ids = order_item.cached_option_products_ids
+    @option_products.select { |op| op.id.in? ids }
   end
 end

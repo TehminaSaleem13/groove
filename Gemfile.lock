@@ -368,25 +368,9 @@ GEM
     rdoc (3.12.2)
       json (~> 1.4)
     redis (3.1.0)
-    redis-actionpack (3.2.4)
-      actionpack (~> 3.2.0)
-      redis-rack (~> 1.4.4)
-      redis-store (~> 1.1.4)
-    redis-activesupport (3.2.5)
-      activesupport (~> 3.2.0)
-      redis-store (~> 1.1.0)
-    redis-rack (1.4.4)
-      rack (~> 1.4.0)
-      redis-store (~> 1.1.4)
-    redis-rails (3.2.4)
-      redis-actionpack (~> 3.2.4)
-      redis-activesupport (~> 3.2.4)
-      redis-store (~> 1.1.4)
     redis-session-store (0.8.0)
       actionpack (>= 3, < 5)
       redis
-    redis-store (1.1.7)
-      redis (>= 2.2)
     reek (1.6.5)
       parser (~> 2.2.0.pre.7)
       rainbow (>= 1.99, < 3.0)
@@ -606,7 +590,7 @@ DEPENDENCIES
   pry
   quiet_assets (>= 1.0.1)
   rails (= 3.2.13)
-  redis-rails
+  redis
   redis-session-store
   rspec-rails (>= 2.13.2)
   rspec_junit_formatter
