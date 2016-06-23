@@ -80,12 +80,12 @@ module CachedMethods
   end
 
   def tenant
-    @@tenant ||= Apartment::Tenant.current
+    @tenant ||= Apartment::Tenant.current
   end
 
   def read_multi(key)
-    Rails.cache.read_multi(keys)[key] || Rails.cache.read(key)
+    @read_multi[key] || @read_multi.merge!(key => Rails.cache.read(key))[key]
   rescue
-    Rails.cache.read(key)
+    (@read_multi = { key => Rails.cache.read(key) })[key]
   end
 end

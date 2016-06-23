@@ -18,7 +18,7 @@ class OrderItem < ActiveRecord::Base
   after_create :create_inventory
   after_update :update_inventory_levels
 
-  cached_methods :product, :order_item_kit_products, :option_products_ids
+  cached_methods :product, :order_item_kit_products, :option_products
   after_save :delete_cache
 
   include OrdersHelper
@@ -137,9 +137,10 @@ class OrderItem < ActiveRecord::Base
     child_item
   end
 
-  def option_products_ids
-    cached_order_item_kit_products
-      .map(&:cached_product_kit_skus).flatten.compact.map(&:option_product_id)
+  def option_products
+    product_ids = cached_order_item_kit_products
+                  .map(&:cached_product_kit_skus).flatten.compact
+                  .map(&:cached_option_product)
   end
 
   def build_individual_kit(depends_kit)
