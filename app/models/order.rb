@@ -397,7 +397,7 @@ class Order < ActiveRecord::Base
     self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.cached_product.is_kit == 1
-          option_products = order_item.option_products
+          option_products = order_item.cached_option_products
           if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
@@ -470,7 +470,7 @@ class Order < ActiveRecord::Base
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.cached_product.is_kit == 1
-          option_products = order_item.option_products
+          option_products = order_item.cached_option_products
           if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
@@ -799,7 +799,7 @@ class Order < ActiveRecord::Base
 
   def order_items_with_eger_load_and_cache
     # key = "order_items_#{id}_was_egar_loaded"
-    if order_items.map(&:product_is_cached?).include? true
+    if order_items.map(&:keys?).include? true
       order_items
     else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
