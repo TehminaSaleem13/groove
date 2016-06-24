@@ -248,14 +248,27 @@ module Groovepacker
         @subscription = tenant.subscription
         if @subscription
           @subscription_info = params[:subscription_info]
-          if @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
+          return result unless @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
+          begin
             create_new_plan_and_assign(tenant)
             update_modification_status(tenant)
+          rescue Exception => ex
+            result = check_exception(ex, result)
           end
         else
           update_fail_status(result, 'Couldn\'t find a valid subscription for the tenant.');
         end
         result
+      end
+
+      def check_exception(ex, result)
+        result['status'] = false
+        if ex.message.include?("does not have a subscription")
+          result['error_messages'] = "Customer does not have any plan subscription."
+        else
+          result['error_messages'] = "Some error occured."
+        end
+        return result
       end
 
       def duplicate(id, duplicate_name)
