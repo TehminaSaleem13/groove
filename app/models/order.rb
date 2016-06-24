@@ -21,7 +21,7 @@ class Order < ActiveRecord::Base
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
   before_save :perform_pre_save_checks
-  after_save :process_unprocessed_orders
+  after_save :process_unprocessed_orders, :delete_cached_order_items_keys
   validates_uniqueness_of :increment_id
 
   include ProductsHelper
@@ -792,7 +792,11 @@ class Order < ActiveRecord::Base
       )
     end
   rescue
-    order_items.map(&:delete_cache)
+    delete_cached_order_items_keys
     retry
+  end
+
+  def delete_cached_order_items_keys
+    order_items.map(&:delete_cache)
   end
 end

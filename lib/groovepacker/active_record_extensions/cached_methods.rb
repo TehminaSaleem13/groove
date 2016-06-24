@@ -80,7 +80,7 @@ module CachedMethods
   end
 
   def tenant
-    @tenant ||= Apartment::Tenant.current
+    Thread.current[:tenant] ||= Apartment::Tenant.current
   end
 
   def read_multi(key)
