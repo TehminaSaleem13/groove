@@ -1,15 +1,15 @@
 class DelayedJobsController < ApplicationController
-  before_filter :groovepacker_authorize!
-  prepend_before_filter :initialize_result_obj
-  
-  def index
-    delayed_jobs = params[:search].present? ? Delayed::Job.where("handler like ? or queue like ? and updated_at > ?", "%#{params[:search]}%", "%#{params[:search]}%", Date.today - 1 ) : Delayed::Job.where("updated_at > ?", Date.today - 1)
-    @result["total_count"] = delayed_jobs.count
-    @result['delayed_jobs'] = delayed_jobs.order(params["sort"] + " " + params["order"]).limit(params["limit"]).offset(params["offset"]).as_json
+	before_filter :groovepacker_authorize!
+	prepend_before_filter :initialize_result_obj
+
+	def index
+		delayed_jobs = params[:search].present? ? Delayed::Job.where("(handler like ? or queue like ?) and updated_at > ?", "%#{params[:search]}%", "%#{params[:search]}%", Date.today - 2 ) : Delayed::Job.where("updated_at > ?", Date.today - 2)
+		@result["total_count"] = delayed_jobs.count
+		@result['delayed_jobs'] = delayed_jobs.order(params["sort"] + " " + params["order"]).limit(params["limit"]).offset(params["offset"]).as_json
 		@result['delayed_jobs'].each_with_index do |delayed_job, index|
 			get_delayed_time(delayed_job, index)	
 		end 
-		render json: @result 
+	render json: @result 
 	end
 
 	def get_delayed_time(delayed_job, index)
@@ -17,8 +17,8 @@ class DelayedJobsController < ApplicationController
 			time_count = {}
 			delayed_time = Time.now.utc - delayed_job["locked_at"]
 			time_count["delayed_job_time"] = Time.at(delayed_time).utc.strftime('%Hh %Mm %Ss')
-      delayed_job = delayed_job.merge(time_count)
-      @result['delayed_jobs'][index] = delayed_job
+			delayed_job = delayed_job.merge(time_count)
+			@result['delayed_jobs'][index] = delayed_job
 		end	
 	end
 
@@ -27,14 +27,13 @@ class DelayedJobsController < ApplicationController
 		if delayed_job_id.present?
 			Delayed::Job.destroy(delayed_job_id)
 			@result['messages'] = "Delayed Job deleted"
-		end
+	end
 		render json: @result 
 	end
 
 	def reset
 		if params["id"].present? && params["attempts"] != 5
 			job = Delayed::Job.find(params["id"])
-			# Delayed::Worker.new.run(job)
 			job.attempts = 0
 			job.last_error = nil
 			job.run_at = Time.now - 1.day
@@ -43,7 +42,6 @@ class DelayedJobsController < ApplicationController
 			job.failed_at = nil
 			job.save!
 			job.reload
-			# job.invoke_job
 			@result['messages'] = "Delayed Job restarted"
 		else
 			@result['status'] = false
@@ -54,6 +52,6 @@ class DelayedJobsController < ApplicationController
 
 	private
 		def initialize_result_obj
-    	@result = { 'status' => true, 'messages' => [], 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [] }
-  	end
+			@result = { 'status' => true, 'messages' => [], 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [] }
+		end
 end
