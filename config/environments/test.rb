@@ -45,7 +45,7 @@ Groovepacks::Application.configure do
     password: ENV['REDIS_PASSWORD'], driver: :hiredis, db: 14, size: 10,
     tcp_keepalive: 300)
 
-  config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15)
+  config.cache_store = :memory_store, { size: 64.megabytes } #:redis_store, $redis.as_json['options'].merge(db: 15)
 
   config.action_mailer.smtp_settings = {
     :address => "smtp.api.createsend.com",
