@@ -134,8 +134,8 @@ class Order < ActiveRecord::Base
     result = false
 
     order_items.includes(:product).each do |order_item|
-      product = order_item.cached_product
-      product_kit_skuss = product.cached_product_kit_skuss
+      product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       # If item has 0 qty
