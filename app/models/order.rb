@@ -152,8 +152,8 @@ class Order < ActiveRecord::Base
     products_list = []
 
     self.order_items.each do |order_item|
-      product = order_item.cached_product
-      product_kit_skuss = product.cached_product_kit_skuss
+      product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
@@ -186,19 +186,9 @@ class Order < ActiveRecord::Base
   end
 
   def update_order_status
-    result = true
     # Implement hold orders from Groovepacker::Inventory
-    products = order_items.includes(:product).map(&:product)
-    result &= products.map(&:status).join
-              .match(/new|inactive/).blank?
-    # self.order_items.includes(:product).each do |order_item|
-    #   product = Product.find_by_id(order_item.product_id)
-    #   unless product.nil?
-    #     if product.status == "new" or product.status == "inactive"
-    #       result &= false
-    #     end
-    #   end
-    # end
+    result = !has_inactive_or_new_products
+
 
     result &= false if unacknowledged_activities.length > 0
 
@@ -220,22 +210,7 @@ class Order < ActiveRecord::Base
   end
 
   def set_order_status
-    result = true
-
-    products = order_items.includes(:product).map(&:product)
-    result &= products.map(&:status).join
-              .match(/new|inactive/).blank?
-
-    # order_items.each do |order_item|
-    #   product = order_item.product
-    #   if !product.nil?
-    #     if product.status == "new" or product.status == "inactive"
-    #       result &= false
-    #     end
-    #   else
-    #     result &= false
-    #   end
-    # end
+    result = !has_inactive_or_new_products
 
     result &= false if self.unacknowledged_activities.length > 0
 

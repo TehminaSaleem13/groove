@@ -159,6 +159,7 @@ module ScanPack
 
     def do_if_under_max_limit_of_shipments
       single_order_status = @single_order.status
+      has_inactive_or_new_products = @single_order.has_inactive_or_new_products
 
       unless single_order_status == 'scanned'
         @single_order.packing_user_id = @current_user.id
@@ -167,9 +168,12 @@ module ScanPack
 
       # PROCESS based on Order Status
       #-----------------------------
+      # Check if order has inactive/new/0qty items but still in awaiting
+      @single_order.update_order_status if single_order_status.eql?('awaiting') &&
+                                           has_inactive_or_new_products
       # search in orders that have status of Scanned
       do_if_already_been_scanned if single_order_status.eql?('scanned')
-      do_if_single_order_status_on_hold if single_order_status.eql?('onhold')
+      do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
       # process orders that have status of Service Issue
       do_if_single_order_status_serviceissue if single_order_status.eql?('serviceissue')
       # search in orders that have status of Cancelled
@@ -195,8 +199,8 @@ module ScanPack
       @result['notice_messages'].push('This order has already been scanned')
     end
 
-    def do_if_single_order_status_on_hold
-      if @single_order.has_inactive_or_new_products
+    def do_if_single_order_status_on_hold(has_inactive_or_new_products)
+      if has_inactive_or_new_products
         # get list of inactive_or_new_products
         @single_order_result['conf_code'] = @session[:confirmation_code]
 
