@@ -30,7 +30,7 @@ test:
   username: root
   password: password
   #socket: /private/tmp/mysql.sock
-  socket: /var/run/mysqld/mysqld.sock
+  #socket: /var/run/mysqld/mysqld.sock
 
 production:
   adapter: mysql2
