@@ -133,7 +133,7 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    order_items.includes(:product).each do |order_item|
+    order_items.includes(product: :product_kit_skuss).each do |order_item|
       product = order_item.product
       product_kit_skuss = product.product_kit_skuss
       next if product.blank?
