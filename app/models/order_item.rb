@@ -295,7 +295,7 @@ class OrderItem < ActiveRecord::Base
   def reset_scanned
     #if item is a kit then make all order item product skus as also unscanned
     if self.product.is_kit == 1
-      self.cached_order_item_kit_products.each do |kit_product|
+      self.order_item_kit_products.each do |kit_product|
         kit_product.reset_scanned
       end
     end
