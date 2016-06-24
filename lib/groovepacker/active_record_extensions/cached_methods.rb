@@ -24,10 +24,19 @@ module CachedMethods
     def cached_methods(*methods)
       methods.each do |association|
         define_method("cached_#{association}") do |key = nil, cached = nil|
-          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
-          cached = Rails.cache.read(key) rescue false
+          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant}"
+          cached = begin
+            instance = "@cached_#{association}"
+            (
+              instance_variable_defined?(instance) &&
+              instance_variable_get(instance)
+            ) || instance_variable_set(instance, read_multi(key))
+          rescue
+            nil
+          end
           return cached if cached
           load_assoc = send(association)
+          load_assoc = load_assoc.to_a if load_assoc.class == ActiveRecord::Relation
           Rails.cache.write(key, load_assoc, expires_in: 30.minutes)
           update_cache_keys(key)
           load_assoc
@@ -35,24 +44,48 @@ module CachedMethods
 
         define_method("#{association}_is_cached?") do
           key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
-          Rails.cache.read(key).present?
+          instance = "@cached_#{association}"
+          (
+            instance_variable_defined?(instance) &&
+            instance_variable_get(instance)
+          ) || Rails.cache.read(key).present?
         end
       end
     end
   end
 
-  private
-
   define_method('update_cache_keys') do |key|
-    multi_key = "#{self.class.to_s.underscore}_#{id}_cache_keys"
     keys = Rails.cache.read(multi_key) || []
     keys << key
     Rails.cache.write(multi_key, keys.uniq)
   end
 
   def delete_cache
-    cached = Rails.cache.read("#{self.class.to_s.underscore}_#{id}_cache_keys")
+    cached = Rails.cache.read(multi_key)
     return unless cached
     cached.each { |key| Rails.cache.delete(key) }
+    Rails.cache.delete(multi_key)
+  end
+
+  def multi_key
+    @multi_key ||= "#{self.class.to_s.underscore}_#{id}_cache_keys_for_tenant_#{tenant}"
+  end
+
+  def keys
+    Rails.cache.read(multi_key)
+  end
+
+  def keys?
+    keys.present?
+  end
+
+  def tenant
+    Thread.current[:tenant] ||= Apartment::Tenant.current
+  end
+
+  def read_multi(key)
+    @read_multi[key] || @read_multi.merge!(key => Rails.cache.read(key))[key]
+  rescue
+    (@read_multi = { key => Rails.cache.read(key) })[key]
   end
 end

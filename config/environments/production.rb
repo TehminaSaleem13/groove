@@ -96,9 +96,11 @@ Groovepacks::Application.configure do
   ENV['REDIS_HOST'] = 'groovelytics-redis'
   ENV['REDIS_PASSWORD'] = '6t!@D2gA4i8njgz^qut#owyaiJXYfM5q'
   ENV['REDIS_PORT'] = '7743'
-  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
-    password: ENV['REDIS_PASSWORD'])
-  config.cache_store = :redis_store, {host: 'localhost', port: 6379} # $redis.as_json['options']
+  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
+    password: ENV['REDIS_PASSWORD'], driver: :hiredis, db: 14, size: 10,
+    tcp_keepalive: 300)
+
+  config.cache_store = :memory_store, { size: 64.megabytes } #:redis_store, $redis.as_json['options'].merge(db: 15)
   # $redis = Redis.new(:host => 'groove-prod-1', :port=> 6379)
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)

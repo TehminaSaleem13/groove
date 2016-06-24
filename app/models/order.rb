@@ -133,9 +133,9 @@ class Order < ActiveRecord::Base
   def has_inactive_or_new_products
     result = false
 
-    order_items.includes(:product).each do |order_item|
-      product = order_item.cached_product
-      product_kit_skuss = product.cached_product_kit_skuss
+    order_items.includes(product: :product_kit_skuss).each do |order_item|
+      product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       # If item has 0 qty
@@ -152,8 +152,8 @@ class Order < ActiveRecord::Base
     products_list = []
 
     self.order_items.each do |order_item|
-      product = order_item.cached_product
-      product_kit_skuss = product.cached_product_kit_skuss
+      product = order_item.product
+      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
@@ -186,19 +186,9 @@ class Order < ActiveRecord::Base
   end
 
   def update_order_status
-    result = true
     # Implement hold orders from Groovepacker::Inventory
-    products = order_items.includes(:product).map(&:product)
-    result &= products.map(&:status).join
-              .match(/new|inactive/).blank?
-    # self.order_items.includes(:product).each do |order_item|
-    #   product = Product.find_by_id(order_item.product_id)
-    #   unless product.nil?
-    #     if product.status == "new" or product.status == "inactive"
-    #       result &= false
-    #     end
-    #   end
-    # end
+    result = !has_inactive_or_new_products
+
 
     result &= false if unacknowledged_activities.length > 0
 
@@ -219,22 +209,7 @@ class Order < ActiveRecord::Base
   end
 
   def set_order_status
-    result = true
-
-    products = order_items.includes(:product).map(&:product)
-    result &= products.map(&:status).join
-              .match(/new|inactive/).blank?
-
-    # order_items.each do |order_item|
-    #   product = order_item.product
-    #   if !product.nil?
-    #     if product.status == "new" or product.status == "inactive"
-    #       result &= false
-    #     end
-    #   else
-    #     result &= false
-    #   end
-    # end
+    result = !has_inactive_or_new_products
 
     result &= false if self.unacknowledged_activities.length > 0
     status = result ? 'awaiting' : 'onhold'
@@ -395,7 +370,7 @@ class Order < ActiveRecord::Base
     self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status != 'scanned'
         if order_item.cached_product.is_kit == 1
-          option_products = order_item.option_products
+          option_products = order_item.cached_option_products
           if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
@@ -468,7 +443,7 @@ class Order < ActiveRecord::Base
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
         if order_item.cached_product.is_kit == 1
-          option_products = order_item.option_products
+          option_products = order_item.cached_option_products
           if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
@@ -797,7 +772,7 @@ class Order < ActiveRecord::Base
 
   def order_items_with_eger_load_and_cache
     # key = "order_items_#{id}_was_egar_loaded"
-    if order_items.map(&:product_is_cached?).include? true
+    if order_items.map(&:keys?).include? true
       order_items
     else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
@@ -817,7 +792,11 @@ class Order < ActiveRecord::Base
       )
     end
   rescue
-    order_items.map(&:delete_cache)
+    delete_cached_order_items_keys
     retry
+  end
+
+  def delete_cached_order_items_keys
+    order_items.map(&:delete_cache)
   end
 end
