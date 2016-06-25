@@ -2,38 +2,16 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
 
   var get_default = function () {
     return {
-      list: [],
-      selected: [],
-      single: {},
-      current: 0,
-      setup: {
-        sort: "updated_at",
-        order: "DESC",
-        search: '',
-        select_all: false,
-        inverted: false,
-        limit: 20,
-        offset: 0,
-        setting: '',
-        status: ''
-      },
-      delayed_jobs_count: {},
-      duplicate_name: ""
+      list: [], selected: [], single: {}, current: 0,
+      setup: { sort: "updated_at", order: "DESC", search: '', select_all: false, inverted: false, limit: 20, offset: 0, setting: '', status: ''},
+      delayed_jobs_count: {}, duplicate_name: ""
     };
   };
 
   var get_delayed_job_list = function () {
     var url = '';
     url = '/delayed_jobs.json'
-    return $http.get(url).success(
-              function (data) {
-                if (data.status) {
-                  data.total_count;
-                  data.delayed_jobs;
-                } else {
-                  delayed_jobs = {};
-                }
-            });
+    return $http.get(url)
   };
 
   var delete_deleyed_job = function(delayed_job_id) {
@@ -49,13 +27,9 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
   };
 
   var update_setup = function (setup, type, value) {
-    if (type == 'sort') {
-      if (setup[type] == value) {
-        if (setup.order == "DESC") {
-          setup.order = "ASC";
-        } else {
-          setup.order = "DESC";
-        }
+    if (type === 'sort' && setup[type] === value) {
+      if (setup.order === "DESC") {
+        setup.order = "ASC";
       } else {
         setup.order = "DESC";
       }
@@ -64,89 +38,78 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
     return setup;
   };
 
-  var get_sinlge = function (id, delayed_jobs) {
-    return $http.get('/delayed_jobs/' + id + '.json').success(function (data) {
-      if (data.delayed_job) {
-        if (typeof delayed_jobs.single['basicinfo'] != "undefined" && data.delayed_job.basicinfo.id == delayed_jobs.single.basicinfo.id) {
-          angular.extend(delayed_jobs.single, data.delayed_job);
-        } else {
-          delayed_jobs.single = {};
-          delayed_jobs.single = data.delayed_job;
-        }
-      } else {
-        delayed_jobs.single = {};
-      }
-    }).error(notification.server_error).success(editable.force_exit).error(editable.force_exit);
+  var get_single_job = function (id, delayed_jobs) {
+    return $http.get('/delayed_jobs/' + id + '.json')
   };
 
-  var select_single = function (delayed_jobs, row) {
+  var select_single_job = function (delayed_jobs, row) {
     var found = false;
-    for (var i = 0; i < delayed_jobs.selected.length; i++) {
-      if (delayed_jobs.selected[i].id == row.id) {
+    for (var i = 0;  i < delayed_jobs.selected.length; i++) {
+      if (delayed_jobs.selected[i].id === row.id) {
         found = i;
         break;
       }
     }
-    if (found !== false) {
-      if (!row.checked) {
-        delayed_jobs.selected.splice(found, 1);
-      }
-    } else {
-      if (row.checked) {
-        delayed_jobs.selected.push(row);
-      }
-    }
+    (found !== false) && (!row.checked) ? delayed_jobs.selected.splice(found, 1) : delayed_jobs.selected.push(row);
   };
 
-  var select_list = function (delayed_jobs, from, to, state) {
+  var select_job_list = function (delayed_jobs, from, to, state) {
     var url = '';
-    var setup = delayed_jobs.setup;
     var from_page = 0;
     var to_page = 0;
-
-    if (typeof from.page != 'undefined' && from.page > 0) {
+    var setup = delayed_jobs.setup;
+    if (from.page > 0) {
       from_page = from.page - 1;
-    }
-    if (typeof to.page != 'undefined' && to.page > 0) {
+    } else if (to.page > 0) {
       to_page = to.page - 1;
     }
     var from_offset = (from_page * setup.limit) + from.index;
     var to_limit = (to_page * setup.limit) + to.index + 1 - from_offset;
-
-    if (setup.search == '') {
-      url = '/delayed_jobs/search.json?search=' + setup.search;
-    } else {
-      url = '/delayed_jobs/search.json?search=' + setup.search;
-    }
+    url = '/delayed_jobs/search.json?search=' + setup.search;
     url += '&is_kit=' + setup.is_kit + '&limit=' + to_limit + '&offset=' + from_offset;
     return $http.get(url).success(function (data) {
       if (data.status) {
         for (var i = 0; i < data.delayed_jobs.length; i++) {
           data.delayed_jobs[i].checked = state;
-          select_single(delayed_jobs, data.delayed_jobs[i]);
+          select_single_job(delayed_jobs, data.delayed_jobs[i]);
         }
-      } else {
-        notification.notify("Some error occurred in loading the selection.");
       }
     });
   };
 
-  var get_list = function (delayed_jobs, page) {
+  var get_job_list = function (delayed_jobs, page) {   
+    (typeof page !== 'undefined' && page > 0) ? page = page - 1 : page = 0;
     var url = '';
     var setup = delayed_jobs.setup;
-    if (typeof page != 'undefined' && page > 0) {
-      page = page - 1;
-    } else {
-      page = 0;
-    }
     delayed_jobs.setup.offset = page * delayed_jobs.setup.limit;
     url = '/delayed_jobs.json?search=' + setup.search + '&sort=' + setup.sort + '&order=' + setup.order;
     url += '&limit=' + setup.limit + '&offset=' + setup.offset;
-    return $http.get(url).success(
-      function (data) {
-        data.delayed_jobs;
+    return $http.get(url).success( function (data) {
+      if (data.status) {
+        delayed_jobs.list = data.delayed_jobs;
+        delayed_jobs.delayed_jobs_count = data.total_count;
+        delayed_jobs.current = false;
+        for (var i = 0; i < delayed_jobs.list.length; i++) {
+          if (delayed_jobs.single && typeof delayed_jobs.single['basicinfo'] != "undefined") {
+            if (delayed_jobs.list[i].id == delayed_jobs.single.basicinfo.id) {
+              delayed_jobs.current = i;
+            }
+          }
+          if (delayed_jobs.setup.select_all) {
+            delayed_jobs.selected = [];
+            delayed_jobs.list[i].checked = delayed_jobs.setup.select_all;
+            select_single_job(delayed_jobs, delayed_jobs.list[i]);
+          } else {
+            for (var k = 0; k < delayed_jobs.selected.length; k++) {
+              if (delayed_jobs.list[i].id == delayed_jobs.selected[k].id) {
+                delayed_jobs.list[i].checked = delayed_jobs.selected[k].checked;
+                break;
+              }
+            }
+          }
+        }
       }
-    ).error(notification.server_error);
+    });
   };
 
   return {
@@ -157,15 +120,15 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
       update: update_setup
     },
     list: {
-      select: select_list,
+      select_pages: select_job_list,
       get: get_delayed_job_list,
-      get_searched: get_list,
+      get_searched: get_job_list,
       destroy: delete_deleyed_job,
       reset: reset_delayed_job
     },
     single: {
-      get: get_sinlge,
-      select: select_single
+      get: get_single_job,
+      select: select_single_job
     }
   };
 }]);
