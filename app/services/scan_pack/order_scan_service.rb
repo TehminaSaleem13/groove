@@ -166,7 +166,7 @@ module ScanPack
 
       Rails.cache.clear
 
-      return unless order_items.present? &&
+      return unless @single_order.order_items.present? &&
         (
           (single_order_status.eql?('awaiting') && has_inactive_or_new_products) ||
           (single_order_status.eql?('onhold') && !has_inactive_or_new_products)
