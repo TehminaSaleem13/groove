@@ -911,13 +911,14 @@ ActiveRecord::Schema.define(:version => 20160610183611) do
 
   create_table "tenants", :force => true do |t|
     t.string   "name"
-    t.datetime "created_at",                             :null => false
-    t.datetime "updated_at",                             :null => false
+    t.datetime "created_at",                                       :null => false
+    t.datetime "updated_at",                                       :null => false
     t.integer  "duplicate_tenant_id"
     t.text     "note"
-    t.boolean  "is_modified",         :default => false
+    t.boolean  "is_modified",                   :default => false
     t.string   "initial_plan_id"
     t.text     "addon_notes"
+    t.boolean  "magento_tracking_push_enabled", :default => false
   end
 
   create_table "transactions", :force => true do |t|

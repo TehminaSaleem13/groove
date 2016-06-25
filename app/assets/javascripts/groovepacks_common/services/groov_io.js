@@ -6,7 +6,7 @@ groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window', 'n
   var connect = function () {
     if (groov_socket === null) {
       if (typeof io !== "undefined") {
-        var socket_conn = io("/v1", {
+        var socket_conn = io("http://socket.localpacker.com/v1", {
           query: 'fingerprint=' + new Fingerprint({
             canvas: true,
             screen_resolution: true

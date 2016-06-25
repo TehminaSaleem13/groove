@@ -6,6 +6,9 @@ class ProductKitSkus < ActiveRecord::Base
   after_save :update_inventory_levels
   #after_destroy :remove_product_from_order_items
 
+  cached_methods :option_product
+  after_save :delete_cache
+
   def add_product_in_order_items
     @order_items = OrderItem.where(:product_id => self.product_id)
     @order_items.each do |order_item|

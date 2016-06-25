@@ -10,12 +10,14 @@ groovepacks_admin.config(['$stateProvider', '$urlRouterProvider', 'hotkeysProvid
     $stateProvider
       .state('home', {url: '/home'})
       .state('tools', {url: '/admin_tools', templateUrl: '/assets/admin_views/base.html', controller: 'adminToolsCtrl'})
-      .state('tools.type', {
-        url: '/{type:tenant}',
-        params: {type: 'tenant'},
-        template: "<div ui-view></div>",
-        abstract: true
-      })
+      .state('tools.type', {url: '/tenant', templateUrl: "/assets/admin_views/tools/admin_tools.html", controller: 'adminToolsCtrl' })
+      .state('tools.delayed_jobs', {url: '/delayed_jobs', templateUrl: "/assets/admin_views/tools/delayed_jobs.html", controller: 'DelayedJobCtrl'})
+      // .state('tools.type', {
+      //   url: '/{type:tenant}',
+      //   params: {type: 'tenant'},
+      //   template: "<div ui-view></div>",
+      //   abstract: true
+      // })
       .state('tools.type.page', {
         url: '/{page:[0-9]+}', params: {page: '1'}, template: "<div ui-view></div>",
         controller: 'tenantsFilterCtrl'

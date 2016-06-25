@@ -24,7 +24,6 @@ class Order < ActiveRecord::Base
   after_save :process_unprocessed_orders
   validates_uniqueness_of :increment_id
 
-
   include ProductsHelper
   include OrdersHelper
   include ApplicationHelper
@@ -187,57 +186,36 @@ class Order < ActiveRecord::Base
   end
 
   def update_order_status
-    result = true
-    if true
-      #Implement hold orders from Groovepacker::Inventory
-      self.order_items.each do |order_item|
-        product = Product.find_by_id(order_item.product_id)
-        unless product.nil?
-          if product.status == "new" or product.status == "inactive"
-            result &= false
-          end
-        end
+    # Implement hold orders from Groovepacker::Inventory
+    result = !has_inactive_or_new_products
+
+
+    result &= false if unacknowledged_activities.length > 0
+
+    if result
+      if status == 'onhold'
+        self.status = 'awaiting'
+        save
       end
-
-      result &= false if self.unacknowledged_activities.length > 0
-
-      if result
-        if self.status == "onhold"
-          self.status = "awaiting"
-        end
-      else
-        if self.status == "awaiting"
-          self.status = "onhold"
-        end
+    else
+      if status == 'awaiting'
+        self.status = 'onhold'
+        save
       end
-
-      self.save
-
-      #isn't being used, shouldn't get called
-      #self.apply_and_update_predefined_tags
     end
+
+    # isn't being used, shouldn't get called
+    # self.apply_and_update_predefined_tags
   end
 
   def set_order_status
-    result = true
-
-    self.order_items.each do |order_item|
-      product = order_item.product
-      if !product.nil?
-        if product.status == "new" or product.status == "inactive"
-          result &= false
-        end
-      else
-        result &= false
-      end
-    end
+    result = !has_inactive_or_new_products
 
     result &= false if self.unacknowledged_activities.length > 0
-
     status = result ? 'awaiting' : 'onhold'
 
-    self.update_column(:status, status)
-    self.update_column(:scan_start_time, nil)
+    update_column(:status, status)
+    update_column(:scan_start_time, nil)
 
     #self.apply_and_update_predefined_tags
   end
@@ -388,33 +366,18 @@ class Order < ActiveRecord::Base
 
   def get_unscanned_items
     unscanned_list = []
-    #Order.connection.clear_query_cache
-    self.reload
-    self.order_items
-      .includes(
-        order_item_kit_products: [
-          product_kit_skus: [
-            product: [
-              :product_skus, :product_images,
-              :product_barcodes
-            ]
-          ]
-        ],
-        product: [
-          :product_skus, :product_images,
-          :product_barcodes
-        ]
-      ).each do |order_item|
+
+    self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status != 'scanned'
-        if order_item.product.is_kit == 1
-          option_products = order_item.option_products
-          if order_item.product.kit_parsing == 'single'
+        if order_item.cached_product.is_kit == 1
+          option_products = order_item.cached_option_products
+          if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             unscanned_list.push(order_item.build_unscanned_single_item)
-          elsif order_item.product.kit_parsing == 'individual'
+          elsif order_item.cached_product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
             unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
-          elsif order_item.product.kit_parsing == 'depends'
+          elsif order_item.cached_product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > order_item.kit_split_scanned_qty
                 unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
@@ -457,7 +420,7 @@ class Order < ActiveRecord::Base
             end
           end
         else
-          unless order_item.product.is_intangible
+          unless order_item.cached_product.is_intangible
             # add order item to unscanned list
             unscanned_item = order_item.build_unscanned_single_item
             if unscanned_item['qty_remaining'] > 0
@@ -467,39 +430,27 @@ class Order < ActiveRecord::Base
         end
       end
     end
-    unscanned_list.sort_by { |hsh| hsh['packing_placement'] }
+    unscanned_list.sort do |a, b|
+      o = (a['packing_placement'] <=> b['packing_placement']);
+      o == 0 ? (a['name'] <=> b['name']) : o
+    end
   end
 
   def get_scanned_items
     scanned_list = []
 
-    self.order_items
-    self.order_items
-      .includes(
-        order_item_kit_products: [
-          product_kit_skus: [
-            product: [
-              :product_skus, :product_images,
-              :product_barcodes
-            ]
-          ]
-        ],
-        product: [
-          :product_skus, :product_images,
-          :product_barcodes
-        ]
-      ).each do |order_item|
+    self.order_items_with_eger_load_and_cache.each do |order_item|
       if order_item.scanned_status == 'scanned' ||
         order_item.scanned_status == 'partially_scanned'
-        if order_item.product.is_kit == 1
-          option_products = order_item.option_products
-          if order_item.product.kit_parsing == 'single'
+        if order_item.cached_product.is_kit == 1
+          option_products = order_item.cached_option_products
+          if order_item.cached_product.kit_parsing == 'single'
             #if single, then add order item to unscanned list
             scanned_list.push(order_item.build_scanned_single_item)
-          elsif order_item.product.kit_parsing == 'individual'
+          elsif order_item.cached_product.kit_parsing == 'individual'
             #else if individual then add all order items as children to unscanned list
             scanned_list.push(order_item.build_scanned_individual_kit(option_products))
-          elsif order_item.product.kit_parsing == 'depends'
+          elsif order_item.cached_product.kit_parsing == 'depends'
             if order_item.kit_split
               if order_item.kit_split_qty > 0
                 scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
@@ -549,7 +500,10 @@ class Order < ActiveRecord::Base
       end
     end
 
-    scanned_list
+    scanned_list.sort do |a, b|
+      o = (b['packing_placement'] <=> a['packing_placement']);
+      o == 0 ? (b['name'] <=> a['name']) : o
+    end
   end
 
   def reset_scanned_status
@@ -814,5 +768,35 @@ class Order < ActiveRecord::Base
   def set_traced_in_dashboard
     self.traced_in_dashboard = true
     self.save!
+  end
+
+  def order_items_with_eger_load_and_cache
+    # key = "order_items_#{id}_was_egar_loaded"
+    if order_items.map(&:keys?).include? true
+      order_items
+    else
+      # Rails.cache.write(key, true, expires_in: 30.minutes)
+      order_items.includes(
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      )
+    end
+  rescue
+    delete_cached_order_items_keys
+    retry
+  end
+
+  def delete_cached_order_items_keys
+    order_items.map(&:delete_cache)
   end
 end

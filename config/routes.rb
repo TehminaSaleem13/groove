@@ -32,12 +32,15 @@ Groovepacks::Application.routes.draw do
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
+  put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
-
+  post '/amazons/products_import' => 'amazons#products_import'
   # The priority is based upon order of creation:
   # first created -> highest priority.
-
+  get '/delayed_jobs' => 'delayed_jobs#index'
+  post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
+  post '/delayed_job_reset' => 'delayed_jobs#reset'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action

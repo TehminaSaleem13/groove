@@ -186,7 +186,8 @@ module Groovepacker
             add_single_item(product)
           end
 
-          @order.update_order_status and return if @order.save
+          @order.update_order_status
+          return if @order.save
           set_status_and_message(false, "Adding item to order failed", ['&', 'push'])
         end
 

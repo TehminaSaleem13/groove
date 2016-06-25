@@ -12,6 +12,7 @@ module ProductsService
       elsif location_params?
         update_product_location
       end
+      @product.reload
       @product.update_product_status
     rescue => e
       puts e.inspect

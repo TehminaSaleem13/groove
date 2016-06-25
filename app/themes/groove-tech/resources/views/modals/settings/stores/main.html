@@ -26,17 +26,36 @@
             <div class="controls col-md-2">
               <div toggle-switch ng-model="stores.single.status" groov-click="update_single_store(true)"></div>
             </div>
-            <div class="col-sm-2" ng-if="stores.single.store_type=='Shopify' || stores.single.store_type=='BigCommerce' || stores.single.store_type=='Magento API 2' || stores.single.store_type=='Amazon'">
+            <div class="col-sm-2" ng-if="stores.single.store_type=='Shopify' || stores.single.store_type=='BigCommerce' || stores.single.store_type=='Magento API 2'">
               <button ng-click="import_product_catalog()" class="groove-button label label-default label-danger" translate>Import Product Catalog
               </button>
             </div>
-
+            
             <div class="col-sm-2" ng-if="stores.single.store_type=='Teapplix'">
               <button ng-click="import_product_catalog()" class="groove-button label label-default label-danger" translate>Import/Update Product Catalog
               </button>
             </div>
 
           </div>
+          <div ng-if="stores.single.store_type=='Amazon'">
+            <div class="form-group">
+              <label class="control-label col-md-3"></label>
+              <div  class="col-sm-4">
+                <input name="productfile" file-upload type="file" value="" required style="width: 220px;" />
+              </div>
+              <div class="col-sm-2">
+                  <button class="modal-save-button" ng-click="amazon_products_import()">Import Poducts</button> 
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-md-3"></label>
+              <div class="col-md-9">
+                <small>( Please upload only unmodified txt file. )</small>
+              </div>
+            </div>
+
+          </div>
+          
           <div class="form-group" ng-if="stores.general_settings.email_address_for_packer_notes==null || stores.general_settings.email_address_for_packer_notes=='null' || stores.general_settings.email_address_for_packer_notes.length<1">
             <label class="control-label col-md-3">Note*</label>
             <div class="col-md-9">

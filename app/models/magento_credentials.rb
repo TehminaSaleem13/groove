@@ -20,10 +20,13 @@ class MagentoCredentials < ActiveRecord::Base
     def schedule_magento_status_update_job
       return true unless self.changes["enable_status_update"].present?
       current_tenant = Apartment::Tenant.current
+      tenant = Tenant.find_by_name(current_tenant)
       if self.enable_status_update and get_scheduled_jobs_for_status_update.blank?
-      	MagentoSoapOrders.new(tenant: current_tenant).schedule!
+      	tenant.update_attributes(magento_tracking_push_enabled: true)
+        #MagentoSoapOrders.new(tenant: current_tenant).schedule!
       else
-      	delete_magento_status_update_job
+      	tenant.update_attributes(magento_tracking_push_enabled: false)
+        #delete_magento_status_update_job
       end
     end
 

@@ -22,7 +22,7 @@ module Groovepacker
             end
             bulk_action.update_attributes(:current => product.name)
             current_status = product.status
-            if product.update_attributes(:status => params[:status])
+            if product.update_column(:status, params[:status])
               product.reload
               if product.status !='inactive'
                 if !product.update_product_status && params[:status] == 'active'
@@ -36,7 +36,7 @@ module Groovepacker
                                               product.name + '. Reason: In order for a product to be Active it needs to '+
                                               'have at least one SKU and one barcode.')
                   end
-                  product.update_attributes(:status => current_status)
+                  product.update_column(:status, current_status)
                 end
               else
                 product.update_due_to_inactive_product

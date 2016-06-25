@@ -26,6 +26,11 @@ module Groovepacker
             @result[:total_imported] = response["orders"].length
             initialize_import_item
             import_orders_from_response(response, shipments_response)
+            if @result[:status]
+              @credential.last_imported_at = importing_time || @credential.last_imported_at
+              @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
+              @credential.save
+            end
           end
 
           def import_single_order(order_no)
@@ -50,7 +55,7 @@ module Groovepacker
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
               ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
-              sleep 0.5
+              sleep 0.3
             end
           end
 
@@ -107,20 +112,20 @@ module Groovepacker
             def set_import_date_and_type
               case @import_item.import_type
               when 'deep'
-                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 7.days)
+                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'quick'
                 quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-3.days : quick_import_date
+                self.import_from = quick_import_date.blank? ? DateTime.now-1.days : quick_import_date
               else
                 last_imported_at = @credential.last_imported_at
-                self.import_from = last_imported_at.blank? ? DateTime.now-2.weeks : last_imported_at-@credential.regular_import_range.days
+                self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
               end
               set_import_date_type
             end
 
             def set_import_date_type
-              date_types = {"deep" => "created_at", "quick" => "modified_at"}
-               self.import_date_type = date_types[@import_item.import_type] || "created_at"
+              date_types = {"deep" => "modified_at", "quick" => "modified_at"}
+              self.import_date_type = date_types[@import_item.import_type] || "created_at"
             end
 
             def ss_tags_list
@@ -166,13 +171,13 @@ module Groovepacker
                 status_response = @client.get_orders(status, import_from, import_date_type)
                 response = get_orders_from_union(response, status_response)
               end
-              self.importing_time = DateTime.now - 1.day
+              self.importing_time = DateTime.now
               self.quick_importing_time = DateTime.now
               return response
             end
 
             def fetch_tagged_orders(response)
-              return response unless @import_item.import_type != 'quick' && gp_ready_tag_id != -1
+              return response unless gp_ready_tag_id != -1
               tagged_response = @client.get_orders_by_tag(gp_ready_tag_id)
               #perform union of orders
               response = get_orders_from_union(response, tagged_response)
@@ -194,7 +199,8 @@ module Groovepacker
 
             def find_or_init_new_order(order)
               shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
-              if @import_item.import_type == 'quick' && shipstation_order && shipstation_order.status!="scanned"
+              return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled")
+              if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy
                 shipstation_order = nil
               end

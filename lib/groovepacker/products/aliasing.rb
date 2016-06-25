@@ -3,21 +3,31 @@ module Groovepacker
     class Aliasing < Groovepacker::Products::Base
 
       def set_alias
-        @product_orig = Product.find(@params[:id])
-        skus_len = @product_orig.product_skus.all.length
-        barcodes_len = @product_orig.product_barcodes.all.length
-        @product_aliases = Product.find_all_by_id(@params[:product_alias_ids])
-        if @product_aliases.length < 1
-          @result['status'] = false
-          @result['messages'].push('No products found to alias')
+        map_product_sku_and_unique_kit
+        if @result["status"]
+          @product_orig = Product.find(@params[:id])
+          skus_len = @product_orig.product_skus.all.length
+          barcodes_len = @product_orig.product_barcodes.all.length
+          @product_aliases = Product.find_all_by_id(@params[:product_alias_ids])
+          if @product_aliases.length < 1
+            @result['status'] = false
+            @result['messages'].push('No products found to alias')
+            return @result
+          end
+
+          @product_aliases.each do |product_alias|
+            do_aliasing(product_alias, skus_len, barcodes_len)
+          end
+          @product_orig.update_product_status
           return @result
         end
+      end
 
-        @product_aliases.each do |product_alias|
-          do_aliasing(product_alias, skus_len, barcodes_len)
-        end
-        @product_orig.update_product_status
-        return @result
+      def map_product_sku_and_unique_kit
+        product_skus_ids = Product.find(@params["id"]).product_kit_skuss.map(&:option_product_id) 
+        return if (product_skus_ids & @params[:product_alias_ids]).blank?
+        @result['status'] = false
+        @result["messages"].push('Can not add kit to itself')
       end
 
       private
