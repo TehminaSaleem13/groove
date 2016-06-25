@@ -161,6 +161,7 @@ class Product < ActiveRecord::Base
       item.order.update_order_status unless item.order.nil? ||
                                             !%w(awaiting onhold)
                                             .include?(item.order.status)
+      item.delete_cache
     end
     result
   end
@@ -184,12 +185,14 @@ class Product < ActiveRecord::Base
       tmp_order_items = order_items.select { |oi| oi.product_id = kit_product.product_id }
       tmp_order_items.each do |item|
         item.order.update_order_status unless item.order.nil?
+        item.delete_cache
       end
     end
 
     order_items = order_items.select { |oi| oi.product_id = id }
     order_items.each do |item|
       item.order.update_order_status unless item.order.nil?
+      item.delete_cache
     end
   end
 
