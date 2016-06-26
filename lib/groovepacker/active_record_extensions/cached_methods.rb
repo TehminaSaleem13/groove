@@ -36,7 +36,16 @@ module CachedMethods
           end
           return cached if cached
           load_assoc = send(association)
-          load_assoc = load_assoc.to_a if load_assoc.class == ActiveRecord::Relation
+          begin
+            if load_assoc.class.in?([ActiveRecord::Relation, Array])
+              load_assoc = load_assoc.to_a
+              load_assoc.map(&:clear_association_cache)
+            else
+              load_assoc.clear_association_cache
+            end
+          rescue
+            nil
+          end
           Rails.cache.write(key, load_assoc, expires_in: 30.minutes)
           update_cache_keys(key)
           load_assoc
