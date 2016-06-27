@@ -33,7 +33,7 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
   };
 
   //list related functions
-  var get_list = function (tenants, page) {
+  var get_list = function (tenants, page, pages_sort) {
     var url = '';
     var setup = tenants.setup;
     if (typeof page != 'undefined' && page > 0) {
@@ -44,6 +44,7 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
     tenants.setup.offset = page * tenants.setup.limit;
     url = '/tenants.json?search=' + setup.search + '&sort=' + setup.sort + '&order=' + setup.order;
     url += '&limit=' + setup.limit + '&offset=' + setup.offset;
+    url += "&pages_sort=" + pages_sort;
     return $http.get(url).success(
       function (data) {
         if (data.status) {
