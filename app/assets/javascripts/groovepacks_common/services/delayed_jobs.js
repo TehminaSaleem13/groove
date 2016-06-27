@@ -2,9 +2,8 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
 
   var get_default = function () {
     return {
-      list: [], selected: [], single: {}, current: 0,
-      setup: { sort: "updated_at", order: "DESC", search: '', select_all: false, inverted: false, limit: 20, offset: 0, setting: '', status: ''},
-      delayed_jobs_count: {}, duplicate_name: ""
+      selected: [], list: [], single: {}, current: 0, delayed_jobs_count: {}, duplicate_name: "", 
+      setup: { sort: "updated_at", order: "DESC", search: '', select_all: false, inverted: false, limit: 20, offset: 0, setting: '', status: ''}
     };
   };
 
@@ -50,7 +49,7 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
         break;
       }
     }
-    (found !== false) && (!row.checked) ? delayed_jobs.selected.splice(found, 1) : delayed_jobs.selected.push(row);
+    ((found !== false) && (!row.checked)) ? delayed_jobs.selected.splice(found, 1) : delayed_jobs.selected.push(row);
   };
 
   var select_job_list = function (delayed_jobs, from, to, state) {
@@ -78,7 +77,7 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
   };
 
   var get_job_list = function (delayed_jobs, page) {   
-    (typeof page !== 'undefined' && page > 0) ? page = page - 1 : page = 0;
+    page = (typeof page !== 'undefined' && page > 0) ? page - 1 : 0;
     var url = '';
     var setup = delayed_jobs.setup;
     delayed_jobs.setup.offset = page * delayed_jobs.setup.limit;
@@ -90,8 +89,8 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
         delayed_jobs.delayed_jobs_count = data.total_count;
         delayed_jobs.current = false;
         for (var i = 0; i < delayed_jobs.list.length; i++) {
-          if (delayed_jobs.single && typeof delayed_jobs.single['basicinfo'] != "undefined") {
-            if (delayed_jobs.list[i].id == delayed_jobs.single.basicinfo.id) {
+          if (delayed_jobs.single && typeof delayed_jobs.single['basicinfo'] !== "undefined") {
+            if (delayed_jobs.list[i].id === delayed_jobs.single.basicinfo.id) {
               delayed_jobs.current = i;
             }
           }
@@ -101,7 +100,7 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
             select_single_job(delayed_jobs, delayed_jobs.list[i]);
           } else {
             for (var k = 0; k < delayed_jobs.selected.length; k++) {
-              if (delayed_jobs.list[i].id == delayed_jobs.selected[k].id) {
+              if (delayed_jobs.list[i].id === delayed_jobs.selected[k].id) {
                 delayed_jobs.list[i].checked = delayed_jobs.selected[k].checked;
                 break;
               }

@@ -48,7 +48,7 @@ groovepacks_admin_controllers.controller('DelayedJobCtrl', ['$scope', '$http', '
         if (delayed_job.setup.inverted) {
           if (delayed_job.setup.select_all) {
             $scope.select_all_jobs_toggle(false);
-          } else if (delayed_job.selected.length == 0) {
+          } else if (delayed_job.selected.length === 0) {
             $scope.select_all_jobs_toggle(true);
           }
         }
@@ -86,7 +86,7 @@ groovepacks_admin_controllers.controller('DelayedJobCtrl', ['$scope', '$http', '
         paginate_options = $scope.gridOptions.paginate
         if (page > 0 && page <= Math.ceil(paginate_options.total_items / paginate_options.items_per_page)) {
           return myscope.get_delayed_jobs(page);
-        };
+        }
       };
 
       $scope.handle_sort = function (predicate) {
