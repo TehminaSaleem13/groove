@@ -52,7 +52,7 @@ module CachedMethods
         end
 
         define_method("#{association}_is_cached?") do
-          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
+          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant}"
           instance = "@cached_#{association}"
           (
             instance_variable_defined?(instance) &&
@@ -89,7 +89,7 @@ module CachedMethods
   end
 
   def tenant
-    Thread.current[:tenant] ||= Apartment::Tenant.current
+    Apartment::Tenant.current
   end
 
   def read_multi(key)
