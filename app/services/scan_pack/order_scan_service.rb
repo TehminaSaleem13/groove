@@ -145,7 +145,7 @@ module ScanPack
       @single_order_result['order_num'] = @single_order.increment_id
 
       # Check if order has inactive/new/0qty items but still in awaiting
-      check_if_order_update_needed
+      check_if_order_update_needed_and_clear_cache
 
       if can_order_be_scanned
         do_if_under_max_limit_of_shipments
@@ -160,10 +160,12 @@ module ScanPack
       @result['data']['scan_pack_settings'] = @scanpack_settings
     end
 
-    def check_if_order_update_needed
+    def check_if_order_update_needed_and_clear_cache
       single_order_status = @single_order.status
       has_inactive_or_new_products = @single_order.has_inactive_or_new_products
 
+      Rails.cache.clear
+      
       return unless @single_order.order_items.present? &&
         (
           (single_order_status.eql?('awaiting') && has_inactive_or_new_products) ||
