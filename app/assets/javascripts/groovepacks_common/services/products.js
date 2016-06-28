@@ -220,7 +220,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       if (data.status) {
         notification.notify("Successfully Updated", 1);
       } else {
-        notification.notify(data.messages, 0);
+        notification.notify(data.error_msg, 0);
       }
     }).error(notification.server_error);
   };
