@@ -19,7 +19,7 @@ class OrderItem < ActiveRecord::Base
   after_update :update_inventory_levels
 
   cached_methods :product, :order_item_kit_products, :option_products
-  after_save :delete_cache
+  after_save :delete_cache_for_associated_obj
 
   include OrdersHelper
 
@@ -359,6 +359,12 @@ class OrderItem < ActiveRecord::Base
     unless scanpack_settings.escape_string.nil?
       return barcode + scanpack_settings.escape_string + lot_number
     end
+  end
+
+  def delete_cache_for_associated_obj
+    product.try(:delete_cache)
+    order_item_kit_products.map(&:delete_cache)
+    delete_cache
   end
 
   private

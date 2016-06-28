@@ -528,6 +528,10 @@ RSpec.describe ScanPackController, :type => :controller do
       @order = FactoryGirl.create(:order, store: Store.first)
       @orderitem = FactoryGirl.create(:order_item, :order=>@order)
       @order.addnewitems
+      barcode = @order.order_items.first.product.product_barcodes.new
+      barcode.barcode = @orderitem.sku
+      barcode.save
+      @order.order_items.first.product.set_product_status
 
       get :scan_barcode, { :state=> "scanpack.rfo", :input => 12345678 }
 

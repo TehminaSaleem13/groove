@@ -36,14 +36,23 @@ module CachedMethods
           end
           return cached if cached
           load_assoc = send(association)
-          load_assoc = load_assoc.to_a if load_assoc.class == ActiveRecord::Relation
+          begin
+            if load_assoc.class.in?([ActiveRecord::Relation, Array])
+              load_assoc = load_assoc.to_a
+              load_assoc.map(&:clear_association_cache)
+            else
+              load_assoc.clear_association_cache
+            end
+          rescue
+            nil
+          end
           Rails.cache.write(key, load_assoc, expires_in: 30.minutes)
           update_cache_keys(key)
           load_assoc
         end
 
         define_method("#{association}_is_cached?") do
-          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}"
+          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant}"
           instance = "@cached_#{association}"
           (
             instance_variable_defined?(instance) &&
@@ -80,7 +89,7 @@ module CachedMethods
   end
 
   def tenant
-    Thread.current[:tenant] ||= Apartment::Tenant.current
+    Apartment::Tenant.current
   end
 
   def read_multi(key)
