@@ -364,68 +364,66 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def get_unscanned_items
+  def get_unscanned_items(order_item_status=['unscanned', 'partially_scanned'], limit=10, offset=0)
     unscanned_list = []
 
-    self.order_items_with_eger_load_and_cache.each do |order_item|
-      if order_item.scanned_status != 'scanned'
-        if order_item.cached_product.is_kit == 1
-          option_products = order_item.cached_option_products
-          if order_item.cached_product.kit_parsing == 'single'
-            #if single, then add order item to unscanned list
-            unscanned_list.push(order_item.build_unscanned_single_item)
-          elsif order_item.cached_product.kit_parsing == 'individual'
-            #else if individual then add all order items as children to unscanned list
-            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
-          elsif order_item.cached_product.kit_parsing == 'depends'
-            if order_item.kit_split
-              if order_item.kit_split_qty > order_item.kit_split_scanned_qty
-                unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
-              end
-              if order_item.qty > order_item.kit_split_qty
-                unscanned_item = order_item.build_unscanned_single_item(true)
-                if unscanned_item['qty_remaining'] > 0
-                  unscanned_list.push(unscanned_item)
-                end
-              end
-              # unscanned_qty = order_item.qty - order_item.scanned_qty
-              # added_to_list_qty = true
-              # unscanned_qty.times do
-              #   if added_to_list_qty < unscanned_qty
-              #     individual_kit_count = 0
-
-              #     #determine no of split kits already in unscanned_list
-              #     unscanned_list.each do |unscanned_item|
-              #       if unscanned_item['product_id'] == order_item.product_id &&
-              #           unscanned_item['product_type'] == 'individual'
-              #           individual_kit_count = individual_kit_count + 1
-              #       end
-              #     end
-
-
-              #     #unscanned list building kits
-              #     if individual_kit_count < order_item.kit_split_qty
-              #       unscanned_list.push(order_item.build_unscanned_individual_kit, true)
-              #       added_to_list_qty = added_to_list_qty + order_item.kit_split_qty
-              #     else
-              #       unscanned_list.push(order_item.build_unscanned_single_item, true)
-              #     end
-              #   end
-              # end
-            else
-              unscanned_item = order_item.build_unscanned_single_item
+    order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
+      if order_item.cached_product.is_kit == 1
+        option_products = order_item.cached_option_products
+        if order_item.cached_product.kit_parsing == 'single'
+          #if single, then add order item to unscanned list
+          unscanned_list.push(order_item.build_unscanned_single_item)
+        elsif order_item.cached_product.kit_parsing == 'individual'
+          #else if individual then add all order items as children to unscanned list
+          unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
+        elsif order_item.cached_product.kit_parsing == 'depends'
+          if order_item.kit_split
+            if order_item.kit_split_qty > order_item.kit_split_scanned_qty
+              unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
+            end
+            if order_item.qty > order_item.kit_split_qty
+              unscanned_item = order_item.build_unscanned_single_item(true)
               if unscanned_item['qty_remaining'] > 0
                 unscanned_list.push(unscanned_item)
               end
             end
-          end
-        else
-          unless order_item.cached_product.is_intangible
-            # add order item to unscanned list
+            # unscanned_qty = order_item.qty - order_item.scanned_qty
+            # added_to_list_qty = true
+            # unscanned_qty.times do
+            #   if added_to_list_qty < unscanned_qty
+            #     individual_kit_count = 0
+
+            #     #determine no of split kits already in unscanned_list
+            #     unscanned_list.each do |unscanned_item|
+            #       if unscanned_item['product_id'] == order_item.product_id &&
+            #           unscanned_item['product_type'] == 'individual'
+            #           individual_kit_count = individual_kit_count + 1
+            #       end
+            #     end
+
+
+            #     #unscanned list building kits
+            #     if individual_kit_count < order_item.kit_split_qty
+            #       unscanned_list.push(order_item.build_unscanned_individual_kit, true)
+            #       added_to_list_qty = added_to_list_qty + order_item.kit_split_qty
+            #     else
+            #       unscanned_list.push(order_item.build_unscanned_single_item, true)
+            #     end
+            #   end
+            # end
+          else
             unscanned_item = order_item.build_unscanned_single_item
             if unscanned_item['qty_remaining'] > 0
               unscanned_list.push(unscanned_item)
             end
+          end
+        end
+      else
+        unless order_item.cached_product.is_intangible
+          # add order item to unscanned list
+          unscanned_item = order_item.build_unscanned_single_item
+          if unscanned_item['qty_remaining'] > 0
+            unscanned_list.push(unscanned_item)
           end
         end
       end
@@ -436,36 +434,33 @@ class Order < ActiveRecord::Base
     end
   end
 
-  def get_scanned_items
+  def get_scanned_items(order_item_status=['scanned', 'partially_scanned'], limit=10, offset=0)
     scanned_list = []
 
-    self.order_items_with_eger_load_and_cache.each do |order_item|
-      if order_item.scanned_status == 'scanned' ||
-        order_item.scanned_status == 'partially_scanned'
-        if order_item.cached_product.is_kit == 1
-          option_products = order_item.cached_option_products
-          if order_item.cached_product.kit_parsing == 'single'
-            #if single, then add order item to unscanned list
-            scanned_list.push(order_item.build_scanned_single_item)
-          elsif order_item.cached_product.kit_parsing == 'individual'
-            #else if individual then add all order items as children to unscanned list
-            scanned_list.push(order_item.build_scanned_individual_kit(option_products))
-          elsif order_item.cached_product.kit_parsing == 'depends'
-            if order_item.kit_split
-              if order_item.kit_split_qty > 0
-                scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
-              end
-              if order_item.single_scanned_qty != 0
-                scanned_list.push(order_item.build_scanned_single_item(true))
-              end
-            else
-              scanned_list.push(order_item.build_scanned_single_item)
+    self.order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
+      if order_item.cached_product.is_kit == 1
+        option_products = order_item.cached_option_products
+        if order_item.cached_product.kit_parsing == 'single'
+          #if single, then add order item to unscanned list
+          scanned_list.push(order_item.build_scanned_single_item)
+        elsif order_item.cached_product.kit_parsing == 'individual'
+          #else if individual then add all order items as children to unscanned list
+          scanned_list.push(order_item.build_scanned_individual_kit(option_products))
+        elsif order_item.cached_product.kit_parsing == 'depends'
+          if order_item.kit_split
+            if order_item.kit_split_qty > 0
+              scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
             end
+            if order_item.single_scanned_qty != 0
+              scanned_list.push(order_item.build_scanned_single_item(true))
+            end
+          else
+            scanned_list.push(order_item.build_scanned_single_item)
           end
-        else
-          # add order item to unscanned list
-          scanned_list.push(order_item.build_unscanned_single_item)
         end
+      else
+        # add order item to unscanned list
+        scanned_list.push(order_item.build_unscanned_single_item)
       end
     end
 
@@ -501,8 +496,14 @@ class Order < ActiveRecord::Base
     end
 
     scanned_list.sort do |a, b|
-      o = (b['packing_placement'] <=> a['packing_placement']);
-      o == 0 ? (b['name'] <=> a['name']) : o
+      sort_order = (b['packing_placement'] <=> a['packing_placement'])
+      if sort_order == 0
+        sort_order = (b['qty_remaining'] <=> a['qty_remaining'])
+        if sort_order == 0
+          sort_order = (b['name'] <=> a['name'])
+        end
+      end
+      sort_order
     end
   end
 
@@ -770,13 +771,21 @@ class Order < ActiveRecord::Base
     self.save!
   end
 
-  def order_items_with_eger_load_and_cache
+  def partially_load_order_item(order_item_status, limit, offset)
+    order_items
+      .where(scanned_status: order_item_status)
+      .limit(limit)
+      .offset(offset)
+  end
+
+  def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
     # key = "order_items_#{id}_was_egar_loaded"
-    if order_items.map(&:keys?).include? true
-      order_items
+    limited_order_items = partially_load_order_item(order_item_status, limit, offset)
+    if limited_order_items.map(&:keys?).include? true
+      limited_order_items
     else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
-      order_items.includes(
+      limited_order_items.includes(
         order_item_kit_products: [
           product_kit_skus: [
             product: [
