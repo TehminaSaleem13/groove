@@ -145,7 +145,7 @@ Groovepacks::Application.configure do
   ENV["SITE_HOST"] = "groovepacker.com"
 
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "orderpacker.com"
+  # ENV["GROOV_ANALYTIC"] = "orderpacker.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
