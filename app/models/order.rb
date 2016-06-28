@@ -364,7 +364,7 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def get_unscanned_items(order_item_status=['unscanned', 'partially_scanned'], limit=10, offset=0)
+  def get_unscanned_items(order_item_status=['unscanned', 'notscanned', 'partially_scanned'], limit=10, offset=0)
     unscanned_list = []
 
     order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
