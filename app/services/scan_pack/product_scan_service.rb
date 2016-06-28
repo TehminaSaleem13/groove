@@ -118,7 +118,7 @@ module ScanPack
       @single_order.last_suggested_at ||= DateTime.now
       @single_order.save
 
-      unscanned_items = @single_order.get_unscanned_items
+      unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
       #search if barcode exists
       barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
 

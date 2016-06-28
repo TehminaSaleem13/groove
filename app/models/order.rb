@@ -364,10 +364,28 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def get_unscanned_items(order_item_status=['unscanned', 'notscanned', 'partially_scanned'], limit=10, offset=0)
+  def get_unscanned_items(
+    most_recent_scanned_product: nil, barcode: nil,
+    order_item_status:['unscanned', 'notscanned', 'partially_scanned'],
+    limit: 10, offset: 0
+    )
     unscanned_list = []
 
-    order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
+    limited_order_items = order_items_with_eger_load_and_cache(order_item_status, limit, offset)
+
+    if barcode
+      barcode_in_order_item = find_unscanned_order_item_with_barcode(barcode)
+      order_item_id = barcode_in_order_item.try(:id)
+      unless limited_order_items.map(&:id).include?(barcode_in_order_item.try(:id))
+        limited_order_items.unshift(barcode_in_order_item) if order_item_id
+      end
+    end
+
+    if most_recent_scanned_product
+      chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
+    end
+
+    limited_order_items.each do |order_item|
       if order_item.cached_product.is_kit == 1
         option_products = order_item.cached_option_products
         if order_item.cached_product.kit_parsing == 'single'
@@ -434,7 +452,68 @@ class Order < ActiveRecord::Base
     end
   end
 
-  def get_scanned_items(order_item_status=['scanned', 'partially_scanned'], limit=10, offset=0)
+  def find_unscanned_order_item_with_barcode(barcode)
+    return unless barcode
+    (
+      order_items
+        .joins(product: :product_barcodes)
+        .where(
+          scanned_status: %w(unscanned notscanned partially_scanned),
+          product_barcodes: { barcode: barcode }
+        ).first
+    ) || (
+      order_items
+        .joins(
+          order_item_kit_products: {
+            product_kit_skus: {
+              product: :product_barcodes
+            }
+          }
+        )
+        .where(
+          scanned_status: %w(unscanned notscanned partially_scanned),
+          product_barcodes: { barcode: barcode }
+        ).first
+    ) || (
+      order_items
+        .joins(
+          order_item_kit_products: {
+            product_kit_skus: {
+              option_product: :product_barcodes
+            }
+          }
+        )
+        .where(
+          scanned_status: %w(unscanned notscanned partially_scanned),
+          product_barcodes: { barcode: barcode }
+        )
+        .first
+    )
+  end
+
+  def chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
+    return if limited_order_items.map(&:product_id).include?(most_recent_scanned_product)
+
+    oi = order_items.where(
+      scanned_status: %w(unscanned notscanned partially_scanned),
+      product_id: most_recent_scanned_product
+    ).first
+
+    if oi
+      limited_order_items.unshift(oi) unless oi.scanned_status != 'scanned'
+    else
+      item = order_items
+        .joins(order_item_kit_products: :product_kit_skus)
+        .where(
+          scanned_status: %w(unscanned notscanned partially_scanned),
+          product_kit_skus: { option_product_id: most_recent_scanned_product }
+        )
+        .first
+      limited_order_items.unshift(item) unless limited_order_items.include?(item) || !item
+    end
+  end
+
+  def get_scanned_items(order_item_status: ['scanned', 'partially_scanned'], limit: 10, offset: 0)
     scanned_list = []
 
     self.order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
