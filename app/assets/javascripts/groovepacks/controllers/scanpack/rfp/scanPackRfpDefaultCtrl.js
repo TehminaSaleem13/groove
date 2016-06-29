@@ -289,26 +289,26 @@ groovepacks_controllers.
           $timeout(myscope.show_product_instructions);
         }
 
-        $scope.unscanned_count = 0;
-        $scope.scanned_count = 0;
+        $scope.unscanned_count = $scope.data.order.scanning_count.unscanned;
+        $scope.scanned_count = $scope.data.order.scanning_count.scanned;
         $scope.item_image_index = 0;
 
-        for (var i = 0; i < $scope.data.order.unscanned_items.length; i++) {
-          if ($scope.data.order.unscanned_items[i].product_type == 'single') {
-            $scope.unscanned_count = $scope.unscanned_count + $scope.data.order.unscanned_items[i].qty_remaining;
-          }
-          else if ($scope.data.order.unscanned_items[i].product_type == 'individual') {
-            for (var j = 0; j < $scope.data.order.unscanned_items[i].child_items.length; j++) {
-              $scope.unscanned_count += $scope.data.order.unscanned_items[i].child_items[j].qty_remaining;
-            }
-          }
-        }
-
-        for (var k = 0; k < $scope.data.order.scanned_items.length; k++) {
-          if ($scope.data.order.scanned_items[k].product_type == 'single') {
-            $scope.scanned_count = $scope.scanned_count + $scope.data.order.scanned_items[k].scanned_qty;
-          }
-        }
+        // for (var i = 0; i < $scope.data.order.unscanned_items.length; i++) {
+        //   if ($scope.data.order.unscanned_items[i].product_type == 'single') {
+        //     $scope.unscanned_count = $scope.unscanned_count + $scope.data.order.unscanned_items[i].qty_remaining;
+        //   }
+        //   else if ($scope.data.order.unscanned_items[i].product_type == 'individual') {
+        //     for (var j = 0; j < $scope.data.order.unscanned_items[i].child_items.length; j++) {
+        //       $scope.unscanned_count += $scope.data.order.unscanned_items[i].child_items[j].qty_remaining;
+        //     }
+        //   }
+        // }
+        //
+        // for (var k = 0; k < $scope.data.order.scanned_items.length; k++) {
+        //   if ($scope.data.order.scanned_items[k].product_type == 'single') {
+        //     $scope.scanned_count = $scope.scanned_count + $scope.data.order.scanned_items[k].scanned_qty;
+        //   }
+        // }
 
         // Replaced by orederByObject filter
         //myscope.arrange_unscanned_items();
