@@ -9,6 +9,7 @@ module ScanPack
         data['next_item'] = {}
         data['unscanned_items'] = @single_order.get_unscanned_items(most_recent_scanned_product: @session[:most_recent_scanned_product])
         data['scanned_items'] = @single_order.get_scanned_items
+        data['scanning_count'] = @single_order.scanning_count
         do_if_unscanned_items_present(data) unless data['unscanned_items'].length == 0
         return data
       end

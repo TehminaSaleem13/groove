@@ -364,6 +364,86 @@ class Order < ActiveRecord::Base
     result
   end
 
+  def scanning_count
+    kits = order_items
+      .joins(:product, order_item_kit_products: [:product_kit_skus])
+      .where(
+        products: { is_kit: 1, kit_parsing: %w(individual depends)}
+      )
+      .select([
+        'order_items.qty as order_item_qty', 'order_items.kit_split_qty',
+        'order_items.kit_split_scanned_qty', 'order_items.kit_split',
+        'product_kit_skus.qty as product_kit_skus_qty',
+        'order_item_kit_products.scanned_qty as kit_product_scanned_qty',
+        'kit_parsing', 'order_items.scanned_qty as order_item_scanned_qty',
+        'is_kit', 'is_intangible', 'order_items.id', 'single_scanned_qty'
+      ]).as_json
+
+    single_kit_or_individual_items = order_items.joins(:product)
+      .where(
+        "(products.kit_parsing = 'single' AND products.is_kit = 1) OR "\
+        "(products.kit_parsing = 'individual' AND products.is_kit = 0 )"
+      )
+      .select([
+        'is_kit', 'kit_parsing', 'order_items.qty as order_item_qty',
+        'order_items.scanned_qty as order_item_scanned_qty', 'is_intangible',
+        'order_items.id', 'single_scanned_qty'
+      ]).as_json
+
+    data = kits.push(*single_kit_or_individual_items)
+
+    data.reduce({scanned: 0, unscanned: 0}) do |tmp_hash, data_hash|
+      if data_hash['is_kit'] == 1
+        case data_hash['kit_parsing']
+        when 'single'
+          tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+          tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+        when 'individual'
+          tmp_hash[:unscanned] += (
+            data_hash['order_item_qty'] * data_hash['product_kit_skus_qty']
+          ) - data_hash['kit_product_scanned_qty']
+          tmp_hash[:scanned] += data_hash['kit_product_scanned_qty']
+        when 'depends'
+          if data_hash['kit_split']
+
+            if data_hash['kit_split_qty'] > data_hash['kit_split_scanned_qty']
+              tmp_hash[:unscanned] += (
+                data_hash['kit_split_qty'] * data_hash['product_kit_skus_qty']
+              ) - data_hash['kit_product_scanned_qty']
+            end
+
+            if data_hash['order_item_qty'] > data_hash['kit_split_qty']
+              tmp_hash[:unscanned] += (
+                data_hash['order_item_qty'] - data_hash['kit_split_qty']
+              ) - (
+                data_hash['order_item_scanned_qty'] - data_hash['kit_split_scanned_qty']
+              )
+            end
+
+            if data_hash['kit_split_qty'] > 0
+              tmp_hash[:scanned] += data_hash['kit_split_scanned_qty']
+            end
+
+            if data_hash['single_scanned_qty'] != 0
+              tmp_hash[:scanned] += data_hash['single_scanned_qty']
+            end
+          else
+            tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+            tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+          end
+        end
+      else
+        # for individual items
+        unless data_hash['is_intangible'] == 1
+          tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+        end
+
+        tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+      end
+      tmp_hash
+    end
+  end
+
   def get_unscanned_items(
     most_recent_scanned_product: nil, barcode: nil,
     order_item_status:['unscanned', 'notscanned', 'partially_scanned'],
