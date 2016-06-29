@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160610183611) do
+ActiveRecord::Schema.define(:version => 20160625094754) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -541,7 +541,6 @@ ActiveRecord::Schema.define(:version => 20160610183611) do
     t.string   "method"
     t.datetime "created_at",                                                                 :null => false
     t.datetime "updated_at",                                                                 :null => false
-    t.string   "store_order_id"
     t.text     "notes_internal"
     t.text     "notes_toPacker"
     t.text     "notes_fromPacker"
@@ -562,6 +561,7 @@ ActiveRecord::Schema.define(:version => 20160610183611) do
     t.integer  "weight_oz"
     t.string   "non_hyphen_increment_id"
     t.boolean  "note_confirmation",                                       :default => false
+    t.string   "store_order_id"
     t.integer  "inaccurate_scan_count",                                   :default => 0
     t.datetime "scan_start_time"
     t.boolean  "reallocate_inventory",                                    :default => false
@@ -706,6 +706,7 @@ ActiveRecord::Schema.define(:version => 20160610183611) do
     t.string   "base_sku"
     t.boolean  "is_intangible",                                                 :default => false
     t.text     "product_receiving_instructions"
+    t.boolean  "status_updated",                                                :default => false
   end
 
   add_index "products", ["store_id"], :name => "index_products_on_store_id"
@@ -770,9 +771,9 @@ ActiveRecord::Schema.define(:version => 20160610183611) do
     t.float    "order_complete_sound_vol",                :default => 0.75
     t.boolean  "type_scan_code_enabled",                  :default => true
     t.string   "type_scan_code",                          :default => "*"
-    t.string   "post_scanning_option",                    :default => "None"
     t.string   "escape_string",                           :default => " - "
     t.boolean  "escape_string_enabled",                   :default => false
+    t.string   "post_scanning_option",                    :default => "None"
     t.boolean  "record_lot_number",                       :default => false
     t.boolean  "show_customer_notes",                     :default => false
     t.boolean  "show_internal_notes",                     :default => false

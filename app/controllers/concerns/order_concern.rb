@@ -3,7 +3,7 @@ module OrderConcern
 
   included do
     before_filter :groovepacker_authorize!, except: [:import_shipworks]
-    prepend_before_filter :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip]
+    prepend_before_filter :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip, :run_orders_status_update]
     before_filter :find_order, only: [:update, :show, :record_exception, :clear_exception, :update_order_list]
     before_filter :check_order_edit_permissions, only: [:add_item_to_order, :update_item_in_order, :remove_item_from_order]
     require 'csv'

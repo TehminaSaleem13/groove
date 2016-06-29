@@ -244,6 +244,12 @@ class OrdersController < ApplicationController
 
     render json: @order_id
   end
+
+  def run_orders_status_update
+    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(@result, params, Apartment::Tenant.current)
+    render json: @result
+  end
+
   # def match
   #   @matching_orders = Order.where('postcode LIKE ?', "#{params['confirm']['postcode']}%")
   #   unless @matching_orders.nil?
