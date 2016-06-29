@@ -97,7 +97,7 @@ Groovepacks::Application.configure do
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'], driver: :hiredis)
 
-  config.cache_store = :memory_store, { size: 64.megabytes } #:redis_store, $redis.as_json['options'].merge(db: 15)
+  config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 
   ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
   ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"

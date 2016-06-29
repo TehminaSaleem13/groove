@@ -8,7 +8,12 @@ class Subscription < ActiveRecord::Base
   include PaymentsHelper
 
   after_create :add_subscriber_to_campaignmonitor
+  before_save :check_value_of_customer_subscription
 
+  
+  def check_value_of_customer_subscription
+    self.customer_subscription_id = self.changes.values[0][0] if [nil, "", "null", "undefined"].include?(self.customer_subscription_id)
+  end
   def save_with_payment(one_time_payment)
     begin
       if valid?
