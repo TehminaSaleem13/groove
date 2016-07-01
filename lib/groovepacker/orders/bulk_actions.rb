@@ -16,6 +16,7 @@ module Groovepacker
             # Iterate over orders and check if products are in active status or not.
             # If all products of an order are in active state then change order status.
             # Save all the failed orders in an object or array.
+            bulk_action.update_attributes(:total => orders.length, :completed => 0, :status => 'in_progress')
             orders.each do |order|
               #TODO# Add code for orders cancelation
               bulk_action.current = order.increment_id

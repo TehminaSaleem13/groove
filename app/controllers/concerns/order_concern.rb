@@ -112,53 +112,53 @@ module OrderConcern
                   'previous_imported' => import_result[:previous_imported])
   end
 
-  def change_order_status(order)
-    # TODO: verify this status check
-    # if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
-    #   (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
-    #   puts "status change not allowed"
-    if permitted_to_status_change(order)
-      @result['error_messages'].push('This status change is not permitted.')
-      return
-    end
+  # def change_order_status(order)
+  #   # TODO: verify this status check
+  #   # if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
+  #   #   (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
+  #   #   puts "status change not allowed"
+  #   if permitted_to_status_change(order)
+  #     @result['error_messages'].push('This status change is not permitted.')
+  #     return
+  #   end
 
-    non_scanning_states = { 'serviceissue' => 'Service Issue', 'onhold' => 'Action Required' }
-    if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
-      @result['notice_messages'].push "#{non_scanning_states[order.status]} Orders cannot be changed to scanned"
-      return
-    end
+  #   non_scanning_states = { 'serviceissue' => 'Service Issue', 'onhold' => 'Action Required' }
+  #   if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
+  #     @result['notice_messages'].push "#{non_scanning_states[order.status]} Orders cannot be changed to scanned"
+  #     return
+  #   end
 
-    return if order_has_inactive_or_new_products(order)
+  #   return if order_has_inactive_or_new_products(order)
 
-    order.status = params[:status]
-    order.reallocate_inventory = params[:reallocate_inventory]
-    order.scanned_by_status_change = false
-    update_status_and_add_activity(order) if params[:status] == 'scanned'
-    return if order.save
-    set_status_and_message(false, order.errors.full_messages)
-  end
+  #   order.status = params[:status]
+  #   order.reallocate_inventory = params[:reallocate_inventory]
+  #   order.scanned_by_status_change = false
+  #   update_status_and_add_activity(order) if params[:status] == 'scanned'
+  #   return if order.save
+  #   set_status_and_message(false, order.errors.full_messages)
+  # end
 
-  def order_has_inactive_or_new_products(order)
-    return false unless order.has_inactive_or_new_products && params[:status].in?(%w(awaiting scanned))
-    # Put on hold if order status not in serviceissue
-    if params[:status].eql? 'awaiting'
-      order.status = 'onhold'
-      order.save
-    end
+  # def order_has_inactive_or_new_products(order)
+  #   return false unless order.has_inactive_or_new_products && params[:status].in?(%w(awaiting scanned))
+  #   # Put on hold if order status not in serviceissue
+  #   if params[:status].eql? 'awaiting'
+  #     order.status = 'onhold'
+  #     order.save
+  #   end
 
-    @result['notice_messages'].push 'One or more of the selected orders contains'\
-        ' New or Inactive items so they can not be changed to Awaiting.'\
-        ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
-        'More Info</a>.'
-    true
-  end
+  #   @result['notice_messages'].push 'One or more of the selected orders contains'\
+  #       ' New or Inactive items so they can not be changed to Awaiting.'\
+  #       ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
+  #       'More Info</a>.'
+  #   true
+  # end
 
-  def update_status_and_add_activity(order)
-    order.scanned_on = Time.now
-    order.packing_user_id = current_user
-    order.scanned_by_status_change = true
-    order.addactivity('Order Manually Moved To Scanned Status', current_user.username)
-  end
+  # def update_status_and_add_activity(order)
+  #   order.scanned_on = Time.now
+  #   order.packing_user_id = current_user
+  #   order.scanned_by_status_change = true
+  #   order.addactivity('Order Manually Moved To Scanned Status', current_user.username)
+  # end
 
   def update_order_attrs
     status = @order.status

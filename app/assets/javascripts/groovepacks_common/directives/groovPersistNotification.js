@@ -45,7 +45,6 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
         if (typeof scope.notifications[scope.selected] == "undefined") {
           scope.selected = '';
         }
-
         for (var i in scope.notifications) {
           if (scope.notifications.hasOwnProperty(i)) {
             if (scope.selected != '' && scope.notifications[scope.selected].type == 'in_progress') return;
@@ -173,7 +172,7 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
           if (message['activity'] == 'kit') {
             notif_message = '<b>Importing Kits:</b> ';
           }
-        } else if (message['identifier']=='order' && message['activity']=='status_update') {
+        } else if ((message['identifier']=='orders' || message['identifier']=='order') && message['activity']=='status_update') {
           if (message['status']=='pending') {
             notif_message = '<b>You have '+ message['total'] +' orders to update </b> ';
           } else if (message['status']=='scheduled') {
@@ -184,6 +183,7 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
             notif_message = '<b>' + message['completed'] +' orders status updated: </b> ';
           }
         }
+        scope.notifications[scope.selected].identifier = message['identifier'];
         myscope.repurpose_selected();
         scope.notifications[hash].type = message['status'];
         if (message['status'] == "scheduled") {

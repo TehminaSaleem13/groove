@@ -82,7 +82,8 @@ class OrdersController < ApplicationController
 
   def change_orders_status
     if current_user.can? 'change_order_status'
-      list_selected_orders.each { |order| change_order_status(order) }
+      GrooveBulkActions.execute_groove_bulk_action("status_update", params, current_user)
+      # list_selected_orders.each { |order| change_order_status(order) }
     else
       set_status_and_message(false, "You do not have enough permissions to change order status", ['push', 'error_messages'])
     end
