@@ -666,11 +666,11 @@ class Order < ActiveRecord::Base
     end
   end
 
-  def reset_scanned_status
+  def reset_scanned_status(current_user)
     self.order_items.each do |order_item|
       order_item.reset_scanned
     end
-
+    self.addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
     self.order_serials.destroy_all
     self.set_order_status
   end
@@ -784,7 +784,8 @@ class Order < ActiveRecord::Base
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         Groovepacker::Inventory::Orders.unsell(self)
-        self.reset_scanned_status
+        user = User.find_by_id(GroovRealtime.current_user_id)
+        self.reset_scanned_status(user)
       end
     end
     self.update_column(:reallocate_inventory, false)

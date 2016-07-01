@@ -100,8 +100,17 @@ groovepacks_controllers.
         if ($scope.data.input!=undefined && $scope.data.input!='') {
           myscope.last_scanned_barcode = $scope.data.input;
         }
-        $window.increment_id = $scope.data.order.increment_id;
-        scanPack.input($scope.data.input, $scope.current_state, id).success($scope.handle_scan_return);
+        var barcodes = [];
+        if (typeof $scope.data.order.next_item != "undefined" ){
+          var values = $scope.data.order.next_item.barcodes;
+          angular.forEach(values, function(value) { this.push(value.barcode.toLowerCase()); }, barcodes);
+        };
+        if (barcodes.includes($scope.data.input.toLowerCase()) || ($scope.current_state != 'scanpack.rfp.default')) {
+          $window.increment_id = $scope.data.order.increment_id;
+          scanPack.input($scope.data.input, $scope.current_state, id).success($scope.handle_scan_return);
+        } else {
+          $scope.trigger_scan_message('fail');
+        }      
       };
 
       myscope.check_reload_settings = function () {
