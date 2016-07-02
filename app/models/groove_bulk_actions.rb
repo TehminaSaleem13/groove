@@ -12,8 +12,10 @@ class GrooveBulkActions < ActiveRecord::Base
     current_tenant = Apartment::Tenant.current
     bulkaction_id = groove_bulk_actions.id
     username = current_user.username
+    orders = orders || {}
+    $redis.set("bulk_action_data_#{bulkaction_id}",Marshal.dump(orders))
     self.delay(run_at: 1.seconds.from_now).execute_relevant_action(
-        activity, current_tenant, params, bulkaction_id, username, orders)
+        activity, current_tenant, params, bulkaction_id, username)
   end
 
   def self.update_groove_bulk_actions(activity, params)
@@ -25,11 +27,11 @@ class GrooveBulkActions < ActiveRecord::Base
     groove_bulk_actions
   end
 
-  def self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username, orders_or_products)
+  def self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
     bulk_actions = params["controller"] == "orders" ? Groovepacker::Orders::BulkActions.new : Groovepacker::Products::BulkActions.new
     case activity
     when 'status_update'
-      bulk_actions.status_update(current_tenant, params, bulkaction_id, username, orders_or_products)
+      bulk_actions.status_update(current_tenant, params, bulkaction_id, username)
     when 'delete'
       bulk_actions.delete(current_tenant, params, bulkaction_id, username)
     when 'duplicate'

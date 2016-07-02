@@ -3,11 +3,14 @@ module Groovepacker
     class BulkActions
 
       # Changes the status of orders
-      def status_update(tenant, params, bulk_actions_id, username, orders)
+      def status_update(tenant, params, bulk_actions_id, username)
         # Change db for tenant
         Apartment::Tenant.switch(tenant)
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         #orders = get_all_orders(params)
+        orders = $redis.get("bulk_action_data_#{bulk_actions_id}")
+        orders = Marshal.load(orders)
+        #orders = []
         @result = Hash.new
         @result['messages'] = []
         @result['status'] = true
