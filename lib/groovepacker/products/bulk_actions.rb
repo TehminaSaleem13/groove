@@ -4,7 +4,7 @@ module Groovepacker
       include ProductsHelper
       include SettingsHelper
 
-      def status_update(tenant, params, bulk_actions_id)
+      def status_update(tenant, params, bulk_actions_id, username, products=nil)
         Apartment::Tenant.switch(tenant)
         result = Hash.new
         result['messages'] =[]

@@ -127,7 +127,7 @@ module ScanPack
       if barcode_found
         last_activity = @single_order.order_activities.last
         action_keyword = last_activity.try(:action).try(:split, ' ')
-        if action_keyword.present? && action_keyword.include?("click") && action_keyword.include?(@order_item.sku.split(' ')[0]) && @typein_count > 1
+        if action_keyword.present? && @order_item.present? && action_keyword.include?("click") && action_keyword.include?(@order_item.try(:sku).try(:split, ' ')[0]) && @typein_count > 1
           last_activity.action  += " for a Type-In count"
           last_activity.save
         end 
