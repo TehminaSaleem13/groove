@@ -19,7 +19,7 @@ module Groovepacker
             # Iterate over orders and check if products are in active status or not.
             # If all products of an order are in active state then change order status.
             # Save all the failed orders in an object or array.
-            bulk_action.update_attributes(:total => orders.length, :completed => 0, :status => 'in_progress')
+            bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
             orders.each do |order|
               #TODO# Add code for orders cancelation
               bulk_action.current = order.increment_id
@@ -28,11 +28,8 @@ module Groovepacker
               # Iterate all products and check if the status is something other 
               # than active then the order status can't be changed
               change_order_status(order, params, username)
-              # If no products have status other than active then change the
-              # status to requested status
+              product_not_active = check_inactive_product_exist(product_not_active, params, order)
               unless product_not_active.present?
-                order.status = params['status']
-                order.save
                 bulk_action.completed += 1
                 bulk_action.save
               end
@@ -53,23 +50,27 @@ module Groovepacker
 
       end
 
-
+      def check_inactive_product_exist(product_not_active, params, order)
+        return unless params['status'].eql?('awaiting')
+        order.order_items.each do |order_item|
+          unless order_item.product.status.eql?('active')
+            @result['status'] &= false
+            @result['messages'].push('There was a problem changing order status for '+
+              order.increment_id + '. Reason: Order must have active products in it'
+            )
+            product_not_active = true
+            break
+          end
+        end
+        product_not_active
+      end
 
       def change_order_status(order, params, username)
         # TODO: verify this status check
-        # if (Order::SOLD_STATUSES.include?(@order.status) && Order::UNALLOCATE_STATUSES.include?(params[:status])) ||
-        #   (Order::UNALLOCATE_STATUSES.include?(@order.status) && Order::SOLD_STATUSES.include?(params[:status]))
-        #   puts "status change not allowed"
-        if permitted_to_status_change(order, params)
-          @result['error_messages'].push('This status change is not permitted.')
-          return
-        end
+        return if permitted_to_status_change(order, params)
 
         non_scanning_states = { 'serviceissue' => 'Service Issue', 'onhold' => 'Action Required' }
-        if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
-          @result['notice_messages'].push "#{non_scanning_states[order.status]} Orders cannot be changed to scanned"
-          return
-        end
+        return if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
 
         return if order_has_inactive_or_new_products(order, params)
 
@@ -94,10 +95,10 @@ module Groovepacker
           order.save
         end
 
-        @result['notice_messages'].push 'One or more of the selected orders contains'\
-            ' New or Inactive items so they can not be changed to Awaiting.'\
-            ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
-            'More Info</a>.'
+        #@result['notice_messages'].push 'One or more of the selected orders contains'\
+        #    ' New or Inactive items so they can not be changed to Awaiting.'\
+        #    ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
+        #    'More Info</a>.'
         true
       end
 
