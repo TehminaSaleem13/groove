@@ -164,8 +164,8 @@ module ScanPack
       single_order_status = @single_order.status
       has_inactive_or_new_products = @single_order.has_inactive_or_new_products
 
-      Rails.cache.clear
-      
+      # Rails.cache.clear
+
       return unless @single_order.order_items.present? &&
         (
           (single_order_status.eql?('awaiting') && has_inactive_or_new_products) ||

@@ -12,7 +12,7 @@ class TenantsController < ApplicationController
 
   def show
     result = admin_single_info
-
+    result['tenant']['logged_in_user'] = current_user.name
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }

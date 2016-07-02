@@ -16,6 +16,7 @@ module Groovepacker
             # Iterate over orders and check if products are in active status or not.
             # If all products of an order are in active state then change order status.
             # Save all the failed orders in an object or array.
+            bulk_action.update_attributes(:total => orders.length, :completed => 0, :status => 'in_progress')
             orders.each do |order|
               #TODO# Add code for orders cancelation
               bulk_action.current = order.increment_id
@@ -105,6 +106,28 @@ module Groovepacker
             end
           end
         end
+      end
+
+      def update_bulk_orders_status(result, params, tenant)
+        Apartment::Tenant.switch(tenant)
+        bulk_action = GrooveBulkActions.where("identifier='order' and activity='status_update'").last
+        bulk_action_update_status(bulk_action, "in_progress")
+        count = 1
+        updated_products = Product.where(status_updated: true)
+        orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+        (orders||[]).each do |order|
+          order.update_order_status
+          bulk_action.completed = count
+          bulk_action.save
+          count += 1
+        end
+        updated_products.update_all(status_updated: false)
+        bulk_action_update_status(bulk_action, "completed")
+      end
+
+      def bulk_action_update_status(bulk_action, status)
+        bulk_action.status = status
+        bulk_action.save
       end
     end
   end

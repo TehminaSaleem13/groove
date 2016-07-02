@@ -277,8 +277,7 @@ class ProductsController < ApplicationController
   end
 
   def update_product_list
-    result = Product.update_product_list(params, @result)
-
+    @result = Product.update_product_list(params, @result)
     render json: @result
   end
 

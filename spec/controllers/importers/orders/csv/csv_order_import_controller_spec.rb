@@ -137,7 +137,7 @@ describe StoresController do
             expect(product.status).to eq('active')
           end
           Order.all.each do |order|
-            expect(order.status).to eq('awaiting')
+            expect(order.status).to eq('onhold')
           end
         end
       end
@@ -336,7 +336,7 @@ describe StoresController do
             expect(product.status).to eq('active')
           end
           Order.all.each do |order|
-            expect(order.status).to eq('awaiting')
+            expect(order.status).to eq('onhold')
           end
         end
         it "Products which have new/inactive base product stay as new products" do

@@ -6,6 +6,7 @@
     ng-bind-html="notifications[selected].message"></span></progressbar>
   <div ng-show="selected != '' && !detail_open" 
     class="pull-right">
+      <a style="padding-right: 10px;" ng-click="update_orders_status($event);" href="" ng-show="notifications[selected].identifier=='order'">Update</a>
       <!-- <a href="" ng-click="notifications[selected].cancel($event)">Cancel All</a> -->
       <a href="" ng-click="bulkCancelAction()">Cancel All</a>
   </div>
@@ -16,6 +17,7 @@
                    type="{{notifications[selected].type}}">
         <div ng-bind-html="notifications[selected].message"></div>
       </progressbar>
+      <a class="pull-right" style="padding-right: 10px;" ng-click="update_orders_status($event);" href="" ng-show="notifications[selected].identifier=='order'">Update</a>
       <div class="pull-right"><a href="" ng-click="notifications[selected].cancel($event)">Cancel</a></div>
       <div class="details-text" ng-bind-html="notifications[selected].details"
            ng-show="notifications[selected].details"></div>
@@ -25,6 +27,7 @@
       <progressbar class="progress-striped" value="notification.percent" type="{{notification.type}}">
         <div ng-bind-html="notification.message"></div>
       </progressbar>
+      <a style="padding-right: 10px;" ng-click="update_orders_status($event);" href="" ng-show="notifications[selected].identifier=='order'">Update</a>
       <div class="pull-right"><a href="" ng-click="notification.cancel($event)">Cancel</a></div>
       <div class="details-text" ng-bind-html="notification.details" ng-show="notification.details"></div>
     </div>

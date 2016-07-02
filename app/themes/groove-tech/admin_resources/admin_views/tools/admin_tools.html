@@ -33,7 +33,12 @@
             </li>
           </ul>
         </div>
+      <div class="col-lg-4 col-md-4">
+        <span>All Tenant Sorting</span>
+        <div toggle-switch ng-model="tenants.update_page_sort" ng-click="update_page_sorting()"></div>
       </div>
+    </div>
+        
       <div class="row">
         <div class="col-sm-12">
           <div groov-data-grid="gridOptions" groov-list="tenants.list">

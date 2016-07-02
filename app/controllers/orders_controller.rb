@@ -82,7 +82,8 @@ class OrdersController < ApplicationController
 
   def change_orders_status
     if current_user.can? 'change_order_status'
-      list_selected_orders.each { |order| change_order_status(order) }
+      GrooveBulkActions.execute_groove_bulk_action("status_update", params, current_user)
+      # list_selected_orders.each { |order| change_order_status(order) }
     else
       set_status_and_message(false, "You do not have enough permissions to change order status", ['push', 'error_messages'])
     end
@@ -244,6 +245,12 @@ class OrdersController < ApplicationController
 
     render json: @order_id
   end
+
+  def run_orders_status_update
+    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(@result, params, Apartment::Tenant.current)
+    render json: @result
+  end
+
   # def match
   #   @matching_orders = Order.where('postcode LIKE ?', "#{params['confirm']['postcode']}%")
   #   unless @matching_orders.nil?
