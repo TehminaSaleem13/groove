@@ -1,3 +1,3 @@
 if Rails.env == "development"
-  require_dependency "#{Rails.root}/app/models/orders.rb"
+   Dir["#{Rails.root}/app/models/**/*.rb"].each { |file| require_dependency file }
 end
