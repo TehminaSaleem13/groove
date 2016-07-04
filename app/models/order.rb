@@ -877,20 +877,20 @@ class Order < ActiveRecord::Base
     return result
   end
 
-  def self.duplicate_selected_orders(orders, current_user, result)
-    orders.each do |order|
-      neworder = order.duplicate_single_order(current_user, result)
+  # def self.duplicate_selected_orders(orders, current_user, result)
+  #   orders.each do |order|
+  #     neworder = order.duplicate_single_order(current_user, result)
 
-      unless neworder.persisted?
-        result['status'] = false
-        result['error_messages'] = neworder.errors.full_messages
-      else
-        #add activity
-        Order.add_activity_to_new_order(neworder, order.order_items, current_user)
-      end
-    end
-    return result
-  end
+  #     unless neworder.persisted?
+  #       result['status'] = false
+  #       result['error_messages'] = neworder.errors.full_messages
+  #     else
+  #       #add activity
+  #       Order.add_activity_to_new_order(neworder, order.order_items, current_user)
+  #     end
+  #   end
+  #   return result
+  # end
 
   def self.add_activity_to_new_order(neworder, order_items, current_user)
     order_items.each do |order_item|
@@ -911,20 +911,20 @@ class Order < ActiveRecord::Base
     neworder_item.save
   end
 
-  def duplicate_single_order(current_user, result)
-    neworder = self.dup
-    index = 0
-    temp_increment_id = ''
+  # def duplicate_single_order(current_user, result)
+  #   neworder = self.dup
+  #   index = 0
+  #   temp_increment_id = ''
 
-    begin
-      temp_increment_id = self.increment_id + "(duplicate"+index.to_s+ ")"
-      neworder.increment_id = temp_increment_id
-      orderslist = Order.where(:increment_id => temp_increment_id)
-      index = index + 1
-    end while orderslist.present?
-    neworder.save(:validate => false)
-    return neworder
-  end
+  #   begin
+  #     temp_increment_id = self.increment_id + "(duplicate"+index.to_s+ ")"
+  #     neworder.increment_id = temp_increment_id
+  #     orderslist = Order.where(:increment_id => temp_increment_id)
+  #     index = index + 1
+  #   end while orderslist.present?
+  #   neworder.save(:validate => false)
+  #   return neworder
+  # end
 
   def set_traced_in_dashboard
     self.traced_in_dashboard = true

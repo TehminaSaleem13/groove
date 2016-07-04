@@ -50,7 +50,8 @@ class OrdersController < ApplicationController
 
   def duplicate_orders
     if current_user.can?('add_edit_order_items')
-      @result = Order.duplicate_selected_orders(list_selected_orders, current_user, @result)
+      GrooveBulkActions.execute_groove_bulk_action("duplicate", params, current_user, list_selected_orders)
+      # @result = Order.duplicate_selected_orders(list_selected_orders, current_user, @result)
     else
       set_status_and_message(false, "You do not have enough permissions to duplicate order", ['push'])
     end
@@ -59,7 +60,8 @@ class OrdersController < ApplicationController
 
   def delete_orders
     if current_user.can? 'add_edit_order_items'
-      delete_selected_orders(list_selected_orders)
+      GrooveBulkActions.execute_groove_bulk_action("delete", params, current_user, list_selected_orders)
+      # delete_selected_orders(list_selected_orders)
     else
       set_status_and_message(false, "You do not have enough permissions to delete order", ['push'])
     end

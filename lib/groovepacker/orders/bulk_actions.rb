@@ -119,6 +119,65 @@ module Groovepacker
       #   end
       #   orders
       # end
+      def delete(current_tenant, params, bulkaction_id, username)
+        Apartment::Tenant.switch(current_tenant)
+        bulk_action = GrooveBulkActions.find(bulkaction_id)
+        orders = $redis.get("bulk_action_delete_data_#{bulkaction_id}")
+        orders = Marshal.load(orders)
+        result = Hash.new
+        result['messages'] = []
+        result['status'] = true
+        bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+        orders.each do |order|
+          bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
+          product_not_active = false
+          result['messages'].push('There was a problem deleting order '+ order.increment_id ) unless order.destroy
+        end
+        unless bulk_action.cancel?
+          bulk_action.status = result['status'] ? 'completed' : 'failed'
+          bulk_action.messages = result['messages']
+          bulk_action.current = ''
+          bulk_action.save
+        end
+      end
+
+      def duplicate(tenant, params, bulk_actions_id)
+        Apartment::Tenant.switch(tenant)
+        result = Hash.new
+        result['messages'] =[]
+        result['status'] = true
+        bulk_action = GrooveBulkActions.find(bulk_actions_id)
+        orders = $redis.get("bulk_action_duplicate_data_#{bulk_actions_id}")
+        orders = Marshal.load(orders)
+        bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+        index = 0
+        temp_increment_id = ''
+        orders.each do |order|
+          neworder = order.dup
+          begin
+            temp_increment_id = order.increment_id + "(duplicate"+index.to_s+ ")"
+            neworder.increment_id = temp_increment_id
+            orderslist = Order.where(:increment_id => temp_increment_id)
+            index = index + 1
+            bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
+          end while orderslist.present?
+          neworder.save(:validate => false)
+          # current_user = User.find_by_id(GroovRealtime.current_user_id)
+          # unless neworder.persisted?
+          #   result['status'] = false
+          #   result['error_messages'] = neworder.errors.full_messages
+          # else
+          #   Order.add_activity_to_new_order(neworder, order.order_items, current_user)
+          # end
+        end
+
+        unless bulk_action.cancel?
+          bulk_action.status = result['status'] ? 'completed' : 'failed'
+          bulk_action.messages = result['messages']
+          bulk_action.current = ''
+          bulk_action.save
+        end        
+      end
 
       def import_csv_orders(tenant, store_id, data, current_user_id)
         Apartment::Tenant.switch(tenant)

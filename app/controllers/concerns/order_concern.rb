@@ -309,9 +309,9 @@ module OrderConcern
     end
   end
 
-  def delete_selected_orders(orders)
-    orders.each do |order|
-      set_status_and_message(false, order.errors.full_messages, ['&']) unless order.destroy
-    end
-  end
+  # def delete_selected_orders(orders)
+  #   orders.each do |order|
+  #     set_status_and_message(false, order.errors.full_messages, ['&']) unless order.destroy
+  #   end
+  # end
 end
