@@ -46,6 +46,7 @@ module TenantsHelper
     result = result_hash
     @tenant = find_tenant(params[:id])
     if @tenant
+      @tenant.update_attribute(:orders_delete_days, params["basicinfo"]["orders_delete_days"])
       helper = Groovepacker::Tenants::Helper.new
       case type
       when 'update_restriction'

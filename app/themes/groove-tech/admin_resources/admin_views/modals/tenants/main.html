@@ -62,6 +62,21 @@
           </div>
         </div>
         <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-calendar fa-5x"></i>
+            <div>Days</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" min= 0 ng-model="tenants.single.basicinfo.orders_delete_days"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div style="clear:both;"><br/></div>
+        <div class="col-sm-4"></div>
+
+
+
+        <div class="col-sm-2">
           <br/><br/>
           <center>
             <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}</div><br/><br/>
@@ -74,7 +89,13 @@
                    class="form-control input-style"/>
           </div> -->
         </div>
-        <div class="col-sm-1"></div>
+        <div class="col-sm-2">
+          <br><br>
+          <button ng-click="update_access_restrictions()"
+                  class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
+          </button>
+        </div>
+        <div class="col-sm-4"></div>
       </div>
       <div style="clear:both;"><br/></div>
       
@@ -85,9 +106,6 @@
             rows="5" ng-model="tenants.single.basicinfo.addon_notes" placeholder="Unfocus will save data..." ng-blur="update_access_restrictions()"></textarea>
         </div>
         <div class="col-sm-4">
-          <button ng-click="update_access_restrictions()"
-                  class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
-          </button>
           <div style="clear:both;"></div>
           <div>
             <h4>Stripe Customer</h4>
@@ -101,7 +119,7 @@
           <div style="clear:both;"></div>
           <div ng-show="tenants.single.logged_in_user == 'gpadmin'">
             <h4 class="control-label">Subscription ID</h4>
-            <input type="password" ng-model="tenants.single.subscription_info.customer_subscription_id" class="form-control input-style"/>
+            <input type="password" ng-model="tenants.single.subscription_info.customer_subscription_id" ng-blur="update_access_restrictions()" class="form-control input-style"/>
           </div>
         </div>
         <div class="col-sm-1"></div>

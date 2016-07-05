@@ -26,9 +26,14 @@ class DeleteOrders
   def perform_for_single_tenant(tenant)
     begin
       Apartment::Tenant.switch(tenant.name)
+      orders_ninety_days_ago_ids = []
+      orders_custom_days_id = []
+      delete_orders_days = tenant.orders_delete_days
       #@orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
       #@orders = Order.find(:all, :conditions => ["updated_at < ?", 91.days.ago.beginning_of_day])
-      @orders_ids = Order.where("updated_at < ?", 91.days.ago.beginning_of_day).pluck(:id)
+      orders_ninety_days_ago_ids = Order.where("updated_at < ?", 91.days.ago.beginning_of_day).pluck(:id)
+      orders_custom_days_id = Order.where("updated_at < ? && (status = ? || status = ?)", delete_orders_days.days.ago.beginning_of_day, "awaiting", "onhold").pluck(:id) if delete_orders_days > 0
+      @orders_ids = (orders_ninety_days_ago_ids + orders_custom_days_id).uniq
       @orders_ids = @orders_ids.first(@delete_count) unless @delete_count.blank?
       return if @orders_ids.empty?
       take_backup(tenant.name)

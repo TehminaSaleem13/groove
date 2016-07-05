@@ -666,11 +666,11 @@ class Order < ActiveRecord::Base
     end
   end
 
-  def reset_scanned_status
+  def reset_scanned_status(current_user)
     self.order_items.each do |order_item|
       order_item.reset_scanned
     end
-
+    self.addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
     self.order_serials.destroy_all
     self.set_order_status
   end
@@ -784,7 +784,8 @@ class Order < ActiveRecord::Base
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         Groovepacker::Inventory::Orders.unsell(self)
-        self.reset_scanned_status
+        user = User.find_by_id(GroovRealtime.current_user_id)
+        self.reset_scanned_status(user)
       end
     end
     self.update_column(:reallocate_inventory, false)
@@ -876,26 +877,25 @@ class Order < ActiveRecord::Base
     return result
   end
 
-  def self.duplicate_selected_orders(orders, current_user, result)
-    orders.each do |order|
-      neworder = order.duplicate_single_order(current_user, result)
+  # def self.duplicate_selected_orders(orders, current_user, result)
+  #   orders.each do |order|
+  #     neworder = order.duplicate_single_order(current_user, result)
 
-      unless neworder.persisted?
-        result['status'] = false
-        result['error_messages'] = neworder.errors.full_messages
-      else
-        #add activity
-        Order.add_activity_to_new_order(neworder, order.order_items, current_user)
-      end
-    end
-    return result
-  end
+  #     unless neworder.persisted?
+  #       result['status'] = false
+  #       result['error_messages'] = neworder.errors.full_messages
+  #     else
+  #       #add activity
+  #       Order.add_activity_to_new_order(neworder, order.order_items, current_user)
+  #     end
+  #   end
+  #   return result
+  # end
 
-  def self.add_activity_to_new_order(neworder, order_items, current_user)
+  def self.add_activity_to_new_order(neworder, order_items, username)
     order_items.each do |order_item|
       Order.create_new_order_item(neworder, order_item)
     end
-    username = current_user.name
     neworder.addactivity("Order duplicated", username)
   end
 
@@ -910,20 +910,20 @@ class Order < ActiveRecord::Base
     neworder_item.save
   end
 
-  def duplicate_single_order(current_user, result)
-    neworder = self.dup
-    index = 0
-    temp_increment_id = ''
+  # def duplicate_single_order(current_user, result)
+  #   neworder = self.dup
+  #   index = 0
+  #   temp_increment_id = ''
 
-    begin
-      temp_increment_id = self.increment_id + "(duplicate"+index.to_s+ ")"
-      neworder.increment_id = temp_increment_id
-      orderslist = Order.where(:increment_id => temp_increment_id)
-      index = index + 1
-    end while orderslist.present?
-    neworder.save(:validate => false)
-    return neworder
-  end
+  #   begin
+  #     temp_increment_id = self.increment_id + "(duplicate"+index.to_s+ ")"
+  #     neworder.increment_id = temp_increment_id
+  #     orderslist = Order.where(:increment_id => temp_increment_id)
+  #     index = index + 1
+  #   end while orderslist.present?
+  #   neworder.save(:validate => false)
+  #   return neworder
+  # end
 
   def set_traced_in_dashboard
     self.traced_in_dashboard = true
