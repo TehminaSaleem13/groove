@@ -892,11 +892,10 @@ class Order < ActiveRecord::Base
   #   return result
   # end
 
-  def self.add_activity_to_new_order(neworder, order_items, current_user)
+  def self.add_activity_to_new_order(neworder, order_items, username)
     order_items.each do |order_item|
       Order.create_new_order_item(neworder, order_item)
     end
-    username = current_user.name
     neworder.addactivity("Order duplicated", username)
   end
 
