@@ -749,16 +749,13 @@ class Order < ActiveRecord::Base
   end
 
   def get_items_count
-    # count = 0
-    # unless self.order_items.empty?
-    #   self.order_items.each do |item|
-    #     count = count + item.qty unless item.qty.nil?
-    #   end
-    # end
-    # count
-
-    # unscanned + scanned count
-    scanning_count.values.sum
+    count = 0
+    unless self.order_items.empty?
+      self.order_items.each do |item|
+        count = count + item.qty unless item.qty.nil?
+      end
+    end
+    count
   end
 
   def update_inventory_levels_for_items
