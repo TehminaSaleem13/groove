@@ -35,9 +35,9 @@ module Groovepacker
         Apartment::Tenant.switch(tenant)
         user = User.where(username: "gpadmin").first
         if OrderImportSummary.where(status: 'in_progress').blank?
-          stores = Store.where(store_type: "CSV")
+          stores = Store.includes(:ftp_credential).where('store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
           result = Hash[:status => true]
-          stores.each do |store|
+          (stores || []).each do |store|
             while result[:status] == true do
               groove_ftp = FTP::FtpConnectionManager.get_instance(store)
               result = groove_ftp.retrieve()
