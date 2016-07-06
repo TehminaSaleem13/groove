@@ -35,6 +35,12 @@ module Groovepacker
 
       def check_inactive_product_exist(product_not_active, params, order)
         return unless params['status'].eql?('awaiting')
+        if order.order_items.present? && order.order_items.map(&:qty).sum == 0
+          order.update_attribute(:status, "onhold")
+          @result['status'] &= false
+          @result['messages'].push('Only orders containing Active items can be Awaiting') 
+          # product_not_active = true
+        end
         order.order_items.each do |order_item|
           unless order_item.product.status.eql?('active')
             @result['status'] &= false
@@ -160,15 +166,14 @@ module Groovepacker
         Apartment::Tenant.switch(tenant)
         if OrderImportSummary.where(status: 'in_progress').blank?
           OrderImportSummary.delete_all
-          order_import_summary = OrderImportSummary.new(user_id: current_user_id, status: 'not_started')
-          order_import_summary.save
+          order_import_summary = OrderImportSummary.create(user_id: current_user_id, status: 'not_started')
           order_import_summaries = OrderImportSummary.where(status: 'not_started')
           if !order_import_summaries.blank?
             ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
             ordered_import_summaries.each do |orderimport_summary|
               if orderimport_summary == ordered_import_summaries.first
                 ImportItem.where(store_id: store_id).delete_all
-                import_item = ImportItem.find_by_store_id(store_id)                
+                import_item = ImportItem.find_by_store_id(store_id)
                 import_item = ImportItem.new(store_id: store_id) if import_item.nil?
                 import_item.order_import_summary_id = orderimport_summary.id
                 import_item.status = 'not_started'

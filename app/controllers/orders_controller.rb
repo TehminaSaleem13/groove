@@ -50,6 +50,7 @@ class OrdersController < ApplicationController
 
   def duplicate_orders
     execute_groove_bulk_action("duplicate")
+    render json: @result
     # if current_user.can?('add_edit_order_items')
     #   GrooveBulkActions.execute_groove_bulk_action("duplicate", params, current_user, list_selected_orders)
     #   # @result = Order.duplicate_selected_orders(list_selected_orders, current_user, @result)
@@ -61,6 +62,7 @@ class OrdersController < ApplicationController
 
   def delete_orders
     execute_groove_bulk_action("delete")
+    render json: @result
     # if current_user.can? 'add_edit_order_items'
     #   GrooveBulkActions.execute_groove_bulk_action("delete", params, current_user, list_selected_orders)
     #   # delete_selected_orders(list_selected_orders)
@@ -270,7 +272,5 @@ class OrdersController < ApplicationController
     else
       set_status_and_message(false, "You do not have enough permissions to #{activity}", ['push', 'error_messages'])  
     end
-    render json: @result
   end
-
 end
