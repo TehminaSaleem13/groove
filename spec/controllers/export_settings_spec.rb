@@ -128,10 +128,6 @@ RSpec.describe ExportsettingsController, type: :controller do
 
       get :order_exports, {:start=> nil, :end=> nil} 
       expect(response.status).to eq(200)
-      filename = File.new("#{Rails.root}/public/csv/error.csv", "w+")
-      open("#{Rails.root}/public/csv/error.csv", "w+") do |f|
-        f << response.body.chomp
-      end
       content = File.read("#{Rails.root}/public/csv/error.csv")
       expect(content).to have_content("We need a start and an end time")
       File.delete("#{Rails.root}/public/csv/error.csv")

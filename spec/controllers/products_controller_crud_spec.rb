@@ -237,7 +237,7 @@ it 'Should update image for product' do
   @file_1 = fixture_file_upload('/files/Groovepacker_image.png', 'png')
   image_id = ProductImage.all.first.id
 
-  post :add_image, {:id=>image_id, :product_image=>@file_1}
+  post :add_image, {:id=>product.id, :product_image=>@file_1}
   expect(response.status).to eq(200)
   result_1 = JSON.parse(response.body)
 
