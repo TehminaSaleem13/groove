@@ -35,11 +35,11 @@ class GrooveBulkActions < ActiveRecord::Base
       bulk_actions.status_update(current_tenant, params, bulkaction_id, username)
     when activity=='delete' && params["controller"]=="orders"
       bulk_actions.delete(current_tenant, bulkaction_id)
-    when activity=='delete' && params["controller"]=="product"
+    when activity=='delete' && params["controller"]=="products"
       bulk_actions.delete(current_tenant, params, bulkaction_id, username)
     when activity=='duplicate' && params["controller"]=="orders"
       bulk_actions.duplicate(current_tenant, bulkaction_id, username)
-    when activity=='duplicate' && params["controller"]=="product"
+    when activity=='duplicate' && params["controller"]=="products"
       bulk_actions.duplicate(current_tenant, params, bulkaction_id)
     when activity=='export'
       bulk_actions.export(current_tenant, params, bulkaction_id, username)
