@@ -113,7 +113,7 @@ module Groovepacker
               case @import_item.import_type
               when 'deep'
                 self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
-              when 'regular' || 'quick'
+              when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
                 self.import_from = quick_import_date.blank? ? DateTime.now-1.days : quick_import_date
