@@ -1,12 +1,21 @@
 namespace :ftp_csv_file_import do
   desc "import file from server"
   task :ftp_import => :environment do
+    current_time = Time.now.in_time_zone('Eastern Time (US & Canada)').strftime("%I:%M")
     Tenant.all.each do |tenant|
       begin
-        puts "starting the rake task"
-        ftp_csv_import = Groovepacker::Orders::Import.new
-        ftp_csv_import.delay.import_ftp_order(tenant.name)
-        puts "task complete"
+        Apartment::Tenant.switch "#{tenant.name}"
+        stores = Store.includes(:ftp_credential).where('store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
+        if stores.present?
+          puts "starting the rake task"
+          ftp_csv_import = Groovepacker::Orders::Import.new
+          if tenant.name == "unitedmedco" && current_time >= "05:00" && current_time <= "10:00"
+            ftp_csv_import.delay.import_ftp_order("unitedmedco")
+          elsif current_time >= "02:00" && current_time <= "10:00"
+            ftp_csv_import.delay.import_ftp_order(tenant.name)
+          end
+          puts "task complete"
+        end
       rescue Exception => e
         puts e.message
       end
