@@ -368,7 +368,7 @@ class Order < ActiveRecord::Base
     kits = order_items
       .joins(:product, order_item_kit_products: [:product_kit_skus])
       .where(
-        products: { is_kit: 1, kit_parsing: %w(individual depends)}
+        products: { is_kit: 1, kit_parsing: %w(individual)}
       )
       .select([
         'order_items.qty as order_item_qty', 'order_items.kit_split_qty',
@@ -382,7 +382,8 @@ class Order < ActiveRecord::Base
     single_kit_or_individual_items = order_items.joins(:product)
       .where(
         "(products.kit_parsing = 'single' AND products.is_kit = 1) OR "\
-        "(products.kit_parsing = 'individual' AND products.is_kit = 0 )"
+        "(products.kit_parsing = 'individual' AND products.is_kit = 0 ) OR "\
+        "(products.kit_parsing = 'depends' AND products.is_kit = 1 )"
       )
       .select([
         'is_kit', 'kit_parsing', 'order_items.qty as order_item_qty',
@@ -892,11 +893,10 @@ class Order < ActiveRecord::Base
   #   return result
   # end
 
-  def self.add_activity_to_new_order(neworder, order_items, current_user)
+  def self.add_activity_to_new_order(neworder, order_items, username)
     order_items.each do |order_item|
       Order.create_new_order_item(neworder, order_item)
     end
-    username = current_user.name
     neworder.addactivity("Order duplicated", username)
   end
 

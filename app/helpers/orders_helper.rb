@@ -240,7 +240,7 @@ module OrdersHelper
                           'notes' => order.notes_internal,
                           'ordernum' => order.increment_id,
                           'order_date' => order.order_placed_time,
-                          'itemslength' => order.get_items_count,
+                          'itemslength' => order.scanning_count.values.sum,
                           'status' => order.status,
                           'recipient' => "#{order.firstname} #{order.lastname}",
                           'email' => order.email,

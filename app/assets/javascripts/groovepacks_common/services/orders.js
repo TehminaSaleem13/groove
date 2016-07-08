@@ -2,8 +2,8 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
 
   var success_messages = {
     update_status: "Status updated Successfully",
-    delete: "Deleted Successfully",
-    duplicate: "Duplicated Successfully"
+    delete: "Deleted Queued Successfully",
+    duplicate: "Duplicated Queued Successfully"
   };
 
   var get_default = function () {

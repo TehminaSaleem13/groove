@@ -49,23 +49,27 @@ class OrdersController < ApplicationController
   end
 
   def duplicate_orders
-    if current_user.can?('add_edit_order_items')
-      GrooveBulkActions.execute_groove_bulk_action("duplicate", params, current_user, list_selected_orders)
-      # @result = Order.duplicate_selected_orders(list_selected_orders, current_user, @result)
-    else
-      set_status_and_message(false, "You do not have enough permissions to duplicate order", ['push'])
-    end
+    execute_groove_bulk_action("duplicate")
     render json: @result
+    # if current_user.can?('add_edit_order_items')
+    #   GrooveBulkActions.execute_groove_bulk_action("duplicate", params, current_user, list_selected_orders)
+    #   # @result = Order.duplicate_selected_orders(list_selected_orders, current_user, @result)
+    # else
+    #   set_status_and_message(false, "You do not have enough permissions to duplicate order", ['push'])
+    # end
+    # render json: @result
   end
 
   def delete_orders
-    if current_user.can? 'add_edit_order_items'
-      GrooveBulkActions.execute_groove_bulk_action("delete", params, current_user, list_selected_orders)
-      # delete_selected_orders(list_selected_orders)
-    else
-      set_status_and_message(false, "You do not have enough permissions to delete order", ['push'])
-    end
+    execute_groove_bulk_action("delete")
     render json: @result
+    # if current_user.can? 'add_edit_order_items'
+    #   GrooveBulkActions.execute_groove_bulk_action("delete", params, current_user, list_selected_orders)
+    #   # delete_selected_orders(list_selected_orders)
+    # else
+    #   set_status_and_message(false, "You do not have enough permissions to delete order", ['push'])
+    # end
+    # render json: @result
   end
 
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
@@ -261,4 +265,12 @@ class OrdersController < ApplicationController
   #   render 'match'
   # end
 
+  private
+  def execute_groove_bulk_action(activity)
+    if current_user.can?('add_edit_order_items')
+      GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user, list_selected_orders)
+    else
+      set_status_and_message(false, "You do not have enough permissions to #{activity}", ['push', 'error_messages'])  
+    end
+  end
 end

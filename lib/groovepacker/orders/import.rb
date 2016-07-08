@@ -31,6 +31,32 @@ module Groovepacker
         return @result
       end
 
+      def import_ftp_order(tenant)
+        Apartment::Tenant.switch(tenant)
+        user = User.where(username: "gpadmin").first
+        if OrderImportSummary.where(status: 'in_progress').blank?
+          stores = Store.includes(:ftp_credential).where('store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
+          result = Hash[:status => true]
+          (stores || []).each do |store|
+            while result[:status] == true do
+              groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+              result = groove_ftp.retrieve()
+              if result[:status] == true
+                order_summary = OrderImportSummary.last
+                order_summary = OrderImportSummary.create(user_id: user.id, import_summary_type: "import_orders", status: 'not_started') if order_summary.blank?
+                ImportItem.where(store_id: store.id).destroy_all
+                order_summary.reload
+                import_item = order_summary.import_items.build(store_id: store.id)
+                import_item.update_attribute(:status, 'not_started')
+                import_item.reload
+                ImportOrders.new.initiate_csv_import(tenant, store.store_type, store, import_item)
+                order_summary.update_attribute(:status, 'completed') if order_summary.status != 'cancelled'
+              end
+            end             
+          end
+        end 
+      end
+
       def import_shipworks(auth_token, request, status = 200)
         return status if @params[:auth_token].nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
 

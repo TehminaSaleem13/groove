@@ -147,7 +147,7 @@ module Groovepacker
             combined['orders'] = union(combined['orders'],
                                        res.parsed_response['orders'])
             page_index += 1
-            return combined if res.parsed_response['orders'].length<500
+            return combined if res.parsed_response['orders'].length<300
           end
         end
 
