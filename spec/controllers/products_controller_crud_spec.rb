@@ -270,5 +270,4 @@ RSpec.describe ProductsController, :type => :controller do
       result = JSON.parse(response.body)
     end
   end
-
 end
