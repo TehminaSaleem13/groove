@@ -115,22 +115,25 @@ RSpec.describe ExportsettingsController, type: :controller do
       File.delete("#{Rails.root}/public/csv/" + export_setting.export_data)
     end
 
-    it 'Should display error message when no start and end date is passed' do
-      request.accept = "application/json"
+    #   ExportsettingsController.stub!(:render)
 
-      general_setting = FactoryGirl.create :general_setting
-      export_setting = FactoryGirl.create(:export_setting,  auto_email_export: true, 
-        time_to_send_export_email: "2016-07-04 16:52:00",
-        export_orders_option: "on_same_day", order_export_type: "include_all", 
-        order_export_email: "test@example.com", manual_export: false)
+    # it 'Should display error message when no start and end date is passed' do
+    #   request.accept = "application/json"
 
-      message = ["We need a start and an end time"]
+    #   general_setting = FactoryGirl.create :general_setting
+    #   export_setting = FactoryGirl.create(:export_setting,  auto_email_export: true, 
+    #     time_to_send_export_email: "2016-07-04 16:52:00",
+    #     export_orders_option: "on_same_day", order_export_type: "include_all", 
+    #     order_export_email: "test@example.com", manual_export: false)
 
-      get :order_exports, {:start=> nil, :end=> nil} 
-      expect(response.status).to eq(200)
-      content = File.read("#{Rails.root}/public/csv/error.csv")
-      expect(content).to have_content("We need a start and an end time")
-      File.delete("#{Rails.root}/public/csv/error.csv")
+    #   # message = ["We need a start and an end time"] 
+    #   get :order_exports, {:start=> nil, :end=> nil}
+
+    #   expect(response.status).to eq(200)
+    #   should_receive(:send_data)
+      # content = File.read("#{Rails.root}/public/csv/error.csv")
+      # expect(content).to have_content("We need a start and an end time")
+      # File.delete("#{Rails.root}/public/csv/error.csv")
     end
 
   end

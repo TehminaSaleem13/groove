@@ -79,16 +79,10 @@ class ExportsettingsController < ApplicationController
       end
     end
     unless result['status']
-      # CSV.generate do |csv|
-      #   csv << result['error_messages']
-      # end
-      # filename = 'error.csv'
-
-      filename = File.new("#{Rails.root}/public/csv/error.csv", "w+")
-      open("#{Rails.root}/public/csv/error.csv", "w+") do |f|
-        f << result['error_messages']
+      CSV.generate do |csv|
+        csv << result['error_messages']
       end
-
+      filename = 'error.csv'
     end
     send_file filename, :type => 'text/csv'
   end
