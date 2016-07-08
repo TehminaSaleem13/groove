@@ -8,17 +8,18 @@ groovepacks_controllers.
       $scope.tp_deep_import_days = 1;
       $scope.import_progress = 10;
       $scope.countdown_progressbar = 0;
-      $scope.import_item_id = 0
+      $scope.import_item_id = 0;
       $scope.add_popup_summary_on_load = true;
       $scope.$on("user-data-reloaded", function () {
         $scope.current_user = auth;
       });
 
       groovIO.on('countdown_update', function (progress_info) {
-        if($scope.import_item_id==0) $scope.import_item_id = progress_info.id;
-        if($scope.import_item_id!=progress_info.id) {
+        if($scope.import_item_id==0){ $scope.import_item_id = progress_info.progress_info.id;}
+        if($scope.import_item_id!=progress_info.progress_info.id) {
           $scope.import_progress = 10 
           $scope.countdown_progressbar = 0;
+          $scope.import_item_id = progress_info.progress_info.id;
         }
         $scope.import_progress = $scope.import_progress - 1
         $scope.countdown_progressbar = (10 - $scope.import_progress)*10
@@ -26,6 +27,7 @@ groovepacks_controllers.
           $scope.import_progress = 10 
           $scope.countdown_progressbar = 0;
         }
+        $scope.countdown_progressbar
       });
 
       groovIO.on('import_status_update', function (message) {
@@ -210,9 +212,9 @@ groovepacks_controllers.
                 '</td>' +
                 '<td style="white-space: nowrap;">{{store.name}}</td>' +
                 '<td style="width:62%;padding:3px;">' +
-                  '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 75}}</progressbar>' +
+                  '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 75}}</progressbar>' + 
                   // '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
-                  '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="{{countdown_progressbar}}" style="text-align: center;">{{import_progress | limitTo: 56}}</progressbar>' +
+                  '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="countdown_progressbar" style="text-align:center;">{{import_progress}}</progressbar>' +
                 '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
