@@ -24,14 +24,14 @@ RSpec.describe ExportOrder do
 				expect(last_delivery).to eq(1)
 			end
 
-      it 'Should not send mail when orders gets exported and auto email export set to false' do
-      	general_setting = FactoryGirl.create :general_setting
-      	export_setting = FactoryGirl.create( :export_order_setting, :auto_email_export => false)
-      	last_delivery = ActionMailer::Base.deliveries.count
-      	expect(last_delivery).to eq(0)
-      end
+			it 'Should not send mail when orders gets exported and auto email export set to false' do
+				general_setting = FactoryGirl.create :general_setting
+				export_setting = FactoryGirl.create( :export_order_setting, :auto_email_export => false)
+				last_delivery = ActionMailer::Base.deliveries.count
+				expect(last_delivery).to eq(0)
+			end
 
-    end
-  end
+		end
+	end
 
 end

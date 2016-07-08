@@ -115,7 +115,7 @@ RSpec.describe ExportsettingsController, type: :controller do
       File.delete("#{Rails.root}/public/csv/" + export_setting.export_data)
     end
 
-    #   ExportsettingsController.stub!(:render)
+    # ExportsettingsController.stub!(:render)
 
     # it 'Should display error message when no start and end date is passed' do
     #   request.accept = "application/json"
@@ -126,15 +126,15 @@ RSpec.describe ExportsettingsController, type: :controller do
     #     export_orders_option: "on_same_day", order_export_type: "include_all", 
     #     order_export_email: "test@example.com", manual_export: false)
 
-    #   # message = ["We need a start and an end time"] 
+    #   message = ["We need a start and an end time"] 
     #   get :order_exports, {:start=> nil, :end=> nil}
 
     #   expect(response.status).to eq(200)
     #   should_receive(:send_data)
-      # content = File.read("#{Rails.root}/public/csv/error.csv")
-      # expect(content).to have_content("We need a start and an end time")
-      # File.delete("#{Rails.root}/public/csv/error.csv")
-    end
+    #   content = File.read("#{Rails.root}/public/csv/error.csv")
+    #   expect(content).to have_content("We need a start and an end time")
+    #   File.delete("#{Rails.root}/public/csv/error.csv")
+    # end
 
   end
 
