@@ -132,7 +132,7 @@ module ScanPack
           last_activity.action  += " for a Type-In count"
           last_activity.save
         end 
-        @single_order.addactivity("Type-In count of #{@typein_count + 1} entered for product #{@input.to_s}", @current_user.username) if @typein_count > 1
+        @single_order.addactivity("Type-In count of #{@typein_count + 1} entered for product #{@order_item.product.primary_sku.to_s}", @current_user.username) if @typein_count > 1
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
