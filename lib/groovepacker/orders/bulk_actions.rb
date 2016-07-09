@@ -77,6 +77,7 @@ module Groovepacker
           order.status = 'onhold'
           order.save
         end
+
         #@result['notice_messages'].push 'One or more of the selected orders contains'\
         #    ' New or Inactive items so they can not be changed to Awaiting.'\
         #    ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
