@@ -129,11 +129,13 @@ module ScanPack
         action_keyword = last_activity.try(:action).try(:split, ' ')
         sku_for_activity = @order_item.product.primary_sku rescue nil
         order_item_sku = sku_for_activity.split(' ')[0] rescue nil
+        type_in_count = @typein_count
         if action_keyword.present? && order_item_sku.present? && action_keyword.include?("click") && action_keyword.include?(order_item_sku) && @typein_count > 1
+          type_in_count = @typein_count.to_i + 1
           last_activity.action  += " for a Type-In count"
           last_activity.save
-        end 
-        @single_order.addactivity("Type-In count of #{@typein_count + 1} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1
+        end    
+        @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
