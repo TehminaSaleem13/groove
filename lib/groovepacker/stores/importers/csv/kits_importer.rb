@@ -48,7 +48,7 @@ module Groovepacker
               @update_status_products.each do |product|
                 product.update_product_status
               end
-
+              update_orders_status
               @bulk_action.status='completed'
               @bulk_action.save
             rescue Exception => e
@@ -56,7 +56,6 @@ module Groovepacker
               @bulk_action.messages=['Some error occured', e.message]
               @bulk_action.save
             end
-            update_orders_status
           end
 
           def build_initial

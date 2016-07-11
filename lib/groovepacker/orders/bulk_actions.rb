@@ -211,8 +211,11 @@ module Groovepacker
       end
 
       def bulk_action_update_status(bulk_action, status)
-        bulk_action.status = status
-        bulk_action.save
+        begin
+          bulk_action.status = status
+          bulk_action.save
+        rescue
+        end
       end
     end
   end
