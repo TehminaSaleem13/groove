@@ -37,7 +37,7 @@ module Groovepacker
             @found_barcodes.clear
 
             import_product_related_data
-            #update_orders_status
+            update_orders_status
             @result
           end
 

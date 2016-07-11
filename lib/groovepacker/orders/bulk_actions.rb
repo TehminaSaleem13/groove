@@ -195,6 +195,7 @@ module Groovepacker
       def update_bulk_orders_status(result, params, tenant)
         Apartment::Tenant.switch(tenant)
         bulk_action = GrooveBulkActions.where("identifier='order' and activity='status_update'").last
+        return if bulk_action.blank?
         bulk_action_update_status(bulk_action, "in_progress")
         count = 1
         updated_products = Product.where(status_updated: true)
@@ -206,16 +207,12 @@ module Groovepacker
           count += 1
         end
         updated_products.update_all(status_updated: false)
-        bulk_action.reload
         bulk_action_update_status(bulk_action, "completed")
       end
 
       def bulk_action_update_status(bulk_action, status)
-        begin
-          bulk_action.status = status
-          bulk_action.save
-        rescue
-        end
+        bulk_action.status = status
+        bulk_action.save
       end
     end
   end
