@@ -206,6 +206,7 @@ module Groovepacker
           count += 1
         end
         updated_products.update_all(status_updated: false)
+        bulk_action.reload
         bulk_action_update_status(bulk_action, "completed")
       end
 
