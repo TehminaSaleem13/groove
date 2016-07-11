@@ -56,6 +56,7 @@ module Groovepacker
               @bulk_action.messages=['Some error occured', e.message]
               @bulk_action.save
             end
+            update_orders_status
           end
 
           def build_initial
