@@ -27,13 +27,18 @@
         </thead>
         <tbody>
         <% for i in 1..(@csv_data.size - 1) do %>
-          <tr style="text-align:center;<%= ((i % 2) == 0) ? 'background:#dcdcdc;' : '' %>">
+         <% order = Order.where(increment_id: @csv_data[i][1]).try(:first) %>
+          <tr style="text-align:center;<%= order.scanned_by_status_change.present? ? 'background:#FF0000;' : ((i % 2) == 0) ? 'background:#dcdcdc;' : '' %>">
             <% if @csv_data[i] %>
               <% @csv_data[i].each_with_index do |td, td_index| %>
                 <% if td_index == @order_number %>
                   <% order=Order.where(increment_id: td).first %>
                   <td>
                     <a href="https://<%= @tenant_name %>.groovepacker.com/#/orders/scanned/1/<%= order.id %>" style="font-weight:bold; color:#66A909;"><%= td %></a>
+                  </td>
+                <%elsif td_index == 0 %>
+                  <td>
+                    <%= td.to_date.strftime("%Y-%m-%d") %> 
                   </td>
                 <% else %>
                   <% if i == (@csv_data.size - 1) %>
