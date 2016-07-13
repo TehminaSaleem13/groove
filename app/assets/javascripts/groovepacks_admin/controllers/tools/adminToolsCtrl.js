@@ -25,7 +25,7 @@ groovepacks_admin_controllers.
       $scope.update_tenants_list = function (tenant, prop) {
         if (prop == 'plan') {
           if (tenant.is_modified == true) {
-            alert('The plan has already been modified for the tenant. You are no more allowed to update the tenant\'s plan from the dropdown.')
+            notification.notify('The plan has already been modified for the tenant. You are no more allowed to update the tenant\'s plan from the dropdown.')
           }
           else if (confirm("Are you sure you want to change the plan for the tenant?")) {
             tenants.list.update_node({

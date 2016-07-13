@@ -57,8 +57,7 @@
             <div>Amount</div>
           </center>
           <div class="col-sm-offset-1 col-sm-10">
-            <input type="text" ng-model="tenants.single.subscription_info.amount"
-                   class="form-control input-style"/>
+            <input type="text" ng-model="tenants.single.subscription_info.amount" class="form-control input-style"/>
           </div>
         </div>
         <div class="col-sm-2">
@@ -119,7 +118,7 @@
           <div style="clear:both;"></div>
           <div ng-show="tenants.single.logged_in_user == 'gpadmin'">
             <h4 class="control-label">Subscription ID</h4>
-            <input type="password" ng-model="tenants.single.subscription_info.customer_subscription_id" ng-blur="update_access_restrictions()" class="form-control input-style"/>
+            <input type="text" ng-model="tenants.single.subscription_info.customer_subscription_id" ng-blur="update_access_restrictions()" class="form-control input-style"/>
           </div>
         </div>
         <div class="col-sm-1"></div>
