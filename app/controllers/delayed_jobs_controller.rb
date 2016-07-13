@@ -31,6 +31,18 @@ class DelayedJobsController < ApplicationController
 		render json: @result 
 	end
 
+	def update
+		if params["_json"][0]["select_all"]
+		 	Delayed::Job.destroy_all
+		else
+			params["_json"].each_with_index do |delayed_job, index|
+				Delayed::Job.destroy(delayed_job["id"]) if index != 0
+			end
+		end
+		@result['messages'] = "Delayed Jobs are deleted"
+		render json: @result
+	end
+
 	def reset
 		if params["id"].present? && params["attempts"] != 5
 			job = Delayed::Job.find(params["id"])

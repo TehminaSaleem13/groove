@@ -19,6 +19,19 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
     return $http.post(url, delayed_job_id)
   };
 
+  var update_delayed_job = function(delayed_jobs, select_all){
+    var url = ''; 
+    url = '/delayed_jobs_update.json'
+    delayed_jobs.setup.jobArray = [];
+    delayed_jobs.setup.jobArray.push({select_all: select_all});
+    for (var i = 0; i < delayed_jobs.list.length; i++) {
+      if (delayed_jobs.list[i].checked == true) {
+        delayed_jobs.setup.jobArray.push({id: delayed_jobs.list[i].id});
+      }
+    }
+    return $http.post(url, delayed_jobs.setup.jobArray)
+  };
+
   var reset_delayed_job = function(current_delayed_job) {
     var url = ''; 
     url = '/delayed_job_reset.json'
@@ -123,7 +136,8 @@ groovepacks_services.factory('delayed_jobs', ['$http', 'notification', 'editable
       get: get_delayed_job_list,
       get_searched: get_job_list,
       destroy: delete_deleyed_job,
-      reset: reset_delayed_job
+      reset: reset_delayed_job,
+      update: update_delayed_job
     },
     single: {
       get: get_single_job,

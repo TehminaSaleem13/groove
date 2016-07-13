@@ -197,6 +197,40 @@ groovepacks_admin_controllers.controller('DelayedJobCtrl', ['$scope', '$http', '
           $scope.$watch('delayed_jobs.selected', myscope.update_selected_count, true);
       };
 
+      $scope.delete_delayed_jobs = function(){
+        if($scope.check_if_not_selected()) {
+          $scope.delayed_jobs.selected = 0;
+          var result = $q.defer();
+          for (var i = 0; i < $scope.delayed_jobs.list.length; i++) {
+            if ($scope.delayed_jobs.list[i].checked) {
+              $scope.delayed_jobs.selected += 1;
+            }
+          }
+
+          select_all = $scope.delayed_jobs.setup.select_all;
+          if ($scope.delayed_jobs.selected === 0) {
+            notification.notify('select a delayed jobs to delete');
+          } else if (confirm("Are you sure you want to delete the delayed job" + (($scope.delayed_jobs.selected == 1) ? "?" : "s?"))) {
+            delayed_jobs.list.update($scope.delayed_jobs, select_all).then(function (data) {
+              myscope.init();
+            })
+          } 
+        } else {
+           notification.notify('select a delayed jobs to delete');
+        }
+      };
+
+      $scope.check_if_not_selected = function () {
+        var selected = false;
+        for (var i = 0; i < $scope.delayed_jobs.list.length; i++) {
+          if ($scope.delayed_jobs.list[i].checked === true) {
+            selected = true;
+            break;
+          }
+        }
+        return selected;
+      };
+
       myscope.common_setup_option = function (type, value, selector) {
         delayed_jobs.setup.update($scope.delayed_jobs.setup, type, value);
         myscope.get_delayed_jobs(1);

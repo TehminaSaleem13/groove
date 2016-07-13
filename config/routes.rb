@@ -42,6 +42,7 @@ Groovepacks::Application.routes.draw do
   get '/delayed_jobs' => 'delayed_jobs#index'
   post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
   post '/delayed_job_reset' => 'delayed_jobs#reset'
+  post '/delayed_jobs_update' => 'delayed_jobs#update'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
