@@ -1,0 +1,11 @@
+<h3>Low inventory email sending failed:</h3>
+<% unless @exception.nil? %>
+  <p><strong>Tenant Name: </strong><%=@tenant%></p>
+  <p><strong>Error Date/Time: </strong><%=DateTime.now.to_s%></p>
+  <% unless @exception.nil? %>
+  <p><strong>Exception message: </strong><%=@exception.message%></p>
+  <p><strong>Exception backtrace: </strong></p>
+  <p><%= raw(@exception.backtrace.join("<br/>")) rescue "" %></p>
+  <% end %>
+<%end%>
+
