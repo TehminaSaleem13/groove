@@ -116,7 +116,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     }
     for (var i = dashboard_data.length - 1; i >= 0; i--) {
       for (var j = dashboard_data[i].values.length - 1; j >= 0; j--) {
-        if (dashboard_data[i].values[j][0] == date &&
+        if (moment(dashboard_data[i].values[j][0]).format('L') == moment(date).format('L') &&
           dashboard_data[i].values[j][1] == y) {
           data_points.data.push(dashboard_data[i].values[j]);
           data_points.user.push([dashboard_data[i].key, dashboard_data[i].color]);
