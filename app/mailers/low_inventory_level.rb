@@ -2,13 +2,25 @@ class LowInventoryLevel < ActionMailer::Base
   default from: "app@groovepacker.com"
 
   def notify(general_settings, tenant)
+    begin
+      Apartment::Tenant.switch(tenant)
+      general_setting = GeneralSetting.all.first
+      @products_list = get_entire_list(tenant)
+      mail to: general_setting.low_inventory_email_address,
+           subject: "GroovePacker Low Inventory Alert"
+      #import_orders_obj = ImportOrders.new
+      #import_orders_obj.reschedule_job('low_inventory_email', tenant)
+    rescue Exception => ex
+      LowInventoryLevel.error_on_low_inv_email(ex, tenant).deliver
+    end
+  end
+
+  def error_on_low_inv_email(ex, tenant)
     Apartment::Tenant.switch(tenant)
-    general_setting = GeneralSetting.all.first
-    @products_list = get_entire_list(tenant)
-    mail to: general_setting.low_inventory_email_address,
-         subject: "GroovePacker Low Inventory Alert"
-    #import_orders_obj = ImportOrders.new
-    #import_orders_obj.reschedule_job('low_inventory_email', tenant)
+    @tenant = tenant
+    @exception = ex
+    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"],
+         subject: "[#{tenant}] [#{Rails.env}] Low Inventory Alert failed"
   end
 
   def build_single_hash(product)
