@@ -16,6 +16,7 @@ module Groovepacker
             else
               set_status_and_msg_for_skipping_import
             end
+            update_orders_status
             @result
           end
 

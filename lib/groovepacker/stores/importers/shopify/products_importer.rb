@@ -12,6 +12,7 @@ module Groovepacker
             response["products"].each do |product|
               create_single_product(product)
             end
+            update_orders_status
           end
 
           def import_single_product(item)

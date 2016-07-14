@@ -41,6 +41,7 @@ module Groovepacker
 								result[:messages] = e
 								send_products_import_complete_email(0, result, credential)
 							end
+							update_orders_status
 							result
 						end
 

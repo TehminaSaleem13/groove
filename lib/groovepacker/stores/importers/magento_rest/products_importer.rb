@@ -7,6 +7,7 @@ module Groovepacker
 
           def import
             result = get_importer.import
+            update_orders_status
           end
 
           def import_single(product_attrs={})

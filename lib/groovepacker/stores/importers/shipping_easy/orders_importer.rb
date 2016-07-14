@@ -27,6 +27,7 @@ module Groovepacker
             end
 
             @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
+            update_orders_status
             @result
           end
 

@@ -12,6 +12,7 @@ module Groovepacker
 						else
 							result = Groovepacker::Stores::Importers::MagentoRest::V1::OrdersImporter.new(handler).import
 						end
+            update_orders_status
             result
           end
           

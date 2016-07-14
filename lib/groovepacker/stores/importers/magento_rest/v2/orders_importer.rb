@@ -126,7 +126,7 @@ module Groovepacker
               	credential.last_imported_at = import_time
               	credential.save
               end
-
+              update_orders_status
               result
             end
 
