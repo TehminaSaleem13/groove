@@ -47,13 +47,13 @@ Groovepacks::Application.configure do
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 
   config.action_mailer.smtp_settings = {
-    :address => "smtp.api.createsend.com",
+    :address => "email-smtp.us-east-1.amazonaws.com",
     :port => 587,
-    :authentication => "plain",
+    :authentication => "login",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',
-    :user_name => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
-    :password => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
+    :user_name => 'AKIAIB6EZSOUF5ZOMOKQ',
+    :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
     :openssl_verify_mode  => 'none'
   }
   # Raise exception on mass assignment protection for Active Record models
