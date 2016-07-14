@@ -10,7 +10,8 @@ module FTP
         self.password = credential.password
         split_location = credential.host.split('/')
         self.host = split_location.first
-        self.directory = split_location.last
+        split_location.shift
+        self.directory = split_location.join("/") rescue ""
       end
     end
 
