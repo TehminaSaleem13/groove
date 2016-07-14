@@ -87,6 +87,7 @@ module Groovepacker
 
       def update_status_and_add_activity(order, username)
         order.scanned_on = Time.now
+        current_user = User.find_by_name("myplan") rescue nil 
         order.packing_user_id = current_user
         order.scanned_by_status_change = true
         order.addactivity('Order Manually Moved To Scanned Status', username)
