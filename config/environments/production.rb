@@ -84,13 +84,13 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
   config.action_mailer.smtp_settings = {
-    :address => "smtp.api.createsend.com",
+    :address => "email-smtp.us-east-1.amazonaws.com",
     :port => 587,
-    :authentication => "plain",
+    :authentication => "login",
     :enable_starttls_auto => true,
     :domain => 'groovepacker.com',
-    :user_name => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
-    :password => '5dd452b4-cecb-439d-9630-d332cf1cdf9a',
+    :user_name => 'AKIAIB6EZSOUF5ZOMOKQ',
+    :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
     :openssl_verify_mode  => 'none'
   }
 
@@ -100,7 +100,8 @@ Groovepacks::Application.configure do
   $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'])
 
-  config.cache_store = :memory_store, { size: 64.megabytes } #:redis_store, $redis.as_json['options'].merge(db: 15)
+  config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
+  
   # $redis = Redis.new(:host => 'groove-prod-1', :port=> 6379)
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)

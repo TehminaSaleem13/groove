@@ -25,7 +25,7 @@ groovepacks_admin_controllers.
       $scope.update_tenants_list = function (tenant, prop) {
         if (prop == 'plan') {
           if (tenant.is_modified == true) {
-            alert('The plan has already been modified for the tenant. You are no more allowed to update the tenant\'s plan from the dropdown.')
+            notification.notify('The plan has already been modified for the tenant. You are no more allowed to update the tenant\'s plan from the dropdown.')
           }
           else if (confirm("Are you sure you want to change the plan for the tenant?")) {
             tenants.list.update_node({
@@ -418,7 +418,8 @@ groovepacks_admin_controllers.
           $scope.gridOptions.paginate.current_page = page;
           $scope._can_load_tenants = false;
           $scope.gridOptions.selections.show_delete = myscope.show_delete();
-          return tenants.list.get($scope.tenants, page).success(function (data) {
+          pages_sort = $scope.tenants.update_page_sort;
+          return tenants.list.get($scope.tenants, page, pages_sort).success(function (data) {
             $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
             myscope.update_selected_count();
             $scope._can_load_tenants = true;
@@ -434,9 +435,19 @@ groovepacks_admin_controllers.
 
       };
 
+      $scope.update_page_sorting = function (){
+        pages_sort = $scope.tenants.update_page_sort
+        page = $state.params.page
+        return tenants.list.get($scope.tenants, page, pages_sort).success(function(data){
+          $scope.gridOptions.paginate.total_items = tenants.list.total_tenants($scope.tenants);
+          myscope.update_selected_count();
+          $scope._can_load_tenants = true;
+        });
+      };
+
       myscope.common_setup_opt = function (type, value, selector) {
         tenants.setup.update($scope.tenants.setup, type, value);
-        myscope.get_tenants(1);
+        myscope.get_tenants($state.params.page);
       };
       myscope.init();
     }]);

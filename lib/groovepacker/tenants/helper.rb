@@ -5,12 +5,16 @@ module Groovepacker
       include PaymentsHelper
 
       def do_gettenants(params)
-        # offset = params[:offset].to_i || 0
-        # limit = params[:limit].to_i || 10
-        tenants = Tenant.order('')
-        # unless params[:select_all] || params[:inverted]
-        #   tenants = tenants.limit(limit).offset(offset)
-        # end
+        offset = params[:offset].to_i || 0
+        limit = params[:limit].to_i || 10
+        page_sort = params["pages_sort"]
+        if page_sort == "true"
+          tenants = Tenant.order('')
+        else
+          unless params[:select_all] || params[:inverted]
+            tenants = Tenant.order('').limit(limit).offset(offset)
+          end
+        end
         tenants
       end
 
@@ -33,8 +37,7 @@ module Groovepacker
           tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].to_s.downcase }
           tenants_result.reverse! if params[:order] == 'DESC'
         end
-
-        tenants_result[offset, limit]
+        params["pages_sort"] == "true" ? tenants_result[offset, limit] : tenants_result
       end
 
       def do_search(params)
@@ -248,6 +251,7 @@ module Groovepacker
         @subscription = tenant.subscription
         if @subscription
           @subscription_info = params[:subscription_info]
+          @subscription.update_attribute(:customer_subscription_id, params[:subscription_info][:customer_subscription_id])
           return result unless @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
           begin
             create_new_plan_and_assign(tenant)
@@ -416,6 +420,7 @@ module Groovepacker
         subscription_result['progress'] = subscription.progress
         subscription_result['transaction_errors'] =
           subscription.transaction_errors if subscription.transaction_errors
+        subscription_result['customer_subscription_id'] = subscription.customer_subscription_id
       end
 
       def create_new_plan_and_assign(tenant)

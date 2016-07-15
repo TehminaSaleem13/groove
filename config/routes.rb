@@ -4,6 +4,7 @@ Groovepacks::Application.routes.draw do
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
   match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
+  match "/delayed_job" => DelayedJobWeb, :anchor => false, via: [:get, :post]
 
   get "/404", :to => "specials#error_404"
 
@@ -32,6 +33,7 @@ Groovepacks::Application.routes.draw do
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
+  get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
@@ -41,6 +43,7 @@ Groovepacks::Application.routes.draw do
   get '/delayed_jobs' => 'delayed_jobs#index'
   post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
   post '/delayed_job_reset' => 'delayed_jobs#reset'
+  post '/delayed_jobs_update' => 'delayed_jobs#update'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action

@@ -15,6 +15,7 @@ module Groovepacker
             send_products_import_email(import_products_count) if import_products_count>20000
             iterate_products_array(response)
             send_products_import_complete_email(import_products_count)
+            update_orders_status
             @result
           end
 

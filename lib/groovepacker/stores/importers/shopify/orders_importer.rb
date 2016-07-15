@@ -16,6 +16,7 @@ module Groovepacker
               break if @import_item.status == 'cancelled'
               import_single_order(order)
             end
+            update_orders_status
             @result
           end
 

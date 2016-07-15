@@ -132,7 +132,7 @@ RSpec.describe ProductsController, :type => :controller do
       expect(base_product.status).to eq('active')
       expect(child_product1.status).to eq('active')
       expect(child_product2.status).to eq('active')
-      expect(order.status).to eq('awaiting')
+      expect(order.status).to eq('onhold')
     end
   end
   describe "Inventory Tracking" do

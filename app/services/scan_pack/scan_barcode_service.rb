@@ -67,7 +67,9 @@ module ScanPack
 
     def do_check_state_and_status_to_add_activity
       if @params[:state] == "scanpack.rfp.default" && @result['status'] == true
-        Order.find(@params[:id]).addactivity("Product with barcode: #{@params[:input]} scanned", @current_user.name)
+        current_product_id = ProductBarcode.where(barcode: @params["input"])[0].try(:product_id)
+        item_sku = ProductSku.where(product_id: current_product_id)[0].try(:sku)
+        Order.find(@params[:id]).addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
       end
     end
 

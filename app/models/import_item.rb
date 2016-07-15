@@ -7,6 +7,7 @@ class ImportItem < ActiveRecord::Base
                   :current_order_imported_item, :to_import, :message, :days,
                   :updated_orders_import
   after_save :emit_data_to_user
+  after_save :emit_countdown_data_to_user
 
 
   def emit_data_to_user
@@ -42,5 +43,12 @@ class ImportItem < ActiveRecord::Base
     eligible = remainder==0 ? true : false
     next_order = self.changes["success_imported"].present? || self.changes["previous_imported"].present? ||self.changes["updated_orders_import"].present?
     return status_changed || (eligible && next_order)
+  end
+
+  def emit_countdown_data_to_user
+    if self.changes["current_increment_id"].present?
+      result = {'progress_info' => self.reload }
+      GroovRealtime::emit('countdown_update', result, :tenant)
+    end
   end
 end

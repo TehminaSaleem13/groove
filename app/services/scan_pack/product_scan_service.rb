@@ -85,7 +85,7 @@ module ScanPack
 
     def do_if_service_issue_code_is_enabled_and_and_eql_to_input
       if @single_order.status !='scanned'
-        @single_order.reset_scanned_status
+        @single_order.reset_scanned_status(@current_user)
         @single_order.status = 'serviceissue'
         @result['data']['next_state'] = 'scanpack.rfo'
         @result['data']['ask_note'] = true
@@ -96,7 +96,7 @@ module ScanPack
 
     def do_if_restart_code_is_enabled_and_and_eql_to_input
       if @single_order.status != 'scanned'
-        @single_order.reset_scanned_status
+        @single_order.reset_scanned_status(@current_user)
         @result['data']['next_state'] = 'scanpack.rfo'
       else
         set_error_messages('Order with id: '+@id.to_s+' is already in scanned state')
@@ -118,14 +118,28 @@ module ScanPack
       @single_order.last_suggested_at ||= DateTime.now
       @single_order.save
 
-      unscanned_items = @single_order.get_unscanned_items
+      unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
       #search if barcode exists
       barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
 
       barcode_found = do_if_barcode_not_found(clean_input, serial_added, clicked) unless barcode_found
 
       if barcode_found
-        @single_order.addactivity("Type-In count Scanned for product #{@input.to_s}", @current_user.username) if @typein_count > 1
+        last_activity = @single_order.order_activities.last
+        action_keyword = last_activity.try(:action).try(:split, ' ')
+        sku_for_activity = @order_item.product.primary_sku rescue nil
+        order_item_sku = sku_for_activity.split(' ')[0] rescue nil
+        type_in_count = @typein_count
+        if action_keyword.present? && order_item_sku.present? && action_keyword.include?(order_item_sku) && @typein_count > 1
+          if action_keyword.include?("click")
+            type_in_count = @typein_count.to_i + 1
+            last_activity.action  += " for a Type-In count"
+            last_activity.save
+          elsif action_keyword.include?("barcode:")
+            type_in_count = @typein_count.to_i + 1
+          end
+        end
+        @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1

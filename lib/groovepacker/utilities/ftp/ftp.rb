@@ -85,7 +85,7 @@ module FTP
           
           unless found_file.nil?
             file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            connection_obj.chdir("~/#{self.directory}")
+            # connection_obj.chdir("~/#{self.directory}")
             connection_obj.getbinaryfile("#{found_file}", "ftp_files/#{current_tenant}/#{file_name}")
             
             file_path = "#{Rails.root}/ftp_files/#{current_tenant}/#{file_name}"

@@ -132,7 +132,9 @@ describe Order do
                :qty=>1, :price=>"10", :row_total=>"10", :order=>order, :name=>kit_product2.name,
                :scanned_status=>'scanned', :scanned_qty => 1)
 
-      order.reset_scanned_status
+      user_role = FactoryGirl.create(:role,:name=>'spec_tester_role')
+      user = FactoryGirl.create(:user,:name=>'Tester', :username=>"spec_tester", :role => user_role)
+      order.reset_scanned_status(user)
 
       order.reload
       expect(order.status).to eq('awaiting')

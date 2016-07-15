@@ -16,7 +16,7 @@ describe OrdersController do
 																																	 :api_key => "test", 
 																																	 :api_secret => "test",
 																																	 :shall_import_awaiting_shipment => true, 
-																																	 :last_imported_at => Time.now-5.minutes,
+																																	 :last_imported_at => Time.now-2.minutes,
 																																	 :shall_import_shipped => true, 
 																																	 :warehouse_location_update => false, 
 																																	 :shall_import_customer_notes => false, 
@@ -58,7 +58,7 @@ describe OrdersController do
 			expect(import_items.count).to eq(1)
 			import_item = import_items.first
 			expect(import_item.status).to eq("completed")
-			expect(import_item.import_type).to eq("regular")
+			expect(import_item.import_type).to eq("quick")
 		end
   end
   
@@ -66,7 +66,7 @@ describe OrdersController do
 		it "Should run import for Single store - Shipstation API 2 and should complete successfully" do
 			@credential.update_attributes(:api_key => ENV['SHIPSTATION_REST_API_KEY'], :api_secret => ENV['SHIPSTATION_REST_API_SECRET'])
 			request.accept = "application/json"
-			get :import, { :store_id=>@store.id, :import_type=> 'quick' }
+			get :import, { :store_id=>@store.id, :import_type=> 'regular_import' }
 			expect(response.status).to eq(200)
 			result = JSON.parse(response.body)
 			expect(result["status"]).to eq(true)
@@ -75,7 +75,7 @@ describe OrdersController do
 			expect(import_items.count).to eq(1)
 			import_item = import_items.first
 			expect(import_item.status).to_not be("completed")
-			expect(import_item.import_type).to eq("quick")
+			expect(import_item.import_type).to eq("regular")
 		end
   
   end

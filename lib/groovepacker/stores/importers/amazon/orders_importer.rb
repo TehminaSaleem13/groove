@@ -16,6 +16,7 @@ module Groovepacker
               @import_item.message = e.message
               @import_item.save
             end
+            update_orders_status
             @result
           end
 

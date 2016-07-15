@@ -58,7 +58,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   def set_clicked_qty(clicked, username, typein_count)
     if clicked
       self.clicked_qty = self.clicked_qty + typein_count
-      self.order_item.order.addactivity("Item with SKU: " +
+      self.order_item.order.addactivity("Kit Part item with SKU: " +
                                           self.cached_product_kit_skus.cached_option_product.cached_primary_sku + " has been click scanned", username)
     end
   end
@@ -92,7 +92,7 @@ class OrderItemKitProduct < ActiveRecord::Base
     scan_time = self.order_item_kit_product_scan_times.create(
       scan_start: self.order_item.order.last_suggested_at,
       scan_end: DateTime.now)
-    (scan_time.scan_end - scan_time.scan_start).to_i
+    scan_time.scan_end.to_i - scan_time.scan_start.to_i
   end
 
   def set_min_value

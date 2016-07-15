@@ -20,6 +20,14 @@
 				    <input type="text" class="form-control search-box" autofocus="autofocus" id="tenants-search-query" ng-model="delayed_jobs.setup.search" placeholder="Search">
 				  </div>
 				</div>
+        <div class="col-lg-1 col-md-1" dropdown>
+          <button type="button" class="groove-button dropdown-toggle">
+            Edit <span class="caret"></span>
+          </button>
+          <ul class="dropdown-menu" role="menu">
+            <li><a ng-click="delete_delayed_jobs()">Delete</a></li>
+          </ul>
+        </div>
 			  <div class="col-sm-12">
 			    <div groov-data-grid="gridOptions" groov-list="new_delayed_jobs">
 					{{new_delayed_jobs}}

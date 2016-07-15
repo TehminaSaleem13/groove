@@ -12,6 +12,7 @@ module Groovepacker
             # requestamazonreport
             # checkamazonreportstatus
             import_all_products
+            update_orders_status
           end
 
           # def requestamazonreport

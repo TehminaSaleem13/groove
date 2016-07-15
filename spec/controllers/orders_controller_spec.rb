@@ -598,6 +598,38 @@ describe OrdersController do
     #   expect(product_inv_wh1.available_inv).to eq(25)
     #   expect(product_inv_wh2.available_inv).to eq(25)
     # end
+
+    it "Changing order status from awaiting to scanned" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      @user_role.change_order_status = true
+      @user_role.save
+      order1 = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'1234567890', :store => store)
+      order2 = FactoryGirl.create(:order, :status=>'onhold', :increment_id=>'1234567891', :store => store)
+      product1 = FactoryGirl.create(:product)
+      product2 = FactoryGirl.create(:product, :status =>'new')
+      order_item1 = FactoryGirl.create(:order_item, :product_id=>product1.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>product1.name)
+      order_item2 = FactoryGirl.create(:order_item, :product_id=>product2.id,
+                    :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>product2.name)
+      product_inv_wh1 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product1,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      product_inv_wh2 = FactoryGirl.create(
+        :product_inventory_warehouse, :product=> product2,
+        :inventory_warehouse_id =>inv_wh.id, 
+        :available_inv => 25, :allocated_inv => 5)
+      put :change_orders_status, {:order_ids=>[order1.id, order2.id],:status=>'scanned'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      order1.reload
+      order2.reload
+      expect(order1.status).to eq("scanned")
+      expect(order2.status).to eq("onhold")
+      expect(result['status']).to eq(true)
+    end
     
     # it "Changing order status from awaiting/service_issue to scanned and clicking on 'yes' option should update inventory counts from allocated to sold" do
     #   request.accept = "application/json"

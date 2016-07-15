@@ -77,6 +77,7 @@ module Groovepacker
                 import_item.save
               end
             end
+            update_orders_status
           end
 
           private

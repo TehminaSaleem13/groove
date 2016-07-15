@@ -41,6 +41,17 @@ groovepacks_services.factory('settings', ['$http', 'notification', function ($ht
       });
   }
 
+  var update_orders_status = function(id) {
+    return $http.get('/orders/run_orders_status_update.json', {id: id})
+      .success(function(response) {
+        console.log('Order status update has been queued', response);
+        // show notification
+      })
+      .error(function(error){
+        // show error message
+      });
+  }
+
 
   //Public facing API
   return {
@@ -49,7 +60,8 @@ groovepacks_services.factory('settings', ['$http', 'notification', function ($ht
       save: save_column_preference
     },
     cancel_bulk_action: cancel_bulk_action,
-    cancel_bulk_actions: cancel_bulk_actions
+    cancel_bulk_actions: cancel_bulk_actions,
+    update_orders_status: update_orders_status
   };
 
 

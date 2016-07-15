@@ -356,9 +356,20 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             return d.color;
           };
         };
+
         scope.toolTipContentFunction = function () {
           return function (key, x, y, e, graph) {
             data = dashboard.stats.points_data(scope.dashboard, scope.charts, Date.parse(x)/1000, y);
+            $("body").on("mousemove", "nvd3-line-chart", function(e){
+              var x = (e.clientX + 20) + 'px !important',
+                  y = (e.clientY - $('.nvtooltip').height() - 20) + 'px !important';
+              if(e.clientX > (window.screen.width/2)){
+                x = window.screen.width - e.clientX + 20 + "px";
+                $('.nvtooltip').attr("style", "top:" + y + ";right:" + x + ";position: fixed");
+              }else{
+                $('.nvtooltip').attr("style", "top:" + y + ";left:" + x + ";position: fixed");
+              }
+            });
             return dashboard.stats.tooltip(data, scope.charts, scope.dashboard);
           };
         };
@@ -375,6 +386,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           console.log('dash_data',scope.dash_data);
           scope.dashboard.max_time_per_item = 0;
           dashboard.model.get_max(scope.dashboard).then(function(response) {
+            window.scope = scope
             days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
             scope.leader_board.list = scope.dash_data.leader_board.list;
             for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {

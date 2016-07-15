@@ -328,18 +328,77 @@ RSpec.describe ProductsController, :type => :controller do
     expect(product.product_barcodes.count).to eq(1)
     expect(product.product_cats.count).to eq(1)
     expect(product.status).to eq("active")
-  end
+  end 
 
-  # describe "Import Products" do
-  #   it "It should import products from magento store" do
-  #   request.accept = "application/json"
-  #   access_restriction = FactoryGirl.create(:access_restriction)
-  #   inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
-  #   store = FactoryGirl.create(:store, :name=>'Magento Store', :store_type=>'Magento', :inventory_warehouse=>inv_wh, :status => true)
-  #   credentials = FactoryGirl.create(:magento_credential, :host=>"http://www.groovepacker.com/store", :username => "gpacker", :api_key => "gpacker.jonnyclean@xoxy.net", :store_id => store.id, import_products: true, last_imported_at: Time.now-10.days)
-  #   general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
-  #   get :import_products,{:id => store.id}
-  #   expect(response.status).to eq(200)
+  # describe "Import Products" do 
+  #   it "It Should get import product" do
+  #     inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
+  #     store = FactoryGirl.create(:store, :inventory_warehouse=> inv_wh)
+  #     get :import_products,{"id"=> store.id}
+  #     expect(response.status).to eq(200)
   #   end
   # end
+
+  describe "Import Products" do
+    it "It should import products from magento store" do
+    request.accept = "application/json"
+    access_restriction = FactoryGirl.create(:access_restriction)
+    inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
+    store = FactoryGirl.create(:store, :name=>'Magento Store', :store_type=>'Magento', :inventory_warehouse=>inv_wh, :status => true)
+    credentials = FactoryGirl.create(:magento_credential, :host=>"http://www.groovepacker.com/store", :username => "gpacker", :api_key => "gpacker.jonnyclean@xoxy.net", :store_id => store.id, import_products: true, last_imported_at: Time.now-10.days)
+    general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true, :hold_orders_due_to_inventory=>true)
+    get :import_products,{:id => store.id}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+    end
+  end
+   
+  it "It can import image" do
+    request.accept = "application/json"
+    access_restriction = FactoryGirl.create(:access_restriction)
+    inv_wh = FactoryGirl.create(:inventory_warehouse, :is_default => true, :name=>'default_inventory_warehouse')
+    store = FactoryGirl.create(:store, :name=>'Magento Store', :store_type=>'Magento', :inventory_warehouse=>inv_wh, :status => true)
+    credentials = FactoryGirl.create(:magento_credential, :host=>"http://www.groovepacker.com/store", :username => "gpacker", :api_key => "gpacker.jonnyclean@xoxy.net", :store_id => store.id, import_products: true, last_imported_at: Time.now-10.days)
+    get :import_images,{:id => store.id}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+  end
+
+  it "It should run product index" do
+    request.accept = "application/json"
+    inv_wh = FactoryGirl.create(:inventory_warehouse)
+    product = FactoryGirl.create(:product)
+    product_sku = FactoryGirl.create(:product_sku, :product=> product)
+    product_barcode = FactoryGirl.create(:product_barcode, :product=> product)
+    product_inv_wh = FactoryGirl.create(:product_inventory_warehouse, :product=> product, :inventory_warehouse_id =>inv_wh.id, :available_inv => 25)
+    get :index, {"filter"=>"active", "sort"=>"", "order"=>"DESC", "is_kit"=>"0", "limit"=>"20", "offset"=>"0"} 
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+  end
+
+  it "It should print label" do 
+    request.accept = "application/json"
+    product = FactoryGirl.create(:product)
+    get :print_receiving_label, {"sort"=>"", "order"=>"DESC", "filter"=>"active", "search"=>"", "select_all"=>false, "inverted"=>false, "is_kit"=>0, "limit"=>20, "offset"=>0, "setting"=>"", "status"=>"", "productArray"=>[{"id"=> product.id}], "product"=>{"status"=>"", "is_kit"=>0}}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+  end
+
+  it "It should search product" do
+    request.accept = "application/json"
+    product = FactoryGirl.create(:product, :name=> "NeuRemedy")
+    get :search, {"search"=>"Neu", "sort"=>"", "order"=>"DESC", "is_kit"=>"0", "limit"=>"20", "offset"=>"0", "action"=>"search", "controller"=>"products", "format"=>"json"}
+    expect(response.status).to eq(200)
+    result = JSON.parse(response.body)
+  end
+
+  # it "Sync With" do
+  #   request.accept = "application/json"
+  #   product = FactoryGirl.create(:product) 
+  #   sync_option = FactoryGirl.create(:sync_option, :product_id => product.id)
+  #   get :search, {"search"=>"Neu", "sort"=>"", "order"=>"DESC", "is_kit"=>"0", "limit"=>"20", "offset"=>"0", "action"=>"search", "controller"=>"products", "format"=>"json"}
+  #   expect(response.status).to eq(200)
+  #   result = JSON.parse(response.body)
+  # end
+
 end

@@ -43,7 +43,7 @@ class ExportsettingsController < ApplicationController
           send_export_email_on_fri: params[:send_export_email_on_fri],
           send_export_email_on_sat: params[:send_export_email_on_sat],
           send_export_email_on_sun: params[:send_export_email_on_sun]
-        )
+          )
         @result['success_messages'].push('Export settings updated successfully.')
         # else
         #   update_false_status(@result, 'Error saving export settings.')
@@ -71,7 +71,7 @@ class ExportsettingsController < ApplicationController
           start_time: Time.parse(params[:start]),
           end_time: Time.parse(params[:end]),
           manual_export: true
-        )
+          )
         filename = "#{Rails.root}/public/csv/" + export_setting.export_data
         export_setting.update_attributes(manual_export: false)
       else

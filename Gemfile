@@ -108,3 +108,4 @@ gem 'wannabe_bool'
 gem 'dotenv-rails'
 gem 'redis-rails'
 gem 'hiredis'
+gem "delayed_job_web"

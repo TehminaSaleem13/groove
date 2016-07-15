@@ -1,5 +1,4 @@
-groovepacks_admin_controllers.
-  controller('DelayedJobCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'delayed_jobs',
+groovepacks_admin_controllers.controller('DelayedJobCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'delayed_jobs',
     function ($scope, $http, $timeout, $location, $state, $cookies, $modal, $q, notification, delayed_jobs) {
       var myscope = {};
 
@@ -8,56 +7,63 @@ groovepacks_admin_controllers.
         myscope.init();
       };   
 
-      myscope.reset = function (current_delayed_job, event) {
-        delayed_jobs.list.reset(current_delayed_job).success(
-              function (data) {
-                if (data.status) {
-                  notification.notify(data.messages, 1);
-                } else {
-                  notification.notify(data.messages, 0);
-                }
-            });;
-        myscope.init();
-      };
+      // myscope.reset = function (current_delayed_job, event) {
+      //   delayed_jobs.list.reset(current_delayed_job).success(
+      //     function (data) {
+      //       if (data.status) {
+      //         notification.notify(data.messages, 1);
+      //       } else {
+      //         notification.notify(data.messages, 0);
+      //       }
+      //   });
+      //   myscope.init();
+      // };
 
-      $scope.select_all_toggle = function (val) {
-        $scope.delayed_jobs.setup.select_all = !!val;
-        $scope.delayed_jobs.selected = [];
-        $scope.delayed_jobs.list = $scope.new_delayed_jobs 
-        for (var i = 0; i < $scope.delayed_jobs.list.length; i++) {
-          $scope.delayed_jobs.list[i].checked = $scope.delayed_jobs.setup.select_all;
-          if ($scope.delayed_jobs.setup.select_all) {
-            myscope.select_single($scope.delayed_jobs.list[i]);
+      $scope.select_all_jobs_toggle = function (val) {
+        delayed_job = $scope.delayed_jobs
+        myscope.invert(false);
+        delayed_job.setup.select_all = !!val;
+        delayed_job.selected = [];
+        delayed_job.list = $scope.new_delayed_jobs 
+        for (var i = 0; i < delayed_job.list.length; i++) {
+          delayed_job.list[i].checked = delayed_job.setup.select_all;
+          if (delayed_job.setup.select_all) {
+            myscope.select_single(delayed_job.list[i]);
           }
         }
       };
 
-      $scope.load_page = function (direction) {
-        var page = parseInt($state.params.page, 10);
-        page = (typeof direction == 'undefined' || direction != 'previous') ? page + 1 : page - 1;
-        return myscope.load_page_number(page);
-      };
+      // $scope.load_page = function (direction) {
+      //   var page = parseInt($state.params.page, 10);
+      //   return myscope.load_page_number(page);
+      // };
 
       myscope.update_selected_count = function () {
-        if ($scope.delayed_jobs.setup.inverted && $scope.gridOptions.paginate.show) {
-          $scope.gridOptions.selections.selected_count = $scope.gridOptions.paginate.total_items - $scope.delayed_jobs.selected.length;
-        } else {
-          $scope.gridOptions.selections.selected_count = $scope.delayed_jobs.selected.length;
+        $scope.gridOptions.selections.selected_count = ($scope.delayed_jobs.setup.inverted && $scope.gridOptions.paginate.show) ? ($scope.gridOptions.paginate.total_items - $scope.delayed_jobs.selected.length) : $scope.delayed_jobs.selected.length;
+      };
+
+      myscope.invert = function (val) {
+        delayed_job = $scope.delayed_jobs
+        delayed_job.setup.inverted = !!val;
+        if (delayed_job.setup.inverted) {
+          if (delayed_job.setup.select_all) {
+            $scope.select_all_jobs_toggle(false);
+          } else if (delayed_job.selected.length === 0) {
+            $scope.select_all_jobs_toggle(true);
+          }
         }
+        myscope.update_selected_count();
       };
 
       myscope.select_single = function (row) {
         delayed_jobs.single.select($scope.delayed_jobs, row);
       };
 
-      myscope.select_pages = function (from, to, state) {
-        delayed_jobs.list.select($scope.delayed_jobs, from, to, state);
+      myscope.select_jobs_pages = function (from, to, state) {
+        delayed_jobs.list.select_pages($scope.delayed_jobs, from, to, state);
       };
 
       myscope.get_delayed_jobs = function (page) {
-        if (typeof page == 'undefined') {
-          page = $state.params.page;
-        }
         if ($scope._can_load_delayed_jobs) {
           $scope.gridOptions.paginate.current_page = page;
           return delayed_jobs.list.get_searched($scope.delayed_jobs, page).success(function (data)  {
@@ -69,40 +75,22 @@ groovepacks_admin_controllers.
       };
 
       myscope.handle_click_fn = function (row, event) {
-        var toState = 'tools.type.page.single';
         var toParams = {};
-        for (var key in $state.params) {
-          if (['filter', 'page'].indexOf(key) != -1) {
-            toParams[key] = $state.params[key];
-          }
-        }
         toParams.delayed_id = row.id;
-        $scope.select_all_toggle(false);
+        var toState = 'tools.type.page.single';
+        $scope.select_all_jobs_toggle(false);
         $state.go(toState, toParams);
       };
 
       myscope.load_page_number = function (page) {
-        if (page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items / $scope.gridOptions.paginate.items_per_page)) {
-          if ($scope.delayed_jobs.setup.search == '') {
-            var toParams = {};
-            for (var key in $state.params) {
-              if ($state.params.hasOwnProperty(key) && ['type', 'filter', 'delayed_id'].indexOf(key) != -1) {
-                toParams[key] = $state.params[key];
-              }
-            }
-            toParams['page'] = page;
-            $state.go($state.current.name, toParams);
-          }
+        paginate_options = $scope.gridOptions.paginate
+        if (page > 0 && page <= Math.ceil(paginate_options.total_items / paginate_options.items_per_page)) {
           return myscope.get_delayed_jobs(page);
-        } else {
-          var req = $q.defer();
-          req.reject();
-          return req.promise;
         }
       };
 
-      $scope.handlesort = function (predicate) {
-        myscope.common_setup_opt('sort', predicate, 'delayed_job');
+      $scope.handle_sort = function (predicate) {
+        myscope.common_setup_option('sort', predicate, 'delayed_job');
       };
 
       myscope.init = function () {
@@ -115,11 +103,9 @@ groovepacks_admin_controllers.
             open: true
           }
         ];
-
         //delayed_jobs.list.get().success(function (data)  {
         //  $scope.new_delayed_jobs = data.delayed_jobs;
         //});
-
         $scope.gridOptions = {
           identifier: 'new_delayed_jobs',
           show_hide: true,
@@ -127,25 +113,27 @@ groovepacks_admin_controllers.
           draggable: true,
           sortable: true,
           scrollbar: true,
-          sort_func: $scope.handlesort,
-          select_all: $scope.select_all_toggle,
+          sort_func: $scope.handle_sort,
+          select_all: $scope.select_all_jobs_toggle,
+          invert: myscope.invert,
           selections: {
             show_dropdown: true,
             single_callback: myscope.select_single,
-            multi_page: myscope.select_pages,
+            multi_page: myscope.select_jobs_pages,
             selected_count: 0,
             show: myscope.show_selected
           },
           setup: $scope.delayed_jobs.setup,
           paginate: {
             show: true,
-            delayed_jobs_count: 50000,
             current_page: $state.params.page,
             items_per_page: $scope.delayed_jobs.setup.limit,
+            delayed_jobs_count: 50000,
             callback: myscope.load_page_number
           },
           editable: {
             functions: {
+                name: myscope.handle_click_fn,
                 open: myscope.delete,
                 reset: myscope.reset
             }
@@ -201,18 +189,51 @@ groovepacks_admin_controllers.
           }
         };
          $scope.$watch('delayed_jobs.setup.search', function () {
-          if ($scope.delayed_jobs.setup.select_all) {
-            $scope.select_all_toggle(false);
-            }
+            // if ($scope.delayed_jobs.setup.select_all) {
+            //   $scope.select_all_jobs_toggle(false);
+            // }
             myscope.get_delayed_jobs(1);
           });
           $scope.$watch('delayed_jobs.selected', myscope.update_selected_count, true);
       };
 
-      myscope.common_setup_opt = function (type, value, selector) {
+      $scope.delete_delayed_jobs = function(){
+        if($scope.check_if_not_selected()) {
+          $scope.delayed_jobs.selected = 0;
+          var result = $q.defer();
+          for (var i = 0; i < $scope.delayed_jobs.list.length; i++) {
+            if ($scope.delayed_jobs.list[i].checked) {
+              $scope.delayed_jobs.selected += 1;
+            }
+          }
+
+          select_all = $scope.delayed_jobs.setup.select_all;
+          if ($scope.delayed_jobs.selected === 0) {
+            notification.notify('select a delayed jobs to delete');
+          } else if (confirm("Are you sure you want to delete the delayed job" + (($scope.delayed_jobs.selected == 1) ? "?" : "s?"))) {
+            delayed_jobs.list.update($scope.delayed_jobs, select_all).then(function (data) {
+              myscope.init();
+            })
+          } 
+        } else {
+           notification.notify('select a delayed jobs to delete');
+        }
+      };
+
+      $scope.check_if_not_selected = function () {
+        var selected = false;
+        for (var i = 0; i < $scope.delayed_jobs.list.length; i++) {
+          if ($scope.delayed_jobs.list[i].checked === true) {
+            selected = true;
+            break;
+          }
+        }
+        return selected;
+      };
+
+      myscope.common_setup_option = function (type, value, selector) {
         delayed_jobs.setup.update($scope.delayed_jobs.setup, type, value);
         myscope.get_delayed_jobs(1);
       };
       myscope.init();
-   
-    }]);
+}]);

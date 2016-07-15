@@ -16,6 +16,7 @@ module Groovepacker
             else
               set_status_and_msg_for_skipping_import
             end
+            update_orders_status
             @result
           end
 
@@ -113,10 +114,12 @@ module Groovepacker
               case @import_item.import_type
               when 'deep'
                 self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
-              when 'quick'
+              when 'regular', 'quick'
+                @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
                 self.import_from = quick_import_date.blank? ? DateTime.now-1.days : quick_import_date
               else
+                @import_item.update_attribute(:import_type, "regular")
                 last_imported_at = @credential.last_imported_at
                 self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
               end

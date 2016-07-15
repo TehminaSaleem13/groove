@@ -40,6 +40,7 @@ class Product < ActiveRecord::Base
                  :product_barcodes, :product_kit_skuss,
                  :primary_sku
   after_save :delete_cache
+  after_save :check_and_update_status_updated_column
 
   SINGLE_KIT_PARSING = 'single'.freeze
   DEPENDS_KIT_PARSING = 'depends'.freeze
@@ -161,13 +162,29 @@ class Product < ActiveRecord::Base
     end
     # update order items status from onhold to awaiting
     @order_items.each do |item|
-      item.order.update_order_status unless item.order.nil? ||
-                                            !%w(awaiting onhold)
-                                            .include?(item.order.status)
+      #item.order.update_order_status unless item.order.nil? ||
+      #                                      !%w(awaiting onhold)
+      #                                      .include?(item.order.status)
       bulkaction.process(item) if general_setting.inventory_tracking?
       item.delete_cache_for_associated_obj
     end
     result
+  end
+
+  def check_and_update_status_updated_column
+    if self.changes["status"].present?
+      obj = self
+      obj.update_column(:status_updated, true)
+      updated_products = Product.where(status_updated: true)
+      orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+      return if orders.length<1
+      action = GrooveBulkActions.where(identifier: "order", activity: "status_update", status: "pending").first
+      if action.blank?
+        action = GrooveBulkActions.new(identifier: "order", activity: "status_update", status: "pending")
+      end
+        action.total = orders.count
+        action.save
+    end
   end
 
   def update_due_to_inactive_product

@@ -45,7 +45,6 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
         if (typeof scope.notifications[scope.selected] == "undefined") {
           scope.selected = '';
         }
-
         for (var i in scope.notifications) {
           if (scope.notifications.hasOwnProperty(i)) {
             if (scope.selected != '' && scope.notifications[scope.selected].type == 'in_progress') return;
@@ -142,6 +141,12 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
         });
       }
 
+      scope.update_orders_status = function(){
+        settings.update_orders_status(scope.bulk_action_ids).then(function(response){
+          //myscope.repurpose_selected();
+        });
+      }
+
       myscope.groove_bulk_actions = function (message, hash) {
         scope.notifications[hash].percent = (message['completed'] / message['total']) * 100;
         var notif_message = '';
@@ -167,11 +172,28 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
           if (message['activity'] == 'kit') {
             notif_message = '<b>Importing Kits:</b> ';
           }
+        } else if ((message['identifier']=='orders' || message['identifier']=='order') && message['activity']=='status_update') {
+          if (message['status']=='pending') {
+            notif_message = '<b>You have '+ message['total'] +' orders to update </b> ';
+          } else if (message['status']=='scheduled') {
+            notif_message = '<b>' + message['total'] +' orders to update: </b> ';
+          } else if (message['status']=='in_progress') {
+            notif_message = '<b>' + message['total'] +' orders scheduled to update: </b> ';
+          } else if (message['status']=='completed') {
+            notif_message = '<b>' + message['completed'] +' orders status updated: </b> ';
+          }
+        } else if (message['identifier']=='orders' && message['activity']=='duplicate') {
+          notif_message = '<b>Order Duplicate:</b> ';
+        } else if (message['identifier']=='orders' && message['activity']=='delete') {
+          notif_message = '<b>Order Delete:</b> ';
         }
+        scope.notifications[scope.selected].identifier = message['identifier'];
         myscope.repurpose_selected();
         scope.notifications[hash].type = message['status'];
         if (message['status'] == "scheduled") {
           notif_message += 'Queued';
+        } else if (message['status'] == "pending") {
+          scope.product_status_update = true
         } else if (message['status'] == "in_progress") {
           notif_message += message['completed'] + '/' + message['total'] + '&nbsp;';
           notif_details = '<b>Currently processing:<b> ' + message['current'] + notif_details;
