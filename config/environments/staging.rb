@@ -93,9 +93,7 @@ Groovepacks::Application.configure do
     :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
     :openssl_verify_mode  => 'none'
   }
-  ENV['REDIS_HOST'] = 'groovelytics-redis'
-  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
-  ENV['REDIS_PORT'] = '7743'
+
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'], driver: :hiredis)
 
@@ -123,8 +121,6 @@ Groovepacks::Application.configure do
     ENV['BC_CLIENT_SECRET'] = "s58qbf72e6jpd2lqr4vvmcnu4s10xdi"
     ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5736"
     ENV['BC_CALLBACK_HOST'] = "admin.groove-packer.com"
-    ENV['HOST_NAME'] = 'groove-packer.com'
-    ENV["SITE_HOST"] = "groove-packer.com"
   else
     ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
     ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
@@ -132,8 +128,6 @@ Groovepacks::Application.configure do
     ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
     ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
     ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
-    ENV['HOST_NAME'] = 'barcodepacker.com'
-    ENV["SITE_HOST"] = "barcodepacker.com"
   end
   ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
@@ -152,7 +146,7 @@ Groovepacks::Application.configure do
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
+  # ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"

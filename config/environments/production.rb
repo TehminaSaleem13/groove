@@ -93,11 +93,12 @@ Groovepacks::Application.configure do
     :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
     :openssl_verify_mode  => 'none'
   }
-  ENV['REDIS_HOST'] = 'groovelytics-redis'
-  ENV['REDIS_PASSWORD'] = '6t!@D2gA4i8njgz^qut#owyaiJXYfM5q'
-  ENV['REDIS_PORT'] = '7743'
-  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
-    password: ENV['REDIS_PASSWORD'], driver: :hiredis)
+
+  # ENV['REDIS_HOST'] = 'groovelytics-redis'
+  # ENV['REDIS_PASSWORD'] = '6t!@D2gA4i8njgz^qut#owyaiJXYfM5q'
+  # ENV['REDIS_PORT'] = '7743'
+  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
+    password: ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
   
@@ -145,7 +146,7 @@ Groovepacks::Application.configure do
   ENV["SITE_HOST"] = "groovepacker.com"
 
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "orderpacker.com"
+  # ENV["GROOV_ANALYTIC"] = "orderpacker.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"

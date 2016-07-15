@@ -91,11 +91,8 @@ Groovepacks::Application.configure do
   Rails.logger = Logger.new(STDOUT)
   config.log_level = :info
 
-  ENV['REDIS_HOST'] = 'localhost'
-  ENV['REDIS_PASSWORD'] = 'foobared'
-  ENV['REDIS_PORT'] = '6379'
-  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
-    password: ENV['REDIS_PASSWORD'], driver: :hiredis)
+  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port=> ENV['REDIS_PORT'].to_i,
+    :password => ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 

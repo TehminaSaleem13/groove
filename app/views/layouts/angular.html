@@ -15,7 +15,6 @@
   <%= csrf_meta_tags %>
   <%= tag :meta, :name => "stripe-key", :content => ENV['STRIPE_PUBLIC_KEY'] %>
   <%= yield(:head) %>
-  <%= airbrake_javascript_notifier %>
 </head>
 <body class="container-well"
       ng-app="<%= (Apartment::Tenant.current == 'admintools')? 'groovepacks_admin' : 'groovepacks' %>"

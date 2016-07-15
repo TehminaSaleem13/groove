@@ -14,8 +14,9 @@ development:
   reconnect: false
   database: groovepacks_development
   pool: 5
-  username: root
-  password: password
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
   socket: /private/tmp/mysql.sock
 
 # Warning: The database defined as "test" will be erased and
@@ -38,9 +39,9 @@ production:
   reconnect: false
   database: groovepacks_production
   pool: 5
-  host: groove-db-1
-  username: groovepacker
-  password: groove123pass
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
   port: 3306
   #socket: /var/run/mysqld/mysqld.sock
 
@@ -50,8 +51,8 @@ staging:
   reconnect: false
   database: groovepacks_production
   pool: 5
-  host: groov-staging-db
-  username: root
-  password: password
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
   port: 3306
   #socket: /var/run/mysqld/mysqld.sock

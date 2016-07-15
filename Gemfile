@@ -55,7 +55,6 @@ group :test do
 end
 
 gem 'redis-session-store'
-gem 'airbrake'
 gem 'devise', '>= 2.1.2'
 gem 'simple_form', '>= 2.0.4'
 gem 'figaro', '>= 0.5.0'
@@ -106,6 +105,7 @@ gem 'delayed_job_recurring'
 gem 'aws_cf_signer'
 gem 'aws-sdk', '~> 2'
 gem 'wannabe_bool'
+gem 'dotenv-rails'
 gem 'redis-rails'
 gem 'hiredis'
 gem "delayed_job_web"

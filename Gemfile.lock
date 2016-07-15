@@ -71,10 +71,6 @@ GEM
       memoizable (~> 0.4.0)
     addressable (2.3.5)
     afm (0.2.0)
-    airbrake (3.1.12)
-      activesupport
-      builder
-      json
     akami (1.2.0)
       gyoku (>= 0.4.0)
       nokogiri (>= 1.4.0)
@@ -188,6 +184,9 @@ GEM
     docile (1.1.5)
     doorkeeper (2.2.1)
       railties (>= 3.2)
+    dotenv (2.0.1)
+    dotenv-rails (2.0.1)
+      dotenv (= 2.0.1)
     ebay (1.1)
     email_spec (1.5.0)
       launchy (~> 2.1)
@@ -557,7 +556,6 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (= 0.3.1)
-  airbrake
   angular-ui-bootstrap-rails
   angularjs-rails (>= 1.2.18)
   apartment (>= 0.25.1)!
@@ -583,6 +581,7 @@ DEPENDENCIES
   delayed_job_web
   devise (>= 2.1.2)
   doorkeeper
+  dotenv-rails
   ebay (~> 1.1)
   email_spec (>= 1.4.0)
   excon
