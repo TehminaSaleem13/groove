@@ -203,7 +203,7 @@ class GeneralSetting < ActiveRecord::Base
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
         if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(date)
-          Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all
+          Delayed::Job.where(queue: "low_inventory_email_scheduled_#{tenant}").destroy_all unless self.changes.blank?
           #LowInventoryLevel.notify(self,tenant).deliver
           LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now, :queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
           job_scheduled = true
