@@ -50,6 +50,205 @@ describe StoresController do
       expect(store.big_commerce_credential).to be_present
     end
   end
+
+  describe "POST 'create'" do
+    it "creates an Shopify store" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { 
+        :store_type => 'Shopify', 
+        :status => false,
+        :shop_name => "Shopers Stop",
+        :regular_import_range => 3 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(false)
+      expect(store.store_type).to eq("Shopify")
+      expect(store.shopify_credential).to be_present
+    end
+  end
+
+  describe "POST 'update'" do
+    it "updates an Shopify store" do
+      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shopify_inventory_warehouse')
+      @store = FactoryGirl.create(:store, :name=>'shopify_store', :inventory_warehouse=>@inv_wh, :status => false)
+      @shopify_credential = FactoryGirl.create(:shopify_credential, :store_id=>@store.id, :shop_name => "Shopers Stop")
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { :store_type => 'Shopify', :id => @store.id, :status => true }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(true)
+      expect(store.store_type).to eq("Shopify")
+      expect(store.shopify_credential).to be_present
+    end
+  end
+
+  describe "POST 'create'" do
+    it "creates an Shipstation store" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { 
+        :store_type => 'Shipstation', 
+        :status => false,
+        :username => "Mike",
+        :password => "SECRET",
+        :regular_import_range => 3 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(false)
+      expect(store.store_type).to eq("Shipstation")
+      expect(store.shipstation_credential).to be_present
+    end
+  end
+
+  describe "POST 'update'" do
+    it "updates an Shipstation store" do
+      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipstation_inventory_warehouse')
+      @store = FactoryGirl.create(:store, :name=>'shipstation_store', :inventory_warehouse=>@inv_wh, :status => false)
+      @shipstation_credential = FactoryGirl.create(:shipstation_credential, :store_id=>@store.id, :username => "Mike", :password => "SECRET")
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { :store_type => 'Shipstation', :id => @store.id, :status => true}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(true)
+      expect(store.store_type).to eq("Shipstation")
+      expect(store.shipstation_credential).to be_present
+    end
+  end
+
+  describe "POST 'create'" do
+    it "creates an Ebay store" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { 
+        :store_type => 'Ebay', 
+        :status => false,
+        :auth_token => "123456",
+        :productauth_token => "SECRET123",
+        :ebay_auth_expiration => "SECRET12",
+        :regular_import_range => 3 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(false)
+      expect(store.store_type).to eq("Ebay")
+      expect(store.ebay_credentials).to be_present
+    end
+  end
+
+  describe "POST 'update'" do
+    it "updates an Ebay store" do
+      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'ebay_inventory_warehouse')
+      @store = FactoryGirl.create(:store, :name=>'ebay_store', :inventory_warehouse=>@inv_wh, :status => false)
+      @ebay_credential = FactoryGirl.create(:ebay_credential, :store_id=>@store.id, :auth_token => "123456", :productauth_token => "SECRET123", :ebay_auth_expiration => "SECRET12")
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { :store_type => 'Ebay', :id => @store.id, :status => true}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(true)
+      expect(store.store_type).to eq("Ebay")
+      expect(store.ebay_credentials).to be_present
+    end
+  end
+
+  describe "POST 'create'" do
+    it "creates an Shipstation API 2 store" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { 
+        :store_type => 'Shipstation API 2', 
+        :status => false,
+        :api_key => "Key",
+        :api_secret => "SECRET",
+        :regular_import_range => 3 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(false)
+      expect(store.store_type).to eq("Shipstation API 2")
+      expect(store.shipstation_rest_credential).to be_present
+    end
+  end
+
+  describe "POST 'update'" do
+    it "updates an Shipstation API 2 store" do
+      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipstation_rest_inventory_warehouse')
+      @store = FactoryGirl.create(:store, :name=>'shipstation_rest_store', :inventory_warehouse=>@inv_wh, :status => false)
+      @shipstation_rest_credential = FactoryGirl.create(:shipstation_rest_credential, :store_id=>@store.id, :api_key => "Key", :api_secret => "SECRET")
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { :store_type => 'Shipstation API 2', :id => @store.id, :status => true}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(true)
+      expect(store.store_type).to eq("Shipstation API 2")
+      expect(store.shipstation_rest_credential).to be_present
+    end
+  end
+
+  describe "POST 'create'" do
+    it "creates an Shipworks store" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { 
+        :store_type => 'Shipworks', 
+        :status => false,
+        :auth_token => "Token",
+        :regular_import_range => 3 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(false)
+      expect(store.store_type).to eq("Shipworks")
+      expect(store.shipworks_credential).to be_present
+    end
+  end
+
+  describe "POST 'update'" do
+    it "updates an Shipworks store" do
+      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipworks_inventory_warehouse')
+      @store = FactoryGirl.create(:store, :name=>'shipworks_store', :inventory_warehouse=>@inv_wh, :status => false)
+      @shipworks_credential = FactoryGirl.create(:shipworks_credential, :store_id=>@store.id, :auth_token => "Token")
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { :store_type => 'Shipworks', :id => @store.id, :status => true}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(true)
+      expect(store.store_type).to eq("Shipworks")
+      expect(store.shipworks_credential).to be_present
+    end
+  end
   
   describe "POST 'create'" do
     it "creates an ShippingEasy store" do
@@ -94,6 +293,48 @@ describe StoresController do
     end
   end
 
+  describe "POST 'create'" do
+    it "creates an Teapplix store" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { 
+        :store_type => 'Teapplix', 
+        :status => false,
+        :account_name => "HELLO",
+        :username => "Name",
+        :password => "SECRET",
+        :gen_barcode_from_sku => true
+      }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(false)
+      expect(store.store_type).to eq("Teapplix")
+      expect(store.teapplix_credential).to be_present
+    end
+  end
+
+  describe "POST 'update'" do
+    it "updates an Teapplix store" do
+      @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'teapplix_inventory_warehouse')
+      @store = FactoryGirl.create(:store, :name=>'teapplix_store', :inventory_warehouse=>@inv_wh, :status => false)
+      @teapplix_credential = FactoryGirl.create(:teapplix_credential, :store_id=>@store.id,:account_name => "HELLO", :username => "Name", :password => "SECRET")
+      request.accept = "application/json"
+      @user.role.update_attribute(:add_edit_stores, true)
+      post :create_update_store, { :store_type => 'Teapplix', :id => @store.id, :status => true }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['store_id']).to be_present
+      store = Store.find_by_id(result['store_id'])
+      expect(store.status).to eq(true)
+      expect(store.store_type).to eq("Teapplix")
+      expect(store.teapplix_credential).to be_present
+    end
+  end
+
   describe "Get 'stores'" do
     it "It fetches all stores excluding system stores" do
       @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'shipping_easy_inventory_warehouse')
@@ -110,8 +351,21 @@ describe StoresController do
     end
   end
 
+  # describe 'exception is ActiveRecord::RecordInvalid' do
+  #   it 'returns the validation error' do
+  #     begin
+  #       raise ActiveRecord::RecordInvalid
+  #     rescue Exception => ex
+  #     end
+  #   end
+  # end
 
-  
+  # describe "GET 'csv_import_data'" do 
+  #   it 'csv map updated' do
+  #     request.accept = "application/json"
+  #     @csv_map = FactoryGirl.create(:csv_map, :name=>'Map')
+  #   end
+  # end
   # describe "GET 'getactivestores'" do
   #   it "Should not return any active stores" do
   #     @inv_wh = FactoryGirl.create(:inventory_warehouse, :name=>'big_commerce_inventory_warehouse1')
@@ -141,6 +395,10 @@ describe StoresController do
   #     expect(result['stores'].length).to eq(2)
   #   end
   # end
+
+  it "It Should return activestore" do
+    
+  end
   
   describe "POST 'create_update_ftp_credentials'" do
     it "Should not create or update ftp credentials for CSV type store" do
