@@ -376,13 +376,13 @@ RSpec.describe ProductsController, :type => :controller do
     result = JSON.parse(response.body)
   end
 
-  it "It should print label" do 
-    request.accept = "application/json"
-    product = FactoryGirl.create(:product)
-    get :print_receiving_label, {"sort"=>"", "order"=>"DESC", "filter"=>"active", "search"=>"", "select_all"=>false, "inverted"=>false, "is_kit"=>0, "limit"=>20, "offset"=>0, "setting"=>"", "status"=>"", "productArray"=>[{"id"=> product.id}], "product"=>{"status"=>"", "is_kit"=>0}}
-    expect(response.status).to eq(200)
-    result = JSON.parse(response.body)
-  end
+  # it "It should print label" do 
+  #   request.accept = "application/json"
+  #   product = FactoryGirl.create(:product)
+  #   get :print_receiving_label, {"sort"=>"", "order"=>"DESC", "filter"=>"active", "search"=>"", "select_all"=>false, "inverted"=>false, "is_kit"=>0, "limit"=>20, "offset"=>0, "setting"=>"", "status"=>"", "productArray"=>[{"id"=> product.id}], "product"=>{"status"=>"", "is_kit"=>0}}
+  #   expect(response.status).to eq(200)
+  #   result = JSON.parse(response.body)
+  # end
 
   it "It should search product" do
     request.accept = "application/json"
