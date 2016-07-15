@@ -108,3 +108,4 @@ gem 'aws-sdk', '~> 2'
 gem 'wannabe_bool'
 gem 'redis-rails'
 gem 'hiredis'
+gem "delayed_job_web"

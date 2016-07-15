@@ -4,6 +4,7 @@ Groovepacks::Application.routes.draw do
 
   match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
   match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
+  match "/delayed_job" => DelayedJobWeb, :anchor => false, via: [:get, :post]
 
   get "/404", :to => "specials#error_404"
 
