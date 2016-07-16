@@ -39,7 +39,7 @@ Groovepacks::Application.configure do
   # }
 
   ENV['REDIS_HOST'] = 'groovelytics-redis'
-  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe$S7w*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
+  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
   ENV['REDIS_PORT'] = '7743'
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'], driver: :hiredis)
