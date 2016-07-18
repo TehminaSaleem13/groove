@@ -10,9 +10,9 @@ namespace :ftp_csv_file_import do
           puts "starting the rake task"
           ftp_csv_import = Groovepacker::Orders::Import.new
           if tenant.name == "unitedmedco" && current_time >= "05:00" && current_time <= "10:00"
-            ftp_csv_import.delay.import_ftp_order("unitedmedco")
+            ftp_csv_import.delay(attempts: 4).import_ftp_order("unitedmedco")
           elsif current_time >= "08:00" && current_time <= "10:00"
-            ftp_csv_import.delay.import_ftp_order(tenant.name)
+            ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant.name)
           end
           puts "task complete"
         end
