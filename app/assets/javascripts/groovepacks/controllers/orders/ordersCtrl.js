@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('ordersCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$q', 'orders', '$modal', 'generalsettings',
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $q, orders, $modal, generalsettings) {
+  controller('ordersCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$q', 'orders', '$modal', 'generalsettings', '$rootScope',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $q, orders, $modal, generalsettings, $rootScope) {
       //Definitions
 
       var myscope = {};
@@ -506,6 +506,10 @@ groovepacks_controllers.
         $scope.$watch('orders.selected', myscope.update_selected_count, true);
 
         $scope.order_modal_closed_callback = myscope.get_orders;
+
+        $rootScope.$on('bulk_action_finished', function () {
+          myscope.get_orders();
+        });
 
       };
 
