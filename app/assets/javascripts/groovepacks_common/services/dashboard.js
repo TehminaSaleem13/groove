@@ -173,9 +173,12 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>' +
         '</div>';
       } else if (charts.type === 'packed_item_stats' || charts.type === 'packed_order_stats') {
-        single_tooltip = data_points.data[i][1] + ' items packed for ' + data_points.data[i][2] + ' orders on ' + date;
-        tooltipText += '<span>' + single_tooltip + '</span></div>';
-        tooltipText += '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>';
+        single_tooltip = data_points.data[i][1] + ' items packed <br/>' + data_points.data[i][2] + ' orders';
+        tooltipText +=
+          '<span><strong>' + date + '</strong></span><br/>' +
+          '<span><strong>' + single_tooltip + '<strong></span>' +
+          '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>' +
+          '</div>';
       }
     }
     return tooltipText;
