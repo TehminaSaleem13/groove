@@ -79,6 +79,7 @@ module Groovepacker
           end
 
           def import_order_time(single_row, result)
+            params[:order_placed_at] = "#{DateTime.now()}" if params[:order_date_time_format] == 'Default'
             if @helper.order_placed_time_mapped?(single_row)
               begin
                 @order['order_placed_time'] = @helper.calculate_order_placed_time(single_row)
