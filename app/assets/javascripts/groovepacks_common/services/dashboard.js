@@ -128,10 +128,12 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
 
   var get_tool_tip = function(data_points, charts, dashboard) {
     var tooltipText = '';
-    for (var i = data_points.data.length - 1; i >= 0; i--) {
+    for (var i = data_points.data.length - 1, j=0; i >= 0; i--, j++) {
         date = d3.time.format('%b %e, %Y')(moment.unix(data_points.data[i][0]).toDate());
         col_sm = Math.floor(12/data_points.data.length);
-        tooltipText += '<div class=col-sm-' + col_sm + ' col-md-' + col_sm + ' col-lg-' + col_sm + '><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
+        col_sm = col_sm < 3 ? 3 : col_sm
+        if(j % 4 == 0){ tooltipText += (j == 0 ? '<div class="col-sm-12"> <div class="row">' : '</div></div><hr><div class="col-sm-12"><div class="row">') }
+        tooltipText += '<div class="col-sm-' + col_sm + ' col-md-' + col_sm + ' col-lg-' + col_sm + '"><h4 style="text-transform: capitalize; color:' + data_points.user[i][1] +
         '">' + data_points.user[i][0] + '</h4>';
       if (charts.type === 'packing_stats' || charts.type === 'packing_error') {
         tooltipText += 
@@ -145,7 +147,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         if (data_points.data[i][6] != null && data_points.data[i][7] != null) {
           var orders = data_points.data[i][6].split(' ')
           var dates = data_points.data[i][7].split(' ')
-          tooltipText += '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>'
+          tooltipText += '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>';
           for (var j = 0; j < orders.length - 1; j++) {
             if (dates[j] == '') {
               tooltipText +=
@@ -168,10 +170,12 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         '<span><strong>Date: </strong>' + date + '</span><br/>' +
         '<span><strong>Daily Speed Score: </strong>' + get_speed(data_points.data[i][1], dashboard) + '% </span><br/>' +
         '<span><strong>Avg. Time/Item: </strong>' + data_points.data[i][1] + ' sec</span>' +
+        '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>' +
         '</div>';
       } else if (charts.type === 'packed_item_stats' || charts.type === 'packed_order_stats') {
         single_tooltip = data_points.data[i][1] + ' items packed for ' + data_points.data[i][2] + ' orders on ' + date;
         tooltipText += '<span>' + single_tooltip + '</span></div>';
+        tooltipText += '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>';
       }
     }
     return tooltipText;
