@@ -383,10 +383,8 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
         };
 
         scope.build_dash_data = function() {
-          console.log('dash_data',scope.dash_data);
           scope.dashboard.max_time_per_item = 0;
           dashboard.model.get_max(scope.dashboard).then(function(response) {
-            window.scope = scope
             days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
             scope.leader_board.list = scope.dash_data.leader_board.list;
             for (var i = 0; i <= scope.dash_data.dashboard.length - 1; i++) {
@@ -406,7 +404,6 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
                 scope.dashboard.packing_speed_summary.previous_period = dashboard.stats.speed(previous_period_avg, scope.dashboard);
                 scope.dashboard.packing_speed_summary.delta =
                   (scope.dashboard.packing_speed_summary.current_period - scope.dashboard.packing_speed_summary.previous_period).toFixed(2);
-                console.log(scope.dashboard);
               }
             }
           })
