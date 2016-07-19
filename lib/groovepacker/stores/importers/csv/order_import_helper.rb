@@ -94,16 +94,16 @@ module Groovepacker
 
           def order_placed_time_mapped?(single_row)
             verify_single_item(single_row, 'order_placed_time') &&
-              !params[:order_date_time_format].nil? &&
-              params[:order_date_time_format] != 'Default'
+              !params[:order_date_time_format].nil? 
+              # && params[:order_date_time_format] != 'Default'
           end
 
           def calculate_order_placed_time(single_row)
             require 'time'
-            imported_order_time =
-              get_row_data(single_row, 'order_placed_time')
+            imported_order_time =  "#{get_row_data(single_row, 'order_placed_time').to_time}"
             separator = (imported_order_time.include? '/') ? '/' : '-'
             order_time_hash = build_order_time_hash(separator)
+            params[:order_date_time_format] = "YYYY/MM/DD TIME" if params[:order_date_time_format] == "Default"
             return DateTime.strptime(
               imported_order_time,
               order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])
