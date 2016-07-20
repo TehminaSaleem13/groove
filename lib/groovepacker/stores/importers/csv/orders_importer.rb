@@ -2,6 +2,7 @@ module Groovepacker
   module Stores
     module Importers
       module CSV
+        require 'timeout'
         # The following class imports orders and conatining items
         # for each order from a csv file.
         class OrdersImporter < CsvBaseImporter
@@ -16,10 +17,9 @@ module Groovepacker
             @imported_products = []
             @base_products = []
             @import_item = @helper.initialize_import_item
-            final_records = @helper.build_final_records
+            final_records = @helper.build_final_records     
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
-
             OrderItem.import @created_order_items
             @created_order_items.each do |item|
               item.run_callbacks(:create) { true }
@@ -42,21 +42,32 @@ module Groovepacker
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
-            if @helper.not_imported?(@imported_orders, inc_id)
-              @order = Order.find_or_initialize_by_increment_id(inc_id)
-              order_persisted = @order.persisted? ? true : false
-              @order.store_id = params[:store_id]
-              @order_required = %w(qty sku increment_id price)
-              @order.save
-              @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
-              import_order_data(order_map, single_row)
-              update_result(result, single_row)
-              import_item_failed_result(result, index) unless result[:status]
-              @order.set_order_status
-            else
-              @import_item.previous_imported += 1
-              @import_item.save
-              # Skipped because of duplicate order
+            begin
+              Timeout::timeout(30) {
+                ActiveRecord::Base.transaction do
+                  if @helper.not_imported?(@imported_orders, inc_id)
+                    @order = Order.find_or_initialize_by_increment_id(inc_id)
+                    order_persisted = @order.persisted? ? true : false
+                    @order.store_id = params[:store_id]
+                    @order_required = %w(qty sku increment_id price)
+                    @order.save
+                    @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
+                    import_order_data(order_map, single_row)
+                    update_result(result, single_row)
+                    import_item_failed_result(result, index) unless result[:status]
+                    @order.set_order_status
+                  else
+                    @import_item.previous_imported += 1
+                    @import_item.save
+                    # Skipped because of duplicate order
+                  end
+                end
+              }
+            rescue Timeout::Error
+              if @order.present?
+                @order.reload 
+                @order.destroy
+              end
             end
           end
 
