@@ -99,9 +99,10 @@ module Groovepacker
 
           def calculate_order_placed_time(single_row)
             require 'time'
-            imported_order_time = "#{Time.parse(get_row_data(single_row, 'order_placed_time'))}" 
+            imported_order_time = get_row_data(single_row, 'order_placed_time')
+            imported_order_time += " 00:00:00" unless imported_order_time.include?(":")
             separator = (imported_order_time.include? '/') ? '/' : '-'
-            order_time_hash = build_order_time_hash(separator)           
+            order_time_hash = build_order_time_hash(separator)
             return DateTime.strptime(
               imported_order_time,
               order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])
