@@ -264,7 +264,8 @@ groovepacks_controllers.
         myscope.reset_change_status();
         if ($scope._can_load_orders) {
           $scope._can_load_orders = false;
-          return orders.list.get($scope.orders, page).success(function (data) {
+          product_search_toggle = $scope.orders.setup.search_by_product;
+          return orders.list.get($scope.orders, page, product_search_toggle).success(function (data) {
             $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
             myscope.update_selected_count();
             myscope.update_table_accordian_width();
@@ -281,6 +282,12 @@ groovepacks_controllers.
         }
 
       };
+
+      $scope.search_by_product = function (){
+        page = $state.params.page;
+        product_search_toggle = $scope.orders.setup.search_by_product;
+        orders.list.get($scope.orders, page, product_search_toggle);
+      }
 
       myscope.update_table_accordian_width = function () {
         if($('.accordion-parent').width() > 200){
@@ -310,6 +317,7 @@ groovepacks_controllers.
         //Public properties
         $scope.orders = orders.model.get();
         $scope.firstOpen = true;
+        $scope.orders.setup.search_by_product = false;
         $scope.general_settings = generalsettings.model.get();
         $scope.allow_status_changes = {
           scanned: true,

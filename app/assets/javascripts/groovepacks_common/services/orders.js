@@ -82,7 +82,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   //list related functions
-  var get_list = function (object, page) {
+  var get_list = function (object, page, product_search_toggle) {
     var url = '';
     var setup = object.setup;
     if (typeof page != 'undefined' && page > 0) {
@@ -96,7 +96,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     } else {
       url = '/orders/search.json?' + $.param({search: setup.search, sort: setup.sort, order: setup.order});
     }
-    url += '&limit=' + setup.limit + '&offset=' + setup.offset;
+    url += '&limit=' + setup.limit + '&offset=' + setup.offset + '&product_search_toggle=' + product_search_toggle;
     return $http.get(url).success(
       function (data) {
         if (data.status) {
