@@ -128,7 +128,7 @@ Groovepacks::Application.configure do
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
 
-  ENV['HOST_NAME'] = 'localpacker.com'
+  ENV['HOST_NAME'] = 'localpackerapi.com'
 
   ENV['ONE_TIME_PAYMENT'] = '50000'
   ENV['BC_ONE_TIME_PAYMENT'] = '0'
@@ -143,7 +143,7 @@ Groovepacks::Application.configure do
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
 
-  ENV["SITE_HOST"] = "localpacker.com"
+  ENV["SITE_HOST"] = "localpackerapi.com"
 
   # analytic server
   ENV["GROOV_ANALYTIC"] = "localhost:4000"

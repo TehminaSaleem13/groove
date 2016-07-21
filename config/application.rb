@@ -72,6 +72,15 @@ module Groovepacks
 
     config.autoload_paths += Dir[ Rails.root.join('app', 'models', "concerns", '**/') ]
     config.autoload_paths += Dir[ Rails.root.join('app', 'controllers', "concerns", '**/') ]
+
+    # To enable Cross-Origin requests
+    config.middleware.insert_before 0, "Rack::Cors" do
+      allow do
+        origins '*'
+        resource '*', :headers => :any, :methods => [:get, :post, :delete, :options]
+      end
+    end
+    
   end
 end
 require Rails.root.join('config','initializers','groove_constants.rb')
