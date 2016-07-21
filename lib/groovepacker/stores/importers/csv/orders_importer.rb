@@ -199,7 +199,7 @@ module Groovepacker
               @import_item.success_imported += 1
               @import_item.save
             rescue ActiveRecord::RecordInvalid => e
-              messages = @order.errors.full_messages + e.message
+              messages = (@order.errors.full_messages << e.message) rescue @order.errors.full_messages
               result = @helper.update_count_error_result(result, messages)
             rescue ActiveRecord::StatementInvalid => e
               result = @helper.update_count_error_result(result, e.messages)
