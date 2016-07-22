@@ -221,6 +221,14 @@ class SettingsController < ApplicationController
     render json: 'ok'
   end
 
+  def search_by_product
+    setting = GeneralSetting.all.first
+    search_toggle = !params["_json"]
+    setting.search_by_product = search_toggle
+    setting.save
+    render json: @result
+  end
+
   # def execute_in_bulk_action(activity)
   #   result = {}
   #   result['status'] = true

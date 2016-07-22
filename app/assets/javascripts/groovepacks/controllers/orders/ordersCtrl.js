@@ -264,7 +264,7 @@ groovepacks_controllers.
         myscope.reset_change_status();
         if ($scope._can_load_orders) {
           $scope._can_load_orders = false;
-          product_search_toggle = $scope.orders.setup.search_by_product;
+          product_search_toggle = $scope.general_settings.single.search_by_product;
           return orders.list.get($scope.orders, page, product_search_toggle).success(function (data) {
             $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
             myscope.update_selected_count();
@@ -285,8 +285,10 @@ groovepacks_controllers.
 
       $scope.search_by_product = function (){
         page = $state.params.page;
-        product_search_toggle = $scope.orders.setup.search_by_product;
-        orders.list.get($scope.orders, page, product_search_toggle);
+        product_search_toggle = $scope.general_settings.single.search_by_product;
+        orders.list.search_by_product_toggle(product_search_toggle);
+        generalsettings.single.get($scope.general_settings).then(function () { $scope.general_settings.single.search_by_product });
+        // orders.list.get($scope.orders, page, product_search_toggle);
       }
 
       myscope.update_table_accordian_width = function () {
@@ -317,7 +319,6 @@ groovepacks_controllers.
         //Public properties
         $scope.orders = orders.model.get();
         $scope.firstOpen = true;
-        $scope.orders.setup.search_by_product = false;
         $scope.general_settings = generalsettings.model.get();
         $scope.allow_status_changes = {
           scanned: true,
@@ -325,7 +326,7 @@ groovepacks_controllers.
         };
 
         $scope.disable_global_edit = disable_global_edit();
-        generalsettings.single.get($scope.general_settings);
+        generalsettings.single.get($scope.general_settings).then(function () { $scope.general_settings.single.search_by_product });
 
         //Private properties
         myscope.do_load_orders = false;

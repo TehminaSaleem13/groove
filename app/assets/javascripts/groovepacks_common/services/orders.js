@@ -132,6 +132,11 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     ).error(notification.server_error);
   };
 
+  var search_by_product_toggle = function(product_search_toggle){
+    url = "/settings/search_by_product.json"
+    return $http.post(url, product_search_toggle);
+  }
+
   var generate_list = function (action, orders) {
     if(typeof $window.order_modified == 'undefined'){$window.order_modified = []};
     orders.setup.orderArray = [];
@@ -470,6 +475,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
       update_items: update_items_setup
     },
     list: {
+      search_by_product_toggle: search_by_product_toggle,
       get: get_list,
       update: update_list,
       select: select_list,
