@@ -120,7 +120,6 @@ module ApplicationHelper
 
   def socket_server
     return "" if ENV['SOCKET_ENDPOINT'].nil?
-    tenant = Apartment::Tenant.current == '' ? 'admintools' : Apartment::Tenant.current 
-    request.protocol + tenant + "." + ENV['SOCKET_ENDPOINT']
+    request.protocol + "socket." + ENV['SOCKET_ENDPOINT']
   end
 end
