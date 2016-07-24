@@ -1,4 +1,6 @@
-groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window', 'notification', '$timeout', function (socketFactory, $http, $window, notification, $timeout) {
+groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window', 
+    'notification', '$timeout', '$cookies', 
+    function (socketFactory, $http, $window, notification, $timeout, $cookies) {
   var groov_socket = null;
   var current_id = 0;
   var forwards = {};
@@ -6,11 +8,12 @@ groovepacks_services.factory("groovIO", ['socketFactory', '$http', '$window', 'n
   var connect = function () {
     if (groov_socket === null) {
       if (typeof io !== "undefined") {
-        var socket_conn = io("/v1", {
+        var socket_server = $('#socket_server').val();
+        var socket_conn = io(socket_server + "/v1", {
           query: 'fingerprint=' + new Fingerprint({
             canvas: true,
             screen_resolution: true
-          }).get()
+          }).get() + '&token=' + $cookies._validation_token_key
         });
         groov_socket = socketFactory({ioSocket: socket_conn, prefix: 'groove_socket:'});
         var to_del = [];
