@@ -59,6 +59,7 @@ module Groovepacker
 
       def create_order_import_summary(store)
         @order_summary = OrderImportSummary.last
+        @order_summary.update_attribute(:status, "not_started") if @order_summary.present?
         @order_summary = OrderImportSummary.create(user_id: user.id, import_summary_type: "import_orders", status: 'not_started') if @order_summary.blank?
         ImportItem.where(store_id: store.id).destroy_all
         @order_summary.reload
