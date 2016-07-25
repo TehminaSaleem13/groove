@@ -6,12 +6,13 @@ class ApplicationController < ActionController::Base
 
   def groovepacker_authorize!
     auth_header = request.headers["Authorization"]
-    if auth_header.nil?
-      authenticate_user!
-    elsif auth_header.include?("Bearer")
+    if !auth_header.nil? && auth_header.include?("Bearer")
       doorkeeper_authorize!
       @current_user = User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
+      stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'user_id' => @current_user.id, 'username' => @current_user.username})
+      $redis.hset('groovehacks:session', auth_header.gsub("Bearer ", ""), stored_session)
     else
+      puts auth_header.inspect
       render status: 401
     end
   end
