@@ -131,6 +131,7 @@ Groovepacks::Application.configure do
   end
   ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
+  ENV['ROLLBAR_ACCESS_TOKEN'] = "6fd94c05f4bd41cd8a788bd71752b80b"
   # Stripe production keys
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"

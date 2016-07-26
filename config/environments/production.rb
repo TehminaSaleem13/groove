@@ -122,6 +122,8 @@ Groovepacks::Application.configure do
   ENV["SHOPIFY_REDIRECT_HOST"] = "groovepacker.com"
   ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
+  ENV['ROLLBAR_ACCESS_TOKEN'] = "6fd94c05f4bd41cd8a788bd71752b80b"
+
   ENV['BC_CALLBACK_HOST'] = "admin.groovepacker.com"
   ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
   ENV['BC_CLIENT_SECRET'] = "d8b8es9ojf0x2dyi1jx12ozvbatcqhr"
