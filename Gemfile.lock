@@ -402,6 +402,8 @@ GEM
     rest-client (1.7.2)
       mime-types (>= 1.16, < 3.0)
       netrc (~> 0.7)
+    rollbar (2.12.0)
+      multi_json
     rspec (3.1.0)
       rspec-core (~> 3.1.0)
       rspec-expectations (~> 3.1.0)
@@ -618,6 +620,7 @@ DEPENDENCIES
   rails (= 3.2.13)
   redis-rails
   redis-session-store
+  rollbar
   rspec-rails (>= 2.13.2)
   rspec_junit_formatter
   rubber
@@ -645,4 +648,4 @@ DEPENDENCIES
   xmlparser
 
 BUNDLED WITH
-   1.11.2
+   1.12.3
