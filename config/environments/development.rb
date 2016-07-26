@@ -146,7 +146,7 @@ Groovepacks::Application.configure do
   ENV["SITE_HOST"] = "localpackerapi.com"
 
   # analytic server
-  ENV["GROOV_ANALYTIC"] = "localhost:4000"
+  ENV["GROOV_ANALYTIC"] = "localpackerstat.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = ""
   ENV["PRODUCTS_IMPORT_EMAILS"] = ""
