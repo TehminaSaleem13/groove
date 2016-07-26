@@ -1,6 +1,6 @@
 groovepacks_admin_controllers.
-  controller('adminToolsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'tenants',
-    function ($scope, $http, $timeout, $location, $state, $cookies, $modal, $q, notification, tenants) {
+  controller('adminToolsCtrl', ['$scope', '$window', '$http', '$timeout', '$location', '$state', '$cookies', '$modal', '$q', 'notification', 'tenants',
+    function ($scope, $window, $http, $timeout, $location, $state, $cookies, $modal, $q, notification, tenants) {
 
       var myscope = {};
 
@@ -443,6 +443,10 @@ groovepacks_admin_controllers.
           myscope.update_selected_count();
           $scope._can_load_tenants = true;
         });
+      }; 
+
+      $scope.redirect_to_delayed = function(){
+        $window.location.href = '/delayed_job'
       };
 
       myscope.common_setup_opt = function (type, value, selector) {
