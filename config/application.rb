@@ -72,6 +72,7 @@ module Groovepacks
 
     config.autoload_paths += Dir[ Rails.root.join('app', 'models', "concerns", '**/') ]
     config.autoload_paths += Dir[ Rails.root.join('app', 'controllers', "concerns", '**/') ]
+    config.time_zones = YAML.load(File.open(Rails.root.join('config', 'time_zones.yml')))
   end
 end
 require Rails.root.join('config','initializers','groove_constants.rb')

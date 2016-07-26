@@ -1,5 +1,5 @@
 groovepacks_controllers.
-  controller('generalSettingsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'generalsettings', 'groov_translator', '$rootScope',
+  controller('generalSettingsCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', 'generalsettings', 'groov_translator', '$rootScope', 
     function ($scope, $http, $timeout, $location, $state, $cookies, generalsettings, groov_translator, $rootScope) {
 
       var myscope = {};
@@ -62,7 +62,9 @@ groovepacks_controllers.
         $scope.general_settings = generalsettings.model.get();
         $scope.confirmation_hash = {};
         myscope.reload_settings();
-
+        generalsettings.single.get($scope.general_settings).then(function () {
+          // $scope.general_settings.single.time_zones["time_zones"]["(AUTO DETECT)"] = $scope.general_settings.single.auto_detect
+        });
         $rootScope.$on('bulk_action_finished', myscope.reload_settings);
       };
 
@@ -95,6 +97,20 @@ groovepacks_controllers.
         $scope.show_button = false;
         generalsettings.single.update($scope.general_settings).then(myscope.reload_settings);
         custom_fields = [$scope.general_settings.single.custom_field_one, $scope.general_settings.single.custom_field_two];
+      };
+
+      $scope.fetch_time_zone = function(){
+        time_zone = {}
+        time_in_zone = $scope.general_settings.single.time_zone
+        dst = $scope.general_settings.single.dst
+        auto_detect = $scope.general_settings.single.time_zone
+        if (time_in_zone == "true" || time_in_zone == "false" ) {
+          time_zone["auto_detect"] = auto_detect
+          time_in_zone = moment().format("Z")
+        } 
+        time_zone["add_time_zone"] = time_in_zone
+        time_zone["dst"] = dst
+        generalsettings.single.add_time_zone(time_zone);
       };
 
       myscope.init();

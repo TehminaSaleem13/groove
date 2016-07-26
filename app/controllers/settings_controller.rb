@@ -90,7 +90,8 @@ class SettingsController < ApplicationController
     @result['success_messages'] = []
     @result['notice_messages'] = []
     @result['data'] = {}
-
+    @result['time_zone'] = Groovepacks::Application.config.time_zones
+    @result['user_sign_in_count'] = current_user.sign_in_count
     general_setting = GeneralSetting.all.first
 
     if general_setting.present?
@@ -227,6 +228,25 @@ class SettingsController < ApplicationController
     setting.search_by_product = search_toggle
     setting.save
     render json: @result
+  end
+
+  def fetch_and_update_time_zone
+    setting = GeneralSetting.first
+    if params["add_time_zone"].present?
+      if params["auto_detect"] == "true" || params["auto_detect"] == "false" && (params["add_time_zone"].include? ":")
+        params["add_time_zone"] = convert_offset_in_second(params["add_time_zone"])
+        setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: true)
+      elsif (!params["add_time_zone"].include? ":") && params["auto_detect"] != "true" && params["auto_detect"] != "false"
+        setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: false)
+      end
+    end
+    setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
+    render json: @result
+  end
+
+  def convert_offset_in_second(offset)
+    minutes = offset.split("-")[1].present? ? -offset.split(":")[1].to_i*60 : offset.split(":")[1].to_i*60   
+    minutes + offset.split(":")[0].to_i*3600
   end
 
   # def execute_in_bulk_action(activity)

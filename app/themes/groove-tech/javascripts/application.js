@@ -14,4 +14,5 @@
 //= require groovepacks
 //= require groovepacks_common/common
 //= require groovepacks_common/lib
+//= require moment
 //= require_tree .
