@@ -30,8 +30,17 @@ module Groovepacker
             result
           end
 
+          def check_or_assign_import_item
+            return unless ImportItem.find_by_id(@import_item.id).blank?
+            import_item_id = @import_item.id
+            @import_item = @import_item.dup  
+            @import_item.id = import_item_id
+            @import_item.save
+          end
+
           def iterate_and_import_rows(final_records, order_map, result)
             final_records.each_with_index do |single_row, index|
+              check_or_assign_import_item
               @import_item.reload
               break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)
