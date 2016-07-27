@@ -87,7 +87,7 @@ class ImportCsv
             result[:status] = false
             result[:messages].push(response[:error_messages])
           end
-          File.delete(file_path)
+          File.delete(file_path) rescue nil
         end
       end
     rescue Exception => e

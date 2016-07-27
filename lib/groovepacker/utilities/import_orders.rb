@@ -156,10 +156,20 @@ class ImportOrders < Groovepacker::Utilities::Base
     data = build_data(map,store)
     import_csv = ImportCsv.new
     result = import_csv.import(tenant, data.to_s)
+    check_or_assign_import_item(import_item)
     import_item.reload
     update_status(import_item, result)
     import_item.update_attributes(message: result[:messages]) unless result[:status]
   end
+
+  def check_or_assign_import_item(import_item)
+    return unless ImportItem.find_by_id(import_item.id).blank?
+    import_item_id = import_item.id
+    import_item = import_item.dup  
+    import_item.id = import_item_id
+    import_item.save
+  end
+
 
   def initiate_import_for(store, import_item, handler)
     import_item.update_attributes(status: 'in_progress')
