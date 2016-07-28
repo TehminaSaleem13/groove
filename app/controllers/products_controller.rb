@@ -263,17 +263,66 @@ class ProductsController < ApplicationController
   def generate_barcode_slip
     @product = Product.find(params[:id])
 
-    respond_to do |format|
-      format.html
-      format.pdf {
-        render :pdf => "file_name",
-               :template => "products/#{get_barcode_slip_template}",
-               :orientation => 'Portrait',
-               :page_height => '1in',
-               :page_width => '3in',
-               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
-      }
+    # respond_to do |format|
+    #   format.html
+    #   format.pdf {
+    #     render :pdf => "file_name",
+    #            :template => "products/#{get_barcode_slip_template}",
+    #            :orientation => 'Portrait',
+    #            :page_height => '1in',
+    #            :page_width => '3in',
+    #            :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
+    #   }
+    # end
+      require 'wicked_pdf'
+      
+      action_view = do_get_action_view_object_for_html_rendering
+      reader_file_path = do_get_pdf_file_path(@product)
+      @tenant_name = Apartment::Tenant.current
+      file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+      # TODO call template dynnamically by using {get_barcode_slip_template}
+      pdf_html = action_view.render :template => 'products/generate_barcode_slip.html', :layout => nil, :locals => {:@product => @product}
+      doc_pdf = WickedPdf.new.pdf_from_string(
+         pdf_html,
+        :inline => true,
+        :save_only => false,
+        :orientation => 'Portrait',
+        :page_height => '1in',
+        :page_width => '3in',
+        :margin => {:top => '0',
+                    :bottom => '0',
+                    :left => '0',
+                    :right => '0'}
+      )
+      File.open(reader_file_path, 'wb') do |file|
+        file << doc_pdf
+      end
+      base_file_name = File.basename(pdf_path)
+      pdf_file = File.open(reader_file_path)
+      GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+      pdf_file.close
+      generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+      render json: generate_barcode
+  end
+
+  def do_get_action_view_object_for_html_rendering
+    ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
+    action_view = ActionView::Base.new()
+    action_view.view_paths = ActionController::Base.view_paths
+    action_view.class_eval do
+      include Rails.application.routes.url_helpers
+      include ApplicationHelper
+      include ProductsHelper
     end
+    action_view
+  end
+
+  def do_get_pdf_file_path(product)
+    file_name_order = Digest::MD5.hexdigest(product.store_product_id)
+    Rails.root.join(
+      'public', 'pdfs', "#{Apartment::Tenant.current}.#{file_name_order}.pdf"
+      )
   end
 
   def update_product_list
