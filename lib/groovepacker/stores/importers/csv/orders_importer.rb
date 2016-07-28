@@ -52,8 +52,8 @@ module Groovepacker
 
           def import_single_order(single_row, index, inc_id, order_map, result)
             begin
-              Timeout::timeout(30) {
-                ActiveRecord::Base.transaction do
+              #Timeout::timeout(30) {
+                #ActiveRecord::Base.transaction do
                   if @helper.not_imported?(@imported_orders, inc_id)
                     @order = Order.find_or_initialize_by_increment_id(inc_id)
                     order_persisted = @order.persisted? ? true : false
@@ -70,14 +70,14 @@ module Groovepacker
                     @import_item.save
                     # Skipped because of duplicate order
                   end
-                end
-              }
-            rescue Timeout::Error
-              if @order.present?
-                @order.reload 
-                @order.destroy
-              end
-            end
+                #end
+              #}
+            #rescue Timeout::Error
+            #  if @order.present?
+            #    @order.reload 
+            #    @order.destroy
+            #  end
+            #end
           end
 
           def import_item_failed_result(result, index)
