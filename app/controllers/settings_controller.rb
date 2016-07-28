@@ -174,26 +174,40 @@ class SettingsController < ApplicationController
     render json: @result
   end
 
+  #This method will generate barcode pdf and upload it in S3 and return url from S3
   def print_action_barcode
+    require 'wicked_pdf' 
     scan_pack_setting = ScanPackSetting.all.first
     @action_code = scan_pack_setting[params[:id]]
-
-    respond_to do |format|
-      format.html
-      format.pdf do
-        render pdf: 'action_barcode_' + params[:id].to_s,
-               template: 'settings/action_barcodes.html.erb',
-               orientation: 'Portrait',
-               page_height: '1in',
-               page_width: '3in',
-               margin: {
-                 top: '0',
-                 bottom: '0',
-                 left: '0',
-                 right: '0'
-               }
-      end
+   
+    scan_pack_object = ScanPack::Base.new
+    action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
+    reader_file_path = scan_pack_object.do_get_pdf_file_path(@action_code)
+    @tenant_name = Apartment::Tenant.current
+    file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+    pdf_html = action_view.render :template => "settings/action_barcodes.html.erb", :layout => nil, :locals => {:@action_code => @action_code}
+    doc_pdf = WickedPdf.new.pdf_from_string(
+       pdf_html,
+      :inline => true,
+      :save_only => false,
+      :orientation => 'Portrait',
+      :page_height => '1in',
+      :page_width => '3in',
+      :margin => {:top => '0',
+                  :bottom => '0',
+                  :left => '0',
+                  :right => '0'}
+    )
+    File.open(reader_file_path, 'wb') do |file|
+      file << doc_pdf
     end
+    base_file_name = File.basename(pdf_path)
+    pdf_file = File.open(reader_file_path)
+    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+    pdf_file.close
+    generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+    render json: {url: generate_barcode}
   end
 
   def update_scan_pack_settings

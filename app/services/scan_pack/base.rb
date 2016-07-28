@@ -155,7 +155,13 @@ module ScanPack
     end
 
     def do_get_pdf_file_path(order)
-      file_name_order = Digest::MD5.hexdigest(order.increment_id)
+      if order.is_a?(String)
+        file_name_order = Digest::MD5.hexdigest(order)
+      elsif (order.store_product_id != 'undefined')
+        file_name_order = Digest::MD5.hexdigest(order.store_product_id)
+      else
+        file_name_order = Digest::MD5.hexdigest(order.increment_id)
+      end
       Rails.root.join(
         'public', 'pdfs', "#{Apartment::Tenant.current}.#{file_name_order}.pdf"
         )
