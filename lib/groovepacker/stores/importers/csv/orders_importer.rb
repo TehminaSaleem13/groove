@@ -40,7 +40,7 @@ module Groovepacker
 
           def iterate_and_import_rows(final_records, order_map, result)
             final_records.each_with_index do |single_row, index|
-              check_or_assign_import_item
+              #check_or_assign_import_item
               @import_item.reload
               break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)

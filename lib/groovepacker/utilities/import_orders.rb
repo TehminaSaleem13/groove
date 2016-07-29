@@ -156,7 +156,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     data = build_data(map,store)
     import_csv = ImportCsv.new
     result = import_csv.import(tenant, data.to_s)
-    check_or_assign_import_item(import_item)
+    #check_or_assign_import_item(import_item)
     import_item.reload
     update_status(import_item, result)
     import_item.update_attributes(message: result[:messages]) unless result[:status]
