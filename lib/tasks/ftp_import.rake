@@ -13,6 +13,10 @@ namespace :ftp_csv_file_import do
             ftp_csv_import.delay(attempts: 4).import_ftp_order("unitedmedco")
           elsif current_time >= "08:00" && current_time <= "10:00"
             ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant.name)
+          else
+            tenant_name = Rails.env=="production" ? "gp50" : "myplan"
+            ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant_name)
+            break
           end
           puts "task complete"
         end

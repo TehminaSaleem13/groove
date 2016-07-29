@@ -42,7 +42,7 @@ module Groovepacker
               groove_ftp = FTP::FtpConnectionManager.get_instance(store)
               result = groove_ftp.retrieve()
               if result[:status] == true
-                create_order_import_summary(store)
+                create_order_import_summary(store, user, tenant)
                 begin
                   ImportOrders.new.initiate_csv_import(tenant, store.store_type, store, @import_item)
                   @order_summary.update_attribute(:status, 'completed') if @order_summary.status != 'cancelled'
@@ -57,10 +57,11 @@ module Groovepacker
         end 
       end
 
-      def create_order_import_summary(store)
+      def create_order_import_summary(store, user, tenant)
+        Apartment::Tenant.switch(tenant)
         @order_summary = OrderImportSummary.last
         @order_summary = OrderImportSummary.create(user_id: user.id, import_summary_type: "import_orders", status: 'not_started') if @order_summary.blank?
-        ImportItem.where(store_id: store.id).destroy_all
+        ImportItem.where("store_id=? and status!='in_progress'", store.id).destroy_all
         @order_summary.reload
         @import_item = @order_summary.import_items.build(store_id: store.id)
         @import_item.status = 'not_started'
