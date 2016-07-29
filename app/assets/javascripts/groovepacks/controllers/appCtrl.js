@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('appCtrl', ['$http', '$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores',
-    function ($http, $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores) {
+  controller('appCtrl', ['$http', '$rootScope', '$scope', '$timeout', '$modalStack', '$state', '$filter', '$document', '$window', 'hotkeys', 'auth', 'notification', 'importOrders', 'groovIO', 'editable', 'stores','ngClipboard',
+    function ($http, $rootScope, $scope, $timeout, $modalStack, $state, $filter, $document, $window, hotkeys, auth, notification, importOrders, groovIO, editable, stores, ngClipboard) {
       $scope.import_store_id = null;
       $scope.bc_deep_import_days = 1;
       $scope.se_deep_import_days = 1;
@@ -125,7 +125,9 @@ groovepacks_controllers.
               single_data.store_type = import_item.store_info.store_type;
               single_data.status = import_item.store_info.status;
               single_data.progress.type = import_item.import_info.status;
-              single_data.progress.error = import_item.import_info.import_error;
+              error_mesage = "Message: " + import_item.import_info.message + "\n";
+              error_mesage = error_mesage + "Error Trace: " + import_item.import_info.import_error + "\n";
+              single_data.progress.error = error_mesage;
               single_data.progress.value = 0;
               single_data.progress.message = '';
               single_data.progress_product.show = false;
@@ -218,9 +220,10 @@ groovepacks_controllers.
                   '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="countdown_progressbar" style="text-align:center;">Importing {{store.store_type == "CSV" ? "Row" : "Order"}} {{import_progress}} of 10 in this set</progressbar>' +
                 '</td>' +
                 '<td ng-if="store.progress.type == \'failed\'" style="width:30px;" tooltip="Click to copy the error details to your clipboard">' +
-                  '<span ng-click="" clip-copy="store.progress.error">' +
+                  '<span ng-click="trigger(store.progress.error)">' +
                     '<i class="fa fa-files-o" aria-hidden="true"></i>' +
                   '</span>'+
+                  '<button id="clipclick" clip-copy="store.progress.error" style="display:none;"></button>' +
                 '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
@@ -259,6 +262,10 @@ groovepacks_controllers.
             '</table>';
         }
       });
+
+      $scope.trigger = function(error){
+        ngClipboard.toClipboard(error);
+      };
 
       $scope.issue_import = function (store_id, days, import_type) {
         //console.log(importOrders);
