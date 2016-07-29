@@ -17,7 +17,7 @@ module Groovepacker
                   response = @mws.orders.next
                 end
                 response.orders.kind_of?(Array) && !response.orders.nil? ? @orders.push(response.orders) : @orders = response.orders
-                break if response["orders"].count < 100
+                break if response["orders"].try(:count).to_i < 100 
               end
               @orders = @orders.flatten rescue []
               check_orders
