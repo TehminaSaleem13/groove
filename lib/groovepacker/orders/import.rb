@@ -49,6 +49,7 @@ module Groovepacker
                 rescue Exception => e
                   result[:status] &= false
                   @import_item.update_attribute(:message, e.message)
+                  Rollbar.error(e, e.message)
                   ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver
                 end
               end
@@ -83,6 +84,7 @@ module Groovepacker
           @import_item.status = 'failed'
           @import_item.message = e.message
           @import_item.save
+          Rollbar.error(e, e.message)
           status = 401
         end
         return status
