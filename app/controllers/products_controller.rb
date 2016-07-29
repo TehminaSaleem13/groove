@@ -159,32 +159,38 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  #This method will generate pdf for receiving inventory label, upload to S3 and return result as url of uploaded file
   def print_receiving_label
+    require 'wicked_pdf' 
     @products = list_selected_products(params)
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json {
-        time = Time.now
-        file_name = 'receiving_label_'+time.strftime('%d_%b_%Y')
-        @result['receiving_label_path'] = '/pdfs/'+ file_name + '.pdf'
-        render :pdf => file_name,
-               :template => 'products/print_receiving_label',
-               :orientation => 'portrait',
-               :page_height => '6in',
-               :save_only => true,
-               :page_width => '4in',
-               :margin => {:top => '1',
-                           :bottom => '0',
-                           :left => '2',
-                           :right => '2'},
-               :handlers => [:erb],
-               :formats => [:html],
-               :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-
-        render json: @result
-      }
+    scan_pack_object = ScanPack::Base.new
+    action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
+    reader_file_path = scan_pack_object.do_get_pdf_file_path(@products.count.to_s)
+    @tenant_name = Apartment::Tenant.current
+    file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+    pdf_html = action_view.render :template => "products/print_receiving_label.html.erb", :layout => nil, :locals => {:@products => @products}
+    doc_pdf = WickedPdf.new.pdf_from_string(
+       pdf_html,
+      :inline => true,
+      :save_only => false,
+      :orientation => 'Portrait',
+      :page_height => '6in',
+      :page_width => '4in',
+      :margin => {:top => '1',
+                  :bottom => '0',
+                  :left => '2',
+                  :right => '2'}
+    )
+    File.open(reader_file_path, 'wb') do |file|
+      file << doc_pdf
     end
+    base_file_name = File.basename(pdf_path)
+    pdf_file = File.open(reader_file_path)
+    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+    pdf_file.close
+    generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+    render json: {url: generate_barcode}
   end
 
   def generate_barcode
@@ -263,7 +269,7 @@ class ProductsController < ApplicationController
   def generate_barcode_slip
     require 'wicked_pdf'
     @product = Product.find(params[:id])
-    
+
     scan_pack_object = ScanPack::Base.new
     action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
     reader_file_path = scan_pack_object.do_get_pdf_file_path(@product)
