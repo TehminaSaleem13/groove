@@ -51,7 +51,7 @@ module Groovepacker
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
-            begin
+            #begin
               #Timeout::timeout(30) {
                 #ActiveRecord::Base.transaction do
                   if @helper.not_imported?(@imported_orders, inc_id)
