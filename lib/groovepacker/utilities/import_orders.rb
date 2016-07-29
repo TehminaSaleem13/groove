@@ -189,7 +189,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   def update_import_item_and_send_mail(e, import_item, tenant)
     import_item_message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
     import_item_message = "Import failed: #{e.message}" if e.message.strip != "Error: 302"
-    import_item.update_attributes(status: 'failed', message: import_item_message)
+    import_item.update_attributes(status: 'failed', message: import_item_message, import_error: e)
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
   end
 end

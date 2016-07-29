@@ -125,6 +125,7 @@ groovepacks_controllers.
               single_data.store_type = import_item.store_info.store_type;
               single_data.status = import_item.store_info.status;
               single_data.progress.type = import_item.import_info.status;
+              single_data.progress.error = import_item.import_info.import_error;
               single_data.progress.value = 0;
               single_data.progress.message = '';
               single_data.progress_product.show = false;
@@ -215,6 +216,11 @@ groovepacks_controllers.
                   '<progressbar type="{{store.progress.type}}" value="store.progress.value"> {{store.progress.message| limitTo: 75}}</progressbar>' + 
                   // '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                   '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="countdown_progressbar" style="text-align:center;">Importing {{store.store_type == "CSV" ? "Row" : "Order"}} {{import_progress}} of 10 in this set</progressbar>' +
+                '</td>' +
+                '<td ng-if="store.progress.type == \'failed\'" style="width:30px;" tooltip="Click to copy the error details to your clipboard">' +
+                  '<span ng-click="" clip-copy="store.progress.error">' +
+                    '<i class="fa fa-files-o" aria-hidden="true"></i>' +
+                  '</span>'+
                 '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
