@@ -216,6 +216,11 @@ groovepacks_controllers.
                   // '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                   '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="countdown_progressbar" style="text-align:center;">Importing {{store.store_type == "CSV" ? "Row" : "Order"}} {{import_progress}} of 10 in this set</progressbar>' +
                 '</td>' +
+                // '<td ng-if="store.progress.type == \'failed\'" style="width:30px;" tooltip="Click to copy the error details to your clipboard">' +
+                  // '<span ng-click="trigger(store.progress.error)">' +
+                    // '<i class="fa fa-files-o" aria-hidden="true" style="cursor: pointer;"></i>' +
+                  // '</span>'+
+                // '</td>' +
                 '<td style="text-align:right;width:38%;padding:3px;">' +
                   '<div class="btn-group">' +
                     '<div ng-show="store.store_type==\'BigCommerce\'" style="display: flex;">' +
