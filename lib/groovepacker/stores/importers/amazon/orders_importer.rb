@@ -20,6 +20,7 @@ module Groovepacker
                 break if response["orders"].try(:count).to_i < 100 
               end
               @orders = @orders.flatten rescue []
+              @result[:total_imported] = @orders.count rescue 0
               check_orders
             rescue Exception => e
               @result[:status] &= false
@@ -44,6 +45,7 @@ module Groovepacker
               break if @import_item.status == 'cancelled'
               @import_item.update_attributes(current_increment_id: order.amazon_order_id, current_order_items: -1, current_order_imported_item: -1 )
               orders_with_increment_id(order)
+              sleep 0.2
             end
           end
 
