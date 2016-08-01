@@ -221,7 +221,7 @@ groovepacks_controllers.
                 '</td>' +
                 '<td ng-if="store.progress.type == \'failed\'" style="width:30px;" tooltip="Click to copy the error details to your clipboard">' +
                   '<span ng-click="trigger(store.progress.error)">' +
-                    '<i class="fa fa-files-o" aria-hidden="true"></i>' +
+                    '<i class="fa fa-files-o" aria-hidden="true" style="cursor: pointer;"></i>' +
                   '</span>'+
                   '<button id="clipclick" clip-copy="store.progress.error" style="display:none;"></button>' +
                 '</td>' +

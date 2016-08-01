@@ -1,4 +1,4 @@
-groovepacks_services.factory('ngClipboard', function($compile,$rootScope,$document) {
+groovepacks_services.factory('ngClipboard',['$compile', '$rootScope', '$document', function($compile,$rootScope,$document) {
   return {
     toClipboard: function(element){
       var copyElement = angular.element('<span id="ngClipboardCopyId">'+element+'</span>');
@@ -17,4 +17,4 @@ groovepacks_services.factory('ngClipboard', function($compile,$rootScope,$docume
       copyElement.remove();
     }
   }
-})
+}])
