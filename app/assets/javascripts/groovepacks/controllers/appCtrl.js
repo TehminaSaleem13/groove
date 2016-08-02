@@ -219,8 +219,8 @@ groovepacks_controllers.
                   // '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="store.progress_product.value">{{store.progress_product.message | limitTo: 56}}</progressbar>' +
                   '<progressbar ng-show="store.progress_product.show" type="{{store.progress_product.type}}" value="countdown_progressbar" style="text-align:center;">Importing {{store.store_type == "CSV" ? "Row" : "Order"}} {{import_progress}} of 10 in this set</progressbar>' +
                 '</td>' +
-                '<td ng-if="store.progress.type == \'failed\'" style="width:30px; cursor:pointer;">' +
-                  '<span ng-click="trigger(store.progress.error)">' +
+                '<td ng-if="store.progress.type == \'failed\'" style="width:30px; cursor:pointer;" >' +
+                  '<span ng-click="trigger(store.progress.error)" tooltip="Click to copy the error details to your clipboard">' +
                     '<i class="fa fa-files-o" aria-hidden="true"></i>' +
                   '</span>'+
                   //'<button id="clipclick" clip-copy="store.progress.error" style="display:none;"></button>' +
