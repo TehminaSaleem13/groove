@@ -168,19 +168,7 @@ class OrdersController < ApplicationController
 
   def generate_pick_list
     require 'wicked_pdf' 
-    @result, @pick_list, @depends_pick_list  =
-                            gp_orders_module.generate_pick_list( list_selected_orders )
-
-    # file_name = 'pick_list_'+Time.now.strftime('%d_%b_%Y')
-    # @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf"}
-    # respond_to do |format|
-    #   format.html {}
-    #   format.pdf {}
-    #   format.json {
-    #     render_pdf(file_name) #defined in application helper
-    #     render json: @result
-    #   }
-    # end
+    @result, @pick_list, @depends_pick_list = gp_orders_module.generate_pick_list( list_selected_orders )
     scan_pack_object = ScanPack::Base.new
     action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
     reader_file_path = scan_pack_object.do_get_pdf_file_path(@pick_list.count.to_s)

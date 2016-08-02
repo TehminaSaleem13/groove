@@ -110,11 +110,13 @@ module Groovepacker
         end
 
         def generate_csv_file
+          current_tenant = Apartment::Tenant.current
           CSV.open(Rails.root.join('public', 'pdfs', @filename), 'wb') do |csv|
             csv << row_map.keys
             @items_list.values.each {|line| csv << line.values }
           end
-          @result['filename'] = 'pdfs/'+@filename
+          public_url = GroovS3.get_csv_export(@filename)
+          @result['filename'] = {url: public_url}
         end
     end
   end
