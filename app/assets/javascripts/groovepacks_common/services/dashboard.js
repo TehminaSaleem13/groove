@@ -117,7 +117,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     for (var i = dashboard_data.length - 1; i >= 0; i--) {
       for (var j = dashboard_data[i].values.length - 1; j >= 0; j--) {
         if (moment(dashboard_data[i].values[j][0] * 1000).format('L') == moment(date * 1000).format('L') &&
-          dashboard_data[i].values[j][1] == y) {
+            dashboard_data[i].values[j][1] == y && !$('.nv-series.disabled').find('.nv-legend-text').text().match(RegExp(dashboard_data[i].key))
+        ) {
           data_points.data.push(dashboard_data[i].values[j]);
           data_points.user.push([dashboard_data[i].key, dashboard_data[i].color]);
         };
