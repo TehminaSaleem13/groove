@@ -27,7 +27,7 @@ module Groovepacker
             @result[:total_imported] = response["orders"].length
             initialize_import_item
             import_orders_from_response(response, shipments_response)
-            if @result[:status]
+            if @result[:status] && @import_item != 'tagged'
               @credential.last_imported_at = importing_time || @credential.last_imported_at
               @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
               @credential.save
@@ -64,6 +64,7 @@ module Groovepacker
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
               tracking_info = shipments_response.find {|shipment| shipment["orderId"]==order["orderId"]} || {}
+              tracking_info = @client.get_shipments_by_orderno(order["orderId"]).first || {} if @import_item.import_type == "tagged"
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
@@ -118,6 +119,9 @@ module Groovepacker
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
                 self.import_from = quick_import_date.blank? ? DateTime.now-1.days : quick_import_date
+              when 'tagged'
+                @import_item.update_attribute(:import_type, "tagged")
+                self.import_from = DateTime.now-1.weeks
               else
                 @import_item.update_attribute(:import_type, "regular")
                 last_imported_at = @credential.last_imported_at
