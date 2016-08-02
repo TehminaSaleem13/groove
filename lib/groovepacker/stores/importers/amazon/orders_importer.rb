@@ -54,7 +54,7 @@ module Groovepacker
               grouped_item_sku
               check_shipping_order(order)
               order_save
-              sleep 0.5
+              sleep 2
             else
               import_item_save
             end
