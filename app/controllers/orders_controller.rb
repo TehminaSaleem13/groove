@@ -1,6 +1,8 @@
 class OrdersController < ApplicationController
   include OrderConcern
 
+  before_filter :groovepacker_authorize!
+
   # Import orders from store based on store id
   def importorders
     if check_user_permissions('import_orders')
@@ -224,6 +226,7 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  #The method is called when Export Items link is clicked from Webclient.
   def order_items_export
     @result['filename'] = ''
     selected_orders = list_selected_orders(true)

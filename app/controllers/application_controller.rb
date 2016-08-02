@@ -13,7 +13,7 @@ class ApplicationController < ActionController::Base
       $redis.hset('groovehacks:session', auth_header.gsub("Bearer ", ""), stored_session)
     else
       puts auth_header.inspect
-      render status: 401
+      render status: 401, json: 'Unauthorized Access'
     end
   end
 

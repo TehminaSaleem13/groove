@@ -1,6 +1,8 @@
 class ProductsController < ApplicationController
   include ProductConcern
 
+  before_filter :groovepacker_authorize!
+
   def import_products
     @store = Store.find(params[:id])
     importservice = init_products_import_service(@store)

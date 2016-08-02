@@ -146,7 +146,7 @@ Groovepacks::Application.configure do
   #Feature Variables
   ENV['DASHBOARD_ENABLE'] = 'YES'
   # analytic server
-  # ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
+  #ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"

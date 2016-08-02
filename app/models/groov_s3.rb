@@ -99,6 +99,7 @@ class GroovS3
       self.save(object, data)
     end
 
+    # This method will generate the URL for the export CSV files and also upload the generated file in S3.
     def get_csv_export(file_name)
       require 'aws-sdk'
       s3 = Aws::S3::Resource.new(
