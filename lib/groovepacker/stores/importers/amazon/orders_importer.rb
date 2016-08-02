@@ -45,7 +45,6 @@ module Groovepacker
               break if @import_item.status == 'cancelled'
               @import_item.update_attributes(current_increment_id: order.amazon_order_id, current_order_items: -1, current_order_imported_item: -1 )
               orders_with_increment_id(order)
-              sleep 0.2
             end
           end
 
@@ -55,6 +54,7 @@ module Groovepacker
               grouped_item_sku
               check_shipping_order(order)
               order_save
+              sleep 0.5
             else
               import_item_save
             end
