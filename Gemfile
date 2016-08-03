@@ -18,12 +18,7 @@ group :assets do
   gem 'jquery-fileupload-rails'
   gem 'jquery-ui-rails'
   gem 'therubyracer', :platform => :ruby
-  gem 'angularjs-rails','>= 1.2.18'
   gem 'jquery-rails'
-  gem 'less-rails-bootstrap'
-  gem 'angular-ui-bootstrap-rails'
-  gem 'momentjs-rails'
-  gem 'fingerprintjs-rails'
 end
 
 group :development do
@@ -96,7 +91,7 @@ gem 'activerecord-import', '= 0.3.1'
 gem 'shopify_api'
 gem 'intercom-rails'
 gem 's3'
-gem 'ng-rails-csrf'
+# gem 'ng-rails-csrf'
 gem 'doorkeeper'
 gem 'oauth'
 gem 'rubocop', require: false
