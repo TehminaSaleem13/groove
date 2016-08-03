@@ -28,8 +28,8 @@ test:
   reconnect: false
   database: groovepacks_test
   pool: 5
-  username: root
-  password: password
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
   #socket: /private/tmp/mysql.sock
   socket: /var/run/mysqld/mysqld.sock
 

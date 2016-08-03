@@ -38,9 +38,9 @@ Groovepacks::Application.configure do
   #   :openssl_verify_mode  => 'none'
   # }
 
-  ENV['REDIS_HOST'] = 'groovelytics-redis'
-  ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
-  ENV['REDIS_PORT'] = '7743'
+  # ENV['REDIS_HOST'] = 'groovelytics-redis'
+  # ENV['REDIS_PASSWORD'] = 'WmHE1h2oRJqIW76AtsC1Eg_ZJXe*UpOpJ1OT_yBKoFQYR1r938Oc!2Ahv2wr'
+  # ENV['REDIS_PORT'] = '7743'
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'], driver: :hiredis)
 
@@ -61,27 +61,27 @@ Groovepacks::Application.configure do
 
   # Print deprecation notices to the stderr
   config.active_support.deprecation = :stderr
-  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
-  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
+  # ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
+  # ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
-  ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
-  ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
-  ENV['HOST_NAME'] = 'testpacker.com'
-  ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '0'
+  # ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
+  # ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
+  # ENV['HOST_NAME'] = 'testpacker.com'
+  # ENV['ONE_TIME_PAYMENT'] = '50000'
+  # ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
 
-  #S3 access details
-  ENV['S3_ACCESS_KEY_ID'] = 'AKIAJ4RBSXRA6F7VW3ZA'
-  ENV['S3_ACCESS_KEY_SECRET'] = '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'
-  ENV['S3_BUCKET_NAME'] = 'groove-dev'
-  ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
+  # #S3 access details
+  # ENV['S3_ACCESS_KEY_ID'] = 'AKIAJ4RBSXRA6F7VW3ZA'
+  # ENV['S3_ACCESS_KEY_SECRET'] = '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'
+  # ENV['S3_BUCKET_NAME'] = 'groove-dev'
+  # ENV['S3_BASE_URL'] = 'https://s3-ap-southeast-1.amazonaws.com/groove-dev'
 
-  #Shipstation rest API test api_key and api_secret
-  ENV['SHIPSTATION_REST_API_KEY'] = "45893449eae24f2e8bc7992904016ca6"
-  ENV['SHIPSTATION_REST_API_SECRET'] = "ddefa497b0fc48c0b162a533920ce990"
+  # #Shipstation rest API test api_key and api_secret
+  # ENV['SHIPSTATION_REST_API_KEY'] = "45893449eae24f2e8bc7992904016ca6"
+  # ENV['SHIPSTATION_REST_API_SECRET'] = "ddefa497b0fc48c0b162a533920ce990"
 
-  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
-  ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
-  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
+  # ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
+  # ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
+  # ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
 end

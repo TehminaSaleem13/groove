@@ -96,69 +96,69 @@ Groovepacks::Application.configure do
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 
-  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
-  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
+  # ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
+  # ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
 
-  ENV['EBAY_APP_ID'] = "Navarata-c04e-41cb-a923-77755ae59a0f"
-  ENV['EBAY_CERT_ID'] = "596cd688-b754-49b1-8b92-a3c393caed49"
-  ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
-  ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-c04e-4-kglxwbl"
-  ENV['EBAY_SANDBOX_MODE'] = "NO"
+  # ENV['EBAY_APP_ID'] = "Navarata-c04e-41cb-a923-77755ae59a0f"
+  # ENV['EBAY_CERT_ID'] = "596cd688-b754-49b1-8b92-a3c393caed49"
+  # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
+  # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-c04e-4-kglxwbl"
+  # ENV['EBAY_SANDBOX_MODE'] = "NO"
   # ENV['EBAY_APP_ID'] = "Navarata-607d-4a45-8a42-51c735a57026"
   # ENV['EBAY_CERT_ID'] = "86380834-e449-4dd9-b19f-748b4625533d"
   # ENV['EBAY_DEV_ID'] = "568a739c-a13d-40e5-922a-6e3ecc652d9d"
   # ENV['EBAY_RU_NAME'] = "Navaratan_Techn-Navarata-607d-4-klyznn"
   # ENV['EBAY_SANDBOX_MODE'] = "YES"
 
-  ENV['SHIPSTATION_USERNAME'] = "dreadhead"
-  ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
+  # ENV['SHIPSTATION_USERNAME'] = "dreadhead"
+  # ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 
-  ENV['SHOPIFY_API_KEY'] = "1177da0ae0ee723ad479792561c4c480"
-  ENV['SHOPIFY_SHARED_SECRET'] = "8f48a567ba58e3ac057253cdde377fc2"
-  ENV["SHOPIFY_REDIRECT_HOST"] = "localpacker.com"
-  ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
+  # ENV['SHOPIFY_API_KEY'] = "1177da0ae0ee723ad479792561c4c480"
+  # ENV['SHOPIFY_SHARED_SECRET'] = "8f48a567ba58e3ac057253cdde377fc2"
+  # ENV["SHOPIFY_REDIRECT_HOST"] = "localpacker.com"
+  # ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
-  ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
-  ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
-  ENV['BC_CLIENT_SECRET'] = "d8b8es9ojf0x2dyi1jx12ozvbatcqhr"
-  ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
+  # ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
+  # ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"
+  # ENV['BC_CLIENT_SECRET'] = "d8b8es9ojf0x2dyi1jx12ozvbatcqhr"
+  # ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
 
-  # Stripe test keys
-  ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
-  ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
+  # # Stripe test keys
+  # ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
+  # ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
 
-  ENV['HOST_NAME'] = 'localpackerapi.com'
+  # ENV['HOST_NAME'] = 'localpackerapi.com'
 
-  ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '0'
+  # ENV['ONE_TIME_PAYMENT'] = '50000'
+  # ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
-  #S3 access details
-  ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
-  ENV['S3_ACCESS_KEY_SECRET'] = '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'
-  ENV['S3_BUCKET_NAME'] = 'groove-dev'
-  ENV['S3_BUCKET_REGION'] = 'us-east-1'
-  ENV['S3_BASE_URL'] = 'https://s3.amazonaws.com/groove-dev'
+  # #S3 access details
+  # ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
+  # ENV['S3_ACCESS_KEY_SECRET'] = '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'
+  # ENV['S3_BUCKET_NAME'] = 'groove-dev'
+  # ENV['S3_BUCKET_REGION'] = 'us-east-1'
+  # ENV['S3_BASE_URL'] = 'https://s3.amazonaws.com/groove-dev'
 
-  #Feature Variables
-  ENV['DASHBOARD_ENABLE'] = 'YES'
+  # #Feature Variables
+  # ENV['DASHBOARD_ENABLE'] = 'YES'
 
-  ENV["SITE_HOST"] = "localpackerapi.com"
+  # ENV["SITE_HOST"] = "localpackerapi.com"
 
-  # analytic server
-  ENV["GROOV_ANALYTIC"] = "localpackerstat.com"
+  # # analytic server
+  # ENV["GROOV_ANALYTIC"] = "localpackerstat.com"
 
-  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = ""
-  ENV["PRODUCTS_IMPORT_EMAILS"] = ""
-  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = ""
+  # ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = ""
+  # ENV["PRODUCTS_IMPORT_EMAILS"] = ""
+  # ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = ""
 
-  #Campaign-Monitoring API_KEY and CLIENT_ID
-  ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
-  ENV['CAMPAIGN_MONITOR_CLIENT_ID'] = "1c1a38f864c174b42eb2ebcd613b6969"
-  #List Name - Dev All Leads
-  ENV['CAMPAIGN_MONITOR_LEADS_LIST_ID'] = "f56496637a0ba321d130137d61145305"
-  #List Name - Dev New Customers
-  ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "78a4f2ed6ed69cc395f886950cf761bc"
-  #List Name - Dev All Customers
-  ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "98cf23f2620ae5062d9657ed991e3466"
+  # #Campaign-Monitoring API_KEY and CLIENT_ID
+  # ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
+  # ENV['CAMPAIGN_MONITOR_CLIENT_ID'] = "1c1a38f864c174b42eb2ebcd613b6969"
+  # #List Name - Dev All Leads
+  # ENV['CAMPAIGN_MONITOR_LEADS_LIST_ID'] = "f56496637a0ba321d130137d61145305"
+  # #List Name - Dev New Customers
+  # ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "78a4f2ed6ed69cc395f886950cf761bc"
+  # #List Name - Dev All Customers
+  # ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "98cf23f2620ae5062d9657ed991e3466"
 end
