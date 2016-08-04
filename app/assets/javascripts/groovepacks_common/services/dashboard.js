@@ -197,6 +197,13 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     }
   };
 
+  var get_stat_stream = function(){
+    url = "/dashboard/get_stat_stream_manually.json"
+    $http.get(url).success(function(){
+      notification.notify("Your request has been queued.", 1);
+    });
+  };
+
   return {
     model: {
       get: get_default,
@@ -208,7 +215,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       dashboard_stat: get_dashboard_data,
       points_data: get_datapoints_data,
       tooltip: get_tool_tip,
-      speed: get_speed
+      speed: get_speed,
+      stat_stream: get_stat_stream
     }
   };
 }]);

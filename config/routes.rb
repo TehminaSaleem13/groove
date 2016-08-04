@@ -298,6 +298,7 @@ Groovepacks::Application.routes.draw do
   resources :dashboard do
     collection do
       get 'exceptions'
+      get 'get_stat_stream_manually'
     end
   end
 

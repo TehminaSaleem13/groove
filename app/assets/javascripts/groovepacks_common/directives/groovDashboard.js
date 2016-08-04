@@ -60,6 +60,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           });
         }
 
+        scope.get_stat = function(){
+          dashboard.stats.stat_stream();
+        }
+
         scope.handle_click_fn = function (row, event) {
           if (typeof event !== 'undefined') {
             event.stopPropagation();

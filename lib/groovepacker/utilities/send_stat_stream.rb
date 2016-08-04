@@ -36,4 +36,9 @@ class SendStatStream
     path = 'dashboard/update_order_data'
     send_stream(tenant, stat_stream, order_id, path)
   end
+
+  def update_stats(tenant)
+    path = "/dashboard/run_stat_stream"
+    HTTParty.get("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}") 
+  end
 end

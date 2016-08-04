@@ -18,4 +18,12 @@ class DashboardController < ApplicationController
     render json: results
   end
 
+  def get_stat_stream_manually
+    results = {"status"=> true, "message" => "Your request has been queued."}
+    tenant = Apartment::Tenant.current
+    stat_stream_obj = SendStatStream.new()
+    stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant)
+    render json: results
+  end
+
 end
