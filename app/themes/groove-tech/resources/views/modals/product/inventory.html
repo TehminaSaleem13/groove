@@ -130,24 +130,20 @@
           </tr>
           </thead>
           <tbody>
-          <tr>
+          <tr ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
+                      ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
             <td><a ui-sref="products.type.filter.page.single({product_id: products_inv_manager.single.basicinfo.id})">{{products_inv_manager.single.basicinfo.name}}</a>
             </td>
             <td>{{products_inv_manager.single.skus[0].sku}}</td>
-            <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
-                      ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+            <td><span>
                     {{warehouse.info.quantity_on_hand}}</span></td>
-            <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
-                      ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+            <td><span>
                     {{warehouse.warehouse_info.name}}</span></td>
-            <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
-                      ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+            <td><span>
                     {{warehouse.info.location_primary}}</span></td>
-            <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
-                      ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+            <td><span>
                     {{warehouse.info.location_secondary}}</span></td>
-            <td><span ng-repeat="warehouse in products_inv_manager.single.inventory_warehouses"
-                      ng-show="warehouse.warehouse_info.id == inventory_manager.single.inv_wh_id">
+            <td><span>
                     {{warehouse.info.location_tertiary}}</span></td>
           </tr>
           </tbody>
