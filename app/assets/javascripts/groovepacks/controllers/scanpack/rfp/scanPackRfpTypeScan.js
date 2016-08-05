@@ -1,0 +1,50 @@
+groovepacks_controllers.controller('scanPackRfpTypeScan', ['$scope', '$modalInstance', '$timeout', 'order_data', 'confirm', 'scan_happend', 'scanPack', 'notification',
+  function ($scope, $modalInstance, $timeout, order_data, confirm, scan_happend, scanPack, notification) {
+    var myscope = {};
+
+    myscope.init = function () {
+      $scope.order = order_data;
+      $scope.scan_happend = scan_happend;
+      $timeout(function () {
+        $scope.focus_search().select();
+      }, 200);
+      $scope.code = {};
+      $scope.code.count = 0;
+    };
+
+    $scope.check_confirm = function (event) {
+      if (event.which != 13) return;
+      $scope.update('ok-enter-key');
+    };
+
+    $scope.update = function (reason) {
+      if (reason == 'ok-enter-key') {
+        if (
+          typeof($scope.code.count) != 'number' || $scope.code.count < 1 ||
+          ($scope.code.count > ($scope.order.next_item.qty_remaining + ($scope.scan_happend ? 1 : 0)))
+          ) {
+          notification.notify("Wrong count has been entered. Please try again.");
+          $modalInstance.dismiss("wrong-count");
+        } else {
+          scanPack.type_scan($scope.order.id, $scope.order.next_item, ($scope.code.count - ($scope.scan_happend ? 1 : 0)) || 1).success(function (data) {
+            $scope.code.count = 0;
+            $timeout($scope.focus_search, 200);
+            if (data.status) {
+              $modalInstance.close("finished");
+              confirm(data.data);
+            }
+          });
+        }
+
+      }
+    };
+
+    $scope.ok = function () {
+      $modalInstance.close("ok-button-click");
+    };
+    $scope.cancel = function () {
+      $modalInstance.dismiss("cancel-button-click");
+    };
+
+    myscope.init();
+  }]);

@@ -1,0 +1,144 @@
+<div class="container-fluid">
+  <fieldset ng-disabled="orders.single.basicinfo.status == 'scanned'">
+    <legend>Order Details</legend>
+    <div class="row">
+      <div class="col-sm-6 container-fluid">
+        <div class="form-group col-sm-12">
+          <label class="control-label">First Name</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.firstname"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Last Name</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.lastname"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Company</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.company"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Address line 1</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.address_1"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Address line 2</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.address_2"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">City</label>
+          <input class="form-control input-style" type="text" ng-model="orders.single.basicinfo.city"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">State</label>
+          <input class="form-control input-style" type="text" ng-model="orders.single.basicinfo.state"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12"
+              ng-show="general_settings.single.custom_field_one">
+          <label class="control-label">{{general_settings.single.custom_field_one}}</label>
+          <input class="form-control input-style" type="text" ng-model="orders.single.basicinfo.custom_field_one"
+                 ng-blur="update_single_order()"/>
+        </div>
+
+      </div>
+      <div class="col-sm-6 container-fluid">
+        <div class="form-group col-sm-12">
+          <label class="control-label">Order #</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.increment_id"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Buyer Email</label>
+          <input class="form-control input-style" type="text" ng-model="orders.single.basicinfo.email"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Store Order id</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.store_order_id"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Order Date</label>
+
+          <div class="container-fluid form-horizontal">
+            <div class="row">
+              <div class="control-label timepicker-label col-md-8">
+                <p class=" input-group">
+                  <input type="text" class="form-control" ng-change="date_picker.show_button=true"
+                         datepicker-popup="{{date_picker.format}}" ng-model="orders.single.basicinfo.order_placed_time"
+                         is-open="date_picker.opened" datepicker-options="dateOptions" ng-required="true"
+                         close-text="Close"/>
+                                <span class="input-group-btn">
+                                    <button type="button" class="btn btn-default" ng-click="open_date_picker($event)"><i
+                                      class="glyphicon glyphicon-calendar"></i></button>
+                                </span>
+                </p>
+              </div>
+
+              <div class="controls col-md-4">
+                <timepicker ng-model="orders.single.basicinfo.order_placed_time"
+                            ng-change="date_picker.show_button=true" show-meridian="false"></timepicker>
+              </div>
+            </div>
+            <button ng-show="date_picker.show_button" ng-click="update_single_order()" class="modal-save-button"
+                    translate>modal.update
+            </button>
+
+          </div>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Zip</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.postcode"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12">
+          <label class="control-label">Country</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.country"
+                 ng-blur="update_single_order()"/>
+        </div>
+        <div class="form-group col-sm-12"
+              ng-show="general_settings.single.custom_field_two">
+          <label class="control-label">{{general_settings.single.custom_field_two}}</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.custom_field_two"
+                 ng-blur="update_single_order()"/>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+  <fieldset ng-disabled="orders.single.basicinfo.status == 'scanned'">
+    <legend>Shipping Information</legend>
+    <div class="row">
+      <div class="col-sm-6">
+        <div class="form-group col-sm-12">
+          <label class="control-label">Scanned on</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.scanned_on"
+                 ng-blur="update_single_order()"/>
+        </div>
+
+      </div>
+      <div class="col-sm-6">
+        <div class="form-group col-sm-12">
+          <label class="control-label">Tracking id #</label>
+          <input class="form-control input-style" type="text"
+                 ng-model="orders.single.basicinfo.tracking_num"
+                 ng-blur="update_single_order()"/>
+        </div>
+      </div>
+    </div>
+  </fieldset>
+</div>

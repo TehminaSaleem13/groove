@@ -1,0 +1,94 @@
+<!-- Modal popup for creating user -->
+<div>
+
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">
+      <span ng-show="context.type=='type_scan_enabled'">Per Product Type-In Count Settings</span>
+      <span ng-show="context.type=='click_scan_enabled'">Per Product Click Scan Settings</span>
+    </div>
+  </div>
+
+  <div class="modal-body">
+    <div class="container-fluid bottom-well">
+      <div class="row">
+        <div class="col-sm-offset-3 col-sm-6">
+          <input type="text" autofocus="autofocus" ng-model="products.setup.search" class="form-control search-box"
+                 placeholder="Search term"/>
+        </div>
+      </div>
+      <div class="row top-buffer">
+        <div class="col-md-12 text-center" ng-show="paginate.show">
+          <pagination total-items="paginate.total_items" ng-model="paginate.current_page" max-size="paginate.max_size"
+                      items-per-page="paginate.items_per_page" class="pagination-sm" rotate="false"></pagination>
+        </div>
+      </div>
+      <div class="row top-buffer">
+        <div class="col-sm-offset-10 col-sm-2">
+          <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+        </div>
+      </div>
+      <div class="row">
+        <div class="col-sm-12">
+          <table class="well table-well table table-striped table-alt">
+            <thead>
+            <tr>
+              <th ng-class="{active: products.setup.sort=='sku'}">
+                <div ng-click="handlesort('sku')" ng-class="products.setup.order">Primary Sku</div>
+              </th>
+              <th ng-class="{active: products.setup.sort=='name'}">
+                <div ng-click="handlesort('name')" ng-class="products.setup.order">Item Name</div>
+              </th>
+              <th colspan="3">
+                <div>Setting</div>
+              </th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr>
+              <td></td>
+              <td></td>
+              <td>
+                <button class="groove-button label label-success" ng-click="set_all('on')">Set all</button>
+              </td>
+              <td>
+                <button class="groove-button label label-success" ng-click="set_all('off')">Set all</button>
+              </td>
+              <td>
+                <button class="groove-button label label-success" ng-click="set_all('on_with_confirmation')">Set all
+                </button>
+              </td>
+            </tr>
+            <tr ng-repeat="product in products.list">
+              <td>{{product.sku}}</td>
+              <td>{{product.name}}</td>
+              <td>
+                <button class="groove-button label label-default"
+                        ng-class="{'label-success':product[context.type]=='on'}" ng-click="set_one(product,'on')">On
+                </button>
+              </td>
+              <td>
+                <button class="groove-button label label-default"
+                        ng-class="{'label-success':product[context.type]=='off'}" ng-click="set_one(product,'off')">Off
+                </button>
+              </td>
+              <td>
+                <button class="groove-button label label-default"
+                        ng-class="{'label-success':product[context.type]=='on_with_confirmation'}"
+                        ng-click="set_one(product,'on_with_confirmation')">On with confirmation
+                </button>
+              </td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
+  </div>
+</div>
+<!-- Kit product modal ends -->

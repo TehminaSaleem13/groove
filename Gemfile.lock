@@ -74,6 +74,8 @@ GEM
     akami (1.2.0)
       gyoku (>= 0.4.0)
       nokogiri (>= 1.4.0)
+    angular-ui-bootstrap-rails (0.11.0)
+    angularjs-rails (1.2.18)
     arel (3.0.2)
     ast (2.1.0)
     astrolabe (1.3.1)
@@ -138,6 +140,7 @@ GEM
       execjs
     coffee-script-source (1.6.3)
     colorize (0.7.3)
+    commonjs (0.2.7)
     concord (0.1.5)
       adamantium (~> 0.2.0)
       equalizer (~> 0.0.9)
@@ -203,6 +206,7 @@ GEM
     figaro (0.7.0)
       bundler (~> 1.0)
       rails (>= 3, < 5)
+    fingerprintjs-rails (0.5.3)
     flay (2.4.0)
       ruby_parser (~> 3.0)
       sexp_processor (~> 4.0)
@@ -254,6 +258,13 @@ GEM
     json (1.8.3)
     launchy (2.3.0)
       addressable (~> 2.3)
+    less (2.5.1)
+      commonjs (~> 0.2.7)
+    less-rails (2.5.0)
+      actionpack (>= 3.1)
+      less (~> 2.5.0)
+    less-rails-bootstrap (3.1.1.1)
+      less-rails (~> 2.5.0)
     libv8 (3.16.14.7)
     listen (2.0.0)
       celluloid (>= 0.15.1)
@@ -274,6 +285,8 @@ GEM
     mini_portile (0.6.0)
     mocha (0.14.0)
       metaclass (~> 0.0.1)
+    momentjs-rails (2.1.0)
+      railties (>= 3.1)
     multi_json (1.7.9)
     multi_test (0.0.2)
     multi_xml (0.5.5)
@@ -288,6 +301,7 @@ GEM
       net-ssh (>= 2.6.5)
     netrc (0.7.7)
     newrelic_rpm (3.7.2.195)
+    ng-rails-csrf (0.1.0)
     nokogiri (1.6.3.1)
       mini_portile (= 0.6.0)
     nori (2.1.0)
@@ -543,6 +557,8 @@ PLATFORMS
 
 DEPENDENCIES
   activerecord-import (= 0.3.1)
+  angular-ui-bootstrap-rails
+  angularjs-rails (>= 1.2.18)
   apartment (>= 0.25.1)!
   aws-sdk (~> 2)
   aws_cf_signer
@@ -572,6 +588,7 @@ DEPENDENCIES
   excon
   factory_girl_rails (>= 4.1.0)
   figaro (>= 0.5.0)
+  fingerprintjs-rails
   fog (~> 1.15.0)
   gelf
   hiredis
@@ -581,12 +598,15 @@ DEPENDENCIES
   jquery-ui-rails
   json
   launchy (>= 2.1.2)
+  less-rails-bootstrap
   listen
   mocha
+  momentjs-rails
   multi_xml
   mws-connect (~> 0.0.7)!
   mysql2 (>= 0.3.19)
   newrelic_rpm
+  ng-rails-csrf
   oauth
   open4
   parallel_tests

@@ -1,0 +1,34 @@
+<div class="col-lg-10 col-md-10">
+  <h3>Backup and Restore</h3>
+
+  <div>
+    <div class="row  info">
+      <div class="col-md-2">Receiving Email</div>
+
+      <div class="controls col-md-5">
+        <input type="text" class="form-control input-style"
+               ng-model="backup_restore.settings.single.export_csv_email" ng-blur="update_export_email()" placeholder="Email address"/>
+      </div>
+      <div class="info col-sm-2">
+        <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+          groov-popover="Specify email address to send the backup link. Email will be sent to all the emails specified in the text field along with super-admin user email. If no email address is specified, then the email will sent only to the admin user email."></i>
+      </div>
+    </div>
+    <div class="row  info">
+      <div class="col-md-2">Backup</div>
+      <div class="col-md-8" ng-click="export_csv()"><a href="">Start Backup</a></div>
+    </div>
+  </div>
+  <div class="row  info">
+    <div class="col-md-2">Restore Action</div>
+    <div class="controls col-md-10 form-inline">
+      <input type="checkbox" ng-model="backup_restore.data.method" value="del_import" ng-checked="backup_restore.data.method == 'del_import'" /> Delete All and Import
+    </div>
+    <div class="form-group">
+      <div class="col-md-offset-2 col-md-10 col-xs-12">
+        <input name="importbackupfile" file-upload type="file" value="" required/>
+        <br/>{{backup_restore.data.file.name}}
+      </div>
+    </div>
+  </div>
+</div>

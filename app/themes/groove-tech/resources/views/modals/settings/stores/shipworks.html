@@ -1,0 +1,199 @@
+<div class="row">
+  <div class="col-md-6">
+    <div class="form-group">
+      <label class="control-label col-md-4 form-inline">
+        Use order number from original order source if available
+      </label>
+
+      <div class="controls col-md-8 form-inline">
+        <div toggle-switch ng-model="stores.single.import_store_order_number" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4 form-inline">
+        Generate Barcode from SKU
+      </label>
+
+      <div class="controls col-md-8 form-inline">
+        <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <legend>Import Orders with following statuses</legend>
+
+    <div class="form-group">
+      <label class="control-label col-md-4 form-inline">In Process</label>
+
+      <div class="controls col-md-8 form-inline">
+        <div toggle-switch ng-model="stores.single.shall_import_in_process" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4 form-inline">New Order</label>
+
+      <div class="controls col-md-8 form-inline">
+        <div toggle-switch ng-model="stores.single.shall_import_new_order" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">Not Shipped</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_not_shipped" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">Shipped</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.shall_import_shipped" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4 form-inline">No Status</label>
+
+      <div class="controls col-md-8 form-inline">
+        <div toggle-switch ng-model="stores.single.shall_import_no_status" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-md-12 text-center">
+    <iframe width="768" height="432" src="https://www.youtube.com/embed/1WJeGw_GbbI?rel=0" frameborder="0"
+            allowfullscreen></iframe>
+  </div>
+</div>
+<div class="row">
+
+  <div class="col-md-12">
+    <legend>ShipWorks Integration Setup</legend>
+    <ol class="list-group">
+      <li class="list-group-item">
+        <p class="list-group-item-text">1. Use the switches above to control which local order statuses ShipWorks will
+          send to GroovePacker.
+          You can enable all statuses if you'll be using a custom button in ShipWorks to import all selected orders.</p>
+      </li>
+      <li class="list-group-item">
+        <p class="list-group-item-text">2. Request URL: <span class="password-label" ng-hide="edit_status"> Please provide a name for your ShipWorks store above to generate Request Url</span><strong
+          ng-show="edit_status">{{stores.single.request_url}}{{stores.single.auth_token}}</strong></p>
+
+        <p class="list-group-item-text" ng-show="edit_status">
+          <button class="groove-button" ng-class="copy_text.class"
+                  clip-copy="stores.single.request_url+stores.single.auth_token" clip-click="copy_acknowledgement()">
+            {{copy_text.text}}
+          </button>
+        </p>
+        <p class="list-group-item-text" ng-show="edit_status">You'll paste it into ShipWorks in step #6 below.</p>
+      </li>
+      <li class="list-group-item">
+        <p class="list-group-item-text">3. In ShipWorks click on the Manage tab at the top and then on Actions. In the
+          window click "New Action".</p>
+      </li>
+      <li class="list-group-item">
+        <p class="list-group-item-text">4. Give the action a name and use the first dropdown to select how you would
+          like the action to be triggered. Creating a custom button gives you control over when orders are sent. </p>
+
+        <p class="list-group-item-text">If the "Require" dropdown is set to "An order to be selected" only selected
+          orders will be sent to GroovePacker when you click the button.</p>
+
+        <p class="list-group-item-text">If you choose not to rely on a selection you'll need to adjust the setting below
+          for "Send the request using". Otherwise you can leave it set to "Selected Orders".</p>
+      </li>
+      <li class="list-group-item">
+        <p class="list-group-item-text">5. After setting your trigger click the Add Task dropdown and select External >
+          Send Web Request. On the "Send the request" dropdown choose "Using the results of processing a template". In
+          the Template Dropdown scroll all the way down and choose the last option: XML Source.</p>
+      </li>
+      <li class="list-group-item">
+        <p class="list-group-item-text">6. The last step is to paste (ctrl-v) your Request URL into the blank and click
+          ok to save your action. Now when the button is clicked (or the trigger you defined is activated) you should
+          see all orders with a local status enabled in step #1, imported into GroovePacker.</p>
+      </li>
+    </ol>
+  </div>
+</div>
+
+<!--   <ol>
+    <li>Open ShipWorks & click on Manage > Actions > New Action (name the new action)</li>
+    <li>Under Actions, Select "An order is downloaded"</li>
+    <li>From the Add Task dropdown Select External>Send web request</li>
+    <li>Under send the request: Select "Using the results of processing a template" as a “POST” (scrolling may be necessary to see the field)</li>
+    <li>For template: Select "XML Source"</li>
+    <li>Copy (ctrl-C) and Paste (ctrl-V) your Request URL to the ShipWorks Request URL blank.</li>
+    <li>Here is your Request URL: [Their full request url would be right here in the list]</li>
+    <li>Click on Ok to save the action</li>
+  </ol> -->
+
+<!--   <div class="row">
+    <div class="col-md-6">
+      <legend>Import Orders</legend>
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="import_orders()"class="modal-save-button" ng-show="edit_status">Import Orders</button>
+        </div>
+      </div>
+      <div class="form-group">
+        <div class="col-xs-12">
+          <label class="alert alert-info" ng-show="stores.import.order.status_show">{{stores.import.order.status}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+    <legend>Import Products</legend>
+
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="import_products()"class="modal-save-button" ng-show="edit_status">Import Products</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-12">
+          <label class="alert alert-info" ng-show="stores.import.product.status_show">{{stores.import.product.status}}</label>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-md-6">
+    <legend>Import Product Images</legend>
+
+      <div class="form-group">
+        <div class="controls col-md-8">
+          <button ng-click="import_images()"class="modal-save-button" ng-show="edit_status">Import Product Images</button>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <div class="col-xs-12">
+          <label class="alert alert-info" ng-show="stores.import.image.status_show">{{stores.import.image.status}}</label>
+        </div>
+      </div>
+    </div>
+  </div> -->
+
+<!--   <div class="row">
+    <div class="col-md-6">
+      <legend>Automatically Update Products?</legend>
+      <div class="form-group">
+          <div class="col-md-9 form-inline">
+            <div toggle-switch ng-model="stores.single.auto_update_products" groov-click="update_single_store(true)"></div>
+          </div>
+      </div>
+    </div>
+  </div> -->

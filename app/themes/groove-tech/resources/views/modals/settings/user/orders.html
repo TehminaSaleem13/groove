@@ -1,0 +1,77 @@
+<div class="container-fluid form-horizontal">
+  <div class="row">
+    <div class="col-md-6">
+      <legend>Order Settings</legend>
+      <div class="form-group">
+        <label class="control-label col-md-5">Add/edit order items</label>
+
+        <div class="controls col-md-2">
+          <input name="add_edit_order_items" ng-model="users.single.role.add_edit_order_items"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-5">Import orders</label>
+
+        <div class="controls col-md-2">
+          <input name="import_orders" ng-model="users.single.role.import_orders"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-5">Change Order Status</label>
+
+        <div class="controls col-md-2">
+          <input name="change_order_status" ng-model="users.single.role.change_order_status"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-5">Create/edit notes from/to Packer</label>
+
+        <div class="controls col-md-2">
+          <input name="create_edit_notescreate_edit_notes" ng-model="users.single.role.create_edit_notes"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox"/>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-6">
+      <legend>Order activity & Packing exceptions</legend>
+      <div class="form-group">
+        <label class="control-label col-md-5">View packing exceptions</label>
+
+        <div class="controls col-md-2">
+          <input name="view_packing_ex" ng-model="users.single.role.view_packing_ex"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox"/>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label class="control-label col-md-5">Record packing exceptions</label>
+
+        <div class="controls col-md-2">
+          <input name="create_packing_ex" ng-model="users.single.role.create_packing_ex"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-md-5">Edit existing packing exceptions</label>
+
+        <div class="controls col-md-2">
+          <input name="edit_packing_ex" ng-model="users.single.role.edit_packing_ex"
+                 ng-disabled="roles_data.selectedRole!=null || roles_data.showSelectBaseRole==true"
+                 ng-change="update_single_user()" type="checkbox" checked/>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+

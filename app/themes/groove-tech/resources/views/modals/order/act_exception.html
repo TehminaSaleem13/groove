@@ -1,0 +1,84 @@
+<div class="container-fluid">
+
+  <div class="row">
+    <div class="col-sm-6">
+      <fieldset>
+        <legend>Activity Log</legend>
+        <div class="form-group" ng-repeat="activity in orders.single.activities">
+          <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+          {{ activity.action}} - by: {{ activity.username }}
+        </div>
+      </fieldset>
+    </div>
+    <div class="col-sm-6">
+      <fieldset>
+        <legend>Packing Exceptions</legend>
+        <div class="form-group">
+          <label class="control-label">Reason</label>
+
+          <div class="controls">
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio"
+                       ng-model="orders.single.exception.reason" value="qty_related"/>
+                Quantity Related
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio"
+                       ng-model="orders.single.exception.reason"
+                       value="incorrect_item"/> Incorrect item
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio"
+                       ng-model="orders.single.exception.reason" value="missing_item"/>
+                Missing item
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio"
+                       ng-model="orders.single.exception.reason" value="damaged_item"/>
+                Damaged item
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio"
+                       ng-model="orders.single.exception.reason"
+                       value="special_instruction"/> Special instruction related
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label">
+                <input type="radio"
+                       ng-model="orders.single.exception.reason" value="other"/> Other
+              </label>
+            </div>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="control-label">Description (optional)</label>
+                    <textarea class="form-control input-style" ng-model="orders.single.exception.description"
+                              class="col-sm-8"
+                              rows="4"></textarea>
+        </div>
+        <div class="form-group">
+          <label class="control-label">Associate exception with</label>
+          <select class="form-control input-style" name="{{'orders_status_'+$index}}"
+                  ng-model="orders.single.exception.assoc"
+                  ng-options="u.name for u in orders.single.users"></select>
+        </div>
+        <button class="btn btn-success" ng-click="update_order_exception()">Record
+          Exception
+        </button>
+        <button class="btn btn-warning" ng-click="clear_order_exception()">Clear Exception
+        </button>
+      </fieldset>
+    </div>
+  </div>
+
+</div>

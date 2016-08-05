@@ -1,0 +1,25 @@
+<div class="container-fluid">
+  <div class="row scan_pack_input" ng-if="!data.order.next_item || current_state != 'scanpack.rfp.default' ">
+    <div class="col-xs-12 scan_pack_title">
+      {{data.title}}
+    </div>
+    <div class="col-xs-12">
+      <input type="text" ng-model="data.input"  ng-keydown="input_enter($event)" autofocus="autofocus" tabindex="1"
+             class="form-control search-box" placeholder="Scan..."/>
+    </div>
+
+  </div>
+  <div ui-view></div>
+  <div class="scan_pack_success_fail row">
+    <div class="middle col-xs-12" ng-show="scan_pack_state=='success'">
+      <img class="col-xs-8 col-xs-offset-2" ng-src="{{scan_pack.scan_states.success.image.src}}" alt=""/>
+    </div>
+    <div class="middle col-xs-12" ng-show="scan_pack.scan_states.fail.image.enabled && scan_pack_state=='fail'">
+      <img class="col-xs-8 col-xs-offset-2" ng-src="{{scan_pack.scan_states.fail.image.src}}" alt=""/>
+    </div>
+    <div class="middle col-xs-12"
+         ng-show="scan_pack.scan_states.order_complete.image.enabled && scan_pack_state=='order_complete'">
+      <img class="col-xs-8 col-xs-offset-2" ng-src="{{scan_pack.scan_states.order_complete.image.src}}" alt=""/>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,38 @@
+<div class="persist-notifications-background persist-notifications-background-top" ng-click="toggle_detail()"></div>
+<div id="notification" class="persist-notifications persist-notifications-top"
+     ng-click="$event.preventDefault();$event.stopPropagation();" ng-class="{'progress-shown':selected != ''}">
+  <progressbar ng-show="selected != '' && !detail_open" ng-click="toggle_detail()" class="progress-striped"
+               value="notifications[selected].percent" type="{{notifications[selected].type}}"><span
+    ng-bind-html="notifications[selected].message"></span></progressbar>
+  <div ng-show="selected != '' && !detail_open" 
+    class="pull-right">
+      <a style="padding-right: 10px;" ng-click="update_orders_status($event);" href="" ng-show="notifications[selected].identifier=='order'">Update</a>
+      <!-- <a href="" ng-click="notifications[selected].cancel($event)">Cancel All</a> -->
+      <a href="" ng-click="bulkCancelAction()">Cancel All</a>
+  </div>
+  <div class="details">
+    <div ng-show="selected==''" class="text-center"><h3>No notifications here</h3></div>
+    <div ng-show="selected!=''" class="single-notification">
+      <progressbar class="progress-striped" value="notifications[selected].percent"
+                   type="{{notifications[selected].type}}">
+        <div ng-bind-html="notifications[selected].message"></div>
+      </progressbar>
+      <a class="pull-right" style="padding-right: 10px;" ng-click="update_orders_status($event);" href="" ng-show="notifications[selected].identifier=='order'">Update</a>
+      <div class="pull-right"><a href="" ng-click="notifications[selected].cancel($event)">Cancel</a></div>
+      <div class="details-text" ng-bind-html="notifications[selected].details"
+           ng-show="notifications[selected].details"></div>
+    </div>
+    <div class="single-notification" ng-click="notification.glow=false" ng-class="{glow:notification.glow}"
+         ng-repeat="(identifier,notification) in notifications" ng-show="selected!=identifier">
+      <progressbar class="progress-striped" value="notification.percent" type="{{notification.type}}">
+        <div ng-bind-html="notification.message"></div>
+      </progressbar>
+      <a style="padding-right: 10px;" ng-click="update_orders_status($event);" href="" ng-show="notifications[selected].identifier=='order'">Update</a>
+      <div class="pull-right"><a href="" ng-click="notification.cancel($event)">Cancel</a></div>
+      <div class="details-text" ng-bind-html="notification.details" ng-show="notification.details"></div>
+    </div>
+  </div>
+  <div class="under-bar" ng-click="toggle_detail()" ng-class="{glow:bar_glow}"><i class="glyphicon"
+                                                                                  ng-class="{'glyphicon-chevron-down':!detail_open,'glyphicon-chevron-up':detail_open}"></i>
+  </div>
+</div>

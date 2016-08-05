@@ -112,7 +112,7 @@ module Groovepacker
         #This mentod will generate CSV file and return the filename as S3 URL generated in get_csv_export method.
         def generate_csv_file
           current_tenant = Apartment::Tenant.current
-          CSV.open(Rails.root.join('public', 'pdfs', @filename), 'wb') do |csv|
+          CSV.open(Rails.root.join('public', 'csv', @filename), 'wb') do |csv|
             csv << row_map.keys
             @items_list.values.each {|line| csv << line.values }
           end

@@ -1,0 +1,38 @@
+<div class="col-lg-10 col-md-10">
+
+  <div class="row">
+
+    <div class="col-lg-9 col-md-9">
+      <div class="col-md-9 col-md-offset-3">
+        <input type="text" ng-model="users.setup.search" autofocus="autofocus" id="user-search-query"
+               class="form-control search-box" placeholder="Search">
+      </div>
+    </div>
+    <div class="col-lg-1 col-md-1" dropdown>
+      <button type="button" class="groove-button dropdown-toggle">
+        Edit <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a ng-click="user_delete()">Delete</a></li>
+        <li><a ng-click="user_duplicate()">Duplicate</a></li>
+      </ul>
+    </div>
+    <div class="col-lg-2 col-md-2" dropdown>
+      <button type="button" class="groove-button dropdown-toggle" data-toggle="dropdown">
+        Change Status <span class="caret"></span>
+      </button>
+      <ul class="dropdown-menu" role="menu">
+        <li><a ng-click="user_change_status('active')">Active</a></li>
+        <li><a ng-click="user_change_status('inactive')">Inactive</a></li>
+      </ul>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div groov-data-grid="gridOptions" groov-list="users.list"></div>
+    </div>
+  </div>
+
+</div>
+<div ui-view></div>

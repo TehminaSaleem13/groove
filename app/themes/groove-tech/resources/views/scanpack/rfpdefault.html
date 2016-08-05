@@ -1,0 +1,227 @@
+<div class="row" ng-show="data.order.next_item.record_serial">
+  <div class="alert alert-info"><h4>Serial number will be needed for this product</h4></div>
+</div>
+<div class="row">
+  <div class="icons-list-style">
+    <div class="col-lg-3 col-md-3 text-center" id='awaiting-order'>
+      <div id='awaiting-order-count'>
+        {{data.raw.awaiting}}
+      </div>
+      <ng-pluralize count="data.raw.awaiting"
+        when="{'1': 'Awaiting Order',
+               'other': 'Awaiting Orders'}">
+      </ng-pluralize><br>
+      <strong>Remaining</strong>
+    </div>
+    <div class="col-lg-1  col-md-1" ng-click="reset_order()">
+      <i class="glyphicon glyphicon-repeat"></i>
+
+      <div class="icons-style">Restart</div>
+    </div>
+    <div class="col-lg-1 col-md-1 pull-left" ng-hide="true">
+      <i class="glyphicon glyphicon-pause"></i>
+
+      <div class="icons-style">
+        Pause
+      </div>
+    </div>
+    <div class="col-lg-1 col-md-1 pull-left" ng-click="add_note()">
+      <i class="glyphicon glyphicon-list-alt "></i>
+
+      <div class="icons-style">Add Note</div>
+    </div>
+  </div>
+</div>
+<div class="confirmation-notes">
+  <div class="row alert alert-note"
+       ng-show="data.scan_pack_settings.show_internal_notes && data.order.notes_internal.length && !show_internal_notes">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_internal_notes=true">
+      <span aria-hidden="true">&times;</span></button>
+    <h4>{{data.order.notes_internal}}</h4>
+  </div>
+  <div class="row alert alert-note"
+       ng-show="data.order.notes_toPacker.length && !show_packer_notes">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_packer_notes=true"><span
+      aria-hidden="true">&times;</span></button>
+    <h4>{{data.order.notes_toPacker}}</h4>
+  </div>
+  <div class="row alert alert-note"
+       ng-show="data.scan_pack_settings.show_customer_notes && data.order.customer_comments.length && !show_customer_notes">
+    <button type="button" class="close" data-dismiss="alert" aria-label="Close" ng-click="show_customer_notes=true">
+      <span aria-hidden="true">&times;</span></button>
+    <h4>{{data.order.customer_comments}}</h4>
+  </div>
+</div>
+<div class="row scanpack-bottom-well">
+  <div class="row">
+    <div class="col-lg-3 col-md-3">
+      <div class="scanpack-well">
+        <div class="well-heading">
+          <span>{{ unscanned_count }} Items Left</span>
+        </div>
+        <div class="row" ng-repeat="unscanned_item in data.order.unscanned_items">
+          <div class="media">
+            <a class="pull-left" href="">
+              <img class="media-object" width="64px" ng-src="{{ unscanned_item.images[0].image }}"/>
+              <span ng-show="unscanned_item.product_type =='individual'"><img src="/assets/images/top.png"></span>
+            </a>
+
+            <div class="media-body">
+              <span class="item-count pull-right">X {{unscanned_item.qty_remaining}}</span>
+								    <span class="media-heading pack_link" ng-click="product_details(unscanned_item.product_id)" tooltip="{{unscanned_item.name}}">{{ unscanned_item.name | cut:false:(90) }}<br/>
+									      {{ unscanned_item.sku }}</span>
+            </div>
+          </div>
+          <div class="sub-products" ng-show="unscanned_item.product_type =='individual'">
+            <div class="sub-products-position">
+              <div class="media" ng-repeat='child_item in unscanned_item.child_items'>
+                <a class="pull-left" href="">
+                  <img class="media-object" width="44px" ng-src="{{ child_item.images[0].image }}"/>
+                </a>
+
+                <div class="media-body">
+                  <span class="item-count pull-right">X {{child_item.qty_remaining}}</span>
+                  <span class="media-heading pack_link" ng-click="product_details(child_item.product_id)">{{ child_item.name }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="sub-products-bottom" ng-show="unscanned_item.product_type =='individual'">
+            <img src="/assets/images/bottom.png">
+          </div>
+          <hr class="scanpack-hr" width="95%">
+          <hr class="scanpack-hr-border" width="96.5%">
+        </div>
+      </div>
+    </div>
+    <div class="col-lg-6 col-md-6">
+      <div class="packing-well" style="margin-top: 0px;">
+        <span class="pack_link" ng-click="order_details(data.order.id)">Now Packing #{{ data.order.increment_id}}</span>
+      </div>
+
+      <div class="scanpack-image-well">
+        <h3 ng-show="data.order.next_item.scanned_qty ==0">Please scan this product next</h3>
+
+        <h3 ng-show="data.order.next_item.scanned_qty !=0">{{data.order.next_item.scanned_qty}} of {{
+          data.order.next_item.qty }} have been scanned</h3>
+
+        <div class="text-left">
+          <h5>
+            &nbsp;
+            <span class="pull-left"><strong tooltip="{{data.order.next_item.name}}">{{data.order.next_item.name | cut:false:230}}</strong></span>
+            <span class="pull-right" ng-class="{pointer: scan_pack.settings.enable_click_sku}"
+                  ng-click="autoscan_barcode()"><strong>{{data.order.next_item.sku}}</strong></span>
+          </h5>
+          <h4>{{data.order.next_item.qty_remaining}} more to scan.</h4>
+
+        </div>
+        <div class=" alert alert-info" ng-show="data.order.next_item.skippable">This product can be skipped, scan the
+          skip code to skip
+        </div>
+
+        <div class="scan_product_images">
+          <div class="scan_product_times img-rounded" ng-show="data.order.next_item.qty > 1">
+            <div class="text-center pull-left"><i class="glyphicon glyphicon-remove"></i><br/>TIMES</div>
+            <div class="times_number pull-right">{{data.order.next_item.qty}}</div>
+          </div>
+          <div ng-click="item_image_index = item_image_index + 1"
+               ng-show="item_image_index < data.order.next_item.images.length - 1" class="nav-right img-circle"><i
+            class="glyphicon glyphicon-step-forward"></i></div>
+          <div ng-click="item_image_index = item_image_index - 1" ng-show="item_image_index > 0"
+               class="nav-left img-circle"><i class="glyphicon glyphicon-step-backward"></i></div>
+          <span class="img-style-helper"></span>
+          <img ng-repeat="image in data.order.next_item.images" ng-show="item_image_index == $index" class="img-style"
+               ng-src="{{ image.image }}"/>
+
+          <div class="special_product_instructions" ng-show="data.order.next_item.instruction.length">
+            <h4>Special instruction for the product:</h4>
+
+            <h3> {{data.order.next_item.instruction}}</h3>
+          </div>
+        </div>
+
+      </div>
+      <div class="product-scan-outside-well">
+        <span class="indicator-ready pull-left"></span>
+
+        <div class="product-scan-well">
+
+          <span class="col-lg-1 col-md-1  glyphicon glyphicon-barcode barcode-icon"></span>
+          <span class="col-lg-11 col-md-11 product-scan-status">
+            <input type="text" ng-model="data.input"  ng-keydown="input_enter($event)" autofocus="autofocus" tabindex="1"
+             class="search-box product-scan-btn text-center" id='ready_product_scan' placeholder="Ready For Product Scan"/>
+          </span>
+        </div>
+      </div>
+      <!--
+      <div class="scan-details-well">
+          <div class="scan-details">
+              <div class="col-lg-7 col-md-7 scan-details-left">
+                  <span>Perfect Scans: 43</span><br>
+                  <span>Perfect Orders: 16</span><br>
+                  <span>Scan Accuracy: 96.2%</span><br>
+                  <span>Avg Scan Time: 9.2 sec</span><br>
+                  <span>Last Scan Time: 8.3 sec</span>
+              </div>
+              <div class="col-lg-5 col-lg-5 scan-details-right">
+                  <span>Recent Bonus:</span><br>
+                  <span>Suggested Scans</span>
+                  <span style="font-size:20px"> 889,394</span>
+              </div>
+          </div>
+      </div>
+      -->
+    </div>
+    <div class="col-lg-3 col-md-3 pull-right">
+      <div class="scanpack-well">
+        <div class="right-well-heading">
+								<span class="col-lg-8 col-md-8">
+									{{scanned_count}} Items Packed
+								</span>
+								<span class="col-lg-4 col-md-4 download-icon-styling">
+									<img src="/assets/images/download-icon.png">
+								</span>
+        </div>
+
+        <div class="row" ng-repeat="scanned_item in data.order.scanned_items"
+             ng-show="scanned_item.product_type =='single'">
+          <div class="media">
+            <a class="pull-left" href="">
+              <img class="media-object" ng-src="{{scanned_item.images[0].image}}" width="64px">
+            </a>
+
+            <div class="media-body">
+              <span class="item-count pull-right">X {{scanned_item.scanned_qty}}</span>
+								    <span class="media-heading pack_link" ng-click="product_details(scanned_item.product_id)" tooltip="{{scanned_item.name}}">{{ scanned_item.name | cut:false:90 }}<br>
+									      {{ scanned_item.sku }}</span>
+            </div>
+          </div>
+          <hr class="scanpack-hr" width="95%">
+          <hr class="scanpack-hr-border" width="96.5%">
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<!--
+<div class="row">
+
+<div class="time time-display">
+<span>00:35:27</span>
+</div>
+<div class="progress-meter">
+<img src="/assets/images/progress_bar.png" height="23px" width="89%"
+        >
+</div>
+
+<div class="scan-timer pull-right">
+<img src="/assets/images/scan-time.png" height="89px" width="103px">
+</div>
+</div>
+<div class="row">
+<div class="scan-time pull-right">
+<span>2</span>
+</div>
+</div>
+
+-->

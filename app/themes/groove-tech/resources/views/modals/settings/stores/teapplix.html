@@ -1,0 +1,105 @@
+<div class="row">
+  <div class="col-md-6">
+    <legend>Teapplix Credentials</legend>
+    <div class="form-group">
+      <label class="control-label col-md-4">Teapplix Account Name</label>
+
+      <div class="controls col-md-8">
+        <input name="host" ng-blur="update_single_store(true)" ng-model="stores.single.account_name"
+               class="form-control input-style" placeholder="Your Teapplix Account Name" type="text" value=""
+               required/>
+      </div>
+    </div>
+    
+    <div class="form-group">
+      <label class="control-label col-md-4">Username</label>
+
+      <div class="controls col-md-8">
+        <input name="username" ng-blur="update_single_store(true)" ng-model="stores.single.username"
+               class="form-control input-style" type="text" value="" required/>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">Password</label>
+
+      <div class="controls col-md-8">
+        <input name="password" ng-blur="update_single_store(true)" ng-model="stores.single.password"
+               class="form-control input-style" type="text" value="" required/>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col-md-6">
+    <legend>Import Orders with following statuses</legend>
+    
+    <div class="form-group">
+      <label class="control-label col-md-4">Import Open Orders</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.import_open_orders" groov-click="update_single_store(true)"></div>
+   
+      </div>
+    </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">Import Shipped Orders</label>
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.import_shipped" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<div class="row">
+
+  <div class="col-md-8">
+    <legend>Store Settings</legend>
+    
+    <div class="form-group">
+      <label class="control-label col-md-3">Generate Barcode from SKU</label>
+
+      <div class="controls col-md-2">
+        <div toggle-switch ng-model="stores.single.gen_barcode_from_sku" groov-click="update_single_store(true)"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign"  style="margin-top: 10px;" popover-trigger="mouseenter" groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
+      </div>
+    </div>
+
+    <div ng-if="stores.single.allow_teapplix_inv_push">
+      <div class="form-group">
+        <label class="control-label col-md-3">Inventory Push/Pull</label>
+
+        <div class="controls col-md-2">
+          <div toggle-switch ng-model="stores.single.update_inv" groov-click="update_single_store(true)"></div>
+        </div>
+      </div>
+    </div>
+
+    <div ng-if="stores.single.allow_teapplix_inv_push">
+      <div class="form-group" ng-show="stores.single.update_inv && stores.single.id && stores.single.account_name && stores.single.username && stores.single.password">
+        <div class="col-md-12">
+          <label class="control-label col-md-3"></label>
+
+          <div class="col-sm-2">
+            <button confirm-click="Are you sure? This will overwrite inventory data!" ng-click="pull_store_inventory()" class="dropdown-toggle groove-button label label-default label-danger" translate>Pull Inventory
+            </button>
+          </div>
+          <div class="col-sm-2">
+            <button confirm-click="Are you sure? This will overwrite inventory data!" ng-click="push_store_inventory()" class="dropdown-toggle groove-button label label-default label-danger" translate>Push Inventory
+            </button>
+          </div>
+        </div>
+        <br><br>
+        <div class="col-md-12">
+          <label class="control-label col-md-3"></label>
+          <div class="col-md-9">
+            <b>Note:</b> To perform <i><b>Inventory Push</b></i>, Make sure you have InvenoryAdvisor® subscription on Teapplix else inventory push will not work.
+          </div>
+        </div>
+      </div>
+    </div>
+    
+  </div>
+  <br/>
+</div>

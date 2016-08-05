@@ -1,0 +1,401 @@
+<div class="col-lg-10 col-md-10">
+  <div class="row">
+
+    <div class="col-xs-12">
+      <h3>{{translations.headings.options}}</h3>
+
+      <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.ask_tracking_number}}</label>
+
+            <div class="controls col-sm-4 form-inline " dropdown>
+              <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':scan_pack.settings.post_scanning_option=='Verify',
+                        'label-warning':scan_pack.settings.post_scanning_option=='Record',
+                        'label-info':scan_pack.settings.post_scanning_option=='PackingSlip',
+                        'label-danger':scan_pack.settings.post_scanning_option=='Barcode'}">
+                <span ng-show="scan_pack.settings.post_scanning_option=='None'" translate>common.none</span>
+                <span ng-show="scan_pack.settings.post_scanning_option=='Verify'" translate>common.verify</span>
+                <span ng-show="scan_pack.settings.post_scanning_option=='Record'" translate>common.record</span>
+                <span ng-show="scan_pack.settings.post_scanning_option=='PackingSlip'"
+                      translate>common.packing_slip</span>
+                <span ng-show="scan_pack.settings.post_scanning_option=='Barcode'" translate>common.order_barcode</span>
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('None')" translate>common.none</a>
+                </li>
+                <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('Verify')" translate>common.verify</a>
+                </li>
+                <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('Record')" translate>common.record</a>
+                </li>
+                <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('PackingSlip')" translate>common.packing_slip</a>
+                </li>
+                <li><a class="dropdown-toggle" ng-click="change_post_scanning_opt('Barcode')" translate>common.order_barcode</a>
+                </li>
+              </ul>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 popover-trigger="mouseenter" popover-placement="bottom"
+                 groov-popover="{{translations.tooltips.ask_post_scanning_functions}}"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3" style="padding-top: 0px;">{{translations.labels.cue_orders_for_scanpack}}</label>
+
+            <div class="controls col-sm-3 col-md-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.scan_by_tracking_number"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 popover-trigger="mouseenter" groov-popover="{{translations.tooltips.cue_orders_optons}}"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.enable_click_sku}}</label>
+
+            <div class="controls form-inline pull-left" ng-class='{"col-sm-1": scan_pack.settings.enable_click_sku, "col-sm-2": !scan_pack.settings.enable_click_sku }'>
+              <div toggle-switch ng-model="scan_pack.settings.enable_click_sku" groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 popover-trigger="mouseenter"
+                 ng-if= '!scan_pack.settings.enable_click_sku'
+                  groov-popover="{{translations.tooltips.enable_click_sku}}"></i>
+            </div>
+            <div class="col-sm-4 col-md-3 col-lg-3 col-lg-offset-0 col-md-offset-1"
+                 ng-show="scan_pack.settings.enable_click_sku">
+              <button ng-click="per_product_setting('enable_click_sku')"
+                      class="groove-button label label-default label-success">Per Product Setting
+              </button>
+            </div>
+
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.type_scan_code}}</label>
+
+            <div class="controls form-inline" ng-class="{'col-md-1': scan_pack.settings.type_scan_code_enabled, 'col-md-2': !scan_pack.settings.type_scan_code_enabled}">
+              <div toggle-switch ng-model="scan_pack.settings.type_scan_code_enabled"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;padding-right: 2px;"
+                 popover-trigger="mouseenter"
+                   ng-if='!scan_pack.settings.type_scan_code_enabled'
+                  groov-popover="{{translations.tooltips.type_in_counts}}"></i>
+            </div>
+            <div class="col-sm-3 col-md-2 col-lg-2"
+                 ng-show="scan_pack.settings.type_scan_code_enabled">
+              <button ng-click="per_product_setting('type_scan_code')"
+                      class="groove-button label label-default label-success">Per Product Setting
+              </button>
+            </div>
+            <div class="col-sm-2" ng-show="scan_pack.settings.type_scan_code_enabled">
+              <input class="form-control input-style" type="text" ng-blur="update_settings()"
+                     ng-model="scan_pack.settings.type_scan_code"/>
+            </div>
+
+            <div class="info col-sm-2">
+              <a href="/settings/print_action_barcode/type_scan_code.pdf" target="_blank"><i
+                class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                 groov-popover="{{translations.tooltips.type_scan_code}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.escape_string}}</label>
+
+            <div class="controls form-inline" ng-class='{"col-sm-1": scan_pack.settings.escape_string_enabled, "col-sm-2": !scan_pack.settings.escape_string_enabled }'>
+              <div toggle-switch ng-model="scan_pack.settings.escape_string_enabled"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 ng-if="!scan_pack.settings.escape_string_enabled" popover-trigger="mouseenter"
+                 groov-popover="{{translations.tooltips.escape_string}}"></i>
+            </div>
+            <div class="col-sm-4 text-left" ng-show="scan_pack.settings.escape_string_enabled">
+              <label class="col-sm-4 col-md-3">{{translations.labels.scan}}</label>
+
+              <div class="col-sm-8 col-md-9">
+                <input class="form-control input-style" type="text" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.escape_string" ng-trim="false"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+              <i class="icon-large glyphicon glyphicon-info-sign pull-left"
+                 ng-show="scan_pack.settings.escape_string_enabled" popover-trigger="mouseenter"
+                 groov-popover="{{translations.tooltips.escape_string}}"></i>
+            </div>
+          </div>
+
+          <div class="form-group" ng-show="scan_pack.settings.escape_string_enabled">
+            <label class="control-label col-sm-3">{{translations.labels.lot_number}}</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.record_lot_number" groov-click="update_settings()"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.show_customer_notes}}</label>
+
+            <div class="controls col-sm-3 col-md-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.show_customer_notes"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 popover-trigger="mouseenter" groov-popover="{{translations.tooltips.show_customer_notes}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.show_internal_notes}}</label>
+
+            <div class="controls col-sm-3 col-md-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.show_internal_notes"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 popover-trigger="mouseenter" groov-popover="{{translations.tooltips.show_internal_notes}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3"
+                   style="padding-top: 0px;">{{translations.labels.intangible_setting}}</label>
+
+            <div class="controls form-inline" ng-class='{"col-md-1": scan_pack.settings.intangible_setting_enabled, "col-md-2": !scan_pack.settings.intangible_setting_enabled}'>
+              <div toggle-switch ng-model="scan_pack.settings.intangible_setting_enabled"
+                   groov-click="update_product_intangibleness()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 ng-if="!scan_pack.settings.intangible_setting_enabled" popover-trigger="mouseenter"
+                 groov-popover="{{translations.tooltips.intanginle_setting}}"></i>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.intangible_setting_enabled">
+              <label class="col-sm-4 col-md-3" style="padding-top: 0px;">{{translations.labels.intangible_string}}</label>
+
+              <div class="col-sm-8 col-md-9">
+                <input class="form-control input-style" type="text" ng-blur="update_product_intangibleness()" ng-model="scan_pack.settings.intangible_string" ng-trim="false"/>
+              </div>
+            </div>
+            <div class="info col-sm-1">
+              <i class="icon-large glyphicon glyphicon-info-sign" ng-show="scan_pack.settings.intangible_setting_enabled" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_setting}}"></i>
+            </div>
+          </div>
+
+          <div class="form-group" ng-show="scan_pack.settings.intangible_setting_enabled">
+            <label class="control-label col-sm-3"
+                   style="padding-top: 0px;">Auto-Generate Barcode for Intangible Items</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.intangible_setting_gen_barcode_from_sku" groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;" popover-trigger="mouseenter" groov-popover="{{translations.tooltips.intangible_setting_gen_barcode_from_sku}}"></i>
+            </div>
+          </div>
+
+
+
+          <div class="form-group">
+            <label class="control-label col-sm-3"
+                   style="padding-top: 0px;">Post Scan Pause</label>
+
+            <div class="controls form-inline" ng-class='{"col-md-1": scan_pack.settings.post_scan_pause_enabled, "col-md-2": !scan_pack.settings.post_scan_pause_enabled}'>
+              <div toggle-switch ng-model="scan_pack.settings.post_scan_pause_enabled"
+                   groov-click="update_settings()"></div>
+              <i class="info icon-large glyphicon glyphicon-info-sign" style="padding-left:5px;"
+                 ng-if="!scan_pack.settings.post_scan_pause_enabled" popover-trigger="mouseenter"
+                 groov-popover="{{translations.tooltips.post_scan_pause}}"></i>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.post_scan_pause_enabled">
+              <label class="col-sm-4 col-md-3" style="padding-top: 0px;">Seconds</label>
+
+              <div class="col-sm-8 col-md-9">
+                <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()" ng-model="scan_pack.settings.post_scan_pause_time"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+            </div>
+          </div>
+
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{{translations.headings.scan_actions}}</h3>
+      <h4>{{translations.headings.scan_actions_sub_head}}</h4>
+
+      <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.skip_code}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.skip_code_enabled" groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.skip_code_enabled">
+              <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+
+              <div class="col-sm-9 col-md-10">
+                <input class="form-control input-style" type="text" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.skip_code"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+              <a href="/settings/print_action_barcode/skip_code.pdf" target="_blank"><i
+                class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.skip_code}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.note_from_packer_code}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.note_from_packer_code_enabled"
+                   groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.note_from_packer_code_enabled">
+              <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+
+              <div class="col-sm-9 col-md-10">
+                <input class="form-control input-style" type="text" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.note_from_packer_code"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+              <a href="/settings/print_action_barcode/note_from_packer_code.pdf" target="_blank"><i
+                class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.note_from_packer_code}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.service_issue_code}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.service_issue_code_enabled"
+                   groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.service_issue_code_enabled">
+              <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+
+              <div class="col-sm-9 col-md-10">
+                <input class="form-control input-style" type="text" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.service_issue_code"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+              <a href="/settings/print_action_barcode/service_issue_code.pdf" target="_blank"><i
+                class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.service_issue_code}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.restart_code}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.restart_code_enabled"
+                   groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.restart_code_enabled">
+              <label class="control-label col-sm-3 col-md-2">{{translations.labels.scan}}</label>
+
+              <div class="col-sm-9 col-md-10">
+                <input class="form-control input-style" type="text" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.restart_code"/>
+              </div>
+            </div>
+            <div class="info col-sm-2">
+              <a href="/settings/print_action_barcode/restart_code.pdf" target="_blank"><i
+                class="icon-large glyphicon glyphicon-print"></i></a>&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.restart_code}}"></i>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+
+  <div class="row">
+    <div class="col-xs-12">
+      <h3>{{translations.headings.feedback}}</h3>
+
+      <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.show_success_image}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.show_success_image" groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.show_success_image">
+              <label class="control-label col-sm-1">{{translations.labels.for}}</label>
+
+              <div class="col-sm-5">
+                <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.success_image_time"/>
+              </div>
+              <label class="control-label col-sm-1">{{translations.labels.seconds}}</label>
+            </div>
+            <div class="info col-sm-2">
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                groov-popover="{{translations.tooltips.feedback}}"></i>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.show_fail_image}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.show_fail_image" groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.show_fail_image">
+              <label class="control-label col-sm-1">{{translations.labels.for}}</label>
+
+              <div class="col-sm-5">
+                <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.fail_image_time"/>
+              </div>
+              <label class="control-label col-sm-1">{{translations.labels.seconds}}</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.show_order_complete_image}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.show_order_complete_image"
+                   groov-click="update_settings()"></div>
+            </div>
+            <div class="col-sm-4" ng-show="scan_pack.settings.show_order_complete_image">
+              <label class="control-label col-sm-1">{{translations.labels.for}}</label>
+
+              <div class="col-sm-5">
+                <input class="form-control input-style" type="number" step="0.1" min="0.3" ng-blur="update_settings()"
+                       ng-model="scan_pack.settings.order_complete_image_time"/>
+              </div>
+              <label class="control-label col-sm-1">{{translations.labels.seconds}}</label>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.play_success_sound}}</label>
+
+            <div class="controls col-sm-2 col-md-1 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.play_success_sound" groov-click="update_settings()"></div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.play_fail_sound}}</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.play_fail_sound" groov-click="update_settings()"></div>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="control-label col-sm-3">{{translations.labels.play_order_complete_sound}}</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="scan_pack.settings.play_order_complete_sound"
+                   groov-click="update_settings()"></div>
+            </div>
+          </div>
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</div>
