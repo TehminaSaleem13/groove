@@ -39,13 +39,13 @@ class SendStatStream
 
   def update_stats(tenant)
     path = "/dashboard/run_stat_stream"
-    HTTParty.get("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}") 
+    HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}") 
   end
 
   def generate_export(tenant, params)
     days = params["duration"]
     email = params["email"]
     path = "/dashboard/generate_stats?days=#{days}&email=#{email}"
-    HTTParty.get("http://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}")
+    HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}")
   end
 end
