@@ -300,6 +300,7 @@ Groovepacks::Application.routes.draw do
       get 'exceptions'
       get 'get_stat_stream_manually'
     end
+    post 'generate_stats'
   end
 
   # Sample resource route with options:

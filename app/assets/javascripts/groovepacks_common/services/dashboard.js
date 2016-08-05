@@ -204,6 +204,21 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     });
   };
 
+  var stat_generate = function(dashboard){
+    $http.get('/settings/get_settings').success(function(response){
+      email = response.data.settings.email_address_for_packer_notes;
+      url = "/dashboard/1/generate_stats.json"
+      data = {}
+      data["duration"] = dashboard["main_summary"]["duration"]
+      data["email"] = email
+      if (email == ''){
+        notification.notify("Please specify an email address for system notifications in the" + "<a href = '#/settings/system/general'> General Preferences.</a>", 0);
+      } else {
+      $http.post(url, data);
+      }
+    }); 
+  }
+
   return {
     model: {
       get: get_default,
@@ -216,7 +231,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       points_data: get_datapoints_data,
       tooltip: get_tool_tip,
       speed: get_speed,
-      stat_stream: get_stat_stream
+      stat_stream: get_stat_stream,
+      stat_generate: stat_generate
     }
   };
 }]);
