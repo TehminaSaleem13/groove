@@ -46,8 +46,8 @@
             <input type="text" class="form-control search-box" autofocus="autofocus" id="order-search-query"
                    ng-model="orders.setup.search" placeholder="Search">
           </div>
-          <div class="col-lg-1 col-md-1 no-padding" groov-click="search_by_product()" groov-popover="When enabled search by product to find open orders which contain it" popover-trigger="mouseenter" popover-placement="bottom">
-            <i class="fa fa-1x fa-search" style="cursor:pointer;" aria-hidden="true" ng-style="{ 'color' : general_settings.single.search_by_product ? 'blank' : 'grey' }" ></i>
+          <div class="col-lg-1 col-md-1 no-padding" groov-click="search_by_product()" groov-popover='When enabled, search by a product to find open orders which contain it.' popover-trigger="mouseenter" popover-placement="bottom">
+            <i class="fa fa-1x fa-search" style="cursor:pointer;" aria-hidden="true" ng-style="{ 'color' : general_settings.single.search_by_product ? 'black' : 'grey' }" ></i>
           </div> 
         </div>
         <div class="col-lg-2 col-md-2" dropdown>
@@ -112,3 +112,8 @@
     </div>
   </div>
 </div>
+<style type="text/css">
+  .popover {
+    max-width: 260px;
+  }
+</style>
