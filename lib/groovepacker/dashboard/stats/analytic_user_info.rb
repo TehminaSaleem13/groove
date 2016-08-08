@@ -2,7 +2,7 @@ module Groovepacker
   module Dashboard
     module Stats
       class AnalyticUserInfo
-        def users_details(tenant)
+        def users_details(tenant, user_change_hash)
           users_info = []
           begin
             Apartment::Tenant.switch(tenant)
@@ -10,10 +10,14 @@ module Groovepacker
             unless @users.empty?
               @users.each do |user|
                 result = build_result
-                result[:packing_user_id] = user.id
+                user_id = user.id
+                result[:packing_user_id] = user_id
                 result[:user_name] = user.username
                 result[:active] = user.active
                 result[:is_deleted] = user.is_deleted
+                if user_change_hash
+                  result[:previous_user_name] = user_change_hash[user_id.to_s]
+                end
                 users_info.push(result)
               end
             end

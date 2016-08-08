@@ -43,12 +43,14 @@ class UsersController < ApplicationController
         if params[:active].blank?
           params[:active] = false
         end
+        
         @user.active = params[:active]
         if params[:name].blank?
           @user.name = params[:username]
         else
           @user.name = params[:name]
         end
+        username_change = @user.username_change
         unless params[:view_dashboard].nil?
           @user.view_dashboard = params[:view_dashboard]
         end
@@ -96,11 +98,14 @@ class UsersController < ApplicationController
           result['user']['role'] = @user.role.attributes
           result['user']['current_user'] = current_user
           # send user data to groovelytics server if the user is newly created.
-          if new_user && !Rails.env.test?
+          if !Rails.env.test?
             tenant_name = Apartment::Tenant.current
             send_user_info_obj = SendUsersInfo.new()
-            send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
+            user_change_hash = {@user.id => username_change[1]} if username_change
+            send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name, user_change_hash)
+            #send_user_info_obj.build_send_users_stream(tenant_name, user_change_hash)
           end
+
         else
           result['status'] = false
           result['messages'] = @user.errors.full_messages
