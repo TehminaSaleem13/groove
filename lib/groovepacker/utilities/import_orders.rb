@@ -78,10 +78,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     job_scheduled = false
     general_settings = GeneralSetting.all.first
     export_settings = ExportSetting.all.first
-    for i in 0..6
-      job_scheduled, date = schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
-      break if job_scheduled
-    end
+    schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
   end
 
   def schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
