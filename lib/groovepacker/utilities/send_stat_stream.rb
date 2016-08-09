@@ -45,7 +45,7 @@ class SendStatStream
   def generate_export(tenant, params)
     days = params["duration"]
     email = params["email"]
-    path = "/dashboard/generate_stats?days=#{days}&email=#{email}"
+    path = URI.escape("/dashboard/generate_stats?days=#{days}&email=#{email}")
     HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}")
   end
 end
