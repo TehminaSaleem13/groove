@@ -16,7 +16,7 @@ module Groovepacker
                 result[:active] = user.active
                 result[:is_deleted] = user.is_deleted
                 if user_change_hash
-                  result[:previous_user_name] = user_change_hash[user_id.to_s]
+                  result[:previous_user_name] = user_change_hash[user_id]
                 end
                 users_info.push(result)
               end
