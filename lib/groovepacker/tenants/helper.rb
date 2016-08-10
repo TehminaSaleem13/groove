@@ -258,6 +258,7 @@ module Groovepacker
             update_modification_status(tenant)
           rescue Exception => ex
             result = check_exception(ex, result)
+            Rollbar.error(ex, ex.message)
           end
         else
           update_fail_status(result, 'Couldn\'t find a valid subscription for the tenant.');
