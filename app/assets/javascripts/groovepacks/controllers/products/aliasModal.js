@@ -39,6 +39,7 @@ groovepacks_controllers.controller('aliasModal', ['$scope', 'type', 'exceptions'
     };
 
     myscope.get_products = function (page) {
+
       if (typeof page == 'undefined') {
         page = scope.paginate.current_page;
       }
@@ -77,7 +78,7 @@ groovepacks_controllers.controller('aliasModal', ['$scope', 'type', 'exceptions'
 
     //Watcher ones
     myscope.can_do_load_products = function () {
-      if (scope._can_load_products && myscope.do_load_products) {
+      if (scope._can_load_products && myscope.do_load_products) { 
         myscope.get_products(1);
         myscope.do_load_products = false;
       }
@@ -134,7 +135,7 @@ groovepacks_controllers.controller('aliasModal', ['$scope', 'type', 'exceptions'
       myscope.get_products(1);
       $timeout(scope.focus_search, 200);
       scope.$watch('products.setup.search', myscope.search_products);
-      scope.$watch('_can_load_products', myscope.can_do_load_products);
+      // scope.$watch('_can_load_products', myscope.can_do_load_products);
       scope.$watch('paginate.current_page', myscope.get_products);
     };
 
