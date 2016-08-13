@@ -11,7 +11,8 @@ module Groovepacker
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         begin
-          products = list_selected_products(params)
+          include_association = false
+          products = list_selected_products(params, include_association)
           bulk_action.update_attributes(:total => products.length, :completed => 0, :status => 'in_progress')
           (products||[]).find_each(:batch_size => 100) do |product|
             #product = Product.find(single_product['id'])

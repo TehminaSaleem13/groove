@@ -2,10 +2,11 @@ module ProductsService
   class ListSelectedProducts < ProductsService::Base
     include ProductsHelper
 
-    attr_accessor :params
+    attr_accessor :params, :include_association
 
-    def initialize(*args)
-      @params = args[0]
+    def initialize(params, include_association = true)
+      @params = params
+      @include_association = include_association
     end
 
     def call
@@ -37,7 +38,7 @@ module ProductsService
       result_rows = result_rows.blank? ? [] : result_rows
       p_ids = result_rows.map { |p| p['id'] }
       products = Product.where('id IN (?)', p_ids)
-      preload_associations(products)
+      preload_associations(products) if include_association
       products
     end
 
