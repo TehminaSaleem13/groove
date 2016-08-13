@@ -32,8 +32,8 @@ module ProductsHelper
     image_name
   end
 
-  def list_selected_products(params)
-    ProductsService::ListSelectedProducts.call(params)
+  def list_selected_products(params, include_association = true)
+    ProductsService::ListSelectedProducts.call(params, include_association)
   end
 
   def do_getproducts(params)
