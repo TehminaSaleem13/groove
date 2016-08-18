@@ -48,6 +48,7 @@ module Groovepacker
               update_import_item(-1, -1)
               import_single_order(single_row, index, inc_id, order_map, result)
             end
+            GC.start
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)

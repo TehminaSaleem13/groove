@@ -33,7 +33,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     #delete existing completed and cancelled order import summaries
     delete_existing_order_import_summaries
     return if @order_import_summary.nil? || @order_import_summary.id.nil?
-    @order_import_summary.import_items.each do |import_item|
+    @order_import_summary.import_items.find_each(:batch_size => 100) do |import_item|
       import_item.reload
       next if import_item.status=="cancelled"
       import_orders_with_import_item(import_item, tenant)
