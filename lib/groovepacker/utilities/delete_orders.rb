@@ -45,9 +45,10 @@ class DeleteOrders
    end
 
   def take_backup(tenant)
+    tenant = 'unitedmedco'
     file_name = "#{tenant}-#{Date.today.to_s}"
-    crds = get_credentials
-    system "mysqldump #{tenant} -h#{crds["host"]} -u#{crds["username"]} -p#{crds["password"]} > public/delete_orders/#{file_name}.sql"
+    #crds = get_credentials
+    system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
     data = File.read("public/delete_orders/#{file_name}.sql")
     GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
     system "rm public/delete_orders/#{file_name}.sql"
