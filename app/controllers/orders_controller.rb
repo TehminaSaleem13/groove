@@ -1,7 +1,6 @@
 class OrdersController < ApplicationController
-  include OrderConcern
-
   before_filter :groovepacker_authorize!
+  include OrderConcern
 
   # Import orders from store based on store id
   def importorders
