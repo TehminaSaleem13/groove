@@ -37,10 +37,8 @@ module Groovepacker
           def build_filtered_final_record
             existing_order_numbers = []
             filtered_final_record = []
-            existing_orders = Order.all
-            existing_orders.each do |order|
-              existing_order_numbers << order.increment_id
-            end
+            existing_order_numbers = Order.pluck(:increment_id)
+            
             final_record.each do |single_row|
               next unless verify_single_item(single_row, 'increment_id')
               filtered_final_record << single_row unless
@@ -102,7 +100,7 @@ module Groovepacker
             imported_order_time = get_row_data(single_row, 'order_placed_time')
             imported_order_time += " 00:00:00" unless imported_order_time.include?(":")
             separator = (imported_order_time.include? '/') ? '/' : '-'
-            order_time_hash = build_order_time_hash(separator)
+            order_time_hash = build_order_time_hash(separator)           
             return DateTime.strptime(
               imported_order_time,
               order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])

@@ -132,6 +132,7 @@ module Groovepacker
                 import_item.save
                 import_item.reload
                 tenant = Apartment::Tenant.current
+                Rollbar.error(e, e.message)
                 ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
               end
               import_item.reload

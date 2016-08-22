@@ -30,8 +30,17 @@ module Groovepacker
             result
           end
 
+          def check_or_assign_import_item
+            return unless ImportItem.where(id: @import_item.id).blank?
+            import_item_id = @import_item.id
+            @import_item = @import_item.dup  
+            @import_item.id = import_item_id
+            @import_item.save
+          end
+
           def iterate_and_import_rows(final_records, order_map, result)
             final_records.each_with_index do |single_row, index|
+              #check_or_assign_import_item
               @import_item.reload
               break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)
@@ -39,12 +48,13 @@ module Groovepacker
               update_import_item(-1, -1)
               import_single_order(single_row, index, inc_id, order_map, result)
             end
+            GC.start
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
-            begin
-              Timeout::timeout(30) {
-                ActiveRecord::Base.transaction do
+            #begin
+              #Timeout::timeout(30) {
+                #ActiveRecord::Base.transaction do
                   if @helper.not_imported?(@imported_orders, inc_id)
                     @order = Order.find_or_initialize_by_increment_id(inc_id)
                     order_persisted = @order.persisted? ? true : false
@@ -61,14 +71,14 @@ module Groovepacker
                     @import_item.save
                     # Skipped because of duplicate order
                   end
-                end
-              }
-            rescue Timeout::Error
-              if @order.present?
-                @order.reload 
-                @order.destroy
-              end
-            end
+                #end
+              #}
+            #rescue Timeout::Error
+            #  if @order.present?
+            #    @order.reload 
+            #    @order.destroy
+            #  end
+            #end
           end
 
           def import_item_failed_result(result, index)
@@ -200,9 +210,9 @@ module Groovepacker
               @import_item.save
             rescue ActiveRecord::RecordInvalid => e
               messages = (@order.errors.full_messages << e.message) rescue @order.errors.full_messages
-              result = @helper.update_count_error_result(result, messages)
+              result = @helper.update_count_error_result(@import_item, result, messages)
             rescue ActiveRecord::StatementInvalid => e
-              result = @helper.update_count_error_result(result, e.messages)
+              result = @helper.update_count_error_result(@import_item, result, e.messages)
             end
             result
           end

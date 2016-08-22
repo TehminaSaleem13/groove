@@ -5,7 +5,7 @@ class ImportItem < ActiveRecord::Base
                   :success_imported, :import_type, :store,
                   :current_increment_id, :current_order_items,
                   :current_order_imported_item, :to_import, :message, :days,
-                  :updated_orders_import
+                  :updated_orders_import, :import_error
   after_save :emit_data_to_user
   after_save :emit_countdown_data_to_user
 

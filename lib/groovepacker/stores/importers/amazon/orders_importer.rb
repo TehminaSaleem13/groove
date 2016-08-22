@@ -6,9 +6,21 @@ module Groovepacker
           def import
             init_common_objects
             begin
-              response = @mws.orders.list_orders :last_updated_after => 2.months.ago, :order_status => ['Unshipped', 'PartiallyShipped']
               @orders = []
-              !response.orders.kind_of?(Array) && !response.orders.nil? ? @orders.push(response.orders) : @orders = response.orders
+              first_call=true
+              
+              while 1 do
+                if first_call
+                  first_call = false
+                  response = @mws.orders.list_orders :last_updated_after => 7.days.ago, :order_status => ['Unshipped', 'PartiallyShipped']
+                else
+                  response = @mws.orders.next
+                end
+                response.orders.kind_of?(Array) && !response.orders.nil? ? @orders.push(response.orders) : @orders = response.orders
+                break if response["orders"].try(:count).to_i < 100 
+              end
+              @orders = @orders.flatten rescue []
+              @result[:total_imported] = @orders.count rescue 0
               check_orders
             rescue Exception => e
               @result[:status] &= false
@@ -42,6 +54,7 @@ module Groovepacker
               grouped_item_sku
               check_shipping_order(order)
               order_save
+              sleep 5
             else
               import_item_save
             end

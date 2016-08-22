@@ -51,14 +51,15 @@ module ScanPack
           }
         )
         do_set_result(output)
+        update_activity(output)
         break if output["matched"]
       end
     end
 
     def do_set_result(output)
-      @result['error_messages'].push *output['error_messages']
-      @result['success_messages'].push *output['success_messages']
-      @result['notice_messages'].push *output['notice_messages']
+      @result['error_messages'].push(*output['error_messages'])
+      @result['success_messages'].push(*output['success_messages'])
+      @result['notice_messages'].push(*output['notice_messages'])
       @result['status'] = output['status']
       @result['data'] = output['data']
       @result['matched'] = output['matched']
@@ -71,6 +72,12 @@ module ScanPack
         item_sku = ProductSku.where(product_id: current_product_id)[0].try(:sku)
         Order.find(@params[:id]).addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
       end
+    end
+
+    def update_activity(output)
+      return unless  @params[:state] == "scanpack.rfp.default" && output['status'] == false
+      latest_activity = Order.find(@params[:id]).order_activities.last
+      latest_activity.update_attribute(:action, "INVALID SCAN - #{latest_activity.action}")
     end
 
     def run_import_for_not_found_order

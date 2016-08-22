@@ -1,0 +1,265 @@
+<!-- show order modal -->
+<div>
+
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="ok()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">Editing: Tenant - ID #{{tenants.single.basicinfo.id}} ({{tenants.single.basicinfo.name}})
+    </div>
+  </div>
+
+
+  <div class="modal-body">
+    <div class="container-fluid">
+      <div>
+        <br/>
+        <br/>
+        <br/>
+      </div>
+      <div class="col-sm-12">
+        <div class="col-sm-1"></div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-dropbox fa-5x"></i>
+
+            <div>Shipments</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_allowed"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-users fa-5x"></i>
+
+            <div>Users</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_users"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-cloud-download fa-5x"></i>
+
+            <div>Sources</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-usd fa-5x"></i>
+
+            <div>Amount</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="text" ng-model="tenants.single.subscription_info.amount" class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <i class="groove-fa fa fa-calendar fa-5x"></i>
+            <div>Days</div>
+          </center>
+          <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" min= 0 ng-model="tenants.single.basicinfo.orders_delete_days"
+                   class="form-control input-style"/>
+          </div>
+        </div>
+        <div style="clear:both;"><br/></div>
+        <div class="col-sm-4"></div>
+
+
+
+        <div class="col-sm-2">
+          <br/><br/>
+          <center>
+            <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}</div><br/><br/>
+
+            <div ng-show="tenants.single.basicinfo.is_modified == true">Modified</div>
+            <div ng-hide="tenants.single.basicinfo.is_modified == true">Unmodified</div>
+          </center>
+          <!-- <div class="col-sm-offset-1 col-sm-10">
+            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+                   class="form-control input-style"/>
+          </div> -->
+        </div>
+        <div class="col-sm-2">
+          <br><br>
+          <button ng-click="update_access_restrictions()"
+                  class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
+          </button>
+        </div>
+        <div class="col-sm-4"></div>
+      </div>
+      <div style="clear:both;"><br/></div>
+      
+      <div class="col-sm-12">
+        <div class="col-sm-offset-1 col-sm-6">
+          <h4 class="control-label" style="width: 100%; text-align: left;">Plan Notes: </h4>
+          <textarea class="form-control input-style"
+            rows="5" ng-model="tenants.single.basicinfo.addon_notes" placeholder="Unfocus will save data..." ng-blur="update_access_restrictions()"></textarea>
+        </div>
+        <div class="col-sm-4">
+          <div style="clear:both;"></div>
+          <div>
+            <h4>Stripe Customer <i class="fa fa-circle" aria-hidden="true" 
+              ng-style="{ 'color' : tenants.single.subscription_info.verified_stripe_account ? '#5cb85c' : 'red' }"></i></h4>
+            <span><a href="https://dashboard.stripe.com/customers/{{tenants.single.subscription_info.customer_id}}" target="_blank">{{tenants.single.subscription_info.email}}</a>
+            </span>
+          </div>
+          <div style="clear:both;"></div>
+          <div>
+            <h4 class="control-label">Stripe Plan</h4>
+            <span><a href="https://dashboard.stripe.com/plans/{{tenants.single.subscription_info.plan_id}}" target="_blank">{{tenants.single.subscription_info.plan}}</a></span>
+          </div>
+          <div style="clear:both;"></div>
+          <div ng-show="tenants.single.logged_in_user == 'gpadmin'">
+            <h4 class="control-label">Customer ID</h4>
+            <input type="text" ng-model="tenants.single.subscription_info.customer_id" ng-blur="update_access_restrictions()" class="form-control input-style"/>
+          </div>
+          <div style="clear:both;"></div>
+          <div ng-show="tenants.single.logged_in_user == 'gpadmin'">
+            <h4 class="control-label">Subscription ID</h4>
+            <input type="text" ng-model="tenants.single.subscription_info.customer_subscription_id" ng-blur="update_access_restrictions()" class="form-control input-style"/>
+          </div>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+      <div style="clear:both;"></div>
+      <hr>
+      <div>
+        <div class="col-sm-1"></div>
+        <div class="col-sm-10">
+          <div class="col-sm-3">
+            <center>
+              <div><i class="groove-fa fa fa-file-text-o fa-5x"></i></div>
+              <br/>
+              <button ng-click="delete_orders()" class="dropdown-toggle groove-button label label-default label-danger"
+                      translate>Delete Orders
+              </button>
+            </center>
+          </div>
+          <div class="col-sm-3">
+            <center>
+              <div><i class="groove-fa fa fa-shopping-cart fa-5x"></i></div>
+              <br/>
+              <button ng-click="delete_products()"
+                      class="dropdown-toggle groove-button label label-default label-danger" translate>Delete Products
+              </button>
+            </center>
+          </div>
+          <div class="col-sm-3" style="vertical-align: bottom;">
+            <center>
+              <div style="height: 1em;"></div>
+              <div>
+                <i class="groove-fa fa fa-file-text-o fa-4x"></i> <i
+                class="glyphicon-plus-style glyphicon glyphicon-plus"></i><i
+                class="groove-fa fa fa-shopping-cart fa-4x"></i>
+              </div>
+              <br/>
+              <button ng-click="delete_orders_and_products()"
+                      class="dropdown-toggle groove-button label label-default label-danger" translate>Orders & Products
+              </button>
+            </center>
+          </div>
+          <div class="col-sm-3">
+            <center>
+              <div><i class="groove-fa fa fa-bomb fa-5x"></i></div>
+              <br/>
+              <button ng-click="delete_all()" class="dropdown-toggle groove-button label label-danger" translate>Clear
+                All Data
+              </button>
+            </center>
+          </div>
+        </div>
+        <div class="col-sm-1"></div>
+      </div>
+      <div class="col-sm-12">
+        <br/>
+      </div>
+      <div style="clear:both;"></div>
+      <hr>
+      <h4 class="control-label" style="width: 100%; text-align: center;">Allow Inventory Pull/Push </h4><br/>
+      <div>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-2">
+          <center>
+            <label class="control-label">BigCommerce</label>
+            <br/>
+            <div class="controls">
+              <div toggle-switch ng-model="tenants.single.access_restrictions_info.allow_bc_inv_push" ng-click="allowinventory_pull_push_all(true)"></div>
+            </div>
+          </center>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <label class="control-label">Shopify</label>
+            <br/>
+            <div class="controls">
+              <div toggle-switch ng-model="tenants.single.access_restrictions_info.allow_shopify_inv_push" ng-click="allowinventory_pull_push_all(true)"></div>
+            </div>
+          </center>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <label class="control-label">Magento2</label>
+            <br/>
+            <div class="controls">
+              <div toggle-switch ng-model="tenants.single.access_restrictions_info.allow_mg_rest_inv_push" ng-click="allowinventory_pull_push_all(true)"></div>
+            </div>
+          </center>
+        </div>
+        <div class="col-sm-2">
+          <center>
+            <label class="control-label">Teapplix</label>
+            <br/>
+            <div class="controls">
+              <div toggle-switch ng-model="tenants.single.access_restrictions_info.allow_teapplix_inv_push" ng-click="allowinventory_pull_push_all(true)"></div>
+            </div>
+          </center>
+        </div>
+        <div class="col-sm-2"></div>
+      </div>
+
+
+      <div class="col-sm-12">
+        <br/>
+      </div>
+      <div style="clear:both;"></div>
+      <hr>
+      <h4 class="control-label" style="width: 100%; text-align: center;">Allow Tracking Number Push </h4><br/>
+      <div>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-4">
+          <center>
+            <label class="control-label">Magento SOAP</label>
+            <br/>
+            <div class="controls">
+              <div toggle-switch ng-model="tenants.single.access_restrictions_info.allow_magento_soap_tracking_no_push" ng-click="allowinventory_pull_push_all(true)"></div>
+            </div>
+          </center>
+        </div>
+        <div class="col-sm-2"></div>
+        <div class="col-sm-2"></div>
+      </div>
+
+
+      <div class="col-sm-12">
+        <br/>
+        <br/>
+        <br/>
+      </div>
+    </div>
+  </div>
+
+  <div class="modal-footer">
+    <button ng-click="cancel()" class="modal-cancel-button" translate>Cancel</button>
+  </div>
+</div>
+

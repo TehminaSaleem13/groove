@@ -36,4 +36,16 @@ class SendStatStream
     path = 'dashboard/update_order_data'
     send_stream(tenant, stat_stream, order_id, path)
   end
+
+  def update_stats(tenant)
+    path = "/dashboard/run_stat_stream"
+    HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}") 
+  end
+
+  def generate_export(tenant, params)
+    days = params["duration"]
+    email = params["email"]
+    path = URI.escape("/dashboard/generate_stats?days=#{days}&email=#{email}")
+    HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}")
+  end
 end

@@ -11,9 +11,10 @@ module Groovepacker
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         begin
-          products = list_selected_products(params)
+          include_association = false
+          products = list_selected_products(params, include_association)
           bulk_action.update_attributes(:total => products.length, :completed => 0, :status => 'in_progress')
-          (products||[]).each do |product|
+          (products||[]).find_each(:batch_size => 100) do |product|
             #product = Product.find(single_product['id'])
             bulk_action.reload
             if bulk_action.cancel?
@@ -79,15 +80,13 @@ module Groovepacker
             bulk_action.current = product.name
             bulk_action.save
             product.order_items.each do |order_item|
-              unless order_item.order.nil?
-                order_item.order.status = 'onhold'
-                order_item.order.save
-                order_item.order.addactivity("An item with Name #{product.name} and " +
-                                               "SKU #{product.primary_sku} has been deleted",
-                                             username,
-                                             'deleted_item'
-                )
+              if order_item.order.status != "scanned" && order_item.order.status != "cancelled"
+                unless order_item.order.nil?
+                  order_item.order.status = 'onhold'
+                  order_item.order.save
+                end
               end
+              order_item.order.addactivity("An item with Name #{product.name} and " + "SKU #{product.primary_sku} has been deleted", username, 'deleted_item') if order_item.order.present?
               order_item.destroy
             end
 

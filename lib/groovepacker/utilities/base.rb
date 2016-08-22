@@ -79,6 +79,7 @@ module Groovepacker
           ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
           ois.reload
           ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
+          GC.start
         end
       end
 

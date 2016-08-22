@@ -33,7 +33,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     #delete existing completed and cancelled order import summaries
     delete_existing_order_import_summaries
     return if @order_import_summary.nil? || @order_import_summary.id.nil?
-    @order_import_summary.import_items.each do |import_item|
+    @order_import_summary.import_items.find_each(:batch_size => 100) do |import_item|
       import_item.reload
       next if import_item.status=="cancelled"
       import_orders_with_import_item(import_item, tenant)
@@ -78,10 +78,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     job_scheduled = false
     general_settings = GeneralSetting.all.first
     export_settings = ExportSetting.all.first
-    for i in 0..6
-      job_scheduled, date = schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
-      break if job_scheduled
-    end
+    schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
   end
 
   def schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
@@ -156,10 +153,20 @@ class ImportOrders < Groovepacker::Utilities::Base
     data = build_data(map,store)
     import_csv = ImportCsv.new
     result = import_csv.import(tenant, data.to_s)
+    #check_or_assign_import_item(import_item)
     import_item.reload
     update_status(import_item, result)
     import_item.update_attributes(message: result[:messages]) unless result[:status]
   end
+
+  def check_or_assign_import_item(import_item)
+    return unless ImportItem.find_by_id(import_item.id).blank?
+    import_item_id = import_item.id
+    import_item = import_item.dup  
+    import_item.id = import_item_id
+    import_item.save
+  end
+
 
   def initiate_import_for(store, import_item, handler)
     import_item.update_attributes(status: 'in_progress')
@@ -179,7 +186,8 @@ class ImportOrders < Groovepacker::Utilities::Base
   def update_import_item_and_send_mail(e, import_item, tenant)
     import_item_message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
     import_item_message = "Import failed: #{e.message}" if e.message.strip != "Error: 302"
-    import_item.update_attributes(status: 'failed', message: import_item_message)
+    import_item.update_attributes(status: 'failed', message: import_item_message, import_error: e)
+    Rollbar.error(e, e.message)
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
   end
 end

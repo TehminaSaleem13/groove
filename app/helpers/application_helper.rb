@@ -117,4 +117,10 @@ module ApplicationHelper
       false
     end
   end
+
+  def socket_server
+    return "" if ENV['SOCKET_ENDPOINT'].nil?
+    request.protocol + "socket." + ENV['SOCKET_ENDPOINT']
+    #request.protocol + "#{Apartment::Tenant.current}.localpacker.com"
+  end
 end

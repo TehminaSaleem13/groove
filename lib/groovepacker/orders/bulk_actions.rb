@@ -181,8 +181,8 @@ module Groovepacker
                 import_item.status = 'not_started'
                 import_item.save
                 import_csv = ImportCsv.new
-                # import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-                import_csv.import(tenant, data)
+                import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+                # import_csv.import(tenant, data)
                 orderimport_summary.reload
                 orderimport_summary.update_attribute(:status, 'completed') if orderimport_summary.status != 'cancelled'
               elsif orderimport_summary.status != 'in_progress'
@@ -201,7 +201,7 @@ module Groovepacker
         count = 1
         updated_products = Product.where(status_updated: true)
         orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
-        (orders||[]).each do |order|
+        (orders||[]).find_each(:batch_size => 100) do |order|
           order.update_order_status
           bulk_action.completed = count
           bulk_action.save

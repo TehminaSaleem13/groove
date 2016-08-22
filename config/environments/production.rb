@@ -160,5 +160,5 @@ Groovepacks::Application.configure do
   # #List Name - New Customers
   # ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "f8a09dc725586f011d56a0b4e5409317"
   # #List Name - All Customers
-  # ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "8f138927c7a231368f3f6fa8e741c878"
+  # ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "8f138927c7a231368f3f6fa8e741c878"\
 end

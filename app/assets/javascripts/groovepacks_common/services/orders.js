@@ -82,7 +82,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
   };
 
   //list related functions
-  var get_list = function (object, page) {
+  var get_list = function (object, page, product_search_toggle) {
     var url = '';
     var setup = object.setup;
     if (typeof page != 'undefined' && page > 0) {
@@ -96,7 +96,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     } else {
       url = '/orders/search.json?' + $.param({search: setup.search, sort: setup.sort, order: setup.order});
     }
-    url += '&limit=' + setup.limit + '&offset=' + setup.offset;
+    url += '&limit=' + setup.limit + '&offset=' + setup.offset + '&product_search_toggle=' + product_search_toggle;
     return $http.get(url).success(
       function (data) {
         if (data.status) {
@@ -131,6 +131,11 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
       }
     ).error(notification.server_error);
   };
+
+  var search_by_product_toggle = function(product_search_toggle){
+    url = "/settings/search_by_product.json"
+    return $http.post(url, product_search_toggle);
+  }
 
   var generate_list = function (action, orders) {
     if(typeof $window.order_modified == 'undefined'){$window.order_modified = []};
@@ -470,6 +475,7 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
       update_items: update_items_setup
     },
     list: {
+      search_by_product_toggle: search_by_product_toggle,
       get: get_list,
       update: update_list,
       select: select_list,

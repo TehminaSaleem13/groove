@@ -80,7 +80,7 @@ module Groovepacks
         resource '*', :headers => :any, :methods => [:get, :post, :delete, :put, :patch, :options]
       end
     end
-    
+    config.time_zones = YAML.load(File.open(Rails.root.join('config', 'time_zones.yml')))
   end
 end
 require Rails.root.join('config','initializers','groove_constants.rb')

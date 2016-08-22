@@ -9,13 +9,20 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
   };
 
   var get_settings = function (settings) {
+    time_in_zone = moment().format("Z");
     var url = '/settings/get_settings.json';
-
     return $http.get(url).success(
       function (data) {
         if (data.status) {
           settings.single = data.data.settings;
+          settings.single.time_zones = data.time_zone
           settings.single.time_to_send_email = new Date(data.data.settings.time_to_send_email);
+          if(data.user_sign_in_count<2 && data.data.settings.time_zone == null) {
+            time_zone = {}
+            time_zone["add_time_zone"] = time_in_zone;
+            time_zone["auto_detect"] = "true";
+            add_time_zone(time_zone);
+          }
         } else {
           notification.notify(data.error_messages, 0);
         }
@@ -41,7 +48,6 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
   var update_settings = function (settings) {
     var url = '/settings/update_settings.json';
     fix_times(settings);
-
     return $http.put(url, settings.single).success(
       function (data) {
         if (data.status) {
@@ -54,6 +60,11 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
     ).error(notification.server_error);
   };
 
+  var add_time_zone = function (time_zone) {
+    var url = '/settings/fetch_and_update_time_zone.json';
+    return $http.post(url, time_zone)
+  }
+
   //Public facing API
   return {
     model: {
@@ -61,7 +72,8 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
     },
     single: {
       update: update_settings,
-      get: get_settings
+      get: get_settings,
+      add_time_zone: add_time_zone
     }
   };
 

@@ -1,6 +1,6 @@
-groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sce',
+groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$document', '$sce',
   '$timeout', '$interval', '$state', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
-  function ($window, $document, $sce, $timeout, $interval, $state, groovIO, orders, stores,
+  function ($http, $window, $document, $sce, $timeout, $interval, $state, groovIO, orders, stores,
             notification, dashboard, dashboard_calculator, users) {
     return {
       restrict: "A",
@@ -42,6 +42,9 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           setTimeout(function(){
             dashboard.stats.dashboard_stat();
           }, 300);
+          $http.get('/settings/get_settings').success(function(response){
+            scope.dashboard.email = response.data.settings.email_address_for_packer_notes;
+          });
         };
 
         scope.switch_tab = function (tab) {
@@ -58,6 +61,14 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           dashboard.model.update_max(scope.dashboard.max_time_per_item).then(function(){
             scope.build_dash_data();
           });
+        }
+
+        scope.get_stat = function(){
+          dashboard.stats.stat_stream();
+        }
+
+        scope.generate_stat = function(){
+          dashboard.stats.stat_generate(scope.dashboard);
         }
 
         scope.handle_click_fn = function (row, event) {

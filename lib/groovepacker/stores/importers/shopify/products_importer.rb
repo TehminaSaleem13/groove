@@ -17,12 +17,27 @@ module Groovepacker
 
           def import_single_product(item)
             initialize_import_objects
-            shopify_product = @client.product(item["product_id"])
-            shopify_product = shopify_product["product"]
-            variant = shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
-            variant["title"] = item["name"]
-            product = create_product_from_variant(variant, shopify_product)
+            fetch_product(item)
+            if @shopify_product.present?
+              variant = @shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
+              variant["title"] = item["name"]
+              product = create_product_from_variant(variant, @shopify_product)
+            end
+
             return product
+          end
+
+          def fetch_product(item)
+            shopify_product = @client.product(item["product_id"])
+            if shopify_product["product"].blank?
+              loop_count = 0
+              loop do
+                loop_count = loop_count + 1
+                shopify_product = @client.product(item["product_id"])
+                break if loop_count >= 1
+              end
+            end
+            @shopify_product = shopify_product["product"]
           end
 
           private
