@@ -3,7 +3,7 @@
   <p><strong>Tenant Name: </strong><%=@subscription.tenant_name%></p>
   <p><strong>Tenant Email: </strong><%=@subscription.email%></p>
   <p><strong>Tenant Username: </strong><%=@subscription.user_name%></p>
-  <p><strong>Exception Date/Time: </strong><%=DateTime.now.to_s%></p>
+  <p><strong>Exception Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
   <% unless @exception.nil? %>
   <p><strong>Exception message: </strong><%=@exception.message%></p>
   <p><strong>Exception backtrace: </strong></p>

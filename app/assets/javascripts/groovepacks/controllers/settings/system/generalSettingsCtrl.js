@@ -110,7 +110,7 @@ groovepacks_controllers.
         } 
         time_zone["add_time_zone"] = time_in_zone
         time_zone["dst"] = dst
-        generalsettings.single.add_time_zone(time_zone);
+        generalsettings.single.add_time_zone(time_zone, $scope.general_settings);
       };
 
       myscope.init();

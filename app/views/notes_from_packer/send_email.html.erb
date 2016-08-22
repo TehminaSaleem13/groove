@@ -12,7 +12,7 @@
 
 
     </h1>
-<span style="color:#000;">The following note was created at: <strong><%= DateTime.now.strftime('%a %d %b, %Y at %H:%M') %></strong> <BR>
+<span style="color:#000;">The following note was created at: <strong><%= (Time.now + GeneralSetting.first.time_zone.to_i).strftime('%a %d %b, %Y at %H:%M') %></strong> <BR>
 This note was added by <strong><%= @mail_data['sender'] %></strong> to order number: <a href="https://<%= @mail_data['tenant_name'] %>.groovepacker.com/#/orders/awaiting/1/<%= @mail_data['order_id'] %>" style="color:#66A909;"><%= @mail_data['order_number'] %></a>
 </span><br>
     <HR>
