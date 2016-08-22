@@ -16,6 +16,7 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
         if (data.status) {
           settings.single = data.data.settings;
           settings.single.time_zones = data.time_zone
+          settings.single.current_time = data.current_time
           settings.single.time_to_send_email = new Date(data.data.settings.time_to_send_email);
           if(data.user_sign_in_count<2 && data.data.settings.time_zone == null) {
             time_zone = {}
@@ -60,9 +61,11 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
     ).error(notification.server_error);
   };
 
-  var add_time_zone = function (time_zone) {
+  var add_time_zone = function (time_zone, settings) {
     var url = '/settings/fetch_and_update_time_zone.json';
-    return $http.post(url, time_zone)
+    return $http.post(url, time_zone).success(function (data) {
+      settings.single.current_time = data.current_time
+    });
   }
 
   //Public facing API
