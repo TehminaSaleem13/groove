@@ -50,12 +50,13 @@ class ExportSetting < ActiveRecord::Base
     filename = generate_file_name
 
     if order_export_type == 'do_not_include'
-      do_export_if_orders_not_included(orders, filename)
+      return do_export_if_orders_not_included(orders, filename)
     else
-      do_export_with_orders(orders, filename)
+      return do_export_with_orders(orders, filename)  
     end
 
-    filename
+    # filename
+    puts "fdsjlfksjglkdfs--->" + do_export_if_orders_not_included(orders, filename).inspect
   end
 
   private
@@ -157,8 +158,8 @@ class ExportSetting < ActiveRecord::Base
 
   def do_export_if_orders_not_included(orders, filename)
     row_map = generate_row_mapping
-    CSV.open(file_path(filename), 'w') do |csv|
-      csv << row_map.keys
+    CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
+     csv << row_map.keys
       orders.each do |order|
         single_row = update_single_row_with_order_data(row_map, order)
         assign_packing_user(single_row, order)
@@ -166,6 +167,17 @@ class ExportSetting < ActiveRecord::Base
         csv << single_row.values
       end
     end
+    public_url = GroovS3.get_csv_export_exception(filename)
+    filename = public_url
+    # CSV.open(file_path(filename), 'w') do |csv|
+    #   csv << row_map.keys
+    #   orders.each do |order|
+    #     single_row = update_single_row_with_order_data(row_map, order)
+    #     assign_packing_user(single_row, order)
+    #     single_row[:click_scanned_qty] = calculate_clicked_qty(order)
+    #     csv << single_row.values
+    #   end
+    # end
   end
 
   def generate_row_mapping

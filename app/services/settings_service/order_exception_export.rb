@@ -40,7 +40,16 @@ module SettingsService
     private
 
     def generate_csv
-      @result['data'] = CSV.generate do |csv|
+      # @result['data'] = CSV.generate do |csv|
+      # @result['data'] = CSV.generate do |csv|
+      #   csv << row_map.keys
+      #   exceptions.each do |exception|
+      #     single_row = row_map.dup
+      #     generate_single_record(exception, single_row) 
+      #     csv << single_row.values
+      #   end
+      # end
+      CSV.open(Rails.root.join('public', 'csv', @result['filename']), 'wb') do |csv|
         csv << row_map.keys
         exceptions.each do |exception|
           single_row = row_map.dup
@@ -48,6 +57,8 @@ module SettingsService
           csv << single_row.values
         end
       end
+      public_url = GroovS3.get_csv_export_exception(@result['filename'])
+      @result['filename'] = public_url
     end
 
     def generate_single_record(exception, single_row)

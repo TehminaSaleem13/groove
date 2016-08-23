@@ -46,7 +46,8 @@ class SettingsController < ApplicationController
     result = SettingsService::OrderExceptionExport.call(
       current_user: current_user, params: params
     ).result
-    send_csv_data(result)
+    # send_csv_data(result)
+    render json: result
   end
 
   def order_serials
