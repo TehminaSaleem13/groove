@@ -58,6 +58,20 @@ module Groovepacker
         end 
       end
 
+      def ftp_order_import(tenant)
+        stores = Store.includes(:ftp_credential).where('host IS NOT NULL and username IS NOT NULL and password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
+        stores.each do |store|
+          params = {}
+          ftp_csv_import = ImportOrders.new
+          params[:tenant] = tenant
+          params[:user] = User.find_by_name('gpadmin')
+          params[:store] = store
+          params[:import_type] = 'regular'
+          params[:days] = nil
+          ftp_csv_import.run_import_for_single_store(params)
+        end
+      end
+
       def create_order_import_summary(store, user, tenant)
         Apartment::Tenant.switch(tenant)
         @order_summary = OrderImportSummary.last
