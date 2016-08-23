@@ -92,7 +92,7 @@ class SettingsController < ApplicationController
     @result['data'] = {}
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
-    @result['current_time'] = (Time.current + GeneralSetting.all.first.time_zone.to_i ).strftime('%I:%M %p')
+    @result['current_time'] = (Time.current + GeneralSetting.all.first.try(:time_zone).to_i ).strftime('%I:%M %p')
     general_setting = GeneralSetting.all.first
 
     if general_setting.present?
