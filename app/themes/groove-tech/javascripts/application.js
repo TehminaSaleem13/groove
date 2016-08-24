@@ -10,8 +10,6 @@
 //= require fingerprint
 //= require jquery.ui.sortable
 //= require angular-animate
-//= require groovepacks_admin
-//= require groovepacks
 //= require groovepacks_common/common
 //= require groovepacks_common/lib
 //= require moment
