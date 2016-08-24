@@ -111,7 +111,8 @@ module FTP
       result
     end
 
-    def update(ftp_file_name)
+    def update(ftp_file_name, tenant)
+      Apartment::Tenant.switch tenant
       result = self.build_result
       begin
         response = connect

@@ -88,7 +88,7 @@ class ImportCsv
         #File.delete(file_path)
         if params[:flag] == 'ftp_download'
           groove_ftp = FTP::FtpConnectionManager.get_instance(store)
-          response = groove_ftp.update(response[:file_info][:ftp_file_name])
+          response = groove_ftp.delay.update(response[:file_info][:ftp_file_name], tenant)
           unless response[:status]
             result[:status] = false
             result[:messages].push(response[:error_messages])
