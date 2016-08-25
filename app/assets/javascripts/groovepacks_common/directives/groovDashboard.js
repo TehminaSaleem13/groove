@@ -89,6 +89,13 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
           });
         };
 
+        groovIO.on('dashboard_update_stat', function (response) {
+          scope.dashboard.percentage = response.data.percentage;
+          if (scope.dashboard.percentage==100) {
+             $timeout(function () { scope.dashboard.percentage = null; }, 5000);
+          }
+        });
+
         groovIO.on('dashboard_update', function (message) {
           days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
           scope.dash_data = message.data;
