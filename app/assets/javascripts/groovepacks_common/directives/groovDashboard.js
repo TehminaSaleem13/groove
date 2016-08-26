@@ -89,6 +89,17 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
           });
         };
 
+        groovIO.on('dashboard_update_stat', function (response) {
+          scope.dashboard.percentage = response.data.percentage;
+          scope.dashboard.stat_status = response.data.status;
+          if (scope.dashboard.percentage==100 && scope.dashboard.stat_status==true) {
+            $timeout(function () { scope.dashboard.percentage = null; }, 5000);
+          }
+          if (scope.dashboard.stat_status==false){
+            scope.dashboard.type = 'failed';
+          }
+        });
+
         groovIO.on('dashboard_update', function (message) {
           days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
           scope.dash_data = message.data;
