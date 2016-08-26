@@ -16,3 +16,6 @@ exclude_paths:
 - "app/assets/javascripts/lib/dragtable.js"
 - "app/assets/javascripts/lib/hotkeys.js"
 - "app/assets/javascripts/lib/textAngular-sanitize.js"
+- "vendor/"
+- "app/assets/"
+- "spec/"
