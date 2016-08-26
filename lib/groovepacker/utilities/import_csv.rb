@@ -87,17 +87,24 @@ class ImportCsv
         end
         #File.delete(file_path)
         if params[:flag] == 'ftp_download'
-          groove_ftp = FTP::FtpConnectionManager.get_instance(store)
-          response = groove_ftp.update(response[:file_info][:ftp_file_name])
-          unless response[:status]
-            result[:status] = false
-            result[:messages].push(response[:error_messages])
-          end
+          rename_ftp_file(store, result, response)
           File.delete(file_path) rescue nil
         end
       end
     rescue Exception => e
       raise e
+    end
+    result
+  end
+
+  def rename_ftp_file(store, result, response)
+    import_item = ImportItem.where(store_id: store.id).last
+    return result if import_item.status=="cancelled"
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    response = groove_ftp.update(response[:file_info][:ftp_file_name])
+    unless response[:status]
+      result[:status] = false
+      result[:messages].push(response[:error_messages])
     end
     result
   end

@@ -25,6 +25,7 @@ module Groovepacker
               item.run_callbacks(:create) { true }
             end
             make_intangible
+            return result if @import_item.status=='cancelled'
             @import_item.status = 'completed'
             @import_item.save
             result
