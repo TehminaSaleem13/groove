@@ -45,7 +45,6 @@ class DeleteOrders
    end
 
   def take_backup(tenant)
-    tenant = 'unitedmedco'
     file_name = "#{tenant}-#{Date.today.to_s}"
     #crds = get_credentials
     system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
