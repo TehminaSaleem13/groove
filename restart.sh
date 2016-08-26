@@ -2,8 +2,6 @@
 bold=`tput bold`
 normal=`tput sgr0`
 
-
-
 while getopts ":e:" opt; do
     case $opt in
         e)
