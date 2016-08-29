@@ -14,7 +14,7 @@ class ShopifyController < ApplicationController
     app_session = $redis.get(key)
     unless app_session.nil?
       app_session = JSON.parse(app_session)
-      @tenant_name = app_session["tenant_name"]
+      @tenant_name = app_session["tenant"]
       @store_id = app_session["store_id"]
 
       Apartment::Tenant.switch(@tenant_name)
