@@ -11,7 +11,7 @@ class ShopifyController < ApplicationController
   # }
   def auth
     key = "groovehacks:shopify:session:#{params[:shop].gsub(".myshopify.com", "")}"
-    app_session_key = $redis.get(key)
+    app_session = $redis.get(key)
     unless app_session.nil?
       app_session = JSON.parse(app_session)
       @tenant_name = app_session["tenant_name"]
