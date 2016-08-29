@@ -457,9 +457,10 @@ class StoresController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
             end
-            current_tenant = Apartment::Tenant.current
-            cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+10.minutes}
-            cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+10.minutes}
+            session_key = "groovehacks:shopify:session:#{@store.shopify_credential.shop_name}"
+            stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'store_id' => @store.id})
+            $redis.set(session_key, stored_session.to_s)
+            $redis.expire(session_key, 300)
           end
           if @store.store_type == 'BigCommerce'
             @bigcommerce = BigCommerceCredential.find_by_store_id(@store.id)
