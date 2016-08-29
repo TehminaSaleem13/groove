@@ -116,14 +116,12 @@ Groovepacks::Application.configure do
 
   if Socket.gethostname=="Refactoring-Test-server-GP"
     ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--xnsxkuc"
-    ENV["SHOPIFY_REDIRECT_HOST"] = "groove-packer.com"
     ENV['BC_CLIENT_ID'] = "aglrh9kae1bmr4ycwy922ag8z8h6lde"
     ENV['BC_CLIENT_SECRET'] = "s58qbf72e6jpd2lqr4vvmcnu4s10xdi"
     ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5736"
     ENV['BC_CALLBACK_HOST'] = "admin.groove-packer.com"
   else
     ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
-    ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
     ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
     ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
     ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
