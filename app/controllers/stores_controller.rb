@@ -483,9 +483,12 @@ class StoresController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
             end
-            current_tenant = Apartment::Tenant.current
-            cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+20.minutes}
-            cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+20.minutes}
+            session_key = "groovehacks:bigcommerce:session:#{@store.big_commerce_credential.shop_name}"
+            stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'store_id' => @store.id})
+            $redis.set(session_key, stored_session.to_s)
+            $redis.expire(session_key, 300)
+            # cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+20.minutes}
+            # cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+20.minutes}
           end
 
           if @store.store_type == 'Teapplix'

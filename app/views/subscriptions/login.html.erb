@@ -40,7 +40,8 @@
             typeof($('#tenant_name').val()) != 'undefined' &&
             $('#tenant_name').val() != '') {
             e.preventDefault();
-            url = 'https://' + $('#tenant_name').val() + ".groovepacker.com";
+            var host_name = '<%=ENV["HOST_NAME"]%>'
+            url = 'https://' + $('#tenant_name').val() + "." + host_name;
             window.location.href = url;
           }
         });
