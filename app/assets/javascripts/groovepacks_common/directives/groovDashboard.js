@@ -97,6 +97,8 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
           }
           if (scope.dashboard.stat_status==false){
             scope.dashboard.type = 'failed';
+          } else {
+            scope.dashboard.type = 'success';
           }
         });
 
