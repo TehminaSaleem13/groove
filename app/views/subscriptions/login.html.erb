@@ -40,7 +40,7 @@
             typeof($('#tenant_name').val()) != 'undefined' &&
             $('#tenant_name').val() != '') {
             e.preventDefault();
-            var host_name = '<%=ENV["HOST_NAME"]%>'
+            var host_name = '<%=ENV["HOST_NAME"]%>';
             url = 'https://' + $('#tenant_name').val() + "." + host_name;
             window.location.href = url;
           }
