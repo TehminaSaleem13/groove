@@ -214,8 +214,14 @@ class Order < ActiveRecord::Base
     result &= false if self.unacknowledged_activities.length > 0
     status = result ? 'awaiting' : 'onhold'
 
-    update_column(:status, status)
-    update_column(:scan_start_time, nil)
+    if self.id.present? 
+      update_column(:status, status)
+      update_column(:scan_start_time, nil)
+    else
+      self.status = status
+      self.scan_start_time = nil
+      self.save
+    end
 
     #self.apply_and_update_predefined_tags
   end

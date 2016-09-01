@@ -31,31 +31,45 @@ module Groovepacker
         return @result
       end
 
-      def import_ftp_order(tenant)
-        Apartment::Tenant.switch(tenant)
-        user = User.where(username: "gpadmin").first
-        if OrderImportSummary.where(status: 'in_progress').blank?
-          stores = Store.includes(:ftp_credential).where('store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
-          result = Hash[:status => true]
-          (stores || []).each do |store|
-            while result[:status] == true do
-              groove_ftp = FTP::FtpConnectionManager.get_instance(store)
-              result = groove_ftp.retrieve()
-              if result[:status] == true
-                create_order_import_summary(store, user, tenant)
-                begin
-                  ImportOrders.new.initiate_csv_import(tenant, store.store_type, store, @import_item)
-                  @order_summary.update_attribute(:status, 'completed') if @order_summary.status != 'cancelled'
-                rescue Exception => e
-                  result[:status] &= false
-                  @import_item.update_attribute(:message, e.message)
-                  Rollbar.error(e, e.message)
-                  ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver
-                end
-              end
-            end             
-          end
-        end 
+      # def import_ftp_order(tenant)
+      #   Apartment::Tenant.switch(tenant)
+      #   user = User.where(username: "gpadmin").first
+      #   if OrderImportSummary.where(status: 'in_progress').blank?
+      #     stores = Store.includes(:ftp_credential).where('host IS NOT NULL and username IS NOT NULL and password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
+      #     result = Hash[:status => true]
+      #     (stores || []).each do |store|
+      #       #while result[:status] == true do
+      #         groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+      #         result = groove_ftp.retrieve()
+      #         if result[:status] == true
+      #           begin
+      #             create_order_import_summary(store, user, tenant)
+      #             ImportOrders.new.initiate_csv_import(tenant, store.store_type, store, @import_item)
+      #             @order_summary.update_attribute(:status, 'completed') if @order_summary.status != 'cancelled'
+      #           rescue Exception => e
+      #             result[:status] &= false
+      #             @import_item.update_attribute(:message, e.message)
+      #             Rollbar.error(e, e.message)
+      #             ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver
+      #           end
+      #         end
+      #       #end             
+      #     end
+      #   end 
+      # end
+
+      def ftp_order_import(tenant)
+        stores = Store.includes(:ftp_credential).where('host IS NOT NULL and username IS NOT NULL and password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
+        stores.each do |store|
+          params = {}
+          ftp_csv_import = ImportOrders.new
+          params[:tenant] = tenant
+          params[:user] = User.find_by_name('gpadmin')
+          params[:store] = store
+          params[:import_type] = 'regular'
+          params[:days] = nil
+          ftp_csv_import.run_import_for_single_store(params)
+        end
       end
 
       def create_order_import_summary(store, user, tenant)

@@ -1,7 +1,7 @@
 <h3>Low inventory email sending failed:</h3>
 <% unless @exception.nil? %>
   <p><strong>Tenant Name: </strong><%=@tenant%></p>
-  <p><strong>Error Date/Time: </strong><%=DateTime.now.to_s%></p>
+  <p><strong>Error Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
   <% unless @exception.nil? %>
   <p><strong>Exception message: </strong><%=@exception.message%></p>
   <p><strong>Exception backtrace: </strong></p>

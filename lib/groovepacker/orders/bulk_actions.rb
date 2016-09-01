@@ -182,7 +182,7 @@ module Groovepacker
                 import_item.save
                 import_csv = ImportCsv.new
                 import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-                # import_csv.import(tenant, data)
+                #import_csv.import(tenant, data)
                 orderimport_summary.reload
                 orderimport_summary.update_attribute(:status, 'completed') if orderimport_summary.status != 'cancelled'
               elsif orderimport_summary.status != 'in_progress'

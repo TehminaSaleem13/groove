@@ -5,24 +5,23 @@ namespace :ftp_csv_file_import do
     Tenant.all.each do |tenant|
       begin
         Apartment::Tenant.switch "#{tenant.name}"
-        stores = Store.includes(:ftp_credential).where('store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
-        if stores.present?
+        import_no_inprogress = OrderImportSummary.where(status: 'in_progress').blank?
+        if import_no_inprogress
           puts "starting the rake task"
           ftp_csv_import = Groovepacker::Orders::Import.new
-          if tenant.name == "unitedmedco" && current_time >= "05:00" && current_time <= "10:00"
-            ftp_csv_import.delay(attempts: 4).import_ftp_order("unitedmedco")
-          elsif current_time >= "08:00" && current_time <= "10:00"
-            ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant.name)
-          else
-            tenant_name = Rails.env=="production" ? "gp50" : "myplan"
-            ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant_name)
-            break
+          if tenant.name == "unitedmedco" && current_time >= "05:00" && current_time <= "12:00"
+            # ftp_csv_import.delay(attempts: 4).import_ftp_order("unitedmedco")
+            ftp_csv_import.ftp_order_import("unitedmedco")
+          elsif current_time >= "08:00" && current_time <= "12:00"
+            # ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant.name)
+            ftp_csv_import.ftp_order_import(tenant.name)
           end
-          puts "task complete"
         end
       rescue Exception => e
         puts e.message
       end
     end
+    puts "task complete"
+    exit(1)
   end
 end

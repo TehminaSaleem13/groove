@@ -93,6 +93,7 @@ class SettingsController < ApplicationController
     @result['data'] = {}
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
+    @result['current_time'] = (Time.current + GeneralSetting.all.first.try(:time_zone).to_i ).strftime('%I:%M %p')
     general_setting = GeneralSetting.all.first
 
     if general_setting.present?
@@ -255,6 +256,8 @@ class SettingsController < ApplicationController
       elsif (!params["add_time_zone"].include? ":") && params["auto_detect"] != "true" && params["auto_detect"] != "false"
         setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: false)
       end
+      @result = {};
+      @result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
     end
     setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
     render json: @result

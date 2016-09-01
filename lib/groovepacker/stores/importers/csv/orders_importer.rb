@@ -25,6 +25,7 @@ module Groovepacker
               item.run_callbacks(:create) { true }
             end
             make_intangible
+            return result if @import_item.status=='cancelled'
             @import_item.status = 'completed'
             @import_item.save
             result
@@ -39,16 +40,69 @@ module Groovepacker
           end
 
           def iterate_and_import_rows(final_records, order_map, result)
+            current_inc_id = nil;
+            order_items_ar = [];
             final_records.each_with_index do |single_row, index|
               #check_or_assign_import_item
               @import_item.reload
               break if @import_item.status == 'cancelled'
               next if @helper.blank_or_invalid(single_row)
-              @import_item.current_increment_id = inc_id = @helper.get_row_data(single_row, 'increment_id').strip
+              inc_id = @helper.get_row_data(single_row, 'increment_id').strip
+              if index!=0 and current_inc_id != inc_id
+                check_order_with_item(order_items_ar, index, current_inc_id, order_map, result) rescue nil
+                order_items_ar = []
+              end
+              current_inc_id = inc_id
+              order_items_ar << single_row
+              @import_item.current_increment_id = inc_id
               update_import_item(-1, -1)
+              result[:order_reimported] = false
               import_single_order(single_row, index, inc_id, order_map, result)
             end
             GC.start
+          end
+
+          def check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
+            order = Order.includes(:order_items).find_by_increment_id(current_inc_id)
+            items_array = get_item_array(order_items_ar)
+            items_array.each do |row|        
+              result = check_single_row_order_item(order_items_ar, index, current_inc_id, order_map, result)
+              break if result[:order_reimported] == true
+            end
+            result
+          end
+
+          def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
+            if order.order_items.count == items_array.count 
+              order_item = order.order_items.where(:sku => row[0]).first
+              order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
+            else
+              order.destroy
+              @created_order_items.pop(order_items_ar.count)
+              new_index = (index - order_items_ar.count + 1)
+              order_items_ar.each do |order_item|
+                result[:order_reimported] = true
+                import_single_order(order_item, new_index, current_inc_id, order_map, result)
+                new_index = new_index + 1
+              end
+            end
+            result
+          end
+
+          def get_item_array(order_items_ar)
+            new_sku = []
+            items_array = []
+            order_items_ar.each do |single_row|
+              qty = @helper.get_row_data(single_row, 'qty').strip.to_i
+              sku = @helper.get_row_data(single_row, 'sku').strip
+              if new_sku.include? sku 
+                items_array.last[1] = items_array.last[1] + qty rescue nil
+              else
+                items_array << [sku, qty]
+              end
+              new_sku = sku 
+            end
+            return items_array 
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
@@ -63,7 +117,7 @@ module Groovepacker
                     @order.save
                     @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
                     import_order_data(order_map, single_row)
-                    update_result(result, single_row)
+                    update_result(result, single_row) if result[:order_reimported] == false
                     import_item_failed_result(result, index) unless result[:status]
                     @order.set_order_status
                   else
