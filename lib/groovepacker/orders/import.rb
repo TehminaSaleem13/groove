@@ -1,7 +1,8 @@
 module Groovepacker
   module Orders
     class Import < Groovepacker::Orders::Base
-
+      require 'import_orders'
+      
       def execute_import
         store = Store.find(@params[:id])
         @result = @result.merge(import_status_hash)
