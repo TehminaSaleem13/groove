@@ -45,7 +45,10 @@ module Groovepacker
             final_records.each_with_index do |single_row, index|
               #check_or_assign_import_item
               @import_item.reload
-              break if @import_item.status == 'cancelled'
+              if @import_item.status == 'cancelled'
+                check_and_destroy_order(single_row)
+                break
+              end
               next if @helper.blank_or_invalid(single_row)
               inc_id = @helper.get_row_data(single_row, 'increment_id').strip
               if index!=0 and current_inc_id != inc_id
@@ -60,6 +63,11 @@ module Groovepacker
               import_single_order(single_row, index, inc_id, order_map, result)
             end
             GC.start
+          end
+
+          def check_and_destroy_order(single_row)
+            inc_id = @helper.get_row_data(single_row, 'increment_id').strip
+            Order.find_by_increment_id(inc_id).destroy rescue nil
           end
 
           def check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
