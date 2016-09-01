@@ -483,7 +483,7 @@ class StoresController < ApplicationController
               @result['status'] = false
               @result['messages'] = [e.message]
             end
-            session_key = "groovehacks:bigcommerce:session:#{@store.big_commerce_credential.shop_name}"
+            session_key = "groovehacks:bigcommerce:session"
             stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'store_id' => @store.id})
             $redis.set(session_key, stored_session.to_s)
             $redis.expire(session_key, 300)
