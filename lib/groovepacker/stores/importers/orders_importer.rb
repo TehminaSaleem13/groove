@@ -31,6 +31,7 @@ module Groovepacker
               handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
               context = Groovepacker::Stores::Context.new(handler)
               context.import_single_order_from(order_no)
+              ImportItem.where("status IS NULL").destroy_all
             end
           end
 

@@ -17,6 +17,7 @@ module Groovepacker
               set_status_and_msg_for_skipping_import
             end
             update_orders_status
+            destroy_nil_import_items
             @result
           end
 
@@ -32,6 +33,7 @@ module Groovepacker
               @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
               @credential.save
             end
+            destroy_nil_import_items
           end
 
           def import_single_order(order_no)
@@ -46,6 +48,7 @@ module Groovepacker
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)
             @import_item.destroy
+            destroy_nil_import_items
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -255,6 +258,10 @@ module Groovepacker
             def product_importer_client
               @product_importer_client ||= Groovepacker::Stores::Context.new(
                               Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@credential.store))
+            end
+
+            def destroy_nil_import_items
+              ImportItem.where("status IS NULL").destroy_all
             end
 
         end
