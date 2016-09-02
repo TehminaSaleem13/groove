@@ -99,6 +99,28 @@ class GroovS3
       self.save(object, data)
     end
 
+    # This method will generate the URL for the export CSV files and also upload the generated file in S3.
+    def get_csv_export(file_name)
+      require 'aws-sdk'
+      s3 = Aws::S3::Resource.new(
+        credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
+        region: ENV['S3_BUCKET_REGION']
+      )
+      obj = s3.bucket(ENV['S3_BUCKET_NAME']).object("public/pdfs/#{file_name}")
+      obj.upload_file('public/pdfs/'+file_name, acl:'public-read')
+      return obj.public_url
+    end
+
+    def get_csv_export_exception(file_name)
+      require 'aws-sdk'
+      s3 = Aws::S3::Resource.new(
+        credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
+        region: ENV['S3_BUCKET_REGION']
+      )
+      obj = s3.bucket(ENV['S3_BUCKET_NAME']).object("public/csv/#{file_name}")
+      obj.upload_file('public/csv/'+file_name, acl:'public-read')
+      return obj.public_url
+    end
 
     def bucket
       if @bucket.nil?

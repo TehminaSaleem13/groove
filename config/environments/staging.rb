@@ -100,66 +100,63 @@ Groovepacks::Application.configure do
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
-  ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
-  ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
+  # ENV['AMAZON_MWS_ACCESS_KEY_ID'] = "AKIAJ4VZ2GY7HZUL277Q"
+  # ENV['AMAZON_MWS_SECRET_ACCESS_KEY'] = "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"
 
-  ENV['EBAY_APP_ID'] = "DSO698331-163d-4ffd-be1a-0eceb5ae5be"
-  ENV['EBAY_CERT_ID'] = "a5b0c5cb-7863-4ade-92f0-1331997def8c"
-  ENV['EBAY_DEV_ID'] = "353bd404-651b-4431-955d-25e0a0c8140f"
-  ENV['EBAY_SANDBOX_MODE'] = "NO"
+  # ENV['EBAY_APP_ID'] = "DSO698331-163d-4ffd-be1a-0eceb5ae5be"
+  # ENV['EBAY_CERT_ID'] = "a5b0c5cb-7863-4ade-92f0-1331997def8c"
+  # ENV['EBAY_DEV_ID'] = "353bd404-651b-4431-955d-25e0a0c8140f"
+  # ENV['EBAY_SANDBOX_MODE'] = "NO"
 
-  ENV['SHIPSTATION_USERNAME'] = "dreadhead"
-  ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
+  # ENV['SHIPSTATION_USERNAME'] = "dreadhead"
+  # ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 
-  ENV['SHOPIFY_API_KEY'] = "74bb4366e7b9b9abfd246ff8eed41201"
-  ENV['SHOPIFY_SHARED_SECRET'] = "d0b33de5f8fadb93ff392505f449402c"
+  # ENV['SHOPIFY_API_KEY'] = "74bb4366e7b9b9abfd246ff8eed41201"
+  # ENV['SHOPIFY_SHARED_SECRET'] = "d0b33de5f8fadb93ff392505f449402c"
 
-  if Socket.gethostname=="Refactoring-Test-server-GP"
-    ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--xnsxkuc"
-    ENV["SHOPIFY_REDIRECT_HOST"] = "groove-packer.com"
-    ENV['BC_CLIENT_ID'] = "aglrh9kae1bmr4ycwy922ag8z8h6lde"
-    ENV['BC_CLIENT_SECRET'] = "s58qbf72e6jpd2lqr4vvmcnu4s10xdi"
-    ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5736"
-    ENV['BC_CALLBACK_HOST'] = "admin.groove-packer.com"
-  else
-    ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
-    ENV["SHOPIFY_REDIRECT_HOST"] = "barcodepacker.com"
-    ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
-    ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
-    ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
-    ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
-  end
-  ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
+  # if Socket.gethostname=="Refactoring-Test-server-GP"
+  #   ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--xnsxkuc"
+  #   ENV['BC_CLIENT_ID'] = "aglrh9kae1bmr4ycwy922ag8z8h6lde"
+  #   ENV['BC_CLIENT_SECRET'] = "s58qbf72e6jpd2lqr4vvmcnu4s10xdi"
+  #   ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/5736"
+  #   ENV['BC_CALLBACK_HOST'] = "admin.groove-packer.com"
+  # else
+  #   ENV['EBAY_RU_NAME'] = "DSO-DSO698331-163d--otkbuvijt"
+  #   ENV['BC_CLIENT_ID'] = "as4fwmwmb2n3w2yolabja7yv9weumoj"
+  #   ENV['BC_CLIENT_SECRET'] = "15a94s1mhhczf79v2lpj79btw443u3w"
+  #   ENV['BC_APP_URL'] = "https://store-1pslcuh.mybigcommerce.com/manage/marketplace/apps/4907"
+  #   ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
+  # end
+  # ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
 
-  ENV['ROLLBAR_ACCESS_TOKEN'] = "6fd94c05f4bd41cd8a788bd71752b80b"
-  # Stripe production keys
-  ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
-  ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
-  ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '0'
+  # # Stripe production keys
+  # ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
+  # ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
+  # ENV['ONE_TIME_PAYMENT'] = '50000'
+  # ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
-  ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
-  ENV['S3_ACCESS_KEY_SECRET'] = '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'
-  ENV['S3_BUCKET_NAME'] = 'groove-staging'
-  ENV['S3_BUCKET_REGION'] = 'us-west-2'
-  ENV['S3_BASE_URL'] = 'https://s3-us-west-2.amazonaws.com/groove-staging'
+  # ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
+  # ENV['S3_ACCESS_KEY_SECRET'] = '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'
+  # ENV['S3_BUCKET_NAME'] = 'groove-staging'
+  # ENV['S3_BUCKET_REGION'] = 'us-west-2'
+  # ENV['S3_BASE_URL'] = 'https://s3-us-west-2.amazonaws.com/groove-staging'
 
-  #Feature Variables
-  ENV['DASHBOARD_ENABLE'] = 'YES'
-  # analytic server
-  # ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
+  # #Feature Variables
+  # ENV['DASHBOARD_ENABLE'] = 'YES'
+  # # analytic server
+  # #ENV["GROOV_ANALYTIC"] = "lockpeppa.com"
 
-  ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
-  ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
-  ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
+  # ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jarett@dcssquared.com"
+  # ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
+  # ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
 
-  #Campaign-Monitoring API_KEY and CLIENT_ID
-  ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
-  ENV['CAMPAIGN_MONITOR_CLIENT_ID'] = "1c1a38f864c174b42eb2ebcd613b6969"
-  #List Name - Staging All Leads
-  ENV['CAMPAIGN_MONITOR_LEADS_LIST_ID'] = "2c369460425c1586ffd25669f0a6963c"
-  #List Name - Staging New Customers
-  ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "464989f6a5e27cd8319ac9114f76213c"
-  #List Name - Staging All Customers
-  ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "45a479e1e3f422b0bdef6c2118ce02a5"
+  # #Campaign-Monitoring API_KEY and CLIENT_ID
+  # ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
+  # ENV['CAMPAIGN_MONITOR_CLIENT_ID'] = "1c1a38f864c174b42eb2ebcd613b6969"
+  # #List Name - Staging All Leads
+  # ENV['CAMPAIGN_MONITOR_LEADS_LIST_ID'] = "2c369460425c1586ffd25669f0a6963c"
+  # #List Name - Staging New Customers
+  # ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "464989f6a5e27cd8319ac9114f76213c"
+  # #List Name - Staging All Customers
+  # ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "45a479e1e3f422b0bdef6c2118ce02a5"
 end

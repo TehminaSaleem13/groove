@@ -109,5 +109,6 @@ gem 'dotenv-rails'
 gem 'redis-rails'
 gem 'hiredis'
 gem "delayed_job_web"
+gem 'rack-cors', :require => 'rack/cors'
 gem 'rollbar'
 gem 'whenever', :require => false

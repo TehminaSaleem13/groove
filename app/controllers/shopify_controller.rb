@@ -10,21 +10,28 @@ class ShopifyController < ApplicationController
   #  "id"=>"1" 
   # }
   def auth
-    #@tenant_name, @is_admin = params[:tenant_name].split('&')
-    @tenant_name = cookies[:tenant_name]
-    @store_id = cookies[:store_id]
-    Apartment::Tenant.switch(@tenant_name)
-    store = Store.find(@store_id)
-    @shopify_credential = store.shopify_credential
-    session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
-    @result = false
+    key = "groovehacks:shopify:session:#{params[:shop].gsub(".myshopify.com", "")}"
+    app_session = $redis.get(key)
+    unless app_session.nil?
+      app_session = JSON.parse(app_session)
+      @tenant_name = app_session["tenant"]
+      @store_id = app_session["store_id"]
 
-    begin
-      @result = true if @shopify_credential.update_attributes({
-                                                                access_token: session.request_token(params.except(:id))
-                                                              })
-      destroy_cookies
-    rescue Exception => ex
+      Apartment::Tenant.switch(@tenant_name)
+      store = Store.find(@store_id)
+      @shopify_credential = store.shopify_credential
+      session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
+      @result = false
+
+      begin
+        @result = true if @shopify_credential.update_attributes({
+                                                                  access_token: session.request_token(params.except(:id))
+                                                                })
+        $redis.del(key)
+      rescue Exception => ex
+        @result = false
+      end
+    else
       @result = false
     end
   end
@@ -69,11 +76,6 @@ class ShopifyController < ApplicationController
 
   def get_shop_name(shop_name)
     (shop_name.split(".").length == 3) ? shop_name.split(".").first : nil
-  end
-
-  def destroy_cookies
-    cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
-    cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
   end
 
 end

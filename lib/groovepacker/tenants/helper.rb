@@ -466,16 +466,16 @@ module Groovepacker
 
       def retrieve_activity_data(tenant_name, tenant_hash)
         tenant_hash['last_activity'] = activity_data_hash
+        current_tenant = Apartment::Tenant.current
         begin
           Apartment::Tenant.switch(tenant_name)
           tenant_hash['last_activity']['most_recent_login'] = most_recent_login
           tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan
           tenant_hash['most_recent_activity'] = most_recent_login['date_time']
-          Apartment::Tenant.switch('admintools')
         rescue => e
           tenant_hash['most_recent_activity'] = nil
-          Apartment::Tenant.switch('admintools')
         end
+        Apartment::Tenant.switch(current_tenant)
       end
 
       def activity_data_hash

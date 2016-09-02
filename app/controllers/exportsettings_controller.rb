@@ -72,19 +72,25 @@ class ExportsettingsController < ApplicationController
           end_time: Time.parse(params[:end]),
           manual_export: true
           )
-        filename = "#{Rails.root}/public/csv/" + export_setting.export_data
+        # filename = "#{Rails.root}/public/csv/" + export_setting.export_data
+        filename = export_setting.export_data
         export_setting.update_attributes(manual_export: false)
       else
         update_false_status(result, 'We need a start and an end time')
       end
     end
     unless result['status']
-      CSV.generate do |csv|
+      CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
         csv << result['error_messages']
       end
-      filename = 'error.csv'
+      public_url = GroovS3.get_csv_export_exception(filename)
+      # CSV.generate do |csv|
+      #   csv << result['error_messages']
+      # end
+      filename = public_url
     end
-    send_file filename, :type => 'text/csv'
+    render json: filename
+    # send_file filename, :type => 'text/csv'
   end
 
   private

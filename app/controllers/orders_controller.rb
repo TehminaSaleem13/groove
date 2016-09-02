@@ -1,4 +1,5 @@
 class OrdersController < ApplicationController
+  before_filter :groovepacker_authorize!
   include OrderConcern
 
   # Import orders from store based on store id
@@ -167,20 +168,38 @@ class OrdersController < ApplicationController
   end
 
   def generate_pick_list
-    @result, @pick_list, @depends_pick_list  =
-                            gp_orders_module.generate_pick_list( list_selected_orders )
-
-    file_name = 'pick_list_'+Time.now.strftime('%d_%b_%Y')
-    @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf"}
-
-    respond_to do |format|
-      format.html {}
-      format.pdf {}
-      format.json {
-        render_pdf(file_name) #defined in application helper
-        render json: @result
-      }
+    require 'wicked_pdf' 
+    @result, @pick_list, @depends_pick_list = gp_orders_module.generate_pick_list( list_selected_orders )
+    scan_pack_object = ScanPack::Base.new
+    action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
+    reader_file_path = scan_pack_object.do_get_pdf_file_path(@pick_list.count.to_s)
+    @tenant_name = Apartment::Tenant.current
+    file_name = 'pick_list_' + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+    pdf_html = action_view.render :template => "orders/generate_pick_list.html.erb", :layout => nil, :locals => {:@pick_list => @pick_list, :@depends_pick_list => @depends_pick_list}
+    doc_pdf = WickedPdf.new.pdf_from_string(
+       pdf_html,
+           :inline => true,
+           :orientation => 'portrait',
+           :page_height => '8in',
+           :save_only => true,
+           :page_width => '11.5in',
+           :margin => {:top => '20', :bottom => '20', :left => '10', :right => '10'},
+           :header => {:spacing => 5, :right => '[page] of [topage]'},
+           :footer => {:spacing => 1},
+           :handlers => [:erb],
+           :formats => [:html],
+    )
+    File.open(reader_file_path, 'wb') do |file|
+      file << doc_pdf
     end
+    base_file_name = File.basename(pdf_path)
+    pdf_file = File.open(reader_file_path)
+    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+    pdf_file.close
+    generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+    # generate_barcode.save
+    render json: {url: generate_barcode}
   end
 
   def generate_packing_slip
@@ -206,6 +225,7 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  #The method is called when Export Items link is clicked from Webclient.
   def order_items_export
     @result['filename'] = ''
     selected_orders = list_selected_orders(true)

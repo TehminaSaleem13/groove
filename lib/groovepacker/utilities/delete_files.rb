@@ -18,7 +18,7 @@ class DeleteFiles
       File.delete(file)
     end
     Dir.chdir(Rails.root)
-    #DeleteFiles.delay(:run_at => 20.seconds.from_now).delete_pdfs
+    DeleteFiles.delay(:run_at => 20.seconds.from_now).delete_pdfs
   end
 
   def self.get_all_files(dir)
