@@ -22,14 +22,32 @@ module Groovepacker
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
             OrderItem.import @created_order_items
-            @created_order_items.each do |item|
-              item.run_callbacks(:create) { true }
-            end
-            make_intangible
+            perform_after_save_callbacks
             return result if @import_item.status=='cancelled'
             @import_item.status = 'completed'
             @import_item.save
             result
+          end
+
+          def perform_after_save_callbacks
+            tenant = Apartment::Tenant.current
+            min_order_item_id = @created_order_items.min.id rescue nil
+            max_order_item_id = @created_order_items.max.id rescue nil
+            min_product_id = @imported_products.min.id rescue nil
+            max_product_id = @imported_products.max.id rescue nil
+            min_base_product_id = @base_products.min.id rescue nil
+            max_base_product_id = @base_products.max.id rescue nil
+            run_order_items = OrdersImporter.new(params, final_record, mapping, nil)
+            run_order_items.delay.run_order_items_callback(min_order_item_id, max_order_item_id, tenant, min_product_id, max_product_id, min_base_product_id, max_base_product_id)
+          end
+
+          def run_order_items_callback(min_order_item_id, max_order_item_id, tenant, min_product_id, max_product_id, min_base_product_id, max_base_product_id)
+            Apartment::Tenant.switch tenant
+            order_items = OrderItem.where("id >= ? and id <= ?", min_order_item_id, max_order_item_id)
+            order_items.each do |item|
+              item.run_callbacks(:create) { true }
+            end
+            make_intangible(min_product_id, max_product_id, min_base_product_id, max_base_product_id)
           end
 
           def check_or_assign_import_item
@@ -270,8 +288,10 @@ module Groovepacker
             result
           end
 
-          def make_intangible
-            [@base_products, @imported_products].each do |products|
+          def make_intangible(min_product_id, max_product_id, min_base_product_id, max_base_product_id)
+            imported_products = Product.where("id >= ? and id <= ?", min_product_id, max_product_id)
+            base_products = Product.where("id >= ? and id <= ?", min_base_product_id, max_base_product_id)
+            [base_products, imported_products].each do |products|
               products.each do |product|
                 make_product_intangible(product) unless product.base_sku
                 product.reload
