@@ -82,8 +82,8 @@ module Groovepacker
 
           def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
             if order.order_items.count == items_array.count 
-              order_item = order.order_items.where(:sku => row[0]).first
-              order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
+              #order_item = order.order_items.where(:sku => row[0]).first
+              #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
             else
               order.destroy
               @created_order_items.pop(order_items_ar.count)
