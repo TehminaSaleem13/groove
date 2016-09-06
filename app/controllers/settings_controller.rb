@@ -252,6 +252,17 @@ class SettingsController < ApplicationController
     minutes + offset.split(":")[0].to_i*3600
   end
 
+  def update_stat_status
+    result = {}
+    setting = GeneralSetting.all.first
+    setting.update_attribute(:stat_status, "preparing to update") if params[:percentage].to_i == 0
+    setting.update_attribute(:stat_status, nil) if params[:percentage].to_i.between?(1, 99)
+    setting.update_attribute(:stat_status, "completed") if params[:percentage].to_i == 100
+    result[:status] = "true"
+    result[:stat_status] = setting.stat_status 
+    render json: result
+  end
+
   # def execute_in_bulk_action(activity)
   #   result = {}
   #   result['status'] = true

@@ -37,6 +37,7 @@ Groovepacks::Application.routes.draw do
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
   post 'settings/search_by_product' => 'settings#search_by_product'
   post '/settings/fetch_and_update_time_zone'  => "settings#fetch_and_update_time_zone"
+  get 'settings/update_stat_status' => 'settings#update_stat_status'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
   post '/amazons/products_import' => 'amazons#products_import'

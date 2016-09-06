@@ -44,6 +44,7 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
           }, 300);
           $http.get('/settings/get_settings').success(function(response){
             scope.dashboard.email = response.data.settings.email_address_for_packer_notes;
+            scope.dashboard.stat_message = response.data.settings.stat_status;
           });
         };
 
@@ -65,6 +66,9 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
 
         scope.get_stat = function(){
           dashboard.stats.stat_stream();
+          scope.dashboard.stat_status = true;
+          scope.dashboard.percentage = 0;
+          scope.dashboard.stat_message = "preparing to update";
         }
 
         scope.generate_stat = function(){
@@ -92,6 +96,9 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
         groovIO.on('dashboard_update_stat', function (response) {
           scope.dashboard.percentage = response.data.percentage;
           scope.dashboard.stat_status = response.data.status;
+          $http.get('/settings/update_stat_status.json?percentage=' + scope.dashboard.percentage).success(function(data){
+            scope.dashboard.stat_message = data.stat_status;
+          });
           if (scope.dashboard.percentage==100 && scope.dashboard.stat_status==true) {
             $timeout(function () { scope.dashboard.percentage = null; }, 5000);
           }
