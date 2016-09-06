@@ -349,7 +349,9 @@ class ProductsController < ApplicationController
       @result['status'] = false
       @result['messages'].push('You do not have enough permissions to create backup csv')
     end
-    @result = generate_error_csv(@result) unless @result['status']
+    if @result['status'] != nil
+      @result = generate_error_csv(@result)
+    end
 
     render json: @result
   end

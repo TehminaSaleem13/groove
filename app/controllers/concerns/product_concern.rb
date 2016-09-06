@@ -55,18 +55,28 @@ module ProductConcern
     def generate_csv(result)
       products = list_selected_products(params)
       result['filename'] = 'products-'+Time.now.to_s+'.csv'
-      CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+      # CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+      #   ProductsHelper.products_csv(products, csv)
+      # end
+      CSV.open(Rails.root.join('public', 'csv', result['filename']), 'w') do |csv|
         ProductsHelper.products_csv(products, csv)
       end
-      return result
+      public_url = GroovS3.get_csv_export_exception(result['filename'])
+
+      return public_url
     end
 
     def generate_error_csv(result)
       result['filename'] = 'error.csv'
-      CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+      # CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+      #   csv << result['messages']
+      # end
+      CSV.open(Rails.root.join('public', 'csv', result['filename']), 'w') do |csv|
         csv << result['messages']
       end
-      return result
+      public_url = GroovS3.get_csv_export_exception(result['filename'])
+
+      return public_url
     end
 
     def get_single_product_info(product)
