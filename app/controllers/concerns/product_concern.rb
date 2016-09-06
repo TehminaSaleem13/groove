@@ -63,7 +63,8 @@ module ProductConcern
       end
       public_url = GroovS3.get_csv_export_exception(result['filename'])
 
-      return public_url
+      result = {'url' => public_url, 'filename' => result['filename']}
+      return result
     end
 
     def generate_error_csv(result)
