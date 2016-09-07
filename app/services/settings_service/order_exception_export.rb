@@ -58,7 +58,7 @@ module SettingsService
         end
       end
       public_url = GroovS3.get_csv_export_exception(@result['filename'])
-      @result['filename'] = public_url
+      @result['filename'] = {'url' => public_url, 'filename' => @result['filename']}
     end
 
     def generate_single_record(exception, single_row)

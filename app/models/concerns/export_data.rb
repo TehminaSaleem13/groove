@@ -140,7 +140,7 @@ module ExportData
     order_hash = generate_header
     order_hash_array.push(order_hash)
     fetch_orders_hash_array(orders, row_map, order_hash_array)
-    push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
+    return push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
   end
 
   def generate_default_row_map
@@ -210,17 +210,6 @@ module ExportData
       end
     end
     public_url = GroovS3.get_csv_export_exception(filename)
-    filename = public_url
-
-    # CSV.open("#{Rails.root}/public/csv/#{filename}", 'w') do |csv|
-    #   show_lot_number = show_lot_or_serial_number?(order_hash_array, :lot_number)
-    #   show_serial_number = show_lot_or_serial_number?(order_hash_array, :serial_number)
-
-    #   csv_row_map = generate_csv_row_map(show_serial_number, show_lot_number, row_map)
-
-    #   order_hash_array.each do |order_hash|
-    #     csv << order_hash.values_at(*csv_row_map.keys)
-    #   end
-    # end
+    return filename = {url: public_url, filename: filename}
   end
 end

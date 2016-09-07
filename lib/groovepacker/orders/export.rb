@@ -117,7 +117,7 @@ module Groovepacker
             @items_list.values.each {|line| csv << line.values }
           end
           public_url = GroovS3.get_csv_export(@filename)
-          @result['filename'] = {url: public_url}
+          @result['filename'] = {url: public_url, filename: @filename}
         end
     end
   end
