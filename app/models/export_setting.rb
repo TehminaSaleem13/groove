@@ -54,9 +54,6 @@ class ExportSetting < ActiveRecord::Base
     else
       return do_export_with_orders(orders, filename)  
     end
-
-    # filename
-    puts "fdsjlfksjglkdfs--->" + do_export_if_orders_not_included(orders, filename).inspect
   end
 
   private
@@ -168,7 +165,7 @@ class ExportSetting < ActiveRecord::Base
       end
     end
     public_url = GroovS3.get_csv_export_exception(filename)
-    filename = public_url
+    filename = {'url' => public_url, 'filename' => filename}
     # CSV.open(file_path(filename), 'w') do |csv|
     #   csv << row_map.keys
     #   orders.each do |order|

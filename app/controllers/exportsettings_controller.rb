@@ -84,10 +84,8 @@ class ExportsettingsController < ApplicationController
         csv << result['error_messages']
       end
       public_url = GroovS3.get_csv_export_exception(filename)
-      # CSV.generate do |csv|
-      #   csv << result['error_messages']
-      # end
-      filename = public_url
+
+      filename = {'url' => public_url, 'filename' => filename}
     end
     render json: filename
     # send_file filename, :type => 'text/csv'

@@ -37,7 +37,6 @@ class SettingsController < ApplicationController
     #   filename = 'insufficient_permissions.zip'
     #   data = zip_to_files(filename, {})
     # end
-    puts '@result: ' + @result.inspect
 
     render json: @result
   end
