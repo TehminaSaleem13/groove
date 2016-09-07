@@ -165,16 +165,7 @@ class ExportSetting < ActiveRecord::Base
       end
     end
     public_url = GroovS3.get_csv_export_exception(filename)
-    filename = {'url' => public_url, 'filename' => filename}
-    # CSV.open(file_path(filename), 'w') do |csv|
-    #   csv << row_map.keys
-    #   orders.each do |order|
-    #     single_row = update_single_row_with_order_data(row_map, order)
-    #     assign_packing_user(single_row, order)
-    #     single_row[:click_scanned_qty] = calculate_clicked_qty(order)
-    #     csv << single_row.values
-    #   end
-    # end
+    filename = {url: public_url, filename: filename}
   end
 
   def generate_row_mapping

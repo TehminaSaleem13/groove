@@ -210,6 +210,6 @@ module ExportData
       end
     end
     public_url = GroovS3.get_csv_export_exception(filename)
-    return filename = {'url' => public_url, 'filename' => filename}
+    return filename = {url: public_url, filename: filename}
   end
 end
