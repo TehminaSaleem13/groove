@@ -262,9 +262,13 @@ RSpec.describe ProductsController, :type => :controller do
       post :generate_products_csv, {:select_all=>false, :inverted=>false, :search=>'', :productArray=>[{'id' => product1.id},{'id' => product2.id}]}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
-      expect(result["status"]).to eq(true)      
-      File.exist?(File.dirname(__FILE__) + '/../../public/csv/'+result['filename']).should == true
-      File.delete(File.dirname(__FILE__) + '/../../public/csv/'+result['filename'])
+      expect(result["status"]).to eq(true)   
+      uri = URI(result['filename'])
+      request = Net::HTTP.new uri.host
+      res= request.request_head uri.path   
+      expect(res.code.to_i == 200).to eq(true)
+      # File.exist?(File.dirname(__FILE__) + '/../../public/csv/'+result['filename']).should == true
+      # File.delete(File.dirname(__FILE__) + '/../../public/csv/'+result['filename'])
     end
   end
 
