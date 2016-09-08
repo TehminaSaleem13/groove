@@ -123,7 +123,7 @@ groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$docume
             {id: 2, name: '30 days', days: '30'},
             {id: 3, name: '90 days', days: '90'},
             {id: 4, name: '180 days', days: '180'},
-            {id: 5, name: 'All time', days: '-1'}
+            {id: 5, name: '365 days', days: '365'}
           ],
           change_days_filter: function (index) {
             this.current_filter_idx = index;
