@@ -7,7 +7,7 @@ class SubscriptionsController < ApplicationController
     @subscription = Subscription.new
     plan_id = params[:plan_id]
     plan_price = plan_id.split("-").last.to_i rescue 0
-    unless plan_price>100 and plan_price%50==0
+    unless plan_price>=100 and plan_price%50==0
       @plan_error = 'Please Select A Plan From The List'
       @plans = fetch_plans_info
       render :select_plan and return  
@@ -177,46 +177,46 @@ class SubscriptionsController < ApplicationController
   def fetch_plans_info
     [
       { 'name' => 'Duo',
-        'plan_id' => 'groove-duo-60',
-        'amount' => '60',
+        'plan_id' => 'groove-100',
+        'amount' => '100',
         'users' => '2',
-        'stores' => '2',
-        'shipments' => '2,200'
+        'stores' => 'Unlimited',
+        'shipments' => 'Unlimited'
       },
       { 'name' => 'Trio',
-        'plan_id' => 'groove-trio-90',
-        'amount' => '90',
+        'plan_id' => 'groove-150',
+        'amount' => '150',
         'users' => '3',
-        'stores' => '3',
-        'shipments' => '4,500'
+        'stores' => 'Unlimited',
+        'shipments' => 'Unlimited'
       },
       { 'name' => 'Quartet',
-        'plan_id' => 'groove-quartet-120',
-        'amount' => '120',
+        'plan_id' => 'groove-200',
+        'amount' => '200',
         'users' => '4',
-        'stores' => '4',
-        'shipments' => '6,700'
+        'stores' => 'Unlimited',
+        'shipments' => 'Unlimited'
       },
       { 'name' => 'Quintet',
-        'plan_id' => 'groove-quintet-150',
-        'amount' => '150',
+        'plan_id' => 'groove-250',
+        'amount' => '250',
         'users' => '5',
-        'stores' => '5',
-        'shipments' => '9,000'
+        'stores' => 'Unlimited',
+        'shipments' => 'Unlimited'
       },
       { 'name' => 'Big Band',
-        'plan_id' => 'groove-bigband-210',
-        'amount' => '210',
+        'plan_id' => 'groove-350',
+        'amount' => '350',
         'users' => '7',
-        'stores' => '7',
-        'shipments' => '14,000'
+        'stores' => 'Unlimited',
+        'shipments' => 'Unlimited'
       },
       { 'name' => 'Symphony',
-        'plan_id' => 'groove-symphony-300',
-        'amount' => '300',
+        'plan_id' => 'groove-500',
+        'amount' => '500',
         'users' => '10',
         'stores' => 'Unlimited',
-        'shipments' => '20,000'
+        'shipments' => 'Unlimited'
       }
     ]
   end
