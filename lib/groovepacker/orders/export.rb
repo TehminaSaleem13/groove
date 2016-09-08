@@ -118,9 +118,9 @@ module Groovepacker
           header << "\n"
           csv << header
           @items_list.values.each do |line|
-            new_row = "\"#{line.values[0].to_s}\", "
+            new_row = "#{line.values[0].to_s}, "
             line.values.each_with_index do |row, index|
-              new_row << "\"#{row}\", " if index != 0
+              new_row << "#{row}, " if index != 0
             end
             new_row << "\n"
             csv << new_row

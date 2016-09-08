@@ -59,11 +59,12 @@ module ProductsService
       inventory_wh_mapping = @data_mapping['inventory_wh']
       item_other_skus_barcodes = @data_mapping['item_other_skus_barcodes']
       headers.each do |title|
-        data_value = find_value([
-                                 item, inventory_wh, title, item_mapping, inventory_wh_mapping,
-                                 item_other_skus_barcodes
-                               ])
-        data.push("\"#{data_value}\"")
+        data.push(
+          find_value([
+                       item, inventory_wh, title, item_mapping, inventory_wh_mapping,
+                       item_other_skus_barcodes
+                     ])
+        )
       end
       do_if_bulk_action
       data
