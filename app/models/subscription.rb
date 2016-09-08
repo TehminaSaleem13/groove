@@ -21,6 +21,7 @@ class Subscription < ActiveRecord::Base
           Apartment::Tenant.switch()
           one_time_payment = calculate_otp(self.coupon_id, one_time_payment.to_i)
         end
+        create_subscribed_plan_if_not_exist
         customer = create_customer(one_time_payment)
 
         if customer
@@ -45,6 +46,19 @@ class Subscription < ActiveRecord::Base
       update_status_and_send_email(e)
       # logger.error "There was a problem with subscription process #{e.message}"
       false
+    end
+  end
+
+  def create_subscribed_plan_if_not_exist
+    interval = self.subscription_plan_id.split("-").first=="an" ? "year" : "month"
+    currency = 'usd'
+    subsc_amount = self.amount.to_i
+    name = self.subscription_plan_id.titleize
+    subsc_plan_id = self.subscription_plan_id
+    begin
+      create_plan(subsc_amount, interval, name, currency, subsc_plan_id)
+    rescue Stripe::InvalidRequestError => e
+
     end
   end
 

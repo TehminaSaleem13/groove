@@ -4,17 +4,16 @@ class SubscriptionsController < ApplicationController
   # before_filter :check_tenant_name
 
   def new
-    begin
-      @subscription = Subscription.new
-      plan_id = params[:plan_id]
-      @monthly_amount = Stripe::Plan.retrieve(plan_id).amount
-      position = split_position(plan_id)
-      @annually_amount = Stripe::Plan.retrieve('an-' + plan_id[0..position - 1]).amount
-    rescue Stripe::InvalidRequestError => e
+    @subscription = Subscription.new
+    plan_id = params[:plan_id]
+    plan_price = plan_id.split("-").last.to_i rescue 0
+    unless plan_price>100 and plan_price%50==0
       @plan_error = 'Please Select A Plan From The List'
       @plans = fetch_plans_info
-      render :select_plan
+      render :select_plan and return  
     end
+    @monthly_amount = plan_price*100
+    @annually_amount = (plan_price-(plan_price*10/100))*12*100
   end
 
   def select_plan
