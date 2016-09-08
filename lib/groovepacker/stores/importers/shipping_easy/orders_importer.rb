@@ -18,6 +18,7 @@ module Groovepacker
             update_import_item_obj_values
             
             response["orders"].each do |order|
+              order = order["order"]
               @order_to_update = false
               @import_item.reload
               break if @import_item.status == 'cancelled'
