@@ -94,6 +94,13 @@ class GroovS3
       self.save(object, data)
     end
 
+    def create_receiving_label_pdf(tenant, file_name, data)
+      object = self.create(tenant, "pdf/#{file_name}", 'application/pdf', :public_read)
+      self.save(object, data)
+      Rails.root.join('public', 'pdfs', "#{file_name}.pdf").delete rescue nil
+      object
+    end
+
     def create_image(tenant, file_name, data, content_type)
       object = self.create(tenant, "image/#{file_name}", content_type, :public_read)
       self.save(object, data)

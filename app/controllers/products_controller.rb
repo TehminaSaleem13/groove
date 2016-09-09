@@ -166,8 +166,10 @@ class ProductsController < ApplicationController
       format.html # show.html.erb
       format.json {
         time = Time.now
-        file_name = 'receiving_label_'+time.strftime('%d_%b_%Y')
+        tenant = Apartment::Tenant.current
+        file_name = "receiving_label_#{tenant}_" +time.strftime('%d_%b_%Y_%I_%M_%S')
         @result['receiving_label_path'] = '/pdfs/'+ file_name + '.pdf'
+        pathname = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
         render :pdf => file_name,
                :template => 'products/print_receiving_label',
                :orientation => 'portrait',
@@ -180,8 +182,9 @@ class ProductsController < ApplicationController
                            :right => '2'},
                :handlers => [:erb],
                :formats => [:html],
-               :save_to_file => Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-
+               :save_to_file => pathname
+        object = GroovS3.create_receiving_label_pdf(tenant, file_name, File.open(pathname).read)
+        @result["receiving_label_path"] = object.url
         render json: @result
       }
     end
