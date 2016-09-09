@@ -4,7 +4,7 @@ module ScanPack
 
     def initialize(current_user, session, params)
       set_scan_pack_action_instances(current_user, session, params)
-      @order = Order.where(@params[:id]).first
+      @order = Order.where(id: @params[:id]).first
     end
 
     def run
