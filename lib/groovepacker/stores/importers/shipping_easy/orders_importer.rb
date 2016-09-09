@@ -139,9 +139,11 @@ module Groovepacker
             end
 
             def update_current_import_item(order)
-              @import_item.update_attributes( current_increment_id: order["external_order_identifier"],
-                                              current_order_items: -1,
-                                              current_order_imported_item: -1 )
+              @import_item.update_attributes( 
+                current_increment_id: order.try(:[], "external_order_identifier"),
+                current_order_items: -1,
+                current_order_imported_item: -1 
+              )
             end
 
             def increase_import_count
