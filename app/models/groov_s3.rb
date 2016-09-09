@@ -23,6 +23,12 @@ class GroovS3
       self.save(object, data)
     end
 
+    def create_order_csv(tenant, type, store_id, data, privacy = :public_read)
+      object = self.create(tenant, "csv/#{type}.#{store_id}.csv", 'text/csv', privacy)
+      self.save(object, data)
+      object
+    end
+
     def create_teapplix_csv(dir, name, data, privacy = :public_read)
       object = self.create(dir, "#{name}.csv", 'text/csv', privacy)
       self.save(object, data)
