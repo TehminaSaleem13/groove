@@ -66,7 +66,7 @@ module Groovepacker
           order = Order.find(exception.order_id)
           {
             recorded_at: exception.created_at,
-            description: exception.description.strip,
+            description: exception.description.try(:strip),
             increment_id: exception.order.increment_id,
             order_id: exception.order_id,
             reason: exception.reason,

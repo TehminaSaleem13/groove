@@ -66,7 +66,7 @@ module Groovepacker
           def import_order_form_response(shipstation_order, order, shipments_response)
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
-              tracking_info = shipments_response.find {|shipment| shipment["orderId"]==order["orderId"]} || {}
+              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"]} || {}
               tracking_info = @client.get_shipments_by_orderno(order["orderId"]).first || {} if @import_item.import_type == "tagged"
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
