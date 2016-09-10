@@ -689,8 +689,8 @@ class StoresController < ApplicationController
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
-              order_file_data = IO.read(open("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv"), 40960)
-              # order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+              # order_file_data = IO.read(open("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv"), 40960)
+              order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
               @result['order']['data'] = order_file_data
               File.delete(order_file_path)
             end
