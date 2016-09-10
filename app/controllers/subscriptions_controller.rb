@@ -23,7 +23,6 @@ class SubscriptionsController < ApplicationController
 
   def confirm_payment
     @subscription = create_subscription(params)
-
     if @subscription
       one_time_payment = params[:shop_name].blank? ? ENV['ONE_TIME_PAYMENT'] : 0
       @subscription.save_with_payment(one_time_payment)
@@ -159,6 +158,12 @@ class SubscriptionsController < ApplicationController
   end
 
   def create_subscription(params)
+    plan_price = params[:plan_id].split("-").last.to_i rescue 0
+    if params[:radio_subscription]=="annualy"
+      params[:amount] = plan_price*100
+    else
+      params[:amount] = (plan_price-(plan_price*10/100))*12*100
+    end
     Subscription.create(stripe_user_token: params[:stripe_user_token],
                         tenant_name: params[:tenant_name],
                         amount: params[:amount],
