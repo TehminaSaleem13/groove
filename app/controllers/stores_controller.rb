@@ -202,7 +202,7 @@ class StoresController < ApplicationController
             @magento_rest.gen_barcode_from_sku = params[:gen_barcode_from_sku]
 
             store = @store
-            shipstation = @magento_rest
+            magento_rest = @magento_rest
             save_store(store, magento_rest, new_record, 'magento_rest_credential')
             # begin
             #   @store.save!
