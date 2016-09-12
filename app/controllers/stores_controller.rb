@@ -307,7 +307,7 @@ class StoresController < ApplicationController
               end
               unless params[:kitfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
-                kit_file_data = params[:kitfile].read
+                kit_file_data = params[:kitfile]
                 File.open(path, "wb") { |f| f.write(kit_file_data) }
 
                 GroovS3.create_csv(current_tenant, 'kit', @store.id, kit_file_data)
@@ -1055,7 +1055,7 @@ class StoresController < ApplicationController
     if current_user.can? 'add_edit_stores'
       system_store_id = Store.find_by_store_type('system').id.to_s
       params['_json'].each do |store|
-        @store = Store.find(store["id"])
+        @store = Store.where(id: store["id"]).first
         unless @store.nil?
           Product.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
           Order.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)

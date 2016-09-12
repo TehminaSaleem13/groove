@@ -486,7 +486,7 @@ class Product < ActiveRecord::Base
   end
 
   def create_or_update_productsku(sku, order, status = nil)
-    product_sku = status == 'new' ? ProductSku.new : ProductSku.find(sku['id'])
+    product_sku = status == 'new' ? ProductSku.new : ProductSku.where(id: sku['id']).first
 
     product_sku.sku = sku['sku']
     product_sku.purpose = sku['purpose']

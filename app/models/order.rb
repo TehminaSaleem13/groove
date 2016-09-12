@@ -135,8 +135,8 @@ class Order < ActiveRecord::Base
 
     order_items.includes(product: :product_kit_skuss).each do |order_item|
       product = order_item.product
-      product_kit_skuss = product.product_kit_skuss
       next if product.blank?
+      product_kit_skuss = product.product_kit_skuss
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       # If item has 0 qty
       if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
