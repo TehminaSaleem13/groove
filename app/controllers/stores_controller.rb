@@ -49,6 +49,7 @@ class StoresController < ApplicationController
             store.ftp_credential.save
           end
         rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.info(e)
           result['status'] = false
           result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
 
@@ -160,6 +161,7 @@ class StoresController < ApplicationController
               @store.save!
               @magento.save if !new_record
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
 
@@ -200,6 +202,7 @@ class StoresController < ApplicationController
                 @magento_rest.save
               end
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.magento_rest_credential.errors.full_messages]
 
@@ -232,6 +235,7 @@ class StoresController < ApplicationController
                 @amazon.save
               end
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages]
 
@@ -264,6 +268,7 @@ class StoresController < ApplicationController
                 @ebay.save
               end
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages]
 
@@ -279,6 +284,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages]
 
@@ -336,6 +342,7 @@ class StoresController < ApplicationController
                 @shipstation.save
               end
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
 
@@ -372,6 +379,7 @@ class StoresController < ApplicationController
                 @shipstation.save
               end
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.shipstation_rest_credential.errors.full_messages]
 
@@ -394,6 +402,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.shipping_easy_credential.errors.full_messages]
             rescue ActiveRecord::StatementInvalid => e
@@ -428,6 +437,7 @@ class StoresController < ApplicationController
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
 
@@ -450,6 +460,7 @@ class StoresController < ApplicationController
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages,
                                      @store.shopify_credential.errors.full_messages]
@@ -476,6 +487,7 @@ class StoresController < ApplicationController
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages,
                                      @store.big_commerce_credential.errors.full_messages]
@@ -517,6 +529,7 @@ class StoresController < ApplicationController
               @store.save!
               @teapplix.save if !new_record
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.teapplix_credential.errors.full_messages]
             rescue ActiveRecord::StatementInvalid => e
@@ -886,6 +899,7 @@ class StoresController < ApplicationController
       begin
         csv_map.save!
       rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.info(e)
         @result['status'] = false
         @result['messages'].push(csv_map.errors.full_messages)
       rescue ActiveRecord::StatementInvalid => e
@@ -1462,25 +1476,23 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result['status'] = true
 
-    access_restriction = AccessRestriction.last
+    AccessRestriction.last
 
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
     if @store && current_user.can?('update_inventories')
-      store = @store
-      store_check(store)
-      # case @store.store_type
-      # when "BigCommerce"
-      #   handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-      # when "Magento API 2"
-      #   handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-      # when "Shopify"
-      #   handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-      # when "Teapplix"
-      #   handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-      # end
+      case @store.store_type
+      when "BigCommerce"
+        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      when "Magento API 2"
+        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      when "Shopify"
+        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      when "Teapplix"
+        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+      end
 
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).pull_inventory
@@ -1494,19 +1506,6 @@ class StoresController < ApplicationController
     render json: @result
   end
 
-  def store_check(store)
-    case store.store_type
-    when "BigCommerce"
-      handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store)
-    when "Magento API 2"
-      handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(store)
-    when "Shopify"
-      handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(store)
-    when "Teapplix"
-      handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(store)
-    end
-  end
-
   def push_store_inventory
     @store = Store.find(params[:id])
 
@@ -1518,18 +1517,16 @@ class StoresController < ApplicationController
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
     if @store && current_user.can?('update_inventories')
-      store = @store
-      store_check(store)
-      # case @store.store_type
-      # when "BigCommerce"
-      #   handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-      # when "Magento API 2"
-      #   handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-      # when "Shopify"
-      #   handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-      # when "Teapplix"
-      #   handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-      # end
+      case @store.store_type
+      when "BigCommerce"
+        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      when "Magento API 2"
+        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      when "Shopify"
+        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      when "Teapplix"
+        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+      end
 
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).push_inventory
