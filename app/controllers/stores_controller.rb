@@ -105,7 +105,8 @@ class StoresController < ApplicationController
         if Store.can_create_new?
           @store = Store.new
           init_update_store_data(params)
-          ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
+          # ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
+          FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
           params[:id] = @store.id
         else
           @result['status'] = false
@@ -692,12 +693,14 @@ class StoresController < ApplicationController
             end
 
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
-            if File.exists? order_file_path
-              # read 4 kb data
-              order_file_data = IO.read(order_file_path, 40960)
-              @result['order']['data'] = order_file_data
-              File.delete(order_file_path)
-            end
+
+            file_delete(order_file_path, 'order')
+            # if File.exists? order_file_path
+            #   # read 4 kb data
+            #   order_file_data = IO.read(order_file_path, 40960)
+            #   @result['order']['data'] = order_file_data
+            #   File.delete(order_file_path)
+            # end
           end
           if ['both', 'product'].include?(params[:type])
             @result['product'] = Hash.new
@@ -727,11 +730,12 @@ class StoresController < ApplicationController
             end
 
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
-            if File.exists? product_file_path
-              product_file_data = IO.read(product_file_path, 40960)
-              @result['product']['data'] = product_file_data
-              File.delete(product_file_path)
-            end
+            file_delete(product_file_path, 'product')
+            # if File.exists? product_file_path
+            #   product_file_data = IO.read(product_file_path, 40960)
+            #   @result['product']['data'] = product_file_data
+            #   File.delete(product_file_path)
+            # end
           end
           if ['both', 'kit'].include?(params[:type])
             @result['kit'] = Hash.new
@@ -752,11 +756,12 @@ class StoresController < ApplicationController
             end
 
             kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
-            if File.exists? kit_file_path
-              kit_file_data = IO.read(kit_file_path, 40960)
-              @result['kit']['data'] = kit_file_data
-              File.delete(kit_file_path)
-            end
+            file_delete(kit_file_path, 'kit')
+            # if File.exists? kit_file_path
+            #   kit_file_data = IO.read(kit_file_path, 40960)
+            #   @result['kit']['data'] = kit_file_data
+            #   File.delete(kit_file_path)
+            # end
           end
         else
           @result['status'] = false
@@ -772,6 +777,20 @@ class StoresController < ApplicationController
       format.json { render json: @result }
     end
   end
+
+  def file_delete(file_path, type)
+    if File.exists? file_path
+      file_data = IO.read(file_path, 40960)
+      if type == 'kit'
+        @result['kit']['data'] = file_data
+      elsif type == 'order'
+        @result['order']['data'] = file_data
+      elsif type == 'product'
+        @result['product']['data'] = file_data
+      end  
+      File.delete(file_path)
+    end
+  end 
 
   def csv_do_import
     @result = Hash.new
@@ -1280,19 +1299,19 @@ class StoresController < ApplicationController
   end
 
   def handle_ebay_redirect
-    ebaytkn = params['ebaytkn']
-    tknexp = params['tknexp']
-    username = params['username']
-    redirect = params['redirect']
-    editstatus = params['editstatus']
-    name = params['name']
-    status = params['status']
-    storetype = params['storetype']
+    # ebaytkn = params['ebaytkn']
+    # tknexp = params['tknexp']
+    # username = params['username']
+    # redirect = params['redirect']
+    # editstatus = params['editstatus']
+    # name = params['name']
+    # status = params['status']
+    # storetype = params['storetype']
     storeid = params['storeid']
-    inventorywarehouseid = params['inventorywarehouseid']
-    importimages = params['importimages']
-    importproducts = params['importproducts']
-    messagetocustomer = params['messagetocustomer']
+    # inventorywarehouseid = params['inventorywarehouseid']
+    # importimages = params['importimages']
+    # importproducts = params['importproducts']
+    # messagetocustomer = params['messagetocustomer']
     tenant_name = params['tenantname']
 
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
@@ -1450,16 +1469,18 @@ class StoresController < ApplicationController
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
     if @store && current_user.can?('update_inventories')
-      case @store.store_type
-      when "BigCommerce"
-        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-      when "Magento API 2"
-        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-      when "Shopify"
-        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-      when "Teapplix"
-        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-      end
+      store = @store
+      store_check(store)
+      # case @store.store_type
+      # when "BigCommerce"
+      #   handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      # when "Magento API 2"
+      #   handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      # when "Shopify"
+      #   handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      # when "Teapplix"
+      #   handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+      # end
 
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).pull_inventory
@@ -1473,6 +1494,19 @@ class StoresController < ApplicationController
     render json: @result
   end
 
+  def store_check(store)
+    case store.store_type
+    when "BigCommerce"
+      handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store)
+    when "Magento API 2"
+      handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(store)
+    when "Shopify"
+      handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(store)
+    when "Teapplix"
+      handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(store)
+    end
+  end
+
   def push_store_inventory
     @store = Store.find(params[:id])
 
@@ -1484,16 +1518,18 @@ class StoresController < ApplicationController
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
 
     if @store && current_user.can?('update_inventories')
-      case @store.store_type
-      when "BigCommerce"
-        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-      when "Magento API 2"
-        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-      when "Shopify"
-        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-      when "Teapplix"
-        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-      end
+      store = @store
+      store_check(store)
+      # case @store.store_type
+      # when "BigCommerce"
+      #   handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+      # when "Magento API 2"
+      #   handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+      # when "Shopify"
+      #   handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+      # when "Teapplix"
+      #   handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+      # end
 
       context = Groovepacker::Stores::Context.new(handler)
       context.delay(:run_at => 1.seconds.from_now).push_inventory
