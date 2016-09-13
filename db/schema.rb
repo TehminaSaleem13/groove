@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160727094805) do
+ActiveRecord::Schema.define(:version => 20160905143724) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -215,6 +215,11 @@ ActiveRecord::Schema.define(:version => 20160727094805) do
     t.integer  "max_time_per_item",                   :default => 10
     t.string   "export_csv_email"
     t.boolean  "show_primary_bin_loc_in_barcodeslip", :default => false
+    t.string   "time_zone"
+    t.boolean  "search_by_product",                   :default => false
+    t.boolean  "auto_detect",                         :default => true
+    t.boolean  "dst",                                 :default => true
+    t.string   "stat_status"
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -263,6 +268,7 @@ ActiveRecord::Schema.define(:version => 20160727094805) do
     t.string   "import_type",                 :default => "regular"
     t.integer  "days"
     t.integer  "updated_orders_import"
+    t.text     "import_error"
   end
 
   create_table "inventory_warehouses", :force => true do |t|

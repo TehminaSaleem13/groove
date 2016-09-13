@@ -16,9 +16,10 @@ module Groovepacker
             return @result if response["orders"].nil?
             @result[:total_imported] = response["orders"].length
             update_import_item_obj_values
-            
             response["orders"].each do |order|
-              @order_to_update = false
+              order_copy = order["order"]
+              order = order_copy unless order_copy.blank? 
+              @order_to_update = false 
               @import_item.reload
               break if @import_item.status == 'cancelled'
               import_single_order(order)
@@ -139,9 +140,11 @@ module Groovepacker
             end
 
             def update_current_import_item(order)
-              @import_item.update_attributes( current_increment_id: order["external_order_identifier"],
-                                              current_order_items: -1,
-                                              current_order_imported_item: -1 )
+              @import_item.update_attributes( 
+                current_increment_id: order.try(:[], "external_order_identifier"),
+                current_order_items: -1,
+                current_order_imported_item: -1 
+              )
             end
 
             def increase_import_count

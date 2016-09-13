@@ -49,6 +49,7 @@ class StoresController < ApplicationController
             store.ftp_credential.save
           end
         rescue ActiveRecord::RecordInvalid => e
+          Rails.logger.info(e)
           result['status'] = false
           result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
 
@@ -105,7 +106,8 @@ class StoresController < ApplicationController
         if Store.can_create_new?
           @store = Store.new
           init_update_store_data(params)
-          ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
+          # ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
+          FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
           params[:id] = @store.id
         else
           @result['status'] = false
@@ -155,17 +157,22 @@ class StoresController < ApplicationController
 
             @magento.import_products = params[:import_products]
             @magento.import_images = params[:import_images]
-            begin
-              @store.save!
-              @magento.save if !new_record
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            store = @store
+            magento = @magento
+            save_store(store, magento, new_record, 'magento_credentials')
+            # begin
+            #   @store.save!
+            #   @magento.save if !new_record
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.magento_credentials.errors.full_messages]
+
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
           end
 
           if @store.store_type == "Magento API 2"
@@ -193,19 +200,24 @@ class StoresController < ApplicationController
             @magento_rest.import_categories = params[:import_categories]
             @magento_rest.import_images = params[:import_images]
             @magento_rest.gen_barcode_from_sku = params[:gen_barcode_from_sku]
-            begin
-              @store.save!
-              if !new_record
-                @magento_rest.save
-              end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.magento_rest_credential.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            store = @store
+            magento_rest = @magento_rest
+            save_store(store, magento_rest, new_record, 'magento_rest_credential')
+            # begin
+            #   @store.save!
+            #   if !new_record
+            #     @magento_rest.save
+            #   end
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.magento_rest_credential.errors.full_messages]
+
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
           end
 
           if @store.store_type == 'Amazon'
@@ -225,19 +237,25 @@ class StoresController < ApplicationController
             @amazon.import_images = params[:import_images]
             @amazon.show_shipping_weight_only = params[:show_shipping_weight_only]
             @store.amazon_credentials = @amazon
-            begin
-              @store.save!
-              if !new_record
-                @amazon.save
-              end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            store = @store
+            amazon = @amazon
+            save_store(store, amazon, new_record, 'amazon_credentials')
+
+            # begin
+            #   @store.save!
+            #   if !new_record
+            #     @amazon.save
+            #   end
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.amazon_credentials.errors.full_messages]
+
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
           end
 
           if @store.store_type == 'Ebay'
@@ -257,19 +275,23 @@ class StoresController < ApplicationController
 
             @store.ebay_credentials = @ebay
 
-            begin
-              @store.save!
-              if !new_record
-                @ebay.save
-              end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages]
+            store = @store
+            ebay = @ebay
+            save_store(store, ebay, new_record, 'ebay_credentials')
+            # begin
+            #   @store.save!
+            #   if !new_record
+            #     @ebay.save
+            #   end
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.ebay_credentials.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
             @result['store_id'] = @store.id
             @result['tenant_name'] = Apartment::Tenant.current
           end
@@ -278,6 +300,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages]
 
@@ -294,8 +317,7 @@ class StoresController < ApplicationController
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
                 order_file_data = params[:orderfile].read
                 File.open(path, "wb") { |f| f.write(order_file_data) }
-
-                GroovS3.create_csv(current_tenant, 'order', @store.id, order_file_data)
+                GroovS3.create_order_csv(current_tenant, 'order', @store.id, order_file_data)
                 @result['csv_import'] = true
               end
               unless params[:productfile].nil?
@@ -329,19 +351,23 @@ class StoresController < ApplicationController
             @shipstation.password = params[:password]
             @store.shipstation_credential = @shipstation
 
-            begin
-              @store.save!
-              if !new_record
-                @shipstation.save
-              end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
+            store = @store
+            shipstation = @shipstation
+            save_store(store, shipstation, new_record, 'shipstation_credential')
+            # begin
+            #   @store.save!
+            #   if !new_record
+            #     @shipstation.save
+            #   end
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
           end
 
           if @store.store_type == 'Shipstation API 2'
@@ -365,19 +391,23 @@ class StoresController < ApplicationController
             @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku]
             @store.shipstation_rest_credential = @shipstation
 
-            begin
-              @store.save!
-              if !new_record
-                @shipstation.save
-              end
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.shipstation_rest_credential.errors.full_messages]
+            store = @store
+            shipstation = @shipstation
+            save_store(store, shipstation, new_record, 'shipstation_rest_credential')
+            # begin
+            #   @store.save!
+            #   if !new_record
+            #     @shipstation.save
+            #   end
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.shipstation_rest_credential.errors.full_messages]
 
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
           end
           if @store.store_type == 'ShippingEasy'
             @shippingeasy = @store.shipping_easy_credential || @store.create_shipping_easy_credential
@@ -393,6 +423,7 @@ class StoresController < ApplicationController
             begin
               @store.save!
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.shipping_easy_credential.errors.full_messages]
             rescue ActiveRecord::StatementInvalid => e
@@ -427,6 +458,7 @@ class StoresController < ApplicationController
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages, @store.shipstation_credential.errors.full_messages]
 
@@ -449,6 +481,7 @@ class StoresController < ApplicationController
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages,
                                      @store.shopify_credential.errors.full_messages]
@@ -475,6 +508,7 @@ class StoresController < ApplicationController
               end
               @store.save
             rescue ActiveRecord::RecordInvalid => e
+              Rails.logger.info(e)
               @result['status'] = false
               @result['messages'] = [@store.errors.full_messages,
                                      @store.big_commerce_credential.errors.full_messages]
@@ -512,16 +546,20 @@ class StoresController < ApplicationController
               @teapplix.import_shipped = false
             end
 
-            begin
-              @store.save!
-              @teapplix.save if !new_record
-            rescue ActiveRecord::RecordInvalid => e
-              @result['status'] = false
-              @result['messages'] = [@store.errors.full_messages, @store.teapplix_credential.errors.full_messages]
-            rescue ActiveRecord::StatementInvalid => e
-              @result['status'] = false
-              @result['messages'] = [e.message]
-            end
+            store = @store
+            teapplix = @teapplix
+            save_store(store, teapplix, new_record, 'teapplix_credential')
+            # begin
+            #   @store.save!
+            #   @teapplix.save if !new_record
+            # rescue ActiveRecord::RecordInvalid => e
+            #   Rails.logger.info(e)
+            #   @result['status'] = false
+            #   @result['messages'] = [@store.errors.full_messages, @store.teapplix_credential.errors.full_messages]
+            # rescue ActiveRecord::StatementInvalid => e
+            #   @result['status'] = false
+            #   @result['messages'] = [e.message]
+            # end
           end
         else
           @result['status'] = false
@@ -535,6 +573,34 @@ class StoresController < ApplicationController
 
     respond_to do |format|
       format.json { render json: @result }
+    end
+  end
+
+  def save_store(store, store_type, new_record, store_type_credientials)
+    begin
+      store.save!
+      store_type.save if !new_record
+    rescue ActiveRecord::RecordInvalid => e
+      Rails.logger.info(e)
+      @result['status'] = false
+      if store_type_credientials == 'magento_credential'
+        @result['messages'] = [store.errors.full_messages, store.magento_credential.errors.full_messages]
+      elsif store_type_credientials == 'magento_rest_credential'
+        @result['messages'] = [store.errors.full_messages, store.magento_rest_credential.errors.full_messages]
+      elsif store_type_credientials == 'amazon_credentials'
+        @result['messages'] = [store.errors.full_messages, store.amazon_credentials.errors.full_messages]
+      elsif store_type_credientials == 'ebay_credentials'
+        @result['messages'] = [store.errors.full_messages, store.ebay_credentials.errors.full_messages]
+      elsif store_type_credientials == 'shipstation_credential'
+        @result['messages'] = [store.errors.full_messages, store.shipstation_credential.errors.full_messages]
+      elsif store_type_credientials == 'shipstation_rest_credential'
+        @result['messages'] = [store.errors.full_messages, store.shipstation_rest_credential.errors.full_messages]
+      elsif store_type_credientials == 'teapplix_credential'        
+        @result['messages'] = [store.errors.full_messages, store.teapplix_credential.errors.full_messages]
+      end
+    rescue ActiveRecord::StatementInvalid => e
+      @result['status'] = false
+      @result['messages'] = [e.message]
     end
   end
 
@@ -694,7 +760,8 @@ class StoresController < ApplicationController
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
-              order_file_data = IO.read(order_file_path, 40960)
+              # order_file_data = IO.read(open("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv"), 40960)
+              order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
               @result['order']['data'] = order_file_data
               File.delete(order_file_path)
             end
@@ -727,11 +794,12 @@ class StoresController < ApplicationController
             end
 
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
-            if File.exists? product_file_path
-              product_file_data = IO.read(product_file_path, 40960)
-              @result['product']['data'] = product_file_data
-              File.delete(product_file_path)
-            end
+            file_delete(product_file_path, 'product')
+            # if File.exists? product_file_path
+            #   product_file_data = IO.read(product_file_path, 40960)
+            #   @result['product']['data'] = product_file_data
+            #   File.delete(product_file_path)
+            # end
           end
           if ['both', 'kit'].include?(params[:type])
             @result['kit'] = Hash.new
@@ -752,11 +820,12 @@ class StoresController < ApplicationController
             end
 
             kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
-            if File.exists? kit_file_path
-              kit_file_data = IO.read(kit_file_path, 40960)
-              @result['kit']['data'] = kit_file_data
-              File.delete(kit_file_path)
-            end
+            file_delete(kit_file_path, 'kit')
+            # if File.exists? kit_file_path
+            #   kit_file_data = IO.read(kit_file_path, 40960)
+            #   @result['kit']['data'] = kit_file_data
+            #   File.delete(kit_file_path)
+            # end
           end
         else
           @result['status'] = false
@@ -772,6 +841,20 @@ class StoresController < ApplicationController
       format.json { render json: @result }
     end
   end
+
+  def file_delete(file_path, type)
+    if File.exists? file_path
+      file_data = IO.read(file_path, 40960)
+      if type == 'kit'
+        @result['kit']['data'] = file_data
+      elsif type == 'order'
+        @result['order']['data'] = file_data
+      elsif type == 'product'
+        @result['product']['data'] = file_data
+      end  
+      File.delete(file_path)
+    end
+  end 
 
   def csv_do_import
     @result = Hash.new
@@ -867,6 +950,7 @@ class StoresController < ApplicationController
       begin
         csv_map.save!
       rescue ActiveRecord::RecordInvalid => e
+        Rails.logger.info(e)
         @result['status'] = false
         @result['messages'].push(csv_map.errors.full_messages)
       rescue ActiveRecord::StatementInvalid => e
@@ -1280,19 +1364,19 @@ class StoresController < ApplicationController
   end
 
   def handle_ebay_redirect
-    ebaytkn = params['ebaytkn']
-    tknexp = params['tknexp']
-    username = params['username']
-    redirect = params['redirect']
-    editstatus = params['editstatus']
-    name = params['name']
-    status = params['status']
-    storetype = params['storetype']
+    # ebaytkn = params['ebaytkn']
+    # tknexp = params['tknexp']
+    # username = params['username']
+    # redirect = params['redirect']
+    # editstatus = params['editstatus']
+    # name = params['name']
+    # status = params['status']
+    # storetype = params['storetype']
     storeid = params['storeid']
-    inventorywarehouseid = params['inventorywarehouseid']
-    importimages = params['importimages']
-    importproducts = params['importproducts']
-    messagetocustomer = params['messagetocustomer']
+    # inventorywarehouseid = params['inventorywarehouseid']
+    # importimages = params['importimages']
+    # importproducts = params['importproducts']
+    # messagetocustomer = params['messagetocustomer']
     tenant_name = params['tenantname']
 
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
@@ -1443,7 +1527,7 @@ class StoresController < ApplicationController
     @result = Hash.new
     @result['status'] = true
 
-    access_restriction = AccessRestriction.last
+    AccessRestriction.last
 
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new

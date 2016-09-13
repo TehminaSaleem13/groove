@@ -372,8 +372,8 @@
           radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
           if (radio_button_value == 'annually') {
             var str = $('#plan_id').val();
-            var plan_str = str.substring(0,str.lastIndexOf('-'));
-            plan_id = 'an-' + plan_str;
+            //var plan_str = str.substring(0,str.lastIndexOf('-'));
+            plan_id = 'an-' + str;
           }
           else {
             plan_id = $('#plan_id').val();
