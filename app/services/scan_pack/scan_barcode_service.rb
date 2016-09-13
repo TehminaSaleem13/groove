@@ -4,6 +4,7 @@ module ScanPack
 
     def initialize(current_user, session, params)
       set_scan_pack_action_instances(current_user, session, params)
+      @order = Order.where(id: @params[:id]).first
     end
 
     def run
@@ -67,16 +68,17 @@ module ScanPack
     end
 
     def do_check_state_and_status_to_add_activity
+      return unless @order
       if @params[:state] == "scanpack.rfp.default" && @result['status'] == true
         current_product_id = ProductBarcode.where(barcode: @params["input"])[0].try(:product_id)
         item_sku = ProductSku.where(product_id: current_product_id)[0].try(:sku)
-        Order.find(@params[:id]).addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
+        @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
       end
     end
 
     def update_activity(output)
-      return unless  @params[:state] == "scanpack.rfp.default" && output['status'] == false
-      latest_activity = Order.find(@params[:id]).order_activities.last
+      return unless  @params[:state] == "scanpack.rfp.default" && output['status'] == false && @order
+      latest_activity = @order.order_activities.last
       latest_activity.update_attribute(:action, "INVALID SCAN - #{latest_activity.action}")
     end
 

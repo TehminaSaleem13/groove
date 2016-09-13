@@ -317,8 +317,7 @@ class StoresController < ApplicationController
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
                 order_file_data = params[:orderfile].read
                 File.open(path, "wb") { |f| f.write(order_file_data) }
-
-                GroovS3.create_csv(current_tenant, 'order', @store.id, order_file_data)
+                GroovS3.create_order_csv(current_tenant, 'order', @store.id, order_file_data)
                 @result['csv_import'] = true
               end
               unless params[:productfile].nil?
@@ -759,14 +758,13 @@ class StoresController < ApplicationController
             end
 
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
-
-            file_delete(order_file_path, 'order')
-            # if File.exists? order_file_path
-            #   # read 4 kb data
-            #   order_file_data = IO.read(order_file_path, 40960)
-            #   @result['order']['data'] = order_file_data
-            #   File.delete(order_file_path)
-            # end
+            if File.exists? order_file_path
+              # read 4 kb data
+              # order_file_data = IO.read(open("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv"), 40960)
+              order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+              @result['order']['data'] = order_file_data
+              File.delete(order_file_path)
+            end
           end
           if ['both', 'product'].include?(params[:type])
             @result['product'] = Hash.new

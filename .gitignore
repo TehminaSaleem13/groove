@@ -22,3 +22,4 @@ protractor_report/
 test/
 coverage/
 pids/
+.DS_Store

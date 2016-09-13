@@ -4,6 +4,7 @@ class CreateTenant
     Apartment::Tenant.create(tenant_name)
     tenant = Tenant.create(name: tenant_name, initial_plan_id: subscription.subscription_plan_id)
     subscription.tenant = tenant
+    subscription.save
     Apartment::Tenant.switch(tenant_name)
     self.apply_restrictions_and_seed(subscription)
     self.delay(run_at: 1.seconds.from_now).create_groovelytics_tenant(tenant_name)

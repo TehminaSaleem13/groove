@@ -10,5 +10,12 @@ class OrderImportSummariesController < ApplicationController
     render json: {status: true}
   end
 
+  def update_order_import_summary
+    orderimportsummary = OrderImportSummary.first
+    orderimportsummary.status = "not_started"
+    orderimportsummary.save
+    render json: {status: true}
+  end
+
 end
 

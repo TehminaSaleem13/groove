@@ -33,10 +33,12 @@ Groovepacks::Application.routes.draw do
   get 'stores/export_active_products' => 'stores#export_active_products'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
+  get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
   get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
   post 'settings/search_by_product' => 'settings#search_by_product'
   post '/settings/fetch_and_update_time_zone'  => "settings#fetch_and_update_time_zone"
+  get 'settings/update_stat_status' => 'settings#update_stat_status'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
   post '/amazons/products_import' => 'amazons#products_import'
@@ -46,6 +48,7 @@ Groovepacks::Application.routes.draw do
   post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
   post '/delayed_job_reset' => 'delayed_jobs#reset'
   post '/delayed_jobs_update' => 'delayed_jobs#update'
+  get '/tenants/delete_summary' => 'tenants#delete_summary'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
