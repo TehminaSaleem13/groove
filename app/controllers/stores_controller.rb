@@ -1469,7 +1469,8 @@ class StoresController < ApplicationController
         :UseProductName => '',
         :Active => ''
       }
-      data = CSV.generate do |csv|
+
+      CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
         csv << row_map.keys
 
         products.each do |product|
@@ -1504,21 +1505,65 @@ class StoresController < ApplicationController
           csv << single_row.values
         end
       end
+      public_url = GroovS3.get_csv_export_exception(filename)
+
+      # data = CSV.generate do |csv|
+      #   csv << row_map.keys
+
+      #   products.each do |product|
+      #     single_row = row_map.dup
+      #     single_row[:SKU] = product.primary_sku
+      #     single_row[:Name] = product.name
+      #     single_row[:WarehouseLocation] = product.primary_warehouse.location_primary
+      #     unless product.weight.round == 0
+      #       single_row[:WeightOz] = product.weight.round.to_s
+      #     else
+      #       single_row[:WeightOz] = ''
+      #     end
+      #     single_row[:Category] = product.primary_category
+      #     single_row[:Tag1] = ''
+      #     single_row[:Tag2] = ''
+      #     single_row[:Tag3] = ''
+      #     single_row[:Tag4] = ''
+      #     single_row[:Tag5] = ''
+      #     single_row[:CustomsDescription] = ''
+      #     single_row[:CustomsValue] = ''
+      #     single_row[:CustomsTariffNo] = ''
+      #     single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
+      #     single_row[:ThumbnailUrl] = ''
+      #     single_row[:UPC] = product.primary_barcode
+      #     single_row[:FillSKU] = ''
+      #     single_row[:Length] = ''
+      #     single_row[:Width] = ''
+      #     single_row[:Height] = ''
+      #     single_row[:UseProductName] = ''
+      #     single_row[:Active] = product.is_active
+
+      #     csv << single_row.values
+      #   end
+      # end
     else
       result['messages'] << 'There are no active products'
     end
 
     unless result['status']
-      data = CSV.generate do |csv|
+      CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
         csv << result['messages']
       end
       filename = 'error.csv'
+      public_url = GroovS3.get_csv_export_exception(filename)
+      # data = CSV.generate do |csv|
+      #   csv << result['messages']
+      # end
+      # filename = 'error.csv'
     end
 
-    respond_to do |format|
-      format.html # show.html.erb
-      format.csv { send_data data, :type => 'text/csv', :filename => filename }
-    end
+    filename = {url: public_url, filename: filename}
+    render json: filename
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.csv { send_data data, :type => 'text/csv', :filename => filename }
+    # end
   end
 
   def pull_store_inventory
