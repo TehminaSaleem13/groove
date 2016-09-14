@@ -146,9 +146,9 @@ module Groovepacker
           def update_status_and_save(order)
             order.status = 'onhold'
             order.save!
-            order.addactivity(
-              'Order Import CSV Import',
-              Store.find(params[:store_id]).name + ' Import')
+            #order.addactivity(
+            #  'Order Import CSV Import',
+            #  Store.find(params[:store_id]).name + ' Import')
             order.update_order_status
           end
 
