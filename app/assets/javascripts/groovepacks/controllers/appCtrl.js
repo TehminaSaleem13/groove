@@ -59,6 +59,7 @@ groovepacks_controllers.
           } else if ($scope.import_summary.import_info.status === 'in_progress') {
             $scope.import_groov_popover.title = get_import_type() + ' in Progress';
           } else if ($scope.import_summary.import_info.status === 'not_started') {
+            importOrders.update_order_import();
             $scope.import_groov_popover.title = get_import_type() + ' not started';
           } else if ($scope.import_summary.import_info.status === 'cancelled') {
             $scope.import_groov_popover.title = get_import_type() + ' cancelled';
