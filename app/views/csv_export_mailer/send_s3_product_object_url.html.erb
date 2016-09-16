@@ -1,2 +1,6 @@
-Click the link to download the product file.
-<a href="<%=@object_url%>"><%=@filename || @no_product%></a>
+<% if @no_product=="Empty"%>
+	Empty. (No active products)
+<% else %>
+	Please click the link to download the product export.
+	<a href="<%=@object_url%>"><%=@filename%></a>
+<% end %>
