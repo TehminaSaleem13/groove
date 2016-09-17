@@ -49,5 +49,13 @@
            groov-popover="If your Barcodes match your SKU, you can enable this option to have GroovePacker automatically generate Barcodes when new products are found during order imports."/>
       </div>
     </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">Include Product</label>
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.include_product" groov-click="include_product()"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="!!!!!DUMMY TEXT!!!!!"/>
+      </div>
+    </div>
   </div>
 </div>
