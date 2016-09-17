@@ -84,7 +84,8 @@ module Groovepacker
             def create_product(sku, product_hash, store_product_id)
               product = Product.includes(:product_skus).where("product_skus.sku = ?", sku)[0]
               if product.blank?
-                product = Product.create(name: product_hash["description"], store: @credential.store ,store_product_id: store_product_id, weight: product_hash["weight_in_ounces"])
+                product_weight = product_hash["weight_in_ounces"] || "0.0"
+                product = Product.create(name: product_hash["description"], store: @credential.store ,store_product_id: store_product_id, weight: product_weight)
                 product.product_skus.create(sku: sku)
                 product.product_cats.create(category: product_hash["product_category_name"])
                 product.product_lots.create(lot_number: product_hash["bin_picking_number"])

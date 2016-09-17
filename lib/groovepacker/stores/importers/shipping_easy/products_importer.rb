@@ -36,9 +36,10 @@ module Groovepacker
           end
 
           def create_new_product_from_order(item, store, sku)
+            product_weight = item["weight_in_ounces"] || "0.0"
             product = Product.create(name: item["item_name"], store: store,
                                      store_product_id: item["ext_line_item_id"],
-                                     weight: item["weight_in_ounces"])
+                                     weight: product_weight)
             
             product.product_skus.create(sku: sku)
 
