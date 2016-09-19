@@ -46,9 +46,53 @@ module Groovepacker
 
               import_order(shiping_easy_order, order)
               shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
-              
               import_order_items_and_create_products(shiping_easy_order, order)
               update_success_import_count
+            end
+
+            def create_alias_and_product(order_item, item)
+              sku = item["product"]["sku"]
+              alias_skus = item["product"]["sku_aliases"]
+              store_product_id =  item["ext_line_item_id"]
+              product = create_product(sku, item["product"], store_product_id)
+              create_alias(alias_skus, product) if alias_skus
+              (item["product"]["bundled_products"] || []).each do |kit_product|
+                kit_pro = Product.joins(:product_skus).where("sku = ?", kit_product["sku"]) 
+                new_kit_product = kit_pro.blank? ? create_product(kit_product["sku"], kit_product, store_product_id) : kit_pro[0]
+                product.product_kit_skuss.create(option_product_id: new_kit_product.id, qty: 1) rescue nil if ProductKitSkus.where(product_id: product.id, option_product_id: new_kit_product.id).blank?
+                kit_alias = kit_product["sku_aliases"]
+                create_alias(kit_alias, new_kit_product) if kit_alias 
+                product.update_attribute(:is_kit, 1)
+              end
+              create_order_item(item, order_item)
+            end
+
+            def create_order_item(item, order_item)
+              order_item_product = Product.joins(:product_skus).where("product_skus.sku = ?", item["sku"]).first rescue nil
+              order_item.product = order_item_product 
+              order_item.sku = item["sku"]
+              order_item.save
+              make_product_intangible(order_item.product) if order_item.product.present?
+            end
+
+            def create_alias(alias_skus, product)
+              alias_skus.each do |alias_sku|
+                product.product_skus.create(sku: alias_sku) rescue nil if !(product.product_skus.map(&:sku).include? alias_sku)
+              end
+            end
+
+            def create_product(sku, product_hash, store_product_id)
+              product = Product.includes(:product_skus).where("product_skus.sku = ?", sku)[0]
+              if product.blank?
+                product_weight = product_hash["weight_in_ounces"] || "0.0"
+                product = Product.create(name: product_hash["description"], store: @credential.store ,store_product_id: store_product_id, weight: product_weight)
+                product.product_skus.create(sku: sku)
+                product.product_cats.create(category: product_hash["product_category_name"])
+                product.product_lots.create(lot_number: product_hash["bin_picking_number"])
+                product.set_product_status
+              end
+              product.product_barcodes.create(barcode: product_hash["upc"]) if product.product_barcodes.blank? 
+              product
             end
 
             def import_order(shiping_easy_order, order)
@@ -72,7 +116,11 @@ module Groovepacker
                 order["recipients"][0]["line_items"].each do |item|
                   order_item = shiping_easy_order.order_items.build
                   import_order_item(order_item, item)
-                  import_single_order_product(order_item, item)
+                  if @credential.includes_product && item["product"].present?
+                    create_alias_and_product(order_item, item)
+                  else
+                    import_single_order_product(order_item, item)
+                  end
                   import_item_count
                 end
               end

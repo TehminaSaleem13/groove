@@ -38,8 +38,8 @@ module Groovepacker
       end
 
       def remove_item_from_order
-        @orderitem = OrderItem.find(@params[:orderitem])
-        if @orderitem.nil?
+        @orderitem = OrderItem.where(id: @params[:orderitem])
+        if @orderitem.blank?
           set_status_and_message(false, "Could not find order item", ['&', 'push'])
           return @result
         end

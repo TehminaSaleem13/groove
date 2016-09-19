@@ -24,7 +24,9 @@ module Groovepacker
       end
 
       def map_product_sku_and_unique_kit
-        product_skus_ids = Product.find(@params["id"]).product_kit_skuss.map(&:option_product_id) 
+        product = Product.where(id: @params["id"]).first
+        return unless product
+        product_skus_ids = product.product_kit_skuss.map(&:option_product_id) 
         return if (product_skus_ids & @params[:product_alias_ids]).blank?
         @result['status'] = false
         @result["messages"].push('Can not add kit to itself')

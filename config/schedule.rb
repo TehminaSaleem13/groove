@@ -21,7 +21,7 @@
 
 # set :output, Rails.root.join('log', 'cron.log')
 
-every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
+every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   rake "ftp_csv_file_import:ftp_import"
 end
 

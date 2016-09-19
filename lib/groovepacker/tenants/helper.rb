@@ -295,6 +295,7 @@ module Groovepacker
           created_tenant.update_attribute(:initial_plan_id, @tenant.initial_plan_id)
           @tenant.duplicate_tenant_id = created_tenant.id
           @tenant.save
+          SendStatStream.new.delay.duplicate_groovlytic_tenant(current_tenant, duplicate_name)
         rescue => e
           update_fail_status(result, e.message)
         end

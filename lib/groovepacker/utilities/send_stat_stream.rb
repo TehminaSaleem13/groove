@@ -31,6 +31,10 @@ class SendStatStream
     end
   end
 
+  def duplicate_groovlytic_tenant(current_tenant, duplicate_name)
+    HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/tenants/duplicate?current_tenant=#{current_tenant}stat&duplicate_name=#{duplicate_name}stat")
+  end
+
   def send_order_exception(order_id, tenant)
     stat_stream = build_stream(tenant, order_id)
     path = 'dashboard/update_order_data'

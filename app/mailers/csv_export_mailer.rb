@@ -14,4 +14,15 @@ class CsvExportMailer < ActionMailer::Base
     subject = "Backup successful."
     mail to: recipients, subject: subject
   end
+
+  def send_s3_product_object_url(filename, object_url, tenant, no_product)
+    Apartment::Tenant.switch(tenant)
+    general_setting = GeneralSetting.all.first
+    recipients = [general_setting.email_address_for_packer_notes]
+    @no_product = "Empty" if no_product
+    @filename = filename
+    @object_url = object_url
+    subject = "Products Export Report."
+    mail to: recipients, subject: subject
+  end
 end
