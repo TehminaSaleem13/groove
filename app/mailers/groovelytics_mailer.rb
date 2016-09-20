@@ -3,6 +3,6 @@ class GroovelyticsMailer < ActionMailer::Base
 
 	def groovelytics_request_failed(tenant)
 		subject = "HTTParty post request to groovelytics server from #{tenant} failed"
-		mail to: "ksahoo@navaratan.com ", subject: subject
+		mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
 	end
 end
