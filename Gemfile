@@ -111,3 +111,4 @@ gem 'hiredis'
 gem "delayed_job_web"
 gem 'rollbar'
 gem 'whenever', :require => false
+gem "skylight"
