@@ -159,7 +159,7 @@ class SubscriptionsController < ApplicationController
 
   def create_subscription(params)
     plan_price = params[:plan_id].split("-").last.to_i rescue 0
-    if params[:radio_subscription]=="annualy"
+    if params[:radio_subscription]=="monthly"
       params[:amount] = plan_price*100
     else
       params[:amount] = (plan_price-(plan_price*10/100))*12*100
