@@ -286,8 +286,9 @@ groovepacks_controllers.
       $scope.search_by_product = function (){
         page = $state.params.page;
         product_search_toggle = $scope.general_settings.single.search_by_product;
-        orders.list.search_by_product_toggle(product_search_toggle);
-        generalsettings.single.get($scope.general_settings).then(function () { $scope.general_settings.single.search_by_product });
+        orders.list.search_by_product_toggle(product_search_toggle).success(function (data) {
+          return generalsettings.single.get($scope.general_settings).then(function () { $scope.general_settings.single.search_by_product });
+        });
         // orders.list.get($scope.orders, page, product_search_toggle);
       }
 

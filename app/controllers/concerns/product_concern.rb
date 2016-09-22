@@ -56,7 +56,8 @@ module ProductConcern
       products = list_selected_products(params)
       result['filename'] = 'products-'+Time.now.to_s+'.csv'
       CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
-        ProductsHelper.products_csv(products, csv)
+        data = ProductsHelper.products_csv(products, csv)
+        result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url
       end
       return result
     end

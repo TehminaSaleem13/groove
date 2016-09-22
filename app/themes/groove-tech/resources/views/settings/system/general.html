@@ -307,11 +307,14 @@
         <fieldset>
           <div class="form-group">
             <label class="control-label col-sm-3">Preferred time zone</label>
-             <div class="controls col-sm-3" dropdown>
-              <select ng-blur="fetch_time_zone()" ng-model="general_settings.single.time_zone" class="dropdown-toggle groove-button">
+             <div class="controls col-sm-8" dropdown>
+              <select class="dropdown-toggle groove-button controls col-sm-8" ng-blur="fetch_time_zone()" ng-model="general_settings.single.time_zone" class="dropdown-toggle groove-button">
                 <option class="dropdown-toggle" ng-selected="general_settings.single.auto_detect == true" value="true">AUTO DETECT</option>
                 <option class="dropdown-toggle" ng-repeat="(value, key) in general_settings.single.time_zones['time_zones']" value="{{key}}" ng-selected="key == general_settings.single.time_zone">{{value}}</option>
-              </select>
+              </select> 
+              <div class="controls col-sm-4" style="padding-top: 4px; font-weight: 600;">
+                Current Time: {{general_settings.single.current_time}}
+              </div>
             </div>
           </div> 
           <div class="form-group">

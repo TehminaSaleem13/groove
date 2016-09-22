@@ -75,4 +75,14 @@ class TenantsController < ApplicationController
       format.json { render json: result }
     end
   end
+
+  def delete_summary
+    result = {}
+    name = Tenant.find(params["tenant"]).name
+    Apartment::Tenant.switch name
+    OrderImportSummary.where("status = ? or status = ? ", "not_started", "in_progress").update_all(status: "cancelled")
+    ImportItem.where("status = ? or status = ? ", "not_started", "in_progress").update_all(status: "cancelled")
+    result[:status] = true
+    render json: result
+  end
 end

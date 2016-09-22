@@ -298,14 +298,19 @@ module OrderConcern
     if params[:store_id].present?
       import_item = order_summary_to_cancel.import_items.find_by_store_id(params[:store_id])
       import_item = ImportItem.where(store_id: params[:store_id]).last if import_item.blank?
-      begin
-          import_item.update_attributes(status: 'cancelled')
-        rescue
-          nil
-        end
-    else
-      ImportItem.where(status: 'in_progress').update_all(status: 'cancelled')
-      order_summary_to_cancel.update_attributes(status: 'completed')
+      begin 
+        import_item.status = 'cancelled'
+        import_item.save
+      rescue
+        nil
+      end
+    else 
+      ImportItem.where("status='in_progress' OR status='not_started'").update_all(status: 'cancelled')
+      order_import_summary = OrderImportSummary.all
+      order_import_summary.each do |import_summary|
+        import_summary.status = "completed"
+        import_summary.save
+      end
     end
   end
 

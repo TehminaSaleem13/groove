@@ -1,6 +1,6 @@
-groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sce',
+groovepacks_directives.directive('groovDashboard', ['$http', '$window', '$document', '$sce',
   '$timeout', '$interval', '$state', 'groovIO', 'orders', 'stores', 'notification', 'dashboard', 'dashboard_calculator', 'users',
-  function ($window, $document, $sce, $timeout, $interval, $state, groovIO, orders, stores,
+  function ($http, $window, $document, $sce, $timeout, $interval, $state, groovIO, orders, stores,
             notification, dashboard, dashboard_calculator, users) {
     return {
       restrict: "A",
@@ -42,6 +42,10 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           setTimeout(function(){
             dashboard.stats.dashboard_stat();
           }, 300);
+          $http.get('/settings/get_settings').success(function(response){
+            scope.dashboard.email = response.data.settings.email_address_for_packer_notes;
+            scope.dashboard.stat_message = response.data.settings.stat_status;
+          });
         };
 
         scope.switch_tab = function (tab) {
@@ -62,6 +66,13 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
 
         scope.get_stat = function(){
           dashboard.stats.stat_stream();
+          scope.dashboard.stat_status = true;
+          scope.dashboard.percentage = 0;
+          scope.dashboard.stat_message = "preparing to update";
+        }
+
+        scope.generate_stat = function(){
+          dashboard.stats.stat_generate(scope.dashboard);
         }
 
         scope.handle_click_fn = function (row, event) {
@@ -82,6 +93,22 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
           });
         };
 
+        groovIO.on('dashboard_update_stat', function (response) {
+          scope.dashboard.percentage = response.data.percentage;
+          scope.dashboard.stat_status = response.data.status;
+          $http.get('/settings/update_stat_status.json?percentage=' + scope.dashboard.percentage).success(function(data){
+            scope.dashboard.stat_message = data.stat_status;
+          });
+          if (scope.dashboard.percentage==100 && scope.dashboard.stat_status==true) {
+            $timeout(function () { scope.dashboard.percentage = null; }, 5000);
+          }
+          if (scope.dashboard.stat_status==false){
+            scope.dashboard.type = 'failed';
+          } else {
+            scope.dashboard.type = 'success';
+          }
+        });
+
         groovIO.on('dashboard_update', function (message) {
           days = scope.charts.days_filters[scope.charts.current_filter_idx].days;
           scope.dash_data = message.data;
@@ -96,7 +123,7 @@ groovepacks_directives.directive('groovDashboard', ['$window', '$document', '$sc
             {id: 2, name: '30 days', days: '30'},
             {id: 3, name: '90 days', days: '90'},
             {id: 4, name: '180 days', days: '180'},
-            {id: 5, name: 'All time', days: '-1'}
+            {id: 5, name: '365 days', days: '365'}
           ],
           change_days_filter: function (index) {
             this.current_filter_idx = index;

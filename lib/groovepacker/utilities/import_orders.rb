@@ -33,8 +33,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     #delete existing completed and cancelled order import summaries
     delete_existing_order_import_summaries
     return if @order_import_summary.nil? || @order_import_summary.id.nil?
-    @order_import_summary.import_items.each do |import_item|
-      next unless import_item.try(:reload) && import_item.status != "cancelled"
+    @order_import_summary.import_items.reload.find_each(:batch_size => 100) do |import_item|
+      next if import_item.status == "cancelled"
       import_orders_with_import_item(import_item, tenant)
     end
     update_import_summary
@@ -66,7 +66,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
     #add import item for the store
     ImportItem.where(store_id: params[:store].id).destroy_all
-    import_summary.import_items.create( store: params[:store], import_type: params[:import_type], days: params[:days])
+    import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
     Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
   end
@@ -77,10 +77,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     job_scheduled = false
     general_settings = GeneralSetting.all.first
     export_settings = ExportSetting.all.first
-    for i in 0..6
-      job_scheduled, date = schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
-      break if job_scheduled
-    end
+    schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
   end
 
   def schedule_a_job(type, date, job_scheduled, general_settings, export_settings)

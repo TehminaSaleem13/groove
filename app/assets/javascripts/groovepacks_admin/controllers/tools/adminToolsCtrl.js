@@ -219,6 +219,10 @@ groovepacks_admin_controllers.
         $scope.popover_is_visible = false;
       }
 
+      myscope.delete_summary = function(tenant){
+        tenants.single.delete_summary(tenant);
+      }
+
       myscope.init = function () {
         myscope.do_load_tentants = false;
         $scope._can_load_tentants = true;
@@ -300,6 +304,7 @@ groovepacks_admin_controllers.
               open: myscope.open_tenant_url,
               show_popover: myscope.show_popover,
               hide_popover: myscope.hide_popover,
+              delete_summary: myscope.delete_summary,
               click: $scope.open_notes
             }
 
@@ -396,6 +401,11 @@ groovepacks_admin_controllers.
               name: "Stripe",
               editable: false,
               transclude: '<a href="" ng-click="options.editable.functions.open(\'dashboard.stripe.com/customers/\'+row[field],$event)" >Stripe URL</a>'
+            }, 
+            id: {
+              name: "Delate Summary",
+              editable: false,
+              transclude: '<button confirm-click="Are you sure? You want to delete import summary!" ng-click="options.editable.functions.delete_summary(row[field],$event)">Delete</button>'
             }
           }
         };

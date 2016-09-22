@@ -85,12 +85,17 @@ module Groovepacker
         end
         
         def csv_to_json(response_body, get_formatted=true)
-          csv = CSV.new(response_body, :headers => true)
-          json_response = csv.to_a.map {|row| row.to_hash}
-          json_response = json_response - [{}]
-          json_response = json_response.as_json rescue {}
-          json_response = get_formatted_orders(json_response) if get_formatted
-          return json_response
+          begin
+            csv = CSV.new(response_body, :headers => true)
+            json_response = csv.to_a.map {|row| row.to_hash}
+            json_response = json_response - [{}]
+            json_response = json_response.as_json rescue {}
+            json_response = get_formatted_orders(json_response) if get_formatted
+            return json_response
+          rescue Exception => e
+            puts e.message
+            puts e.backtrace
+          end
         end
         
         def get_formatted_orders(json_response)

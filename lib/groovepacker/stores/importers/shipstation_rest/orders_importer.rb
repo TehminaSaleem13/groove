@@ -17,6 +17,7 @@ module Groovepacker
               set_status_and_msg_for_skipping_import
             end
             update_orders_status
+            destroy_nil_import_items
             @result
           end
 
@@ -32,6 +33,7 @@ module Groovepacker
               @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
               @credential.save
             end
+            destroy_nil_import_items
           end
 
           def import_single_order(order_no)
@@ -46,6 +48,7 @@ module Groovepacker
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)
             @import_item.destroy
+            destroy_nil_import_items
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -63,8 +66,14 @@ module Groovepacker
           def import_order_form_response(shipstation_order, order, shipments_response)
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
-              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"]} || {}
-              tracking_info = @client.get_shipments_by_orderno(order["orderId"]).first || {} if @import_item.import_type == "tagged"
+              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {}
+              if tracking_info.blank?
+                response = @client.get_shipments_by_orderno(order["orderNumber"])
+                tracking_info = {}
+                response.each do |shipment|
+                  tracking_info = shipment if shipment["voided"] == false
+                end
+              end
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
@@ -255,6 +264,10 @@ module Groovepacker
             def product_importer_client
               @product_importer_client ||= Groovepacker::Stores::Context.new(
                               Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@credential.store))
+            end
+
+            def destroy_nil_import_items
+              ImportItem.where("status IS NULL").destroy_all
             end
 
         end

@@ -166,11 +166,24 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         }
         tooltipText += '</div>';
       } else if (charts.type === 'packing_speed_stats' || charts.type === 'packing_time_stats') {
+        $.each(dashboard.packing_stats, function(i, response) {
+            if (response.key == data_points.user[0][0]){
+              $.each(response.values, function(j, value){
+                if (value[0] == data_points.data[0][0]){
+                  orders_count = value[2];
+                  items_count = value[3]; 
+                } 
+              });
+            }
+        });
         tooltipText +=
-        '<span><strong>Period Speed Score: </strong>' + get_speed(data_points.data[i][2], dashboard) + '% </span><br/>' +
-        '<span><strong>Date: </strong>' + date + '</span><br/>' +
-        '<span><strong>Daily Speed Score: </strong>' + get_speed(data_points.data[i][1], dashboard) + '% </span><br/>' +
-        '<span><strong>Avg. Time/Item: </strong>' + data_points.data[i][1] + ' sec</span>' +
+        '<span><strong>' + date + '</strong></span><br/>' +
+        '<span><strong>Period Speed Score: ' + get_speed(data_points.data[i][2], dashboard) + '%</strong></span><br/>' +
+        '<span><strong>Period Sec/Item: ' + data_points.data[i][2] + ' sec</strong></span><br/>' +
+        '<span><strong>Day\'s Speed Score: ' + get_speed(data_points.data[i][1], dashboard) + '% </strong></span><br/>' +
+        '<span><strong>Day\'s Sec/Item: ' + data.data[i][1]  + '</strong></span><br/>' +
+        '<span><strong>' + items_count + ' Items Packed</strong></span><br/>' +
+        '<span><strong>' + orders_count +' Orders Packed</strong></span><br/>' +
         '<legend style="border-bottom: 2px solid rgba(0,0,1,.86); margin-bottom: 10px;"></legend>' +
         '</div>';
       } else if (charts.type === 'packed_item_stats' || charts.type === 'packed_order_stats') {
@@ -204,6 +217,22 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
     });
   };
 
+  var stat_generate = function(dashboard){
+    $http.get('/settings/get_settings').success(function(response){
+      email = response.data.settings.email_address_for_packer_notes;
+      url = "/dashboard/1/generate_stats.json"
+      data = {}
+      data["duration"] = dashboard["main_summary"]["duration"]
+      data["email"] = email
+      if (email == ''){
+        notification.notify("Please specify an email address for system notifications in the" + "<a href = '#/settings/system/general'> General Preferences.</a>", 0);
+      } else {
+        notification.notify("Your request has been queued.", 1);
+        $http.post(url, data);
+      }
+    }); 
+  }
+
   return {
     model: {
       get: get_default,
@@ -216,7 +245,8 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       points_data: get_datapoints_data,
       tooltip: get_tool_tip,
       speed: get_speed,
-      stat_stream: get_stat_stream
+      stat_stream: get_stat_stream,
+      stat_generate: stat_generate
     }
   };
 }]);

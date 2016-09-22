@@ -92,6 +92,7 @@ class SettingsController < ApplicationController
     @result['data'] = {}
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
+    @result['current_time'] = (Time.current + GeneralSetting.all.first.try(:time_zone).to_i ).strftime('%I:%M %p')
     general_setting = GeneralSetting.all.first
 
     if general_setting.present?
@@ -239,6 +240,8 @@ class SettingsController < ApplicationController
       elsif (!params["add_time_zone"].include? ":") && params["auto_detect"] != "true" && params["auto_detect"] != "false"
         setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: false)
       end
+      @result = {};
+      @result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
     end
     setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
     render json: @result
@@ -247,6 +250,17 @@ class SettingsController < ApplicationController
   def convert_offset_in_second(offset)
     minutes = offset.split("-")[1].present? ? -offset.split(":")[1].to_i*60 : offset.split(":")[1].to_i*60   
     minutes + offset.split(":")[0].to_i*3600
+  end
+
+  def update_stat_status
+    result = {}
+    setting = GeneralSetting.all.first
+    setting.update_attribute(:stat_status, "preparing to update") if params[:percentage].to_i == 0
+    setting.update_attribute(:stat_status, nil) if params[:percentage].to_i.between?(1, 99)
+    setting.update_attribute(:stat_status, "completed") if params[:percentage].to_i == 100
+    result[:status] = "true"
+    result[:stat_status] = setting.stat_status 
+    render json: result
   end
 
   # def execute_in_bulk_action(activity)

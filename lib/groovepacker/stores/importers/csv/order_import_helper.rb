@@ -37,10 +37,8 @@ module Groovepacker
           def build_filtered_final_record
             existing_order_numbers = []
             filtered_final_record = []
-            existing_orders = Order.all
-            existing_orders.each do |order|
-              existing_order_numbers << order.increment_id
-            end
+            existing_order_numbers = Order.pluck(:increment_id)
+            
             final_record.each do |single_row|
               next unless verify_single_item(single_row, 'increment_id')
               filtered_final_record << single_row unless
@@ -148,9 +146,9 @@ module Groovepacker
           def update_status_and_save(order)
             order.status = 'onhold'
             order.save!
-            order.addactivity(
-              'Order Import CSV Import',
-              Store.find(params[:store_id]).name + ' Import')
+            #order.addactivity(
+            #  'Order Import CSV Import',
+            #  Store.find(params[:store_id]).name + ' Import')
             order.update_order_status
           end
 

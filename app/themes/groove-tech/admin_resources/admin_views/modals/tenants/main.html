@@ -107,13 +107,20 @@
         <div class="col-sm-4">
           <div style="clear:both;"></div>
           <div>
-            <h4>Stripe Customer</h4>
-            <span><a href="https://dashboard.stripe.com/customers/{{tenants.single.subscription_info.customer_id}}" target="_blank">{{tenants.single.subscription_info.email}}</a></span>
+            <h4>Stripe Customer <i class="fa fa-circle" aria-hidden="true" 
+              ng-style="{ 'color' : tenants.single.subscription_info.verified_stripe_account ? '#5cb85c' : 'red' }"></i></h4>
+            <span><a href="https://dashboard.stripe.com/customers/{{tenants.single.subscription_info.customer_id}}" target="_blank">{{tenants.single.subscription_info.email}}</a>
+            </span>
           </div>
           <div style="clear:both;"></div>
           <div>
             <h4 class="control-label">Stripe Plan</h4>
             <span><a href="https://dashboard.stripe.com/plans/{{tenants.single.subscription_info.plan_id}}" target="_blank">{{tenants.single.subscription_info.plan}}</a></span>
+          </div>
+          <div style="clear:both;"></div>
+          <div ng-show="tenants.single.logged_in_user == 'gpadmin'">
+            <h4 class="control-label">Customer ID</h4>
+            <input type="text" ng-model="tenants.single.subscription_info.customer_id" ng-blur="update_access_restrictions()" class="form-control input-style"/>
           </div>
           <div style="clear:both;"></div>
           <div ng-show="tenants.single.logged_in_user == 'gpadmin'">

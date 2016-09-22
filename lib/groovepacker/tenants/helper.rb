@@ -251,13 +251,14 @@ module Groovepacker
         @subscription = tenant.subscription
         if @subscription
           @subscription_info = params[:subscription_info]
-          @subscription.update_attribute(:customer_subscription_id, params[:subscription_info][:customer_subscription_id])
+          @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id])
           return result unless @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
           begin
             create_new_plan_and_assign(tenant)
             update_modification_status(tenant)
           rescue Exception => ex
             result = check_exception(ex, result)
+            Rollbar.error(ex, ex.message)
           end
         else
           update_fail_status(result, 'Couldn\'t find a valid subscription for the tenant.');
@@ -294,6 +295,7 @@ module Groovepacker
           created_tenant.update_attribute(:initial_plan_id, @tenant.initial_plan_id)
           @tenant.duplicate_tenant_id = created_tenant.id
           @tenant.save
+          SendStatStream.new.delay.duplicate_groovlytic_tenant(current_tenant, duplicate_name)
         rescue => e
           update_fail_status(result, e.message)
         end
@@ -421,6 +423,12 @@ module Groovepacker
         subscription_result['transaction_errors'] =
           subscription.transaction_errors if subscription.transaction_errors
         subscription_result['customer_subscription_id'] = subscription.customer_subscription_id
+        begin
+          subscriptions = Stripe::Customer.retrieve(subscription.stripe_customer_id).subscriptions
+          subscription_result['verified_stripe_account'] = subscriptions["data"].map(&:id).include? subscription.customer_subscription_id
+        rescue
+          subscription_result['verified_stripe_account'] = false
+        end
       end
 
       def create_new_plan_and_assign(tenant)

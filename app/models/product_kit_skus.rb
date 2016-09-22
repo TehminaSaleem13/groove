@@ -1,6 +1,6 @@
 class ProductKitSkus < ActiveRecord::Base
   belongs_to :product
-  attr_accessible :sku
+  attr_accessible :sku, :option_product_id, :qty
   has_many :order_item_kit_products, dependent: :destroy
   belongs_to :option_product, class_name: 'Product'
   after_save :add_product_in_order_items

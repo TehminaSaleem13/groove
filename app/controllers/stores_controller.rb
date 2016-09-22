@@ -1,6 +1,5 @@
 class StoresController < ApplicationController
   before_filter :groovepacker_authorize!, :except => [:handle_ebay_redirect]
-
   include StoresHelper
 
   def index
@@ -294,8 +293,7 @@ class StoresController < ApplicationController
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
                 order_file_data = params[:orderfile].read
                 File.open(path, "wb") { |f| f.write(order_file_data) }
-
-                GroovS3.create_csv(current_tenant, 'order', @store.id, order_file_data)
+                GroovS3.create_order_csv(current_tenant, 'order', @store.id, order_file_data)
                 @result['csv_import'] = true
               end
               unless params[:productfile].nil?
@@ -308,7 +306,7 @@ class StoresController < ApplicationController
               end
               unless params[:kitfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
-                kit_file_data = params[:kitfile].read
+                kit_file_data = params[:kitfile]
                 File.open(path, "wb") { |f| f.write(kit_file_data) }
 
                 GroovS3.create_csv(current_tenant, 'kit', @store.id, kit_file_data)
@@ -690,7 +688,8 @@ class StoresController < ApplicationController
             order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
             if File.exists? order_file_path
               # read 4 kb data
-              order_file_data = IO.read(order_file_path, 40960)
+              # order_file_data = IO.read(open("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv"), 40960)
+              order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
               @result['order']['data'] = order_file_data
               File.delete(order_file_path)
             end
@@ -906,7 +905,7 @@ class StoresController < ApplicationController
         if OrderImportSummary.where(status: 'in_progress').empty?
           bulk_actions = Groovepacker::Orders::BulkActions.new
           bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+          #bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
         else
           @result['status'] = false
           @result['messages'].push("Import is in progress. Try after it is complete")
@@ -1055,7 +1054,7 @@ class StoresController < ApplicationController
     if current_user.can? 'add_edit_stores'
       system_store_id = Store.find_by_store_type('system').id.to_s
       params['_json'].each do |store|
-        @store = Store.find(store["id"])
+        @store = Store.where(id: store["id"]).first
         unless @store.nil?
           Product.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
           Order.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
@@ -1349,88 +1348,14 @@ class StoresController < ApplicationController
   end
 
   def export_active_products
-    require 'csv'
     result = Hash.new
-    result['status'] = true
-    result['messages'] = []
-
-    products = Product.where(status: 'active')
-    unless products.empty?
-      filename = 'groove-products-'+Time.now.to_s+'.csv'
-      row_map = {
-        :SKU => '',
-        :Name => '',
-        :WarehouseLocation => '',
-        :WeightOz => '',
-        :Category => '',
-        :Tag1 => '',
-        :Tag2 => '',
-        :Tag3 => '',
-        :Tag4 => '',
-        :Tag5 => '',
-        :CustomsDescription => '',
-        :CustomsValue => '',
-        :CustomsTariffNo => '',
-        :CustomsCountry => '',
-        :ThumbnailUrl => '',
-        :UPC => '',
-        :FillSKU => '',
-        :Length => '',
-        :Width => '',
-        :Height => '',
-        :UseProductName => '',
-        :Active => ''
-      }
-      data = CSV.generate do |csv|
-        csv << row_map.keys
-
-        products.each do |product|
-          single_row = row_map.dup
-          single_row[:SKU] = product.primary_sku
-          single_row[:Name] = product.name
-          single_row[:WarehouseLocation] = product.primary_warehouse.location_primary
-          unless product.weight.round == 0
-            single_row[:WeightOz] = product.weight.round.to_s
-          else
-            single_row[:WeightOz] = ''
-          end
-          single_row[:Category] = product.primary_category
-          single_row[:Tag1] = ''
-          single_row[:Tag2] = ''
-          single_row[:Tag3] = ''
-          single_row[:Tag4] = ''
-          single_row[:Tag5] = ''
-          single_row[:CustomsDescription] = ''
-          single_row[:CustomsValue] = ''
-          single_row[:CustomsTariffNo] = ''
-          single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
-          single_row[:ThumbnailUrl] = ''
-          single_row[:UPC] = product.primary_barcode
-          single_row[:FillSKU] = ''
-          single_row[:Length] = ''
-          single_row[:Width] = ''
-          single_row[:Height] = ''
-          single_row[:UseProductName] = ''
-          single_row[:Active] = product.is_active
-
-          csv << single_row.values
-        end
-      end
-    else
-      result['messages'] << 'There are no active products'
-    end
-
-    unless result['status']
-      data = CSV.generate do |csv|
-        csv << result['messages']
-      end
-      filename = 'error.csv'
-    end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.csv { send_data data, :type => 'text/csv', :filename => filename }
-    end
+    tenant = Apartment::Tenant.current
+    export_product = ExportSsProductsCsv.new
+    export_product.delay.export_active_products(tenant)
+    result["message"] = "Your export is being processed. It will be emailed to #{GeneralSetting.all.first.email_address_for_packer_notes} when it is ready." 
+    # result['message'] = "expoting report started" 
+    # GroovRealtime::emit('popup_display_for_on_demand_import', result, :tenant)
+    render json: result
   end
 
   def pull_store_inventory

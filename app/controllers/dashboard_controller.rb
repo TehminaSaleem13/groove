@@ -26,4 +26,13 @@ class DashboardController < ApplicationController
     render json: results
   end
 
+  def generate_stats
+    results = {"status"=> true}
+    tenant = Apartment::Tenant.current
+    stat_stream_obj = SendStatStream.new()
+    # stat_stream_obj.generate_export(tenant, params)
+    stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'generate_export').generate_export(tenant, params)
+    render json: results
+  end
+
 end

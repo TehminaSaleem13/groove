@@ -1,6 +1,6 @@
-groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
+groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'store_data', '$window', '$sce', '$interval', '$state', '$stateParams', '$modal',
   '$modalInstance', '$timeout', 'hotkeys', 'stores', 'warehouses', 'notification', '$q', 'groov_translator', 'Lightbox',
-  function (scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator, Lightbox) {
+  function ($http, scope, store_data, $window, $sce, $interval, $state, $stateParams, $modal, $modalInstance, $timeout, hotkeys, stores, warehouses, notification, $q, groov_translator, Lightbox) {
     var myscope = {};
 
     /**
@@ -648,7 +648,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$scope', 'store_data', 
     };
 
     scope.export_active_products = function () {
-      $window.open('/stores/export_active_products.csv');
+      // $window.open('/stores/export_active_products.csv');
+      $http.get('/stores/export_active_products.json').success(function (data) {
+        notification.notify(data.message, 1);
+      });
     };
 
     myscope.init = function () {

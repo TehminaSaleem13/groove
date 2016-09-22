@@ -173,7 +173,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
         products.setup.select_all = false;
         products.setup.inverted = false;
         products.selected = [];
-        $window.open('/csv/' + data.filename);
+        $window.open(data.filename);
       } else {
         notification.notify(data.messages, 0);
       }

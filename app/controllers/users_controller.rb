@@ -101,9 +101,9 @@ class UsersController < ApplicationController
           if !Rails.env.test?
             tenant_name = Apartment::Tenant.current
             send_user_info_obj = SendUsersInfo.new()
-            user_change_hash = {@user.id => username_change.first} if username_change
-            send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name, user_change_hash)
-            #send_user_info_obj.build_send_users_stream(tenant_name, user_change_hash)
+            send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
+          else
+            HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/users/update_username?tenant=#{Apartment::Tenant.current}&username=#{@user.username}&packing_user_id=#{@user.id}") rescue nil if @user.present?
           end
 
         else
