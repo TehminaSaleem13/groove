@@ -56,7 +56,7 @@ module ScanPack
     end
 
     def find_order
-      ['awaiting', 'onhold', 'serviceissue', 'cancelled', 'scanned'].each do |status|
+      ["('awaiting')", "('onhold')", "('serviceissue', 'cancelled', 'scanned')"].each do |status|
         return unless @orders.blank?
         query = generate_query(status)
         @orders = Order.where(query)
@@ -72,7 +72,7 @@ module ScanPack
         \) or \
         non_hyphen_increment_id IN \(\
           '#{input_without_special_char}', '\##{input_without_special_char}'\
-        \)) and status = '#{status}'
+        \)) and status IN #{status}
       )
     end
 
