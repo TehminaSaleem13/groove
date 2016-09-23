@@ -1,6 +1,6 @@
 FactoryGirl.define do
   factory :subscription do
-    email "test1@gmail.com"
+    email "success@simulator.amazonses.com"
     tenant_name 'test'
     amount '30'
     stripe_user_token 'fsafa43244324234'

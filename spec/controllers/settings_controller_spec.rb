@@ -64,8 +64,8 @@ RSpec.describe SettingsController, type: :controller do
 
   context 'Export backup CSV' do
     it 'must export CSV' do
-      general_setting = FactoryGirl.create :general_setting, admin_email: 'test@gmail.com',
-                                           export_csv_email: 'test@gmail.com'
+      general_setting = FactoryGirl.create :general_setting, admin_email: 'success@simulator.amazonses.com',
+                                           export_csv_email: 'success@simulator.amazonses.com'
       xhr :get, :export_csv, {}
       result = JSON.parse response.body
       expect(result['status']).to eql true

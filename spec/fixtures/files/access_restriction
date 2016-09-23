@@ -16,7 +16,7 @@
    "progress"=>"transaction_complete",
    "transaction_errors"=>"",
    "start_day"=>"20 Jun",
-   "email"=>"myplan1@mailinator.com",
+   "email"=>"success@simulator.amazonses.com",
    "customer_subscription_id"=>"sub_8fmwQ41vbiUpQM"},
  "access_restrictions_info"=>
   {"shipped_current"=>68,

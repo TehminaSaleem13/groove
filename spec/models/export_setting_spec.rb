@@ -6,7 +6,7 @@ RSpec.describe ExportSetting, :type => :model do
       :export_setting,
       send_export_email_on_mon: true,
       time_to_send_export_email: Time.zone.now.since(rand(1..999).days),
-      order_export_email: 'test@gmail.com'
+      order_export_email: 'success@simulator.amazonses.com'
     )
 
     @general_settings = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
