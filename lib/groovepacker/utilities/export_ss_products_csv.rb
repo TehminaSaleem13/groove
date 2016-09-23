@@ -50,7 +50,7 @@ class ExportSsProductsCsv
       filename = 'error.csv'
     end
     no_product = products.blank?
-    object_url = GroovS3.create_order_csv(Apartment::Tenant.current, 'product', filename, data).url rescue nil
+    object_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'product', filename, data).url rescue nil
     CsvExportMailer.send_s3_product_object_url(filename, object_url, Apartment::Tenant.current, no_product).deliver 
   end
 

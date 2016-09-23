@@ -293,23 +293,21 @@ class StoresController < ApplicationController
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
                 order_file_data = params[:orderfile].read
                 File.open(path, "wb") { |f| f.write(order_file_data) }
-                GroovS3.create_order_csv(current_tenant, 'order', @store.id, order_file_data)
+                GroovS3.create_public_csv(current_tenant, 'order', @store.id, order_file_data)
                 @result['csv_import'] = true
               end
               unless params[:productfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
                 product_file_data = params[:productfile].read
                 File.open(path, "wb") { |f| f.write(product_file_data) }
-
-                GroovS3.create_csv(current_tenant, 'product', @store.id, product_file_data)
+                GroovS3.create_public_csv(current_tenant, 'product', @store.id, product_file_data)
                 @result['csv_import'] = true
               end
               unless params[:kitfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
                 kit_file_data = params[:kitfile]
                 File.open(path, "wb") { |f| f.write(kit_file_data) }
-
-                GroovS3.create_csv(current_tenant, 'kit', @store.id, kit_file_data)
+                GroovS3.create_public_csv(current_tenant, 'kit', @store.id, kit_file_data)
                 @result['csv_import'] = true
               end
             end
@@ -723,7 +721,7 @@ class StoresController < ApplicationController
 
             product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
             if File.exists? product_file_path
-              product_file_data = IO.read(product_file_path, 40960)
+              product_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
               @result['product']['data'] = product_file_data
               File.delete(product_file_path)
             end
@@ -748,7 +746,7 @@ class StoresController < ApplicationController
 
             kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
             if File.exists? kit_file_path
-              kit_file_data = IO.read(kit_file_path, 40960)
+              kit_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
               @result['kit']['data'] = kit_file_data
               File.delete(kit_file_path)
             end
@@ -905,7 +903,7 @@ class StoresController < ApplicationController
         if OrderImportSummary.where(status: 'in_progress').empty?
           bulk_actions = Groovepacker::Orders::BulkActions.new
           bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-          #bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
         else
           @result['status'] = false
           @result['messages'].push("Import is in progress. Try after it is complete")
