@@ -24,7 +24,7 @@ module Groovepacker
                 import_item.to_import = result[:total_imported]
                 import_item.save
                 orders_response.each do |item|
-                  import_item.reload
+                  import_item = ImportItem.find_by_id(import_item.id) rescue import_item
                   break if import_item.status == 'cancelled'
                   next unless item.class.to_s.include?("Hash")
                   import_single_order(item, import_item, client, credential, session, result)
@@ -39,7 +39,8 @@ module Groovepacker
               Rollbar.error(e, e.message)
               ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
             end
-            import_item.reload
+            import_item = ImportItem.find_by_id(import_item.id) rescue import_item
+
             if get_statuses_to_import(credential).blank?
               result[:status] = false
               import_item.message = 'All import statuses are disabled. Import skipped.'

@@ -1051,7 +1051,7 @@ class StoresController < ApplicationController
       product_import.cancel = true
       unless product_import.status == 'in_progress'
         product_import.status = 'cancelled'
-        Delayed::Job.find(product_import.delayed_job_id).destroy
+        Delayed::Job.find(product_import.delayed_job_id).destroy rescue nil
       end
 
       if product_import.save

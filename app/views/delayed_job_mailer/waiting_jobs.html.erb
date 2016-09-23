@@ -1,0 +1,28 @@
+<style type="text/css">
+  table.delayed_job td {padding: 5px; border: 1px solide #d4d4d4;}
+  table.delayed_job {padding: 5px;}
+</style>
+<h3>Here is the list of jobs waiting for worker to be assigned:</h3>
+----
+<% current_time = Time.now %>
+<% @jobs.each_with_index do |job, index| %>
+  <h3>Job-<%=index+1%></h3>
+  <table class="delayed_job" style="padding: 5px;">
+    <tr>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><strong>Run At: </strong></td>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><%= job.run_at %></td>
+    </tr>
+    <tr>
+      <td style="width: 100px;padding: 5px;border: 1px solid #d4d4d4;"><strong>Waiting For: </strong></td>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><%= ((job.run_at-current_time)/60).round(2) %> minutes</td>
+    </tr>
+    <tr>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><strong>Queue: </strong></td>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><%= job.queue %></td>
+    </tr>
+    <tr>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><strong>Handler: </strong></td>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><%= job.handler %></td>
+    </tr>
+  </table>
+<% end %>
