@@ -15,18 +15,31 @@ module ProductsService
       set_header
       check_headers_against_product_column
       set_data_mapping
-      csv = ""
-      csv << headers.join(",")
-      csv << "\n" 
+      csv << headers
       products.each do |item|
         if @bulk_action
           @bulk_action.reload
           return true if bulk_action_cancelled?
         end
-        csv << process_data(item).join(",")
-        csv << "\n"
+        csv << process_data(item)
       end
       csv
+      # bulk_action?
+      # set_header
+      # check_headers_against_product_column
+      # set_data_mapping
+      # csv = ""
+      # csv << headers.join(",")
+      # csv << "\n" 
+      # products.each do |item|
+      #   if @bulk_action
+      #     @bulk_action.reload
+      #     return true if bulk_action_cancelled?
+      #   end
+      #   csv << process_data(item).join(",")
+      #   csv << "\n"
+      # end
+      # csv
     end
 
     private
