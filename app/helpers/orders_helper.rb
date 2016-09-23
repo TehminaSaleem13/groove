@@ -234,7 +234,11 @@ module OrdersHelper
   end
 
   def generate_order_hash(order)
-    store_name = order.store.name || ""
+    if order.store != nil
+      store_name = order.store.name
+    else
+      store_name = ""
+    end
     @orders_result.push({ 'id' => order.id,
                           'store_name' => store_name,
                           'notes' => order.notes_internal,
