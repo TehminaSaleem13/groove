@@ -46,9 +46,7 @@ module ScanPack
     end
 
     def collect_orders
-      query = generate_query
-      @orders = Order.where(query)
-
+      find_order
       if @orders.empty? && @scanpack_settings.scan_by_tracking_number
         @orders = Order.where(
           'tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',
@@ -57,16 +55,24 @@ module ScanPack
       @single_order = @orders.first
     end
 
-    def generate_query
+    def find_order
+      ['awaiting', 'onhold', 'serviceissue', 'cancelled', 'scanned'].each do |status|
+        return unless @orders.blank?
+        query = generate_query(status)
+        @orders = Order.where(query)
+      end
+    end
+
+    def generate_query(status)
       input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       %(\
-        increment_id IN \(\
+        (increment_id IN \(\
           '#{input_with_special_char}', '\##{input_with_special_char}'\
         \) or \
         non_hyphen_increment_id IN \(\
           '#{input_without_special_char}', '\##{input_without_special_char}'\
-        \)
+        \)) and status = '#{status}'
       )
     end
 
