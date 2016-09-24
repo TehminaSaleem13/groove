@@ -6,11 +6,15 @@ import (
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
+	// "io/ioutil"
 	"log"
 	"os"
+	// "os/exec"
+	"sync"
 	_ "strconv"
 	"strings"
 	"time"
+	"runtime"
 )
 
 type CONFIG struct {
@@ -29,6 +33,7 @@ var (
 	ENV            CONFIG
 	IntTenant      string
 	IntDeleteCount int
+	wg sync.WaitGroup
 )
 
 func main() {
@@ -42,9 +47,11 @@ func main() {
 	defer db.Close()
 	tenants := collect_tenant_names(db)
 
+	// tenant_backup(tenants)
+
 	for i, tenant := range tenants {
-		msg := perform_deletion(tenant)
 		log.Println("---------- Operation ", i, " STARTED ---------")
+		msg := perform_deletion(tenant)
 		for m := range msg {
 			log.Println(m)
 		}
@@ -52,14 +59,16 @@ func main() {
 	}
 
 	end_time := time.Since(start_time)
-	log.Println("Completed In (", end_time, ")")
+	log.Println("Deletion Completed In (", end_time, ")")
 }
 
 func intialize() {
+	runtime.GOMAXPROCS(runtime.NumCPU())
+
 	_ = godotenv.Load("../../../../.env")
 
 	// DB Config
-	ENV.DB_HOST = "tcp(" + os.Getenv("DB_HOST") + ":3306)"
+	ENV.DB_HOST = os.Getenv("DB_HOST")
 	ENV.DB_NAME = "groovepacks_development"
 	ENV.DB_USER = os.Getenv("DB_USERNAME")
 	ENV.DB_PASS = os.Getenv("DB_PASSWORD")
@@ -78,7 +87,7 @@ func intialize() {
 func sql_open(db_name string) *sql.DB {
 	// user:password@host/DB?charset=utf8
 	dsn := ENV.DB_USER + ":" + ENV.DB_PASS +
-		"@" + ENV.DB_HOST + "/" + db_name +
+		"@" + "tcp(" + ENV.DB_HOST + ":3306)" + "/" + db_name +
 		"?charset=utf8"
 	db, err := sql.Open("mysql", dsn)
 	if err != nil {
@@ -130,6 +139,50 @@ func collect_tenant_names(db *sql.DB) []Tenant {
 	return tenants
 }
 
+// func tenant_backup(tenants []Tenant) {
+
+// 	for _, tenant := range tenants {
+// 		func(){
+
+// 			file_path := "public/delete_orders/" +
+// 				tenant.Name + "-" +
+// 				time.Now().In(time_zone("Asia/Kolkata")).Format("2006-01-02") +
+// 				".sql"
+
+// 			log.Println("Creating Backup for Tenant : ", tenant.Name)
+
+// 			args := []string{
+// 				"-h" + ENV.DB_HOST,
+// 				"-u" + ENV.DB_USER,
+// 				"-p" + ENV.DB_PASS,
+// 				tenant.Name,
+// 			}
+
+// 			cmd := exec.Command("mysqldump", args...)
+// 			stdout, err := cmd.StdoutPipe()
+// 			if err != nil {
+// 				log.Fatal(err)
+// 			}
+
+// 			if err := cmd.Start(); err != nil {
+// 				log.Fatal(err)
+// 			}
+
+// 			bytes, err := ioutil.ReadAll(stdout)
+// 			if err != nil {
+// 				log.Fatal(err)
+// 			}
+
+// 			err = ioutil.WriteFile(file_path, bytes, 0644)
+// 			if err != nil {
+// 				panic(err)
+// 			}
+
+// 			log.Println("Backup File Created : ", file_path)
+// 		}()
+// 	}
+// }
+
 func time_zone(location string) *time.Location {
 	zone, err := time.LoadLocation(location)
 	if err != nil {
@@ -174,13 +227,15 @@ func perform_deletion(tenant Tenant) <-chan string {
 func orders_ninety_days_ago_ids(db *sql.DB) []string {
 	var order_ids []string
 
-	rows, err := sq.
+	query := sq.
 		Select("id").
 		From("orders").
 		Where("updated_at < ?",
 			time.Now().AddDate(0, 0, -90).In(time_zone("Asia/Kolkata")).Format("2006-01-02 15:04:05")).
-		RunWith(db).Query()
+		RunWith(db)
+	log.Println(query.ToSql())
 
+	rows, err := query.Query()
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -201,14 +256,17 @@ func orders_ninety_days_ago_ids(db *sql.DB) []string {
 func orders_custom_days_ids(delete_order_days int, db *sql.DB) []string {
 	var order_ids []string
 
-	rows, err := sq.
+	query := sq.
 		Select("id").
 		From("orders").
 		Where("updated_at < ? && (status = ? || status = ?)",
 			time.Now().AddDate(0, 0, -delete_order_days).In(time_zone("Asia/Kolkata")).Format("2006-01-02 15:04:05"),
 			"awaiting", "onhold").
-		RunWith(db).Query()
+		RunWith(db)
 
+	log.Println(query.ToSql())
+
+	rows, err := query.Query()
 	defer rows.Close()
 	if err != nil {
 		log.Fatal(err)
@@ -325,4 +383,11 @@ func delete_items(order_ids []string, db *sql.DB) {
 		log.Println(query.ToSql())
 		log.Println(query.Exec())
 	}
+
+	_query := sq.
+		Delete("order_items").
+		Where("id IN (" + strings.Join(order_item_ids, ",") + ")").
+		RunWith(db)
+	log.Println(_query.ToSql())
+	log.Println(_query.Exec())
 }
