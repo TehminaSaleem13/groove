@@ -14,14 +14,14 @@ class DeleteOrders
   def perform
     unless @tenant.blank?
       tenant = Tenant.find_by_name(@tenant)
-      take_backup(@tenant.name)
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{@tenant.name} #{@delete_count}")
+      # take_backup(@tenant.name)
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{Rails.env} #{@tenant.name} #{@delete_count}")
     else
       tenants = Tenant.order(:name) rescue Tenant.all
-      tenants.each do |tenant|
-        take_backup(tenant.name)
-      end
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders")
+      # tenants.each do |tenant|
+      #   take_backup(tenant.name)
+      # end
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{Rails.env}")
     end
   end
 
@@ -46,26 +46,26 @@ class DeleteOrders
   #   end
   #  end
 
-  def take_backup(tenant)
-    # tenant = 'unitedmedco'
-    file_name = "#{tenant}-#{Date.today.to_s}"
-    #crds = get_credentials
-    puts "Taking backup for #{tenant}"
-    system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
-    data = File.read("public/delete_orders/#{file_name}.sql")
-    GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
-    system "rm public/delete_orders/#{file_name}.sql"
+  # def take_backup(tenant)
+  #   # tenant = 'unitedmedco'
+  #   file_name = "#{tenant}-#{Date.today.to_s}"
+  #   #crds = get_credentials
+  #   puts "Taking backup for #{tenant}"
+  #   system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
+  #   data = File.read("public/delete_orders/#{file_name}.sql")
+  #   GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
+  #   system "rm public/delete_orders/#{file_name}.sql"
 
-    #back_hash = []
-    #back_hash.push(build_store_user_hash('stores'))
-    #back_hash.push(build_store_user_hash('users'))
-    #@orders_ids.each do |order|
-    #  back_hash.push(build_hash(order.id))
-    #end
-    #puts back_hash.inspect
-    #file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    #GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
-  end
+  #   #back_hash = []
+  #   #back_hash.push(build_store_user_hash('stores'))
+  #   #back_hash.push(build_store_user_hash('users'))
+  #   #@orders_ids.each do |order|
+  #   #  back_hash.push(build_hash(order.id))
+  #   #end
+  #   #puts back_hash.inspect
+  #   #file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+  #   #GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
+  # end
 
   # def delete_orders
   #   tenant = Apartment::Tenant.current
