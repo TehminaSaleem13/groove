@@ -38,6 +38,14 @@ var (
 
 func main() {
 
+	f, err := os.OpenFile("log/go.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	if err != nil {
+	    log.Println("error opening file: %v", err)
+	}
+	defer f.Close()
+
+	log.SetOutput(f)
+
 	start_time := time.Now()
 	intialize()
 
@@ -65,23 +73,24 @@ func main() {
 func intialize() {
 	runtime.GOMAXPROCS(runtime.NumCPU())
 
-	_ = godotenv.Load("../../../../.env")
+	// Intial Variables
+	if len(os.Args) > 2 {
+		IntTenant = os.Args[2]
+		// IntDeleteCount = 100 //os.Args[2]
+	}
+
+	log.Println(IntTenant)
+
+	_ = godotenv.Load(".env")
 
 	// DB Config
 	ENV.DB_HOST = os.Getenv("DB_HOST")
-	ENV.DB_NAME = "groovepacks_development"
+	ENV.DB_NAME = "groovepacks_" + os.Args[1]
 	ENV.DB_USER = os.Getenv("DB_USERNAME")
 	ENV.DB_PASS = os.Getenv("DB_PASSWORD")
 
-	fmt.Println(ENV)
+	log.Println(ENV)
 
-	// Intial Variables
-	if len(os.Args) > 2 {
-		IntTenant = os.Args[1]
-		IntDeleteCount = 100 //os.Args[2]
-	}
-
-	fmt.Println(IntTenant, IntDeleteCount)
 }
 
 func sql_open(db_name string) *sql.DB {
@@ -89,7 +98,10 @@ func sql_open(db_name string) *sql.DB {
 	dsn := ENV.DB_USER + ":" + ENV.DB_PASS +
 		"@" + "tcp(" + ENV.DB_HOST + ":3306)" + "/" + db_name +
 		"?charset=utf8"
+	log.Println(dsn)
+
 	db, err := sql.Open("mysql", dsn)
+	
 	if err != nil {
 		log.Fatal(err)
 	}
