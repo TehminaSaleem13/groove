@@ -877,6 +877,7 @@ class Order < ActiveRecord::Base
       addactivity("Order Exception Cleared", current_user.name)
       stat_stream_obj = SendStatStream.new()
       stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'clear_order_exception_#{self.id}').send_order_exception(self.id, tenant)
+      #stat_stream_obj.send_order_exception(self.id, tenant)
     else
       result['status'] &= false
       result['messages'].push('Error clearing exceptions')
