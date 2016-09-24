@@ -53,7 +53,7 @@ class DeleteOrders
     puts "Taking backup for #{tenant}"
     system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
     data = File.read("public/delete_orders/#{file_name}.sql")
-    # GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
+    GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
     system "rm public/delete_orders/#{file_name}.sql"
 
     #back_hash = []
