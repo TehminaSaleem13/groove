@@ -10,11 +10,11 @@ import (
 	"log"
 	"os"
 	// "os/exec"
-	"sync"
+	"runtime"
 	_ "strconv"
 	"strings"
+	"sync"
 	"time"
-	"runtime"
 )
 
 type CONFIG struct {
@@ -30,9 +30,9 @@ type Tenant struct {
 }
 
 var (
-	ENV            CONFIG
-	IntTenant      string
-	IntDeleteCount int
+	ENV       CONFIG
+	IntTenant string
+	// IntDeleteCount int
 	wg sync.WaitGroup
 )
 
@@ -57,15 +57,15 @@ func main() {
 
 	// tenant_backup(tenants)
 
-	for i, tenant := range tenants {
-		log.Println("---------- Operation ", i, " STARTED ---------")
-		msg := perform_deletion(tenant)
-		for m := range msg {
-			log.Println(m)
-		}
-		log.Println("----------------------------------------------")
+	for _, tenant := range tenants {
+		wg.Add(1)
+		go func(tenant Tenant) {
+			perform_deletion(tenant)
+			wg.Done()
+		}(tenant)
 	}
 
+	wg.Wait()
 	end_time := time.Since(start_time)
 	log.Println("Deletion Completed In (", end_time, ")")
 }
@@ -101,7 +101,7 @@ func sql_open(db_name string) *sql.DB {
 	log.Println(dsn)
 
 	db, err := sql.Open("mysql", dsn)
-	
+
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -203,37 +203,28 @@ func time_zone(location string) *time.Location {
 	return zone
 }
 
-func perform_deletion(tenant Tenant) <-chan string {
-	msg := make(chan string)
+func perform_deletion(tenant Tenant) {
+	db := sql_open(tenant.Name)
+	defer db.Close()
 
-	go func() {
-		msg <- "Performing Deletion for Tenant DB -> " + tenant.Name
-		defer close(msg)
+	order_ids := orders_ninety_days_ago_ids(db)
+	delete_order_days := tenant.OrdersDeleteDays
 
-		db := sql_open(tenant.Name)
-		defer db.Close()
+	if delete_order_days > 0 {
+		order_ids = append(order_ids, orders_custom_days_ids(delete_order_days, db)...)
+		order_ids = removeDuplicates(order_ids)
+	}
 
-		order_ids := orders_ninety_days_ago_ids(db)
-		delete_order_days := tenant.OrdersDeleteDays
+	if len(order_ids) == 0 {
+		log.Println("No Orders Found !!!")
+		return
+	}
 
-		if delete_order_days > 0 {
-			order_ids = append(order_ids, orders_custom_days_ids(delete_order_days, db)...)
-			order_ids = removeDuplicates(order_ids)
-		}
+	//if IntDeleteCount > 0 {
+	//	order_ids = order_ids[:IntDeleteCount]
+	//}
 
-		if len(order_ids) == 0 {
-			msg <- "No Orders Found !!!"
-			return
-		}
-
-		//if IntDeleteCount > 0 {
-		//	order_ids = order_ids[:IntDeleteCount]
-		//}
-
-		msg <- delete_orders(order_ids, db, &msg)
-	}()
-
-	return msg
+	delete_orders(order_ids, db)
 }
 
 func orders_ninety_days_ago_ids(db *sql.DB) []string {
@@ -308,7 +299,7 @@ func removeDuplicates(a []string) []string {
 	return result
 }
 
-func delete_orders(order_ids []string, db *sql.DB, msg *chan string) string {
+func delete_orders(order_ids []string, db *sql.DB) {
 	for i, j := 0, len(order_ids); i < j; {
 		tmp := j - i
 		if tmp > 500 {
@@ -345,7 +336,7 @@ func delete_orders(order_ids []string, db *sql.DB, msg *chan string) string {
 		i += 500
 	}
 
-	return "Orders Deleted"
+	log.Println("Orders Deleted")
 }
 
 func delete_items(order_ids []string, db *sql.DB) {
