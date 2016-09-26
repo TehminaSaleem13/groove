@@ -12,16 +12,17 @@ class DeleteOrders
   end
 
   def perform
+    database = Rails.configuration.database_configuration[Rails.env]["database"]
     unless @tenant.blank?
       tenant = Tenant.find_by_name(@tenant)
       # take_backup(@tenant.name)
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{Rails.env} #{@tenant.name} #{@delete_count}")
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
     else
       tenants = Tenant.order(:name) rescue Tenant.all
       # tenants.each do |tenant|
       #   take_backup(tenant.name)
       # end
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{Rails.env}")
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
     end
   end
 
