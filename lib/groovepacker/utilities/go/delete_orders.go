@@ -85,7 +85,7 @@ func intialize() {
 
 	// DB Config
 	ENV.DB_HOST = os.Getenv("DB_HOST")
-	ENV.DB_NAME = "groovepacks_" + os.Args[1]
+	ENV.DB_NAME = os.Args[1]
 	ENV.DB_USER = os.Getenv("DB_USERNAME")
 	ENV.DB_PASS = os.Getenv("DB_PASSWORD")
 
