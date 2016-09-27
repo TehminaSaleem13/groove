@@ -12,100 +12,104 @@ class DeleteOrders
   end
 
   def perform
+    database = Rails.configuration.database_configuration[Rails.env]["database"]
     unless @tenant.blank?
       tenant = Tenant.find_by_name(@tenant)
-      perform_for_single_tenant(tenant)
+      # take_backup(@tenant.name)
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
     else
       tenants = Tenant.order(:name) rescue Tenant.all
-      tenants.each do |tenant|
-        perform_for_single_tenant(tenant)
-      end
+      # tenants.each do |tenant|
+      #   take_backup(tenant.name)
+      # end
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
     end
   end
 
-  def perform_for_single_tenant(tenant)
-    begin
-      Apartment::Tenant.switch(tenant.name)
-      orders_ninety_days_ago_ids = []
-      orders_custom_days_id = []
-      delete_orders_days = tenant.orders_delete_days
-      #@orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
-      #@orders = Order.find(:all, :conditions => ["updated_at < ?", 91.days.ago.beginning_of_day])
-      orders_ninety_days_ago_ids = Order.where("updated_at < ?", 91.days.ago.beginning_of_day).pluck(:id)
-      orders_custom_days_id = Order.where("updated_at < ? && (status = ? || status = ?)", delete_orders_days.days.ago.beginning_of_day, "awaiting", "onhold").pluck(:id) if delete_orders_days > 0
-      @orders_ids = (orders_ninety_days_ago_ids + orders_custom_days_id).uniq
-      @orders_ids = @orders_ids.first(@delete_count) unless @delete_count.blank?
-      return if @orders_ids.empty?
-      take_backup(tenant.name)
-      delete_orders
-    rescue Exception => e
-      puts e.message
-      puts e.backtrace.join("\n")
-    end
-   end
+  # def perform_for_single_tenant(tenant)
+  #   begin
+  #     Apartment::Tenant.switch(tenant.name)
+  #     orders_ninety_days_ago_ids = []
+  #     orders_custom_days_id = []
+  #     delete_orders_days = tenant.orders_delete_days
+  #     #@orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
+  #     #@orders = Order.find(:all, :conditions => ["updated_at < ?", 91.days.ago.beginning_of_day])
+  #     orders_ninety_days_ago_ids = Order.where("updated_at < ?", 91.days.ago.beginning_of_day).pluck(:id)
+  #     orders_custom_days_id = Order.where("updated_at < ? && (status = ? || status = ?)", delete_orders_days.days.ago.beginning_of_day, "awaiting", "onhold").pluck(:id) if delete_orders_days > 0
+  #     @orders_ids = (orders_ninety_days_ago_ids + orders_custom_days_id).uniq
+  #     @orders_ids = @orders_ids.first(@delete_count) unless @delete_count.blank?
+  #     return if @orders_ids.empty?
+  #     take_backup(tenant.name)
+  #     delete_orders
+  #   rescue Exception => e
+  #     puts e.message
+  #     puts e.backtrace.join("\n")
+  #   end
+  #  end
 
-  def take_backup(tenant)
-    tenant = 'unitedmedco'
-    file_name = "#{tenant}-#{Date.today.to_s}"
-    #crds = get_credentials
-    system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
-    data = File.read("public/delete_orders/#{file_name}.sql")
-    GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
-    system "rm public/delete_orders/#{file_name}.sql"
+  # def take_backup(tenant)
+  #   # tenant = 'unitedmedco'
+  #   file_name = "#{tenant}-#{Date.today.to_s}"
+  #   #crds = get_credentials
+  #   puts "Taking backup for #{tenant}"
+  #   system "mysqldump #{tenant} -h#{ENV['DB_HOST']} -u#{ENV['DB_USERNAME']} -p#{ENV['DB_PASSWORD']} > public/delete_orders/#{file_name}.sql"
+  #   data = File.read("public/delete_orders/#{file_name}.sql")
+  #   GroovS3.create_order_backup(tenant, "#{file_name}.sql", data)
+  #   system "rm public/delete_orders/#{file_name}.sql"
 
-    #back_hash = []
-    #back_hash.push(build_store_user_hash('stores'))
-    #back_hash.push(build_store_user_hash('users'))
-    #@orders_ids.each do |order|
-    #  back_hash.push(build_hash(order.id))
-    #end
-    #puts back_hash.inspect
-    #file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    #GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
-  end
+  #   #back_hash = []
+  #   #back_hash.push(build_store_user_hash('stores'))
+  #   #back_hash.push(build_store_user_hash('users'))
+  #   #@orders_ids.each do |order|
+  #   #  back_hash.push(build_hash(order.id))
+  #   #end
+  #   #puts back_hash.inspect
+  #   #file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+  #   #GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
+  # end
 
-  def delete_orders
-    tenant = Apartment::Tenant.current
-    @orders_ids.each_slice(500) do |orders_ids|
-      # orders_ids = orders.map(&:id)
-      delete_order_data(orders_ids, tenant)
-      Order.delete_all(["id IN (?)", orders_ids])
-    end
-  end
+  # def delete_orders
+  #   tenant = Apartment::Tenant.current
+  #   @orders_ids.each_slice(500) do |orders_ids|
+  #     # orders_ids = orders.map(&:id)
+  #     delete_order_data(orders_ids, tenant)
+  #     Order.delete_all(["id IN (?)", orders_ids])
+  #   end
+  # end
 
-  def delete_order_data(orders_ids, tenant)
-    delete_items(tenant, orders_ids)
-    OrderActivity.delete_all(["order_id IN (?)", orders_ids])
-    OrderException.delete_all(["order_id IN (?)", orders_ids])
-    OrderSerial.delete_all(["order_id IN (?)", orders_ids])
-    OrderShipping.delete_all(["order_id IN (?)", orders_ids])
+  # def delete_order_data(orders_ids, tenant)
+  #   delete_items(tenant, orders_ids)
+  #   OrderActivity.delete_all(["order_id IN (?)", orders_ids])
+  #   OrderException.delete_all(["order_id IN (?)", orders_ids])
+  #   OrderSerial.delete_all(["order_id IN (?)", orders_ids])
+  #   OrderShipping.delete_all(["order_id IN (?)", orders_ids])
 
-    #delete_items(order.id)
-    #order.order_activities.destroy_all unless order.order_activities.empty?
-    #order.order_exception.destroy if order.order_exception
-    #order.order_serials.destroy_all unless order.order_serials.empty?
-    #order.order_shipping.destroy if order.order_shipping
-    #order.destroy
-  end
+  #   #delete_items(order.id)
+  #   #order.order_activities.destroy_all unless order.order_activities.empty?
+  #   #order.order_exception.destroy if order.order_exception
+  #   #order.order_serials.destroy_all unless order.order_serials.empty?
+  #   #order.order_shipping.destroy if order.order_shipping
+  #   #order.destroy
+  # end
 
-  def delete_items(tenant, orders_ids)
-    order_items = OrderItem.where("order_id IN (?)", orders_ids)
-    order_items_ids = order_items.map(&:id)
-    OrderItemKitProduct.delete_all(["order_item_id IN (?)", order_items_ids])
-    OrderItemOrderSerialProductLot.delete_all(["order_item_id IN (?)", order_items_ids])
-    OrderItemScanTime.delete_all(["order_item_id IN (?)", order_items_ids])
-    order_items.destroy_all
+  # def delete_items(tenant, orders_ids)
+  #   order_items = OrderItem.where("order_id IN (?)", orders_ids)
+  #   order_items_ids = order_items.map(&:id)
+  #   OrderItemKitProduct.delete_all(["order_item_id IN (?)", order_items_ids])
+  #   OrderItemOrderSerialProductLot.delete_all(["order_item_id IN (?)", order_items_ids])
+  #   OrderItemScanTime.delete_all(["order_item_id IN (?)", order_items_ids])
+  #   order_items.destroy_all
 
-    # order = Order.find(id)
-    # order_items = order.order_items
-    # return if order_items.empty?
-    # order_items.each do |item|
-    #   item.order_item_kit_products.destroy_all unless item.order_item_kit_products.empty?
-    #   item.order_item_order_serial_product_lots. destroy_all unless item.order_item_order_serial_product_lots.empty?
-    #   item.order_item_scan_times.destroy_all unless item.order_item_scan_times.empty?
-    #   item.destroy
-    # end
-  end
+  #   # order = Order.find(id)
+  #   # order_items = order.order_items
+  #   # return if order_items.empty?
+  #   # order_items.each do |item|
+  #   #   item.order_item_kit_products.destroy_all unless item.order_item_kit_products.empty?
+  #   #   item.order_item_order_serial_product_lots. destroy_all unless item.order_item_order_serial_product_lots.empty?
+  #   #   item.order_item_scan_times.destroy_all unless item.order_item_scan_times.empty?
+  #   #   item.destroy
+  #   # end
+  # end
 
   # def build_store_user_hash(key)
   #   result = {}
@@ -257,10 +261,10 @@ class DeleteOrders
   #   }
   # end
 
-  def get_credentials
-    info = YAML::load(IO.read("config/database.yml"))
-    credentials = info[Rails.env]
-    credentials["host"] = "localhost" if credentials["host"].blank?
-    return credentials
-  end
+  # def get_credentials
+  #   info = YAML::load(IO.read("config/database.yml"))
+  #   credentials = info[Rails.env]
+  #   credentials["host"] = "localhost" if credentials["host"].blank?
+  #   return credentials
+  # end
 end

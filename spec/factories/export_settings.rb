@@ -12,7 +12,7 @@ FactoryGirl.define do
     last_exported "2016-04-07 01:51:44" 
     export_orders_option "on_same_day"
     order_export_type "include_all" 
-    order_export_email "test@example.com"
+    order_export_email "success@simulator.amazonses.com"
     start_time "2016-07-04 16:41:16" 
     end_time "2016-07-04 16:41:16" 
     manual_export false

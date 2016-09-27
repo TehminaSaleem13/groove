@@ -653,7 +653,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should ADD note" do
     request.accept = "application/json"
 
-    @generalsetting.update_attribute(:email_address_for_packer_notes, 'groovetest123456@gmail.com')
+    @generalsetting.update_attribute(:email_address_for_packer_notes, 'success@simulator.amazonses.com')
     order = FactoryGirl.create(:order, :increment_id=>'123-456')
 
     get :add_note, {:id => order.id, note: 'Hello'}
@@ -685,7 +685,7 @@ RSpec.describe ScanPackController, :type => :controller do
   it "should scan product instruction" do
     request.accept = "application/json"
 
-    @generalsetting.update_attribute(:email_address_for_packer_notes, 'groovetest123456@gmail.com')
+    @generalsetting.update_attribute(:email_address_for_packer_notes, 'success@simulator.amazonses.com')
     @user.update_attribute(:confirmation_code, 'Hello')
 
     inv_wh = FactoryGirl.create(:inventory_warehouse)

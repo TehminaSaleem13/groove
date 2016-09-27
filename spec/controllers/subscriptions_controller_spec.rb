@@ -3,7 +3,7 @@ require 'rails_helper'
 RSpec.describe SubscriptionsController, :type => :controller do
   before(:each) do
     FactoryGirl.create(:tenant, :name=>"sitetest")
-    FactoryGirl.create(:subscription, :email=>"test_user@gmail.com")
+    FactoryGirl.create(:subscription, :email=>"success@simulator.amazonses.com")
     #@s_token = Stripe::Token.create( :card => { :number => "4111111111111111", :exp_month => 10, :exp_year => 2018, :cvc => "121" })
   end
   after(:each) do
@@ -29,7 +29,7 @@ RSpec.describe SubscriptionsController, :type => :controller do
 
     it "Email for subscription should be invalidate" do
       request.accept = "application/json"
-      get :valid_email, {"email"=>"test_user@gmail.com", "subscription"=>{}}
+      get :valid_email, {"email"=>"success@simulator.amazonses.com", "subscription"=>{}}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['valid']).to eq(false)

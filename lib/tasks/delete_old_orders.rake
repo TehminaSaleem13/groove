@@ -5,7 +5,11 @@ namespace :doo do
     #for single tenant run it like this -
     #DeleteOrders.new(tenant: "demo").schedule!
     #DeleteOrders.new.perform
+    # t1 = Time.now
     DeleteOrders.new.delay(run_at: 1.seconds.from_now).perform
+    # DeleteOrders.new.perform
+    # p Time.now - t1
+
     exit(1)
   end
 end

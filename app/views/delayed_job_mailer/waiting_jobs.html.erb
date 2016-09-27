@@ -14,7 +14,7 @@
     </tr>
     <tr>
       <td style="width: 100px;padding: 5px;border: 1px solid #d4d4d4;"><strong>Waiting For: </strong></td>
-      <td style="padding: 5px;border: 1px solid #d4d4d4;"><%= ((job.run_at-current_time)/60).round(2) %> minutes</td>
+      <td style="padding: 5px;border: 1px solid #d4d4d4;"><%= ((current_time-job.run_at)/60).round(2) %> minutes</td>
     </tr>
     <tr>
       <td style="padding: 5px;border: 1px solid #d4d4d4;"><strong>Queue: </strong></td>
