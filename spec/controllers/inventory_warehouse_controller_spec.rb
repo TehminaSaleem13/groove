@@ -125,15 +125,33 @@ describe InventoryWarehouseController do
 
   describe "GET 'index'" do
     it "returns http success" do
-      # get 'index'
-      # response.should be_success
+      request.accept = "application/json"
+      get 'index'
+      response.should be_success
     end
   end
 
   describe "GET 'destroy'" do
     it "returns http success" do
-      # get 'destroy'
-      # response.should be_success
+      request.accept = "application/json"
+      get :destroy, {:inv_wh_ids => [InventoryWarehouse.last.id]}
+      response.should be_success
+    end
+  end 
+
+  describe "GET 'available user'" do
+    it "returns http success" do
+      request.accept = "application/json"
+      get :available_users, {:inv_wh_id => InventoryWarehouse.last.id}
+      response.should be_success
+    end
+  end
+
+  describe "GET 'changestatus'" do
+    it "returns http success" do
+      request.accept = "application/json"
+      get :changestatus, {:inv_wh_ids => [InventoryWarehouse.last.id], :status => 'active'}
+      response.should be_success
     end
   end
 
