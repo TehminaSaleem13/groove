@@ -7,6 +7,7 @@ groovepacks_controllers.
       $scope.ss_deep_import_days = 1;
       $scope.tp_deep_import_days = 1;
       $scope.import_progress = 1;
+      $scope.not_started_summary = 0;
       $scope.countdown_progressbar = 0;
       $scope.import_item_id = 0;
       $scope.add_popup_summary_on_load = true;
@@ -59,7 +60,7 @@ groovepacks_controllers.
           } else if ($scope.import_summary.import_info.status === 'in_progress') {
             $scope.import_groov_popover.title = get_import_type() + ' in Progress';
           } else if ($scope.import_summary.import_info.status === 'not_started') {
-            importOrders.update_order_import();
+            $scope.not_started_summary = importOrders.update_order_import($scope.not_started_summary);
             $scope.import_groov_popover.title = get_import_type() + ' not started';
           } else if ($scope.import_summary.import_info.status === 'cancelled') {
             $scope.import_groov_popover.title = get_import_type() + ' cancelled';

@@ -75,7 +75,7 @@ module Groovepacker
         end
 
         def get_shipments_by_orderno(orderno)
-          response = @service.query("/shipments?orderNumber=#{orderno}", nil, "get")
+          response = @service.query("/shipments?orderNumber=#{URI.encode(orderno)}", nil, "get")
           response["shipments"]
         end
 

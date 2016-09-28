@@ -7,7 +7,7 @@ FactoryGirl.define do
     store nil
     firstname "Shyam"
     lastname "Visamsetty"
-    email "svisamsetty@navaratan.com"
+    email "success@simulator.amazonses.com"
     address_1 "7-1-79, SV's Meera Mansion"
     address_2 "Ameerpet, Hyderabad"
     city "Hyderabad"

@@ -25,6 +25,10 @@ every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   rake "ftp_csv_file_import:ftp_import"
 end
 
+every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
+  rake "doo:check_failed_or_stopped_jobs"
+end
+
 every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   command "/home/ubuntu/groove/meganto_status_update.sh"
 end

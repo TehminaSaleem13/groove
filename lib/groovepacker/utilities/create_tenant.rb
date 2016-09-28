@@ -37,7 +37,7 @@ class CreateTenant
     begin
       HTTParty::Basement.default_options.update(verify: false)
       HTTParty.post(
-        "https://#{ENV['GROOV_ANALYTIC']}/tenants",
+        "http://admin.#{ENV['GROOV_ANALYTIC']}/tenants",
         query: { tenant_name: tenant_name }
       )
       send_user_info_obj = SendUsersInfo.new

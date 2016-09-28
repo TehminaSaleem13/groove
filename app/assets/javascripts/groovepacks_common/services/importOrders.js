@@ -43,8 +43,11 @@ groovepacks_services.factory("importOrders", ['$http', 'notification', function 
           });
       },
 
-      update_order_import: function(){
-        $http.get('/order_import_summary/update_order_import_summary.json'); 
+      update_order_import: function(not_started_summary){
+        if(not_started_summary==0){
+          $http.get('/order_import_summary/update_order_import_summary.json'); 
+          return 1;
+        };
       }
       // do_import: function(scope) {
 

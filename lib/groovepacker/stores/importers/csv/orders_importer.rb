@@ -18,6 +18,7 @@ module Groovepacker
             @base_products = []
             @import_item = @helper.initialize_import_item
             final_records = @helper.build_final_records     
+            Order.where("increment_id like '%\-currupted'").destroy_all
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
             OrderItem.import @created_order_items
@@ -71,12 +72,13 @@ module Groovepacker
           end
 
           def check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
-            order = Order.includes(:order_items).find_by_increment_id(current_inc_id)
+            order = Order.includes(:order_items).find_by_increment_id("#{current_inc_id}-currupted")
             items_array = get_item_array(order_items_ar)
             items_array.each do |row|        
               result = check_single_row_order_item(order_items_ar, index, current_inc_id, order_map, result)
               break if result[:order_reimported] == true
             end
+            @order.update_attribute(increment_id: "#{origional_order_id}") if origional_order_id
             result
           end
 
@@ -114,33 +116,22 @@ module Groovepacker
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
-            #begin
-              #Timeout::timeout(30) {
-                #ActiveRecord::Base.transaction do
-                  if @helper.not_imported?(@imported_orders, inc_id)
-                    @order = Order.find_or_initialize_by_increment_id(inc_id)
-                    order_persisted = @order.persisted? ? true : false
-                    @order.store_id = params[:store_id]
-                    @order_required = %w(qty sku increment_id price)
-                    @order.save
-                    @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
-                    import_order_data(order_map, single_row)
-                    update_result(result, single_row) if result[:order_reimported] == false
-                    import_item_failed_result(result, index) unless result[:status]
-                    @order.set_order_status
-                  else
-                    @import_item.previous_imported += 1
-                    @import_item.save
-                    # Skipped because of duplicate order
-                  end
-                #end
-              #}
-            #rescue Timeout::Error
-            #  if @order.present?
-            #    @order.reload 
-            #    @order.destroy
-            #  end
-            #end
+            if @helper.not_imported?(@imported_orders, inc_id)
+              @order = Order.find_or_initialize_by_increment_id(inc_id)
+              order_persisted = @order.persisted? ? true : false
+              @order.store_id = params[:store_id]
+              @order_required = %w(qty sku increment_id price)
+              @order.save
+              @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
+              @order.update_attributes(increment_id: "#{inc_id}-currupted") unless order_persisted 
+              import_order_data(order_map, single_row)
+              update_result(result, single_row) if result[:order_reimported] == false
+              import_item_failed_result(result, index) unless result[:status]
+              @order.set_order_status
+            else
+              @import_item.previous_imported += 1
+              @import_item.save # Skipped because of duplicate order
+            end
           end
 
           def import_item_failed_result(result, index)
@@ -267,7 +258,7 @@ module Groovepacker
           def save_order_and_update_count(result)
             begin
               @helper.update_status_and_save(@order)
-              @imported_orders[@order.increment_id] = true
+              @imported_orders["#{origional_order_id}"] = true if origional_order_id
               @import_item.success_imported += 1
               @import_item.save
             rescue ActiveRecord::RecordInvalid => e
@@ -295,6 +286,10 @@ module Groovepacker
             @product_helper = Groovepacker::Stores::Importers::CSV::ProductImportHelper.new(params, final_record, mapping, import_action)
             @order_item_helper.initiate_helper
             @product_helper.initiate_helper
+          end
+
+          def origional_order_id
+            @order.increment_id.split("-currupted").first rescue nil
           end
         end
       end

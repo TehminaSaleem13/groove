@@ -14,6 +14,7 @@ class SendStatStream
 
   def send_stream(tenant, stat_stream, order_id, path)
     begin
+      error_raised_manualy = false
       HTTParty::Basement.default_options.update(verify: false) if !Rails.env.production?
       # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/#{path}",
       response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}",
@@ -24,15 +25,16 @@ class SendStatStream
         order = Order.find(order_id)
         order.set_traced_in_dashboard
       else
+        error_raised_manualy = true
         raise 'Error.'
       end
     rescue => e
-      GroovelyticsMailer.groovelytics_request_failed(tenant).deliver
+      GroovelyticsMailer.groovelytics_request_failed(tenant, error_raised_manualy, e).deliver
     end
   end
 
   def duplicate_groovlytic_tenant(current_tenant, duplicate_name)
-    HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/tenants/duplicate?current_tenant=#{current_tenant}stat&duplicate_name=#{duplicate_name}stat")
+    HTTParty.post("https://groovelytics_productionstat.#{ENV["GROOV_ANALYTIC"]}/tenants/duplicate?current_tenant=#{current_tenant}stat&duplicate_name=#{duplicate_name}stat")
   end
 
   def send_order_exception(order_id, tenant)
