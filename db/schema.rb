@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160625094754) do
+ActiveRecord::Schema.define(:version => 20160928070633) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -215,6 +215,11 @@ ActiveRecord::Schema.define(:version => 20160625094754) do
     t.integer  "max_time_per_item",                   :default => 10
     t.string   "export_csv_email"
     t.boolean  "show_primary_bin_loc_in_barcodeslip", :default => false
+    t.string   "time_zone"
+    t.boolean  "search_by_product",                   :default => false
+    t.boolean  "auto_detect",                         :default => true
+    t.boolean  "dst",                                 :default => true
+    t.string   "stat_status"
   end
 
   create_table "generate_barcodes", :force => true do |t|
@@ -262,6 +267,7 @@ ActiveRecord::Schema.define(:version => 20160625094754) do
     t.string   "import_type",                 :default => "regular"
     t.integer  "days"
     t.integer  "updated_orders_import"
+    t.text     "import_error"
   end
 
   create_table "inventory_warehouses", :force => true do |t|
@@ -473,9 +479,11 @@ ActiveRecord::Schema.define(:version => 20160625094754) do
     t.string   "inv_status_reason",                                    :default => ""
     t.integer  "clicked_qty",                                          :default => 0
     t.boolean  "is_barcode_printed",                                   :default => false
+    t.boolean  "is_deleted",                                           :default => false
   end
 
   add_index "order_items", ["inv_status", "scanned_status"], :name => "index_order_items_on_inv_status_and_scanned_status"
+  add_index "order_items", ["is_deleted"], :name => "index_order_items_on_is_deleted"
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
 
   create_table "order_serials", :force => true do |t|
@@ -795,6 +803,7 @@ ActiveRecord::Schema.define(:version => 20160625094754) do
     t.datetime "created_at",                                   :null => false
     t.datetime "updated_at",                                   :null => false
     t.datetime "last_imported_at"
+    t.boolean  "includes_product",          :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|
@@ -920,6 +929,7 @@ ActiveRecord::Schema.define(:version => 20160625094754) do
     t.string   "initial_plan_id"
     t.text     "addon_notes"
     t.boolean  "magento_tracking_push_enabled", :default => false
+    t.integer  "orders_delete_days",            :default => 14,    :null => false
   end
 
   create_table "transactions", :force => true do |t|
