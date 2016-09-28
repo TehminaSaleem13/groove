@@ -15,15 +15,35 @@ class DeleteOrders
     database = Rails.configuration.database_configuration[Rails.env]["database"]
     unless @tenant.blank?
       tenant = Tenant.find_by_name(@tenant)
-      # take_backup(@tenant.name)
       system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
+      destroy_order_items(@tenant)
     else
       tenants = Tenant.order(:name) rescue Tenant.all
-      # tenants.each do |tenant|
-      #   take_backup(tenant.name)
-      # end
       system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
+      tenants.each{ |tenant| destroy_order_items(tenant) }
     end
+  end
+
+  def destroy_order_items(tenant)
+    Apartment::Tenant.switch(tenant.name)
+    OrderItem
+      .where(is_deleted: true)
+      .includes(
+        :order_item_scan_times,
+        order_item_kit_products: [
+          product_kit_skus: [
+            product: [
+              :product_skus, :product_images,
+              :product_barcodes
+            ]
+          ]
+        ],
+        product: [
+          :product_skus, :product_images,
+          :product_barcodes
+        ]
+      )
+      .destroy_all
   end
 
   # def perform_for_single_tenant(tenant)
