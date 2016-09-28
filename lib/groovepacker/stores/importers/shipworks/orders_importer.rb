@@ -39,7 +39,7 @@ module Groovepacker
                       tracking_num: tracking_num,
                       notes_internal: notes_internal)
 
-                    import_item.current_order_items = order["Item"].length
+                    import_item.current_order_items = order["Item"].length rescue 0
                     import_item.current_order_imported_item = 0
                     import_item.save
 
