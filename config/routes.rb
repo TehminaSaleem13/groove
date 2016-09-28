@@ -305,6 +305,7 @@ Groovepacks::Application.routes.draw do
     end
     post 'generate_stats'
   end
+  post '/dashboard/update_to_avg_datapoint' => 'dashboard#update_to_avg_datapoint'
 
   # Sample resource route with options:
   #   resources :products do

@@ -168,13 +168,26 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       } else if (charts.type === 'packing_speed_stats' || charts.type === 'packing_time_stats') {
         $.each(dashboard.packing_stats, function(i, response) {
             if (response.key == data_points.user[0][0]){
+              sum = 0
+              $.each(dashboard.packing_speed_stats[i].values, function(q, val) {
+                sum = sum + val[1];
+              });
+              avg = sum/dashboard.packing_speed_stats[i].values.length;
               $.each(response.values, function(j, value){
                 if (value[0] == data_points.data[0][0]){
-                  orders_count = value[2];
-                  items_count = value[3]; 
+                    orders_count = value[2];
+                    items_count = value[3]; 
                 } 
               });
             }
+        });
+        clicked = 0
+        $("body").on("click", "nvd3-line-chart", function(){ 
+          if (data.data[0][1] > 30 && clicked == 0 && charts.type === 'packing_speed_stats') {
+            clicked = clicked + 1
+            url = "/dashboard/update_to_avg_datapoint.json?avg=" + avg + "&&val=" + data.data[0][1];
+            $http.post(url);
+          }
         });
         tooltipText +=
         '<span><strong>' + date + '</strong></span><br/>' +
