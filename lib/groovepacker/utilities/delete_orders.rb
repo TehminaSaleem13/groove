@@ -7,21 +7,21 @@ class DeleteOrders
   #priority 10
 
   def initialize(attrs={})
-    @tenant = attrs[:tenant]
-    @delete_count = attrs[:delete_count]
+    # @tenant = attrs[:tenant]
+    # @delete_count = attrs[:delete_count]
   end
 
   def perform
     database = Rails.configuration.database_configuration[Rails.env]["database"]
-    unless @tenant.blank?
-      tenant = Tenant.find_by_name(@tenant)
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
-      destroy_order_items(@tenant)
-    else
+    # unless @tenant.blank?
+    #   tenant = Tenant.find_by_name(@tenant)
+    #   system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
+    #   destroy_order_items(@tenant)
+    # else
       tenants = Tenant.order(:name) rescue Tenant.all
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
+      HTTParty.get("http://localhost:8080/rake_tasks/delete_orders/")
       tenants.each{ |tenant| destroy_order_items(tenant) }
-    end
+    # end
   end
 
   def destroy_order_items(tenant)
