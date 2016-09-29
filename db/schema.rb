@@ -480,9 +480,11 @@ ActiveRecord::Schema.define(:version => 20160915111705) do
     t.string   "inv_status_reason",                                    :default => ""
     t.integer  "clicked_qty",                                          :default => 0
     t.boolean  "is_barcode_printed",                                   :default => false
+    t.boolean  "is_deleted",                                           :default => false
   end
 
   add_index "order_items", ["inv_status", "scanned_status"], :name => "index_order_items_on_inv_status_and_scanned_status"
+  add_index "order_items", ["is_deleted"], :name => "index_order_items_on_is_deleted"
   add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
 
   create_table "order_serials", :force => true do |t|

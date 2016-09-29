@@ -388,7 +388,8 @@ func delete_items(order_ids []string, db *sql.DB) {
 	}
 
 	_query := sq.
-		Delete("order_items").
+		Update("order_items").
+		Set("is_deleted", 1).
 		Where("id IN (" + strings.Join(order_item_ids, ",") + ")").
 		RunWith(db)
 	log.Println(_query.ToSql())

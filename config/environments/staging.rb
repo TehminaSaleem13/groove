@@ -77,5 +77,5 @@ Groovepacks::Application.configure do
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
     password: ENV['REDIS_PASSWORD'], driver: :hiredis)
 
-  config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
+  config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } 
 end

@@ -240,5 +240,62 @@ RSpec.describe UsersController, :type => :controller do
       expect(role['restore_backups']).to be(false)
     end
 
+    it "should call all user" do
+      request.accept = "application/json"
+      get :index
+      expect(response.status).to eq(200)
+    end
+
+    it "should print confirmation code" do 
+      request.accept = "application/pdf"
+      get :print_confirmation_code, {id: @user.id}
+      expect(response.status).to eq(200)
+    end
+
+    it "should create role" do 
+      request.accept = "application/json"
+      user_role = {"access_orders"=>true, "access_products"=>true, "access_scanpack"=>true, "access_settings"=>false, "add_edit_order_items"=>true, "add_edit_products"=>true, "add_edit_stores"=>false, "add_edit_users"=>false, "change_order_status"=>true, "create_backups"=>true, "create_edit_notes"=>true, "create_packing_ex"=>true, "custom"=>false, "delete_products"=>false, "display"=>true, "edit_general_prefs"=>false, "edit_packing_ex"=>false, "edit_scanning_prefs"=>false, "import_orders"=>true, "import_products"=>false, "make_super_admin"=>false, "restore_backups"=>false, "view_packing_ex"=>true, "new_name"=>"test"}
+      get :create_role, {"id"=>@user.id, "username"=>@user.username, "active"=>true, "name"=>"TestUser", "inventory_warehouse_id"=>InventoryWarehouse.last.id, "role_id"=>Role.last.id, "view_dashboard"=>false, "is_deleted"=>false, "role"=> user_role, "current_user"=>{"active"=>true, "id"=>@user.id, "inventory_warehouse_id"=>InventoryWarehouse.last.id, "role_id"=>@user.role.id}, "user"=>{"username"=>@user.username}}
+      expect(response.status).to eq(200)
+    end
+
+    it "should delete role" do
+      request.accept = "application/json"
+      @user.role.update_attribute(:name, "Scan & Pack User")
+      user_role = {"id" => @user.role.id,"access_orders"=>true, "access_products"=>true, "access_scanpack"=>true, "access_settings"=>false, "add_edit_order_items"=>true, "add_edit_products"=>true, "add_edit_stores"=>false, "add_edit_users"=>false, "change_order_status"=>true, "create_backups"=>true, "create_edit_notes"=>true, "create_packing_ex"=>true, "custom"=>false, "delete_products"=>false, "display"=>true, "edit_general_prefs"=>false, "edit_packing_ex"=>false, "edit_scanning_prefs"=>false, "import_orders"=>true, "import_products"=>false, "make_super_admin"=>false, "restore_backups"=>false, "view_packing_ex"=>true, "new_name"=>"test"}
+      get :delete_role, {"active"=>true, "current_user"=>{"active"=>true, "id"=>@user.id, "inventory_warehouse_id"=>InventoryWarehouse.last.id, "is_deleted"=>false, "name"=>@user.name, "role_id"=>@user.role.id, "username"=>@user.username, "view_dashboard"=>false}, "id"=>@user.id, "inventory_warehouse_id"=>InventoryWarehouse.last.id, "is_deleted"=>false, "name"=>"TestUser", "role"=> user_role, "role_id"=>@user.role.id, "username"=>@user.username, "view_dashboard"=>false, "user"=>{"username"=>@user.username}}
+      expect(response.status).to eq(200)
+    end
+
+    it "should update status" do 
+      request.accept = "application/json"
+      post :change_user_status, {"_json" => [{"id"=>@user.id, "index"=>8, "active"=>true}]}
+      expect(response.status).to eq(200)
+    end
+
+    it "should duplicate user" do 
+      request.accept = "application/json"
+      post :duplicate_user, {"_json" => [{"id"=>@user.id, "index"=>8, "active"=>true}]}
+      expect(response.status).to eq(200)
+    end
+
+    it "should delete user" do
+      request.accept = "application/json"
+      post :delete_user, {"_json" => [{"id"=>@user.id, "index"=>8, "active"=>true}]}
+      expect(response.status).to eq(200) 
+    end
+
+    it "should show" do
+      request.accept = "application/json"
+      get :show, {"id" => @user.id}
+      expect(response.status).to eq(200) 
+    end
+
+    # it "should create tenant" do
+    #   request.accept = "application/json"
+    #   get :create_tenant, {"name" => "" }
+    #   expect(response.status).to eq(200) 
+    # end
+
   end
 end

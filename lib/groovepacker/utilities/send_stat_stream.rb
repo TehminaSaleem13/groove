@@ -14,6 +14,7 @@ class SendStatStream
 
   def send_stream(tenant, stat_stream, order_id, path)
     begin
+      error_raised_manualy = false
       HTTParty::Basement.default_options.update(verify: false) if !Rails.env.production?
       # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/#{path}",
       response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}",
@@ -24,10 +25,11 @@ class SendStatStream
         order = Order.find(order_id)
         order.set_traced_in_dashboard
       else
+        error_raised_manualy = true
         raise 'Error.'
       end
     rescue => e
-      GroovelyticsMailer.groovelytics_request_failed(tenant).deliver
+      GroovelyticsMailer.groovelytics_request_failed(tenant, error_raised_manualy, e).deliver
     end
   end
 
