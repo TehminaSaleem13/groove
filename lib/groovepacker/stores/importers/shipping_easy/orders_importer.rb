@@ -20,7 +20,7 @@ module Groovepacker
               order_copy = order["order"]
               order = order_copy unless order_copy.blank? 
               @order_to_update = false 
-              @import_item.reload
+              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               break if @import_item.status == 'cancelled'
               import_single_order(order)
               #increase_import_count

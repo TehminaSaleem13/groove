@@ -45,7 +45,7 @@ module Groovepacker
             order_items_ar = [];
             final_records.each_with_index do |single_row, index|
               #check_or_assign_import_item
-              @import_item.reload
+              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               if @import_item.status == 'cancelled'
                 check_and_destroy_order(single_row)
                 break
