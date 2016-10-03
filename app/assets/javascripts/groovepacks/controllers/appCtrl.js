@@ -61,7 +61,7 @@ groovepacks_controllers.
             $scope.import_groov_popover.title = get_import_type() + ' in Progress';
           } else if ($scope.import_summary.import_info.status === 'not_started') {
             $scope.not_started_summary = importOrders.update_order_import($scope.not_started_summary);
-            $scope.import_groov_popover.title = get_import_type() + ' not started';
+            $scope.import_groov_popover.title = 'Waking up the ' + get_import_type() + ' Hamster...';
           } else if ($scope.import_summary.import_info.status === 'cancelled') {
             $scope.import_groov_popover.title = get_import_type() + ' cancelled';
           }
@@ -163,7 +163,7 @@ groovepacks_controllers.
                   single_data.progress.message += ' The import was cancelled.';
                 }
               } else if (import_item.import_info.status === 'not_started') {
-                single_data.progress.message += get_import_type() + ' not started.';
+                single_data.progress.message += 'Waking up the ' + get_import_type() + ' Hamster...';
               } else if (import_item.import_info.status === 'in_progress') {
                 $scope.import_summary.import_info.status = 'in_progress';
                 if (import_item.import_info.to_import > 0) {
