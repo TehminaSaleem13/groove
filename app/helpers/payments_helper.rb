@@ -192,13 +192,14 @@ module PaymentsHelper
     }
   end
 
-  def create_plan(amount, interval, name, currency, id)
+  def create_plan(amount, interval, name, currency, id, trial_period_days=nil)
     Stripe::Plan.create(
       amount: amount,
       interval: interval,
       name: name,
       currency: currency,
-      id: id
+      id: id,
+      trial_period_days: trial_period_days
     )
   end
 
