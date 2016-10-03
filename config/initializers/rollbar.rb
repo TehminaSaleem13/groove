@@ -62,5 +62,5 @@ Rollbar.configure do |config|
   # https://devcenter.heroku.com/articles/deploying-to-a-custom-rails-environment
   config.environment = ENV['ROLLBAR_ENV'] || Rails.env
 end
-Rollbar.debug("Running Script")
+# Rollbar.debug("Running Script")
 
