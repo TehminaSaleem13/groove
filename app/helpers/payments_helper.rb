@@ -166,29 +166,19 @@ module PaymentsHelper
   end
 
   def construct_plan_hash
-    {
-      'solo' => 'groove-solo',
-      'duo' => 'groove-duo',
-      'trio' => 'groove-trio',
-      'quintet' => 'groove-quintet',
-      'symphony' => 'groove-symphony',
-      'annual-solo' => 'annual-groove-solo',
-      'annual-duo' => 'annual-groove-duo',
-      'annual-trio' => 'annual-groove-trio',
-      'annual-quintet' => 'annual-groove-quintet',
-      'annual-symphony' => 'annual-groove-symphony',
-      'duo-60' => 'groove-duo-60',
-      'trio-90' => 'groove-trio-90',
-      'quartet-120' => 'groove-quartet-120',
-      'quintet-150' => 'groove-quintet-150',
-      'bigband-210' => 'groove-bigband-210',
-      'symphony-300' => 'groove-symphony-300',
-      'an-duo' => 'an-groove-duo',
-      'an-trio' => 'an-groove-trio',
-      'an-quartet' => 'an-groove-quartet',
-      'an-quintet' => 'an-groove-quintet',
-      'an-bigband' => 'an-groove-bigband',
-      'an-symphony' => 'an-groove-symphony'
+    { 
+      'Groove 100' => 'groove-100',
+      'Groove 150' => 'groove-150',
+      'Groove 200' => 'groove-200',
+      'Groove 250' => 'groove-250',
+      'Groove 350' => 'groove-350',
+      'Groove 500' => 'groove-500',
+      'An Groove 100' => 'an-groove-100',
+      'An Groove 150' => 'an-groove-150',
+      'An Groove 200' => 'an-groove-200',
+      'An Groove 250' => 'an-groove-250',
+      'An Groove 350' => 'an-groove-350',
+      'An Groove 500' => 'an-groove-500'
     }
   end
 
