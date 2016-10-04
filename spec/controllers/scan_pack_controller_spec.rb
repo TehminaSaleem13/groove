@@ -4270,5 +4270,12 @@ RSpec.describe ScanPackController, :type => :controller do
 
     end
 
+    it "Should reset order scan" do 
+      request.accept = "application/json"
+      order = Order.new(increment_id: 132456789)
+      order.save
+      post :reset_order_scan, {"order_id" => order.id}
+    end
+
   end
 end
