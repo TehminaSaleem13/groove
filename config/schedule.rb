@@ -37,6 +37,10 @@ every 1.day, :at => '7:50 am' do
   rake "doo:schedule_inventory_email"
 end
 
+every 1.day, :at => '7:50 am' do
+  rake "doo:schedule_orders_export_email"
+end
+
 every 1.day, :at => '01:00 am' do
   rake "doo:delete_old_orders"
 end
