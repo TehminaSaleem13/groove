@@ -1,4 +1,4 @@
-groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', function ($http, notification, auth) {
+groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$modal', function ($http, notification, auth, $modal) {
   var get_default = function () {
     return {
       packing_stats: [],
@@ -181,14 +181,48 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
               });
             }
         });
+        
+
         clicked = 0
         $("body").on("click", "nvd3-line-chart", function(){ 
-          if (data.data[0][1] > 30 && clicked == 0 && charts.type === 'packing_speed_stats') {
+          if (clicked == 0 && charts.type === 'packing_speed_stats') {
             clicked = clicked + 1
-            url = "/dashboard/update_to_avg_datapoint.json?avg=" + avg + "&&val=" + data.data[0][1];
-            $http.post(url);
+            //if(scope.confirm_dialog!=undefined){
+            //  scope.confirm_dialog.close();
+            //}
+            $modal.open({
+              template: '<div class="dialog-modal" style="margin-top: 20%;"> \
+                          <style>.modal.fade.ng-isolate-scope.in {z-index: 99999!important;}</style> \
+                          <div class="modal-header"> \
+                            <h3 class="modal-title">fdsfdsf</h3> \
+                          </div> \
+                          <div class="modal-body" style="min-height: 140px; text-align: center; padding: 25px;">Extreme data points resulting from unusual events can be averaged to normalize the stats data. <br/>Would you like to average this data point?</div> \
+                          <div class="modal-footer"> \
+                            <button class="btn btn-primary" ng-click="ok()">Ok</button> \
+                            <button class="btn btn-warning" ng-click="cancel()">Cancel</button> \
+                          </div> \
+                      </div>'
+            });
+            // if(confirm("dsadasdasdas")) {
+            //   alert("yes");
+            //   //url = "/dashboard/update_to_avg_datapoint.json?avg=" + avg + "&&val=" + data.data[0][1];
+            //   //$http.post(url);
+            // }
           }
         });
+
+
+
+
+
+        // clicked = 0
+        // $("body").on("click", "nvd3-line-chart", function(){ 
+        //   if (data.data[0][1] > 30 && clicked == 0 && charts.type === 'packing_speed_stats') {
+        //     clicked = clicked + 1
+        //     url = "/dashboard/update_to_avg_datapoint.json?avg=" + avg + "&&val=" + data.data[0][1];
+        //     $http.post(url);
+        //   }
+        // });
         tooltipText +=
         '<span><strong>' + date + '</strong></span><br/>' +
         '<span><strong>Period Speed Score: ' + get_speed(data_points.data[i][2], dashboard) + '%</strong></span><br/>' +
