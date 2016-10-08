@@ -59,7 +59,7 @@
         <div class="well-heading">
           <span>{{ unscanned_count }} Items Left</span>
         </div>
-        <div class="row" ng-repeat="unscanned_item in data.order.unscanned_items">
+        <div class="row" ng-repeat="unscanned_item in data.order.unscanned_items | limitTo: 10">
           <div class="media">
             <a class="pull-left" href="">
               <img class="media-object" width="64px" ng-src="{{ unscanned_item.images[0].image }}"/>
