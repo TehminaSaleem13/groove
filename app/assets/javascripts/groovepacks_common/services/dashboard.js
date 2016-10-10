@@ -1,4 +1,15 @@
-groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', function ($http, notification, auth) {
+groovepacks_controllers.controller('DashboardCtrl', function ($scope, $modal, $log, $http) {
+  $scope.ok = function(avg, data_point){
+    url = "/dashboard/update_to_avg_datapoint.json?avg=" + avg + "&&val=" + data_point;
+    $http.post(url);
+    $scope.modal_d.close();
+  };
+  $scope.cancel = function(){
+    $scope.modal_d.close();
+  };
+});
+
+groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$modal', function ($http, notification, auth, $modal) {
   var get_default = function () {
     return {
       packing_stats: [],
@@ -168,14 +179,26 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
       } else if (charts.type === 'packing_speed_stats' || charts.type === 'packing_time_stats') {
         $.each(dashboard.packing_stats, function(i, response) {
             if (response.key == data_points.user[0][0]){
+              sum = 0
+              $.each(dashboard.packing_speed_stats[i].values, function(q, val) {
+                sum = sum + val[1];
+              });
+              avg = sum/dashboard.packing_speed_stats[i].values.length;
               $.each(response.values, function(j, value){
                 if (value[0] == data_points.data[0][0]){
-                  orders_count = value[2];
-                  items_count = value[3]; 
+                    orders_count = value[2];
+                    items_count = value[3]; 
                 } 
               });
             }
         });
+        
+        clicked = 0
+        if (clicked == 0){
+          clicked = clicked + 1;
+          trigger_click(avg, data.data[0][1], charts);
+        };
+
         tooltipText +=
         '<span><strong>' + date + '</strong></span><br/>' +
         '<span><strong>Period Speed Score: ' + get_speed(data_points.data[i][2], dashboard) + '%</strong></span><br/>' +
@@ -231,6 +254,36 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', func
         $http.post(url, data);
       }
     }); 
+  }
+
+
+
+  var trigger_click = function(avg, data_point, charts){
+    clicked = 0
+    $("body").on("click", "nvd3-line-chart", function(){ 
+      if (clicked == 0 && charts.type === 'packing_speed_stats') {
+        clicked = clicked + 1
+        var modal_d = $modal.open({
+          template:
+           '<div id="modal-dialog-box" class="dialog-modal" style="margin-top: 20%;" ng-controller="DashboardCtrl"> \
+                <style>.modal.fade.ng-isolate-scope.in {z-index: 99999!important;}</style> \
+                <div class="modal-header"> \
+                  <h3 class="modal-title">Please Confirm</h3> \
+                </div> \
+                <div class="modal-body" style="min-height: 140px; text-align: center; padding: 25px;">Extreme data points resulting from unusual events can be averaged to normalize the stats data. <br/>Would you like to average this data point?</div> \
+                <div class="modal-footer"> \
+                  <button class="btn btn-primary ok_button" ng-click="ok(avg, data_point)">Ok</button> \
+                  <button class="btn btn-warning cancel_button" ng-click="cancel()">Cancel</button> \
+                </div> \
+            </div>',
+            controller: function($scope){
+              $scope.avg = avg;
+              $scope.data_point = data_point;
+              $scope.modal_d = modal_d;
+            }
+        });
+      }
+    });
   }
 
   return {
