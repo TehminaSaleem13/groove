@@ -208,6 +208,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.gen_barcode_from_sku = data.credentials.magento_rest_credential.gen_barcode_from_sku;
 
           } else if (data.store.store_type == 'ShippingEasy') {
+            stores.single.include_product = data.credentials.shipping_easy_credentials.includes_product
             stores.single.api_key = data.credentials.shipping_easy_credentials.api_key;
             stores.single.api_secret = data.credentials.shipping_easy_credentials.api_secret;
             stores.single.import_ready_for_shipment = data.credentials.shipping_easy_credentials.import_ready_for_shipment;
