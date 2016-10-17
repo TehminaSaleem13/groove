@@ -120,7 +120,7 @@ module Groovepacker
             orders += response['orders'] unless response['orders'].nil?
             total_pages = response.parsed_response['pages']
             page_index += 1
-            return orders if page_index > total_pages
+            return orders if page_index > total_pages.to_i
           end
         end
 
