@@ -70,7 +70,8 @@ module Groovepacker
             end
 
             def create_s3_image(item)
-              image_data = IO.read(open(item["product"]["image"]["original"]))
+              image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
+              # image_data = IO.read(open(item["product"]["image"]["original"]))
               file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p') + "_shipping_easy_" + item["ext_line_item_id"]
               tenant = Apartment::Tenant.current
               GroovS3.create_image(tenant, file_name, image_data, 'public_read')
