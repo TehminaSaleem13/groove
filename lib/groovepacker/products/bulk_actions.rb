@@ -80,14 +80,16 @@ module Groovepacker
             bulk_action.current = product.name
             bulk_action.save
             product.order_items.each do |order_item|
-              if order_item.order.status != "scanned" && order_item.order.status != "cancelled"
-                unless order_item.order.nil?
-                  order_item.order.status = 'onhold'
-                  order_item.order.save
+              if order_item.order.present?
+                if order_item.order.status != "scanned" && order_item.order.status != "cancelled"
+                  unless order_item.order.nil?
+                    order_item.order.status = 'onhold'
+                    order_item.order.save
+                  end
                 end
+                order_item.order.addactivity("An item with Name #{product.name} and " + "SKU #{product.primary_sku} has been deleted", username, 'deleted_item') if order_item.order.present?
+                order_item.destroy
               end
-              order_item.order.addactivity("An item with Name #{product.name} and " + "SKU #{product.primary_sku} has been deleted", username, 'deleted_item') if order_item.order.present?
-              order_item.destroy
             end
 
             ProductKitSkus.where(option_product_id: product.id).each do |product_kit_sku|
