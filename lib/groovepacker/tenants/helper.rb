@@ -251,7 +251,7 @@ module Groovepacker
         @subscription = tenant.subscription
         if @subscription
           @subscription_info = params[:subscription_info]
-          @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id])
+          @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id], :subscription_plan_id => params[:subscription_info][:plan_id])
           return result unless @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
           begin
             create_new_plan_and_assign(tenant)
