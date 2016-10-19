@@ -1,9 +1,12 @@
 <div class="container-fluid">
   <div class="row scan_pack_input" ng-if="!data.order.next_item || current_state != 'scanpack.rfp.default' ">
-    <div class="col-xs-12 scan_pack_title">
+    <div class="col-xs-7 scan_pack_title">
       {{data.title}}
     </div>
-    <div class="col-xs-12">
+    <div class="col-xs-5 scan_pack_title">
+      <p class="pull-right">{{data.msg}}
+      <i ng-if="data.msg != nil" id="popup_video" ng-click="show_video()" class="icon-large glyphicon glyphicon-info-sign ng-scope" popover-trigger="mouseenter" popover-placement='left'></i></p>
+    </div>
       <input type="text" ng-model="data.input"  ng-keydown="input_enter($event)" autofocus="autofocus" tabindex="1"
              class="form-control search-box" placeholder="Scan..."/>
     </div>
@@ -23,3 +26,15 @@
     </div>
   </div>
 </div>
+
+
+<style type="text/css">
+  .app-modal-video-window .modal-dialog {
+    top: 20%;
+  }
+
+  .close-video-button  {
+    top: -21px;
+    right: 23px;
+  }
+</style>

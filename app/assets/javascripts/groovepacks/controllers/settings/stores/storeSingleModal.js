@@ -436,6 +436,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
       stores.single.amazon_products_import(scope.stores.single);
     };
 
+    scope.include_product = function(){
+      store_id = scope.stores.single.id
+      $http.get('/stores/update_include_product.json?store_id=' + store_id).success(function (data) {
+        stores.single.include_product = data.include_product
+      });
+    };
+
     scope.import_ftp = function() {
       scope.stores.single.type = 'order';
       if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {

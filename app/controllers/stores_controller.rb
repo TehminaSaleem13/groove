@@ -20,6 +20,14 @@ class StoresController < ApplicationController
     end
   end
 
+  def update_include_product
+    result = {}
+    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
+    shippingeasy_cred.update_attribute(:includes_product, !shippingeasy_cred.includes_product)
+    result["includes_product"] = shippingeasy_cred.includes_product  
+    render json: result
+  end
+
   def create_update_ftp_credentials
     result = {}
 

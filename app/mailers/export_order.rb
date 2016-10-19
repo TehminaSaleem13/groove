@@ -23,8 +23,8 @@ class ExportOrder < ActionMailer::Base
     attachments["#{filename}"] = File.read(file_locatin)
     mail to: export_settings.order_export_email,
          subject: "GroovePacker Order Export Report"
-    import_orders_obj = ImportOrders.new
-    import_orders_obj.reschedule_job('export_order', tenant)
+    #import_orders_obj = ImportOrders.new
+    #import_orders_obj.reschedule_job('export_order', tenant)
     File.delete(file_locatin)
   end
 

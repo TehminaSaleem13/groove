@@ -41,7 +41,7 @@ module Groovepacker
 
           def orders_import
             @orders.each do |order|
-              @import_item.reload
+              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               break if @import_item.status == 'cancelled'
               @import_item.update_attributes(current_increment_id: order.amazon_order_id, current_order_items: -1, current_order_imported_item: -1 )
               orders_with_increment_id(order)

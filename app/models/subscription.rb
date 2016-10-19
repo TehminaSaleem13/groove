@@ -56,7 +56,7 @@ class Subscription < ActiveRecord::Base
     name = self.subscription_plan_id.titleize
     subsc_plan_id = self.subscription_plan_id
     begin
-      create_plan(subsc_amount, interval, name, currency, subsc_plan_id)
+      create_plan(subsc_amount, interval, name, currency, subsc_plan_id, 30)
     rescue Stripe::InvalidRequestError => e
 
     end

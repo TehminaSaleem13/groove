@@ -31,6 +31,7 @@ Groovepacks::Application.routes.draw do
   post "magento_rest/callback" => "magento_rest#callback"
   get "magento_rest/redirect" => "magento_rest#redirect"
   get 'stores/export_active_products' => 'stores#export_active_products'
+  get 'stores/update_include_product' => 'stores#update_include_product'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
   get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
@@ -305,6 +306,7 @@ Groovepacks::Application.routes.draw do
     end
     post 'generate_stats'
   end
+  post '/dashboard/update_to_avg_datapoint' => 'dashboard#update_to_avg_datapoint'
 
   # Sample resource route with options:
   #   resources :products do

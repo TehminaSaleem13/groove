@@ -31,7 +31,7 @@ module Groovepacker
                 import_item.save
 
                 orders.each do |order|
-                  import_item.reload
+                  import_item = ImportItem.find_by_id(import_item.id) rescue import_item
                   break if import_item.status == 'cancelled'
                   import_item.current_increment_id = order.order_number
                   import_item.current_order_items = -1

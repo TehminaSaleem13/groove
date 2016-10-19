@@ -38,7 +38,7 @@
                   </td>
                 <%elsif td_index == 0 %>
                   <td>
-                    <%= td.to_date.strftime("%Y-%m-%d") %> 
+                    <%= td.to_date.strftime("%Y-%m-%d") rescue nil %> 
                   </td>
                 <% else %>
                   <% if i == (@csv_data.size - 1) %>
