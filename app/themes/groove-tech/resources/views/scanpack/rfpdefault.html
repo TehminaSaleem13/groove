@@ -108,7 +108,7 @@
         <div class="text-left">
           <h5>
             &nbsp;
-            <span class="pull-left"><strong tooltip="{{data.order.next_item.name}}">{{data.order.next_item.name | cut:false:230}}</strong></span>
+            <span class="pull-left"><strong tooltip="{{data.order.next_item.name}}">{{data.order.next_item.name | limitTo:45}}</strong></span>
             <span class="pull-right" ng-class="{pointer: scan_pack.settings.enable_click_sku}"
                   ng-click="autoscan_barcode()"><strong>{{data.order.next_item.sku}}</strong></span>
           </h5>
