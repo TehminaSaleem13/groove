@@ -143,11 +143,11 @@ module Groovepacker
           page_index = 1
           loop do
             res = @service.query("/Orders/List?orderStatus=" \
-              "#{status}&page=#{page_index}&pageSize=300#{start_date}", nil, "get")
+              "#{status}&page=#{page_index}&pageSize=150#{start_date}", nil, "get")
             combined['orders'] = union(combined['orders'],
                                        res.parsed_response['orders'])
             page_index += 1
-            return combined if res.parsed_response['orders'].length<300
+            return combined if res.parsed_response['orders'].length<150
           end
         end
 
