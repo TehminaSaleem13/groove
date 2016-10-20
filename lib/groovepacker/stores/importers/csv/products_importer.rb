@@ -505,7 +505,7 @@ module Groovepacker
                   )
             }
             File.open(event_file_path, "w+"){|f| f.write(event_data.to_json)}
-            usable_records = `apex -p gopacker -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`
+            usable_records = `apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`
             @usable_records = JSON.parse(usable_records).map do |record|
               record = record.symbolize_keys
               record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
