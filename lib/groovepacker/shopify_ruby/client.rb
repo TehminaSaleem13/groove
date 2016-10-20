@@ -5,7 +5,7 @@ module Groovepacker
         page_index = 1
         combined_response = {}
         combined_response["orders"] = []
-        last_import = shopify_credential.last_imported_at.to_datetime rescue (DateTime.now - 80.days)
+        last_import = shopify_credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
         while page_index
           query = {"page" => page_index, "updated_at_min" => last_import, "limit" => 250}.as_json
           response = HTTParty.get('https://'+ shopify_credential.shop_name +
