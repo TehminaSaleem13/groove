@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('scanPackCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'scanPack', 'generalsettings', 'groov_audio', '$window', '$modal', 
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, generalsettings, groov_audio, $window, $modal) {
+  controller('scanPackCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', 'scanPack', 'generalsettings', 'groov_audio', '$window', '$modal', '$sce', '$interval',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, scanPack, generalsettings, groov_audio, $window, $modal, $sce, $interval) {
       var myscope = {
         gen_setting_loaded: 0,
         scanpack_setting_loaded: 0
@@ -54,6 +54,9 @@ groovepacks_controllers.
         }
       };
       $scope.handle_scan_return = function (data) {
+        if (data.data.order.store_type != undefined) {
+          $scope.store_type = data.data.order.store_type
+        } 
         $scope.set('raw', data);
         if (typeof data.data != "undefined") {
           if (typeof data.data.order != "undefined") {
@@ -69,12 +72,43 @@ groovepacks_controllers.
               $scope.$broadcast('reload-scanpack-state');
             } else {
               if (data.data.order_complete) {
-                $scope.trigger_scan_message('order_complete');
+                if ($scope.store_type=="ShippingEasy" && data.data.order.popup_shipping_label==true){
+                  var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + data.data.order.store_order_id + "/edit");
+                  $scope.open_popup(shippingeasy_url);
+                } else {
+                  $scope.trigger_scan_message('order_complete');
+                }
               }
             }
             $state.go(data.data.next_state, data.data);
           }
         }
+      };
+
+      $scope.open_popup = function (url) {
+        var w = 1000;
+        var h = 600;
+        var left_adjust = angular.isDefined($window.screenLeft) ? $window.screenLeft : $window.screen.left;
+        var top_adjust = angular.isDefined($window.screenTop) ? $window.screenTop : $window.screen.top;
+        var width = $window.innerWidth ? $window.innerWidth : $window.document.documentElement.clientWidth ? $window.document.documentElement.clientWidth : $window.screen.width;
+        var height = $window.innerHeight ? $window.innerHeight : $window.document.documentElement.clientHeight ? $window.document.documentElement.clientHeight : $window.screen.height;
+
+        var left = ((width / 2) - (w / 2)) + left_adjust;
+        var top = ((height / 2) - (h / 2)) + top_adjust;
+
+        var popup = $window.open(url, '', "top=" + top + ", left=" + left + ", width=" + w + ", height=" + h);
+        var interval = 1000;
+
+        var i = $interval(function () {
+          try {
+            if (popup == null || popup.closed) {
+              $interval.cancel(i);
+              $scope.trigger_scan_message('order_complete');
+            }
+          } catch (e) {
+            console.error(e);
+          }
+        }, interval);
       };
 
       $scope.input_enter = function (event) {
@@ -163,3 +197,4 @@ groovepacks_controllers.
         });
       };
     }]);
+

@@ -57,5 +57,13 @@
            groov-popover="Enable this switch to automatically create Kits and Aliases for products during order imports"/>
       </div>
     </div>
+    <div class="form-group">
+      <label class="control-label col-md-4">ShippingEasy Printing Popup</label>
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.popup_shipping_label" groov-click="popup_shipping_label()"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="If the packer will be printing a shipping label after packing each order, you can enable this switch to display the order in ShippingEasy once packing completes."/>
+      </div>
+    </div>
   </div>
 </div>

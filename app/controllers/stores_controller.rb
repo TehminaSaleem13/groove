@@ -28,6 +28,14 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def popup_shipping_label
+    result = {}
+    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
+    shippingeasy_cred.update_attribute(:popup_shipping_label, !shippingeasy_cred.popup_shipping_label)
+    result["popup_shipping_label"] = shippingeasy_cred.popup_shipping_label  
+    render json: result
+  end
+
   def create_update_ftp_credentials
     result = {}
 
