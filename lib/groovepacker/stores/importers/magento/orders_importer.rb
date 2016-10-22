@@ -11,7 +11,6 @@ module Groovepacker
             import_item = handler[:import_item]
             result = self.build_result
             import_time = DateTime.now
-            
             begin
               orders_response = get_orders(client, credential, session)
               unless orders_response.blank?
@@ -73,7 +72,7 @@ module Groovepacker
               @filters = {}
               @filter = {}
               item = {}
-              item['key'] = 'status'
+              item['key'] = 'state'
               item['value'] = status
               @filter['item'] = item
               @filters['filter'] = @filter
