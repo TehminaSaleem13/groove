@@ -67,6 +67,7 @@ module Groovepacker
               end
               create_order_item(item, order_item)
               product.product_images.create(image: s3_image_url) if s3_image_url.present?
+              product.set_product_status
             end
 
             def create_s3_image(item)
