@@ -54,7 +54,7 @@ groovepacks_controllers.
         }
       };
       $scope.handle_scan_return = function (data) {
-        if (data.data.order.store_type != undefined) {
+        if (data.data.order!=undefined && data.data.order.store_type != undefined) {
           $scope.store_type = data.data.order.store_type
         } 
         $scope.set('raw', data);
@@ -78,6 +78,9 @@ groovepacks_controllers.
                 } else {
                   $scope.trigger_scan_message('order_complete');
                 }
+                // if ($scope.store_type == "Shipstation API 2" && !!window.chrome && !!window.chrome.webstore){
+                //   $(".content_for_extension").text(data.data.order.store_order_id);
+                // }
               }
             }
             $state.go(data.data.next_state, data.data);
@@ -136,6 +139,7 @@ groovepacks_controllers.
         }
         $window.increment_id = $scope.data.order.increment_id;
         scanPack.input($scope.data.input, $scope.current_state, id).success($scope.handle_scan_return);
+          // scanPack.update_chrome_tab();
         // var barcodes = [];
         // if (typeof $scope.data.order.next_item != "undefined" ){
         //   var values = $scope.data.order.next_item.barcodes;
