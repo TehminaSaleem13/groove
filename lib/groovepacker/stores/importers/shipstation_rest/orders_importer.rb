@@ -66,7 +66,7 @@ module Groovepacker
           def import_order_form_response(shipstation_order, order, shipments_response)
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
-              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {}
+              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {} rescue {}
               if tracking_info.blank?
                 response = @client.get_shipments_by_orderno(order["orderNumber"])
                 tracking_info = {}
