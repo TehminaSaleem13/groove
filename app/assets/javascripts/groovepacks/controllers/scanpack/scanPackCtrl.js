@@ -187,17 +187,10 @@ groovepacks_controllers.
         });
       }
 
-      $scope.close = function(){
-        $scope.video_modal_popup.close();
-      }
-
       $scope.show_video = function(){
         var video_modal_popup = $modal.open({
-          template: '<button ng-controller="scanPackCtrl" type="button" class="close-btn" ng-click="close()" style="top: -21px; right: 23px;"><i class="glyphicon glyphicon-remove"></i></button><iframe width="560" height="315" src="https://www.youtube.com/embed/GAhFG-CPTJ0?rel=0" frameborder="0" allowfullscreen></iframe>',
-          windowClass: 'app-modal-video-window',
-          controller: function($scope){
-            $scope.video_modal_popup = video_modal_popup;
-          }
+          template: '<iframe width="560" height="315" src="https://www.youtube.com/embed/GAhFG-CPTJ0?rel=0" frameborder="0" allowfullscreen></iframe>', 
+          windowClass: 'app-modal-video-window'
         });
       };
     }]);
