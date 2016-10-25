@@ -5,11 +5,11 @@ groovepacks_controllers.
       $scope.editreload = function () {
         return $scope.rfpinit().then(function () {
           $scope.set('title', "Fix item statuses or scan a new order");
-          $scope.set('msg', "Not sure how to proceed? Click Here");
+          $scope.set('msg', null);
           if (typeof $scope.data.raw.data != "undefined"
             && typeof $scope.data.raw.data.inactive_or_new_products != "undefined"
             && $scope.data.raw.data.inactive_or_new_products.length > 0) {
-
+            $scope.set('msg', "Not sure how to proceed? Click Here");
             $scope.products.list = $scope.data.raw.data.inactive_or_new_products;
             $state.go('scanpack.rfp.product_edit', {order_num: $stateParams.order_num});
             if (typeof $scope.data.raw.data.zero_qty_product != "undefined") {
