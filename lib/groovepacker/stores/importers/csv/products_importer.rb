@@ -147,9 +147,9 @@ module Groovepacker
                     end
                   end
                 end
-                return false
               end
             end
+            return false
           end
 
           def init_prod_inv
@@ -164,16 +164,16 @@ module Groovepacker
 
           def build_prod_inv(product_inventory,single_row)
             if !self.mapping['inv_wh1'].nil? && self.mapping['inv_wh1'][:position] >= 0
-              product_inventory[:quantity_on_hand] = single_row[self.mapping['inv_wh1'][:position]]
+              product_inventory[:quantity_on_hand] = single_row[self.mapping['inv_wh1'][:position]] || ''
             end
             if !self.mapping['location_primary'].nil? && self.mapping['location_primary'][:position] >= 0
-              product_inventory[:location_primary] = single_row[self.mapping['location_primary'][:position]]
+              product_inventory[:location_primary] = single_row[self.mapping['location_primary'][:position]] || ''
             end
             if !self.mapping['location_secondary'].nil? && self.mapping['location_secondary'][:position] >= 0
-              product_inventory[:location_secondary] = single_row[self.mapping['location_secondary'][:position]]
+              product_inventory[:location_secondary] = single_row[self.mapping['location_secondary'][:position]] || ''
             end
             if !self.mapping['location_tertiary'].nil? && self.mapping['location_tertiary'][:position] >= 0
-              product_inventory[:location_tertiary] = single_row[self.mapping['location_tertiary'][:position]]
+              product_inventory[:location_tertiary] = single_row[self.mapping['location_tertiary'][:position]] || ''
             end
             product_inventory
           end
@@ -483,75 +483,77 @@ module Groovepacker
           end
 
           def build_usable_records
-            # # Calling Go lambda function
-            # # => Generate event parameter file
-            # barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").map{|mp| mp[:position]}
-            # barcodes = final_record.map do |sr|
-            #   sr.values_at(*barcode_positions).map { |bc| bc.split(',') if bc }.flatten
-            # end.flatten.compact.uniq
-            # barcodes_count = ProductBarcode.where(barcode: barcodes).group(:barcode).count
-            # time_stamp = Time.now.to_i
-            # event_file_path = "tmp/test_#{time_stamp}.json"
-            # event_data = {
-            #   final_record: final_record,
-            #   mapping: mapping,
-            #   store_product_id_base: @store_product_id_base,
-            #   barcodes_count: barcodes_count,
-            #   scan_pack_settings: ScanPackSetting.select([:intangible_setting_enabled, :intangible_string]).first,
-            #   params: params.as_json(
-            #     only: [:use_sku_as_product_name, :generate_barcode_from_sku]
-            #     ).merge(
-            #       default_inventory_warehouse_id: @default_inventory_warehouse_id
-            #       )
-            # }
-            # File.open(event_file_path, "w+"){|f| f.write(event_data.to_json)}
-            # usable_records = `apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`
-            # @usable_records = JSON.parse(usable_records).map do |record|
-            #   record = record.symbolize_keys
-            #   record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
-            #   record
-            # end
-
-            self.final_record.each_with_index do |single_row, index|
-              do_skip = true
-              for i in 0..(single_row.length-1)
-                do_skip = false unless single_row[i].blank?
-                break unless do_skip              
-              end
-              next if do_skip
-              if !self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?
-                single_row_skus = build_single_row_skus(single_row)
-                
-                if (@all_skus & single_row_skus).length > 0
-                  @duplicate_file += 1
-                else
-                  usable_record = init_usable_record(index)
-                  @all_skus += single_row_skus
-                  usable_record[:skus] = single_row_skus
-                  @usable_records << build_usable_record(usable_record,single_row)
-                  @success += 1
-                end
-              end
-
-              if (index + 1) % @check_length === 0 || index === (self.final_record.length - 1)
-                @product_import.reload
-                @product_import.success = @success
-                @product_import.current_sku = @all_skus.last
-                if @product_import.cancel
-                  @product_import.status = 'cancelled'
-                  @product_import.save
-                  return true
-                end
-                if index === (self.final_record.length - 1)
-                  @success = 0
-                  @product_import.status = 'processing_products'
-                  @product_import.success = @success
-                  @product_import.current_sku = ''
-                  @product_import.total = @usable_records.length
-                end
-                @product_import.save
-              end
+            # Calling Go lambda function
+            # => Generate event parameter file
+            barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").map{|mp| mp[:position]}
+            barcodes = final_record.map do |sr|
+              sr.values_at(*barcode_positions).map { |bc| bc.split(',') if bc }.flatten
+            end.flatten.compact.uniq
+            barcodes_count = ProductBarcode.where(barcode: barcodes).group(:barcode).count
+            time_stamp = Time.now.to_i
+            event_file_path = "tmp/#{Apartment::Tenant.current}_product_importer_event_#{time_stamp}.json"
+            event_data = {
+              store_product_id_base: @store_product_id_base,
+              mapping: mapping,
+              barcodes_count: barcodes_count,
+              scan_pack_settings: ScanPackSetting.select([:intangible_setting_enabled, :intangible_string]).first,
+              final_record: final_record,
+              params: params.as_json(
+                only: [:use_sku_as_product_name, :generate_barcode_from_sku]
+                ).merge(
+                  default_inventory_warehouse_id: @default_inventory_warehouse_id
+                  )
+            }
+            File.open(event_file_path, "w"){|f| f.write(event_data.to_json)}
+            return_data = JSON.parse(`apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`)
+            @usable_records = return_data["usable_records"].map do |record|
+              record = record.symbolize_keys
+              record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
+              record
             end
+            @duplicate_file, @success, @all_skus, @all_barcodes =
+              return_data.values_at("duplicate_file", "success", "all_skus", "all_barcodes")
+              
+            # self.final_record.each_with_index do |single_row, index|
+            #   do_skip = true
+            #   for i in 0..(single_row.length-1)
+            #     do_skip = false unless single_row[i].blank?
+            #     break unless do_skip              
+            #   end
+            #   next if do_skip
+            #   if !self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?
+            #     single_row_skus = build_single_row_skus(single_row)
+                
+            #     if (@all_skus & single_row_skus).length > 0
+            #       @duplicate_file += 1
+            #     else
+            #       usable_record = init_usable_record(index)
+            #       @all_skus += single_row_skus
+            #       usable_record[:skus] = single_row_skus
+            #       @usable_records << build_usable_record(usable_record,single_row)
+            #       @success += 1
+            #     end
+            #   end
+
+            #   if (index + 1) % @check_length === 0 || index === (self.final_record.length - 1)
+            #     @product_import.reload
+            #     @product_import.success = @success
+            #     @product_import.current_sku = @all_skus.last
+            #     if @product_import.cancel
+            #       @product_import.status = 'cancelled'
+            #       @product_import.save
+            #       return true
+            #     end
+            #     if index === (self.final_record.length - 1)
+            #       @success = 0
+            #       @product_import.status = 'processing_products'
+            #       @product_import.success = @success
+            #       @product_import.current_sku = ''
+            #       @product_import.total = @usable_records.length
+            #     end
+            #     @product_import.save
+            #   end
+            # end
           end
 
           def import_or_overwrite_prod
