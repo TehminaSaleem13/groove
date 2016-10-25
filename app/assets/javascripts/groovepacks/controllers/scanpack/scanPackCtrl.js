@@ -54,7 +54,7 @@ groovepacks_controllers.
         }
       };
       $scope.handle_scan_return = function (data) {
-        if (data.data.order!=undefined && data.data.order.store_type != undefined) {
+        if ((data.data != "undefined") && (data.data.order!=undefined) && (data.data.order.store_type != undefined)) {
           $scope.store_type = data.data.order.store_type
         } 
         $scope.set('raw', data);
@@ -72,7 +72,7 @@ groovepacks_controllers.
               $scope.$broadcast('reload-scanpack-state');
             } else {
               if (data.data.order_complete) {
-                if ($scope.store_type=="ShippingEasy" && data.data.order.popup_shipping_label==true){
+                if ($scope.store_type=="ShippingEasy" && (data.data != "undefined") && (data.data.order!=undefined) &&data.data.order.popup_shipping_label==true){
                   var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + data.data.order.store_order_id + "/edit");
                   $scope.open_popup(shippingeasy_url);
                 } else {
