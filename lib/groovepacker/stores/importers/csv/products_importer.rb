@@ -485,34 +485,51 @@ module Groovepacker
           def build_usable_records
             # Calling Go lambda function
             # => Generate event parameter file
-            barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").map{|mp| mp[:position]}
-            barcodes = final_record.map do |sr|
-              sr.values_at(*barcode_positions).map { |bc| bc.split(',') if bc }.flatten
-            end.flatten.compact.uniq
-            barcodes_count = ProductBarcode.where(barcode: barcodes).group(:barcode).count
-            time_stamp = Time.now.to_i
-            event_file_path = "tmp/#{Apartment::Tenant.current}_product_importer_event_#{time_stamp}.json"
-            event_data = {
-              store_product_id_base: @store_product_id_base,
-              mapping: mapping,
-              barcodes_count: barcodes_count,
-              scan_pack_settings: ScanPackSetting.select([:intangible_setting_enabled, :intangible_string]).first,
-              final_record: final_record,
-              params: params.as_json(
-                only: [:use_sku_as_product_name, :generate_barcode_from_sku]
-                ).merge(
-                  default_inventory_warehouse_id: @default_inventory_warehouse_id
-                  )
-            }
-            File.open(event_file_path, "w"){|f| f.write(event_data.to_json)}
-            return_data = JSON.parse(`apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`)
-            @usable_records = return_data["usable_records"].map do |record|
-              record = record.symbolize_keys
-              record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
-              record
+            @retry_count = 0
+            slice_size = 100
+            final_record.each_slice(slice_size) do |final_record_slice|
+              barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").compact.map{|mp| mp[:position]}
+              barcodes = final_record_slice.map do |sr|
+                sr.values_at(*barcode_positions).map { |bc| bc.split(',') if bc }.flatten
+              end.flatten.compact.uniq
+              barcodes_count = ProductBarcode.where(barcode: barcodes).group(:barcode).count
+              time_stamp = Time.now.to_i
+              event_file_path = "tmp/#{Apartment::Tenant.current}_product_importer_event_#{time_stamp}.json"
+              event_data = {
+                store_product_id_base: @store_product_id_base,
+                mapping: mapping,
+                barcodes_count: barcodes_count,
+                scan_pack_settings: ScanPackSetting.select([:intangible_setting_enabled, :intangible_string]).first,
+                final_record: final_record_slice,
+                params: params.as_json(
+                  only: [:use_sku_as_product_name, :generate_barcode_from_sku]
+                  ).merge(
+                    default_inventory_warehouse_id: @default_inventory_warehouse_id
+                    )
+              }
+              File.open(event_file_path, "w"){|f| f.write(event_data.to_json)}
+              begin
+                return_data = JSON.parse(`apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`)
+                File.delete(event_file_path)
+                usable_records = return_data["usable_records"].map do |record|
+                  record = record.symbolize_keys
+                  record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
+                  record
+                end
+
+                duplicate_file, success, all_skus, all_barcodes =
+                  return_data.values_at("duplicate_file", "success", "all_skus", "all_barcodes")
+              rescue Exception => e
+                retry if @retry_count += 1 < 5
+                puts e.message
+              end
+              
+              @usable_records.push(*usable_records)
+              @duplicate_file += duplicate_file
+              @success += success
+              @all_skus.push(*all_skus)
+              @all_barcodes.push(*all_barcodes)
             end
-            @duplicate_file, @success, @all_skus, @all_barcodes =
-              return_data.values_at("duplicate_file", "success", "all_skus", "all_barcodes")
               
             # self.final_record.each_with_index do |single_row, index|
             #   do_skip = true
