@@ -1,4 +1,4 @@
-module Groovepacker
+  module Groovepacker
   module Stores
     module Importers
       module Magento
@@ -12,7 +12,7 @@ module Groovepacker
             result = self.build_result
             import_time = DateTime.now
             begin
-              orders_response = get_orders(client, credential, session)
+              orders_response = get_orders(client, credential, session, import_item)
               unless orders_response.blank?
                 result[:total_imported] = orders_response.length
                 import_item.current_increment_id = ''
@@ -60,14 +60,14 @@ module Groovepacker
             def get_statuses_to_import(credential)
               statuses = []
               statuses << "processing" if credential.shall_import_processing
-              statuses << "pending" if credential.shall_import_pending
+              statuses << "new" if credential.shall_import_pending
               statuses << "closed" if credential.shall_import_closed
               statuses << "complete" if credential.shall_import_complete
-              statuses << "fraud" if credential.shall_import_fraud
+              statuses << "payment_review" if credential.shall_import_fraud
               return statuses
             end
 
-            def get_filters(status, credential)
+            def get_filters(status, credential, import_item)
               @filters_array = {}
               @filters = {}
               @filter = {}
@@ -81,9 +81,14 @@ module Groovepacker
               @filters1 = {}
               @filter1 = {}
               item1 = {}
-              if credential.last_imported_at.to_s != ""
+              if import_item.import_type == "deep"
+                item1['key'] = 'created_at'
+                item1['value'] = [{'key' => 'from', 'value' => (Time.now - (import_item.days.days rescue 1.days)).utc.to_s}]
+              elsif credential.last_imported_at.to_s != ""
                 item1['key'] = 'created_at'
                 item1['value'] = [{'key' => 'from', 'value' => credential.last_imported_at.to_s}]
+              end       
+              if item1.present?
                 @filter1['item'] = item1
                 @filters1['complex_filter'] = @filter1
                 @filters_array = @filters_array.merge(@filters1)
@@ -91,11 +96,11 @@ module Groovepacker
               @filters_array
             end
 
-            def get_orders(client, credential, session)
+            def get_orders(client, credential, session, import_item)
               orders = []
               statuses = get_statuses_to_import(credential)
               statuses.each do |status|
-                filters_array = get_filters(status, credential)
+                filters_array = get_filters(status, credential, import_item)
                 response = client.call(:sales_order_list, message: {sessionId: session, filters: filters_array})
                 next if response.body[:sales_order_list_response][:result][:item].blank?
                 orders << response.body[:sales_order_list_response][:result][:item]

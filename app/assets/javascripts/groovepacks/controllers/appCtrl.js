@@ -6,6 +6,7 @@ groovepacks_controllers.
       $scope.se_deep_import_days = 1;
       $scope.ss_deep_import_days = 1;
       $scope.tp_deep_import_days = 1;
+      $scope.mg_deep_import_days = 1;
       $scope.import_progress = 1;
       $scope.not_started_summary = 0;
       $scope.countdown_progressbar = 0;
@@ -243,6 +244,13 @@ groovepacks_controllers.
                         '<input type="number" ng-model="store.days" ng-value="{{se_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
                     '</div>' +
+                    '<div ng-show="store.store_type==\'Magento\'" style="display: flex;">' +
+                      '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 4, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
+                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
+                        '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
+                        '<input type="number" ng-model="store.days" ng-value="{{mg_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
+                      '</div>' +
+                    '</div>' +
                     '<div ng-show="store.store_type==\'Shipstation API 2\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Tagged Import" ng-click="issue_import(store.id, 7, \'tagged\')"><img class="icons" src="/assets/images/tagged_import.png"></img></a>' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 7, \'regular_import\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
@@ -332,6 +340,9 @@ groovepacks_controllers.
         if(store.store_type==="Teapplix"){
           days = $scope.tp_deep_import_days;
         }
+        if(store.store_type==="Magento"){
+          days = $scope.mg_deep_import_days;
+        }
         return days;
       };
 
@@ -347,6 +358,9 @@ groovepacks_controllers.
         }
         if(store.store_type==="Teapplix"){
           $scope.tp_deep_import_days = store.days;
+        }
+        if(store.store_type==="Magento"){
+          $scope.mg_deep_import_days = store.days;
         }
       };
 
