@@ -559,6 +559,30 @@ describe OrdersController do
       expect(order_item2.inv_status).to eq('allocated')
     end
 
+    it "should show desc internal notes sorted" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order_one = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'123', :store => store, :notes_internal => "ABC")
+      order_two = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'321', :store => store, :notes_internal => "NBA")
+      response = get :index, {:filter=>"awaiting", :sort =>"notes", :order=>"DESC",:limit=> 20, :offset=>0, :product_search_toggle=> false}
+      result = JSON.parse(response.body)["orders"]
+      expect(result.first["ordernum"]).to eq("321")
+      expect(response.status).to eq(200)
+    end
+
+    it "should show asc internal notes sorted" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
+      order_one = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'123', :store => store, :notes_internal => "ABC")
+      order_two = FactoryGirl.create(:order, :status=>'awaiting', :increment_id=>'321', :store => store, :notes_internal => "NBA")
+      response = get :index, {:filter=>"awaiting", :sort =>"notes", :order=>"ASC",:limit=> 20, :offset=>0, :product_search_toggle=> false}
+      result = JSON.parse(response.body)["orders"]
+      expect(result.first["ordernum"]).to eq("123")
+      expect(response.status).to eq(200)
+    end
+
 		# Switching between off and on will be handled very differently
     # it "inventory does not adjust when order item quantity in order is changed, if inventory tracking is off" do
     #   request.accept = "application/json"

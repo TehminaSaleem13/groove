@@ -29,7 +29,6 @@ module Groovepacker
           retrieve_plan_data(tenant_name, tenant_hash)
           retrieve_shipping_data(tenant_name, tenant_hash)
           retrieve_activity_data(tenant_name, tenant_hash)
-
           tenants_result.push(tenant_hash)
         end
         @sort = sort_param(params)
@@ -56,11 +55,19 @@ module Groovepacker
         construct_query_and_get_result(params, search, sort_key, sort_order, query_add)
       end
 
-      def get_subscription_data(name)
+      def get_subscription_data(name, state)
         subscription_result = subscription_result_hash
         @tenant = Tenant.where(name: name).first
         rec_subscription(@tenant, subscription_result)
-
+        begin
+          if state == "show"
+            subscriptions = Stripe::Customer.retrieve(@tenant.subscription.stripe_customer_id).subscriptions  
+            subscription_ids = subscriptions.data.map(&:id) 
+            subscription_result['verified_stripe_account'] = subscription_ids.include? @tenant.subscription.customer_subscription_id
+          end
+        rescue
+          subscription_result['verified_stripe_account'] = false
+        end
         subscription_result
       end
 
@@ -251,7 +258,7 @@ module Groovepacker
         @subscription = tenant.subscription
         if @subscription
           @subscription_info = params[:subscription_info]
-          @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id])
+          @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id], :subscription_plan_id => params[:subscription_info][:plan_id])
           return result unless @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
           begin
             create_new_plan_and_assign(tenant)
@@ -347,7 +354,7 @@ module Groovepacker
       end
 
       def retrieve_plan_data(tenant_name, tenant_hash)
-        plan_data = get_subscription_data(tenant_name)
+        plan_data = get_subscription_data(tenant_name, "index")
         tenant_hash['start_day'] = plan_data['start_day']
         tenant_hash['plan'] = plan_data['plan']
         tenant_hash['amount'] = plan_data['amount']
@@ -408,27 +415,15 @@ module Groovepacker
 
       def retrieve_subscription_result(subscription_result, subscription)
         sub_plan_id = subscription.subscription_plan_id
-        subscription_result['plan'] =
-          construct_plan_hash.key(sub_plan_id) ||
-          get_plan_name(sub_plan_id)
+        subscription_result['plan'] = construct_plan_hash.key(sub_plan_id) || sub_plan_id.capitalize.gsub("-"," ") #get_plan_name(sub_plan_id)
         subscription_result['plan_id'] = sub_plan_id
-        subscription_result['amount'] =
-          '%.2f' % [(subscription.amount * 100).round / 100.0 / 100.0] if subscription.amount
-        subscription_result['start_day'] =
-          subscription.created_at.strftime('%d %b')
-        subscription_result['customer_id'] =
-          subscription.stripe_customer_id if subscription.stripe_customer_id
+        subscription_result['amount'] = '%.2f' % [(subscription.amount * 100).round / 100.0 / 100.0] if subscription.amount
+        subscription_result['start_day'] = subscription.created_at.strftime('%d %b')
+        subscription_result['customer_id'] = subscription.stripe_customer_id if subscription.stripe_customer_id
         subscription_result['email'] = subscription.email if subscription.email
         subscription_result['progress'] = subscription.progress
-        subscription_result['transaction_errors'] =
-          subscription.transaction_errors if subscription.transaction_errors
+        subscription_result['transaction_errors'] = subscription.transaction_errors if subscription.transaction_errors
         subscription_result['customer_subscription_id'] = subscription.customer_subscription_id
-        begin
-          subscriptions = Stripe::Customer.retrieve(subscription.stripe_customer_id).subscriptions
-          subscription_result['verified_stripe_account'] = subscriptions["data"].map(&:id).include? subscription.customer_subscription_id
-        rescue
-          subscription_result['verified_stripe_account'] = false
-        end
       end
 
       def create_new_plan_and_assign(tenant)

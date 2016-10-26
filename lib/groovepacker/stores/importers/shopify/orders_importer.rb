@@ -12,10 +12,11 @@ module Groovepacker
             initialize_import_item
             return @result if response["orders"].nil?
             response["orders"].each do |order|
-              @import_item.reload
+              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               break if @import_item.status == 'cancelled'
               import_single_order(order)
             end
+            @credential.update_attributes( :last_imported_at => Time.now ) if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end

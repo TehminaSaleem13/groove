@@ -127,7 +127,7 @@ module TenantsHelper
     result['tenant'] = {}
     result['tenant']['basicinfo'] = tenant.attributes
     helper = Groovepacker::Tenants::Helper.new
-    result['tenant']['subscription_info'] = helper.get_subscription_data(tenant.name)
+    result['tenant']['subscription_info'] = helper.get_subscription_data(tenant.name, "show")
     access_info = Groovepacker::Dashboard::Stats::ShipmentStats.new
     result['tenant']['access_restrictions_info'] = access_info.get_shipment_stats(tenant.name)
   end

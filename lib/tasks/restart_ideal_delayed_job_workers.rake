@@ -19,7 +19,7 @@ namespace :delayed_job do
 
         p "Restarting #{worker_name} with memory usage #{memory}"
 
-        `sudo monit restart #{worker_name}`
+        `sudo monit restart #{worker_name.gsub('.','_')}`
       end
 
     rescue StandardError => e

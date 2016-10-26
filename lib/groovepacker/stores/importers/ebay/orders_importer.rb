@@ -31,7 +31,7 @@ module Groovepacker
                 @ordercnt = 0
 
                 order_or_transactionArray.each do |order_transaction|
-                  import_item.reload
+                  import_item = ImportItem.find_by_id(import_item.id) rescue import_item
                   break if import_item.status == 'cancelled'
                   #single line item order transaction
                   if !order_transaction.transaction.nil?

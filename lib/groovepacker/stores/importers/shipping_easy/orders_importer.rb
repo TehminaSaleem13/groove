@@ -20,7 +20,7 @@ module Groovepacker
               order_copy = order["order"]
               order = order_copy unless order_copy.blank? 
               @order_to_update = false 
-              @import_item.reload
+              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               break if @import_item.status == 'cancelled'
               import_single_order(order)
               #increase_import_count
@@ -51,6 +51,7 @@ module Groovepacker
             end
 
             def create_alias_and_product(order_item, item)
+              s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
               sku = item["product"]["sku"]
               alias_skus = item["product"]["sku_aliases"]
               store_product_id =  item["ext_line_item_id"]
@@ -65,6 +66,18 @@ module Groovepacker
                 product.update_attribute(:is_kit, 1)
               end
               create_order_item(item, order_item)
+              product.product_images.create(image: s3_image_url) if s3_image_url.present?
+              product.set_product_status
+            end
+
+            def create_s3_image(item)
+              image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
+              # image_data = IO.read(open(item["product"]["image"]["original"]))
+              file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p') + "_shipping_easy_" + item["ext_line_item_id"]
+              tenant = Apartment::Tenant.current
+              GroovS3.create_image(tenant, file_name, image_data, 'public_read')
+              s3_image_url = ENV['S3_BASE_URL']+'/'+tenant+'/image/'+file_name
+              return s3_image_url
             end
 
             def create_order_item(item, order_item)

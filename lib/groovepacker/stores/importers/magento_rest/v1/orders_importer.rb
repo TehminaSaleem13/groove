@@ -26,7 +26,7 @@ module Groovepacker
                   import_item.save
 
                   orders.each do |order|
-                    import_item.reload
+                    import_item = ImportItem.find_by_id(import_item.id) rescue import_item
                     break if import_item.status == 'cancelled'
                     order = order.last
                     import_item.current_increment_id = order["increment_id"]
@@ -130,12 +130,12 @@ module Groovepacker
                 import_item.status = "failed"
                 import_item.message = e.message
                 import_item.save
-                import_item.reload
+                import_item = ImportItem.find_by_id(import_item.id) rescue import_item
                 tenant = Apartment::Tenant.current
                 Rollbar.error(e, e.message)
                 ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
               end
-              import_item.reload
+              import_item = ImportItem.find_by_id(import_item.id) rescue import_item
               if import_item.status != 'cancelled' and import_item.status!="failed"
               	credential.last_imported_at = import_time
               	credential.save

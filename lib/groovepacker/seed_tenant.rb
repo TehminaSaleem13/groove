@@ -46,7 +46,12 @@ module Groovepacker
       if ExportSetting.all.length == 0
         ExportSetting.create(:auto_email_export => 1,
                              :export_orders_option => 'on_same_day',
-                             :order_export_type => 'include_all')
+                             :order_export_type => 'do_not_include',
+                             :send_export_email_on_mon => true,
+                             :send_export_email_on_tue => true,
+                             :send_export_email_on_wed => true,
+                             :send_export_email_on_thu => true,
+                             :send_export_email_on_fri => true)
       end
 
       if ScanPackSetting.all.length == 0

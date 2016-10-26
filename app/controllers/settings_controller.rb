@@ -143,12 +143,20 @@ class SettingsController < ApplicationController
       'notice_messages' => [], 'error_messages' => [],
       'bulk_action_cancelled_ids' => []
     }
-
     if params[:id].present?
       params[:id].each do |bulk_action_id|
         update_bulk_action(bulk_action_id, result)
       end
     else
+      rem_bulkactions = GrooveBulkActions.where("status = 'pending' OR status = 'in_progress'")
+      rem_bulkactions.each do |bulk_action|
+        bulk_action.cancel = true
+        bulk_action.status = 'cancelled'
+        bulk_action.save
+        $redis.del("bulk_action_delete_data_#{Apartment::Tenant.current}_#{bulk_action.id}")
+        $redis.del("bulk_action_duplicate_data_#{Apartment::Tenant.current}_#{bulk_action.id}")
+        $redis.del("bulk_action_data_#{Apartment::Tenant.current}_#{bulk_action.id}")
+      end
       result['status'] &= false
       result['error_messages'] = ['no id bulk action id provided']
     end

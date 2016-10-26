@@ -5,15 +5,21 @@ module Groovepacker
         page_index = 1
         combined_response = {}
         combined_response["orders"] = []
-        response = HTTParty.get('https://'+ shopify_credential.shop_name +
-                                  '.myshopify.com/admin/orders',
-                                headers: {
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
-                                  "Content-Type" => "application/json",
-                                  "Accept" => "application/json"
-                                })
-        page_index = page_index + 1
-        combined_response["orders"] = response["orders"]
+        last_import = shopify_credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+        while page_index
+          query = {"page" => page_index, "updated_at_min" => last_import, "limit" => 250}.as_json
+          response = HTTParty.get('https://'+ shopify_credential.shop_name +
+                                    '.myshopify.com/admin/orders',
+                                  query: query,
+                                  headers: {
+                                    "X-Shopify-Access-Token" => shopify_credential.access_token,
+                                    "Content-Type" => "application/json",
+                                    "Accept" => "application/json"
+                                  })
+          page_index = page_index + 1
+          combined_response["orders"] = response["orders"]
+          break if (response["orders"].blank? || response["orders"].count < 250)
+        end
         combined_response
       end
 

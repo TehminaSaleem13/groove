@@ -41,6 +41,9 @@ module SettingsHelper
       bulk_action.status = 'cancelled'
       bulk_action.save && result['bulk_action_cancelled_ids']
                           .push(bulk_action_id)
+      $redis.del("bulk_action_delete_data_#{Apartment::Tenant.current}_#{bulk_action_id}")
+      $redis.del("bulk_action_duplicate_data_#{Apartment::Tenant.current}_#{bulk_action_id}")
+      $redis.del("bulk_action_data_#{Apartment::Tenant.current}_#{bulk_action_id}")
       # puts 'We saved the bulk action objects'
       # puts 'Error occurred while saving bulk action object'
     else

@@ -483,6 +483,35 @@ module Groovepacker
           end
 
           def build_usable_records
+            # # Calling Go lambda function
+            # # => Generate event parameter file
+            # barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").map{|mp| mp[:position]}
+            # barcodes = final_record.map do |sr|
+            #   sr.values_at(*barcode_positions).map { |bc| bc.split(',') if bc }.flatten
+            # end.flatten.compact.uniq
+            # barcodes_count = ProductBarcode.where(barcode: barcodes).group(:barcode).count
+            # time_stamp = Time.now.to_i
+            # event_file_path = "tmp/test_#{time_stamp}.json"
+            # event_data = {
+            #   final_record: final_record,
+            #   mapping: mapping,
+            #   store_product_id_base: @store_product_id_base,
+            #   barcodes_count: barcodes_count,
+            #   scan_pack_settings: ScanPackSetting.select([:intangible_setting_enabled, :intangible_string]).first,
+            #   params: params.as_json(
+            #     only: [:use_sku_as_product_name, :generate_barcode_from_sku]
+            #     ).merge(
+            #       default_inventory_warehouse_id: @default_inventory_warehouse_id
+            #       )
+            # }
+            # File.open(event_file_path, "w+"){|f| f.write(event_data.to_json)}
+            # usable_records = `apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`
+            # @usable_records = JSON.parse(usable_records).map do |record|
+            #   record = record.symbolize_keys
+            #   record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
+            #   record
+            # end
+
             self.final_record.each_with_index do |single_row, index|
               do_skip = true
               for i in 0..(single_row.length-1)

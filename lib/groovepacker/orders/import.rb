@@ -83,7 +83,7 @@ module Groovepacker
         @import_item = @order_summary.import_items.build(store_id: store.id)
         @import_item.status = 'not_started'
         @import_item.save
-        @import_item.reload
+        @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
       end
 
       def import_shipworks(auth_token, request, status = 200)

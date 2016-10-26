@@ -44,7 +44,7 @@ module Groovepacker
         end
 
         def set_final_sort_key(sort_order, sort_key)
-          sort_key_hash = {'ordernum' => 'increment_id', 'order_date' => 'order_placed_time', 'notes' => 'notes_toPacker', 'recipient' => "firstname #{sort_order}, lastname"}
+          sort_key_hash = {'ordernum' => 'increment_id', 'order_date' => 'order_placed_time', 'notes' => 'notes_internal', 'recipient' => "firstname #{sort_order}, lastname"}
           sort_key = sort_key_hash[sort_key] if sort_key_hash.keys.include?(sort_key)
           return sort_key
         end

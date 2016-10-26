@@ -23,7 +23,7 @@ module Groovepacker
           while page_index
             response = @service.query("/shipments?page=#{page_index}&pageSize=200#{start_date}", nil, "get")
             shipments_after_last_import = shipments_after_last_import.push(response["shipments"]).flatten
-            break if response["shipments"].count<200
+            break if (response["shipments"].count rescue 0)<200
             page_index +=1
           end
           return shipments_after_last_import
@@ -120,7 +120,7 @@ module Groovepacker
             orders += response['orders'] unless response['orders'].nil?
             total_pages = response.parsed_response['pages']
             page_index += 1
-            return orders if page_index > total_pages
+            return orders if page_index > total_pages.to_i
           end
         end
 
@@ -143,11 +143,11 @@ module Groovepacker
           page_index = 1
           loop do
             res = @service.query("/Orders/List?orderStatus=" \
-              "#{status}&page=#{page_index}&pageSize=300#{start_date}", nil, "get")
+              "#{status}&page=#{page_index}&pageSize=150#{start_date}", nil, "get")
             combined['orders'] = union(combined['orders'],
                                        res.parsed_response['orders'])
             page_index += 1
-            return combined if res.parsed_response['orders'].length<300
+            return combined if res.parsed_response['orders'].length<150
           end
         end
 

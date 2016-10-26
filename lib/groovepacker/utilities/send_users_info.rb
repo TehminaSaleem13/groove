@@ -13,7 +13,7 @@ class SendUsersInfo
   def send_stream(tenant_name, users_info)
     users_info.each do |info|
       HTTParty::Basement.default_options.update(verify: false)
-      HTTParty.post("http://#{tenant_name}stat.#{ENV["GROOV_ANALYTIC"]}/users/create_user",
+      HTTParty.post("https://#{tenant_name}stat.#{ENV["GROOV_ANALYTIC"]}/users/create_user",
       # HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/users/create_user",
         query: {tenant_name: tenant_name},
         body: info.to_json,

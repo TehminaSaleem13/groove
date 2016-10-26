@@ -21,6 +21,12 @@ module ScanPack
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
       do_scan_now
+      if @result["data"].present? && @result["data"]["order"].present?
+        order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"])
+        @result["data"]["order"]["store_type"] = order.store.store_type rescue nil
+        @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy" && order.store.shipping_easy_credential.present?
+        @result["data"]["order"]["store_order_idea"] = order.store_order_id rescue nil
+      end
       if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
        stores = Store.where("status=? and on_demand_import=?", true, true)
        run_import_for_not_found_order if stores.present?

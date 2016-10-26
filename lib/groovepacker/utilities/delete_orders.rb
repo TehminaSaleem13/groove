@@ -19,7 +19,7 @@ class DeleteOrders
     #   destroy_order_items(@tenant)
     # else
       tenants = Tenant.order(:name) rescue Tenant.all
-      HTTParty.get("http://localhost:8080/rake_tasks/delete_orders/")
+      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
       tenants.each{ |tenant| destroy_order_items(tenant) }
     # end
   end
