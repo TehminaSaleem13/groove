@@ -70,7 +70,7 @@ module Groovepacker
               if tracking_info.blank?
                 response = @client.get_shipments_by_orderno(order["orderNumber"])
                 tracking_info = {}
-                response.each do |shipment|
+                (response || []).each do |shipment|
                   tracking_info = shipment if shipment["voided"] == false
                 end
               end
