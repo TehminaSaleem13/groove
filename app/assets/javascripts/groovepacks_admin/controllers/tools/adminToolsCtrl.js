@@ -410,11 +410,19 @@ groovepacks_admin_controllers.
           }
         };
 
+        myscope.initializing = true;
         $scope.$watch('tenants.setup.search', function () {
-          if ($scope.tenants.setup.select_all) {
-            $scope.select_all_toggle(false);
+          if (myscope.initializing) {
+            $timeout(function() { myscope.initializing = false; });
+          } else {
+            if ($scope.tenantFilterTimeout) $timeout.cancel($scope.tenantFilterTimeout);
+            if ($scope.tenants.setup.select_all) {
+              $scope.select_all_toggle(false);
+            }
+            $scope.tenantFilterTimeout = $timeout(function() {
+              myscope.get_tenants(1);
+            }, 500); 
           }
-          myscope.get_tenants(1);
         });
         $scope.tenant_modal_closed_callback = myscope.get_tenants;
         $scope.$watch('tenants.selected', myscope.update_selected_count, true);
