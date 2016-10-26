@@ -89,7 +89,7 @@ groovepacks_controllers.
       };
 
       $scope.open_popup = function (url) {
-        var w = 1000;
+        var w = 1240;
         var h = 600;
         var left_adjust = angular.isDefined($window.screenLeft) ? $window.screenLeft : $window.screen.left;
         var top_adjust = angular.isDefined($window.screenTop) ? $window.screenTop : $window.screen.top;
