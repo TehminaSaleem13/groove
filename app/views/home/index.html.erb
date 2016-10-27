@@ -101,6 +101,7 @@
     </div>
     <input type="hidden" id="current_tenant" value="<%= @current_tenant %>"/>
     <input type="hidden" id="domain" value="<%= ENV['GROOV_ANALYTIC']%>"/>
+    <input type="hidden" id="gl_app_url" value="<%= ENV['GROOV_ANALYTIC_URL'] %>"/>
     <input type="hidden" id="site_host" value="<%= ENV['SITE_HOST']%>"/>
     <div class="container-fluid">
 
@@ -109,6 +110,7 @@
 
   </div>
 <% end %>
+<div class="content_for_extension"></div>
 <!-- Please dont remove this html code. This is only to load editable when layout is loaded -->
 <div groov-editable="gridOptions"></div>
 <!-- ...................................................................................... -->

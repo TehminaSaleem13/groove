@@ -5,7 +5,7 @@ namespace :cssa do
     tenants = Tenant.all
     tenants.each do |tenant|
       begin
-        HTTParty.post("http://#{tenant.name}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard/update_data_model")
+        HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/dashboard/update_data_model")
       rescue Exception => e
         puts e.message
       end

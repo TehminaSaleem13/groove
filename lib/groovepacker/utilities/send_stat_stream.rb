@@ -15,11 +15,10 @@ class SendStatStream
   def send_stream(tenant, stat_stream, order_id, path)
     begin
       HTTParty::Basement.default_options.update(verify: false) if !Rails.env.production?
-      # response = HTTParty.post("http://#{ENV["GROOV_ANALYTIC"]}/#{path}",
-      response = HTTParty.post("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}",
+      response = HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",
         query: {tenant_name: tenant},
         body: stat_stream.to_json,
-        headers: { 'Content-Type' => 'application/json' })
+        headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
       if response.response.code == '200'
         order = Order.find(order_id)
         order.set_traced_in_dashboard
@@ -30,7 +29,9 @@ class SendStatStream
   end
 
   def duplicate_groovlytic_tenant(current_tenant, duplicate_name)
-    HTTParty.post("https://groovelytics_productionstat.#{ENV["GROOV_ANALYTIC"]}/tenants/duplicate?current_tenant=#{current_tenant}stat&duplicate_name=#{duplicate_name}stat")
+    HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/tenants/duplicate",
+          query: {current_tenant: "#{current_tenant}stat", duplicate_name: "#{duplicate_name}stat"},
+          headers: { 'Content-Type' => 'application/json', 'tenant' => current_tenant }))
   end
 
   def send_order_exception(order_id, tenant)
@@ -41,13 +42,16 @@ class SendStatStream
 
   def update_stats(tenant)
     path = "/dashboard/run_stat_stream"
-    HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}") 
+    HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",
+          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant }) 
   end
 
   def generate_export(tenant, params)
     days = params["duration"]
     email = params["email"]
-    path = URI.escape("/dashboard/generate_stats?days=#{days}&email=#{email}")
-    HTTParty.get("https://#{tenant}stat.#{ENV["GROOV_ANALYTIC"]}/#{path}")
+    path = "/dashboard/generate_stats"
+    HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",
+          query: {tenant_name: tenant, days: days, email: email},
+          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
   end
 end
