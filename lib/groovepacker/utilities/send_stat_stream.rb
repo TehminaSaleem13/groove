@@ -31,7 +31,7 @@ class SendStatStream
   def duplicate_groovlytic_tenant(current_tenant, duplicate_name)
     HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/tenants/duplicate",
           query: {current_tenant: "#{current_tenant}stat", duplicate_name: "#{duplicate_name}stat"},
-          headers: { 'Content-Type' => 'application/json', 'tenant' => current_tenant }))
+          headers: { 'Content-Type' => 'application/json', 'tenant' => current_tenant })
   end
 
   def send_order_exception(order_id, tenant)
