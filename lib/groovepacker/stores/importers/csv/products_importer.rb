@@ -507,10 +507,9 @@ module Groovepacker
                     default_inventory_warehouse_id: @default_inventory_warehouse_id
                     )
               }
-              File.open(event_file_path, "w"){|f| f.write(event_data.to_json)}
               begin
+                File.open(event_file_path, "w"){|f| f.write(event_data.to_json)}
                 return_data = JSON.parse(`apex -C vendor/gopacker invoke csv_product_importer_helper < #{event_file_path}`)
-                File.delete(event_file_path)
                 usable_records = return_data["usable_records"].map do |record|
                   record = record.symbolize_keys
                   record[:inventory] = record[:inventory].try(:map, &:symbolize_keys)
@@ -519,8 +518,9 @@ module Groovepacker
 
                 duplicate_file, success, all_skus, all_barcodes =
                   return_data.values_at("duplicate_file", "success", "all_skus", "all_barcodes")
+                File.delete(event_file_path)
               rescue Exception => e
-                retry if @retry_count += 1 < 5
+                retry if (@retry_count += 1) < 5
                 puts e.message
               end
               
