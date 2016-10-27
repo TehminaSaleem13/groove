@@ -525,8 +525,8 @@ module Groovepacker
               end
               
               @usable_records.push(*usable_records)
-              @duplicate_file += duplicate_file
-              @success += success
+              @duplicate_file += duplicate_file.to_i
+              @success += success.to_i
               @all_skus.push(*all_skus)
               @all_barcodes.push(*all_barcodes)
             end
