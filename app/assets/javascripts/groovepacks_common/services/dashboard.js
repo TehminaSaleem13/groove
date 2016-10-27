@@ -49,7 +49,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
     
     if(tenant)
     {
-      var domain = document.getElementById('domain').value;
+      var domain = document.getElementById('gl_app_url').value;
       var site_host = document.getElementById('site_host').value;
       var access_token = localStorage.getItem('access_token');
       var created_at = localStorage.getItem('created_at');
@@ -95,7 +95,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
   var request_analytic_server = function(tenant, domain, site_host, access_token, protocol) {
     $http.get(
       // protocol + '//' + domain +'/dashboard/calculate',
-      protocol + '//' + tenant + 'stat.' + domain +'/dashboard/calculate',
+      domain +'/dashboard/calculate',
       {headers: {'Authorization':'Bearer ' + access_token, 'domain':site_host, 'tenant':tenant}}
       ).error(function(response){
       notification.notify("Failed to load dashboard data", 0);

@@ -6,7 +6,7 @@ namespace :cta do
     tenants.each do |tenant|
       begin
         HTTParty::Basement.default_options.update(verify: false)
-        HTTParty.post("https://#{ENV["GROOV_ANALYTIC"]}/tenants",
+        HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/tenants",
           query: {tenant_name: tenant.name})
       rescue Exception => e
         puts e.message

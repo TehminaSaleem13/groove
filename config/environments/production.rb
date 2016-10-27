@@ -149,6 +149,7 @@ Groovepacks::Application.configure do
 
   # analytic server
   # ENV["GROOV_ANALYTIC"] = "orderpacker.com"
+  # ENV["GROOV_ANALYTIC_URL"] = "https://api.lockingaccelerator.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
