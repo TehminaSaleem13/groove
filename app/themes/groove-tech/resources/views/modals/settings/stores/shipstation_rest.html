@@ -162,6 +162,17 @@
              groov-click="update_single_store(true)"></div>
       </div>
     </div>
+
+    <div class="form-group">
+      <label class="control-label col-md-4">Use Chrome Extention</label>
+
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.use_chrome_extention"
+             groov-click="use_chrome_extention()"></div>
+        <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+           groov-popover="If the packer will be printing a shipping label after packing each order, you can enable this switch to display the order in ShipStation once packing completes. The Scan Pack Ship extension will need to be installed in your chrome browser. You can download this extension here. "></i>
+      </div>
+    </div>
   </div>
 </div>
 <div class="row">

@@ -15,4 +15,12 @@ class ShipstationRestCredentialsController < ApplicationController
   	render json: @result
   end
 
+  def use_chrome_extention
+    result = {}
+    shipstation_cred = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    shipstation_cred.update_attribute(:use_chrome_extention, !shipstation_cred.use_chrome_extention)
+    result["use_chrome_extention"] = shipstation_cred.use_chrome_extention  
+    render json: result
+  end
+
 end

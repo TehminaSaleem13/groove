@@ -244,6 +244,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.username = data.credentials.shipstation_credentials.username;
             stores.single.password = data.credentials.shipstation_credentials.password;
           } else if (data.store.store_type == 'Shipstation API 2') {
+            stores.single.use_chrome_extention = data.credentials.shipstation_rest_credentials.use_chrome_extention;
             stores.single.api_key = data.credentials.shipstation_rest_credentials.api_key;
             stores.single.api_secret = data.credentials.shipstation_rest_credentials.api_secret;
             stores.single.shall_import_awaiting_shipment = data.credentials.shipstation_rest_credentials.shall_import_awaiting_shipment;

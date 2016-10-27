@@ -78,9 +78,9 @@ groovepacks_controllers.
                 } else {
                   $scope.trigger_scan_message('order_complete');
                 }
-                // if ($scope.store_type == "Shipstation API 2" && !!window.chrome && !!window.chrome.webstore){
-                //   $(".content_for_extension").text(data.data.order.store_order_id);
-                // }
+                if ($scope.store_type == "Shipstation API 2" && !!window.chrome && !!window.chrome.webstore && data.data.order.use_chrome_extention==true){
+                  $(".content_for_extension").text(data.data.order.increment_id);
+                }
               }
             }
             $state.go(data.data.next_state, data.data);
