@@ -37,7 +37,10 @@ class DashboardController < ApplicationController
 
   def update_to_avg_datapoint
     results = {"status"=> true}
-    HTTParty.post("http://#{Apartment::Tenant.current}stat.#{ENV["GROOV_ANALYTIC"]}/dashboard/update_item_scan_time?actual=#{params["val"]}&avg=#{params["avg"]}&tenant=#{Apartment::Tenant.current}stat")
+    #HTTParty.post("https://api.#{ENV["GROOV_ANALYTIC"]}/dashboard/update_item_scan_time?actual=#{params["val"]}&avg=#{params["avg"]}&tenant=#{Apartment::Tenant.current}stat")
+    response = HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/dashboard/update_item_scan_time",
+        body: {actual: params["val"], avg: params["avg"]}.to_json,
+        headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
     render json: results
   end
 

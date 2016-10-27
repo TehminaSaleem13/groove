@@ -103,7 +103,9 @@ class UsersController < ApplicationController
             send_user_info_obj = SendUsersInfo.new()
             send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
           else
-            HTTParty.post("https://#{Apartment::Tenant.current}stat.#{ENV["GROOV_ANALYTIC"]}/users/update_username?tenant=#{Apartment::Tenant.current}&username=#{@user.username}&packing_user_id=#{@user.id}") rescue nil if @user.present?
+            HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
+                  query: { username: @user.username, packing_user_id: @user.id },
+                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
           end
 
         else
