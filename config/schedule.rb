@@ -34,7 +34,11 @@ every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
 end
 
 every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
-  command "/home/ubuntu/groove/meganto_status_update.sh"
+  if environment=='staging'
+    command "/home/ubuntu/groove/scripts-staging/meganto_status_update.sh"
+  else
+    command "/home/ubuntu/groove/meganto_status_update.sh"
+  end
 end
 
 every 1.day, :at => '7:50 am' do
