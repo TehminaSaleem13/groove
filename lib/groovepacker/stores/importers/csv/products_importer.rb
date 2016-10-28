@@ -487,8 +487,9 @@ module Groovepacker
             # => Generate event parameter file
             @retry_count = 0
             slice_size = 100
+            barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").compact.map{|mp| mp[:position]}
+            
             final_record.each_slice(slice_size) do |final_record_slice|
-              barcode_positions = mapping.values_at("barcode", "secondary_barcode", "tertiary_barcode").compact.map{|mp| mp[:position]}
               barcodes = final_record_slice.map do |sr|
                 sr.values_at(*barcode_positions).map { |bc| bc.split(',') if bc }.flatten
               end.flatten.compact.uniq
@@ -529,7 +530,24 @@ module Groovepacker
               @success += success.to_i
               @all_skus.push(*all_skus)
               @all_barcodes.push(*all_barcodes)
+
+              @product_import.reload
+              @product_import.success = @success
+              @product_import.current_sku = @all_skus.last
+              if @product_import.cancel
+                @product_import.status = 'cancelled'
+                @product_import.save
+                return true
+              end
+              @product_import.save
             end
+
+            @success = 0
+            @product_import.status = 'processing_products'
+            @product_import.success = @success
+            @product_import.current_sku = ''
+            @product_import.total = @usable_records.length
+            @product_import.save
               
             # self.final_record.each_with_index do |single_row, index|
             #   do_skip = true
