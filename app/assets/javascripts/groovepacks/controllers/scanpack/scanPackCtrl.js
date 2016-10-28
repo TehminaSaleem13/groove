@@ -72,14 +72,15 @@ groovepacks_controllers.
               $scope.$broadcast('reload-scanpack-state');
             } else {
               if (data.data.order_complete) {
-                if ($scope.store_type=="ShippingEasy" && (data.data != "undefined") && (data.data.order!=undefined) &&data.data.order.popup_shipping_label==true){
-                  var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + data.data.order.store_order_id + "/edit");
+                if ($scope.data.order.store_type=="ShippingEasy" && ($scope.data != "undefined") && ($scope.data.order!=undefined) && $scope.data.order.popup_shipping_label==true){
+                  var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + $scope.data.order.store_order_id + "/edit");
                   $scope.open_popup(shippingeasy_url);
                 } else {
                   $scope.trigger_scan_message('order_complete');
                 }
-                if ($scope.store_type == "Shipstation API 2" && !!window.chrome && !!window.chrome.webstore && data.data.order.use_chrome_extention==true){
-                  $(".content_for_extension").text(data.data.order.increment_id);
+                
+                if ($scope.data.order.store_type == "Shipstation API 2" && !!window.chrome && !!window.chrome.webstore && $scope.data.order.use_chrome_extention==true){
+                  $(".content_for_extension").text($scope.data.order.increment_id);
                 }
               }
             }
