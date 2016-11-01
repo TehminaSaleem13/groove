@@ -249,28 +249,27 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
 
   var trigger_click = function(avg, data_point, charts){
     clicked = 0
+    dashboard_data.avg = avg;
+    dashboard_data.data_point = data_point;
     $("body").on("click", "nvd3-line-chart", function(){ 
       if (clicked == 0 && charts.type === 'packing_speed_stats') {
         clicked = clicked + 1
         var modal_d = $modal.open({
           template:
-           '<div id="modal-dialog-box" class="dialog-modal" style="margin-top: 20%;" ng-controller="DashboardCtrl"> \
+           '<div id="modal-dialog-box" class="dialog-modal" style="margin-top: 20%;"> \
                 <style>.modal.fade.ng-isolate-scope.in {z-index: 99999!important;}</style> \
                 <div class="modal-header"> \
                   <h3 class="modal-title">Please Confirm</h3> \
                 </div> \
                 <div class="modal-body" style="min-height: 140px; text-align: center; padding: 25px;">Extreme data points resulting from unusual events can be averaged to normalize the stats data. <br/>Would you like to average this data point?</div> \
                 <div class="modal-footer"> \
-                  <button class="btn btn-primary ok_button" ng-click="ok(avg, data_point)">Ok</button> \
+                  <button class="btn btn-primary ok_button" ng-click="ok()">Ok</button> \
                   <button class="btn btn-warning cancel_button" ng-click="cancel()">Cancel</button> \
                 </div> \
             </div>',
-            controller: function($scope){
-              $scope.avg = avg;
-              $scope.data_point = data_point;
-              $scope.modal_d = modal_d;
-            }
+            controller: 'DashboardCtrl'
         });
+        dashboard_data.modal_d = modal_d;
       }
     });
   }

@@ -1,10 +1,10 @@
-groovepacks_controllers.controller('DashboardCtrl', function ($scope, $modal, $log, $http) {
-  $scope.ok = function(avg, data_point){
-    url = "/dashboard/update_to_avg_datapoint.json?avg=" + avg + "&&val=" + data_point;
+groovepacks_controllers.controller('DashboardCtrl', ['$scope', '$modal', '$log', '$http', 'dashboard', function ($scope, $modal, $log, $http, dashboard) {
+  $scope.ok = function(){
+    url = "/dashboard/update_to_avg_datapoint.json?avg=" + dashboard_data.avg + "&&val=" + dashboard_data.data_point;
     $http.post(url);
-    $scope.modal_d.close();
+    dashboard_data.modal_d.close();
   };
   $scope.cancel = function(){
-    $scope.modal_d.close();
+    dashboard_data.modal_d.close();
   };
-});
+}]);
