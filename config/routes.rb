@@ -209,6 +209,7 @@ Groovepacks::Application.routes.draw do
       post 'confirmation_code'
       post 'add_note'
       post 'reset_order_scan'
+      post 'get_shipment'
     end
     member do
     end

@@ -73,8 +73,17 @@ groovepacks_controllers.
             } else {
               if (data.data.order_complete) {
                 if ($scope.data.order.store_type=="ShippingEasy" && ($scope.data != "undefined") && ($scope.data.order!=undefined) && $scope.data.order.popup_shipping_label==true){
-                  var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + $scope.data.order.store_order_id + "/edit");
-                  $scope.open_popup(shippingeasy_url);
+                  if($scope.data.order.shipment_id != null){
+                    var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + parseInt($scope.data.order.shipment_id) + "/edit");
+                    $scope.open_popup(shippingeasy_url);
+                  } else {
+                    scanPack.getshipment($scope.data.order.store_id, $scope.data.order.store_order_id).success(function (d) {
+                      if(d.shipment_id != null){
+                        var shippingeasy_url = $sce.trustAsResourceUrl("http://app.shippingeasy.com/shipments/" + parseInt(d.shipment_id) + "/edit");
+                        $scope.open_popup(shippingeasy_url);
+                      };
+                    });
+                  };
                 } else {
                   $scope.trigger_scan_message('order_complete');
                 }
@@ -96,10 +105,8 @@ groovepacks_controllers.
         var top_adjust = angular.isDefined($window.screenTop) ? $window.screenTop : $window.screen.top;
         var width = $window.innerWidth ? $window.innerWidth : $window.document.documentElement.clientWidth ? $window.document.documentElement.clientWidth : $window.screen.width;
         var height = $window.innerHeight ? $window.innerHeight : $window.document.documentElement.clientHeight ? $window.document.documentElement.clientHeight : $window.screen.height;
-
         var left = ((width / 2) - (w / 2)) + left_adjust;
         var top = ((height / 2) - (h / 2)) + top_adjust;
-
         var popup = $window.open(url, '', "top=" + top + ", left=" + left + ", width=" + w + ", height=" + h);
         var interval = 1000;
 

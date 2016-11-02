@@ -58,6 +58,16 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
     });
   };
 
+  var getshipment = function(store_id, order_id){
+    return $http.post('/scan_pack/get_shipment.json', {store_id: store_id, order_id: order_id}).success(function (data) {
+      if (data.shipment_id) {
+        data.shipment_id;
+      } else {
+        notification.notify("Shipment not found!", 0);
+      }
+    });
+  }
+
   var reset = function (id) {
     return $http.post('/scan_pack/reset_order_scan.json', {order_id: id}).success(function (data) {
       notification.notify(data.notice_messages, 2);
@@ -173,6 +183,7 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   return {
 
     input: input,
+    getshipment: getshipment,
     reset: reset,
     settings: {
       model: get_default,
