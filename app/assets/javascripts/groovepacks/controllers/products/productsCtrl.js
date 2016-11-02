@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('productsCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$q', '$modal', 'products', '$rootScope',
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $q, $modal, products, $rootScope) {
+  controller('productsCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$q', '$modal', 'products', '$rootScope', '$window',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $q, $modal, products, $rootScope, $window) {
       //Definitions
 
       var myscope = {};
@@ -248,6 +248,10 @@ groovepacks_controllers.
         }
       };
 
+      myscope.update_print_status = function (product) {
+        $window.open('/products/' + product.id + '/generate_barcode_slip.pdf');
+      };
+
       myscope.show_delete = function () {
         if ($state.params.filter == 'inactive') {
           return true;
@@ -276,7 +280,6 @@ groovepacks_controllers.
 
         //Cache current page
         myscope.page_exists = -1;
-
         $scope.gridOptions = {
           identifier: 'products',
           dynamic_width: true,
@@ -308,6 +311,7 @@ groovepacks_controllers.
           draggable: true,
           sortable: true,
           editable: {
+            print_status: myscope.update_print_status,
             array: false,
             update: $scope.update_product_list,
             elements: {
@@ -328,7 +332,7 @@ groovepacks_controllers.
               name: myscope.handle_click_fn
             }
 
-          },
+          },         
           all_fields: {
             image: {
               name: "Image",
@@ -392,6 +396,14 @@ groovepacks_controllers.
               col_length: 20,
               class: "span3",
               hidden: true
+            },
+            print_barcode: {
+              name: "Print Barcode",
+              editable: false,
+              hidden: true,
+              col_length: 20,
+              transclude: "<a class='groove-button label label-default' groov-click=\"options.editable.print_status(row)\" href=\"\">" +
+              "&nbsp;&nbsp;<i class=\"glyphicon glyphicon-print icon-large white\"></i>&nbsp;&nbsp;</a>"
             },
             location_name: {
               name: "Warehouse Name",
