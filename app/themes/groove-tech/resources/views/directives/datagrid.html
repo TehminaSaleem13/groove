@@ -62,9 +62,13 @@
                       tooltip-placement='{{set_position(row, rows)}}'
                       class="grid-text">
                 </span>
+
+                
                 <span bo-if="options.all_fields[field].transclude == '' && row[field] !== null && row[field].toString().length <= 25"
-                      bo-text="row[field] | cut:false:(25*options.no_of_lines)" class="grid-text">
+                      bo-text="row[field].toString() | cut:false:(25*options.no_of_lines)" class="grid-text">
                 </span>
+
+
                 <span bo-if="options.all_fields[field].transclude == '' && (row[field] == null || !row[field].toString().length)"
                     tooltip="{{'Edit ' + options.all_fields[field].name}}" tooltip-placement='{{set_position(row, rows)}}' class="grid-text">
                   &nbsp;{{row[field]}}</span>
