@@ -169,10 +169,14 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
         $.each(dashboard.packing_stats, function(i, response) {
             if (response.key == data_points.user[0][0]){
               sum = 0
-              $.each(dashboard.packing_speed_stats[i].values, function(q, val) {
-                sum = sum + val[1];
+              $.each(dashboard.packing_speed_stats, function(a, obj) {
+                if (obj.key == response.key) {
+                  $.each(obj.values, function(q, val) {
+                    sum = sum + val[1];
+                  });
+                };
               });
-              avg = sum/dashboard.packing_speed_stats[i].values.length;
+              avg = sum/response.values.length;
               $.each(response.values, function(j, value){
                 if (value[0] == data_points.data[0][0]){
                     orders_count = value[2];
@@ -251,7 +255,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
     clicked = 0
     dashboard_data.avg = avg;
     dashboard_data.data_point = data_point;
-    $("body").on("click", "nvd3-line-chart", function(){ 
+    $(".nv-linesWrap path").click(function(){ 
       if (clicked == 0 && charts.type === 'packing_speed_stats') {
         clicked = clicked + 1
         var modal_d = $modal.open({
