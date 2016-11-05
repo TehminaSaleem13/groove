@@ -457,6 +457,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
       });
     }
 
+    scope.switch_back_button = function(){
+      store_id = scope.stores.single.id
+      $http.get('/shipstation_rest_credentials/switch_back_button.json?store_id=' + store_id).success(function (data) {
+        stores.single.switch_back_button = data.switch_back_button
+      });
+    }
+
     scope.import_ftp = function() {
       scope.stores.single.type = 'order';
       if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
