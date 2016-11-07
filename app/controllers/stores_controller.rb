@@ -617,7 +617,6 @@ class StoresController < ApplicationController
       @result["status"] = false
       @result["messages"].push("No store selected")
     end
-
     if @result["status"]
       if !@store.nil?
         if params[:type].nil? || !['both', 'order', 'product', 'kit'].include?(params[:type])
@@ -825,9 +824,9 @@ class StoresController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Product Map'
         end
         if csv_map.product_csv_map_id.nil?
-          map_data = CsvMap.create(:kind => 'product', :name => params[:name], :map => {})
+          map_data = CsvMap.new(:kind => 'product', :name => params[:name], :map => {})
           csv_map.product_csv_map_id = map_data.id
-          csv_map.save
+          # csv_map.save
         else
           map_data = csv_map.product_csv_map
         end
@@ -836,9 +835,9 @@ class StoresController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Kit Map'
         end
         if csv_map.kit_csv_map_id.nil?
-          map_data = CsvMap.create(:kind => 'kit', :name => params[:name], :map => {})
+          map_data = CsvMap.new(:kind => 'kit', :name => params[:name], :map => {})
           csv_map.kit_csv_map_id = map_data.id
-          csv_map.save
+          # csv_map.save
         else
           map_data = csv_map.kit_csv_map
         end
@@ -847,16 +846,14 @@ class StoresController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Order Map'
         end
         if csv_map.order_csv_map_id.nil?
-          map_data = CsvMap.create(:kind => 'order', :name => params[:name], :map => {})
+          map_data = CsvMap.new(:kind => 'order', :name => params[:name], :map => {})
           csv_map.order_csv_map_id = map_data.id
-          csv_map.save
+          # csv_map.save
         else
           map_data = csv_map.order_csv_map
         end
       end
-
       map_data.name = params[:name]
-
       map_data.map = {
         :rows => params[:rows],
         :sep => params[:sep],
@@ -872,12 +869,14 @@ class StoresController < ApplicationController
         :day_month_sequence => params[:day_month_sequence],
         :map => params[:map]
       }
-      map_data.save
       begin
+        map_data.save!
         csv_map.save!
       rescue ActiveRecord::RecordInvalid => e
         @result['status'] = false
         @result['messages'].push(csv_map.errors.full_messages)
+        @result['messages'].push(map_data.errors.full_messages)
+        @result['messages'] = @result['messages'].reject(&:empty?)
       rescue ActiveRecord::StatementInvalid => e
         @result['status'] = false
         @result['messages'].push(e.message)
@@ -945,7 +944,6 @@ class StoresController < ApplicationController
         import_csv = ImportCsv.new
         delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
         # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
-
         product_import.delayed_job_id = delayed_job.id
         product_import.total = 0
         product_import.success = 0
@@ -954,9 +952,7 @@ class StoresController < ApplicationController
         product_import.save
       end
       # Comment everything before this line till previous comment (i.e. the entire if block) when everything is moved to bulk actions
-
     end
-
     respond_to do |format|
       format.json { render json: @result }
     end
