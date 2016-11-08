@@ -88,7 +88,7 @@ groovepacks_controllers.
                   $scope.trigger_scan_message('order_complete');
                 }
                 if ($scope.data.order.store_type == "Shipstation API 2" && !!window.chrome && !!window.chrome.webstore && $scope.data.order.use_chrome_extention==true){
-                  $(".content_for_extension").attr("data-switch_back", $scope.data.order.switch_back_button);
+                  $(".content_for_extension").attr("data-switch_back",  [$scope.data.order.switch_back_button, $scope.data.order.auto_click_create_label]);
                   $(".content_for_extension").text($scope.data.order.increment_id);
                 }
               }

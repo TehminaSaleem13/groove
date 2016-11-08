@@ -464,6 +464,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
       });
     }
 
+    scope.auto_click_create_label = function(){
+      store_id = scope.stores.single.id
+      $http.get('/shipstation_rest_credentials/auto_click_create_label.json?store_id=' + store_id).success(function (data) {
+        stores.single.auto_click_create_label = data.auto_click_create_label
+      });
+    }
+
     scope.import_ftp = function() {
       scope.stores.single.type = 'order';
       if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
