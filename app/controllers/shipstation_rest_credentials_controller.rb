@@ -23,4 +23,20 @@ class ShipstationRestCredentialsController < ApplicationController
     render json: result
   end
 
+  def switch_back_button
+    result = {}
+    shipstation_cred = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    shipstation_cred.update_attribute(:switch_back_button, !shipstation_cred.switch_back_button)
+    result["switch_back_button"] = shipstation_cred.switch_back_button  
+    render json: result
+  end
+
+  def auto_click_create_label
+    result = {}
+    shipstation_cred = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    shipstation_cred.update_attribute(:auto_click_create_label, !shipstation_cred.auto_click_create_label)
+    result["auto_click_create_label"] = shipstation_cred.auto_click_create_label  
+    render json: result
+  end
+
 end

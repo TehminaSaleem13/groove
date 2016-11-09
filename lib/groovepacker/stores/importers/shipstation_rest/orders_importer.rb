@@ -52,7 +52,7 @@ module Groovepacker
           end
 
           def import_orders_from_response(response, shipments_response)
-            check_or_assign_import_item
+            # check_or_assign_import_item
             response["orders"].each do |order|
               @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               break if @import_item.status == 'cancelled'

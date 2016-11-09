@@ -34,6 +34,8 @@ Groovepacks::Application.routes.draw do
   get 'stores/update_include_product' => 'stores#update_include_product'
   get 'stores/popup_shipping_label' => 'stores#popup_shipping_label'
   get 'shipstation_rest_credentials/use_chrome_extention' => 'shipstation_rest_credentials#use_chrome_extention'
+  get 'shipstation_rest_credentials/switch_back_button' => 'shipstation_rest_credentials#switch_back_button'
+  get 'shipstation_rest_credentials/auto_click_create_label' => 'shipstation_rest_credentials#auto_click_create_label'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
   get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'

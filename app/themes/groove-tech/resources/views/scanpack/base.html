@@ -4,7 +4,7 @@
       {{data.title}}
     </div>
     <div class="col-xs-5 scan_pack_title">
-      <p class="pull-right">{{data.msg}}
+      <p class="pull-right" ng-click="show_video()" style="cursor: pointer;">{{data.msg}}
       <i ng-if="data.msg != nil" id="popup_video" ng-click="show_video()" class="icon-large glyphicon glyphicon-info-sign ng-scope" popover-trigger="mouseenter" popover-placement='left' style="cursor: pointer;"></i></p>
     </div>
       <input type="text" ng-model="data.input"  ng-keydown="input_enter($event)" autofocus="autofocus" tabindex="1"
