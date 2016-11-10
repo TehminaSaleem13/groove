@@ -142,7 +142,7 @@ module Groovepacker
           combined = { 'orders' => [] }
           page_index = 1
           loop do
-            res = @service.query("/Orders/List?orderStatus=" \
+            res = @service.query("/Orders?orderStatus=" \
               "#{status}&page=#{page_index}&pageSize=150#{start_date}", nil, "get")
             combined['orders'] = union(combined['orders'],
                                        res.parsed_response['orders'])
