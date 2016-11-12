@@ -495,7 +495,7 @@ module Groovepacker
               end.flatten.compact.uniq
               barcodes_count = ProductBarcode.where(barcode: barcodes).group(:barcode).count
               time_stamp = Time.now.to_i
-              event_file_path = "tmp/#{Apartment::Tenant.current}_product_importer_event_#{time_stamp}.json"
+              event_file_path = "uploads/#{Apartment::Tenant.current}_product_importer_event_#{time_stamp}.json"
               event_data = {
                 store_product_id_base: @store_product_id_base,
                 mapping: mapping,
