@@ -1,53 +1,172 @@
-<div class="row">
-  <div class="box-outer">
-    <div class="box">
-      <%= render 'shared/existing_customer', shop: @shop_name %>
+<div class="pricing_page">
+  <div class="row">
+    <div class="box-outer">
+      <div class="box">
+        <%= render 'shared/existing_customer', shop: @shop_name %>
+      </div>
+      <div class="col-sm-offset-3 col-sm-6">
+        <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
+      </div>
     </div>
-    <div class="col-sm-offset-3 col-sm-6">
-      <img src="/assets/images/logo.png" class="col-xs-12" alt="GroovePacker"/>
+  </div>
+  <div class="row col-md-11 setup_pricing">
+    <div class="pricinguser bottom-well">
+
+
+
+      <div class="">            
+        <div class="row topheading">
+          <h1><span>Setup &amp; Pricing</span></h1>
+        </div>
+        <div class="row topsec">
+          <div class="col-md-7 col-sm-7 col-xs-12">
+            <h3>1 on 1 VIP setup to ensure success</h3>
+            <p>
+              A one time $500 initialization will be collected when you
+              create your account today. It is <u>fully refundable</u> 
+              on cancellation any time during your free trial.
+              Monthly billing will not begin until after your trial.
+            </p>
+          </div>
+          <div class="col-md-5 col-sm-5 col-xs-12">
+            <h3>Your Initialization will include:</h3>
+            <ul>
+              <span></span>
+              <li class="data-merging">Initial Data Merging and Product Import</li>
+              <li class="server">Server Provisioning &amp; Account configuration</li>
+              <li class="import-source">Import Source Setup &amp; Configuration</li>
+              <li class="support">Unlimited Support &amp; Product Training</li>
+            </ul>
+          </div>
+        </div>
+
+        <div class="row smallrow">
+          <div class="col-md-4 col-sm-4 col-xs-12">Simple Pricing - No contracts</div>
+          <div class="col-md-4 col-sm-4 col-xs-12 text-center">Risk Free Startup &amp; Trial</div>
+          <div class="col-md-3 col-sm-4 col-xs-12 text-right">Satisfaction Guaranteed</div>
+        </div>
+
+        <section class="priceingcontent">                
+          <div class="row">
+            <div class="col-md-7">
+              <div class="row">
+                <div class="col-md-8">
+                  <h3>
+                    <i class="fa fa-dropbox"></i> Unlimited Shipments
+                  </h3>
+                </div>
+                <div class="col-md-3">
+                  <h1>+ $0</h1>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-8">
+                  <h3>
+                    <i class="fa fa-cloud-download"></i> Unlimited Order Sources
+                  </h3>
+                </div>
+                <div class="col-md-3">
+                  <h1>+ $0</h1>
+                </div>
+              </div>
+              <div class="row">
+                <div class="col-md-8">
+                  <h3>
+                    <i class="fa fa-user"></i>
+                    <a href="javascript:;" class="no_of_users_dec"><i class="fa fa-chevron-left"></i></a>
+                    <span class="no_of_users_label">3</span>
+                    <input type="hidden" class="no_of_users" name="no_of_users" value="3"/>
+                    <a href="javascript:;" class="no_of_users_inc"><i class="fa fa-chevron-right"></i></a>
+                    Total Users
+                  </h3>
+                </div>
+                <div class="col-md-3">
+                  <h1>+ $<span class="price_label">150<span></h1>
+                </div>
+              </div>
+              <div class="row fade4">
+                <div class="col-md-8">
+                  <h3>
+                    <input type="checkbox" class="bill_annually" name="bill_annually"> Bill Annually
+                  </h3>
+                </div>
+                <div class="col-md-3">
+                  <h1>- $<span class="discount_amount">15</span></h1>
+                </div>
+              </div>
+              <div class="row total">
+                <div class="col-md-8">
+                  <h3>
+                    Price / Month:
+                  </h3>
+                </div>
+                <div class="col-md-3">
+                  <h1>$<span class="total_amount">150</span></h1>
+                </div>
+              </div>
+            </div>
+            <div class="col-md-5 right pd-rgt-nn">
+              <div class="box never_pay_more">
+                <span></span>
+                <ul>
+                  <li><i class="fa fa-angle-right"></i> Never pay more for increased volume.</li>
+                  <li><i class="fa fa-angle-right"></i> Import orders from unlimited accounts.</li>
+                  <li><i class="fa fa-angle-right"></i> Add or Remove users at any time.</li>
+                </ul>
+              </div>
+              <div class="box never_pay_more">
+                <span></span>
+                <h2>More than 10K SKUs?</h2>
+                <p>
+                  Ask about pricing for high sku
+                  plans if you have more than
+                  10,000 SKUs in your inventory.
+                </p>
+              </div>
+              <p>
+                <%=image_tag "/assets/images/guarantee-txt.png" %>
+              </p>
+            </div>
+          </div>
+          <div class="row bttnrow">
+            <div class="col-md-5">
+              <p>
+                Select 2 or more users at $50/user <br>or Choose annual billing at $45/user
+              </p>
+            </div>
+            <div class="col-md-7 pd-none">
+              <button class="btn get_started">Get Started</button>
+            </div>
+          </div>
+          <div class="row terms">
+            <div class="col-md-6 pull-right">
+              <p>
+                *If GroovePacker is not saving you more than it costs at any point just let us know 
+                and we’ll cancel your account with a full refund for your last month’s service!
+              </p>
+            </div>
+          </div>
+        </section>
+      </div>
+    </div>
+
+
+
+    <div class="row">
+      <% if @plan_error != '' %>
+        <div class="col-md-offset-3 col-md-6 well-footer text-center">
+          <p><%=@plan_error%></p>
+        </div>
+      <% end %>
     </div>
   </div>
 </div>
-<div class="row bottom-well col-md-offset-1 col-md-10">
-  <div class="row">
-    <div class="col-md-offset-3 col-md-6 well-header text-center">
-      <p>Choose Your Free Trial Account Type</p>
-    </div>
-  </div>
-  <% @plans.each do |plan| %>
-    <div class="col-md-2 price-column">
-      <div class="col-box-primary">
-        <%= plan['name'] %><br>$<%= plan['amount'] %><br> /Month
-      </div>
-      <div class="col-box">
-        <%= plan['shipments'] %></br> Shipments<br/> <i class="fa fa-dropbox" style="font-size: 40px;"></i>
-      </div>
-      <div class="col-box">
-        <%= plan['users'] %> Users<br/>
-        <% for j in 1..plan['users'].to_i %>
-          <% if plan['users'].to_i > 4 %>
-            <i class="fa fa-user" style="font-size: 20px; margin-top: 5px;"></i>
-          <% else %>
-            <i class="fa fa-user" style="font-size: 40px; margin-top: 5px;"></i>
-          <% end %>
-        <% end %>
-      </div>
-      <div class="col-box">
-        <%= plan['stores'] %><br/>&nbsp;Import&nbsp;Sources&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<br/> <i class="fa fa-cloud-download" style="font-size: 40px; margin-top: 0px;"></i>
-      </div>
-      <br/>
 
-      <div class="text-center">
-        <%= link_to 'Get Started', {action: 'new', controller: 'subscriptions', plan_id: plan['plan_id'], shop_name: params[:shop_name], shop_type: params[:shop_type], email: params[:email]}, class: "btn btn-success" %>
-      </div>
-    </div>
-  <% end %>
-  <div class="row">
-    <% if @plan_error != '' %>
-      <div class="col-md-offset-3 col-md-6 well-footer text-center">
-        <p><%=@plan_error%></p>
-      </div>
-    <% end %>
-  </div>
-</div>
-
+<script type="text/javascript">
+  $(".get_started").click(function(){
+    var no_of_users = $('.no_of_users').val();
+    var checked = $(".bill_annually:checked").length;
+    var subscription_type = checked>0 ? "annually" : "monthly"
+    window.location = "/subscriptions/new?plan_id=GROOV-"+50*no_of_users+"&shop_name=<%=params[:shop_name]%>&shop_type=<%=params[:shop_type]%>&email=<%=params[:email]%>&radio_subscription="+subscription_type;
+  })
+</script>

@@ -86,7 +86,7 @@
           <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
         </div>
         <hr width="95%">
-        <% if params[:shop_name].nil? %>
+        <% if params[:shop_name].blank? %>
           <div>
             <h4>
               <center>Risk Free 30-day Evaluation</center>
@@ -96,7 +96,10 @@
             <label>If you are not completely satisfied, please let us know at any time during the evaluation period and
               all charges will be credited in full.</label>
           </div>
-
+          <br/>
+<%
+=begin
+%>
           <div style="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
           <div class="form-group" style="padding-top: 2px;margin-top: -5px;">
             <div>
@@ -120,7 +123,9 @@
               </div>
             </div>
           </div>
-
+<%
+=end
+%>
           <div class="form-group">
             <label for="coupon_id" class="control-label">Promotional Code</label>
 
@@ -154,6 +159,15 @@
       </fieldset>
     </form>
     <script>
+      $(document).ready(function(){
+        var subscription_type = "<%= params['radio_subscription'] %>";
+        if(subscription_type=="annually") {
+          $("[type='radio'][value='annually']").prop('checked',true);
+        } else {
+          $("[type='radio'][value='monthly']").prop('checked',true);
+        }
+      });
+
       var valid = {
         tenant_name: false,
         email: false,
