@@ -298,6 +298,8 @@ Groovepacks::Application.routes.draw do
     end
   end
 
+  get '/cost_calculator' => 'cost_calculators#index'
+
   resources :stripe do
     collection do
       post 'webhook'
