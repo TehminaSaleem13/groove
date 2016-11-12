@@ -20,7 +20,7 @@ module ExportData
     order_item_serial_lots.each do |order_item_serial_lot|
       product_lot = order_item_serial_lot.product_lot
       order_serial = order_item_serial_lot.order_serial
-      next unless order_serial && product_lot
+      next unless order_serial || product_lot
       parse_order_item_serial_lots([
         order_item_serial_lot, row_map, order_item,
         product_lot, order_serial, order_hash_item_array

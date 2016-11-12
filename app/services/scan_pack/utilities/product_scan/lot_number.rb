@@ -11,7 +11,7 @@ module ScanPack::Utilities::ProductScan::LotNumber
   def store_lot_number(order_item, serial_added)
     do_if_record_lot_number_is_set_and_serial_added_is_not_set(
       order_item
-      ) if @scanpack_settings.record_lot_number && !serial_added
+      ) if !serial_added
     @result
   end
 

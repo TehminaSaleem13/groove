@@ -69,6 +69,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
     Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
+
   end
 
   def reschedule_job(type, tenant)
@@ -153,7 +154,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_csv = ImportCsv.new
     result = import_csv.import(tenant, data.to_s)
     #check_or_assign_import_item(import_item)
-    import_item.reload
+    import_item = ImportItem.find_by_id(import_item.id) rescue import_item
     update_status(import_item, result)
     import_item.update_attributes(message: result[:messages]) unless result[:status]
   end
@@ -170,7 +171,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   def initiate_import_for(store, import_item, handler)
     import_item.update_attributes(status: 'in_progress')
     result = Groovepacker::Stores::Context.new(handler).import_orders
-    import_item.reload
+    import_item = ImportItem.find_by_id(import_item.id) rescue import_item
     import_item.previous_imported = result[:previous_imported]
     import_item.success_imported = result[:success_imported]
     update_status(import_item, result)

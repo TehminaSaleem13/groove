@@ -102,7 +102,21 @@ class ScanPackController < ApplicationController
     render json: product_instruction_obj.run
   end
 
+  def get_shipment
+    result = {}
+    filters = {includes: "products", id: params["order_id"].to_i} rescue nil
+    filters = filters.merge(get_cred(params["store_id"]))
+    response = ::ShippingEasy::Resources::Order.find(filters) rescue nil
+    result[:shipment_id] = response["order"]["shipments"][0]["id"] rescue nil
+    render json: result 
+  end
+
   private
+
+  def get_cred(store_id)
+    cred = ShippingEasyCredential.find_by_store_id(store_id) rescue nil
+    return response = {api_key: cred.api_key, api_secret: cred.api_secret}
+  end
 
   def set_result_instance
     @result = {

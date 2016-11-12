@@ -15,7 +15,7 @@ module Groovepacker
         combined_response = {"orders" => []}
         filters = { page: page_index, per_page: 100, status: statuses, last_updated_at: @last_imported_at, includes: "products"}
         filters = filters.merge(api_key_and_secret)
-        last_import = @credential.last_imported_at rescue 4.days
+        last_import = @credential.last_imported_at rescue (DateTime.now - 4.days)
 
         if import_item.import_type=='deep'
           days_back_to_import = import_item.days.to_i.days rescue 4.days

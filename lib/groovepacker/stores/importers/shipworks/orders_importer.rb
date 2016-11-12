@@ -131,8 +131,10 @@ module Groovepacker
 
           def import_order_item(item, import_item, order, store)
             sku = nil
-            sku = item["SKU"] unless item["SKU"].nil?
-            sku = item["Code"] unless item["Code"].nil? || item["Code"] == item["SKU"]
+            if item.present?
+              sku = item["SKU"] unless item["SKU"].nil?
+              sku = item["Code"] unless item["Code"].nil? || item["Code"] == item["SKU"]
+            end
             if !sku.nil? && ProductSku.find_by_sku(sku)
               product = ProductSku.find_by_sku(sku).product
             else

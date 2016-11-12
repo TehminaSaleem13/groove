@@ -64,7 +64,8 @@ module Groovepacker
                 # if non-nil sku is not found
                 product = create_new_product_from_order(variant, variant["sku"], shopify_product)
               else
-                  product = ProductSku.where(sku: variant["sku"]).first.product
+                product = ProductSku.where(sku: variant["sku"]).first.product
+                product.product_barcodes.create(barcode: variant["barcode"]) if product.product_barcodes.blank? && variant["barcode"].present?
               end
               return product
             end
