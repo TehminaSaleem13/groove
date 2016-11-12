@@ -36,8 +36,10 @@ $(document).ready(function(){
 		var checked = $(".bill_annually:checked").length;
 		var total_amount;
 		if(checked>0) {
+			$('.discount_section').removeClass("fade4");
 			total_amount = (50*no_of_users)-(5*no_of_users);
 		} else {
+			$('.discount_section').addClass("fade4");
 			total_amount = 50*no_of_users;
 		}
 		$(".total_amount").text(total_amount);

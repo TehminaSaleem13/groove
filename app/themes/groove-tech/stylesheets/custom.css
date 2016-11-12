@@ -40,7 +40,7 @@ body{
 
 
   .pricinguser.bottom-well{
-    padding: 0;
+    padding: 4px;
     margin: 0;
   }
   .pricinguser.bottom-well .container{
@@ -168,7 +168,7 @@ body{
   }
   .pricinguser .priceingcontent .fade4 h1{
     color: rgba(84, 83, 83, 0.46);
-    padding-left: 8px;
+    /*padding-left: 8px;*/
   }
   .pricinguser .priceingcontent .total h3{
     border-top: 3px solid rgba(0,0,0,0.54);
@@ -181,7 +181,7 @@ body{
   .pricinguser .priceingcontent .right .box{
     background: #ebeaea none repeat scroll 0 0;
     font-size: 20px;
-    margin: 30px 13px 30px 0;
+    margin: 50px 0 0 0;
     padding: 12px 15px;
     position: relative;
     color: #494949;
@@ -190,10 +190,10 @@ body{
     background: #dedcdc none repeat scroll 0 0;
     height: 100%;
     position: absolute;
-    right: -13px;
+    right: -15px;
     top: -5px;
     transform: skewY(-41deg);
-    width: 13px;
+    width: 15px;
   }
   .pricinguser .priceingcontent .right .box ul{
     margin: 0;
