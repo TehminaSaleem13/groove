@@ -237,11 +237,8 @@ module ScanPack
                           product_edit_matched_for_order: false,
                           product_edit_matched_for_products: [])
           @single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
-          message = 'This order was automatically placed on hold because it '\
-            'contains items that have a status of New or Inactive. These items '\
-            'may not have barcodes or other information needed for processing. '\
-            'Please ask a user with product edit permissions to scan their code'\
-            ' so that these items can be edited or scan a different order.'
+          message = "The order you've scanned has a status of Action Required because it contains items that are New or Inactive. Often one or more items in the order need to have a barcode added. This will require Product Edit permissions. <br />" +
+          "Please ask a user with product edit permissions to scan or enter their confirmation code if you wish to add the barcodes and continue packing this order. Alternatively you can scan a different packing slip to pack another order."
         end
       else
         @single_order_result['order_edit_permission'] = @current_user.can?('import_orders')
