@@ -834,9 +834,7 @@ class StoresController < ApplicationController
             end
 
             kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
-
-            file_delete(kit_file_path, 'kit')
-
+            # file_delete(kit_file_path, 'kit')
             if File.exists? kit_file_path
               kit_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
               @result['kit']['data'] = kit_file_data
