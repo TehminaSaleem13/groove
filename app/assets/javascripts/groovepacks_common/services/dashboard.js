@@ -189,7 +189,7 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
         clicked = 0
         if (clicked == 0){
           clicked = clicked + 1;
-          trigger_click(avg, data.data[0][1], charts);
+          trigger_click(avg,  data.user[0][0], data.data[0][1], charts);
         };
 
         tooltipText +=
@@ -251,10 +251,11 @@ groovepacks_services.factory('dashboard', ['$http', 'notification', 'auth', '$mo
 
 
 
-  var trigger_click = function(avg, data_point, charts){
+  var trigger_click = function(avg, username, data_point, charts){
     clicked = 0
     dashboard_data.avg = avg;
     dashboard_data.data_point = data_point;
+    dashboard_data.username = username;
     $(".nv-linesWrap path").click(function(){ 
       if (clicked == 0 && charts.type === 'packing_speed_stats') {
         clicked = clicked + 1

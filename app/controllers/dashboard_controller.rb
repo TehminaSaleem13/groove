@@ -39,7 +39,7 @@ class DashboardController < ApplicationController
     results = {"status"=> true}
     #HTTParty.post("https://api.#{ENV["GROOV_ANALYTIC"]}/dashboard/update_item_scan_time?actual=#{params["val"]}&avg=#{params["avg"]}&tenant=#{Apartment::Tenant.current}stat")
     response = HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/dashboard/update_item_scan_time",
-        body: {actual: params["val"], avg: params["avg"]}.to_json,
+        body: {actual: params["val"], avg: params["avg"], username: params["username"]}.to_json,
         headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
     render json: results
   end
