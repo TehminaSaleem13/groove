@@ -215,11 +215,11 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
       stores.csv.import(scope.stores, scope.stores.single.id).success(function (data) {
         scope.csv.importer = {};
         scope.csv.importer.default_map = {value: 'none', name: "Unmapped"};
-        if ("kit" in data && "data" in data["kit"]) {
+        if (data["kit"]!=undefined && data["kit"]["data"]!=undefined) {
           scope.csv.importer.kit = data["kit"];
           scope.csv.importer.type = "kit";
         }
-        if ("order" in data && "data" in data["order"]) {
+        if (data["order"]!=undefined && data["order"]["data"]!=undefined) {
           scope.csv.importer.order = data["order"];
           scope.csv.importer.type = "order";
         }
