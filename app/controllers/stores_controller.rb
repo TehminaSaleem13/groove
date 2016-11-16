@@ -824,7 +824,7 @@ class StoresController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Product Map'
         end
         if csv_map.product_csv_map_id.nil?
-          map_data = CsvMap.new(:kind => 'product', :name => params[:name], :map => {})
+          map_data = CsvMap.create(:kind => 'product', :name => params[:name], :map => {})
           csv_map.product_csv_map_id = map_data.id
           # csv_map.save
         else
@@ -835,7 +835,7 @@ class StoresController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Kit Map'
         end
         if csv_map.kit_csv_map_id.nil?
-          map_data = CsvMap.new(:kind => 'kit', :name => params[:name], :map => {})
+          map_data = CsvMap.create(:kind => 'kit', :name => params[:name], :map => {})
           csv_map.kit_csv_map_id = map_data.id
           # csv_map.save
         else
@@ -846,7 +846,7 @@ class StoresController < ApplicationController
           params[:name] = csv_map.store.name+' - Default Order Map'
         end
         if csv_map.order_csv_map_id.nil?
-          map_data = CsvMap.new(:kind => 'order', :name => params[:name], :map => {})
+          map_data = CsvMap.create(:kind => 'order', :name => params[:name], :map => {})
           csv_map.order_csv_map_id = map_data.id
           # csv_map.save
         else

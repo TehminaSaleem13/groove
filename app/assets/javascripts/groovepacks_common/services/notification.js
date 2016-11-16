@@ -24,6 +24,10 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
   };
 
   var notify = function (msgs, type) {
+    // notification_id = localStorage.getItem('notification_id');
+    // if (close == "2"){
+    //   delete_notif(notification_id)
+    // }
     if (typeof type != "number" || typeof notif_types[type] == "undefined") {
       type = notif_types["default"];
     }
@@ -40,8 +44,12 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
           }
         }
         id++;
-        notifications[id] = {show: true, alert: alert, msg: msgs[i]};
-        queue_remove(id);
+        // notifications[id] = {show: true, alert: alert, msg: msgs[i]};
+        // if (close!=1) {
+          queue_remove(id);
+        // } else {
+        //   localStorage.setItem('notification_id', id);
+        // }
       }
     }else { // if more than 5 notifications group them.
       var message = msgs[0];

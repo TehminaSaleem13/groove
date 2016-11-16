@@ -604,10 +604,8 @@ RSpec.describe ScanPackController, :type => :controller do
       expect(result["data"]["status"]).to eq("onhold")
       expect(result["data"]["next_state"]).to eq("scanpack.rfp.confirmation.product_edit")
       #expect(result["data"]["inactive_or_new_products"]).to eq()
-      expect(result["notice_messages"][0]).to eq("This order was automatically placed on hold because it contains "+
-        "items that have a status of New or Inactive. These items may not have barcodes or other information needed "+
-        "for processing. Please ask a user with product edit permissions to scan their code so that these items can be "+
-        "edited or scan a different order.")
+      expect(result["notice_messages"][0]).to eq("The order you've scanned has a status of Action Required because it contains items that are New or Inactive. Often one or more items in the order need to have a barcode added. This will require Product Edit permissions. <br />" +
+          "Please ask a user with product edit permissions to scan or enter their confirmation code if you wish to add the barcodes and continue packing this order. Alternatively you can scan a different packing slip to pack another order.")
     end
 
     it "should process order scan for orders having a status of Service issue" do

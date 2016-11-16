@@ -69,7 +69,6 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
     Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
-
   end
 
   def reschedule_job(type, tenant)
@@ -186,7 +185,12 @@ class ImportOrders < Groovepacker::Utilities::Base
   def update_import_item_and_send_mail(e, import_item, tenant)
     import_item_message = "Connection failed: Please verify store URL is https rather than http if the store is secure"
     import_item_message = "Import failed: #{e.message}" if e.message.strip != "Error: 302"
-    import_item.update_attributes(status: 'failed', message: import_item_message, import_error: e)
+    if import_item.store.store_type=="Shipstation API 2" && e.message.include?("401")
+      import_item_message = "Authorization with Shipstation store failed. Please check your API credentials"
+      import_item.update_attributes(status: 'failed', message: import_item_message, import_error: import_item_message)
+    else
+      import_item.update_attributes(status: 'failed', message: import_item_message, import_error: e)
+    end
     Rollbar.error(e, e.message)
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
   end

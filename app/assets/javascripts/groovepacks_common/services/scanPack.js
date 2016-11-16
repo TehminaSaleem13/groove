@@ -49,7 +49,13 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
   var input = function (input, state, id) {
     set_order_scanned('push');
     return $http.post('/scan_pack/scan_barcode.json', {input: input, state: state, id: id}).success(function (data) {
-      notification.notify(data.notice_messages, 2);
+      // if (data.notice_messages.length == 0){
+      //   notification.notify(data.notice_messages, 2, 2);
+      // } else if(data.notice_messages[0].length > 400)  {
+      //   notification.notify(data.notice_messages, 2, 1);
+      // } else {
+        notification.notify(data.notice_messages, 2);
+      // }
       notification.notify(data.success_messages, 1);
       notification.notify(data.error_messages, 0);
     }).error(function(){
