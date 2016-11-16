@@ -44,7 +44,7 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
           }
         }
         id++;
-        // notifications[id] = {show: true, alert: alert, msg: msgs[i]};
+        notifications[id] = {show: true, alert: alert, msg: msgs[i]};
         // if (close!=1) {
           queue_remove(id);
         // } else {
