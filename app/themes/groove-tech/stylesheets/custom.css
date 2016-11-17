@@ -96,8 +96,8 @@ body{
     background-repeat: no-repeat;
     height: 35px;
     padding-left: 50px;
-    margin: 5px 0;
-    line-height: 32px;
+    margin: 10px 5px;
+    line-height: 20px;
   }
   .pricinguser .topsec .data-merging{
     background-position: 0 3px;
