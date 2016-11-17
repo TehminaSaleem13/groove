@@ -232,38 +232,49 @@ groovepacks_controllers.
                   '<div class="btn-group">' +
                     '<div ng-show="store.store_type==\'BigCommerce\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 4, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                      '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
+                      '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                         '<input type="number" ng-model="store.days" ng-value="{{bc_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
+                        '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'ShippingEasy\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 4, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
+                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                         '<input type="number" ng-model="store.days" ng-value="{{se_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
+                        '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'Magento\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 4, \'regular\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
+                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                         '<input type="number" ng-model="store.days" ng-value="{{mg_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
+                        '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'Shipstation API 2\'" style="display: flex;">' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Tagged Import" ng-click="issue_import(store.id, 7, \'tagged\')"><img class="icons" src="/assets/images/tagged_import.png"></img></a>' +
                       '<a class="btn" ng-hide="import_summary.import_info.status==\'in_progress\'" title="Regular Import" ng-click="issue_import(store.id, 7, \'regular_import\')"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
-                      '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
+                      '<div ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/deep_import.png"></img></a>' +
                         '<input type="number" ng-model="store.days" ng-value="{{ss_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
+                        '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
                     '</div>' +
                     '<div ng-show="store.store_type==\'Teapplix\'" style="display: flex;">' +
-                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="width: 120px;">' +
+                      '<div  ng-hide="import_summary.import_info.status==\'in_progress\'" ng-mouseover="show_days_select(store, true)" ng-mouseleave="show_days_select(store, false)" style="display: flex;">' +
                         '<a class="btn" title="Deep Import" ng-click="issue_import(store.id, store.days, \'deep\')" style="float: left;"><img class="icons" src="/assets/images/reg_import.png"></img></a>' +
                         '<input type="number" ng-model="store.days" ng-value="{{tp_deep_import_days}}" data-import="{{store.id}}" ng-mouseleave="check_days_value(store)" max="30" style="display: none;font-size: 15px;height: 30px;width: 50px;"/>' +
                       '</div>' +
+                        '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
+                    '</div>' +
+                    '<div ng-show="store.store_type==\'Shopify\'" style="display: flex;">' +
+                      '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
+                    '</div>' + 
+                    '<div ng-show="store.store_type==\'Magento API 2\'" style="display: flex;">' +
+                      '<a class="btn" title="Fix It" ng-click="fix_imported_at(store.id)" style="float: left;"><img class="icons" src="/assets/images/importsummary_fix_it.png"></img></a>' +
                     '</div>' +
                     '<a class="btn" ng-show="import_summary.import_info.status==\'in_progress\' && import_summary.import_info.import_summary_type != \'update_locations\'" title="Cancel Import" ng-click="cancel_import(store.id)"><img class="icons" src="/assets/images/cancel_import.png"></img></a>' +
                   '</div>' +
@@ -272,6 +283,10 @@ groovepacks_controllers.
             '</table>';
         }
       });
+
+      $scope.fix_imported_at = function(store_id){
+        importOrders.fix_imported_at(store_id);
+      };
 
       $scope.trigger = function(error){
         ngClipboard.toClipboard(error);

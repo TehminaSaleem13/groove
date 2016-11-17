@@ -39,6 +39,7 @@ Groovepacks::Application.routes.draw do
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
   get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
+  get '/order_import_summary/fix_imported_at' => 'OrderImportSummaries#fix_imported_at'
   get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
   post 'settings/search_by_product' => 'settings#search_by_product'
