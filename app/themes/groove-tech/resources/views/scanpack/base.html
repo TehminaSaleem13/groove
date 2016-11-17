@@ -4,8 +4,9 @@
       {{data.title}}
     </div>
     <div class="col-xs-5 scan_pack_title">
-      <p class="pull-right" ng-click="show_video()" style="cursor: pointer;">{{data.msg}}
-      <i ng-if="data.msg != nil" id="popup_video" ng-click="show_video()" class="icon-large glyphicon glyphicon-info-sign ng-scope" popover-trigger="mouseenter" popover-placement='left' style="cursor: pointer;"></i></p>
+      <p class="pull-right" id="popup_video" ng-click="show_video()" style="cursor: pointer;">{{data.msg}}</p>
+      <i ng-if="data.msg != nil" class="icon-large glyphicon glyphicon-info-sign ng-scope" popover-trigger="mouseenter" popover-placement='left' groov-popover="This screen allows you to quickly add barcodes for new items that are in this order. To continue just right-click the barcode area beside each product to edit it and scan the product barcode to add it. For a quick demo video with more info click the link to the left." style="cursor: pointer;">
+      </i>
     </div>
       <input type="text" ng-model="data.input"  ng-keydown="input_enter($event)" autofocus="autofocus" tabindex="1"
              class="form-control search-box" placeholder="Scan..."/>
