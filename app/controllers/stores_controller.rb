@@ -321,7 +321,7 @@ class StoresController < ApplicationController
               end
               unless params[:kitfile].nil?
                 path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
-                kit_file_data = params[:kitfile]
+                kit_file_data = params[:kitfile].read
                 File.open(path, "wb") { |f| f.write(kit_file_data) }
                 GroovS3.create_public_csv(current_tenant, 'kit', @store.id, kit_file_data)
                 @result['csv_import'] = true
@@ -425,6 +425,7 @@ class StoresController < ApplicationController
                   shall_import_not_shipped: params[:shall_import_not_shipped],
                   shall_import_shipped: params[:shall_import_shipped],
                   shall_import_no_status: params[:shall_import_no_status],
+                  shall_import_ignore_local: params[:shall_import_ignore_local],
                   gen_barcode_from_sku: params[:gen_barcode_from_sku])
                 new_record = true
               else
@@ -435,6 +436,7 @@ class StoresController < ApplicationController
                   shall_import_not_shipped: params[:shall_import_not_shipped],
                   shall_import_shipped: params[:shall_import_shipped],
                   shall_import_no_status: params[:shall_import_no_status],
+                  shall_import_ignore_local: params[:shall_import_ignore_local],
                   gen_barcode_from_sku: params[:gen_barcode_from_sku])
               end
               @store.save

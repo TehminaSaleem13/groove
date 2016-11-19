@@ -26,8 +26,15 @@
 <div class="row">
   <div class="col-md-6">
     <legend>Import Orders with following statuses</legend>
-
     <div class="form-group">
+      <label class="control-label col-md-4 form-inline">Ignore local status</label>
+
+      <div class="controls col-md-8 form-inline">
+        <div toggle-switch ng-model="stores.single.shall_import_ignore_local" groov-click="update_single_store(true)"></div>
+      </div>
+    </div>
+
+    <div class="form-group" ng-if="stores.single.shall_import_ignore_local == false">
       <label class="control-label col-md-4 form-inline">In Process</label>
 
       <div class="controls col-md-8 form-inline">
@@ -35,7 +42,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="stores.single.shall_import_ignore_local == false">
       <label class="control-label col-md-4 form-inline">New Order</label>
 
       <div class="controls col-md-8 form-inline">
@@ -43,7 +50,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="stores.single.shall_import_ignore_local == false">
       <label class="control-label col-md-4">Not Shipped</label>
 
       <div class="controls col-md-8">
@@ -51,7 +58,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="stores.single.shall_import_ignore_local == false">
       <label class="control-label col-md-4">Shipped</label>
 
       <div class="controls col-md-8">
@@ -59,7 +66,7 @@
       </div>
     </div>
 
-    <div class="form-group">
+    <div class="form-group" ng-if="stores.single.shall_import_ignore_local == false">
       <label class="control-label col-md-4 form-inline">No Status</label>
 
       <div class="controls col-md-8 form-inline">
