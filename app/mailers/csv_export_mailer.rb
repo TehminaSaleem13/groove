@@ -5,14 +5,14 @@ class CsvExportMailer < ActionMailer::Base
     Apartment::Tenant.switch(tenant)
     general_setting = GeneralSetting.all.first
     recipients = [general_setting.admin_email]
-    user_emails = general_setting.export_csv_email.split(',')
+    user_emails = general_setting.export_csv_email.split(',') rescue []
     user_emails.each do |email|
       recipients << email
     end
     @filename = filename
     @object_url = object_url
     subject = "Backup successful."
-    mail to: recipients, subject: subject
+    mail to: recipients, subject: subject if recipients[0].present?
   end
 
   def send_s3_product_object_url(filename, object_url, tenant, no_product)

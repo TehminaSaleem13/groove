@@ -10,8 +10,8 @@ class ExportOrder < ActionMailer::Base
     filename = export_settings.export_data
     @tenant_name = tenant
     file_locatin = "#{Rails.root}/public/csv/#{filename}"
-    @csv_data = CSV.read(file_locatin)
-    @csv_data.first.each_with_index do |value, index|
+    @csv_data = CSV.read(file_locatin) rescue []
+    @csv_data.try(:first).try(:each_with_index) do |value, index|
       case value
       when 'order_number'
         @order_number = index
@@ -20,12 +20,12 @@ class ExportOrder < ActionMailer::Base
       end
     end
 
-    attachments["#{filename}"] = File.read(file_locatin)
+    attachments["#{filename}"] = File.read(file_locatin) rescue nil
     mail to: export_settings.order_export_email,
          subject: "GroovePacker Order Export Report"
     #import_orders_obj = ImportOrders.new
     #import_orders_obj.reschedule_job('export_order', tenant)
-    File.delete(file_locatin)
+    File.delete(file_locatin) rescue nil
   end
 
   def get_order_counts(export_settings)

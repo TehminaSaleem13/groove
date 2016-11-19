@@ -9,7 +9,7 @@
     <div style="width: 70vw;overflow:auto;">
       <table style="margin:0 auto;margin-top: 20px; border-spacing: 0; background-color:#e8e7e7;border-radius:15px;">
         <thead>
-        <% @csv_data.first.each_with_index do |th, index| %>
+        <% @csv_data.try(:first).try(:each_with_index) do |th, index| %>
           <% if index == 0 %>
             <th style="border-top-left-radius:15px;-webkit-border-top-left-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007; white-space: nowrap;">
               <%= th.titleize %>
