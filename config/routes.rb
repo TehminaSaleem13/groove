@@ -299,6 +299,7 @@ Groovepacks::Application.routes.draw do
   end
 
   get '/cost_calculator' => 'cost_calculators#index'
+  get '/email_calculations' => 'cost_calculators#email_calculations'
 
   resources :stripe do
     collection do

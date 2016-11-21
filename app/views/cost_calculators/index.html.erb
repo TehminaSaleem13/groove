@@ -1,245 +1,495 @@
-<!DOCTYPE html>
-<html lang="en">
-  <head>
-    <meta http-equiv="content-type" content="text/html; charset=UTF-8">
-    <meta charset="utf-8">
-    <title>GP Error Calculator</title>
-    <meta name="generator" content="Bootply" />
-    <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
-  </head>
-  <body class="container-well">
-<div>
-  <div class="jumbotron text-center">
-    <div class="container">
-      <div class="row">
-        <div class="col col-lg-12 col-sm-12">
-          <h1>GP Error Calculator</h1>
-          <p></p>
-        </div>
-      </div>
-    </div> 
-  </div>
+<div class="errorcalculator">
+          
+    <h2 class="text-center">Fulfillment Error Cost Calculator</h2>
 
-  <div class="container">
-    <div class="row">
-      <div class="col-md-4">
-        <div class="well">
-          <p>Number of orders an average packer packs per day</p>
-          <input id="order_count" type="number" name="order_count" min="0">
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <form id="cost_calc">
+        <div class="row">
+          <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
+            <h4><strong>Error Volume</strong></h4>
+            <h1><strong id="error_per_day"><%= @params[:error_per_day] %></strong></h1>
+            <p>Errors Per day</p>
+          </div>
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+            
+            <div class="row">
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox">
+                  <h4>Number of packers.</h4>
+                  <input id="packer_count" type="text" name="packer_count" value="<%= @params[:packer_count] %>">
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox">
+                  <h4>Number of orders an average packer packs per day.</h4>
+                  <input id="order_count" type="text" name="order_count" value="<%= @params[:order_count] %>">
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox">
+                  <h4>Error rate for the average packer.</h4>
+                  <input id="avg_error" type="text" name="avg_error" value="<%= @params[:avg_error] %>">% 
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </div>
+
+        <h2>Tangible Costs</h2>
+        <div class="row comunication">
+          <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
+            <h4><strong>Communication & Customer Service Costs</strong></h4>
+            <h1><strong>$<span id="cost_of_comm"><%= @params[:cost_of_comm] %></span></strong></h1>
+          </div>
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+            
+            <div class="row">
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox">
+                  <h4>
+                    <input id="regular_percentage" type="text" name="regular_percentage" value="<%= @params[:regular_percentage] %>"> % are routine communications handled by regular staff.
+                  </h4>
+                  <h4>
+                    The average cost is: <input id="regular_comm" type="text" name="regular_comm" value="<%= @params[:regular_comm] %>">
+                  </h4>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox">
+                  <h4><strong id="escalated_percentage"><%= @params[:escalated_percentage] %></strong> become escalated communications requiring the owner or management.</h4>
+                  <h4>
+                    The average cost is: <input id="escalated_comm" type="text" name="escalated_comm" value="<%= @params[:escalated_comm] %>">
+                  </h4>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox">
+                  <h4>The average number of communications required to resolve an error related issue.</h4>
+                  <input id="avg_comm" type="text" name="avg_comm" value="<%= @params[:avg_comm] %>">
+                </div>
+              </div>
+            </div>
+
+            <h4>
+              For example: One email or call when the issue is reported.<br> One email or call to let the customer know the reshipment is in in progress,<br> a final email or call to verify the customer has successfully received the item.<br> If the customer will be returning an incorrect item an additional email will likely be sent to the customer to let<br> them know it was recieved.
+            </h4>
+
+          </div>
+        </div>
+
+
+
+        <div class="row replacement">
+          <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
+            <h4><strong>Replacement Shipment Costs</strong></h4>
+            <h1><strong>$<span id="total_replacement_costs"><%= @params[:total_replacement_costs] %></span></strong></h1>
+          </div>
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+            
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="box overridebox">
+
+                  <div class="row">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <input id="cost_ship_replacement" type="text" name="cost_ship_replacement" value="<%= @params[:cost_ship_replacement] %>"></div>
+                    <div class="col-md-11 col-sm-11 col-xs-12">
+                      <h4>
+                         Postage for shipping the replacement item (include insurance and other applicable fees)
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <input type="text" id="total_expedited" value="<%= @params[:total_expedited] %>" disabled></div>
+                    <div class="col-md-11 col-sm-11 col-xs-12">
+                      <h4>
+                        1 in <input id="expedited_count" type="text" name="expedited_count" value="<%= @params[:expedited_count] %>"> replacement shipments ( <input id="expedited_percentage" type="text" name="expedited_percentage" value="<%= @params[:expedited_percentage] %>">%) require expedited shipping to prevent loosing the customer. The average cost of expedited shipping is <input type="text" id="expedited_avg" name="expedited_avg" value="<%= @params[:expedited_avg] %>">
+                      </h4>
+                    </div>
+                  </div>
+
+                  <div class="row">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <input type="text" id="total_international" value="<%= @params[:total_international] %>" disabled></div>
+                    <div class="col-md-11 col-sm-11 col-xs-12">
+                     <h4>
+                         1 in <input id="international_count" type="text" name="international_count" value="<%= @params[:international_count] %>"> replacement shipments ( <input id="international_percentage" type="text" name="international_percentage" value="<%= @params[:international_percentage] %>"> %) require international shipping to prevent loosing the customer. The average cost of international shipping is <input id="avg_order_profit" type="text" name="avg_order_profit" value="<%= @params[:avg_order_profit] %>"">
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <input id="reshipment" type="text" name="reshipment" value="<%= @params[:reshipment] %>"></div>
+                    <div class="col-md-11 col-sm-11 col-xs-12">
+                     <h4>
+                        Estimated cost of Box, Packing Paper, Label, Tape & printed or promotional materials in Reshipment
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <input id="cost_labor_reshipment" type="text" name="cost_labor_reshipment" value="<%= @params[:cost_labor_reshipment] %>"></div>
+                    <div class="col-md-11 col-sm-11 col-xs-12">
+                     <h4>
+                         Cost of labor for pick pack on reshipment
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <input id="cost_apology" type="text" name="cost_apology" value="<%= @params[:cost_apology] %>"></div>
+                    <div class="col-md-11 col-sm-11 col-xs-12">
+                     <h4>
+                        Cost of Gift/Apology item
+                      </h4>
+                    </div>
+                  </div>
+
+                </div>
+              </div>
+            </div>
+
+            <h4>
+              These costs are related to getting the correct or missing item(s) to the customer after the error is reported.
+              This cost will be part of every error except when the customer cancels the order as a result of the error.
+              Return shipment costs related to the customer returning an incorrect item are covered in the next section.
+            </h4>
+
+
+          </div>
+        </div>
+
+
+        <div class="row replacement">
+          <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
+            <h4><strong>Return Shipment OR Product Abandonment</strong></h4>
+            <h1><strong>$<span id="return_shipment_or_abandonment"><%= @params[:return_shipment_or_abandonment] %></span></strong></h1>
+          </div>
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+            
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="box overridebox">
+                  <h4>
+                    Any time an incorrect item is sent there will either be a return shipment cost or a product abandonment cost. The calculation is based on an incorrect item getting sent in <input type="text" id="total_error_shipment" name="total_error_shipment" value="<%= @params[:total_error_shipment] %>"> % of the error shipments.
+                  </h4>
+                  <h4>
+                    In <input type="text" id="product_abandonment_percentage" value="<%= @params[:product_abandonment_percentage] %>"> % of these instances the incorrect item will be gifted to the customer as the cost is less than the cost of the return. The average cost of the abandoned item is <input id="avg_product_abandonment" type="text" name="avg_product_abandonment" value="<%= @params[:avg_product_abandonment] %>">
+                  </h4>
+                  <h4>
+                    In <input id="return_shipping_percentage" type="text" name="return_shipping_percentage" value="<%= @params[:return_shipping_percentage] %>"> % of these instances the incorrect item will need to be returned and the list of costs below will apply:
+                  </h4>
+                  <ul>
+                    <li>
+                      <input type="text" id="cost_return" name="cost_return" value="<%= @params[:cost_return] %>"> Optional Cost of return shipping to 3PL and associated 3PL fees
+                    </li>
+                    <li>
+                      <input id="return_shipping_cost" type="text" name="return_shipping_cast" value="<%= @params[:return_shipping_cost] %>"> 6.00 Cost of return postage from the Customer (or 3PL facility)
+                    </li>
+                    <li>
+                      <input id="return_shipping_insurance" type="text" name="return_shipping_insurance" value="<%= @params[:return_shipping_insurance] %>"> Cost of insurance and or package tracking on return shipment
+                    </li>
+                    <li>
+                      <input id="cost_recieving_process" type="text" name="cost_recieving_process" value="<%= @params[:cost_recieving_process] %>"> Cost of receiving and processing the physical return
+                    </li>
+                    <li>
+                      <input id="cost_confirm" type="text" name="cost_confirm" value="<%= @params[:cost_confirm] %>"> Cost of communication to confirm it's receipt with the customer or follow up if it is not received as expected.
+                    </li>
+                  </ul>
+                  
+                </div>
+              </div>
+              
+            </div>
+
+            <h4>
+              These costs are related to getting the correct or missing item(s) to the customer after the error is reported.
+              This cost will be part of every error except when the customer cancels the order as a result of the error.
+              Return shipment costs related to the customer returning an incorrect item are covered in the next section.
+            </h4>
+
+          </div>
+        </div>
+
+
+        <h2>Intangible Costs</h2>
+        <div class="row replacement">
+          <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
+            <h4></h4>
+            <br><br><br><br>
+            <h1><strong>$<span id="intangible_cost"><%= @params[:intangible_cost] %></span></strong></h1>
+          </div>
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+            
+            <div class="row">
+              <div class="col-md-12 col-sm-12 col-xs-12">
+                <div class="box overridebox">
+                  <br>
+
+                  <div class="row">
+                    <div class="col-md-1 pd-none">
+                    <input type="text" id="misc_cost" value="<%= @params[:misc_cost] %>"></div>
+                    <div class="col-md-11">
+                      <h4>
+                        Misc. Cost not accounted for elsewhere
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 pd-none"><input type="text" id="cancel_order_shipment" value="<%= @params[:cancel_order_shipment] %>" disabled></div>
+                    <div class="col-md-11">
+                      <h4>
+                        1 In <input type="text" id="incorrect_current_order" value="<%= @params[:incorrect_current_order] %>"> incorrect shipments ( <input type="text" id="incorrect_current_order_per" value="<%= @params[:incorrect_current_order_per] %>"> %) cause the customer to cancel the current order. The estimated profit for an average order is <input type="text" id="avg_current_order" value="<%= @params[:avg_current_order] %>">
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 pd-none"><input type="text" id="lifetime_order_val" value="<%= @params[:lifetime_order_val] %>"  disabled></div>
+                    <div class="col-md-11">
+                      <h4>
+                        1 In <input type="text" id="incorrect_lifetime_order" value="<%= @params[:incorrect_lifetime_order] %>"> incorrect shipments ( <input type="text" id="incorrect_lifetime_order_per" value="<%= @params[:incorrect_lifetime_order_per] %>"> %) cause the customer to place all future orders with competitors. The estimated lifetime value of a customer is <input type="text" id="lifetime_val" value="<%= @params[:lifetime_val] %>">
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 pd-none"><input type="text" id="negative_post_review" value="<%= @params[:negative_post_review] %>" disabled></div>
+                    <div class="col-md-11">
+                      <h4>
+                        1 In <input type="text" id="negative_shipment" value="<%= @params[:negative_shipment] %>"> incorrect shipments ( <input type="text" id="negative_shipment_per" value="<%= @params[:negative_shipment_per] %>"> %) result in a negative post or review which causes a potential customer to do business with a competitor instead. Based on the lifetime value of $<span id="lifetime_value"></span>.
+                      </h4>
+                    </div>
+                  </div>
+                  <div class="row">
+                    <div class="col-md-1 pd-none"><input type="text" id="inventory_shortage" value="<%= @params[:inventory_shortage] %>" disabled></div>
+                    <div class="col-md-11">
+                      <h4>
+                        1 In <input type="text" id="inventory_shortage_order" value="<%= @params[:inventory_shortage_order] %>"> incorrect shipments ( <input type="text" id="inventory_shortage_order_per" value="<%= @params[:inventory_shortage_order_per] %>"> %) result in an inventory shortage or oversell which costs a sale. The estimated profit per sale of $<span id="avg_current_order_val"><%= @params[:avg_current_order_val] %></span> is used for this calculation.
+                      </h4>
+                    </div>
+                  </div>
+                  <br>
+                  <br>
+                  <br>
+                  <br><br>
+                                
+                </div>
+              </div>
+              
+            </div>
+
+
+          </div>
+        </div>
+
+        <h2><strong>Totals</strong></h2>
+        <div class="row total">
+          <div class="col-md-12 col-sm-12 col-xs-12 pd-none">
+
+            <div class="row">
+              <div class="col-md-4 col-sm-4 col-xs-12 text-center right">
+                <div class="box overridebox">
+                  <h3>Total Cost per error</h3>
+                  <h1><strong>$<span id="total_cost"><%= @params[:total_cost] %></span></strong></h1>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-3 col-xs-12 text-center right">
+                <div class="box overridebox">
+                  <h3>Error cost per day</h3>
+                  <h1><strong>$<span id ="error_cost_per_day"><%= @params[:error_cost_per_day] %></span></strong></h1>
+                </div>
+              </div>
+              <div class="col-md-5 col-sm-5 col-xs-12 text-center right">
+                <div class="box overridebox">
+                  <h3>Monthly cost of shipping errors</h3>
+                  <h1><strong>$<span id="monthly_shipping"><%= @params[:monthly_shipping] %></span></strong></h1>
+                </div>
+              </div>
+            </div>
+
+            <div class="row">
+
+              <div class="col-md-5 col-sm-5 col-xs-12 text-center right">
+                <div class="box overridebox">
+                  <h3>Montly Cost of GroovePacker</h3>
+                  <h1><strong>$<span id="gp_cost"><%= @params[:gp_cost] %></span></strong></h1>
+                </div>
+              </div>
+
+              <div class="col-md-1 col-sm-1 col-xs-12"></div>
+
+              <div class="col-md-6 col-sm-6 col-xs-12 text-center right pd-lft-nn">
+                <div class="box overridebox">
+                  <h3>Expected Savings Per month using GroovePacker</h3>
+                  <h1><strong>$<span id="monthly_saving"><%= @params[:monthly_saving] %></span></strong></h1>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+      </form>
+      <div class="row total" style="background-color: rgba(0,0,0,0.5); opacity: 0.8;">
+        <div class="col-md-12 col-sm-12 col-xs-12 pd-none">
+        <div class="row">
+          <div class="box overridebox" style="background-color: white">
+            <h3>Please follow the link below to see an estimate of what we are currently spending on shipping errors. You can adjust the any of the estimates to refine the calculation. <br/><br/></h3>
+          </div>
+          <h3 style="color: white;">Save and email my cost calculator to me and my team at the following addresses: </h3>
+
+          <div class="col-md-7 right" style="line-height: 48px;">
+            <input type="text" id="recipient_one" style="width: 100%; line-height: 30px;"><br/>
+            <input type="text" id="recipient_two" style="width: 100%; line-height: 30px;"><br/>
+            <input type="text" id="recipient_three" style="width: 100%; line-height: 30px;"><br/>
+            <div style="text-align: right; margin: 14px;" ><button id="send_calculated_email" class="right"><h3 style="line-height: 0px;">Send</h3></button></div>
+          </div>
+          <div class="col-md-5 left">
+            <div class="col-md-1 right"> 
+              <input type="checkbox" name="follow_up_email" id="follow_up_email" style="margin: 15px 0 0">
+              </div>
+            <div class="col-md-11 left"> 
+              <h5 style="color: white;"> You may send up to 2 follow up emails about GroovePacker to this address only</h5>
+            </div><br>
+          </div>
+
+        </div>
         </div>
       </div>
-      <div class="col-md-4">
-        <div class="well">
-          <p>Number of packers</p>
-          <input id="packer_count" type="number" name="packer_count" min="0">
-        </div>
-      </div>
-      <div class="col-md-4">
-        <div class="well">
-          <p>Average Packer Error Rate(%)</p>
-          <input id="avg_error" type="number" name="avg_error" min="0" max="100">
-        </div>
-      </div>
-    </div>
-      <div class="row">
-        <div class="col-lg-6 col-sm-6">
-          <div class="well"><b>Errors Per day</b>: <p id="error_per_day"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-4 col-sm-6">
-          <div class="well">
-            <input id="regular_comm" type="number" name="regular_comm" min="0" max="1000">
-            Cost per regular communication occurs
-            <input id="regular_percentage" type="number" name="regular_percentage" min="0" max="100">% of the time
-          </div>
-        </div>
-        <div class="col-lg-4 col-sm-6">
-          <div class="well">
-            <input id="escalated_comm" type="number" name="escalated_comm" min="0" max="1000">
-            Cost per escalated communication occurs
-            <p id="escalated_percentage"></p>% of the time    
-          </div>
-        </div>
-        <div class="col-lg-4 col-sm-12">
-          <div class="well">
-            <p>Average number of communications</p>
-            <input id="avg_comm" type="number" name="avg_comm" min="0">
-          </div>
-        </div>
-      </div> 
-      <div class="row">
-        <div class="col-lg-6 col-sm-6">
-          <div class="well"><b>Cost of Communication / Service:</b>
-            <p id="cost_of_comm"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-xs-3">
-          <div class="well"><p>Cost of return shipping</p>
-            <input id="return_shipping_cost" type="number" name="return_shipping_cast" min="0">
-          </div>
-        </div>
-        <div class="col-xs-3">
-          <div class="well">
-            <p>Cost of insurance on return shipping</p>
-              <input id="return_shipping_insurance" type="number" name="return_shipping_insurance" min="0">
-          </div>
-        </div>
-        <div class="col-xs-3">
-          <div class="well">
-            <p>Cost of receiving and processing the return to get it back on the shelf </p>
-            <input id="cost_recieving_process" type="number" name="cost_recieving_process" min="0">
-          </div>
-        </div>
-        <div class="col-xs-3">
-          <div class="well">
-            <p>Cost of communicate to confirm it's receipt with the customer or follow up if it is not received as expected</p>
-            <input id="cost_confirm" type="number" name="cost_confirm" min="0">
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-6 col-sm-6">
-          <div class="well">Return Shipment occurs
-            <input id="return_shipping_percentage" type="number" name="return_shipping_percentage" min="0">
-            % of the time
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-6">
-          <div class="well">
-            <b>Return Shipment or Product Abandonment (The percentage determines how the cost is calculated):</b>
-            <p id="return_ship"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-6 col-sm-6">
-          <div class="well"><p id="product_abandonment"> </p> = Product Abandonment occurs <p id="product_abandonment_percentage"></p>% of the time
-          </div>
-        </div>
-        <div class="col-lg-6 col-sm-6">
-          <div class="well">Cost of the average product abandoned
-            <input id="avg_product_abandonment" type="number" name="avg_product_abandonment" min="0">        
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">
-            Cost due to cancelation of current order after incorrect item is shipped 
-            <input id="incorrect_item" type="number" name="incorrect_item" min="0" max="1000">
-            times or <p id="incorrect_percentage"></p>% of the time
-            Assuming profit on average order is
-            <input id="avg_order_profit" type="number" name="avg_order_profit" min="0"> = <p id= "calc_cost"></p>
-          </div>
-        </div>
-      </div> 
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">
-            Customer places all future orders with a competetor due to error frustration
-            <input id="frustration_order" type="number" name="frustration_order" min="0" max="1000">
-            errors or <p id="frustration_percentage"></p>% of the time
-            Assuming life long customer value of
-            <input id="avg_customer_value" type="number" name="avg_customer_value" min="0"> = <p id= "future_calc_cost"></p>
-          </div>
-        </div>
-      </div> 
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">
-            Error related Social Media post prevents a future customer
-            <input id="social_error" type="number" name="social_error" min="0" max="1000">
-            errors or <p id="social_error_percentage"></p>% of the time
-            Assuming life long customer value of
-            <input id="future_customer_value" type="number" name="future_customer_value" min="0"> = <p id= "life_long_calc_cost"></p>
-          </div>
-        </div>
-      </div> 
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Cost of shipping the replacement item (include insurance, increase the average cost for international shipments if applicable as well as expedited shipments if applicable):
-            <input id="cost_ship_replacement" type="number" name="cost_ship_replacement" min="0" max="1000">
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Box, Packing Paper, Label & Other printed items or promotional materials included in Reshipment:
-            <input id="reshipment" type="number" name="reshipment" min="0" max="1000">
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Cost of labor for pick pack on reshipment:
-            <input id="cost_labor_reshipment" type="number" name="cost_labor_reshipment" min="0" max="1000">
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Cost of Gift/Apology item:
-            <input id="cost_apology" type="number" name="cost_apology" min="0" max="1000">
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well"><b>Total Cost Per Error:</b>
-            <p id="total_cost_per_error"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well"><b>Daily Cost of Errors:</b>
-            <p id="daily_cost_error"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Packing Days per month
-            <input id="packing_days_per_month" type="number" name="packing_days_per_month" min="0" max="1000">
-            <p></p><b>Monthly Error Cost: </b><p id="monthly_error_cost"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Cost of plan needed in GroovePacker
-            <p id="cost_of_plan"></p>
-          </div>
-        </div>
-      </div>
-      <div class="row">
-        <div class="col-lg-12 col-sm-12">
-          <div class="well">Expected Savings Per month using GroovePacker
-            <p id="expected_savings"></p>
-          </div>
-        </div>
-      </div>
-      <hr>
+
+    <div class="clearfix"></div>
   </div>
-</div>
-<hr>
-  <script src="//ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
-  </body>
+<div class="clearfix"></div>
+<style type="text/css">
+  
+/* Error Cost Calculator page css start */
+
+.errorcalculator{
+  /*min-width: 1280px;*/
+}
+.errorcalculator > h2 {
+  margin-top: 0;
+}
+.errorcalculator{
+  padding: 0 3%;
+}
+.errorcalculator .row{
+  margin: 0;
+}
+.errorcalculator > div > .row{
+  background: rgba(0,0,0,0.1);
+  margin-top: 20px;
+  padding: 20px;
+}
+.errorcalculator .row .left h1{
+  margin: 0;
+}
+.errorcalculator .row .right .box{
+  width: 100%;
+  background: #d1d3d4;
+  padding: 10px 20px;
+  border-radius: 10px;
+  min-height: 110px;
+}
+.errorcalculator .row .right .box h4{
+  font-size: 16px;
+  text-align: center;
+}
+.errorcalculator .row .right .row div:first-child .box input{
+  margin-top: 32px;
+}
+.errorcalculator .row .right .box input[type="text"]{
+  background: #fff none repeat scroll 0 0;
+  border: medium none;
+  display: block;
+  margin: 15px auto 0;
+  padding: 2px 0;
+  text-align: center;
+  width: 40%; 
+}
+.errorcalculator .comunication .right .box h4{
+  text-align: left;
+}
+.errorcalculator .comunication .right .box h4 input[type="text"]{
+  display: inline-block;
+  width: 20%;
+}
+.errorcalculator .comunication .right .row div:first-child .box input{
+  margin-top: 6px;
+}
+.errorcalculator .comunication .right .row div:last-child .box input{
+  /*font-weight: bold;*/
+  margin: 23px auto 10px;
+}
+.errorcalculator .comunication .right > h4{
+  line-height: 20px;
+  font-size: 16px;
+  padding: 5px 15px 0;
+}
+.errorcalculator .replacement .right .box h4 span{
+  background: #fff;
+  padding: 0 5px;
+  display: inline-block;
+  font-weight: bold;
+}
+.errorcalculator .replacement .right .box h4{
+  text-align: left;
+  margin: 5px 0;
+}
+.errorcalculator .replacement .right .box input[type="text"],  
+.errorcalculator .replacement .right .row div:first-child .box input[type="text"]{
+  width: 60px;
+  display: inline-block;
+  margin: 5px 0 10px;
+}
+.errorcalculator .replacement .right .box .row{
+  margin-bottom: 10px;
+}
+.errorcalculator .replacement .right .box ul{
+  margin: 0 0 20px 10%;
+  padding: 0;
+}
+.errorcalculator .replacement .right .box ul li{
+  list-style: none;
+  font-size: 16px;
+}
+.errorcalculator .replacement .right .box ul li input[type="text"]{
+  display: inline-block;
+  width: 60px;
+}
+.errorcalculator .replacement .right .row div:first-child .box li input{
+  margin-top: 20px;
+}
+.errorcalculator .total .row{
+  margin: 10px 0 100px;
+}
+.errorcalculator .total .row .right .box{
+  padding: 10px 0;
+}
+.errorcalculator .total .row .right .box h3{
+  font-size: 22px;
+}
+
+.overridebox{
+  height: auto !important;
+  position: relative !important;
+}
+
+#total_expedited #total_international #cancel_order_shipment #lifetime_order_val #negative_post_review #inventory_shortage  {
+  color: #dedbdb !important;
+}
+
+/* Error Cost Calculator page css stop */
+</style>
 <script type="text/javascript">
   $(document).ready(function () {
-    $('#order_count, #packer_count, #avg_error').on('change paste keyup input', function () {
+    $("#total_expedited, #total_international, #cancel_order_shipment, #lifetime_order_val, #negative_post_review, #inventory_shortage").css("background", "#dedbdb");
+    $(document).on('change paste keyup input', function () {
       var order_count = $("#order_count").val();
       var packer_count = $("#packer_count").val();
       var avg_error = $("#avg_error").val();
       if (order_count != null && packer_count != null && avg_error != null){
-        $("#error_per_day").html(parseFloat(order_count*packer_count*(avg_error/100)));
-        $("#error_per_day").val(parseFloat(order_count*packer_count*(avg_error/100)));
+        $("#error_per_day").html(parseFloat(order_count*packer_count*(avg_error/100)).toFixed(2));
+        $("#error_per_day").val(parseFloat(order_count*packer_count*(avg_error/100)).toFixed(2));
       var error_per_day = $("#error_per_day").val();
       var total_cost_per_error = $("#total_cost_per_error").val();
       $("#daily_cost_error").html(parseFloat(total_cost_per_error*error_per_day));
@@ -250,12 +500,12 @@
     });
 
     
-    $('#regular_percentage, #escalated_percentage, #avg_error, #avg_comm').on('change paste keyup input', function(){ 
-      var regular_percentage = $("#regular_percentage").val();
-      var avg_comm = $("#avg_comm").val();
-      var regular_percentage = $("#regular_percentage").val();
-      var regular_comm = $("#regular_comm").val();
-      var escalated_comm = $("#escalated_comm").val();
+    $(document).on('change paste keyup input', function(){ 
+      var regular_percentage = parseFloat($("#regular_percentage").val());
+      var avg_comm = parseFloat($("#avg_comm").val());
+      var regular_percentage = parseFloat($("#regular_percentage").val());
+      var regular_comm = parseFloat($("#regular_comm").val());
+      var escalated_comm = parseFloat($("#escalated_comm").val());
       if(regular_percentage != null){
         $("#regular_percentage").on('change paste keyup input', function(){
           $("#escalated_percentage").html(parseFloat(100-regular_percentage));
@@ -263,24 +513,24 @@
         });
       };
       if(regular_percentage != null && avg_comm != null && regular_comm != null && regular_percentage != null && escalated_comm != null) {
-        $("#cost_of_comm").html(parseFloat(avg_comm*(((regular_comm*regular_percentage)/100)+((escalated_comm*(100-regular_percentage))/100))));
-         $("#cost_of_comm").val(parseFloat(avg_comm*(((regular_comm*regular_percentage)/100)+((escalated_comm*(100-regular_percentage))/100))))
+        $("#cost_of_comm").html(parseFloat(avg_comm*(((regular_comm*regular_percentage)/100)+((escalated_comm*(100-regular_percentage))/100))).toFixed(2));
+         $("#cost_of_comm").val(parseFloat(avg_comm*(((regular_comm*regular_percentage)/100)+((escalated_comm*(100-regular_percentage))/100))).toFixed(2))
       };
     });
 
-    $('#return_shipping_cost, #return_shipping_insurance, #cost_recieving_process, #cost_confirm, #return_shipping_percentage').on('change paste keyup input', function(){
-      var return_shipping_cost = parseFloat($("#return_shipping_cost").val());
-      var return_shipping_insurance = parseFloat($("#return_shipping_insurance").val());
-      var cost_recieving_process = parseFloat($("#cost_recieving_process").val());
-      var cost_confirm = parseFloat($("#cost_confirm").val());
-      var return_shipping_percentage = parseFloat($("#return_shipping_percentage").val());
-      if(return_shipping_cost != null && return_shipping_insurance != null && cost_recieving_process != null && cost_confirm != null && return_shipping_percentage != null ){
-        $("#return_ship").html(parseFloat((return_shipping_percentage/100)*(return_shipping_cost + return_shipping_insurance + cost_recieving_process + cost_confirm)));
-        $("#return_ship").val(parseFloat((return_shipping_percentage/100)*(return_shipping_cost + return_shipping_insurance + cost_recieving_process + cost_confirm)))
-      }
-    });
+    // $('#return_shipping_cost, #return_shipping_insurance, #cost_recieving_process, #cost_confirm, #return_shipping_percentage').on('change paste keyup input', function(){
+    //   var return_shipping_cost = parseFloat($("#return_shipping_cost").val());
+    //   var return_shipping_insurance = parseFloat($("#return_shipping_insurance").val());
+    //   var cost_recieving_process = parseFloat($("#cost_recieving_process").val());
+    //   var cost_confirm = parseFloat($("#cost_confirm").val());
+    //   var return_shipping_percentage = parseFloat($("#return_shipping_percentage").val());
+    //   if(return_shipping_cost != null && return_shipping_insurance != null && cost_recieving_process != null && cost_confirm != null && return_shipping_percentage != null ){
+    //     $("#return_ship").html(parseFloat((return_shipping_percentage/100)*(return_shipping_cost + return_shipping_insurance + cost_recieving_process + cost_confirm)));
+    //     $("#return_ship").val(parseFloat((return_shipping_percentage/100)*(return_shipping_cost + return_shipping_insurance + cost_recieving_process + cost_confirm)))
+    //   }
+    // });
 
-    $('#return_shipping_percentage').on('change paste keyup input', function(){
+    $(document).on('change paste keyup input', function(){
       var return_shipping_percentage = $("#return_shipping_percentage").val();
       if(return_shipping_percentage != null){
         $("#product_abandonment_percentage").html(parseFloat(100 - return_shipping_percentage));
@@ -288,7 +538,15 @@
       };
     });
 
-    $('#avg_product_abandonment').on('change paste keyup input', function(){
+    $(document).on('change paste keyup input', function(){
+      var product_abandonment_percentage = $("#product_abandonment_percentage").val();
+      if(product_abandonment_percentage != null){
+        $("#return_shipping_percentage").html(parseFloat(100 - product_abandonment_percentage));
+        $("#return_shipping_percentage").val(parseFloat(100 - product_abandonment_percentage));
+      };
+    });
+
+    $(document).on('change paste keyup input', function(){
       var return_shipping_percentage = $("#return_shipping_percentage").val();
       var avg_product_abandonment = $("#avg_product_abandonment").val();
       if(return_shipping_percentage != null && avg_product_abandonment != null){
@@ -297,7 +555,7 @@
       };
     });
 
-    $('#incorrect_item, #avg_order_profit').on('change paste keyup input', function() {
+    $(document).on('change paste keyup input', function() {
       var incorrect_item = $("#incorrect_item").val();
       var avg_order_profit = $("#avg_order_profit").val();
       var incorrect_item_per = parseFloat(100/incorrect_item)
@@ -309,7 +567,7 @@
       };
     });
 
-    $('#frustration_order, #avg_customer_value').on('change paste keyup input', function() {
+    $(document).on('change paste keyup input', function() {
       var frustration_order = $("#frustration_order").val();
       var avg_customer_value = $("#avg_customer_value").val();
       var incorrect_item_per = parseFloat(100/frustration_order)
@@ -321,7 +579,7 @@
       };
     });
 
-    $('#social_error, #future_customer_value').on('change paste keyup input', function() {
+    $(document).on('change paste keyup input', function() {
       var social_error = $("#social_error").val();
       var future_customer_value = $("#future_customer_value").val();
       var incorrect_item_per = parseFloat(100/social_error)
@@ -333,19 +591,22 @@
       };
     });
 
-    $('#cost_apology, #cost_labor_reshipment, #reshipment, #cost_ship_replacement, #cost_of_comm, #return_ship, #product_abandonment, #calc_cost, #future_calc_cost, #life_long_calc_cost').on('change paste keyup input', function(){
+    $(document).on('change paste keyup input', function(){
       var cost_apology = parseFloat($("#cost_apology").val()) || 0;
       var cost_labor_reshipment = parseFloat($("#cost_labor_reshipment").val()) || 0;
       var reshipment = parseFloat($("#reshipment").val()) || 0;
       var cost_ship_replacement = parseFloat($("#cost_ship_replacement").val()) || 0;
       var cost_of_comm = parseFloat($("#cost_of_comm").val()) || 0;
-      var return_ship = parseFloat($("#return_ship").val()) || 0;
-      var product_abandonment = parseFloat($("#product_abandonment").val()) || 0;
-      var calc_cost = parseFloat($("#calc_cost").val()) || 0;
-      var future_calc_cost = parseFloat($("#future_calc_cost").val()) || 0;
-      var life_long_calc_cost = parseFloat($("#life_long_calc_cost").val()) || 0;
-      $("#total_cost_per_error").html(parseFloat(life_long_calc_cost + future_calc_cost + calc_cost + product_abandonment + return_ship + cost_ship_replacement + reshipment + cost_labor_reshipment + cost_apology));
-      $("#total_cost_per_error").val(parseFloat(life_long_calc_cost + future_calc_cost + calc_cost + product_abandonment + return_ship + cost_ship_replacement + reshipment + cost_labor_reshipment + cost_apology));
+      // var return_ship = parseFloat($("#return_ship").val()) || 0;
+      // var product_abandonment = parseFloat($("#product_abandonment").val()) || 0;
+      // var calc_cost = parseFloat($("#calc_cost").val()) || 0;
+      // var future_calc_cost = parseFloat($("#future_calc_cost").val()) || 0;
+      // var life_long_calc_cost = parseFloat($("#life_long_calc_cost").val()) || 0;
+      var total_international = parseFloat($("#total_international").val()) || 0;
+      var total_expedited = parseFloat($("#total_expedited").val()) || 0;
+
+      $("#total_replacement_costs").html(parseFloat(cost_ship_replacement + reshipment + cost_labor_reshipment + cost_apology + total_expedited + total_international).toFixed(2));
+      $("#total_replacement_costs").val(parseFloat(cost_ship_replacement + reshipment + cost_labor_reshipment + cost_apology + total_expedited + total_international).toFixed(2));
 
       var error_per_day = $("#error_per_day").val();
       var total_cost_per_error = $("#total_cost_per_error").val();
@@ -353,7 +614,7 @@
       $("#daily_cost_error").val(parseFloat(total_cost_per_error*error_per_day));
     });
 
-    $('#packing_days_per_month').on('change paste keyup input', function(){
+    $(document).on('change paste keyup input', function(){
       var packing_days_per_month = $('#packing_days_per_month').val();
       var daily_cost_error = $("#daily_cost_error").val();
       $("#monthly_error_cost").html(parseFloat(daily_cost_error*packing_days_per_month));
@@ -365,6 +626,36 @@
       $("#expected_savings").val(parseFloat(monthly_error_cost - cost_of_plan));
     });
 
+    $(document).on('change paste keyup input', function(){
+      var expedited_percentage = $('#expedited_percentage').val();
+      var international_percentage = $('#international_percentage').val();
+      $('#international_count').val(parseFloat(100/international_percentage));
+      $('#expedited_count').val(parseFloat(100/expedited_percentage));
+    });
+
+    $(document).on('change paste keyup input', function(){
+      var expedited_count = $('#expedited_count').val();
+      var international_count = $('#international_count').val();
+      $('#international_percentage').val(parseFloat(100/international_count));
+      $('#expedited_percentage').val(parseFloat(100/expedited_count));
+    });
+
+    $(document).on('change paste keyup input', function(){
+      var expedited_percentage = $('#expedited_percentage').val();
+      var expedited_avg = $('#expedited_avg').val();
+      if (expedited_percentage != null && expedited_avg != null){
+        $('#total_expedited').val(parseFloat(expedited_percentage*expedited_avg/100))
+      }
+    });
+
+    $(document).on('change paste keyup input', function(){
+      var international_percentage = $('#international_percentage').val();
+      var avg_order_profit = $('#avg_order_profit').val();
+      if (international_percentage != null && avg_order_profit != null){
+        $('#total_international').val(parseFloat(international_percentage*avg_order_profit/100))
+      }
+    });
+
     $(document).on('change paste keyup input', 'input', function() {
       var error_per_day = $("#error_per_day").val();
       var total_cost_per_error = $("#total_cost_per_error").val();
@@ -372,6 +663,171 @@
       $("#daily_cost_error").val(parseFloat(total_cost_per_error*error_per_day));
     });
 
+    $(document).on('change paste keyup input', function(){
+      var total_error_shipment = parseInt($('#total_error_shipment').val()) || 0;
+      var product_abandonment_percentage = parseInt($('#product_abandonment_percentage').val()) || 0;
+      var avg_product_abandonment = parseInt($('#avg_product_abandonment').val()) || 0;
+      var return_shipping_percentage = parseInt($('#return_shipping_percentage').val()) || 0;
+      var cost_return = parseInt($('#cost_return').val()) || 0;
+      var return_shipping_cost = parseInt($('#return_shipping_cost').val()) || 0;
+      var return_shipping_insurance = parseInt($('#return_shipping_insurance').val()) || 0;
+      var cost_recieving_process = parseInt($('#cost_recieving_process').val()) || 0;
+      var cost_confirm = parseInt($('#cost_confirm').val()) || 0;
+
+      $('#return_shipment_or_abandonment').html(
+        parseFloat((total_error_shipment/100)*((product_abandonment_percentage*avg_product_abandonment/100) + ((return_shipping_percentage/100)*(cost_return + return_shipping_cost + return_shipping_insurance + cost_recieving_process + cost_confirm)))).toFixed(2));
+      $('#return_shipment_or_abandonment').val(
+        parseFloat((total_error_shipment/100)*((product_abandonment_percentage*avg_product_abandonment/100) + ((return_shipping_percentage/100)*(cost_return + return_shipping_cost + return_shipping_insurance + cost_recieving_process + cost_confirm)))).toFixed(2));
+    });
+
+
+    $('#incorrect_current_order, #incorrect_lifetime_order, #negative_shipment, #inventory_shortage_order').on('change paste keyup input', function(){
+      var incorrect_current_order = parseInt($('#incorrect_current_order').val()) || 0; 
+      var incorrect_lifetime_order = parseInt($('#incorrect_lifetime_order').val()) || 0;
+      var negative_shipment = parseInt($('#negative_shipment').val()) || 0;
+      var inventory_shortage_order = parseInt($('#inventory_shortage_order').val()) || 0;
+      if(incorrect_current_order != null){
+        $('#incorrect_current_order_per').html(parseFloat(100/incorrect_current_order))
+        $('#incorrect_current_order_per').val(parseFloat(100/incorrect_current_order))
+      }
+      if(incorrect_lifetime_order != null){
+        $('#incorrect_lifetime_order_per').html(parseFloat(100/incorrect_lifetime_order))
+        $('#incorrect_lifetime_order_per').val(parseFloat(100/incorrect_lifetime_order))
+      }
+      if(negative_shipment != null){
+        $('#negative_shipment_per').html(parseFloat(100/negative_shipment))
+        $('#negative_shipment_per').val(parseFloat(100/negative_shipment))
+      }
+      if(inventory_shortage_order != null){
+        $('#inventory_shortage_order_per').html(parseFloat(100/inventory_shortage_order))
+        $('#inventory_shortage_order_per').val(parseFloat(100/inventory_shortage_order))
+      }
+    });
+
+    $('#incorrect_current_order_per, #incorrect_lifetime_order_per, #negative_shipment_per, #inventory_shortage_order_per').on('change paste keyup input', function(){
+      var incorrect_current_order_per = parseInt($('#incorrect_current_order_per').val()) || 0; 
+      var incorrect_lifetime_order_per = parseInt($('#incorrect_lifetime_order_per').val()) || 0;
+      var negative_shipment_per = parseInt($('#negative_shipment_per').val()) || 0;
+      var inventory_shortage_order_per = parseInt($('#inventory_shortage_order_per').val()) || 0;
+      if(incorrect_current_order_per != null){
+        $('#incorrect_current_order').html(parseFloat(100/incorrect_current_order_per))
+        $('#incorrect_current_order').val(parseFloat(100/incorrect_current_order_per))
+      }
+      if(incorrect_lifetime_order_per != null){
+        $('#incorrect_lifetime_order').html(parseFloat(100/incorrect_lifetime_order_per))
+        $('#incorrect_lifetime_order').val(parseFloat(100/incorrect_lifetime_order_per))
+      }
+      if(negative_shipment_per != null){
+        $('#negative_shipment').html(parseFloat(100/negative_shipment_per))
+        $('#negative_shipment').val(parseFloat(100/negative_shipment_per))
+      }
+      if(inventory_shortage_order_per != null){
+        $('#inventory_shortage_order').html(parseFloat(100/inventory_shortage_order_per))
+        $('#inventory_shortage_order').val(parseFloat(100/inventory_shortage_order_per))
+      }
+    });
+
+
+    $('#avg_current_order, #lifetime_val, #incorrect_current_order_per, #incorrect_lifetime_order_per, #negative_shipment_per, #inventory_shortage_order_per, #incorrect_current_order, #incorrect_lifetime_order, #negative_shipment, #inventory_shortage_order, #misc_cost').on('change paste keyup input', function(){
+      var incorrect_current_order_per = parseInt($('#incorrect_current_order_per').val()) || 0;
+      var avg_current_order = parseInt($('#avg_current_order').val()) || 0;
+      var incorrect_lifetime_order_per = parseInt($('#incorrect_lifetime_order_per').val()) || 0;
+      var lifetime_val = parseInt($('#lifetime_val').val()) || 0;
+      var negative_shipment_per = parseInt($('#negative_shipment_per').val()) || 0;
+      var inventory_shortage_order_per = parseInt($('#inventory_shortage_order_per').val()) || 0;
+
+      if(incorrect_current_order_per != null && avg_current_order != null){
+        $('#cancel_order_shipment').val(parseFloat(incorrect_current_order_per*avg_current_order/100));
+        $('#cancel_order_shipment').html(parseFloat(incorrect_current_order_per*avg_current_order/100));
+      }
+      if(incorrect_lifetime_order_per != null && lifetime_val != null){
+        $('#lifetime_order_val').val(parseFloat(incorrect_lifetime_order_per*lifetime_val/100));
+        $('#lifetime_order_val').html(parseFloat(incorrect_lifetime_order_per*lifetime_val/100));
+      }
+      if(negative_shipment_per != null && lifetime_val != null){
+        $('#negative_post_review').val(parseFloat(negative_shipment_per*lifetime_val/100));
+        $('#negative_post_review').html(parseFloat(negative_shipment_per*lifetime_val/100));
+      }
+      if(inventory_shortage_order_per != null && avg_current_order != null){
+        $('#inventory_shortage').val(parseFloat(inventory_shortage_order_per*avg_current_order/100));
+        $('#inventory_shortage').html(parseFloat(inventory_shortage_order_per*avg_current_order/100));
+      }
+
+      var misc_cost = parseInt($('#misc_cost').val()) || 0;
+      var cancel_order_shipment = parseInt($('#cancel_order_shipment').val()) || 0;
+      var lifetime_order_val = parseInt($('#lifetime_order_val').val()) || 0;
+      var negative_post_review = parseInt($('#negative_post_review').val()) || 0;
+      var inventory_shortage = parseInt($('#inventory_shortage').val()) || 0;
+      $('#intangible_cost').html(parseFloat(misc_cost + cancel_order_shipment + negative_post_review + lifetime_order_val + inventory_shortage).toFixed(2))
+      $('#intangible_cost').val(parseFloat(misc_cost + cancel_order_shipment + negative_post_review + lifetime_order_val + inventory_shortage).toFixed(2))
+    });
+
+    $(document).on('change paste keyup input', 'input', function() {  
+      calculate_values();
+    });
+
+    $(document).ready(function(){
+      $('#misc_cost').change();
+      $('#packer_count').change();
+      $('#incorrect_current_order').change();
+      calculate_values();
+    });   
+
+    function calculate_values() {
+      var intangible_cost = parseInt($('#intangible_cost').val()) || 0;
+      var return_shipment_or_abandonment = parseInt($('#return_shipment_or_abandonment').val()) || 0;
+      var total_replacement_costs = parseInt($('#total_replacement_costs').val()) || 0;
+      var cost_of_comm = parseInt($('#cost_of_comm').val()) || 0;
+      $('#total_cost').html(parseFloat(intangible_cost + return_shipment_or_abandonment + total_replacement_costs + cost_of_comm).toFixed(2))
+      $('#total_cost').val(parseFloat(intangible_cost + return_shipment_or_abandonment + total_replacement_costs + cost_of_comm).toFixed(2))
+
+      var total_cost = parseInt($('#total_cost').val()) || 0;
+      var error_per_day = parseInt($("#error_per_day").val()) || 0;
+      $('#error_cost_per_day').html(parseFloat(total_cost*error_per_day).toFixed(2));
+      $('#error_cost_per_day').val(parseFloat(total_cost*error_per_day).toFixed(2));
+
+      var error_cost_per_day = parseInt($('#error_cost_per_day').val()) || 0;      
+      $('#monthly_shipping').html(parseFloat(error_cost_per_day*30).toFixed(2));
+      $('#monthly_shipping').val(parseFloat(error_cost_per_day*30).toFixed(2))
+
+      var packer_count = parseFloat($('#packer_count').val()) || 0; 
+      $('#gp_cost').html(parseFloat(packer_count*50));
+      $('#gp_cost').val(parseFloat(packer_count*50));
+
+      var gp_cost = parseFloat($('#gp_cost').val()) || 0;
+      var monthly_shipping = parseFloat($('#monthly_shipping').val()) || 0;
+      $('#monthly_saving').html(parseFloat(monthly_shipping - gp_cost).toFixed(2));
+      $('#monthly_saving').val(parseFloat(monthly_shipping - gp_cost).toFixed(2))
+      $('#lifetime_value').val($('#lifetime_val').val());
+      $('#avg_current_order_val').val($('#avg_current_order').val());
+      $('#lifetime_value').html($('#lifetime_val').val());
+      $('#avg_current_order_val').html($('#avg_current_order').val());
+    }
+
+    $(document).on('change paste keyup input', 'input', function(e) {  
+      if (isNaN(parseFloat(this.value)) == true) {
+        $(this.id).val(0);
+      } else {
+        $(this.id).val(parseFloat(this.value).toFixed(2));
+      }
+    });
+
+    $('#send_calculated_email').on('click', function () {
+      send_email();
+    });
+
+    var send_email = function () {
+      $.ajax({
+        type: "GET",
+        contentType: "application/json; charset=utf-8",
+        url: "/email_calculations?" + $("#cost_calc").serialize(),
+        data: {recipient_one: $('#recipient_one').val(), recipient_two: $('#recipient_two').val(),
+        recipient_three: $('#recipient_three').val(),
+        follow_up_email: $('#follow_up_email').is(':checked')},
+        dataType: "json"
+      });
+    }
+
   });
 </script>
-</html>
+
