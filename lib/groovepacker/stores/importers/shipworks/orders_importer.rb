@@ -82,6 +82,7 @@ module Groovepacker
 
           private
           def allowed_status_to_import?(credential, status)
+            return true if credential.shall_import_ignore_local
             return false if status.nil? && !credential.shall_import_no_status
             return true if status.nil? && credential.shall_import_no_status
             return true if status.strip == 'In Process' && credential.shall_import_in_process

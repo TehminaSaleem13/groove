@@ -1,0 +1,257 @@
+body{
+    margin: 0;
+    padding: 0;
+    font-family: 'Play', sans-serif;
+  }
+  .pricinguser .row{
+    margin: 0;
+  }
+  .pd-none{
+    padding: 0;
+  }
+  .pd-lft-nn{
+    padding-left: 0;
+  }
+  .pd-rgt-nn{
+    padding-right: 0;
+  }
+
+
+  /* Old css used */
+
+  .gradient-well {
+    border: 5px solid rgba(201, 201, 201, 0.69);
+    border-radius: 19px;
+    box-shadow: 1px 1px 10px rgba(0, 0, 1, 0.86);
+    display: table;
+    margin: 0 auto;
+    min-width: 900px;
+    padding: 0;
+  }
+  .bottom-well {
+    background: #e8e7e7 none repeat scroll 0 0;
+    border: 4px solid rgba(201, 201, 201, 0.69);
+    border-radius: 15px;
+    box-shadow: 1px 1px 4px rgba(0, 0, 1, 0.86) inset;
+    margin-bottom: 20px;
+    min-height: 20px;
+    padding: 19px;
+  }
+
+
+  .pricinguser.bottom-well{
+    padding: 4px;
+    margin: 0;
+  }
+  .pricinguser.bottom-well .container{
+    padding: 0;
+  }
+  .pricinguser .topheading h1{
+    background: #f3f1f1;
+    padding: 10px 0;
+    text-align: center;
+    font-size: 38px;
+    color: #545353;
+    position: relative;
+  }
+  .pricinguser .topheading h1 span{
+    background: #f3f1f1;
+    padding: 0 20px;
+    display: inline-block;
+    position: relative;
+    z-index: 1;
+  }
+  .pricinguser .topheading h1:after{
+    border-bottom: 5px dotted #ccc;
+    border-top: 5px dotted #ccc;
+    content: "";
+    height: 16px;
+    left: 10%;
+    position: absolute;
+    top: 25px;
+    width: 80%;
+    z-index: 0;
+  }
+  .pricinguser .topsec h3{
+    color: #000;
+    font-size: 23px;
+  }
+  .pricinguser .topsec p{
+    font-size: 19px;
+    color: #545353;
+    margin-top: 20px;
+    width: 72%;
+    padding-left: 6px;
+  }
+  .pricinguser .topsec ul{
+    margin: 0;
+    padding: 0;
+    position: relative;
+  }
+  .pricinguser .topsec ul li{
+    list-style: none;
+    font-size: 16px;
+    color: #545353;
+    background-image: url("/assets/images/pricing-icon-sprite.png");
+    background-repeat: no-repeat;
+    height: 35px;
+    padding-left: 50px;
+    margin: 5px 5px;
+    line-height: 20px;
+  }
+  .pricinguser .topsec .data-merging{
+    background-position: 0 3px;
+  }
+  .pricinguser .topsec .server{
+    background-position: 6px -61px;
+  }
+  .pricinguser .topsec .import-source{
+    background-position: 2px -128px;
+  }
+  .pricinguser .topsec .support{
+    background-position: 4px -187px;
+  }
+  .pricinguser .topsec ul span{
+    width: 3px;
+    height: 100%;
+    background: rgba(80,80,80,0.17);
+    position: absolute;
+    left: -35px;
+    top: 0;
+  }
+  .pricinguser .smallrow{
+    background: #f3f1f1;
+    font-size: 15px;
+    color: #545353;
+    margin: 15px 0;
+  }
+  .pricinguser .priceingcontent{
+    background: #f5f4f4;
+    margin: 5px 20px;
+    border-radius: 10px;
+    min-height: 200px;
+    color: #545353;
+  }
+  .pricinguser .priceingcontent h3{
+    width: 86%;
+    border-bottom: #ccc solid 2px;
+    padding: 30px 5px;
+    margin: 0;
+  }
+  .pricinguser .priceingcontent h1{
+    margin: 0;
+    padding: 25px 0;
+  }
+  .pricinguser .priceingcontent h3 > i{
+    font-size: 35px;
+    color: #494949;
+    margin-right: 12px;
+  }
+  .pricinguser .priceingcontent h3 input{
+    margin-right: 35px;
+  }
+  .pricinguser .priceingcontent i.fa-chevron-left, 
+  .pricinguser .priceingcontent i.fa-chevron-right {
+    color: #3f8907;
+    font-size: 20px;
+    font-weight: bold;
+  }
+  .pricinguser .priceingcontent a + span{
+    font-size: 42px;
+    font-weight: bold;
+    position: relative;
+    top: 6px;
+  }
+  .pricinguser .priceingcontent .fade4 h3{
+    color: rgba(84, 83, 83, 0.7);
+    border-bottom: none; 
+  }
+  .pricinguser .priceingcontent .fade4 h1{
+    color: rgba(84, 83, 83, 0.46);
+    /*padding-left: 8px;*/
+  }
+  .pricinguser .priceingcontent .total h3{
+    border-top: 3px solid rgba(0,0,0,0.54);
+    border-bottom: none;
+    padding-left: 63px;
+  }
+  .pricinguser .priceingcontent .total h1{
+    padding-left: 30px;
+  }
+  .pricinguser .priceingcontent .right .box{
+    background: #ebeaea none repeat scroll 0 0;
+    font-size: 20px;
+    margin: 30px 0 0 0;
+    padding: 12px 15px;
+    position: relative;
+    color: #494949;
+  }
+  .pricinguser .priceingcontent .right .box span{
+    background: #dedcdc none repeat scroll 0 0;
+    height: 100%;
+    position: absolute;
+    right: -15px;
+    top: -5px;
+    transform: skewY(-41deg);
+    width: 15px;
+  }
+  .pricinguser .priceingcontent .right .box ul{
+    margin: 0;
+    padding: 0;
+  }
+  .pricinguser .priceingcontent .right .box ul li{
+    list-style: none;
+    font-size: 20px;
+    color: #000;
+    padding: 5px 0;
+  }
+  .pricinguser .priceingcontent .right .box ul li i{
+    font-size: 18px;
+    font-weight: bold;
+  }
+  .pricinguser .priceingcontent .right .box + .box{
+    width: 70%;
+    float: right;
+  }
+  .pricinguser .priceingcontent .right .box h2{
+    font-size: 24px;
+    margin: 0;
+  }
+  .pricinguser .priceingcontent .right .box p{
+    font-size: 18px;
+    color: #494949;
+  }
+  .pricinguser .priceingcontent .right .box + p{
+    position: relative;
+    left: -50px;
+    top: 6px;
+  }
+  .pricinguser .priceingcontent .bttnrow p{
+    font-size: 22px;
+    color: #545353;
+  }
+  .pricinguser .priceingcontent .bttnrow button{
+    background: #3f8907 none repeat scroll 0 0;
+    border: medium none;
+    border-radius: 10px;
+    color: #fff;
+    font-size: 20px;
+    margin-top: 12px;
+    padding: 7px 30px;
+  }
+  .pricinguser .priceingcontent .terms p{
+    font-size: 13px;
+    font-weight: 600;
+  }
+
+  .pricing_page .setup_pricing {
+    margin: 25px 4.166%;
+  }
+
+  .pricinguser .never_pay_more {
+    height: auto;
+  }
+
+  .price_font p{
+    font-size: 18px !important;
+  }

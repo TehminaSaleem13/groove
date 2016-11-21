@@ -37,8 +37,9 @@ class ExportSetting < ActiveRecord::Base
     single_row
   end
 
-  def export_data
+  def export_data(tenant=nil)
     require 'csv'
+    Apartment::Tenant.switch (tenant)
     # result = set_result_hash
     start_time, end_time = set_start_and_end_time
     return with_error_filename if start_time.blank?
@@ -48,7 +49,6 @@ class ExportSetting < ActiveRecord::Base
     save
 
     filename = generate_file_name
-
     if order_export_type == 'do_not_include'
       return do_export_if_orders_not_included(orders, filename)
     else
@@ -155,8 +155,8 @@ class ExportSetting < ActiveRecord::Base
 
   def do_export_if_orders_not_included(orders, filename)
     row_map = generate_row_mapping
-    CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
-     csv << row_map.keys
+    data = CSV.generate do |csv|
+      csv << row_map.keys
       orders.each do |order|
         single_row = update_single_row_with_order_data(row_map, order)
         assign_packing_user(single_row, order)
@@ -164,8 +164,10 @@ class ExportSetting < ActiveRecord::Base
         csv << single_row.values
       end
     end
-    public_url = GroovS3.get_csv_export_exception(filename)
-    filename = {url: public_url, filename: filename}
+    tenant = Apartment::Tenant.current
+    GroovS3.create_export_csv(tenant, filename, data)
+    url = GroovS3.find_export_csv(tenant, filename)
+    CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
   end
 
   def generate_row_mapping

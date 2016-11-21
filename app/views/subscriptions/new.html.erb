@@ -86,7 +86,7 @@
           <iframe src="/assets/views/termsofservicetos.html" width="100%" height="200px"></iframe>
         </div>
         <hr width="95%">
-        <% if params[:shop_name].nil? %>
+        <% if params[:shop_name].blank? %>
           <div>
             <h4>
               <center>Risk Free 30-day Evaluation</center>
@@ -96,11 +96,12 @@
             <label>If you are not completely satisfied, please let us know at any time during the evaluation period and
               all charges will be credited in full.</label>
           </div>
+          <br/>
 
-          <div style="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
+          <!-- <div style="padding-left:23px;"><h4>Please choose how you would like to be billed:</h4></div>
           <div class="form-group" style="padding-top: 2px;margin-top: -5px;">
             <div>
-              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%= @monthly_amount/100 %>
+              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription1" name="radio_subscription" value="monthly" checked/>Monthly:($<%#= @monthly_amount/100 %>
                 .00)</label>
 
               <div style="padding-left:23px;width: 97%;font-size: 14px; margin-top: -10px;">
@@ -110,8 +111,8 @@
               </div>
             </div>
             <div style="padding-top: 5px;">
-              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%= @monthly_amount*12/100 %>
-                .00</strike>)($<%= @annually_amount/100 %>.00) Save 10%</label>
+              <label class="radio" style="margin-left: -5px;"><input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green;"/>Annually:(<strike>$<%#= @monthly_amount*12/100 %>
+                .00</strike>)($<%#= @annually_amount/100 %>.00) Save 10%</label>
 
               <div style="padding-left:23px;width: 85%;font-size: 14px; margin-top: -10px;">
                 <label id="annual_billing_label">The first annual billing will be charged after 30 days at a 10%
@@ -119,7 +120,10 @@
                 <label id="annual_discount_label"></label>
               </div>
             </div>
-          </div>
+          </div> -->
+
+          <input type="radio" id="radio_subscription1" style="display: none;" name="radio_subscription" value="monthly" checked/>
+          <input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green; display: none;"/>
 
           <div class="form-group">
             <label for="coupon_id" class="control-label">Promotional Code</label>
@@ -154,6 +158,15 @@
       </fieldset>
     </form>
     <script>
+      $(document).ready(function(){
+        var subscription_type = "<%= params['radio_subscription'] %>";
+        if(subscription_type=="annually") {
+          $("[type='radio'][value='annually']").prop('checked',true);
+        } else {
+          $("[type='radio'][value='monthly']").prop('checked',true);
+        }
+      });
+
       var valid = {
         tenant_name: false,
         email: false,
@@ -194,7 +207,7 @@
 
       var handler = StripeCheckout.configure({
         key: $('#stripe_public_key').val(),
-        image: '/assets/images/apple-touch-icon.png',
+        image: 'https://admintools.groovepacker.com/assets/images/apple-touch-icon.png',
         token: function (token) {
           $.ajax({
             type: "POST",
@@ -234,7 +247,7 @@
               )
             }
             else {
-              var redirect_url = 'subscriptions/show?transaction_id=' + response.transaction_id + '&notice=' + response.notice + '&email=' + response.email + '&next_date=' + response.next_date
+              var redirect_url = '/subscriptions/show?transaction_id=' + response.transaction_id + '&notice=' + response.notice + '&email=' + response.email + '&next_date=' + response.next_date
               window.location.href = redirect_url
             }
           });

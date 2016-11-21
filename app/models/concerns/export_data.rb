@@ -199,7 +199,7 @@ module ExportData
   end
 
   def push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
-    CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
+    data = CSV.generate do |csv|
       show_lot_number = show_lot_or_serial_number?(order_hash_array, :lot_number)
       show_serial_number = show_lot_or_serial_number?(order_hash_array, :serial_number)
 
@@ -209,7 +209,8 @@ module ExportData
         csv << order_hash.values_at(*csv_row_map.keys)
       end
     end
-    public_url = GroovS3.get_csv_export_exception(filename)
-    return filename = {url: public_url, filename: filename}
+    GroovS3.create_export_csv(tenant, filename, data)
+    url = GroovS3.find_export_csv(tenant, filename)
+    CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
   end
 end

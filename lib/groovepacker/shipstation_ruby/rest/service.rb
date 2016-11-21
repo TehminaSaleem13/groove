@@ -74,8 +74,10 @@ module Groovepacker
         end
 
         def handle_exceptions(response)
-          fail Exception, 'Authorization with Shipstation store failed.' \
-            ' Please check your API credentials' if response.code == 401
+          fail Exception, response.inspect if response.code == 401
+          # fail Exception, JSON.parse(response.inspect) if response.code == 401
+          # fail Exception, 'Authorization with Shipstation store failed.' \
+          #   ' Please check your API credentials' if response.code == 401
           fail Exception, response.inspect if response.code == 500
           fail Exception, 'Please contact support team. Gateway timeout error'\
             ' from Shipstation API.' if response.code == 504
