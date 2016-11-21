@@ -1,0 +1,16 @@
+class CostCalculatorsController < ApplicationController
+	def index
+	  @params = {}
+	  @params = cost_calculation
+	end
+
+	def email_calculations
+		CostCalculatorMailer.send_cost_calculation(params).deliver
+		render json: {}
+	end
+
+	private
+	def cost_calculation
+		{packer_count: params[:packer_count] || 3, order_count: params[:order_count] || 180 , avg_error: params[:avg_error] || 2, regular_percentage: params[:regular_percentage] || 80, regular_comm: params[:regular_comm] ||  0.45, escalated_percentage: params[:escalated_percentage] || 20, escalated_comm: params[:escalated_comm] || 3,avg_comm: params[:avg_comm] ||  2,cost_ship_replacement: params[:cost_ship_replacement] ||  3.25, expedited_count: params[:expedited_count] ||  40, expedited_avg: params[:expedited_avg] ||  25, international_count: params[:international_count] ||  15, avg_order_profit: params[:avg_order_profit] ||  30, reshipment: params[:reshipment] ||  0.75,cost_labor_reshipment: params[:cost_labor_reshipment] ||  0.20, cost_apology: params[:cost_apology] ||  2,total_error_shipment: params[:total_error_shipment] ||   35, product_abandonment_percentage: params[:product_abandonment_percentage] ||  80, avg_product_abandonment: params[:avg_product_abandonment] || 6,return_shipping_percentage: params[:return_shipping_percentage] || 20,cost_return: params[:cost_return] || 0,return_shipping_cost: params[:return_shipping_cost] || 6,return_shipping_insurance: params[:return_shipping_insurance] || 1,cost_recieving_process: params[:cost_recieving_process] || 1,cost_confirm: params[:cost_confirm] || 0.25,misc_cost: params[:misc_cost] || 0,incorrect_current_order: params[:incorrect_current_order] || 15, avg_current_order: params[:avg_current_order] || 30,incorrect_lifetime_order: params[:incorrect_lifetime_order] || 40,lifetime_val: params[:lifetime_val] || 250,negative_shipment: params[:negative_shipment] || 150 ,inventory_shortage_order: params[:inventory_shortage_order] || 30, expedited_percentage: params[:expedited_percentage] || 2.5, international_percentage: params[:international_percentage] || 6.67, incorrect_current_order_per: params[:incorrect_current_order_per] || 6.67, incorrect_lifetime_order_per: params[:incorrect_lifetime_order_per] || 2.5, negative_shipment_per: params[:negative_shipment_per] || 1, inventory_shortage_order_per: params[:inventory_shortage_order_per] || 3.33,total_expedited: params[:total_expedited] || 0.63, total_international: params[:total_international] || 2, cancel_order_shipment: params[:cancel_order_shipment] || 1.8, lifetime_order_val: params[:lifetime_order_val] || 5, negative_post_review: params[:negative_post_review] || 0, inventory_shortage: params[:inventory_shortage] || 0.9}
+	end
+end
