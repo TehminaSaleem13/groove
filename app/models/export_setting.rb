@@ -132,7 +132,7 @@ class ExportSetting < ActiveRecord::Base
 
   def same_day_or_last_exported(start_time)
     if export_orders_option.eql? 'on_same_day'
-      start_time
+      Time.zone.now.beginning_of_day
     else
       last_exported || '2000-01-01 00:00:00'
     end
