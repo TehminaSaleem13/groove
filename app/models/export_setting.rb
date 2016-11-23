@@ -47,12 +47,11 @@ class ExportSetting < ActiveRecord::Base
     orders = Order.where(scanned_on: start_time..end_time)
     self.last_exported = Time.zone.now
     save
-
     filename = generate_file_name
     if order_export_type == 'do_not_include'
       do_export_if_orders_not_included(orders, filename)
     else
-      do_export_with_orders(orders, filename)
+      do_export_with_orders(orders, filename, tenant)
     end
 
     filename
@@ -120,13 +119,12 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def set_start_and_end_time
-    start_time = self.start_time.beginning_of_day
-    end_time = self.end_time.end_of_day
+    start_time = self.start_time.beginning_of_day rescue DateTime.now-1.days
+    end_time = self.end_time.end_of_day rescue DateTime.now
     return [start_time, end_time] if manual_export
 
     start_time = same_day_or_last_exported(start_time)
     end_time = Time.zone.now
-
     [start_time, end_time]
   end
 
@@ -169,7 +167,7 @@ class ExportSetting < ActiveRecord::Base
     tenant = Apartment::Tenant.current
     GroovS3.create_export_csv(tenant, filename, data)
     url = GroovS3.find_export_csv(tenant, filename)
-    CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
+    CsvExportMailer.delay.send_s3_object_url(filename, url, tenant) if ExportSetting.first.manual_export == true
   end
 
   def generate_row_mapping

@@ -134,13 +134,13 @@ module ExportData
     single_row
   end
 
-  def do_export_with_orders(orders, filename)
+  def do_export_with_orders(orders, filename, tenant)
     row_map = generate_default_row_map
     order_hash_array = []
     order_hash = generate_header
     order_hash_array.push(order_hash)
     fetch_orders_hash_array(orders, row_map, order_hash_array)
-    push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
+    push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map, tenant)
   end
 
   def generate_default_row_map
@@ -198,7 +198,7 @@ module ExportData
     end
   end
 
-  def push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map)
+  def push_orders_hash_array_to_csv_file(filename, order_hash_array, row_map, tenant)
     data = CSV.generate do |csv|
       show_lot_number = show_lot_or_serial_number?(order_hash_array, :lot_number)
       show_serial_number = show_lot_or_serial_number?(order_hash_array, :serial_number)
@@ -211,6 +211,6 @@ module ExportData
     end
     GroovS3.create_export_csv(tenant, filename, data)
     url = GroovS3.find_export_csv(tenant, filename)
-    CsvExportMailer.send_s3_object_url(filename, url, tenant).deliver
+    CsvExportMailer.delay.send_s3_object_url(filename, url, tenant) if ExportSetting.first.manual_export == true
   end
 end

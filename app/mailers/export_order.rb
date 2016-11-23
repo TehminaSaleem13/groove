@@ -6,11 +6,15 @@ class ExportOrder < ActionMailer::Base
     export_settings = ExportSetting.first
     
     @counts = get_order_counts(export_settings) if export_settings.export_orders_option == 'on_same_day'
-    
-    filename = export_settings.export_data
-    @tenant_name = tenant
-    file_locatin = "#{Rails.root}/public/csv/#{filename}"
-    @csv_data = CSV.read(file_locatin) rescue []
+    filename = export_settings.export_data(tenant)
+    @tenant_name = tenant    
+    url = GroovS3.find_export_csv(tenant, filename)
+    # file_locatin = "#{Rails.root}/public/csv/#{filename}"
+    @csv_data = []
+    file_data = Net::HTTP.get(URI.parse(url)) rescue []
+    file_data = file_data.split("\n")
+    file_data.each {|row| @csv_data << row.split(",")}
+    # @csv_data = Net::HTTP.get(URI.parse(url)) rescue []
     @csv_data.try(:first).try(:each_with_index) do |value, index|
       case value
       when 'order_number'
@@ -20,7 +24,7 @@ class ExportOrder < ActionMailer::Base
       end
     end
 
-    attachments["#{filename}"] = File.read(file_locatin) rescue nil
+    attachments["#{filename}"] = Net::HTTP.get(URI.parse(url)) rescue nil
     mail to: export_settings.order_export_email,
          subject: "GroovePacker Order Export Report"
     #import_orders_obj = ImportOrders.new
