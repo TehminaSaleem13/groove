@@ -29,7 +29,7 @@ class ExportOrder < ActionMailer::Base
          subject: "GroovePacker Order Export Report"
     #import_orders_obj = ImportOrders.new
     #import_orders_obj.reschedule_job('export_order', tenant)
-    File.delete(file_locatin) rescue nil
+    #File.delete(file_locatin) rescue nil
   end
 
   def get_order_counts(export_settings)

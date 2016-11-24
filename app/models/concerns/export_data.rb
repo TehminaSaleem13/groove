@@ -210,7 +210,7 @@ module ExportData
       end
     end
     GroovS3.create_export_csv(tenant, filename, data)
-    url = GroovS3.find_export_csv(tenant, filename)
-    CsvExportMailer.delay.send_s3_object_url(filename, url, tenant) if ExportSetting.first.manual_export == true
+    #url = GroovS3.find_export_csv(tenant, filename)
+    # ExportOrder.export(tenant).deliver if ExportSetting.first.manual_export == true
   end
 end
