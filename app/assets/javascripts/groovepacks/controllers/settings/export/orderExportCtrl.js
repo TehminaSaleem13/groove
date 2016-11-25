@@ -42,7 +42,7 @@ groovepacks_controllers.
         if ($scope.exports.start.time <= $scope.exports.end.time) {
           // $window.open('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
           $http.get('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
-          $scope.notify('Your request has been queued', 1);
+          $scope.notify('It will be emailed to ' + $scope.export_settings.single.order_export_email, 1);
         } else {
           $scope.notify('Start time can not be after End time');
         }
@@ -50,3 +50,4 @@ groovepacks_controllers.
 
       myscope.init();
     }]);
+ 
