@@ -113,3 +113,4 @@ gem 'rack-cors', :require => 'rack/cors'
 gem 'rollbar'
 gem 'whenever', :require => false
 gem "skylight"
+gem 'scout_apm'
