@@ -476,6 +476,7 @@ GEM
       nokogiri (>= 1.4.0)
       nori (~> 2.1.0)
       wasabi (~> 3.1.0)
+    scout_apm (2.1.15)
     sexp_processor (4.6.0)
     shipping_easy (0.6.1)
       faraday (>= 0.8.7)
@@ -637,6 +638,7 @@ DEPENDENCIES
   s3
   sass-rails (~> 3.2.3)
   savon
+  scout_apm
   shipping_easy
   shopify_api
   simple_form (>= 2.0.4)
