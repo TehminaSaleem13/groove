@@ -54,8 +54,8 @@ module ProductsHelper
                   scan_pack_settings.intangible_string.present?
     intangible_strings = scan_pack_settings.intangible_string.strip.split(',')
     intangible_strings.each do |string|
-      next unless (product.name.include?(string)) ||
-                  (product.primary_sku.include?(string))
+      next unless (product.name.downcase.include?(string.downcase)) ||
+                  (product.primary_sku.downcase.include?(string.downcase))
       product.is_intangible = true
       product.save
       break
