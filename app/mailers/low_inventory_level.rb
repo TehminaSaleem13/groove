@@ -29,12 +29,27 @@ class LowInventoryLevel < ActionMailer::Base
 
   def get_entire_list(tenant)
     low_limit = ActiveRecord::Base::sanitize(GeneralSetting.all.first.default_low_inventory_alert_limit)
-    warehouses = ProductInventoryWarehouses.find_by_sql('SELECT * FROM '+tenant+'.product_inventory_warehouses WHERE (product_inv_alert = 0 AND available_inv <='+low_limit.to_s+') OR (product_inv_alert = 1 AND available_inv <= product_inv_alert_level AND product_inv_alert_level != 0)')
-    product_ids = []
-    warehouses.each do |warehouse|
-      product_ids.push(warehouse.product_id)
-    end
-    products = Product.find_all_by_id(product_ids)
-    return products
+    # warehouses = ProductInventoryWarehouses.find_by_sql('SELECT * FROM '+tenant+'.product_inventory_warehouses WHERE (product_inv_alert = 0 AND available_inv <='+low_limit.to_s+') OR (product_inv_alert = 1 AND available_inv <= product_inv_alert_level AND product_inv_alert_level != 0)')
+    # product_ids = []
+    # warehouses.each do |warehouse|
+    #   product_ids.push(warehouse.product_id)
+    # end
+    # products = Product.find_all_by_id(product_ids)
+    products =
+      Product
+      .joins(:product_inventory_warehousess)
+      .includes(
+        :product_skus,
+        :product_images,
+        :product_barcodes,
+        product_inventory_warehousess: :inventory_warehouse
+      )
+      .where(
+        "product_inv_alert = 0 AND available_inv <= #{low_limit}"\
+        " OR product_inv_alert = 1 AND available_inv <= product_inv_alert_level"\
+        " AND product_inv_alert_level != 0"
+      )
+    
+    return products.to_a.uniq
   end
 end
