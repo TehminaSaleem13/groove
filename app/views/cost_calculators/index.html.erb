@@ -57,15 +57,15 @@
               </div>
               <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="box overridebox">
-                  <h4><strong id="escalated_percentage right-inner-addon"><%= @params[:escalated_percentage] %><span>%</span></strong> become escalated communications requiring the owner or management.</h4>
+                  <h4><strong id="escalated_percentage"><%= @params[:escalated_percentage] %></strong><b>%</b> become escalated communications requiring the owner or management.</h4>
                   <h4>
                     The average cost is: <input id="escalated_comm" type="text" name="escalated_comm" value="<%= @params[:escalated_comm] %>">  per communication.
                   </h4>
                 </div>
               </div>
               <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="box overridebox right-inner-addon">
-                  <h4>The average number of communications required to resolve an error related issue.</h4><span style="padding: 14px 90px">%</span>
+                <div class="box overridebox">
+                  <h4>The average number of communications required to resolve an error related issue.</h4>
                   <input id="avg_comm" type="text" name="avg_comm" value="<%= @params[:avg_comm] %>">
                 </div>
               </div>

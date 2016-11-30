@@ -71,13 +71,13 @@ $(document).ready(function(){
     $(document).on('change paste keyup input', function(){ 
       var regular_percentage = parseFloat($("#regular_percentage").val());
       var avg_comm = parseFloat($("#avg_comm").val());
-      var regular_percentage = parseFloat($("#regular_percentage").val());
+      // var regular_percentage = parseFloat($("#regular_percentage").val());
       var regular_comm = parseFloat($("#regular_comm").val());
       var escalated_comm = parseFloat($("#escalated_comm").val());
       if(regular_percentage != null){
         $("#regular_percentage").on('change paste keyup input', function(){
-          $("#escalated_percentage").html(parseFloat(100-regular_percentage).toFixed(2));
-          $("#escalated_percentage").val(parseFloat(100-regular_percentage).toFixed(2));
+          $("#escalated_percentage").html(parseFloat(100-regular_percentage));
+          $("#escalated_percentage").val(parseFloat(100-regular_percentage));
         });
       };
       if(regular_percentage != null && avg_comm != null && regular_comm != null && regular_percentage != null && escalated_comm != null) {
