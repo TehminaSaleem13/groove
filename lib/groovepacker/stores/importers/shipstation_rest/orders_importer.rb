@@ -127,7 +127,7 @@ module Groovepacker
               when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-1.days : quick_import_date
+                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
                 self.import_from = DateTime.now-1.weeks
