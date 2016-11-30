@@ -4,13 +4,13 @@
 
     <div class="col-md-12 col-sm-12 col-xs-12">
       <form id="cost_calc">
-        <div class="row">
+        <div class="row out_box">
           <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
-            <h4><strong>Error Volume</strong></h4>
+            <h4 class="box_margin"><strong>Error Volume</strong></h4>
             <h1><strong id="error_per_day"><%= @params[:error_per_day] %></strong></h1>
             <p>Errors Per day</p>
           </div>
-          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none out_box_margin">
             
             <div class="row">
               <div class="col-md-4 col-sm-4 col-xs-12">
@@ -26,9 +26,10 @@
                 </div>
               </div>
               <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="box overridebox">
+                <div class="box overridebox right-inner-addon">
                   <h4>Error rate for the average packer.</h4>
-                  <input id="avg_error" type="text" name="avg_error" value="<%= @params[:avg_error] %>">% 
+                  <span style="padding: 7px 90px">%</span>
+                  <input id="avg_error" type="text" name="avg_error" value="<%= @params[:avg_error] %>">
                 </div>
               </div>
             </div>
@@ -37,35 +38,34 @@
         </div>
 
         <h2>Tangible Costs</h2>
-        <div class="row comunication">
+        <div class="row comunication out_box">
           <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
-            <h4><strong>Communication & Customer Service Costs</strong></h4>
+            <h4 class="box_margin"><strong>Communication & Customer Service Costs</strong></h4>
             <h1><strong>$<span id="cost_of_comm"><%= @params[:cost_of_comm] %></span></strong></h1>
           </div>
-          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
-            
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none out_box_margin">
             <div class="row">
               <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="box overridebox">
-                  <h4>
-                    <input id="regular_percentage" type="text" name="regular_percentage" value="<%= @params[:regular_percentage] %>"> % are routine communications handled by regular staff.
+                  <h4 class="right-inner-addon"><span style="padding: 7px 170px">%</span>
+                    <input id="regular_percentage" type="text" name="regular_percentage" value="<%= @params[:regular_percentage] %>"> are routine communications handled by regular staff.
                   </h4>
                   <h4>
-                    The average cost is: <input id="regular_comm" type="text" name="regular_comm" value="<%= @params[:regular_comm] %>">
-                  </h4>
-                </div>
-              </div>
-              <div class="col-md-4 col-sm-4 col-xs-12">
-                <div class="box overridebox">
-                  <h4><strong id="escalated_percentage"><%= @params[:escalated_percentage] %></strong> become escalated communications requiring the owner or management.</h4>
-                  <h4>
-                    The average cost is: <input id="escalated_comm" type="text" name="escalated_comm" value="<%= @params[:escalated_comm] %>">
+                    The average cost is: <input id="regular_comm" type="text" name="regular_comm" value="<%= @params[:regular_comm] %>">  per communication.
                   </h4>
                 </div>
               </div>
               <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="box overridebox">
-                  <h4>The average number of communications required to resolve an error related issue.</h4>
+                  <h4><strong id="escalated_percentage right-inner-addon"><%= @params[:escalated_percentage] %><span>%</span></strong> become escalated communications requiring the owner or management.</h4>
+                  <h4>
+                    The average cost is: <input id="escalated_comm" type="text" name="escalated_comm" value="<%= @params[:escalated_comm] %>">  per communication.
+                  </h4>
+                </div>
+              </div>
+              <div class="col-md-4 col-sm-4 col-xs-12">
+                <div class="box overridebox right-inner-addon">
+                  <h4>The average number of communications required to resolve an error related issue.</h4><span style="padding: 14px 90px">%</span>
                   <input id="avg_comm" type="text" name="avg_comm" value="<%= @params[:avg_comm] %>">
                 </div>
               </div>
@@ -80,19 +80,20 @@
 
 
 
-        <div class="row replacement">
+        <div class="row replacement out_box box_margin">
           <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
-            <h4><strong>Replacement Shipment Costs</strong></h4>
+            <h4 class="box_margin"><strong>Replacement Shipment Costs</strong></h4>
             <h1><strong>$<span id="total_replacement_costs"><%= @params[:total_replacement_costs] %></span></strong></h1>
           </div>
-          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none out_box_margin">
             
             <div class="row">
               <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="box overridebox">
 
                   <div class="row">
-                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none left-inner-addon">
+                    <span>$</span>
                     <input id="cost_ship_replacement" type="text" name="cost_ship_replacement" value="<%= @params[:cost_ship_replacement] %>"></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
                       <h4>
@@ -101,26 +102,30 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
-                    <input type="text" id="total_expedited" value="<%= @params[:total_expedited] %>" disabled></div>
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none left-inner-addon">
+                    <span>$</span>
+                    <input type="text" id="total_expedited" value="&nbsp; &nbsp; &nbsp;<%= @params[:total_expedited] %>" disabled></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
-                      <h4>
-                        1 in <input id="expedited_count" type="text" name="expedited_count" value="<%= @params[:expedited_count] %>"> replacement shipments ( <input id="expedited_percentage" type="text" name="expedited_percentage" value="<%= @params[:expedited_percentage] %>">%) require expedited shipping to prevent loosing the customer. The average cost of expedited shipping is <input type="text" id="expedited_avg" name="expedited_avg" value="<%= @params[:expedited_avg] %>">
+                      <h4 class="right-inner-addon">
+                        1 in <input id="expedited_count" type="text" name="expedited_count" value="<%= @params[:expedited_count] %>"> replacement shipments (<input id="expedited_percentage" type="text" name="expedited_percentage" value="<%= @params[:expedited_percentage] %>"><span class="override_span input_align">%</span>) require expedited shipping to prevent loosing the customer. The average cost of expedited shipping is <addon class="right-inner-addon"><input type="text" id="expedited_avg" name="expedited_avg" value="<%= @params[:expedited_avg] %>"><span class="expedited_avg input_align">$</span>
+                      </addon>
                       </h4>
                     </div>
                   </div>
 
                   <div class="row">
-                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
-                    <input type="text" id="total_international" value="<%= @params[:total_international] %>" disabled></div>
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none left-inner-addon">
+                    <span>$</span>
+                    <input type="text" id="total_international" value="&nbsp; &nbsp; &nbsp;<%= @params[:total_international] %>" disabled></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
-                     <h4>
-                         1 in <input id="international_count" type="text" name="international_count" value="<%= @params[:international_count] %>"> replacement shipments ( <input id="international_percentage" type="text" name="international_percentage" value="<%= @params[:international_percentage] %>"> %) require international shipping to prevent loosing the customer. The average cost of international shipping is <input id="avg_order_profit" type="text" name="avg_order_profit" value="<%= @params[:avg_order_profit] %>"">
+                     <h4 class="right-inner-addon">
+                         1 in <input id="international_count" type="text" name="international_count" value="<%= @params[:international_count] %>"> replacement shipments (<input id="international_percentage" type="text" name="international_percentage" value="<%= @params[:international_percentage] %>"><span class="override_span input_align">%</span> ) require international shipping to prevent loosing the customer. The average cost of international shipping is <addon class="right-inner-addon"><input id="avg_order_profit" type="text" name="avg_order_profit" value="<%= @params[:avg_order_profit] %>""><span class="override_span input_align">$</span></addon>
                       </h4>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none left-inner-addon">
+                    <span>$</span>
                     <input id="reshipment" type="text" name="reshipment" value="<%= @params[:reshipment] %>"></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
                      <h4>
@@ -129,7 +134,8 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none left-inner-addon">
+                    <span>$</span>
                     <input id="cost_labor_reshipment" type="text" name="cost_labor_reshipment" value="<%= @params[:cost_labor_reshipment] %>"></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
                      <h4>
@@ -138,7 +144,8 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none">
+                    <div class="col-md-1 col-sm-1 col-xs-12 pd-none left-inner-addon">
+                    <span>$</span>
                     <input id="cost_apology" type="text" name="cost_apology" value="<%= @params[:cost_apology] %>"></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
                      <h4>
@@ -162,39 +169,39 @@
         </div>
 
 
-        <div class="row replacement">
+        <div class="row replacement out_box box_margin">
           <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
-            <h4><strong>Return Shipment OR Product Abandonment</strong></h4>
+            <h4 class="box_margin"><strong>Return Shipment OR Product Abandonment</strong></h4>
             <h1><strong>$<span id="return_shipment_or_abandonment"><%= @params[:return_shipment_or_abandonment] %></span></strong></h1>
           </div>
-          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none">
+          <div class="col-md-10 col-sm-10 col-xs-12 right pd-none out_box_margin">
             
             <div class="row">
               <div class="col-md-12 col-sm-12 col-xs-12">
                 <div class="box overridebox">
                   <h4>
-                    Any time an incorrect item is sent there will either be a return shipment cost or a product abandonment cost. The calculation is based on an incorrect item getting sent in <input type="text" id="total_error_shipment" name="total_error_shipment" value="<%= @params[:total_error_shipment] %>"> % of the error shipments.
+                    Any time an incorrect item is sent there will either be a return shipment cost or a product abandonment cost. The calculation is based on an incorrect item getting sent in <addon class="right-inner-addon"><input type="text" id="total_error_shipment" name="total_error_shipment" value="<%= @params[:total_error_shipment] %>"><span class="override_span input_align">%</span></addon> of the error shipments.
                   </h4>
-                  <h4>
-                    In <input type="text" id="product_abandonment_percentage" value="<%= @params[:product_abandonment_percentage] %>"> % of these instances the incorrect item will be gifted to the customer as the cost is less than the cost of the return. The average cost of the abandoned item is <input id="avg_product_abandonment" type="text" name="avg_product_abandonment" value="<%= @params[:avg_product_abandonment] %>">
+                  <h4 class="right-inner-addon">
+                    In <addon class="right-inner-addon"><input type="text" id="product_abandonment_percentage" value="<%= @params[:product_abandonment_percentage] %>"><span class="override_span input_align">%</span></addon> of these instances the incorrect item will be gifted to the customer as the cost is less than the cost of the return. The average cost of the abandoned item is <addon class="right-inner-addon"><input id="avg_product_abandonment" type="text" name="avg_product_abandonment" value="<%= @params[:avg_product_abandonment] %>"><span class="override_span input_align">$</span></addon>
                   </h4>
-                  <h4>
-                    In <input id="return_shipping_percentage" type="text" name="return_shipping_percentage" value="<%= @params[:return_shipping_percentage] %>"> % of these instances the incorrect item will need to be returned and the list of costs below will apply:
+                  <h4 class="right-inner-addon">
+                    In <input id="return_shipping_percentage" type="text" name="return_shipping_percentage" value="<%= @params[:return_shipping_percentage] %>"><span class="override_span input_align">%</span> of these instances the incorrect item will need to be returned and the list of costs below will apply:
                   </h4>
                   <ul>
-                    <li>
+                    <li class="left-inner-addon"><span>$</span>
                       <input type="text" id="cost_return" name="cost_return" value="<%= @params[:cost_return] %>"> Optional Cost of return shipping to 3PL and associated 3PL fees
                     </li>
-                    <li>
+                    <li class="left-inner-addon"><span>$</span>
                       <input id="return_shipping_cost" type="text" name="return_shipping_cast" value="<%= @params[:return_shipping_cost] %>"> 6.00 Cost of return postage from the Customer (or 3PL facility)
                     </li>
-                    <li>
+                    <li class="left-inner-addon"><span>$</span>
                       <input id="return_shipping_insurance" type="text" name="return_shipping_insurance" value="<%= @params[:return_shipping_insurance] %>"> Cost of insurance and or package tracking on return shipment
                     </li>
-                    <li>
+                    <li class="left-inner-addon"><span>$</span>
                       <input id="cost_recieving_process" type="text" name="cost_recieving_process" value="<%= @params[:cost_recieving_process] %>"> Cost of receiving and processing the physical return
                     </li>
-                    <li>
+                    <li class="left-inner-addon"><span>$</span>
                       <input id="cost_confirm" type="text" name="cost_confirm" value="<%= @params[:cost_confirm] %>"> Cost of communication to confirm it's receipt with the customer or follow up if it is not received as expected.
                     </li>
                   </ul>
@@ -215,7 +222,7 @@
 
 
         <h2>Intangible Costs</h2>
-        <div class="row replacement">
+        <div class="row replacement out_box">
           <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
             <h4></h4>
             <br><br><br><br>
@@ -225,11 +232,12 @@
             
             <div class="row">
               <div class="col-md-12 col-sm-12 col-xs-12">
-                <div class="box overridebox">
+                <div class="box overridebox out_box_margin">
                   <br>
 
                   <div class="row">
-                    <div class="col-md-1 pd-none">
+                    <div class="col-md-1 pd-none left-inner-addon">
+                    <span>$</span>
                     <input type="text" id="misc_cost" value="<%= @params[:misc_cost] %>"></div>
                     <div class="col-md-11">
                       <h4>
@@ -238,34 +246,39 @@
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 pd-none"><input type="text" id="cancel_order_shipment" value="<%= @params[:cancel_order_shipment] %>" disabled></div>
+                    <div class="col-md-1 pd-none left-inner-addon">
+                    <span>$</span>
+                    <input type="text" id="cancel_order_shipment" value="<%= @params[:cancel_order_shipment] %>" disabled></div>
                     <div class="col-md-11">
                       <h4>
-                        1 In <input type="text" id="incorrect_current_order" value="<%= @params[:incorrect_current_order] %>"> incorrect shipments ( <input type="text" id="incorrect_current_order_per" value="<%= @params[:incorrect_current_order_per] %>"> %) cause the customer to cancel the current order. The estimated profit for an average order is <input type="text" id="avg_current_order" value="<%= @params[:avg_current_order] %>">
+                        1 In <input type="text" id="incorrect_current_order" value="<%= @params[:incorrect_current_order] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="incorrect_current_order_per" value="<%= @params[:incorrect_current_order_per] %>"> <span class="override_span input_align">%</span></addon>) cause the customer to cancel the current order. The estimated profit for an average order is <addon class="left-inner-addon"><input type="text" id="avg_current_order" value="<%= @params[:avg_current_order] %>"><span class="override_span input_align">$</span></addon>
                       </h4>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 pd-none"><input type="text" id="lifetime_order_val" value="<%= @params[:lifetime_order_val] %>"  disabled></div>
+                    <div class="col-md-1 pd-none left-inner-addon">
+                    <span>$</span><input type="text" id="lifetime_order_val" value="<%= @params[:lifetime_order_val] %>"  disabled></div>
                     <div class="col-md-11">
                       <h4>
-                        1 In <input type="text" id="incorrect_lifetime_order" value="<%= @params[:incorrect_lifetime_order] %>"> incorrect shipments ( <input type="text" id="incorrect_lifetime_order_per" value="<%= @params[:incorrect_lifetime_order_per] %>"> %) cause the customer to place all future orders with competitors. The estimated lifetime value of a customer is <input type="text" id="lifetime_val" value="<%= @params[:lifetime_val] %>">
+                        1 In <input type="text" id="incorrect_lifetime_order" value="<%= @params[:incorrect_lifetime_order] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="incorrect_lifetime_order_per" value="<%= @params[:incorrect_lifetime_order_per] %>"> <span class="override_span input_align">%</span></addon>) cause the customer to place all future orders with competitors. The estimated lifetime value of a customer is <addon class="right-inner-addon"> <input type="text" id="lifetime_val" value="<%= @params[:lifetime_val] %>"><span class="override_span input_align"> $</span></addon>
                       </h4>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 pd-none"><input type="text" id="negative_post_review" value="<%= @params[:negative_post_review] %>" disabled></div>
+                    <div class="col-md-1 pd-none left-inner-addon">
+                    <span>$</span>
+                    <input type="text" id="negative_post_review" value="<%= @params[:negative_post_review] %>" disabled></div>
                     <div class="col-md-11">
                       <h4>
-                        1 In <input type="text" id="negative_shipment" value="<%= @params[:negative_shipment] %>"> incorrect shipments ( <input type="text" id="negative_shipment_per" value="<%= @params[:negative_shipment_per] %>"> %) result in a negative post or review which causes a potential customer to do business with a competitor instead. Based on the lifetime value of $<span id="lifetime_value"></span>.
+                        1 In <input type="text" id="negative_shipment" value="<%= @params[:negative_shipment] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="negative_shipment_per" value="<%= @params[:negative_shipment_per] %>"><span class="override_span input_align">%</span> </addon>) result in a negative post or review which causes a potential customer to do business with a competitor instead. Based on the lifetime value of $<span id="lifetime_value"></span>.
                       </h4>
                     </div>
                   </div>
                   <div class="row">
-                    <div class="col-md-1 pd-none"><input type="text" id="inventory_shortage" value="<%= @params[:inventory_shortage] %>" disabled></div>
+                    <div class="col-md-1 pd-none left-inner-addon"><span>$</span><input type="text" id="inventory_shortage" value="<%= @params[:inventory_shortage] %>" disabled></div>
                     <div class="col-md-11">
                       <h4>
-                        1 In <input type="text" id="inventory_shortage_order" value="<%= @params[:inventory_shortage_order] %>"> incorrect shipments ( <input type="text" id="inventory_shortage_order_per" value="<%= @params[:inventory_shortage_order_per] %>"> %) result in an inventory shortage or oversell which costs a sale. The estimated profit per sale of $<span id="avg_current_order_val"><%= @params[:avg_current_order_val] %></span> is used for this calculation.
+                        1 In <input type="text" id="inventory_shortage_order" value="<%= @params[:inventory_shortage_order] %>"> incorrect shipments (<addon class="right-inner-addon"> <input type="text" id="inventory_shortage_order_per" value="<%= @params[:inventory_shortage_order_per] %>"><span class="override_span input_align">%</span> </addon>) result in an inventory shortage or oversell which costs a sale. The estimated profit per sale of $<span id="avg_current_order_val"><%= @params[:avg_current_order_val] %></span> is used for this calculation.
                       </h4>
                     </div>
                   </div>
@@ -284,8 +297,8 @@
         </div>
 
         <h2><strong>Totals</strong></h2>
-        <div class="row total">
-          <div class="col-md-12 col-sm-12 col-xs-12 pd-none">
+        <div class="row total out_box">
+          <div class="col-md-12 col-sm-12 col-xs-12 pd-none out_box_margin">
 
             <div class="row">
               <div class="col-md-4 col-sm-4 col-xs-12 text-center right">
@@ -332,8 +345,10 @@
       <div class="row total" style="background-color: rgba(0,0,0,0.5); opacity: 0.8;">
         <div class="col-md-12 col-sm-12 col-xs-12 pd-none">
         <div class="row">
-          <div class="box overridebox" style="background-color: white">
-            <h3>Please follow the link below to see an estimate of what we are currently spending on shipping errors. You can adjust the any of the estimates to refine the calculation. <br/><br/></h3>
+          <div>
+            <h3>
+           ​<textarea id="email_text" name="email_text"  rows="3" cols="87"><%= @params[:email_text] %></textarea>
+            </h3>
           </div>
           <h3 style="color: white;">Save and email my cost calculator to me and my team at the following addresses: </h3>
 
@@ -359,4 +374,3 @@
     <div class="clearfix"></div>
   </div>
 <div class="clearfix"></div>
-

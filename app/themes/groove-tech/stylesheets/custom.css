@@ -374,4 +374,63 @@ body{
   color: #dedbdb !important;
 }
 
+.gradient-well-inner{
+  max-width: 1200px !important;
+}
+
+.left-inner-addon {
+  position: relative;
+}
+.left-inner-addon input {
+    padding-left: 22px;    
+}
+.left-inner-addon span {
+    position: absolute;
+    padding: 7px 2px;
+    pointer-events: none;
+}
+
+.right-inner-addon {
+    position: relative;
+}
+.right-inner-addon input {
+    padding-right: 30px;    
+}
+.right-inner-addon span {
+    position: absolute;
+    right: 0px;
+    padding: 7px 12px;
+    pointer-events: none;
+}
+.override_span{
+  padding: 1px 0px 4px !important; 
+  position: relative !important;
+}
+
+.out_box{
+  background: rgba(161, 161, 161, .4);
+}
+
+.out_box_margin{
+  margin-top: 20px !important; 
+  margin-bottom: 10px;
+}
+
+.box_margin{margin-top: 20px !important;}
+
+.input_align{
+  background: #fff;
+  padding: 0 5px !important;
+  display: inline-block;
+  font-weight: bold;
+  left: -10px;
+  top: -1px;
+  height: 21px;
+  line-height: 20px;
+}
+#expedited_avg + span.input_align{
+  right: 0;
+  left: auto;
+}
+
 /* Error Cost Calculator page css stop */
