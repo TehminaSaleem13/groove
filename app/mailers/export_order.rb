@@ -44,8 +44,11 @@ class ExportOrder < ActionMailer::Base
 
   def get_order_counts(export_settings)
     result = {}
-    day_begin, end_time = export_settings.send(:set_start_and_end_time)
-    #day_begin = Time.zone.now.beginning_of_day
+    if export_settings.manual_export
+      day_begin, end_time = export_settings.send(:set_start_and_end_time)  
+    else
+      day_begin = Time.zone.now.beginning_of_day
+    end
     result['imported'] = Order.where("created_at >= ?", day_begin).size
     result['scanned'] = Order.where("scanned_on >= ?", day_begin).size
     result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_by_status_change = ?", day_begin, true).size
