@@ -16,83 +16,98 @@
         <br/>
       </div>
       <div class="col-sm-12">
-        <div class="col-sm-1"></div>
-        <div class="col-sm-2">
-          <center>
-            <i class="groove-fa fa fa-dropbox fa-5x"></i>
+        <div class="col-md-12">
+          <div class="col-sm-1"></div>
+          <div class="col-sm-2">
+            <center>
+              <i class="groove-fa fa fa-dropbox fa-5x"></i>
 
-            <div>Shipments</div>
-          </center>
-          <div class="col-sm-offset-1 col-sm-10">
-            <input type="number" ng-model="tenants.single.access_restrictions_info.max_allowed"
-                   class="form-control input-style"/>
+              <div>Shipments</div>
+            </center>
+            <div class="col-sm-offset-1 col-sm-10">
+              <input type="number" ng-model="tenants.single.access_restrictions_info.max_allowed"
+                     class="form-control input-style"/>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <center>
+              <i class="groove-fa fa fa-users fa-5x"></i>
+
+              <div>Users</div>
+            </center>
+            <div class="col-sm-offset-1 col-sm-10">
+              <input type="number" ng-model="tenants.single.access_restrictions_info.max_users"
+                     class="form-control input-style"/>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <center>
+              <i class="groove-fa fa fa-cloud-download fa-5x"></i>
+
+              <div>Sources</div>
+            </center>
+            <div class="col-sm-offset-1 col-sm-10">
+              <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+                     class="form-control input-style"/>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <center>
+              <i class="groove-fa fa fa-usd fa-5x"></i>
+
+              <div>Amount</div>
+            </center>
+            <div class="col-sm-offset-1 col-sm-10">
+              <input type="text" ng-model="tenants.single.subscription_info.amount" class="form-control input-style"/>
+            </div>
+          </div>
+          <div class="col-sm-2">
+            <center>
+              <i class="groove-fa fa fa-calendar fa-5x"></i>
+              <div>Days</div>
+            </center>
+            <div class="col-sm-offset-1 col-sm-10">
+              <input type="number" min= 0 ng-model="tenants.single.basicinfo.orders_delete_days"
+                     class="form-control input-style"/>
+            </div>
+          </div>
+          <div style="clear:both;"><br/></div>
+          <div class="col-sm-4"></div>
+        </div>
+        <div class="col-md-12">
+          <div class="col-sm-5"></div>
+          <div class="col-sm-2">
+            <br/><br/>
+            <center>
+              <input type="radio" name="interval" value="month" ng-model="tenants.single.subscription_info.interval"> Monthly 
+              <input type="radio" name="interval" value="year"
+              ng-model="tenants.single.subscription_info.interval"> Yearly
+            </center>
           </div>
         </div>
-        <div class="col-sm-2">
-          <center>
-            <i class="groove-fa fa fa-users fa-5x"></i>
 
-            <div>Users</div>
-          </center>
-          <div class="col-sm-offset-1 col-sm-10">
-            <input type="number" ng-model="tenants.single.access_restrictions_info.max_users"
-                   class="form-control input-style"/>
+        <div class="col-md-12">
+          <div class="col-sm-4"></div>
+          <div class="col-sm-2">
+            <br/>
+            <center>
+              <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}
+              <br/>
+              ( {{tenants.single.basicinfo.is_modified == true ? "Modified" : "Unmodified"}}
+               )
+              </div>
+            </center>
+            <!-- <div class="col-sm-offset-1 col-sm-10">
+              <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
+                     class="form-control input-style"/>
+            </div> -->
           </div>
-        </div>
-        <div class="col-sm-2">
-          <center>
-            <i class="groove-fa fa fa-cloud-download fa-5x"></i>
-
-            <div>Sources</div>
-          </center>
-          <div class="col-sm-offset-1 col-sm-10">
-            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
-                   class="form-control input-style"/>
+          <div class="col-sm-2">
+            <br>
+            <button ng-click="update_access_restrictions()"
+                    class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
+            </button>
           </div>
-        </div>
-        <div class="col-sm-2">
-          <center>
-            <i class="groove-fa fa fa-usd fa-5x"></i>
-
-            <div>Amount</div>
-          </center>
-          <div class="col-sm-offset-1 col-sm-10">
-            <input type="text" ng-model="tenants.single.subscription_info.amount" class="form-control input-style"/>
-          </div>
-        </div>
-        <div class="col-sm-2">
-          <center>
-            <i class="groove-fa fa fa-calendar fa-5x"></i>
-            <div>Days</div>
-          </center>
-          <div class="col-sm-offset-1 col-sm-10">
-            <input type="number" min= 0 ng-model="tenants.single.basicinfo.orders_delete_days"
-                   class="form-control input-style"/>
-          </div>
-        </div>
-        <div style="clear:both;"><br/></div>
-        <div class="col-sm-4"></div>
-
-
-
-        <div class="col-sm-2">
-          <br/><br/>
-          <center>
-            <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}</div><br/><br/>
-
-            <div ng-show="tenants.single.basicinfo.is_modified == true">Modified</div>
-            <div ng-hide="tenants.single.basicinfo.is_modified == true">Unmodified</div>
-          </center>
-          <!-- <div class="col-sm-offset-1 col-sm-10">
-            <input type="number" ng-model="tenants.single.access_restrictions_info.max_import_sources"
-                   class="form-control input-style"/>
-          </div> -->
-        </div>
-        <div class="col-sm-2">
-          <br><br>
-          <button ng-click="update_access_restrictions()"
-                  class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
-          </button>
         </div>
         <div class="col-sm-4"></div>
       </div>

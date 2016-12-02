@@ -68,6 +68,7 @@ module Groovepacker
         rescue
           subscription_result['verified_stripe_account'] = false
         end
+        subscription_result["interval"] = @tenant.subscription.interval rescue nil
         subscription_result
       end
 
@@ -259,7 +260,7 @@ module Groovepacker
         if @subscription
           @subscription_info = params[:subscription_info]
           @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id], :subscription_plan_id => params[:subscription_info][:plan_id])
-          return result unless @subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)
+          return result unless (@subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)) || (@subscription.interval != @subscription_info[:interval])
           begin
             create_new_plan_and_assign(tenant)
             update_modification_status(tenant)
@@ -432,12 +433,12 @@ module Groovepacker
         existing_plan = get_plan_info(@subscription_info[:plan_id])['plan_info']
         amount = @subscription_info[:amount].to_i * 100
         create_plan(amount,
-                    existing_plan.interval,
+                    @subscription_info[:interval] || @subscription.interval,
                     plan_info['plan_name'],
-                    existing_plan.currency,
+                    "usd",
                     plan_id)
         update_stripe_subscription(plan_id)
-        update_app_subscription(plan_id, amount)
+        update_app_subscription(plan_id, amount, @subscription_info[:interval])
         existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]]
       end
 
@@ -454,9 +455,10 @@ module Groovepacker
         end
       end
 
-      def update_app_subscription(plan_id, amount)
+      def update_app_subscription(plan_id, amount, interval)
         @subscription.subscription_plan_id = plan_id
         @subscription.amount = amount
+        @subscription.interval = interval if interval
         @subscription.save
       end
 
