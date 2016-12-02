@@ -12,7 +12,7 @@ class CsvExportMailer < ActionMailer::Base
     @filename = filename
     @object_url = object_url
     subject = "Backup successful."
-    mail to: recipients, subject: subject if recipients[0].present?
+    mail to: recipients, subject: subject if recipients.compact.present?
   end
 
   def send_s3_product_object_url(filename, object_url, tenant, no_product)

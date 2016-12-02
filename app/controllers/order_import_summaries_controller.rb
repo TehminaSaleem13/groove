@@ -36,6 +36,7 @@ class OrderImportSummariesController < ApplicationController
     end
     if cred   
       cred.last_imported_at = nil
+      cred.quick_import_last_modified = nil if store.store_type == "Shipstation API 2"
       cred.save
     end
     render json: {status: true}

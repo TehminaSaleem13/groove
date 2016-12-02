@@ -21,7 +21,14 @@ module ProductsService
           @bulk_action.reload
           return true if bulk_action_cancelled?
         end
-        csv << process_data(item)
+        arr = process_data(item)
+        new_arr = []
+        arr.each do |val| 
+          new_arr << (val.class==String ? "\"#{val}\"" : val)
+        end
+        # csv << process_data(item).join(",")
+        csv << new_arr.join(",")
+        csv << "\n"
       end
       csv
       # bulk_action?

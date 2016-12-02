@@ -9,6 +9,7 @@ module FTP
         unless self.host.nil? || self.username.nil? || self.password.nil?
           Timeout.timeout(20) do
             result[:connection_obj] = Net::FTP.new(self.host, self.username, self.password)
+            result[:connection_obj].passive = true
           end
           return result
         else

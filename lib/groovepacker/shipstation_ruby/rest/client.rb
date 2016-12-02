@@ -49,6 +49,7 @@ module Groovepacker
         def get_order_on_demand(orderno, using_tracking_number=false)
           Rails.logger.info 'Getting orders with order No: ' + orderno
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
+          response = (response.class == String ? {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1} : response)
           response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
           log_on_demand_order_import(orderno, response, using_tracking_number)
           if using_tracking_number

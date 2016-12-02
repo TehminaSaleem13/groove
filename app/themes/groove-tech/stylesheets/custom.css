@@ -255,3 +255,182 @@ body{
   .price_font p{
     font-size: 18px !important;
   }
+
+
+/* Error Cost Calculator page css start */
+
+.errorcalculator{
+  /*min-width: 1280px;*/
+}
+.errorcalculator > h2 {
+  margin-top: 0;
+}
+.errorcalculator{
+  padding: 0 3%;
+}
+.errorcalculator .row{
+  margin: 0;
+}
+.errorcalculator > div > .row{
+  background: rgba(0,0,0,0.1);
+  margin-top: 20px;
+  padding: 20px;
+}
+.errorcalculator .row .left h1{
+  margin: 0;
+}
+.errorcalculator .row .right .box{
+  width: 100%;
+  background: #d1d3d4;
+  padding: 10px 20px;
+  border-radius: 10px;
+  min-height: 110px;
+}
+.errorcalculator .row .right .box h4{
+  font-size: 16px;
+  text-align: center;
+}
+.errorcalculator .row .right .row div:first-child .box input{
+  margin-top: 32px;
+}
+.errorcalculator .row .right .box input[type="text"]{
+  background: #fff none repeat scroll 0 0;
+  border: medium none;
+  display: block;
+  margin: 15px auto 0;
+  padding: 2px 0;
+  text-align: center;
+  width: 40%; 
+}
+.errorcalculator .comunication .right .box h4{
+  text-align: left;
+}
+.errorcalculator .comunication .right .box h4 input[type="text"]{
+  display: inline-block;
+  width: 20%;
+}
+.errorcalculator .comunication .right .row div:first-child .box input{
+  margin-top: 6px;
+}
+.errorcalculator .comunication .right .row div:last-child .box input{
+  /*font-weight: bold;*/
+  margin: 23px auto 10px;
+}
+.errorcalculator .comunication .right > h4{
+  line-height: 20px;
+  font-size: 16px;
+  padding: 5px 15px 0;
+}
+.errorcalculator .replacement .right .box h4 span{
+  background: #fff;
+  padding: 0 5px;
+  display: inline-block;
+  font-weight: bold;
+}
+.errorcalculator .replacement .right .box h4{
+  text-align: left;
+  margin: 5px 0;
+}
+.errorcalculator .replacement .right .box input[type="text"],  
+.errorcalculator .replacement .right .row div:first-child .box input[type="text"]{
+  width: 60px;
+  display: inline-block;
+  margin: 5px 0 10px;
+}
+.errorcalculator .replacement .right .box .row{
+  margin-bottom: 10px;
+}
+.errorcalculator .replacement .right .box ul{
+  margin: 0 0 20px 10%;
+  padding: 0;
+}
+.errorcalculator .replacement .right .box ul li{
+  list-style: none;
+  font-size: 16px;
+}
+.errorcalculator .replacement .right .box ul li input[type="text"]{
+  display: inline-block;
+  width: 60px;
+}
+.errorcalculator .replacement .right .row div:first-child .box li input{
+  margin-top: 20px;
+}
+.errorcalculator .total .row{
+  margin: 10px 0 100px;
+}
+.errorcalculator .total .row .right .box{
+  padding: 10px 0;
+}
+.errorcalculator .total .row .right .box h3{
+  font-size: 22px;
+}
+
+.overridebox{
+  height: auto !important;
+  position: relative !important;
+}
+
+#total_expedited #total_international #cancel_order_shipment #lifetime_order_val #negative_post_review #inventory_shortage  {
+  color: #dedbdb !important;
+}
+
+.gradient-well-inner{
+  max-width: 1200px !important;
+}
+
+.left-inner-addon {
+  position: relative;
+}
+.left-inner-addon input {
+    padding-left: 22px;    
+}
+.left-inner-addon span {
+    position: absolute;
+    padding: 7px 2px;
+    pointer-events: none;
+}
+
+.right-inner-addon {
+    position: relative;
+}
+.right-inner-addon input {
+    padding-right: 30px;    
+}
+.right-inner-addon span {
+    position: absolute;
+    right: 0px;
+    padding: 7px 12px;
+    pointer-events: none;
+}
+.override_span{
+  padding: 1px 0px 4px !important; 
+  position: relative !important;
+}
+
+.out_box{
+  background: rgba(115, 114, 114, .4);
+}
+
+.out_box_margin{
+  margin-top: 20px !important; 
+  margin-bottom: 10px;
+}
+
+.box_margin{margin-top: 20px !important;}
+
+.input_align{
+  background: #fff;
+  padding: 0 5px !important;
+  display: inline-block;
+  font-weight: bold;
+  left: -10px;
+  top: -1px;
+  height: 21px;
+  line-height: 20px;
+}
+#expedited_avg + span.input_align{
+  right: 0;
+  left: auto;
+}
+
+/* Error Cost Calculator page css stop */

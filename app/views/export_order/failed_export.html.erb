@@ -1,0 +1,7 @@
+<h3>Order Export has failed:</h3>
+<p><strong>Tenant Name: </strong><%= Apartment::Tenant.current%></p>
+<p><strong>Import Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
+<p><strong>Exception message: </strong></p>
+<p><%= @exception.message %></p>
+<p><strong>Exception backtrace: </strong></p>
+<p><%= raw(@exception.backtrace.join("<br/>"))%></p>

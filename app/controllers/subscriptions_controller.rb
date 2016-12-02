@@ -162,8 +162,10 @@ class SubscriptionsController < ApplicationController
     params[:plan_id] = params[:plan_id].gsub("groove", params[:tenant_name])
     if params[:radio_subscription]=="monthly"
       params[:amount] = plan_price*100
+      interval = "month"
     else
       params[:amount] = (plan_price-(plan_price*10/100))*12*100
+      interval = "year"
     end
     Subscription.create(stripe_user_token: params[:stripe_user_token],
                         tenant_name: params[:tenant_name],
@@ -173,7 +175,8 @@ class SubscriptionsController < ApplicationController
                         user_name: params[:user_name],
                         password: params[:password],
                         status: 'started',
-                        coupon_id: params[:coupon_id])
+                        coupon_id: params[:coupon_id],
+                        interval: interval)
   end
 
   def split_position(plan_id)

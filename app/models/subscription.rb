@@ -2,7 +2,7 @@ class Subscription < ActiveRecord::Base
   attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, 
                   :subscription_plan_id, :status, :user_name, :password, :coupon_id,
                   :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
-                  :progress, :customer_subscription_id, :created_at, :updated_at
+                  :progress, :customer_subscription_id, :created_at, :updated_at, :interval
   belongs_to :tenant
   has_many :transactions
   include PaymentsHelper
