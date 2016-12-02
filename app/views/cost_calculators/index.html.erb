@@ -107,8 +107,11 @@
                     <input type="text" id="total_expedited" value="&nbsp; &nbsp; &nbsp;<%= @params[:total_expedited] %>" disabled></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
                       <h4 class="right-inner-addon">
-                        1 in <input id="expedited_count" type="text" name="expedited_count" value="<%= @params[:expedited_count] %>"> replacement shipments (<input id="expedited_percentage" type="text" name="expedited_percentage" value="<%= @params[:expedited_percentage] %>"><span class="override_span input_align">%</span>) require expedited shipping to prevent loosing the customer. The average cost of expedited shipping is <addon class="right-inner-addon"><input type="text" id="expedited_avg" name="expedited_avg" value="<%= @params[:expedited_avg] %>"><span class="expedited_avg input_align">$</span>
-                      </addon>
+                        1 in <input id="expedited_count" type="text" name="expedited_count" value="<%= @params[:expedited_count] %>"> replacement shipments (<input id="expedited_percentage" type="text" name="expedited_percentage" value="<%= @params[:expedited_percentage] %>"><span class="override_span input_align">%</span>) require expedited shipping to prevent loosing the customer. The average cost of expedited shipping is 
+                        <addon class="left-inner-addon">
+                          &nbsp;&nbsp;<span class="override_span input_align">$</span>
+                          <input type="text" id="expedited_avg" name="expedited_avg" value="<%= @params[:expedited_avg] %>" style="margin: 4px -15px 10px">
+                        </addon>
                       </h4>
                     </div>
                   </div>
@@ -119,7 +122,9 @@
                     <input type="text" id="total_international" value="&nbsp; &nbsp; &nbsp;<%= @params[:total_international] %>" disabled></div>
                     <div class="col-md-11 col-sm-11 col-xs-12">
                      <h4 class="right-inner-addon">
-                         1 in <input id="international_count" type="text" name="international_count" value="<%= @params[:international_count] %>"> replacement shipments (<input id="international_percentage" type="text" name="international_percentage" value="<%= @params[:international_percentage] %>"><span class="override_span input_align">%</span> ) require international shipping to prevent loosing the customer. The average cost of international shipping is <addon class="right-inner-addon"><input id="avg_order_profit" type="text" name="avg_order_profit" value="<%= @params[:avg_order_profit] %>""><span class="override_span input_align">$</span></addon>
+                         1 in <input id="international_count" type="text" name="international_count" value="<%= @params[:international_count] %>"> replacement shipments (<input id="international_percentage" type="text" name="international_percentage" value="<%= @params[:international_percentage] %>"><span class="override_span input_align">%</span> ) require international shipping to prevent loosing the customer. The average cost of international shipping is <addon class="left-inner-addon">
+                         &nbsp;&nbsp;<span class="override_span input_align">$</span>
+                         <input id="avg_order_profit" type="text" name="avg_order_profit" value="<%= @params[:avg_order_profit] %>" style="margin: 4px -15px 10px"></addon>
                       </h4>
                     </div>
                   </div>
@@ -183,7 +188,7 @@
                     Any time an incorrect item is sent there will either be a return shipment cost or a product abandonment cost. The calculation is based on an incorrect item getting sent in <addon class="right-inner-addon"><input type="text" id="total_error_shipment" name="total_error_shipment" value="<%= @params[:total_error_shipment] %>"><span class="override_span input_align">%</span></addon> of the error shipments.
                   </h4>
                   <h4 class="right-inner-addon">
-                    In <addon class="right-inner-addon"><input type="text" id="product_abandonment_percentage" value="<%= @params[:product_abandonment_percentage] %>"><span class="override_span input_align">%</span></addon> of these instances the incorrect item will be gifted to the customer as the cost is less than the cost of the return. The average cost of the abandoned item is <addon class="right-inner-addon"><input id="avg_product_abandonment" type="text" name="avg_product_abandonment" value="<%= @params[:avg_product_abandonment] %>"><span class="override_span input_align">$</span></addon>
+                    In <addon class="right-inner-addon"><input type="text" id="product_abandonment_percentage" value="<%= @params[:product_abandonment_percentage] %>"><span class="override_span input_align">%</span></addon> of these instances the incorrect item will be gifted to the customer as the cost is less than the cost of the return. The average cost of the abandoned item is <addon class="left-inner-addon">&nbsp;&nbsp;<span class="override_span input_align">$</span> <input id="avg_product_abandonment" type="text" name="avg_product_abandonment" value="<%= @params[:avg_product_abandonment] %>" style="margin: 4px -15px 10px"></addon>
                   </h4>
                   <h4 class="right-inner-addon">
                     In <input id="return_shipping_percentage" type="text" name="return_shipping_percentage" value="<%= @params[:return_shipping_percentage] %>"><span class="override_span input_align">%</span> of these instances the incorrect item will need to be returned and the list of costs below will apply:
@@ -251,7 +256,7 @@
                     <input type="text" id="cancel_order_shipment" value="<%= @params[:cancel_order_shipment] %>" disabled></div>
                     <div class="col-md-11">
                       <h4>
-                        1 In <input type="text" id="incorrect_current_order" value="<%= @params[:incorrect_current_order] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="incorrect_current_order_per" value="<%= @params[:incorrect_current_order_per] %>"> <span class="override_span input_align">%</span></addon>) cause the customer to cancel the current order. The estimated profit for an average order is <addon class="left-inner-addon"><input type="text" id="avg_current_order" value="<%= @params[:avg_current_order] %>"><span class="override_span input_align">$</span></addon>
+                        1 In <input type="text" id="incorrect_current_order" value="<%= @params[:incorrect_current_order] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="incorrect_current_order_per" value="<%= @params[:incorrect_current_order_per] %>"> <span class="override_span input_align">%</span></addon>) cause the customer to cancel the current order. The estimated profit for an average order is &nbsp; &nbsp;<addon class="left-inner-addon"><span class="input_align">$</span><input type="text" id="avg_current_order" value="<%= @params[:avg_current_order] %>"></addon>
                       </h4>
                     </div>
                   </div>
@@ -260,7 +265,7 @@
                     <span>$</span><input type="text" id="lifetime_order_val" value="<%= @params[:lifetime_order_val] %>"  disabled></div>
                     <div class="col-md-11">
                       <h4>
-                        1 In <input type="text" id="incorrect_lifetime_order" value="<%= @params[:incorrect_lifetime_order] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="incorrect_lifetime_order_per" value="<%= @params[:incorrect_lifetime_order_per] %>"> <span class="override_span input_align">%</span></addon>) cause the customer to place all future orders with competitors. The estimated lifetime value of a customer is <addon class="right-inner-addon"> <input type="text" id="lifetime_val" value="<%= @params[:lifetime_val] %>"><span class="override_span input_align"> $</span></addon>
+                        1 In <input type="text" id="incorrect_lifetime_order" value="<%= @params[:incorrect_lifetime_order] %>"> incorrect shipments ( <addon class="right-inner-addon"><input type="text" id="incorrect_lifetime_order_per" value="<%= @params[:incorrect_lifetime_order_per] %>"> <span class="override_span input_align">%</span></addon>) cause the customer to place all future orders with competitors. The estimated lifetime value of a customer is &nbsp; &nbsp;<addon class="left-inner-addon"><span class="input_align">$</span><input type="text" id="lifetime_val" value="<%= @params[:lifetime_val] %>"></addon>
                       </h4>
                     </div>
                   </div>
