@@ -439,7 +439,7 @@ module Groovepacker
                     plan_id)
         update_stripe_subscription(plan_id)
         update_app_subscription(plan_id, amount, @subscription_info[:interval])
-        existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]]
+        (existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]]) rescue nil
       end
 
       def update_stripe_subscription(plan_id)
