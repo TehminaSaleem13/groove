@@ -121,7 +121,7 @@ Groovepacks::Application.configure do
   ENV['SHOPIFY_SHARED_SECRET'] = "23f69cf421abb3af107934410ba7c624"
   ENV["SHOPIFY_REDIRECT_HOST"] = "groovepacker.com"
   ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
-  ENV['SHOPIFY_BILLING_IN_TEST'] = "null"
+  ENV['SHOPIFY_BILLING_IN_TEST'] = "false"
 
   ENV['ROLLBAR_ACCESS_TOKEN'] = "6fd94c05f4bd41cd8a788bd71752b80b"
 

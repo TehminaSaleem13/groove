@@ -45,9 +45,9 @@ class ShopifyController < ApplicationController
     app_charges.attributes = {
         "name" => "One Time Charge for Deployment",
         "price" => 500.0,
-        "return_url" => "http://admin.localpacker.com/shopify/recurring_application_fee?shop_name=#{shop_name}", 
-        "test"=> ENV['SHOPIFY_BILLING_IN_TEST']
+        "return_url" => "http://admin.localpacker.com/shopify/recurring_application_fee?shop_name=#{shop_name}"
     }
+    app_charges.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if app_charges.save
       redirect_to app_charges.attributes["confirmation_url"]
     end
@@ -65,9 +65,9 @@ class ShopifyController < ApplicationController
             "name" =>  "Recurring App Charges",
             "price" => 10.00,
             "return_url" => "http://admin.localpacker.com/shopify/recurring_tenant_charges?shop_name=#{params['shop_name']}", 
-            "test" => ENV['SHOPIFY_BILLING_IN_TEST'],
             "trial_days" => 30,
             "terms" => "10 out of 2"}
+    recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if recurring_application_charge.save
       redirect_to recurring_application_charge.confirmation_url
     end
@@ -85,9 +85,9 @@ class ShopifyController < ApplicationController
             "name" =>  "Tenant charges",
             "price" => 100.00,
             "return_url" => "http://admin.localpacker.com/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
-            "test" => ENV['SHOPIFY_BILLING_IN_TEST'],
             "trial_days" => 30,
             "terms" => "10 out of 2"}
+    recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if recurring_application_charge.save
       redirect_to recurring_application_charge.confirmation_url
     end
