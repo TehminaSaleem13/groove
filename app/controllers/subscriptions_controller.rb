@@ -1,6 +1,7 @@
 class SubscriptionsController < ApplicationController
   include PaymentsHelper
   include StoresHelper
+  skip_before_filter  :verify_authenticity_token
   # before_filter :check_tenant_name
 
   def new
@@ -81,7 +82,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def show
-    flash[:notice] = params[:notice]
+    flash[:notice] = params[:notice] 
   end
 
   def complete
@@ -123,12 +124,17 @@ class SubscriptionsController < ApplicationController
   end
 
   def create_shopify_credential(store_id)
-    shopify_credential = ShopifyCredential.create(shop_name: params[:shop_name], store_id: store_id)
-    return{ valid: true,
-            redirect_url:
-              Groovepacker::ShopifyRuby::Utilities.new(
-                shopify_credential
-              ).permission_url(params[:tenant_name], true)
+    token = $redis.get(params[:shop_name] + ".myshopify.com")
+    shopify_credential = ShopifyCredential.create(shop_name: params[:shop_name], store_id: store_id, access_token: token)
+    $redis.del(params[:shop_name] + ".myshopify.com_ready_to_be_deployed")
+    $redis.del(params[:shop_name] + ".myshopify.com_otf")
+    $redis.del(params[:shop_name] + ".myshopify.com_rsaf")
+    $redis.del(params[:shop_name] + ".myshopify.com_rtc")
+    return {valid: true, 
+            transaction_id: @subscription.stripe_transaction_identifier,
+            notice: 'Congratulations! Your GroovePacker is being deployed!',
+            email: params[:email],
+            next_date: (Time.now + 30.days).strftime("%B %d %Y")
           }
   end
 
@@ -167,16 +173,23 @@ class SubscriptionsController < ApplicationController
       params[:amount] = (plan_price-(plan_price*10/100))*12*100
       interval = "year"
     end
-    Subscription.create(stripe_user_token: params[:stripe_user_token],
-                        tenant_name: params[:tenant_name],
-                        amount: params[:amount],
-                        subscription_plan_id: params[:plan_id],
-                        email: params[:email],
-                        user_name: params[:user_name],
-                        password: params[:password],
-                        status: 'started',
-                        coupon_id: params[:coupon_id],
-                        interval: interval)
+   
+    subscription = Subscription.new(stripe_user_token: params[:stripe_user_token],
+                                    tenant_name: params[:tenant_name],
+                                    amount: params[:amount],
+                                    subscription_plan_id: params[:plan_id],
+                                    email: params[:email],
+                                    user_name: params[:user_name],
+                                    password: params[:password],
+                                    status: 'started',
+                                    coupon_id: params[:coupon_id], interval: interval)
+    if params["shop_name"].present? and params["shop_type"]=="Shopify"
+      all_charges_paid = $redis.get("#{params["shop_name"]}.myshopify.com_ready_to_be_deployed")
+      subscription.shopify_customer = true
+      subscription.all_charges_paid = all_charges_paid
+    end
+    subscription.save
+    return subscription
   end
 
   def split_position(plan_id)

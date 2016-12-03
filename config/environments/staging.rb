@@ -130,6 +130,7 @@ Groovepacks::Application.configure do
     ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
   end
   ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
+  ENV['SHOPIFY_BILLING_IN_TEST'] = true
 
   ENV['ROLLBAR_ACCESS_TOKEN'] = "6fd94c05f4bd41cd8a788bd71752b80b"
   # Stripe production keys

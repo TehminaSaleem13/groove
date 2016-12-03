@@ -253,6 +253,10 @@ Groovepacks::Application.routes.draw do
       get 'callback'
       get 'preferences'
       get 'help'
+      post 'get_auth'
+      get 'recurring_application_fee'
+      get 'recurring_tenant_charges'
+      get 'finalize_payment'
     end
   end
 
@@ -296,6 +300,7 @@ Groovepacks::Application.routes.draw do
       get 'valid_email'
       get 'validate_coupon_id'
       get 'complete'
+      get 'shopify_final_process'
     end
   end
 

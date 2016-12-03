@@ -122,9 +122,6 @@
             </div>
           </div> -->
 
-          <input type="radio" id="radio_subscription1" style="display: none;" name="radio_subscription" value="monthly" checked/>
-          <input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green; display: none;"/>
-
           <div class="form-group">
             <label for="coupon_id" class="control-label">Promotional Code</label>
 
@@ -155,9 +152,40 @@
         <% else %>
           <%= render 'payment_form' %>
         <% end %>
+        <input type="radio" id="radio_subscription1" style="display: none;" name="radio_subscription" value="monthly" checked/>
+          <input type="radio" id="radio_subscription2" name="radio_subscription" value="annually" style="-webkit-appearance:block; background:green; display: none;"/>
       </fieldset>
     </form>
     <script>
+      // $('#testbutton').on('click', function(){
+      //   var getUrlParameter = function getUrlParameter(sParam) {
+      //       var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+      //           sURLVariables = sPageURL.split('&'),
+      //           sParameterName,
+      //           i;
+
+      //       for (i = 0; i < sURLVariables.length; i++) {
+      //           sParameterName = sURLVariables[i].split('=');
+
+      //           if (sParameterName[0] === sParam) {
+      //               return sParameterName[1] === undefined ? true : sParameterName[1];
+      //           }
+      //       }
+      //   };
+      //   $.ajax({
+      //     type: "POST",
+      //     contentType: "application/json; charset=utf-8",
+      //     url: "/subscriptions/create_using_shopify",
+      //     data: JSON.stringify({
+      //       "tenant": getUrlParameter("shop_name"),
+      //       "name": getUrlParameter("plan_id"),
+      //       "email": getUrlParameter("email"),
+      //       "price": 10.0
+      //     }),
+      //     dataType: "json"
+      //   });
+      // });
+
       $(document).ready(function(){
         var subscription_type = "<%= params['radio_subscription'] %>";
         if(subscription_type=="annually") {
@@ -205,11 +233,29 @@
         open_handler(plan_id, "<%= params[:shop_name] %>");
       })
 
+      window.CallParent = function() {
+        plan_id = $('#plan_id').val();
+        if ($("input[name='radio_subscription']:checked").length > 0) {
+          radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
+          var str = $('#plan_id').val();
+          plan_id = str;
+          if (radio_button_value == 'annually') {
+            plan_id = 'an-' + str;
+          }
+        }
+        request_tenant_creation();
+      }
+
       var handler = StripeCheckout.configure({
         key: $('#stripe_public_key').val(),
-        image: 'https://admintools.groovepacker.com/assets/images/apple-touch-icon.png',
+        image: 'https://admin.groovepacker.com/assets/images/apple-touch-icon.png',
         token: function (token) {
-          $.ajax({
+          request_tenant_creation(token);
+        }
+      });
+
+      function request_tenant_creation(token={}) {
+        $.ajax({
             type: "POST",
             contentType: "application/json; charset=utf-8",
             url: "/subscriptions/confirm_payment",
@@ -255,8 +301,7 @@
           $('#shopButton').hide();
           $('#processing_alert_success').show();
           $('#processing_alert_error').hide();
-        }
-      });
+      }
 
       $(document).ready(function () {
         show_coupon_block = false;
@@ -394,6 +439,7 @@
           open_handler(plan_id, "regular");
         }
       });
+
     </script>
 
     <script type="text/javascript" src="https://static.leaddyno.com/js"></script>

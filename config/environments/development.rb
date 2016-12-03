@@ -114,10 +114,11 @@ Groovepacks::Application.configure do
   ENV['SHIPSTATION_USERNAME'] = "dreadhead"
   ENV['SHIPSTATION_PASSWORD'] = "g8J$v5KLoP"
 
-  ENV['SHOPIFY_API_KEY'] = "1177da0ae0ee723ad479792561c4c480"
-  ENV['SHOPIFY_SHARED_SECRET'] = "8f48a567ba58e3ac057253cdde377fc2"
+  ENV['SHOPIFY_API_KEY'] = "74bb4366e7b9b9abfd246ff8eed41201"
+  ENV['SHOPIFY_SHARED_SECRET'] = "d0b33de5f8fadb93ff392505f449402c"
   ENV["SHOPIFY_REDIRECT_HOST"] = "localpacker.com"
   ENV['SHOPIFY_ONE_TIME_PAYMENT'] = '0'
+  ENV['SHOPIFY_BILLING_IN_TEST'] = "true"
 
   ENV['BC_CALLBACK_HOST'] = "admin.barcodepacker.com"
   ENV['BC_CLIENT_ID'] = "hcd39v5m3dapbtpa2gpi5f4iz3syjps"

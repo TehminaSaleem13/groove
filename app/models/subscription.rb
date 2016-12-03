@@ -21,13 +21,18 @@ class Subscription < ActiveRecord::Base
           Apartment::Tenant.switch()
           one_time_payment = calculate_otp(self.coupon_id, one_time_payment.to_i)
         end
-        create_subscribed_plan_if_not_exist
-        customer = create_customer(one_time_payment)
+        unless self.shopify_customer
+          create_subscribed_plan_if_not_exist
+          customer = create_customer(one_time_payment)
+        end
 
         if customer
           self.update_progress('customer_created')
           self.stripe_customer_id = customer.id
           create_tenant_and_transaction(customer)
+        elsif self.shopify_customer and self.all_charges_paid
+          self.update_progress('customer_created')
+          create_tenant_and_transaction()
         end
         self.status = 'completed'
         self.is_active = true
@@ -96,14 +101,19 @@ class Subscription < ActiveRecord::Base
     status
   end
 
-  def create_tenant_and_transaction(customer)
-    return unless customer.subscriptions.data.first
-    self.customer_subscription_id = customer.subscriptions.data.first.id
-
+  def create_tenant_and_transaction(customer=nil)
+    
+    if self.shopify_customer
+      self.customer_subscription_id = nil
+    elsif customer.present? and customer.subscriptions.data.first
+      self.customer_subscription_id = customer.subscriptions.data.first.id
+    else
+      return
+    end
     CreateTenant.new.create_tenant self
 
     Apartment::Tenant.switch()
-    create_transaction(customer)
+    create_transaction(customer) unless self.shopify_customer
     self.update_progress('transaction_complete')
   end
 
