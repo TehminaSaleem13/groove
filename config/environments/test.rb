@@ -70,6 +70,8 @@ Groovepacks::Application.configure do
   ENV['ONE_TIME_PAYMENT'] = '50000'
   ENV['BC_ONE_TIME_PAYMENT'] = '0'
 
+  ENV['SHOPIFY_BILLING_IN_TEST'] = "true"
+
 
   #S3 access details
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAJ4RBSXRA6F7VW3ZA'
