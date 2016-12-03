@@ -4,7 +4,7 @@ class GroovS3
     @bucket = nil
 
     def create(tenant, file, content_type = 'application/octet-stream', privacy = :public_read)
-      object = self.bucket.objects.build(tenant+'/'+file)
+      object = self.bucket.objects.build("#{tenant}/#{file}")
       object.acl = privacy
       object.content_type = content_type
       object
