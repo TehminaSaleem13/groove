@@ -134,7 +134,8 @@ class SubscriptionsController < ApplicationController
             transaction_id: @subscription.stripe_transaction_identifier,
             notice: 'Congratulations! Your GroovePacker is being deployed!',
             email: params[:email],
-            next_date: (Time.now + 30.days).strftime("%B %d %Y")
+            next_date: (Time.now + 30.days).strftime("%B %d %Y"),
+            store: "Shopify"
           }
   end
 
@@ -150,6 +151,7 @@ class SubscriptionsController < ApplicationController
     # cookies.delete(:bc_auth)
     cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
     cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
+    response_for_successful_subscription["store"] = "BigCommerce" 
     return response_for_successful_subscription
   end
 
