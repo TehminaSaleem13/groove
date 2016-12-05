@@ -31,6 +31,11 @@
 </head>
 <body class="container-well">
 <div class="container main-body">
+  <%if params["controller"] == "cost_calculators" && params["action"] == "index"%>
+    <div class ="text-center" style="margin: 25px">
+      <img class="icons" src="/assets/images/cost-calculator-header-image-02.png"></img>
+    </div>
+  <%end%>
   <div class="gradient-well">
     <div class="container-fluid gradient-well-inner">
       <%= yield %>
