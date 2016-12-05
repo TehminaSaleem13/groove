@@ -13,7 +13,7 @@
             <h2 style="margin: 0; line-height: 40px;">Orders Imported today: <span><%= @counts['imported'] %></span></h2>
             <h2 style="margin: 0; line-height: 40px;">Orders Scanned today: <span><%= @counts['scanned'] %></span></h2>
             <h2 style="margin: 0; line-height: 40px;">Items Scanned today: <span><%= @counts['item_scanned'] %></span></h2>
-            <h2 style="margin: 0; line-height: 40px;">Unscanned Orders: <span><%= @counts['imported'].to_i - @counts['scanned'].to_i %></span></h2>
+            <h2 style="margin: 0; line-height: 40px;">Unscanned Orders: <span><%= @counts['unscanned'].to_i %></span></h2>
           </div>
           <div style="width: 50%; float: right;">
             <% if @counts['imported'] > 0 %>
