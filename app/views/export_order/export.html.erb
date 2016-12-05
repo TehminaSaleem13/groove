@@ -1,4 +1,4 @@
-<div style="-webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; position: relative; margin: auto; padding: 10px 50px 100px 50px; border: 4px solid rgba(128, 128, 128, 1); -webkit-border-radius: 24px / 23px; border-radius: 24px / 23px; color: rgba(0,0,0,0.9); -o-text-overflow: clip; text-overflow: clip; background: url('http://www.groovepacker.com/site/images/background_image.png') #000; background-position: 50% 50%; -webkit-background-origin: padding-box; background-origin: padding-box; -webkit-background-clip: border-box; background-clip: border-box; -webkit-background-size: cover; background-size: cover; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4);">
+<div style="-webkit-box-sizing: content-box; -moz-box-sizing: content-box; box-sizing: content-box; position: relative; margin: auto; padding: 10px 50px 100px 50px; border: 4px solid rgba(128, 128, 128, 1); -webkit-border-radius: 24px / 23px; border-radius: 24px / 23px;  -o-text-overflow: clip; text-overflow: clip; background: url('http://www.groovepacker.com/site/images/background_image.png') #73ae0c; background-position: 50% 50%; -webkit-background-origin: padding-box; background-origin: padding-box; -webkit-background-clip: border-box; background-clip: border-box; -webkit-background-size: cover; background-size: cover; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4);">
   <a href="https://<%= @tenant_name %>.groovepacker.com/"><img style="margin: auto; display: block;" src="http://www.groovepacker.com/site/images/GroovePacker_Bc_logo_400x73.png" alt=""></a>
 
   <h1 style="text-align: center; text-shadow: 0 0 20px rgba(0, 0, 0, 0.8);  font-family: 'Arial', sans-serif; font-family: 'Play', sans-serif; font-weight: 700; color: #95E329; font-size: 25px; background-color: black; width: 33%; margin: 1% auto; border-style: solid; border-radius: 10px; border-color: gray;">
@@ -7,6 +7,26 @@
 
   <div style="margin-left:auto; margin-right:auto; background: #C1C2C1; border-color: #aca3a3; border-width: 4px; border-radius: 20px; font-family: 'Lato', sans-serif; padding: 15px; border-style: double; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.8);">
     <div style="width: 70vw;overflow:auto;">
+      <% if @counts %>
+        <div style="background: #a8a9a8; margin: 0 auto; padding: 10px; border-radius: 12px; border: #95af5e solid 1px; color: #333;">
+          <div style="width: 50%; float: left;">
+            <h2 style="margin: 0; line-height: 40px;">Orders Imported today: <span><%= @counts['imported'] %></span></h2>
+            <h2 style="margin: 0; line-height: 40px;">Orders Scanned today: <span><%= @counts['scanned'] %></span></h2>
+            <h2 style="margin: 0; line-height: 40px;">Items Scanned today: <span><%= @counts['item_scanned'] %></span></h2>
+            <h2 style="margin: 0; line-height: 40px;">Unscanned Orders: <span><%= @counts['imported'].to_i - @counts['scanned'].to_i %></span></h2>
+          </div>
+          <div style="width: 50%; float: right;">
+            <% if @counts['imported'] > 0 %>
+              <h2 style="margin: 0; line-height: 40px;">Set to Service Issue: <span><%= @counts['service_issue'] %></span></h2>
+              <h2 style="margin: 0; line-height: 40px;">Set to Action Required: <span><%= @counts['onhold'] %></span></h2>
+              <!-- <h2 style="margin: 0; line-height: 40px;">Cancelled in GroovePacker: <span>0</span></h2> -->
+              <h2 style="margin: 0; line-height: 40px;">Deleted from GroovePacker: <span><%= @counts['cancelled'] %></span></h2>
+              <h2 style="margin: 0; line-height: 40px;">Manually Set to Scanned: <span><%= @counts['scanned_manually'] %></span></h2>
+            <%end%>
+          </div>
+          <div style="clear: both;"></div>
+        </div>
+      <% end %>
       <table style="margin:0 auto;margin-top: 20px; border-spacing: 0; background-color:#e8e7e7;border-radius:15px;">
         <thead>
         <% @csv_data.try(:first).try(:each_with_index) do |th, index| %>
@@ -60,22 +80,5 @@
         </tbody>
       </table>
     </div>
-
-    <% if @counts %>
-      <p>Order imported today: <%= @counts['imported'] %></p>
-
-      <p>Order scanned today: <%= @counts['scanned'] %></p>
-
-      <p>Order manually changed to scanned without scanning today: <%= @counts['scanned_manually'] %></p>
-      <% if @counts['imported'] > 0 %>
-        <p>Today's Order Remaining Awaiting: <%= @counts['awaiting'] %></p>
-
-        <p>Today's Order Remaining On Hold: <%= @counts['onhold'] %></p>
-
-        <p>Today's Order Remaining Cancelled: <%= @counts['cancelled'] %></p>
-
-      <% end %>
-      <p>Today's Order Summary: <%= @counts['total'] %></p>
-    <% end %>
   </div>
 </div>
