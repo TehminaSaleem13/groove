@@ -27,6 +27,7 @@ $(document).ready(function(){
 		$(".discount_amount").text(5*no_of_users);
 		$(".no_of_users_label").text(no_of_users);
 		$(".no_of_users").val(no_of_users);
+    $(".discount_annually").text(60*no_of_users);
 		add_discount_if_billing_annually();
 	}
 

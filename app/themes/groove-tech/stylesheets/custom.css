@@ -256,6 +256,14 @@ body{
     font-size: 18px !important;
   }
 
+  .display_pricing_name{
+    display: flex;
+  }
+
+  .space_on_pricing_name{
+    padding: 0 5px;
+  }
+
 
 /* Error Cost Calculator page css start */
 

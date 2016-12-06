@@ -51,7 +51,7 @@
             <div class="col-md-7">
               <div class="row">
                 <div class="col-md-8">
-                  <h3>
+                  <h3 class="display_pricing_name">
                     <i class="fa fa-dropbox"></i> Unlimited Shipments
                   </h3>
                 </div>
@@ -61,7 +61,7 @@
               </div>
               <div class="row">
                 <div class="col-md-8">
-                  <h3>
+                  <h3 class="display_pricing_name">
                     <i class="fa fa-cloud-download"></i> Unlimited Order Sources
                   </h3>
                 </div>
@@ -71,13 +71,14 @@
               </div>
               <div class="row">
                 <div class="col-md-8">
-                  <h3>
+                  <h3 style="padding: 18px 5px 0px;">
                     <i class="fa fa-user"></i>
                     <a href="javascript:;" class="no_of_users_dec"><i class="fa fa-chevron-left"></i></a>
                     <span class="no_of_users_label">3</span>
                     <input type="hidden" class="no_of_users" name="no_of_users" value="3"/>
                     <a href="javascript:;" class="no_of_users_inc"><i class="fa fa-chevron-right"></i></a>
                     Total Users
+                    <p style="font-size: 18px; padding-top: 30px;">Select 2 or more users at $50/user </p>
                   </h3>
                 </div>
                 <div class="col-md-4">
@@ -86,8 +87,9 @@
               </div>
               <div class="row discount_section fade4">
                 <div class="col-md-8">
-                  <h3>
+                  <h3 style="padding: 30px 5px 0px;">
                     <input type="checkbox" class="bill_annually" name="bill_annually"> Bill Annually
+                    <p style="font-size: 18px; padding-top: 30px;">Save $<span class="discount_annually">180</span> annually</p>
                   </h3>
                 </div>
                 <div class="col-md-4">
@@ -101,7 +103,7 @@
                   </h3>
                 </div>
                 <div class="col-md-4">
-                  <h1>$<span class="total_amount">150</span><%=image_tag "/assets/images/guarantee-txt.png", style: "position: absolute; margin-left: 30px; margin-top: -10px;" %></h1>
+                  <h1 style="padding-left: 20px;">$<span class="total_amount">150</span><%=image_tag "/assets/images/guarantee-txt.png", style: "position: absolute; margin-left: 30px; margin-top: -10px;" %></h1>
                 </div>
               </div>
             </div>
@@ -129,9 +131,9 @@
             </div>
           </div>
           <div class="row bttnrow price_font">
-            <div class="col-md-5">
+            <div class="col-md-5" style="width: 38%">
               <p>
-                Select 2 or more users at $50/user <br>or Choose annual billing at $45/user
+                 <br>
               </p>
             </div>
             <div class="col-md-7 pd-none">
