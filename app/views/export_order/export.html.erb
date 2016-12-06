@@ -6,22 +6,22 @@
   </h1>
 
   <div style="margin-left:auto; margin-right:auto; background: #C1C2C1; border-color: #aca3a3; border-width: 4px; border-radius: 20px; font-family: 'Lato', sans-serif; padding: 15px; border-style: double; -webkit-box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.4); box-shadow: 5px 5px 8px 2px rgba(0,0,0,0.8);">
-    <div style="width: 70vw;overflow:auto;">
+    <div style="width: 100%;overflow:auto;">
       <% if @counts %>
-        <div style="background: #a8a9a8; margin: 0 auto; padding: 10px; border-radius: 12px; border: #95af5e solid 1px; color: #333;">
+        <div style="background: #a8a9a8; margin: 0 auto; padding: 10px; border-radius: 12px; border: #95af5e solid 1px; color: #333; max-width: 93%">
           <div style="width: 50%; float: left;">
-            <h2 style="margin: 0; line-height: 40px;">Orders Imported today: <span><%= @counts['imported'] %></span></h2>
-            <h2 style="margin: 0; line-height: 40px;">Orders Scanned today: <span><%= @counts['scanned'] %></span></h2>
-            <h2 style="margin: 0; line-height: 40px;">Items Scanned today: <span><%= @counts['item_scanned'] %></span></h2>
-            <h2 style="margin: 0; line-height: 40px;">Unscanned Orders: <span><%= @counts['unscanned'].to_i %></span></h2>
+            <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Orders Imported today: <span><%= @counts['imported'] %></span></h2>
+            <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Orders Scanned today: <span><%= @counts['scanned'] %></span></h2>
+            <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Items Scanned today: <span><%= @counts['item_scanned'] %></span></h2>
+            <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Unscanned Orders: <span><%= @counts['unscanned'].to_i %></span></h2>
           </div>
           <div style="width: 50%; float: right;">
             <% if @counts['imported'] > 0 %>
-              <h2 style="margin: 0; line-height: 40px;">Set to Service Issue: <span><%= @counts['service_issue'] %></span></h2>
-              <h2 style="margin: 0; line-height: 40px;">Set to Action Required: <span><%= @counts['onhold'] %></span></h2>
+              <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Set to Service Issue: <span><%= @counts['service_issue'] %></span></h2>
+              <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Set to Action Required: <span><%= @counts['onhold'] %></span></h2>
               <!-- <h2 style="margin: 0; line-height: 40px;">Cancelled in GroovePacker: <span>0</span></h2> -->
-              <h2 style="margin: 0; line-height: 40px;">Deleted from GroovePacker: <span><%= @counts['cancelled'] %></span></h2>
-              <h2 style="margin: 0; line-height: 40px;">Manually Set to Scanned: <span><%= @counts['scanned_manually'] %></span></h2>
+              <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Deleted from GroovePacker: <span><%= @counts['cancelled'] %></span></h2>
+              <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Manually Set to Scanned: <span><%= @counts['scanned_manually'] %></span></h2>
             <%end%>
           </div>
           <div style="clear: both;"></div>

@@ -52,7 +52,7 @@ class ExportOrder < ActionMailer::Base
     scanned_orders = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time)
     result['imported'] = Order.where("created_at >= ? and created_at <= ?", day_begin, end_time).size
     result['scanned'] = scanned_orders.size
-    result['unscanned'] = Order.where("created_at >= ? and created_at <= ? and scanned_on >= ? and scanned_on <= ?", day_begin, end_time, day_begin, end_time).count
+    result['unscanned'] = result['imported'] - Order.where("created_at >= ? and created_at <= ? and scanned_on >= ? and scanned_on <= ?", day_begin, end_time, day_begin, end_time).count
     result['item_scanned'] = scanned_orders.joins(:order_items).count
     result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_on <= ? and scanned_by_status_change = ?", day_begin, end_time, true).size
     result['awaiting'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'awaiting').size
