@@ -290,7 +290,7 @@ module Groovepacker
             CSV.open("#{dir}/#{ident}.csv", 'w') do |csv|
               headers= []
               if ident == :products
-                ProductsHelper.products_csv(model.all, csv, bulk_actions_id)
+                ProductsHelper.products_csv(model.all, csv, bulk_actions_id, true)
               else
                 headers= model.column_names.dup
 
