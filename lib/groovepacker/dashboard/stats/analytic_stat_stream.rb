@@ -49,7 +49,7 @@ module Groovepacker
           result[:scanned_on] = order.scanned_on ||= order.updated_at
           result[:inaccurate_scan_count] = order.inaccurate_scan_count
           result[:packing_time] = order.total_scan_time
-          result[:scanned_item_count] = order.total_scan_count
+          result[:scanned_item_count] = order.order_items.map(&:qty).sum
         end
 
         def bind_exception(order, result)
