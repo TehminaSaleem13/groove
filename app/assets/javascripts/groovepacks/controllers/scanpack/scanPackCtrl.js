@@ -179,15 +179,13 @@ groovepacks_controllers.
         scanPack.settings.get($scope.scan_pack).success(function () {
           angular.forEach(['success', 'fail', 'order_complete'], function (i) {
             if ($scope.scan_pack.settings['show_' + i + '_image']) {
-              if (i == "success"){
-                $scope.scan_pack.scan_states[i].image.enabled = $scope.scan_pack.settings['show_' + i + '_image']; 
-                $scope.scan_pack.scan_states[i].image.src = $scope.scan_pack.settings[i + '_image_src'];
-                $scope.scan_pack.scan_states[i].image.time = $scope.scan_pack.settings[i + '_image_time'] * 1000;
-              }
+              $scope.scan_pack.scan_states[i].image.enabled = $scope.scan_pack.settings['show_' + i + '_image']; 
+              $scope.scan_pack.scan_states[i].image.src = $scope.scan_pack.settings[i + '_image_src'];
+              $scope.scan_pack.scan_states[i].image.time = $scope.scan_pack.settings[i + '_image_time'] * 1000;
             }
             if ($scope.scan_pack.settings['play_' + i + '_sound']) {
               $scope.scan_pack.scan_states[i].sound.enabled = $scope.scan_pack.settings['play_' + i + '_sound'];
-              if ((typeof myscope.sounds[i] == 'undefined') && (i == "success") ){
+              if (typeof myscope.sounds[i] == 'undefined'){
                 myscope.sounds[i] = groov_audio.load($scope.scan_pack.settings[i + '_sound_url'], $scope.scan_pack.settings[i + '_sound_vol']);
               }
             }
