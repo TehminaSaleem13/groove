@@ -43,7 +43,7 @@
           if (valid.email) {
             var valid_host = '<%=ENV["HOST_NAME"]%>';
             url = 'http://admin.' + valid_host + '/subscriptions/select_plan?email=' +
-              $('#tenant_email').val() + '&shop_name=<%=@shop_name%>&shop_type=Shopify';
+              encodeURIComponent($('#tenant_email').val()) + '&shop_name=<%=@shop_name%>&shop_type=Shopify';
             window.location.href = url;
           }
         });

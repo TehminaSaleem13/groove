@@ -7,16 +7,17 @@
 <div class="form-group">
   <div class="control-label">
     <i class="fa fa-check-square-o"></i>
-    Your creditcard will not be charged during the trial.
+    Only the one time startup fee explained on the previous page will be charged today. It is fully refundable should you not decide to continue please email <a href="mailto:suport@groovepacker.com">suport@groovepacker.com</a> any time during the free trial.
+    <!-- Your creditcard will not be charged during the trial. -->
   </div>
 </div>
 
-<div class="form-group">
+<!-- <div class="form-group">
   <div class="control-label">
     <i class="fa fa-check-square-o"></i>
     You’ll have access to remove your card information at any time, if you do not wish to continue the trial.
   </div>
-</div>
+</div> -->
 
 <div class="form-group">
   <div class="control-label">
@@ -27,11 +28,11 @@
 </div>
 
 <div class="text-center">
-  <!-- <script src="https://checkout.stripe.com/checkout.js"></script> -->
-  <button id="auth_button" class="btn btn-success" style="margin-bottom: 5px;">Groovy, Start My Trial!</button>
-  <p> Why is a Credit Card required for a free trial?
+  <script src="https://checkout.stripe.com/checkout.js"></script>
+  <button id="<%= params['shop_type'] == 'Shopify' ? 'auth_button' : 'shopButton'%>" class="btn btn-success" style="margin-bottom: 5px;">Groovy, Start My Trial!</button>
+  <!-- <p> Why is a Credit Card required for a free trial?
     <i id="cc_info" data-placement="bottom" data-content="<p>When you start your trial, resources are dedicated to building and running your groovepacker instance. Free support is also provided to ensure you have the best experience possible. We ask that you provide a valid card number to let us know that you are a real person interested in using Groovepacker in your business. This lowers costs while increasing performance and security. When you click 'Start My Trial' you'll be given a form where you can enter your card info securely.</p>" class="fa fa-info-circle"></i><span id=""></span>
-  </p>
+  </p> -->
 
   <div class="alert alert-success" id="processing_alert_success" style="display:none;">
     <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.

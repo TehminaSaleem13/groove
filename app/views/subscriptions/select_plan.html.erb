@@ -173,6 +173,6 @@
     var no_of_users = $('.no_of_users').val();
     var checked = $(".bill_annually:checked").length;
     var subscription_type = checked>0 ? "annually" : "monthly"
-    window.location = "/subscriptions/new?plan_id=GROOV-"+50*no_of_users+"&shop_name=<%=params[:shop_name]%>&shop_type=<%=params[:shop_type]%>&email=<%=params[:email]%>&radio_subscription="+subscription_type;
+    window.location = "/subscriptions/new?plan_id=GROOV-"+50*no_of_users+"&shop_name=<%=params[:shop_name]%>&shop_type=<%=params[:shop_type]%>&email="+encodeURIComponent("<%=params[:email]%>")+"&radio_subscription="+subscription_type;
   })
 </script>
