@@ -45,7 +45,7 @@ class ShopifyController < ApplicationController
     app_charges.attributes = {
         "name" => "One Time Charge for Deployment",
         "price" => 500.0,
-        "return_url" => "http://admin.localpacker.com/shopify/recurring_application_fee?shop_name=#{shop_name}"
+        "return_url" => "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/recurring_application_fee?shop_name=#{shop_name}"
     }
     app_charges.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if app_charges.save
@@ -58,13 +58,13 @@ class ShopifyController < ApplicationController
     $redis.set("#{params['shop_name']}_otf", params["charge_id"])                    #otf -> One Time Fee
     $redis.set("#{params["shop_name"]}_ready_to_be_deployed", false)
     token = $redis.get("#{params['shop_name']}")
-    session = ShopifyAPI::Session.new("groovepacker-dev-shop.myshopify.com", token)
+    session = ShopifyAPI::Session.new(params['shop_name'], token)
     ShopifyAPI::Base.activate_session(session)
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
     recurring_application_charge.attributes = {
             "name" =>  "Recurring App Charges",
             "price" => 10.00,
-            "return_url" => "http://admin.localpacker.com/shopify/recurring_tenant_charges?shop_name=#{params['shop_name']}", 
+            "return_url" => "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/recurring_tenant_charges?shop_name=#{params['shop_name']}", 
             "trial_days" => 30,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
@@ -79,13 +79,13 @@ class ShopifyController < ApplicationController
     $redis.set("#{params['shop_name']}_rsaf", params["charge_id"])      #saf -> Recurring Shopify App Fee
     $redis.set("#{params["shop_name"]}_ready_to_be_deployed", false)
     token = $redis.get("#{params['shop_name']}")
-    session = ShopifyAPI::Session.new("groovepacker-dev-shop.myshopify.com", token)
+    session = ShopifyAPI::Session.new(params['shop_name'], token)
     ShopifyAPI::Base.activate_session(session)
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
     recurring_application_charge.attributes = {
             "name" =>  "Tenant charges",
             "price" => price,
-            "return_url" => "http://admin.localpacker.com/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
+            "return_url" => "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
             "trial_days" => 30,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
