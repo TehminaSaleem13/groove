@@ -75,6 +75,7 @@ class ShopifyController < ApplicationController
 
 
   def recurring_tenant_charges
+    price = $redis.get("#{params["shop_name"]}_plan_id").split("-")[1].to_f
     $redis.set("#{params['shop_name']}_rsaf", params["charge_id"])      #saf -> Recurring Shopify App Fee
     $redis.set("#{params["shop_name"]}_ready_to_be_deployed", false)
     token = $redis.get("#{params['shop_name']}")
@@ -83,11 +84,12 @@ class ShopifyController < ApplicationController
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
     recurring_application_charge.attributes = {
             "name" =>  "Tenant charges",
-            "price" => 100.00,
+            "price" => price,
             "return_url" => "http://admin.localpacker.com/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
             "trial_days" => 30,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
+    $redis.del("#{params["shop_name"]}_plan_id")
     if recurring_application_charge.save
       redirect_to recurring_application_charge.confirmation_url
     end
@@ -142,6 +144,7 @@ class ShopifyController < ApplicationController
   end
 
   def get_auth
+    $redis.set("#{params["shop_name"]}"+ ".myshopify.com_plan_id", params["name"])
     result = {}
     destroy_cookies rescue nil
     session = ShopifyAPI::Session.new(params["shop_name"] + ".myshopify.com")
