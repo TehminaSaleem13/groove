@@ -122,7 +122,7 @@ module Groovepacker
           product_cats = ProductCat.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_cats, @params[:cats])
           (@params[:cats]||[]).each do |category|
-            status = @product.create_or_update_productcat(category)
+            status = @product.create_or_update_productcat(category, product_cats)
             @result['status'] &= status
           end
         end
@@ -133,15 +133,19 @@ module Groovepacker
           product_skus = ProductSku.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_skus, @params[:skus])
           (@params[:skus]||[]).each_with_index do |sku, index|
-            status = create_or_update_single_sku(sku, index, true)
+            status = create_or_update_single_sku(sku, index, true, product_skus)
             @result['status'] &= status
           end
         end
 
-        def create_or_update_single_sku(sku, index, status)
-          db_sku = ProductSku.find_by_sku(sku["sku"])
+        def create_or_update_single_sku(sku, index, status, product_skus)
+          db_sku =
+            product_skus.find{|_sku| _sku.sku == sku["sku"]} ||
+            ProductSku.find_by_sku(sku["sku"])
+          
           if sku["id"].present?
-            status = @product.create_or_update_productsku(sku, index)
+            db_sku = product_skus.find{|_sku| _sku.id == sku["id"]}
+            status = @product.create_or_update_productsku(sku, index, nil, db_sku)
           elsif sku["sku"].present? && db_sku.blank?
             status = @product.create_or_update_productsku(sku, index, 'new')
           elsif sku["sku"].present? && db_sku.present?
@@ -157,14 +161,20 @@ module Groovepacker
           product_barcodes = ProductBarcode.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_barcodes, @params[:barcodes])
           return if @params[:barcodes].blank?
-          @params[:barcodes].each_with_index { |barcode, index| @result['status'] &= create_or_update_single_barcode(barcode, index, true) }
+          @params[:barcodes].each_with_index do |barcode, index|
+            @result['status'] &= create_or_update_single_barcode(barcode, index, true, product_barcodes)
+          end
         end
 
-        def create_or_update_single_barcode(barcode, index, status)
-          db_barcode = ProductBarcode.find_by_barcode(barcode["barcode"])
+        def create_or_update_single_barcode(barcode, index, status, product_barcodes)
+          db_barcode = 
+            product_barcodes.find{|_bar| _bar.barcode == barcode["barcode"]} ||
+            ProductBarcode.find_by_barcode(barcode["barcode"])
+
           case true
           when barcode["id"].present?
-            status = @product.create_or_update_productbarcode(barcode, index)
+            db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"]}
+            status = @product.create_or_update_productbarcode(barcode, index, nil, db_barcode)
           when barcode["barcode"].present? && db_barcode.blank?
             status = @product.create_or_update_productbarcode(barcode, index, 'new')
           when barcode["barcode"].present? && db_barcode.present?
@@ -179,15 +189,16 @@ module Groovepacker
           product_images = ProductImage.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_images, @params[:images])
           (@params[:images]||[]).each_with_index do |image, index|
-            unless @product.create_or_update_productimage(image, index)
+            unless @product.create_or_update_productimage(image, index, product_images)
               @result['status'] &= false
             end
           end
         end
 
         def update_product_kit_skus
+          kit_products = ProductKitSkus.where(product_id: @product.id)
           (@params[:productkitskus]||[]).each do |kit_product|
-            @product.create_or_update_productkitsku(kit_product)
+            @product.create_or_update_productkitsku(kit_product, kit_products)
           end
         end
 
@@ -219,7 +230,7 @@ module Groovepacker
         def destroy_object_if_not_defined(objects_array, obj_params)
           return @result if objects_array.blank?
 
-          ids = obj_params.map {|obj| obj["id"]} rescue []
+          ids = obj_params.map {|obj| obj["id"]}.compact rescue []
           objects_array.each do |object|
             found_obj = false
             found_obj = true if ids.include?(object.id)

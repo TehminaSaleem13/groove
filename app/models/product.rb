@@ -459,16 +459,16 @@ class Product < ActiveRecord::Base
     end
   end
 
-  def create_or_update_productcat(category)
-    product_cat = ProductCat.find_or_initialize_by_id(category['id'])
+  def create_or_update_productcat(category, categories=[])
+    product_cat = categories.find{|cat| cat.id == category['id']} || ProductCat.new
     product_cat.category = category['category']
     product_cat.product_id = id unless product_cat.persisted?
     response = product_cat.save ? true : false
     response
   end
 
-  def create_or_update_productimage(image, order)
-    product_image = ProductImage.find_or_initialize_by_id(image['id'])
+  def create_or_update_productimage(image, order, images=[])
+    product_image = images.find{|_img| _img.id == image["id"]} || ProductImage.new
     product_image.image = image['image']
     product_image.caption = image['caption']
     product_image.product_id = id unless product_image.persisted?
@@ -477,16 +477,22 @@ class Product < ActiveRecord::Base
     response
   end
 
-  def create_or_update_productkitsku(kit_product)
-    actual_product = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product['option_product_id'], id)
+  def create_or_update_productkitsku(kit_product, products=[])
+    actual_product =
+      products.find do |_product|
+        _product.product_id == id &&
+        _product.option_product_id == kit_product['option_product_id']
+      end ||
+      ProductKitSkus.find_by_option_product_id_and_product_id(kit_product['option_product_id'], id)
+
     return unless actual_product
     actual_product.qty = kit_product['qty']
     actual_product.packing_order = kit_product['packing_order']
     actual_product.save
   end
 
-  def create_or_update_productsku(sku, order, status = nil)
-    product_sku = status == 'new' ? ProductSku.new : ProductSku.where(id: sku['id']).first
+  def create_or_update_productsku(sku, order, status = nil, db_sku=nil)
+    product_sku = status == 'new' ? ProductSku.new : db_sku
 
     product_sku.sku = sku['sku']
     product_sku.purpose = sku['purpose']
@@ -496,8 +502,8 @@ class Product < ActiveRecord::Base
     response
   end
 
-  def create_or_update_productbarcode(barcode, order, status = nil)
-    product_barcode = status == 'new' ? ProductBarcode.new : ProductBarcode.find(barcode['id'])
+  def create_or_update_productbarcode(barcode, order, status = nil, db_barcode=nil)
+    product_barcode = status == 'new' ? ProductBarcode.new : db_barcode
 
     product_barcode.barcode = barcode['barcode']
     product_barcode.product_id = id unless product_barcode.persisted?
