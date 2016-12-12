@@ -102,7 +102,7 @@ class Product < ActiveRecord::Base
 
     @order_items = OrderItem.where(
       product_id: id, scanned_status: 'notscanned'
-    ).includes(order: [order_items: :product])
+    ).includes(order: [order_items: [:product, :order_item_kit_products]])
 
     if status != 'inactive' || force_from_inactive_state
       result = true
@@ -162,7 +162,7 @@ class Product < ActiveRecord::Base
     end
     # update order items status from onhold to awaiting
     @order_items.each do |item|
-      #item.order.update_order_status unless item.order.nil? ||
+      # item.order.update_order_status unless item.order.nil? ||
       #                                      !%w(awaiting onhold)
       #                                      .include?(item.order.status)
       bulkaction.process(item) if general_setting.inventory_tracking?
