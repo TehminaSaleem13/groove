@@ -373,8 +373,7 @@ groovepacks_controllers.
             },
             qty_on_hand: {
               name: "QoH",
-              col_length: 7,
-              sortable: false
+              col_length: 7
             },
             available_inv: {
               name: "Avbl Inv",
