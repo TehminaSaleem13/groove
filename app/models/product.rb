@@ -95,14 +95,18 @@ class Product < ActiveRecord::Base
     true
   end
 
-  def update_product_status(force_from_inactive_state = false)
+  def update_product_status(force_from_inactive_state = false, eager_loaded_obj = {})
     # original_status = self.status
     bulkaction = Groovepacker::Inventory::BulkActions.new
     general_setting = GeneralSetting.setting
 
-    @order_items = OrderItem.where(
-      product_id: id, scanned_status: 'notscanned'
-    ).includes(order: [order_items: [:product, :order_item_kit_products]])
+    @order_items = if eager_loaded_obj[:multi_product_order_items]
+      eager_loaded_obj[:multi_product_order_items].select{ |oi| oi.product_id == id }
+    else
+      OrderItem.where(
+        product_id: id, scanned_status: 'notscanned'
+      ).includes(order: [order_items: [:product, :order_item_kit_products]])
+    end
 
     if status != 'inactive' || force_from_inactive_state
       result = true
@@ -122,9 +126,16 @@ class Product < ActiveRecord::Base
       # if kit it should contain kit products as well
       if is_kit == 1
         result &= false if product_kit_skuss.empty?
-        option_products = Product.where(
-          id: product_kit_skuss.collect(&:option_product_id)
-        )
+        option_products =
+          if eager_loaded_obj[:option_products_if_kit_one]
+            eager_loaded_obj[:option_products_if_kit_one]
+              .select{ |p| (p.product_kit_skuss - product_kit_skuss).empty? }
+          else
+            Product.where(
+              id: product_kit_skuss.collect(&:option_product_id)
+            )
+          end
+
         option_products.each do |option_product|
           if !option_product.nil? &&
              option_product.status != 'active'
@@ -146,18 +157,46 @@ class Product < ActiveRecord::Base
       # for non kit products, update all kits product statuses where the
       # current product is an item of the kit
       if is_kit == 0
-        @kit_products = ProductKitSkus.where(option_product_id: id).includes(:product)
+        @kit_products =
+          if eager_loaded_obj[:kit_skus_if_kit_zero]
+            eager_loaded_obj[:kit_skus_if_kit_zero]
+              .select{ |pkss| pkss.option_product_id == id }
+          else
+            ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
+          end
+        
+        # To reduce individual product query fire on order items
+        multi_product_order_items =
+          OrderItem.where(product_id: @kit_products.map{|kp| kp.product.id}, scanned_status: 'notscanned')
+          .includes(order: [order_items: [:product, :order_item_kit_products]])
+
         #result_kit = true
         @kit_products.each do |kit_product|
           if kit_product.product.status != 'inactive'
-            kit_product.product.update_product_status
+            kit_product.product.update_product_status(nil, {
+              multi_product_order_items: multi_product_order_items
+            })
           end
         end
       end
 
       if result && base_sku.nil?
-        products = Product.where(base_sku: primary_sku)
-        products.each(&:update_product_status) unless products.empty?
+        products =
+          if eager_loaded_obj[:multi_base_sku_products]
+            eager_loaded_obj[:multi_base_sku_products]
+              .select{ |pkss| p.base_sku == primary_sku }
+          else
+            Product.where(base_sku: primary_sku)
+          end
+
+        # To reduce individual product query fire on order items
+        multi_product_order_items =
+          OrderItem.where(product_id: products.map(&:id), scanned_status: 'notscanned')
+          .includes(order: [order_items: [:product, :order_item_kit_products]])
+
+        products.each{|p| p.update_product_status(nil, {
+          multi_product_order_items: multi_product_order_items
+        })} unless products.empty?
       end
     end
     # update order items status from onhold to awaiting
@@ -547,7 +586,7 @@ class Product < ActiveRecord::Base
     counts
   end
 
-  def generate_barcode(result)
+  def generate_barcode(result, eager_loaded_obj = {})
     if product_barcodes.blank?
       sku = product_skus.first
       unless sku.nil?
@@ -559,7 +598,7 @@ class Product < ActiveRecord::Base
         end
       end
     end
-    update_product_status
+    update_product_status(nil, eager_loaded_obj)
     result
   end
 
