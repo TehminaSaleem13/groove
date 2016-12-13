@@ -184,7 +184,7 @@ class Product < ActiveRecord::Base
         products =
           if eager_loaded_obj[:multi_base_sku_products]
             eager_loaded_obj[:multi_base_sku_products]
-              .select{ |pkss| p.base_sku == primary_sku }
+              .select{ |p| p.base_sku == primary_sku }
           else
             Product.where(base_sku: primary_sku)
           end
