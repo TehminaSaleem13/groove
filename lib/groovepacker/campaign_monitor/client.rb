@@ -15,6 +15,25 @@ module Groovepacker
         end
       end
 
+      def add_cost_calculator_lists(saving, error, email)
+        body_params = {
+           "EmailAddress" => email,
+            "CustomFields" =>
+              [{
+               "key" => "CostPerError",
+               "value" => error.to_f
+               },
+               {
+                "key" => "ErrorCostPerMonth",
+                "value" => saving.to_f
+              }]
+          }
+        begin
+          post("https://api.createsend.com/api/v3.1/subscribers/#{ENV['CAMPAIGN_MONITOR_CALCULATOR_LIST_ID']}.json", body_params)
+        rescue Exception => ex
+        end
+      end
+
       def remove_subscriber_from_lists
         begin
           delete("https://api.createsend.com/api/v3.1/subscribers/#{ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID']}.json?email=#{@subscriber.email}")

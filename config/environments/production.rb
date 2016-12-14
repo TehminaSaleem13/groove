@@ -165,4 +165,6 @@ Groovepacks::Application.configure do
   ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "f8a09dc725586f011d56a0b4e5409317"
   #List Name - All Customers
   ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "8f138927c7a231368f3f6fa8e741c878"
+  #List Name - Cost Calculator
+  ENV['CAMPAIGN_MONITOR_CALCULATOR_LIST_ID'] = "26ecbba939d6fcfb070c1f0b7354e3ff"
 end

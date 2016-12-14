@@ -342,6 +342,11 @@ $(document).ready(function(){
       calculate_values();
     });   
 
+    function hide_total(){
+      $(".data_div").hide();
+      $(".save_and_continue").show();
+    }
+
     function calculate_values() {
       var intangible_cost = parseFloat($('#intangible_cost').val()) || 0;
       var return_shipment_or_abandonment = parseFloat($('#return_shipment_or_abandonment').val()) || 0;
@@ -379,20 +384,28 @@ $(document).ready(function(){
       } else {
         $(this.id).val(parseFloat(this.value).toFixed(2));
       }
+      $(".data_div").hide();
+      $(".save_and_continue").show();
     });
 
     $('#send_calculated_email').on('click', function () {
-      send_email();
+      send_email(false);
     });
 
-    var send_email = function () {
+    $('#save_link_button').on('click', function () {
+      $(".data_div").show();
+      $(".save_and_continue").hide();
+      send_email(true);
+    });
+
+    var send_email = function (response) {
       $.ajax({
         type: "GET",
         contentType: "application/json; charset=utf-8",
         url: "/email_calculations?" + $("#cost_calc").serialize(),
-        data: {recipient_one: $('#recipient_one').val(), recipient_two: $('#recipient_two').val(),
+        data: {recipient_one: $('#recipient_one').val(), recipient_two: $('#recipient_two').val(), monthly_saving: $('#monthly_saving').val(), monthly_shipping: $('#monthly_shipping').val(),
         recipient_three: $('#recipient_three').val(),
-        follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val() },
+        follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val(), only_save: response},
         dataType: "json"
       });
     }

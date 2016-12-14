@@ -8,6 +8,10 @@ groovepacks_controllers.
         $scope.current_page = '';
         $scope.show_table_data = false;
         $scope.setup_page('show_card_details');
+        $http.get('/settings/get_settings').success(function(response){
+          $scope.cost_calculator_url = response.data.settings.cost_calculator_url
+        })
+
         $scope.translations = {
           "headings": {
             "credit_cards": ""
