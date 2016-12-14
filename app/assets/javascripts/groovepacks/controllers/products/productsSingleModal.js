@@ -17,7 +17,7 @@ groovepacks_controllers.
       scope.update = function (reason) {
         hotkeys.del('up');
         hotkeys.del('down');
-        if (reason == "cancel-button-click" || reason == "escape key press") {
+        if (reason == "cancel-button-click" || reason == "escape key press" || reason == "backdrop click") {
           myscope.rollback();
         } else {
           if (!scope.alias_added) {
