@@ -113,9 +113,15 @@
               import_item.current_order_items = -1
               import_item.current_order_imported_item = -1
               import_item.save
-              order_info = client.call(:sales_order_info,
-                                       message: {sessionId: session, orderIncrementId: item[:increment_id]})
-
+              attempts = 0
+              loop do
+                begin
+                  order_info = client.call(:sales_order_info, message: {sessionId: session, orderIncrementId: item[:increment_id]})
+                rescue Exception => ex
+                  attempts = attempts + 1
+                end
+                break if attempts >= 5
+              end
               order_info = order_info.body[:sales_order_info_response][:result]
               if Order.where(:increment_id => item[:increment_id]).length == 0
                 @order = Order.new
