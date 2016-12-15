@@ -116,13 +116,15 @@
               attempts = 0
               loop do
                 begin
-                  order_info = client.call(:sales_order_info, message: {sessionId: session, orderIncrementId: item[:increment_id]})
-                  break
+                  @order_info = client.call(:sales_order_info, message: {sessionId: session, orderIncrementId: item[:increment_id]})
+                  attempts = 5
                 rescue Exception => ex
                   attempts = attempts + 1
                 end
                 break if attempts >= 5
               end
+              order_info = @order_info
+              @order_info = nil
               order_info = order_info.body[:sales_order_info_response][:result] rescue nil
               if Order.where(:increment_id => item[:increment_id]).length == 0
                 @order = Order.new
