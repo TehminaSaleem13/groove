@@ -14,6 +14,7 @@ module Groovepacker
             product = ProductSku.where(sku: r_product["sku"]).first.product
           end
           make_product_intangible(product)
+          product.save
           return product
 		end        
 
