@@ -3,7 +3,7 @@ module Groovepacker
     module Importers
       module ImporterCommonMethods
 		
-		def find_create_product(r_product)
+		    def find_create_product(r_product)
           if r_product["sku"].blank?
             # if sku is nil or empty
             product = create_product_with_temp_sku(r_product)
@@ -15,8 +15,9 @@ module Groovepacker
           end
           make_product_intangible(product)
           product.save
+          product.set_product_status
           return product
-		end        
+		    end        
 
         def create_product_with_temp_sku(r_product)
           product_is_nil = Product.find_by_name(r_product["name"]).nil?
@@ -41,7 +42,25 @@ module Groovepacker
           return product
         end
 
+        def create_new_product(item, sku)
+          #create and import product
+          product = Product.new(name: item["name"], store: @credential.store, store_product_id: 0)
+          product.product_skus.build(sku: sku)
 
+          if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
+            product.product_barcodes.build(barcode: sku)
+          end
+
+          #Build Image
+          unless item["imageUrl"].nil? || product.product_images.length > 0
+            product.product_images.build(image: item["imageUrl"])
+          end
+          product.save
+          unless item["warehouseLocation"].nil?
+            product.primary_warehouse.update_column( 'location_primary', item["warehouseLocation"] )
+          end
+          product
+        end
       end
     end
   end
