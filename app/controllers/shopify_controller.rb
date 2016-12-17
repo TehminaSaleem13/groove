@@ -114,7 +114,7 @@ class ShopifyController < ApplicationController
       tenant_data = subsc.tenant_data.split("-")
       access_restriction =  AccessRestriction.last
       access_restriction.update_attributes(:num_shipments => tenant_data[1], :num_users => tenant_data[2], :num_import_sources => tenant_data[3])
-      subsc.update_attributes(:subscription_plan_id => plan, :tenant_charge_id => params["charge_id"], :shopify_payment_token => nil, :tenant_data => nil)
+      subsc.update_attributes(:subscription_plan_id => plan, :tenant_charge_id => params["charge_id"], :shopify_payment_token => nil, :tenant_data => nil, :amount => tenant_data[0].to_f*100)
       if tenant_fee.status == "declined"
         render "payment_failed" and return
       else
