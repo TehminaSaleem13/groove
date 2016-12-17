@@ -50,7 +50,7 @@ class ShopifyController < ApplicationController
     recurring_application_charge.attributes = {
             "name" =>  "Tenant plan charges",
             "price" => price + 10,
-            "return_url" => "http://#{tenant_name}.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/finalize_payment?shop_name=#{shop_name}", 
+            "return_url" => "https://#{tenant_name}.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{shop_name}", 
             "trial_days" => 0,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
@@ -68,7 +68,7 @@ class ShopifyController < ApplicationController
     app_charges.attributes = {
         "name" => "One Time Charge for Deployment",
         "price" => 500.0,
-        "return_url" => "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
+        "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
     }
     app_charges.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if app_charges.save
@@ -89,7 +89,7 @@ class ShopifyController < ApplicationController
     recurring_application_charge.attributes = {
             "name" =>  "Tenant and App charges",
             "price" => price + 10,
-            "return_url" => "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
+            "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
             "trial_days" => 30,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
@@ -187,7 +187,7 @@ class ShopifyController < ApplicationController
     destroy_cookies rescue nil
     session = ShopifyAPI::Session.new("#{params['shop_name']}.myshopify.com")
     scope = [ "read_orders", "write_orders", "read_products", "write_products"]
-    result[:permission_url] = session.create_permission_url(scope, "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/auth")
+    result[:permission_url] = session.create_permission_url(scope, "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/auth")
     if @tenant.present?
       return result[:permission_url]
     else
