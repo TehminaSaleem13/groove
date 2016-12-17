@@ -22,6 +22,7 @@ class Order < ActiveRecord::Base
   after_update :update_inventory_levels_for_items
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
+  after_save :update_tracking_num_value
   validates_uniqueness_of :increment_id
 
   include ProductsHelper
@@ -66,6 +67,13 @@ class Order < ActiveRecord::Base
     bulkaction = Groovepacker::Inventory::BulkActions.new
     bulkaction.process_unprocessed
     true
+  end
+
+  def update_tracking_num_value
+    if self.tracking_num == ""
+      self.tracking_num = nil
+      self.save
+    end
   end
 
   def addnewitems
@@ -810,7 +818,7 @@ class Order < ActiveRecord::Base
   def scanned_items_count
     count = 0
     self.order_items.each do |item|
-      if item.product.is_kit == 1
+      if item.try(:product).try(:is_kit) == 1
         if item.product.kit_parsing == 'depends'
           count = count + item.single_scanned_qty
           item.order_item_kit_products.each do |kit_product|

@@ -43,7 +43,7 @@ module Groovepacker
             on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{Apartment::Tenant.current}.log")
             on_demand_logger.info("=========================================")
             on_demand_logger.info("StoreId: #{@credential.store.id}")
-            response, shipments_response = @client.get_order_on_demand(order_no)
+            response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)

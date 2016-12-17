@@ -7,16 +7,17 @@
 <div class="form-group">
   <div class="control-label">
     <i class="fa fa-check-square-o"></i>
-    Your creditcard will not be charged during the trial.
+    Only the one time startup fee explained on the previous page will be charged today. It is fully refundable should you not decide to continue please email <a href="mailto:suport@groovepacker.com">suport@groovepacker.com</a> any time during the free trial.
+    <!-- Your creditcard will not be charged during the trial. -->
   </div>
 </div>
 
-<div class="form-group">
+<!-- <div class="form-group">
   <div class="control-label">
     <i class="fa fa-check-square-o"></i>
     You’ll have access to remove your card information at any time, if you do not wish to continue the trial.
   </div>
-</div>
+</div> -->
 
 <div class="form-group">
   <div class="control-label">
@@ -28,10 +29,10 @@
 
 <div class="text-center">
   <script src="https://checkout.stripe.com/checkout.js"></script>
-  <button id="shopButton" class="btn btn-success" style="margin-bottom: 5px;">Groovy, Start My Trial!</button>
-  <p> Why is a Credit Card required for a free trial?
+  <button id="<%= params['shop_type'] == 'Shopify' ? 'auth_button' : 'shopButton'%>" class="btn btn-success" style="margin-bottom: 5px;">Groovy, Start My Trial!</button>
+  <!-- <p> Why is a Credit Card required for a free trial?
     <i id="cc_info" data-placement="bottom" data-content="<p>When you start your trial, resources are dedicated to building and running your groovepacker instance. Free support is also provided to ensure you have the best experience possible. We ask that you provide a valid card number to let us know that you are a real person interested in using Groovepacker in your business. This lowers costs while increasing performance and security. When you click 'Start My Trial' you'll be given a form where you can enter your card info securely.</p>" class="fa fa-info-circle"></i><span id=""></span>
-  </p>
+  </p> -->
 
   <div class="alert alert-success" id="processing_alert_success" style="display:none;">
     <div><i class="glyphicon glyphicon-refresh spin" style="font-size: 12px;"></i> Your subscription is being processed.
@@ -43,6 +44,68 @@
 </div>
 
 <script type="text/javascript">
+$('#auth_button').on('click', function(e){
+  e.preventDefault();
+  var getUrlParameter = function getUrlParameter(sParam) {
+      var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+          sURLVariables = sPageURL.split('&'),
+          sParameterName,
+          i;
+
+      for (i = 0; i < sURLVariables.length; i++) {
+          sParameterName = sURLVariables[i].split('=');
+
+          if (sParameterName[0] === sParam) {
+              return sParameterName[1] === undefined ? true : sParameterName[1];
+          }
+      }
+  };
+  $.ajax({
+    type: "POST",
+    contentType: "application/json; charset=utf-8",
+    url: "/shopify/get_auth",
+    async: false , 
+    data: JSON.stringify({
+      "shop_name": getUrlParameter("shop_name"), 
+      "name": getUrlParameter("plan_id"),
+      "email": getUrlParameter("email"),
+    }),
+    dataType: "json"
+  }).success(function (response) {  
+    window.open(response.permission_url,"Ratting","width=1250,height=1000,0,status=0");
+  });
+});
+
+// $('#testbutton').on('click', function(){
+//   var getUrlParameter = function getUrlParameter(sParam) {
+//       var sPageURL = decodeURIComponent(window.location.search.substring(1)),
+//           sURLVariables = sPageURL.split('&'),
+//           sParameterName,
+//           i;
+
+//       for (i = 0; i < sURLVariables.length; i++) {
+//           sParameterName = sURLVariables[i].split('=');
+
+//           if (sParameterName[0] === sParam) {
+//               return sParameterName[1] === undefined ? true : sParameterName[1];
+//           }
+//       }
+//   };
+//   $.ajax({
+//     type: "POST",
+//     contentType: "application/json; charset=utf-8",
+//     url: "/subscriptions/create_using_shopify",
+//     data: JSON.stringify({
+//       "tenant": getUrlParameter("shop_name"), 
+//       "name": getUrlParameter("plan_id"),
+//       "email": getUrlParameter("email"),
+//       "price": 10.0,
+//     }),
+//     dataType: "json"
+//   })
+// });
+
+
   $(document).ready(function () {
     $('#cc_info').popover({
       html: true,

@@ -7,7 +7,7 @@
   <link href='https://fonts.googleapis.com/css?family=Play:400,700' rel='stylesheet' type='text/css'>
   <link href='https://fonts.googleapis.com/css?family=Open+Sans:300italic,400italic,600italic,700italic,800italic,400,300,600,700,800' rel='stylesheet' type='text/css'>
   <%= stylesheet_link_tag "application", :media => "all" %>
-  <%= javascript_include_tag "https://js.stripe.com/v2/", "application" %>
+  <%= javascript_include_tag "https://js.stripe.com/v2/", socket_server + "/socket/socket.io.js", "application" %>
 
   <%= csrf_meta_tags %>
   <%= tag :meta, :name => "stripe-key", :content => ENV['STRIPE_PUBLIC_KEY'] %>
@@ -31,6 +31,11 @@
 </head>
 <body class="container-well">
 <div class="container main-body">
+  <%if params["controller"] == "cost_calculators" && params["action"] == "index"%>
+    <div class ="text-center" style="margin: 25px">
+      <img class="icons" src="/assets/images/cost-calculator-header-image-02.png"></img>
+    </div>
+  <%end%>
   <div class="gradient-well">
     <div class="container-fluid gradient-well-inner">
       <%= yield %>
@@ -46,9 +51,14 @@
       var current_href = window.location.href;
       var is_admin = current_href.search("admin.groovepacker.com");
       if(is_admin!=-1) return;
-      FreshWidget.init("", {"queryString": "&widgetType=popup&formTitle=Customer+Support&submitThanks=Thank+you!+We'll+be+in+touch+shortly.", "utf8": "✓", "widgetType": "popup", "buttonType": "text", "buttonText": "Get Support", "buttonColor": "white", "buttonBg": "#73ae0c ", "alignment": "2", "offset": "825px", "submitThanks": "Thank you! We'll be in touch shortly.", "formHeight": "825px", "url": "https://groovepacker.freshdesk.com"} );
+      FreshWidget.init("", {"queryString": "&widgetType=popup&formTitle=Customer+Support&submitThanks=Thank+you!+We'll+be+in+touch+shortly.", "utf8": "✓", "widgetType": "popup", "buttonType": "text", "buttonText": "Get Support", "buttonColor": "white", "buttonBg": "#73ae0c ", "alignment": "2", "offset": "825px", "submitThanks": "Thank you! We'll be in touch shortly.", "formHeight": "500px", "url": "https://groovepacker.freshdesk.com"} );
     });
 </script>
+<style type="text/css">
+  .freshwidget-button{
+    top: 500px !important; 
+  }
+</style>
 </body>
 
 </html>

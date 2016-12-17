@@ -35,30 +35,7 @@ module Groovepacker
           #     product = get_product_with_temp_skus(products)
           #   end
           #   return product
-          # end
-
-          def create_new_product(item, sku)
-            #create and import product
-            product = Product.new(name: item["name"], store: @credential.store, store_product_id: 0)
-            product.product_skus.build(sku: sku)
-
-            if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
-              product.product_barcodes.build(barcode: sku)
-            end
-
-            #Build Image
-            unless item["imageUrl"].nil? || product.product_images.length > 0
-              product.product_images.build(image: item["imageUrl"])
-            end
-            product.save
-            unless item["warehouseLocation"].nil?
-              product.primary_warehouse.update_column( 'location_primary', item["warehouseLocation"] )
-            end
-
-            product.set_product_status
-
-            product
-          end
+          # end    
         end
       end
     end

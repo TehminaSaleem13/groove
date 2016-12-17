@@ -209,7 +209,7 @@ module ExportData
         csv << order_hash.values_at(*csv_row_map.keys)
       end
     end
-    GroovS3.create_export_csv(tenant, filename, data)
+    GroovS3.create_export_csv(tenant, filename, data) rescue nil
     #url = GroovS3.find_export_csv(tenant, filename)
     # ExportOrder.export(tenant).deliver if ExportSetting.first.manual_export == true
   end

@@ -44,8 +44,8 @@ module ProductsHelper
     ProductsService::SearchProducts.call(params, results_only)
   end
 
-  def self.products_csv(products, csv, bulk_actions_id = nil)
-    ProductsService::GenerateCSV.call(products, csv, bulk_actions_id)
+  def self.products_csv(products, csv, bulk_actions_id = nil, bulk_csv = nil)
+    ProductsService::GenerateCSV.call(products, csv, bulk_actions_id, bulk_csv)
   end
 
   def make_product_intangible(product)

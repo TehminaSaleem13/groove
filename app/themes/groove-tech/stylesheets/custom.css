@@ -256,6 +256,14 @@ body{
     font-size: 18px !important;
   }
 
+  .display_pricing_name{
+    display: flex;
+  }
+
+  .space_on_pricing_name{
+    padding: 0 5px;
+  }
+
 
 /* Error Cost Calculator page css start */
 
@@ -372,10 +380,6 @@ body{
 
 #total_expedited #total_international #cancel_order_shipment #lifetime_order_val #negative_post_review #inventory_shortage  {
   color: #dedbdb !important;
-}
-
-.gradient-well-inner{
-  max-width: 1200px !important;
 }
 
 .left-inner-addon {

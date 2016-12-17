@@ -3,32 +3,46 @@ module ProductsService
     attr_accessor :products, :csv, :bulk_actions_id, :headers, :default_inv_id
 
     def initialize(*args)
-      @products, @csv, @bulk_actions_id = args
+      @products, @csv, @bulk_actions_id, @bulk_csv = args
       @headers = []
       @data_mapping = {}
       @default_inv_id = InventoryWarehouse.where(is_default: true).first.id
       preload_associations(products)
     end
 
-    def call
+    def call      
       bulk_action?
       set_header
       check_headers_against_product_column
       set_data_mapping
-      csv << headers
-      products.each do |item|
-        if @bulk_action
-          @bulk_action.reload
-          return true if bulk_action_cancelled?
+      csv = ""
+      if @bulk_csv
+        @csv << headers
+        products.each do |item|
+          if @bulk_action
+            @bulk_action.reload
+            return true if bulk_action_cancelled?
+          end
+          @csv << process_data(item)
         end
-        arr = process_data(item)
-        new_arr = []
-        arr.each do |val| 
-          new_arr << (val.class==String ? "\"#{val}\"" : val)
+        @csv
+      else
+        csv << headers.join(",")
+        csv << "\n" 
+        products.each do |item|
+          if @bulk_action
+            @bulk_action.reload
+            return true if bulk_action_cancelled?
+          end
+          arr = process_data(item)
+          new_arr = []
+          arr.each do |val| 
+            new_arr << (val.class==String ? "\"#{val}\"" : val)
+          end
+          csv << new_arr.join(",")
+          csv << "\n"
         end
-        # csv << process_data(item).join(",")
-        csv << new_arr.join(",")
-        csv << "\n"
+        csv
       end
       csv
       # bulk_action?

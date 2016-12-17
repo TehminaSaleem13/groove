@@ -13,13 +13,21 @@ class ProductSku < ActiveRecord::Base
     end
   end
 
-  def self.get_temp_sku
+  def self.get_temp_sku    
     temp_skus = ProductSku.where("sku LIKE 'TSKU-%'").order(:sku)
-    if temp_skus.length > 0
-      next_sku = "TSKU-" + (get_last_temp_sku_token(temp_skus) + 1).to_s
-    else
-      next_sku = "TSKU-1"
+    while(1)
+      if temp_skus.length > 0
+        next_sku = "TSKU-" + (get_last_temp_sku_token(temp_skus) + 1).to_s
+      else
+        next_sku = "TSKU-1"
+      end
+      if !ProductSku.find_by_sku(next_sku)
+        break
+      else
+        temp_skus << next_sku
+      end
     end
+
     next_sku
   end
 

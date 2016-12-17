@@ -46,12 +46,13 @@ module Groovepacker
           @service.query("/orders/" + orderId, nil, "get")
         end
 
-        def get_order_on_demand(orderno, using_tracking_number=false)
+        def get_order_on_demand(orderno, import_item, using_tracking_number=false)
           Rails.logger.info 'Getting orders with order No: ' + orderno
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
           response = (response.class == String ? {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1} : response)
           response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
           log_on_demand_order_import(orderno, response, using_tracking_number)
+          import_item.update_attributes(:status => "completed",:current_increment_id => orderno, :updated_orders_import => response["orders"].count)
           if using_tracking_number
             return response
           else
@@ -64,7 +65,7 @@ module Groovepacker
           response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")
           return {"orders" => []} if response["shipments"].blank?
           shipment = response["shipments"].first
-          return get_order_on_demand(shipment["orderNumber"], true), response["shipments"]
+          return get_order_on_demand(shipment["orderNumber"], nil, true), response["shipments"]
         end
 
         def log_on_demand_order_import(orderno, response, using_tracking_number)

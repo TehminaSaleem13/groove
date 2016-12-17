@@ -1,7 +1,7 @@
-<div class="errorcalculator">
-          
-    <h2 class="text-center">Fulfillment Error Cost Calculator</h2>
-
+<div class="errorcalculator">     
+    <div class="col-md-12 col-sm-12 col-xs-12">
+      <div class="text-center" style=" display: -webkit-inline-box;background-color: white;font-size: 22px;margin-bottom:5px;border-radius: 9px;width: 100%;"><h4 style="width:100%; color: #333333"><b>Modify the estimates below to match your costs and see what your company is currently spending on errors.</b></h4></div>
+    </div>
     <div class="col-md-12 col-sm-12 col-xs-12">
       <form id="cost_calc">
         <div class="row out_box">
@@ -48,18 +48,18 @@
               <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="box overridebox">
                   <h4 class="right-inner-addon"><span style="padding: 7px 170px">%</span>
-                    <input id="regular_percentage" type="text" name="regular_percentage" value="<%= @params[:regular_percentage] %>"> are routine communications handled by regular staff.
+                    <input id="regular_percentage" type="text" name="regular_percentage" value="<%= @params[:regular_percentage] %>"> &nbsp;are routine communications handled by regular staff.
                   </h4>
-                  <h4>
-                    The average cost is: <input id="regular_comm" type="text" name="regular_comm" value="<%= @params[:regular_comm] %>">  per communication.
+                  <h4 class="left-inner-addon">
+                    The average cost is: <span style="padding: 7px 5px">$</span>&nbsp;<input id="regular_comm" type="text" name="regular_comm" value="<%= @params[:regular_comm] %>" style="width: 60px;">  per communication.
                   </h4>
                 </div>
               </div>
               <div class="col-md-4 col-sm-4 col-xs-12">
                 <div class="box overridebox">
                   <h4><strong id="escalated_percentage"><%= @params[:escalated_percentage] %></strong><b>%</b> become escalated communications requiring the owner or management.</h4>
-                  <h4>
-                    The average cost is: <input id="escalated_comm" type="text" name="escalated_comm" value="<%= @params[:escalated_comm] %>">  per communication.
+                  <h4 class="left-inner-addon">
+                    The average cost is: <span style="padding: 16px 6px;">$</span>&nbsp;<input id="escalated_comm" type="text" name="escalated_comm" value="<%= @params[:escalated_comm] %>" style="width: 60px;">  per communication.
                   </h4>
                 </div>
               </div>
@@ -160,14 +160,14 @@
                   </div>
 
                 </div>
+                <h4>
+                  These costs only apply when the wrong item has been sent to the customer and will need to be returned or abandoned because the cost of bringing it back is more than the cost of the product.
+                </h4>
               </div>
+
             </div>
 
-            <h4>
-              These costs are related to getting the correct or missing item(s) to the customer after the error is reported.
-              This cost will be part of every error except when the customer cancels the order as a result of the error.
-              Return shipment costs related to the customer returning an incorrect item are covered in the next section.
-            </h4>
+            
 
 
           </div>
@@ -227,7 +227,7 @@
 
 
         <h2>Intangible Costs</h2>
-        <div class="row replacement out_box">
+        <div class="row replacement out_box" style="padding-bottom: 10px;">
           <div class="col-md-2 col-sm-2 col-xs-12 text-center left pd-none">
             <h4></h4>
             <br><br><br><br>
@@ -301,9 +301,16 @@
           </div>
         </div>
 
-        <h2><strong>Totals</strong></h2>
-        <div class="row total out_box">
-          <div class="col-md-12 col-sm-12 col-xs-12 pd-none out_box_margin">
+        <div class="col-md-12">
+          <div class="col-md-3"><h2 style="padding-top: 10px;"><strong>Totals</strong></h2></div>
+          <div class="col-md-2"></div>
+          <div class="col-md-7">
+            <button class="right btn left" id="save_link_button" data-remote="true" style="font-size: 20px; background-color: #3fa413; color: white; margin-bottom: 25px;margin-top: 25px;">Save & Continue</button>
+          </div>
+        </div>
+
+        <div class="row total" >
+          <div class="col-md-12 col-sm-12 col-xs-12 pd-none out_box" style="padding-top: 15px;">
 
             <div class="row">
               <div class="col-md-4 col-sm-4 col-xs-12 text-center right">
@@ -321,7 +328,9 @@
               <div class="col-md-5 col-sm-5 col-xs-12 text-center right">
                 <div class="box overridebox">
                   <h3>Monthly cost of shipping errors</h3>
-                  <h1><strong>$<span id="monthly_shipping"><%= @params[:monthly_shipping] %></span></strong></h1>
+                  <h1 class="data_div" style="color: #be1e2d;"><strong>$<span id="monthly_shipping">
+                    <%= @params[:monthly_shipping] %></span></strong></h1>
+                  <h2 class="save_and_continue"><b style="color: #8e8d8d">Click Save & Continue</b></h2>
                 </div>
               </div>
             </div>
@@ -340,42 +349,76 @@
               <div class="col-md-6 col-sm-6 col-xs-12 text-center right pd-lft-nn">
                 <div class="box overridebox">
                   <h3>Expected Savings Per month using GroovePacker</h3>
-                  <h1><strong>$<span id="monthly_saving"><%= @params[:monthly_saving] %></span></strong></h1>
+                  <h1 class="data_div" style="color: #006838;"><strong>$<span id="monthly_saving"><%= @params[:monthly_saving] %></span></strong></h1>
+                  <h2 class="save_and_continue"><b style="color: #8e8d8d">Click Save & Continue</b></h2>
                 </div>
               </div>
             </div>
           </div>
         </div>
       </form>
-      <div class="row total" style="background-color: rgba(0,0,0,0.5); opacity: 0.8;">
-        <div class="col-md-12 col-sm-12 col-xs-12 pd-none">
-        <div class="row">
-          <div>
-            <h3>
-           ​<textarea id="email_text" name="email_text"  rows="3" cols="87"><%= @params[:email_text] %></textarea>
-            </h3>
-          </div>
-          <h3 style="color: white;">Save and email my cost calculator to me and my team at the following addresses: </h3>
+      <h3 style="padding-left: 5px;">Tell your team</h3>
+      <div class="out_box out_box_margin" style="padding: 20px;">
+        <h4 style="padding-left: 5px;">
+          Everyone knows that shipping errors are costly, both financially and to the reputation of your brand, but without putting a number on the actual costs it’s difficult to justify an investment which solves the problem.<br/><br/>
 
-          <div class="col-md-7 right" style="line-height: 48px;">
-            <input type="text" id="recipient_one" style="width: 100%; line-height: 30px;"><br/>
-            <input type="text" id="recipient_two" style="width: 100%; line-height: 30px;"><br/>
-            <input type="text" id="recipient_three" style="width: 100%; line-height: 30px;"><br/>
-            <div style="text-align: right;" ><button id="send_calculated_email" class="right btn" style="padding: 6px 30px;font-size: 20px;">Send</button></div>
-          </div>
-          <div class="col-md-5 left">
-            <div class="col-md-1 right"> 
-              <input type="checkbox" name="follow_up_email" id="follow_up_email" style="margin: 15px 0 0">
-              </div>
-            <div class="col-md-11 left"> 
-              <h5 style="color: white;"> You may send up to 2 follow up emails about GroovePacker to this address only</h5>
-            </div><br>
-          </div>
+          Our aim with this calculator is to make these costs clear, and in some cases, highlight situations where implementing GroovePacker would more than pay for itself many times over.<br/><br/>
 
+          You can share these results with your team using the form below. <br/><br/>
+
+          If you would like to receive a couple additional emails which explore other benefits like simplified training, packer performance visibility and more, please check the box beside your email address below.
+        </h4>
+        <div class="row total out_box_margin" style="background-color: rgba(0,0,0,0.5); opacity: 0.8;">
+          <div class="col-md-12 col-sm-12 col-xs-12 pd-none">
+          <div class="row">
+            <div>
+              <h3>
+             ​<textarea id="email_text" name="email_text"  rows="5" cols="87"><%= @params[:email_text] || 
+          "Hi Guys, 
+Looks like we are spending about #{@params[:monthly_shipping]} each month on shippping errors. Please follow the link below to see the details of this estimate. You can adjust the any of the inputs to refine the calculation.
+#{@calculator_url}" %></textarea>
+              </h3>
+            </div>
+            <h3 style="color: white;">Save and email my cost calculator to me and my team at the following addresses: </h3>
+
+            <div class="col-md-7 right" style="line-height: 48px;">
+              <input type="text" id="recipient_one" style="width: 100%; line-height: 30px;"><br/>
+              <input type="text" id="recipient_two" style="width: 100%; line-height: 30px;"><br/>
+              <input type="text" id="recipient_three" style="width: 100%; line-height: 30px;"><br/>
+              <div style="text-align: right;" ><button id="send_calculated_email" class="right btn" style="padding: 6px 30px;font-size: 20px;">Send</button></div>
+            </div>
+            <div class="col-md-5 left">
+              <div class="col-md-1 right"> 
+                <input type="checkbox" name="follow_up_email" id="follow_up_email" style="margin: 15px 0 0">
+                </div>
+              <div class="col-md-11 left"> 
+                <h5 style="color: white;"> You may send up to 2 follow up emails about GroovePacker to this address only</h5>
+              </div><br>
+            </div>
+          </div>
+          </div>
         </div>
+        <div>
+          <div style="display: flex;">
+            <div class="col-md-2"></div>
+            <div class="col-md-5 right"><h3>Interested in learning more?</h3>&emsp;<p style="margin-top: -30px;">See a demo and get your questions answered</p></div>
+            <button class="right btn col-md-2 left" onclick="window.open('https://groovepacker.com/see-a-demo', '_blank');" style="font-size: 20px; background-color: #3fa413; color: white; margin-bottom: 15px;margin-top: 15px;">Learn More</button>
+          </div>
+
+          <div style="display: flex;">
+            <div class="col-md-2"></div>
+            <div class="col-md-5 right"><h3>Ready to Groove?</h3>&emsp;<p style="margin-top: -30px;">Select a plan from our pricing page and start your <br/> free trial today.</p></div>
+            <button class="right btn col-md-2 left" onclick="window.open('https://groovepacker.com/pricing','_blank');" style="font-size: 20px; background-color: #3fa413; color: white; margin-bottom: 25px;margin-top: 25px;">Get Started</button>
+          </div>
         </div>
       </div>
 
     <div class="clearfix"></div>
   </div>
 <div class="clearfix"></div>
+
+<style type="text/css">
+.gradient-well-inner{
+  max-width: 1200px !important;
+}
+</style>

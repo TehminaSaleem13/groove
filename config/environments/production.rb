@@ -78,4 +78,6 @@ Groovepacks::Application.configure do
     password: ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes }
+
+  ENV['SHOPIFY_BILLING_IN_TEST'] = "false"
 end
