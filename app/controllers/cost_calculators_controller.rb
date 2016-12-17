@@ -7,6 +7,9 @@ class CostCalculatorsController < ApplicationController
 	end
 
 	def email_calculations
+		recipient_one = params[:recipient_one]
+		recipient_two = params[:recipient_two]
+		recipient_three = params[:recipient_three]
 		if params["only_save"] == "false"
 			add_calculator_to_campaignmonitor if params["follow_up_email"] == "true"
 			CostCalculatorMailer.send_cost_calculation(params).deliver
@@ -14,7 +17,7 @@ class CostCalculatorsController < ApplicationController
 		setting = GeneralSetting.last
 		setting.cost_calculator_url = "/cost_calculator?" + URI.encode(params.except!("controller", "action", "cost_calculator", "recipient_one", "recipient_two" , "recipient_three", "recipient_four", "follow_up_email").to_query)
 		setting.save
-		render json: {}
+		render json: {"message" => "Email Sent to #{recipient_one} #{recipient_two} #{recipient_three}"}
 	end
 
 	def add_calculator_to_campaignmonitor

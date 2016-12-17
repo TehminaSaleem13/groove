@@ -386,6 +386,11 @@ $(document).ready(function(){
       }
       $(".data_div").hide();
       $(".save_and_continue").show();
+      $('.message').hide();
+    });
+
+    $("#remove_message").click(function(){
+      $('.message').hide();
     });
 
     $('#send_calculated_email').on('click', function () {
@@ -403,10 +408,14 @@ $(document).ready(function(){
         type: "GET",
         contentType: "application/json; charset=utf-8",
         url: "/email_calculations?" + $("#cost_calc").serialize(),
-        data: {recipient_one: $('#recipient_one').val(), recipient_two: $('#recipient_two').val(), monthly_saving: $('#monthly_saving').val(), monthly_shipping: $('#monthly_shipping').val(),
+        data: {recipient_one: $('#recipient_one').val(), recipient_two: $('#recipient_two').val(), monthly_saving: $('#monthly_saving').val(), monthly_shipping: $('#monthly_shipping').val(), recipient_name: $('#recipient_name').val(),
         recipient_three: $('#recipient_three').val(),
         follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val(), only_save: response},
         dataType: "json"
+      }).success(function (message) {
+        $('.message').show();
+        $('#remove_message').show();
+        $('.notice').html(message.message);
       });
     }
 
