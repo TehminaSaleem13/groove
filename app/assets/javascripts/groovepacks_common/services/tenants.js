@@ -216,7 +216,11 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
   var update_access_restriction_data = function (tenants) {
     return $http.post('/tenants/' + tenants.single.basicinfo.id + '/update_access_restrictions.json', tenants.single).success(function (data) {
       if (data.status) {
-        notification.notify("Successfully Updated.", 1);
+        if (data.shopify_customer == true){
+          notification.notify("Update plan email has been sent. Values will be updated when client accepts payment.", 1);
+        } else {
+          notification.notify("Successfully Updated.", 1);
+        }
       } else {
         notification.notify(data.error_messages, 0);
       }

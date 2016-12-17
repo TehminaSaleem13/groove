@@ -126,9 +126,11 @@ class SubscriptionsController < ApplicationController
   def create_shopify_credential(store_id)
     token = $redis.get(params[:shop_name] + ".myshopify.com")
     shopify_credential = ShopifyCredential.create(shop_name: params[:shop_name], store_id: store_id, access_token: token)
+    app_charge_id = $redis.get(params[:shop_name] + ".myshopify.com_otf")
+    recurring_tenant_charge_id = $redis.get(params[:shop_name] + ".myshopify.com_rtc")
+    @subscription.update_attributes(app_charge_id: app_charge_id, tenant_charge_id: recurring_tenant_charge_id, shopify_shop_name: params[:shop_name])
     $redis.del(params[:shop_name] + ".myshopify.com_ready_to_be_deployed")
     $redis.del(params[:shop_name] + ".myshopify.com_otf")
-    $redis.del(params[:shop_name] + ".myshopify.com_rsaf")
     $redis.del(params[:shop_name] + ".myshopify.com_rtc")
     return {valid: true, 
             transaction_id: @subscription.stripe_transaction_identifier,
@@ -151,8 +153,9 @@ class SubscriptionsController < ApplicationController
     # cookies.delete(:bc_auth)
     cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
     cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
-    response_for_successful_subscription["store"] = "BigCommerce" 
-    return response_for_successful_subscription
+    response = response_for_successful_subscription
+    response["store"] = "BigCommerce" 
+    return response
   end
 
   def response_for_successful_subscription

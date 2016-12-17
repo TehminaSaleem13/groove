@@ -50,7 +50,16 @@ module TenantsHelper
       helper = Groovepacker::Tenants::Helper.new
       case type
       when 'update_restriction'
-        result = helper.update_restrictions(@tenant, params)
+        subsc = @tenant.subscription
+        if subsc.shopify_customer
+          access = params["access_restrictions_info"]
+          subsc.tenant_data = "#{params["subscription_info"]["amount"]}-#{access['max_allowed']}-#{access['max_users']}-#{access['max_import_sources']}"
+          subsc.shopify_payment_token = SecureRandom.hex #(0...20).map { ('a'..'z').to_a[rand(15)] }.join
+          subsc.save
+          ShopifyMailer.recurring_payment(@tenant, "http://#{@tenant.name}.localpacker.com/shopify/update_customer_plan.json?one_time_token=#{subsc.shopify_payment_token}").deliver
+        else
+          result = helper.update_restrictions(@tenant, params)
+        end
         result = helper.update_tenant(@tenant, params) if result['status'] == true
         result = helper.update_subscription_plan(@tenant, params) if result['status'] == true
       when 'update_node'

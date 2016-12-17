@@ -69,6 +69,7 @@ module Groovepacker
           subscription_result['verified_stripe_account'] = false
         end
         subscription_result["interval"] = @tenant.subscription.interval rescue nil
+        subscription_result["shopify_customer"] = @tenant.subscription.shopify_customer rescue nil
         subscription_result
       end
 
