@@ -259,6 +259,7 @@ Groovepacks::Application.routes.draw do
       get 'update_customer_plan'
       get 'finalize_payment'
       get 'invalid_request'
+      get 'payment_failed'
     end
   end
 
