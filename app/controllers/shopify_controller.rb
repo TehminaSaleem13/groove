@@ -64,7 +64,6 @@ class ShopifyController < ApplicationController
   end
 
   def one_time_fee(token, shop_name)
-    binding.pry
     token_params = $redis.get(shop_name)
     $redis.set("#{params['shop']}_ready_to_be_deployed", false)
     ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
@@ -84,7 +83,6 @@ class ShopifyController < ApplicationController
   end
 
   def recurring_tenant_charges
-    binding.pry
     otf = ShopifyAPI::ApplicationCharge.find(params["charge_id"])
     otf.activate if otf.status == "accepted" 
     price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f rescue nil
