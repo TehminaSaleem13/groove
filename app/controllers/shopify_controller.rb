@@ -83,8 +83,6 @@ class ShopifyController < ApplicationController
   end
 
   def recurring_tenant_charges
-    otf = ShopifyAPI::ApplicationCharge.find(params["charge_id"])
-    otf.activate if otf.status == "accepted" 
     price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f rescue nil
     $redis.set("#{params['shop_name']}_otf", params["charge_id"])      #saf -> Recurring Shopify App Fee
     $redis.set("#{params['shop_name']}_ready_to_be_deployed", false)
@@ -108,14 +106,14 @@ class ShopifyController < ApplicationController
 
 
   def finalize_payment
-    tenant_fee = ShopifyAPI::RecurringApplicationCharge.find(params["charge_id"])
-    tenant_fee.activate if tenant_fee.status == "accepted" 
     existing_store = $redis.get("#{params['shop_name']}_existing_store")
     plan = $redis.get("#{params['shop_name']}_plan_id").split(".")[0] rescue nil
     $redis.del("#{params['shop_name']}_plan_id")
     $redis.del("#{params['shop_name']}_existing_store")
     $redis.set("#{params['shop_name']}_rtc", params["charge_id"])
     if existing_store.present?
+      tenant_fee = ShopifyAPI::RecurringApplicationCharge.find(params["charge_id"])
+      tenant_fee.activate if tenant_fee.status == "accepted" 
       tenant = Tenant.find_by_name(Apartment::Tenant.current)
       tenant.update_attribute(:is_modified, true)
       subsc = Subscription.find_by_tenant_name(tenant.name)
@@ -223,10 +221,14 @@ class ShopifyController < ApplicationController
     ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(params["shop_name"], token)
     ShopifyAPI::Base.activate_session(session)
-    otf = ShopifyAPI::ApplicationCharge.find($redis.get("#{params['shop_name']}_otf")).attributes["status"] rescue nil
-    rtc = ShopifyAPI::RecurringApplicationCharge.find($redis.get("#{params['shop_name']}_rtc")).attributes["status"] rescue nil
-    resp_status = (otf=="active" and rtc=="active")
+    otf = ShopifyAPI::ApplicationCharge.find($redis.get("#{params['shop_name']}_otf"))
+    otf_status = otf.attributes["status"] rescue nil
+    rtc = ShopifyAPI::RecurringApplicationCharge.find($redis.get("#{params['shop_name']}_rtc"))
+    rtc_status = rtc.attributes["status"] rescue nil
+    resp_status = (otf_status=="accepted" and rtc_status=="accepted")
     if resp_status
+      otf.activate
+      rtc.activate
       $redis.set("#{params['shop_name']}_ready_to_be_deployed", true)
     end
     return resp_status
