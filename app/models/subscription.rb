@@ -56,7 +56,8 @@ class Subscription < ActiveRecord::Base
   end
 
   def create_subscribed_plan_if_not_exist
-    interval = self.subscription_plan_id.split("-").first=="an" ? "year" : "month"
+    interval = self.interval
+    # interval = self.subscription_plan_id.split("-").first=="an" ? "year" : "month"
     currency = 'usd'
     subsc_amount = self.amount.to_i
     name = self.subscription_plan_id.titleize

@@ -229,8 +229,17 @@
       });
       $('#shopButton').on('click', function (event) {
         event.preventDefault();
-        plan_id = $('#plan_id').val();
-        open_handler(plan_id, "<%= params[:shop_name] %>");
+        if ($("input[name='radio_subscription']:checked").length > 0) {
+          radio_button_value = $('input:radio[name=radio_subscription]:checked').val();
+          if (radio_button_value == 'annually') {
+            var str = $('#plan_id').val();
+            plan_id = 'an-' + str;
+          }
+          else {
+            plan_id = $('#plan_id').val();
+          }
+          open_handler(plan_id, "<%= params[:shop_name] %>");
+        } 
       })
 
       window.CallParent = function() {
@@ -406,6 +415,7 @@
               var amount = 0;
               if (channel == 'Shopify' || channel == 'BigCommerce') {
                 amount = 0;
+                // amount = Number(one_time_payment / 100).toFixed(2);
                 description = 'Add a card to your account';
               } else {
                 amount = one_time_payment;
