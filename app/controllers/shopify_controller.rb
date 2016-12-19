@@ -11,6 +11,7 @@ class ShopifyController < ApplicationController
   # }
   def auth
     if cookies[:tenant_name].blank?
+      ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
       session = ShopifyAPI::Session.new(params["shop"])
       token = session.request_token(params.except(:id))
       @result = true if token.present?
@@ -27,6 +28,7 @@ class ShopifyController < ApplicationController
       Apartment::Tenant.switch(@tenant_name)
       store = Store.find(@store_id) rescue nil
       @shopify_credential = store.shopify_credential
+      ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
       session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
       @result = false
       begin
@@ -41,15 +43,17 @@ class ShopifyController < ApplicationController
   end
 
   def update_plan(token, shop_name)
-    price = $redis.get("#{shop_name}_plan_id").split("-")[1].to_f
+    price = $redis.get("#{shop_name}_plan_id").split("-")[1].to_f rescue nil
     tenant_name = $redis.get("#{shop_name}_tenant")
     Apartment::Tenant.switch tenant_name
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(shop_name, token)
     ShopifyAPI::Base.activate_session(session)
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
     recurring_application_charge.attributes = {
             "name" =>  "Tenant plan charges",
             "price" => price + 10,
+            # "return_url" => "http://#{tenant_name}.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{shop_name}", 
             "return_url" => "https://#{tenant_name}.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{shop_name}", 
             "trial_days" => 0,
             "terms" => "10 out of 2"}
@@ -60,14 +64,17 @@ class ShopifyController < ApplicationController
   end
 
   def one_time_fee(token, shop_name)
+    binding.pry
     token_params = $redis.get(shop_name)
     $redis.set("#{params['shop']}_ready_to_be_deployed", false)
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(shop_name, token)
     ShopifyAPI::Base.activate_session(session)
     app_charges = ShopifyAPI::ApplicationCharge.new()
     app_charges.attributes = {
         "name" => "One Time Charge for Deployment",
         "price" => 500.0,
+        # "return_url" => "http://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
         "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
     }
     app_charges.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
@@ -77,12 +84,14 @@ class ShopifyController < ApplicationController
   end
 
   def recurring_tenant_charges
+    binding.pry
     otf = ShopifyAPI::ApplicationCharge.find(params["charge_id"])
-    otf.status == "accepted" ? otf.activate : redirect(select_plan_subscriptions_path)
-    price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f
+    otf.activate if otf.status == "accepted" 
+    price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f rescue nil
     $redis.set("#{params['shop_name']}_otf", params["charge_id"])      #saf -> Recurring Shopify App Fee
     $redis.set("#{params['shop_name']}_ready_to_be_deployed", false)
     token = $redis.get("#{params['shop_name']}")
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(params["shop_name"], token)
     ShopifyAPI::Base.activate_session(session)
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
@@ -90,6 +99,7 @@ class ShopifyController < ApplicationController
             "name" =>  "Tenant and App charges",
             "price" => price + 10,
             "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
+            # "return_url" => "http://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
             "trial_days" => 30,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
@@ -143,6 +153,7 @@ class ShopifyController < ApplicationController
   def disconnect
     store = Store.find(params[:id])
     @shopify_credential = store.shopify_credential
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
     if @shopify_credential.update_attributes({
                                                access_token: nil
@@ -185,13 +196,15 @@ class ShopifyController < ApplicationController
   def get_auth
     result = {}
     destroy_cookies rescue nil
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new("#{params['shop_name']}.myshopify.com")
     scope = [ "read_orders", "write_orders", "read_products", "write_products"]
     result[:permission_url] = session.create_permission_url(scope, "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/auth")
+    # result[:permission_url] = session.create_permission_url(scope, "http://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/auth")
     if @tenant.present?
       return result[:permission_url]
     else
-      $redis.del("#{params['shop']}_existing_store")
+      $redis.del("#{params['shop_name']}_existing_store")
       $redis.set("#{params['shop_name']}.myshopify.com_plan_id", params["name"])
       render json: result
     end
@@ -209,6 +222,7 @@ class ShopifyController < ApplicationController
 
   def check_if_paid_all_the_charges
     token = $redis.get(params["shop_name"])
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(params["shop_name"], token)
     ShopifyAPI::Base.activate_session(session)
     otf = ShopifyAPI::ApplicationCharge.find($redis.get("#{params['shop_name']}_otf")).attributes["status"] rescue nil
