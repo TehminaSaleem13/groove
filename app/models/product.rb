@@ -95,6 +95,34 @@ class Product < ActiveRecord::Base
     true
   end
 
+  def self.generate_eager_loaded_obj(products)
+    product_ids = products.pluck(:id)
+
+    # To reduce individual product query fire on order items
+
+      option_products_if_kit_one = Product.where(
+          id: products.where(is_kit: 1).map{|p| p.product_kit_skuss.collect(&:option_product_id)}.flatten
+        )
+      multi_product_order_items =
+        OrderItem.where(product_id: product_ids, scanned_status: 'notscanned')
+        .includes(order: [order_items: [:product, :order_item_kit_products]])
+
+      kit_skus_if_kit_zero =
+        ProductKitSkus.where(option_product_id: products.where(is_kit: 0).pluck(:id))
+        .includes(product: :product_kit_skuss)
+
+      multi_base_sku_products = Product.where(base_sku: products.map(&:primary_sku))
+
+      eager_loaded_obj = {
+        multi_product_order_items: multi_product_order_items,
+        kit_skus_if_kit_zero: kit_skus_if_kit_zero,
+        option_products_if_kit_one: option_products_if_kit_one,
+        multi_base_sku_products: multi_base_sku_products
+      }
+
+    eager_loaded_obj
+  end
+
   def update_product_status(force_from_inactive_state = false, eager_loaded_obj = {})
     # original_status = self.status
     bulkaction = Groovepacker::Inventory::BulkActions.new
