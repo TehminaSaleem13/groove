@@ -1,4 +1,5 @@
 <div class="errorcalculator">     
+  <input type="hidden" id ="montly_expenses" name="montly_expenses" value="<%= @params[:monthly_shipping] %>">
     <div class="col-md-12 col-sm-12 col-xs-12">
       <div class="text-center" style=" display: -webkit-inline-box;background-color: white;font-size: 22px;margin-bottom:5px;border-radius: 9px;width: 100%;"><h4 style="width:100%; color: #333333"><b>Modify the estimates below to match your costs and see what your company is currently spending on errors.</b></h4></div>
     </div>
@@ -381,7 +382,15 @@
               </div>
               <h3 style="color: white;">Save and email my cost calculator link to me and my team at the following addresses: </h3>
               <div class="col-md-12 out_box email_body" style="padding-top: 20px;">
-                <div class="alert alert-success message"><p class="notice"></p> &nbsp;&nbsp;<i id="remove_message" class="fa fa-times" style="float: right;"></i></div>
+
+                <div class="alert alert-success alert-dismissible" role="alert" id="message"> 
+                  <button  id="remove_message" type="button" class="close" data-dismiss="alert" aria-label="Close">
+                    <span aria-hidden="true">&times;</span></button>
+                    <span class="notice"></span>
+                </div>
+
+                <!-- <div class="alert alert-success" id="message" style="width: 100% ">
+                  <p class="notice" style="width: 90%"></p> &nbsp;&nbsp;<i style="width: 10%" id="remove_message" class="fa fa-times" style="float: right;"></i></div> -->
                 <div class="col-md-1"></div>
                 <div class="col-md-7" style="line-height: 48px;">
                   <div class="display_flex"><h4 class="green_color col-sm-4"><b>Your Name</b></h4> <input type="text" id="recipient_name" style="width: 70%; line-height: 30px; margin-bottom: 5px" class="col-sm-8"></div>
@@ -447,7 +456,7 @@
     <div class="clearfix"></div>
   </div>
 <div class="clearfix"></div>
-
+<%= javascript_include_tag "cost_calculator" %>
 <style type="text/css">
 .gradient-well-inner{
   max-width: 1200px !important;

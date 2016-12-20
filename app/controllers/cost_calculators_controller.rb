@@ -17,7 +17,7 @@ class CostCalculatorsController < ApplicationController
 		setting = GeneralSetting.last
 		setting.cost_calculator_url = "/cost_calculator?" + URI.encode(params.except!("controller", "action", "cost_calculator", "recipient_one", "recipient_two" , "recipient_three", "recipient_four", "follow_up_email").to_query)
 		setting.save
-		render json: {"message" => "Email Sent to #{recipient_one} #{recipient_two} #{recipient_three}"}
+		render json: {"message" => "Email Sent to #{recipient_one} #{recipient_two} #{recipient_three}", "only_save" => params["only_save"] }
 	end
 
 	def add_calculator_to_campaignmonitor
