@@ -14,7 +14,7 @@ module Groovepacker
         def query(query, body, method)
           response = nil
           trial_count = 0
-          loop do
+          loop do          
             puts "loop #{trial_count}" unless Rails.env=="test"
             begin
               response = send(query, body, method)
@@ -23,7 +23,11 @@ module Groovepacker
               trial_count += 1
               next
             end
-            handle_response(response, trial_count) ? break : trial_count += 1
+            if handle_response(response, trial_count) 
+              break 
+            else
+              trial_count += 1
+            end
             break if trial_count >= 5
           end
           handle_exceptions(response)
@@ -43,11 +47,12 @@ module Groovepacker
 
         def handle_response(response, trial_count)
           successful_response = false
-          if error_status_codes.include?(response.code) ||
-             (response.code == 504 && trial_count == 4) || (response.code == 401 && trial_count == 4) 
+          if error_status_codes.include?(response.code) || (response.code == 504 && trial_count == 4) || (response.code == 401 && trial_count == 4) 
             handle_exceptions(response)
           elsif response.code == 504  
             sleep(5)
+          elsif response.code == 401
+            sleep(2)
           else
             successful_response = true
           end
