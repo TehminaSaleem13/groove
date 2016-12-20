@@ -54,8 +54,13 @@
       var current_href = window.location.href;
       var is_admin = current_href.search("admin.groovepacker.com");
       if(is_admin!=-1) return;
-      FreshWidget.init("", {"queryString": "&widgetType=popup&formTitle=Customer+Support&submitThanks=Thank+you!+We'll+be+in+touch+shortly.", "utf8": "✓", "widgetType": "popup", "buttonType": "text", "buttonText": "Get Support", "buttonColor": "white", "buttonBg": "#73ae0c ", "alignment": "2", "offset": "825px", "submitThanks": "Thank you! We'll be in touch shortly.", "formHeight": "825px", "url": "https://groovepacker.freshdesk.com"} );
+      FreshWidget.init("", {"queryString": "&widgetType=popup&formTitle=Customer+Support&submitThanks=Thank+you!+We'll+be+in+touch+shortly.", "utf8": "✓", "widgetType": "popup", "buttonType": "text", "buttonText": "Get Support", "buttonColor": "white", "buttonBg": "#73ae0c ", "alignment": "2", "offset": "825px", "submitThanks": "Thank you! We'll be in touch shortly.", "formHeight": "500px", "url": "https://groovepacker.freshdesk.com"} );
     });
 </script>
+<style type="text/css">
+  .freshwidget-button{
+    top: 500px !important; 
+  }
+</style>
 </body>
 </html>

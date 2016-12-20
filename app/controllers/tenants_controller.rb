@@ -2,6 +2,8 @@ class TenantsController < ApplicationController
   include PaymentsHelper
   include TenantsHelper
 
+  before_filter :groovepacker_authorize!
+
   def index
     result = admin_list_info
 

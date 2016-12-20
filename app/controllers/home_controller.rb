@@ -17,7 +17,6 @@ class HomeController < ApplicationController
     user = Hash.new
     unless current_user.nil?
       user['username'] = current_user.username
-      user['password'] = current_user.encrypted_password
       user['name'] = current_user.name
       user['view_dashboard'] = current_user.view_dashboard
       user['id'] = current_user.id

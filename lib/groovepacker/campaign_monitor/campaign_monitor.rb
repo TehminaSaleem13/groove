@@ -11,6 +11,11 @@ module Groovepacker
         @client.add_subscriber_to_lists
       end
 
+      def add_cost_calculator_lists(saving, error, email)
+        @client = ::Groovepacker::CampaignMonitor::Client.new
+        @client.add_cost_calculator_lists(saving, error, email)
+      end
+
       def remove_subscriber_from_lists
         @client.remove_subscriber_from_lists
       end

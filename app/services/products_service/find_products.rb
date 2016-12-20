@@ -20,7 +20,6 @@ module ProductsService
         @products = Product.order(@sort_key + ' ' + @sort_order)
         default_query
       end
-
       query_if_no_products
 
       preload_associations(@products)
@@ -46,14 +45,14 @@ module ProductsService
     def expected_sort_keys
       %w(
         sku store_type barcode location_primary location_secondary
-        location_tertiary location_name available_inv cat
+        location_tertiary location_name available_inv cat qty_on_hand
       )
     end
 
     def supported_sort_keys
       %w(
         updated_at name sku status barcode location_primary location_secondary
-        location_tertiary location_name cat available_inv store_type
+        location_tertiary location_name cat available_inv store_type qty_on_hand
       )
     end
 
@@ -216,6 +215,17 @@ module ProductsService
         ( products.id = product_inventory_warehouses.product_id ) \
         #{@kit_query}#{@status_filter_text} \
         ORDER BY product_inventory_warehouses.available_inv \
+        #{@sort_order}#{@query_add}
+      )
+    end
+
+    def sort_by_qty_on_hand
+      %(\
+        SELECT products.* FROM products \
+        LEFT JOIN product_inventory_warehouses ON \
+        ( products.id = product_inventory_warehouses.product_id ) \
+        #{@kit_query}#{@status_filter_text} \
+        ORDER BY (product_inventory_warehouses.available_inv + product_inventory_warehouses.allocated_inv)\
         #{@sort_order}#{@query_add}
       )
     end

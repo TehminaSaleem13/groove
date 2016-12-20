@@ -22,6 +22,7 @@ class Order < ActiveRecord::Base
   after_update :update_inventory_levels_for_items
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
+  after_save :update_tracking_num_value
   validates_uniqueness_of :increment_id
 
   include ProductsHelper
@@ -66,6 +67,13 @@ class Order < ActiveRecord::Base
     bulkaction = Groovepacker::Inventory::BulkActions.new
     bulkaction.process_unprocessed
     true
+  end
+
+  def update_tracking_num_value
+    if self.tracking_num == ""
+      self.tracking_num = nil
+      self.save
+    end
   end
 
   def addnewitems

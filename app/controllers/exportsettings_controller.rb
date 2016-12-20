@@ -80,10 +80,12 @@ class ExportsettingsController < ApplicationController
       end
     end
     unless result['status']
-      CSV.generate do |csv|
+      CSV.open(Rails.root.join('public', 'csv', filename), 'wb') do |csv|
         csv << result['error_messages']
       end
-      filename = 'error.csv'
+      public_url = GroovS3.get_csv_export_exception(filename)
+
+      filename = {url: public_url, filename: filename}
     end
     render json: result
     # send_file filename, :type => 'text/csv'
