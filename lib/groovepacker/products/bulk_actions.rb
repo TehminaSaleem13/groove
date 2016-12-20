@@ -11,8 +11,16 @@ module Groovepacker
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         begin
-          include_association = false
-          products = list_selected_products(params, include_association)
+          products =
+            list_selected_products(params)
+            .includes(:product_kit_skuss, :product_barcodes, :product_skus, :product_kit_activities)
+
+          products.update_all(status: params[:status])
+          products.reload
+
+          eager_loaded_obj = Product.generate_eager_loaded_obj(products)
+
+
           bulk_action.update_attributes(:total => products.length, :completed => 0, :status => 'in_progress')
           (products||[]).find_each(:batch_size => 100) do |product|
             #product = Product.find(single_product['id'])
@@ -23,10 +31,9 @@ module Groovepacker
             end
             bulk_action.update_attributes(:current => product.name)
             current_status = product.status
-            if product.update_column(:status, params[:status])
-              product.reload
+            if product.status == params[:status]
               if product.status !='inactive'
-                if !product.update_product_status && params[:status] == 'active'
+                if !product.update_product_status(nil, eager_loaded_obj) && params[:status] == 'active'
                   result['status'] &= false
                   if product.is_kit == 1
                     result['messages'].push('There was a problem changing kit status for '+
@@ -65,7 +72,18 @@ module Groovepacker
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
 
         begin
-          products = list_selected_products(params)
+          products =
+            list_selected_products(params)
+            .includes(
+              :product_barcodes, :product_skus, :product_cats, :product_images,
+              :store, :product_kit_skuss, :product_inventory_warehousess,
+              order_items: [:order]
+            )
+
+          products_kit_skus =
+            ProductKitSkus.where(option_product_id: products.pluck(:id))
+            .includes(product: :product_kit_skuss)
+
           bulk_action.total = products.length
           bulk_action.completed = 0
           bulk_action.status = 'in_progress'
@@ -92,17 +110,19 @@ module Groovepacker
               end
             end
 
-            ProductKitSkus.where(option_product_id: product.id).each do |product_kit_sku|
-              product_kit_sku.product.status = 'new'
-              product_kit_sku.product.save
-              product_kit_sku.product.product_kit_activities.create(
-                activity_message: "An item with Name #{product.name} and " +
-                  "SKU #{product.primary_sku} has been deleted",
-                username: username,
-                activity_type: 'deleted_item'
-              )
-              product_kit_sku.destroy
-            end
+            products_kit_skus
+              .select{ |pkss| pkss.option_product_id == product.id }
+              .each do |product_kit_sku|
+                product_kit_sku.product.status = 'new'
+                product_kit_sku.product.save
+                product_kit_sku.product.product_kit_activities.create(
+                  activity_message: "An item with Name #{product.name} and " +
+                    "SKU #{product.primary_sku} has been deleted",
+                  username: username,
+                  activity_type: 'deleted_item'
+                )
+                product_kit_sku.destroy
+              end
 
             if product.destroy
               result['status'] &= true
