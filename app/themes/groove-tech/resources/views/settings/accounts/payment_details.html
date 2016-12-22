@@ -43,8 +43,9 @@
     </div>
 
      <div class="col-xs-12">
-       <h3>Error Cost Tracking</h3>
-       <a href="{{cost_calculator_url + '&from_app=true' || '/cost_calculator?from_app=true'}}">Cost Calculator Link</a>
+       <h3>Error Cost Tracking {{cost_calculator_url }}</h3>
+       <a ng-if="cost_calculator_url != null" href="{{cost_calculator_url + '&from_app=true'}}" >Cost Calculator Link</a>
+       <a ng-if="cost_calculator_url == null" href="{{'/cost_calculator?from_app=true'}}" >Cost Calculator Link</a>
      </div>
   </div>
 </div>
