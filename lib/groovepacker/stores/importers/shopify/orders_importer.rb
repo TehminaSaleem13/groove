@@ -14,7 +14,7 @@ module Groovepacker
             response["orders"].each do |order|
               @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
               break if @import_item.status == 'cancelled'
-              import_single_order(order)
+              import_single_order(order) if order.present?
             end
             @credential.update_attributes( :last_imported_at => Time.now ) if @import_item.status != 'cancelled'
             update_orders_status
@@ -32,6 +32,7 @@ module Groovepacker
             end
 
             def import_single_order(order)
+
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               if Order.find_by_increment_id(order["name"])
                 #mark previously imported
