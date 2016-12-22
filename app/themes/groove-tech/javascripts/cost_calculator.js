@@ -321,10 +321,11 @@
       $('#monthly_shipping').val(parseFloat(error_cost_per_day*30).toFixed(2))
 
       var email_text_to_rep = $("#email_text").val();
-      email_text_to_rep = email_text_to_rep.replace(monthly_cost, parseFloat(error_cost_per_day*30).toFixed(2));
-      monthly_cost = parseFloat(error_cost_per_day*30).toFixed(2);
-      $("#email_text").val(email_text_to_rep);
-
+      if (email_text_to_rep != undefined){
+        email_text_to_rep = email_text_to_rep.replace(monthly_cost, parseFloat(error_cost_per_day*30).toFixed(2));
+        monthly_cost = parseFloat(error_cost_per_day*30).toFixed(2);
+        $("#email_text").val(email_text_to_rep);
+      }
       var packer_count = parseFloat($('#packer_count').val()) || 0; 
       $('#gp_cost').html(parseFloat(packer_count*50));
       $('#gp_cost').val(parseFloat(packer_count*50));
@@ -376,7 +377,7 @@
         url: "/email_calculations?" + $("#cost_calc").serialize(),
         data: {recipient_one: recipient_one, recipient_two: recipient_two, monthly_saving: $('#monthly_saving').val(), monthly_shipping: $('#monthly_shipping').val(), recipient_name: $('#recipient_name').val(),
         recipient_three: recipient_three,
-        follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val(), only_save: response},
+        follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val(), cost_header: $("#cost_header").val(), only_save: response},
         dataType: "json"
       }).success(function (message) {
         $('#remove_message').show();
