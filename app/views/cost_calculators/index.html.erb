@@ -375,7 +375,7 @@
             <div class="row">
               <div>
                 <h3>
-               ​<textarea style="max-width: 100%;" id="email_text" name="email_text"  rows="5" cols="87"><%= URI.decode(@params[:email_text]) || 
+               ​<textarea style="max-width: 100%;" id="email_text" name="email_text"  rows="5" cols="87"><%= (URI.decode(@params[:email_text]) rescue nil) || 
             "Hi Guys, 
   Looks like we are spending about $#{@params[:monthly_shipping]} each month on shipping errors. Please follow the link below to see the details of this estimate. You can adjust any of the inputs to refine the calculation." %></textarea>
                 </h3>
