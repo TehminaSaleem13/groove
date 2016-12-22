@@ -1,0 +1,19 @@
+<h3>Shipstation Request Data</h3>
+<% unless @import_exception.nil? %>
+  <p><strong>Tenant Name: </strong><%=Apartment::Tenant.current%></p>
+    <p>
+      <strong>API Endpoint: </strong><%=@end_point %>
+    </p>
+    <p>
+      <strong>Authorization Header: </strong><%=@header %>
+    </p>
+    <p>
+      <strong>JSON: </strong><%=Rack::Utils.parse_nested_query(@query.split("?")[1])%>
+    </p>
+    <p>
+      <strong>URL: </strong><%="#{@end_point}#{@query}" %>
+    </p>
+  <p><strong>Import Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
+  <p><strong>Exception message: </strong><%=@import_exception.inspect%></p>
+<%end%>
+
