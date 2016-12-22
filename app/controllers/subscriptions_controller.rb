@@ -26,6 +26,7 @@ class SubscriptionsController < ApplicationController
     @subscription = create_subscription(params)
     if @subscription
       one_time_payment = params[:shop_name].blank? ? ENV['ONE_TIME_PAYMENT'] : 0
+      one_time_payment = ENV['BC_ONE_TIME_PAYMENT'] if params[:shop_type] == "BigCommerce"
       @subscription.save_with_payment(one_time_payment)
       check_status_and_render
     else
