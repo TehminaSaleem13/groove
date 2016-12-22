@@ -11,6 +11,19 @@ class ImportMailer < ActionMailer::Base
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
 
+  def shipstation_unauthorized(import_exception, query, header, end_point)
+    @end_point = end_point
+    @header = header
+    @query = query
+    @import_exception = import_exception
+    if @import_exception.nil?
+      subject = "Import failed"
+    else
+      subject = "[#{Apartment::Tenant.current}] [#{Rails.env}] SS Failed request data"
+    end
+    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
+  end
+
   def send_products_import_email(products_count, credential)
     @products_count = products_count
     @credential = credential

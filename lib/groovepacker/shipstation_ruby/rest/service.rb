@@ -71,6 +71,7 @@ module Groovepacker
 
         def send(query, body, method)
           debug_output = Rails.env=="development" ? $stdout : false
+          @query = query
           if method == "get"
             HTTParty.get("#{@endpoint}#{query}", headers: headers, debug_output: debug_output)
           else
@@ -79,7 +80,13 @@ module Groovepacker
         end
 
         def handle_exceptions(response)
-          fail Exception, response.inspect if response.code == 401
+          if response.code == 401
+            query = @query
+            end_point = @endpoint
+            current_tenant = Apartment::Tenant.current
+            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "islandwatersports", "gunmagwarehouse", "warmyourfloor"].include?(current_tenant)
+            fail Exception, response.inspect
+          end
           # fail Exception, JSON.parse(response.inspect) if response.code == 401
           # fail Exception, 'Authorization with Shipstation store failed.' \
           #   ' Please check your API credentials' if response.code == 401
