@@ -2,7 +2,8 @@ class Subscription < ActiveRecord::Base
   attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, 
                   :subscription_plan_id, :status, :user_name, :password, :coupon_id,
                   :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
-                  :progress, :customer_subscription_id, :created_at, :updated_at, :interval
+                  :progress, :customer_subscription_id, :created_at, :updated_at, :interval,
+                  :app_charge_id, :tenant_charge_id, :shopify_shop_name, :tenant_data, :shopify_payment_token
   belongs_to :tenant
   has_many :transactions
   include PaymentsHelper
@@ -55,7 +56,8 @@ class Subscription < ActiveRecord::Base
   end
 
   def create_subscribed_plan_if_not_exist
-    interval = self.subscription_plan_id.split("-").first=="an" ? "year" : "month"
+    interval = self.interval
+    # interval = self.subscription_plan_id.split("-").first=="an" ? "year" : "month"
     currency = 'usd'
     subsc_amount = self.amount.to_i
     name = self.subscription_plan_id.titleize

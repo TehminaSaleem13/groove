@@ -42,7 +42,7 @@ class TenantsController < ApplicationController
     current_tenant = Apartment::Tenant.current_tenant
     result = update_plan_ar(type)
     Apartment::Tenant.switch(current_tenant)
-
+    result["shopify_customer"] = Tenant.find(params["basicinfo"]["id"]).subscription.shopify_customer
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }

@@ -55,6 +55,7 @@ Groovepacks::Application.routes.draw do
   post '/delayed_job_reset' => 'delayed_jobs#reset'
   post '/delayed_jobs_update' => 'delayed_jobs#update'
   get '/tenants/delete_summary' => 'tenants#delete_summary'
+  
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
@@ -254,9 +255,11 @@ Groovepacks::Application.routes.draw do
       get 'preferences'
       get 'help'
       post 'get_auth'
-      get 'recurring_application_fee'
       get 'recurring_tenant_charges'
+      get 'update_customer_plan'
       get 'finalize_payment'
+      get 'invalid_request'
+      get 'payment_failed'
     end
   end
 

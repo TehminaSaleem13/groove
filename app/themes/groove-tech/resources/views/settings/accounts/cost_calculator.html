@@ -1,0 +1,79 @@
+<div class="col-lg-10 col-sm-10 general-settings">
+   <h3 style="font-size: 24px; margin-left: 25px; color: rgba(0, 0, 0, 0.6);"><b>Fulfillment Error Cost Calculator</b></h3><br/>
+        <div class="row total" style="width: 100%;">
+          <div ng-if="cost_calculator_url != null" class="col-md-12 col-sm-12 col-xs-12 pd-none" style="padding-top: 15px; width: 80%; margin-left: 100px;">
+            <div class="row" style="margin-bottom: 40px;">
+              <div class="col-md-4 col-sm-4 col-xs-12 text-center right">
+                <div class="box overridebox grey_color cost_border">
+                  <h3>Total Cost per error</h3>
+                  <h1><strong>$<span id="total_cost">{{cost.total_cot_per_error}}</span></strong></h1>
+                </div>
+              </div>
+              <div class="col-md-3 col-sm-3 col-xs-12 text-center right">
+                <div class="box overridebox grey_color cost_border">
+                  <h3>Error cost per day</h3>
+                  <h1><strong>$<span id ="error_cost_per_day">{{cost.error_cost_per_day}}</span></strong></h1>
+                </div>
+              </div>
+              <div class="col-md-5 col-sm-5 col-xs-12 text-center right">
+                <div class="box overridebox grey_color cost_border">
+                  <h3>Monthly cost of shipping errors</h3>
+                  <h1 class="data_div" style="color: #be1e2d;"><strong>$<span id="monthly_shipping">{{cost.monthly_shipping}}</span></strong></h1>
+                </div>
+              </div>
+            </div>
+            <div class="row">
+              <div class="col-md-5 col-sm-5 col-xs-12 text-center right">
+                <div class="box overridebox grey_color cost_border">
+                  <h3>Montly Cost of GroovePacker</h3>
+                  <h1><strong>$<span id="gp_cost">{{cost.gp_cost}}</span></strong></h1>
+                </div>
+              </div>
+              <div class="col-md-1 col-sm-1 col-xs-12"></div>
+              <div class="col-md-6 col-sm-6 col-xs-12 text-center right pd-lft-nn">
+                <div class="box overridebox grey_color cost_border">
+                  <h3>Expected Savings Per month using GroovePacker</h3>
+                  <h1 class="data_div" style="color: #006838;"><strong>$<span id="monthly_saving">{{cost.monthly_saving}}</span></strong></h1>
+                </div>
+              </div>
+            </div>              
+            <div class="text-center ng-scope active" style="margin-top: 40px;">
+	            <a href="{{cost_calculator_url + '&from_app=true'}}"><span style="background-color: #558641;color: #fff; padding: 3px 10px; cursor: pointer; border-radius: 11px; font-size: 18px;"><b>Refine Calculator Link</b></span>
+	            </a>
+	   				</div>
+        	</div>
+
+          <div ng-if="cost_calculator_url == null" class="col-md-12 col-sm-12 col-xs-12 pd-none text-center" style="margin-left: 80px; width:85%; padding-right: 50px; padding-left: 50px; padding: 15px; line-height: 25px; margin-bottom: 20px; background-color: #d0cfcf; margin-top: 20px;">
+          	<span class="text-center" style="text-align: center; font-size: 15px;"><b>The cost calculator allows you to quickly estimate the cost of shipping errors for your business so you can see what is saved by eliminating them. Please enter your shipping error percentage prior to implementing GroovePacker. In a coming release we will include your current packing accuracy rate calculated using the actual exceptions that you record for orders in GroovePacker. If you are not already recording packing exceptions in GroovePacker you can begin doing so now and this data will be available for the calculator. </b></span>
+          </div>
+          <div ng-if="cost_calculator_url == null" class="text-center" style="display: table;width: 100%; padding-top: 40px;">
+          	<a href="{{'/cost_calculator?from_app=true'}}"><span style="background-color: #558641;color: #fff; padding: 3px 10px; cursor: pointer; border-radius: 11px; font-size: 18px;"><b>Click Here to Calculate Costs</b></span>
+	   			</a>
+	   	  </div>
+        </div>
+ </div>
+
+<style type="text/css">
+	.grey_color{
+		background-color: #d1d3d4;
+	} 
+
+	.cost_border{
+		border-color:#afaeae;
+		border-radius:7px;
+	}
+
+	h3 {
+		font-size: 15px;
+	}
+
+	h1 {
+		font-size: 27px
+	}
+
+  .box{
+    border: 1px solid #afaeae !important;
+    border-left: auto !important;
+    border-right: auto !important;
+  }
+</style>

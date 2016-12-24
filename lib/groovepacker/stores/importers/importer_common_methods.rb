@@ -13,8 +13,8 @@ module Groovepacker
           else
             product = ProductSku.where(sku: r_product["sku"]).first.product
           end
+          product.reload
           make_product_intangible(product)
-          product.save
           product.set_product_status
           return product
 		    end        
@@ -44,16 +44,16 @@ module Groovepacker
 
         def create_new_product(item, sku)
           #create and import product
-          product = Product.new(name: item["name"], store: @credential.store, store_product_id: 0)
-          product.product_skus.build(sku: sku)
+          product = Product.create(name: item["name"], store: @credential.store, store_product_id: 0)
+          product.product_skus.create(sku: sku)
 
           if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
-            product.product_barcodes.build(barcode: sku)
+            product.product_barcodes.create(barcode: sku)
           end
 
           #Build Image
           unless item["imageUrl"].nil? || product.product_images.length > 0
-            product.product_images.build(image: item["imageUrl"])
+            product.product_images.create(image: item["imageUrl"])
           end
           product.save
           unless item["warehouseLocation"].nil?

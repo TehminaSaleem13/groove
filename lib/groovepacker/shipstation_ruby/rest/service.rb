@@ -14,7 +14,7 @@ module Groovepacker
         def query(query, body, method)
           response = nil
           trial_count = 0
-          loop do
+          loop do          
             puts "loop #{trial_count}" unless Rails.env=="test"
             begin
               response = send(query, body, method)
@@ -23,7 +23,11 @@ module Groovepacker
               trial_count += 1
               next
             end
-            handle_response(response, trial_count) ? break : trial_count += 1
+            if handle_response(response, trial_count) 
+              break 
+            else
+              trial_count += 1
+            end
             break if trial_count >= 5
           end
           handle_exceptions(response)
@@ -43,11 +47,12 @@ module Groovepacker
 
         def handle_response(response, trial_count)
           successful_response = false
-          if error_status_codes.include?(response.code) ||
-             (response.code == 504 && trial_count == 4) || (response.code == 401 && trial_count == 4) 
+          if error_status_codes.include?(response.code) || (response.code == 504 && trial_count == 4) || (response.code == 401 && trial_count == 4) 
             handle_exceptions(response)
           elsif response.code == 504  
             sleep(5)
+          elsif response.code == 401
+            sleep(2)
           else
             successful_response = true
           end
@@ -66,6 +71,7 @@ module Groovepacker
 
         def send(query, body, method)
           debug_output = Rails.env=="development" ? $stdout : false
+          @query = query
           if method == "get"
             HTTParty.get("#{@endpoint}#{query}", headers: headers, debug_output: debug_output)
           else
@@ -74,7 +80,13 @@ module Groovepacker
         end
 
         def handle_exceptions(response)
-          fail Exception, response.inspect if response.code == 401
+          if response.code == 401
+            query = @query
+            end_point = @endpoint
+            current_tenant = Apartment::Tenant.current
+            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "islandwatersports", "gunmagwarehouse", "warmyourfloor"].include?(current_tenant)
+            fail Exception, response.inspect
+          end
           # fail Exception, JSON.parse(response.inspect) if response.code == 401
           # fail Exception, 'Authorization with Shipstation store failed.' \
           #   ' Please check your API credentials' if response.code == 401

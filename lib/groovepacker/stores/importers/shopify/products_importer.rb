@@ -11,6 +11,8 @@ module Groovepacker
             return if response["products"].blank?
             response["products"].each do |product|
               create_single_product(product)
+              product = product.reload rescue product 
+              product.set_product_status
             end
             update_orders_status
           end

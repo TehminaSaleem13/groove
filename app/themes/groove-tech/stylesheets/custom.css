@@ -415,9 +415,17 @@ body{
   background: rgba(115, 114, 114, .4);
 }
 
+.footer_out_box{
+  background: rgba(115, 114, 114, .2);
+}
+
 .out_box_margin{
   margin-top: 20px !important; 
   margin-bottom: 10px;
+}
+
+.email_body{
+  background: rgba(114, 114, 114, 0.3);
 }
 
 .box_margin{margin-top: 20px !important;}
@@ -437,4 +445,10 @@ body{
   left: auto;
 }
 
+.display_flex{
+  display: flex;
+}
+.green_color{
+  color: #71a913;
+}
 /* Error Cost Calculator page css stop */
