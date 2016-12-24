@@ -144,6 +144,10 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'ho
         url: '/card_details', templateUrl: '/assets/views/settings/accounts/payment_details.html',
         controller: 'paymentsCtrl'
       })
+      .state('settings.accounts.cost_calculator', {
+        url: '/cost_calculator', templateUrl: '/assets/views/settings/accounts/cost_calculator.html',
+        controller: 'costCalculatorCtrl'
+      })
 
       .state('settings.export', {url: '/export', template: '<div ui-view></div>', abstract: true})
       .state('settings.export.backup_restore', {

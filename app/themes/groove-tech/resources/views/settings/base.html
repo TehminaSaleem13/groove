@@ -59,11 +59,12 @@
           </accordion-group>
           <accordion-group is-open="tabs[4].open">
             <accordion-heading>
-              <a ui-sref="settings.accounts.card_details">Account Settings</a>
+            <a ui-sref="settings.accounts.card_details">Account Settings</a>
             </accordion-heading>
-            <li ng-class="{active:current_page =='show_card_details'}" ui-sref="settings.accounts.card_details"
-            ui-sref-opts="{reload: true}">Payment
-              Method
+            <li ng-class="{active:current_page=='show_card_details'}" ui-sref="settings.accounts.card_details"
+            ui-sref-opts="{reload: true}">Payment Method
+            </li>
+            <li ng-class="{active:current_page=='cost_calculator'}" ui-sref="settings.accounts.cost_calculator">Cost Calculator
             </li>
           </accordion-group>
         </accordion>
