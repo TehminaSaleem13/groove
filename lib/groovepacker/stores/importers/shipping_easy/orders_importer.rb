@@ -76,7 +76,7 @@ module Groovepacker
               file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item["ext_line_item_id"]}"
               tenant = Apartment::Tenant.current
               GroovS3.create_image(tenant, file_name, image_data, 'public_read')
-              s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/#{image}/#{file_name}"
+              s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
               return s3_image_url
             end
 
