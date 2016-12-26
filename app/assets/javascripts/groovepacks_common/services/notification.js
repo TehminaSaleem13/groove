@@ -7,6 +7,7 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
     default: 0
   };
   var notifications = {};
+  var close = 0;
 
   var delete_notif = function (id) {
     delete notifications[id];
@@ -23,10 +24,12 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
     );
   };
 
-  var notify = function (msgs, type, close = 0) {
+  var notify = function (msgs, type) {
+    
     notification_id = localStorage.getItem('notification_id');
-    if (close == "2"){
-      delete_notif(notification_id)
+    if (close == 2){
+      delete_notif(notification_id);
+      close == 0;
     }
     if (typeof type != "number" || typeof notif_types[type] == "undefined") {
       type = notif_types["default"];
@@ -47,6 +50,7 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
         notifications[id] = {show: true, alert: alert, msg: msgs[i]};
         if (close!=1) {
           queue_remove(id);
+          close == 0;
         } else {
           localStorage.setItem('notification_id', id);
         }
