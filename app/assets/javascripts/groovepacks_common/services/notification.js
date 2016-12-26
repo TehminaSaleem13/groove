@@ -23,7 +23,7 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
     );
   };
 
-  var notify = function (msgs, type, close=0) {
+  var notify = function (msgs, type, close = 0) {
     notification_id = localStorage.getItem('notification_id');
     if (close == "2"){
       delete_notif(notification_id)
