@@ -7,7 +7,6 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
     default: 0
   };
   var notifications = {};
-  var close = 0;
 
   var delete_notif = function (id) {
     delete notifications[id];
@@ -24,12 +23,14 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
     );
   };
 
+  var close = function(close){
+    $rootScope.close_notify_no = close; 
+  }
+
   var notify = function (msgs, type) {
-    
     notification_id = localStorage.getItem('notification_id');
-    if (close == 2){
+    if ($rootScope.close_notify_no == 2){
       delete_notif(notification_id);
-      close == 0;
     }
     if (typeof type != "number" || typeof notif_types[type] == "undefined") {
       type = notif_types["default"];
@@ -38,6 +39,7 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
     if (typeof msgs == "string") {
       msgs = [msgs];
     }
+    
     if(msgs.length <= 5) {
       for (var i = 0; i < msgs.length; i++) {
         for (var notif_id in notifications) {
@@ -48,9 +50,8 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
         }
         id++;
         notifications[id] = {show: true, alert: alert, msg: msgs[i]};
-        if (close!=1) {
+        if ($rootScope.close_notify_no!=1) {
           queue_remove(id);
-          close == 0;
         } else {
           localStorage.setItem('notification_id', id);
         }
@@ -65,10 +66,12 @@ groovepacks_services.factory("notification", ['$timeout', '$rootScope', '$window
       notifications[0] = {show: true, alert: alert, msg: finalMessage};
       queue_remove(0);
     }
+    $rootScope.close_notify_no = 0;
     $rootScope.$broadcast('notification', {data: notifications});
   };
   return {
     notify: notify,
+    close: close,
     server_error: function (data) {
       if (typeof data == 'object' && typeof data['error'] != "undefined" && data['error'] == "You need to sign in or sign up before continuing.") {
         $window.location.href = '/users/sign_in';
