@@ -412,7 +412,7 @@
 
             <div class="controls col-sm-9 form-inline">
               <div toggle-switch ng-model="general_settings.single.scheduled_order_import"
-                   groov-click="update_settings()"></div>
+                   groov-click="update_settings()" class="pull-left"></div>
               <div ng-if="general_settings.single.scheduled_order_import==true && general_settings.single.scheduled_import_toggle==true" class="controls col-sm-2" dropdown>
                 <button class="dropdown-toggle groove-button">
                   {{general_settings.single.schedule_import_mode}} 

@@ -5,25 +5,9 @@ namespace :doo do
     tenants.each do |tenant|
       Apartment::Tenant.switch tenant.name	
       setting = GeneralSetting.last
-      day = DateTime.now.strftime("%A")
-      result = false
-      if day=='Sunday' && setting.import_orders_on_sun
-        result = true
-      elsif day=='Monday' && setting.import_orders_on_mon
-        result = true
-      elsif day=='Tuesday' && setting.import_orders_on_tue
-        result = true
-      elsif day=='Wednesday' && setting.import_orders_on_wed
-        result = true
-      elsif day=='Thursday' && setting.import_orders_on_thurs
-        result = true
-      elsif day=='Friday' && setting.import_orders_on_fri
-        result = true
-      elsif day=='Saturday' && setting.import_orders_on_sat
-        result = true
-      end
+      result = setting.should_import_orders_today
 
-      if result == true
+      if result == true && setting.schedule_import_mode == "Hourly"
         order_summary_info = OrderImportSummary.new
         order_summary_info.user_id = nil
         order_summary_info.status = 'not_started'
