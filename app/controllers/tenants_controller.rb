@@ -40,7 +40,7 @@ class TenantsController < ApplicationController
     current_tenant = Apartment::Tenant.current_tenant
     result = update_plan_ar(type)
     Apartment::Tenant.switch(current_tenant)
-    result["shopify_customer"] = Tenant.find(params["basicinfo"]["id"]).subscription.shopify_customer
+    result["shopify_customer"] = Tenant.find(params["basicinfo"]["id"]).subscription.shopify_customer rescue nil
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }
@@ -65,6 +65,19 @@ class TenantsController < ApplicationController
       format.html # show.html.erb
       format.json { render json: result }
     end
+  end
+
+  def update_import_mode
+    tenant = Tenant.find(params["tenant"])
+    Apartment::Tenant.switch tenant.name
+    setting = GeneralSetting.last
+    tenant.scheduled_import_toggle = !tenant.scheduled_import_toggle
+    tenant.save
+    if tenant.scheduled_import_toggle == false
+      setting.schedule_import_mode = "Daily"
+      setting.save
+    end
+    render json: {}
   end
 
   def create_duplicate

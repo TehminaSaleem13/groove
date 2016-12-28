@@ -353,6 +353,7 @@ module Groovepacker
         tenant_hash['note'] = tenant.note
         tenant_hash['url'] = tenant.name + '.groovepacker.com'
         tenant_hash['is_modified'] = tenant.is_modified
+        tenant_hash['scheduled_import_toggle'] = tenant.scheduled_import_toggle
       end
 
       def retrieve_plan_data(tenant_name, tenant_hash)
@@ -394,7 +395,7 @@ module Groovepacker
       end
 
       def build_query(search, sort_key, sort_order)
-        'SELECT tenants.id as id, tenants.name as name, tenants.note as note, tenants.is_modified as is_modified, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
+        'SELECT tenants.id as id, tenants.name as name, tenants.scheduled_import_toggle as scheduled_import_toggle, tenants.note as note, tenants.is_modified as is_modified, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
           FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id)
             WHERE
               (

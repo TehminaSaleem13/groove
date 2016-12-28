@@ -413,9 +413,20 @@
             <div class="controls col-sm-9 form-inline">
               <div toggle-switch ng-model="general_settings.single.scheduled_order_import"
                    groov-click="update_settings()"></div>
+              <div ng-if="general_settings.single.scheduled_order_import==true && general_settings.single.scheduled_import_toggle==true" class="controls col-sm-2" dropdown>
+                <button class="dropdown-toggle groove-button">
+                  {{general_settings.single.schedule_import_mode}} 
+                  <span class="caret"></span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a class="dropdown-toggle" ng-click="change_opt('schedule_import_mode','Daily')">Daily</a></li>
+                  <li><a class="dropdown-toggle" ng-click="change_opt('schedule_import_mode','Hourly')">Hourly</a></li>
+                </ul>
+              </div>
             </div>
+
           </div>
-          <div class="form-group" ng-show="general_settings.single.scheduled_order_import== '1'">
+          <div ng-if="general_settings.single.schedule_import_mode != 'Hourly'" class="form-group" ng-show="general_settings.single.scheduled_order_import== '1'">
             <label class="control-label col-sm-3">Schedule Time for Import-orders</label>
 
             <div class="controls col-sm-9">

@@ -17,6 +17,7 @@ groovepacks_services.factory('generalsettings', ['$http', 'notification', functi
           settings.single = data.data.settings;
           settings.single.time_zones = data.time_zone
           settings.single.current_time = data.current_time
+          settings.single.scheduled_import_toggle = data.scheduled_import_toggle
           settings.single.time_to_send_email = new Date(data.data.settings.time_to_send_email);
           if(data.user_sign_in_count<2 && data.data.settings.time_zone == null) {
             time_zone = {}

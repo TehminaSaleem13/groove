@@ -223,6 +223,12 @@ groovepacks_admin_controllers.
         tenants.single.delete_summary(tenant);
       }
 
+
+      myscope.update_import_mode = function(tenant){
+        tenant = tenant["id"]
+        tenants.single.update_import_mode(tenant);
+      }
+
       myscope.init = function () {
         myscope.do_load_tentants = false;
         $scope._can_load_tentants = true;
@@ -305,6 +311,7 @@ groovepacks_admin_controllers.
               show_popover: myscope.show_popover,
               hide_popover: myscope.hide_popover,
               delete_summary: myscope.delete_summary,
+              update_import_mode: myscope.update_import_mode,
               click: $scope.open_notes
             }
 
@@ -406,9 +413,14 @@ groovepacks_admin_controllers.
               name: "Delate Summary",
               editable: false,
               transclude: '<button confirm-click="Are you sure? You want to delete import summary!" ng-click="options.editable.functions.delete_summary(row[field],$event)">Delete</button>'
+            },
+            scheduled_import_toggle: {
+              name: "Import Option",
+              editable: false,
+              transclude: '<div toggle-switch ng-model=row["scheduled_import_toggle"] ng-change="options.editable.functions.update_import_mode(row)"></div>'
             }
           }
-        };
+        }; 
 
         myscope.initializing = true;
         $scope.$watch('tenants.setup.search', function () {

@@ -21,7 +21,7 @@ class GeneralSetting < ActiveRecord::Base
                   :tracking_error_info_not_found, :custom_field_one,
                   :custom_field_two, :export_csv_email,
                   :show_primary_bin_loc_in_barcodeslip,
-                  :time_zone, :auto_detect
+                  :time_zone, :auto_detect, :schedule_import_mode
   # validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
   validates :email_address_for_packer_notes, :format => { :with => /(\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})(,\s*([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,}))*\z)/i }, :allow_blank => true
   after_save :send_low_inventory_alert_email
@@ -100,8 +100,7 @@ class GeneralSetting < ActiveRecord::Base
       job_scheduled = false
       date = DateTime.now
       for i in 0..6
-        job_scheduled = self.schedule_job(date,
-                                          self.time_to_import_orders, 'import_orders')
+        job_scheduled = self.schedule_job(date, self.time_to_import_orders, 'import_orders')
         date = date + 1.day
         break if job_scheduled
       end

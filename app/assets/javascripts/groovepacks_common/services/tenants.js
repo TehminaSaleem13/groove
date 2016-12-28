@@ -277,6 +277,10 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
     $http.get('tenants/delete_summary.json?tenant=' + tenant);
   }
 
+  var update_import_mode = function(tenant){
+    $http.get('tenants/update_import_mode.json?tenant=' + tenant); 
+  }
+
   //Public facing API
   return {
     model: {
@@ -301,7 +305,8 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
       rollback: rollback_single_tenant,
       duplicate: duplicate_tenant,
       popover: construct_popover,
-      delete_summary: delete_import_summary
+      delete_summary: delete_import_summary,
+      update_import_mode: update_import_mode
     }
   };
 }]);

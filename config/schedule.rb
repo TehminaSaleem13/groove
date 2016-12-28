@@ -53,6 +53,9 @@ every 1.day, :at => '01:00 am' do
   rake "doo:delete_old_orders"
 end
 
+every 60.minutes  do
+  rake "doo:schedule_hourly_import"
+end
 # every 1.day, :at => '03:00 am' do
 #   runner "backup perform --trigger db_backup"
 # end
