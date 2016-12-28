@@ -73,7 +73,7 @@ class ShopifyController < ApplicationController
     app_charges = ShopifyAPI::ApplicationCharge.new()
     app_charges.attributes = {
         "name" => "One Time Charge for Deployment",
-        "price" => 500.0,
+        "price" => 1.0,
         # "return_url" => "http://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
         "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
     }
