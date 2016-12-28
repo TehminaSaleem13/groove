@@ -90,7 +90,7 @@ module Groovepacker
           response = @service.query('/accounts/listtags', nil, "get")
           tags = response.parsed_response
           unless tags.blank?
-            tags.each {|tag| tagslist_by_name[tag["name"]] = tag["tagId"]} rescue nil
+            tags.each {|tag| tagslist_by_name[tag["name"].downcase] = tag["tagId"]} rescue nil
           end
           return tagslist_by_name
         end
@@ -98,7 +98,7 @@ module Groovepacker
         def get_tag_id(tag)
           response = @service.query('/accounts/listtags', nil, "get")
           tags = response.parsed_response
-          index = tags.empty? ? nil : tags.index { |x| x['name'] == tag }
+          index = tags.empty? ? nil : tags.index { |x| x['name'].downcase == tag.downcase }
           index.nil? ? -1 : tags[index]['tagId']
         end
 

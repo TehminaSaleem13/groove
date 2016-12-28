@@ -9,16 +9,20 @@ module Groovepacker
             client = handler[:store_handle]
             result = {
               verification_result: true,
-              message: nil
+              message: ""
             }
             tags.each do |tag|
               if client.get_tag_id(tag) == -1
                 result[:verification_result] = false
-                result[:message] = "#{tag} Tag is not available"
+                result[:message] << ", " if result[:message].present?  
+                result[:message] << "#{tag} Tag not found "
+              else
+                result[:message] << ", " if result[:message].present?  
+                result[:message] << "#{tag} Tag found "
               end
             end
-            result[:message] =
-              "Tags are available in your shipstation account." if result[:verification_result]
+            # result[:message] =
+            #   "Tags are available in your shipstation account." if result[:verification_result]
             result
           end
         end

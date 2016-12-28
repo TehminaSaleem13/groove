@@ -149,11 +149,11 @@ module Groovepacker
             end
 
             def gp_ready_tag_id
-              @gp_ready_tag_id ||= ss_tags_list[@credential.gp_ready_tag_name] || -1
+              @gp_ready_tag_id ||= ss_tags_list[@credential.gp_ready_tag_name.downcase] || -1
             end
 
             def gp_imported_tag_id
-              @gp_imported_tag_id ||= ss_tags_list[@credential.gp_imported_tag_name] || -1
+              @gp_imported_tag_id ||= ss_tags_list[@credential.gp_imported_tag_name.downcase] || -1
             end
 
             def init_shipping_address(shipstation_order, order)
