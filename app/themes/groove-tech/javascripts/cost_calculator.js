@@ -370,14 +370,14 @@
     var send_email = function (response) {
       var recipient_one = $('#recipient_one').val();
       var recipient_two = $('#recipient_two').val();
-      var recipient_three = $('#recipient_three').val()
+      var recipient_three = $('#recipient_three').val();
       $.ajax({
         type: "GET",
         contentType: "application/json; charset=utf-8",
         url: "/email_calculations?" + $("#cost_calc").serialize(),
         data: {gp_cost: $("#gp_cost").val(), monthly_shipping: $("#monthly_shipping").val(), error_cost_per_day: $("#error_cost_per_day").val(), total_cost: $("#total_cost").val(), recipient_one: recipient_one, recipient_two: recipient_two, monthly_saving: $('#monthly_saving').val(), monthly_shipping: $('#monthly_shipping').val(), recipient_name: $('#recipient_name').val(),
         recipient_three: recipient_three,
-        follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val(), cost_header: $("#cost_header").val(), only_save: response}, 
+        follow_up_email: $('#follow_up_email').is(':checked'), email_text: $("#email_text").val(), cost_header: $("#cost_header").html(), only_save: response}, 
         dataType: "json"
       }).success(function (message) {
         $('#remove_message').show();

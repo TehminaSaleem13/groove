@@ -4,10 +4,11 @@
       <div>
         <h4 style="width:100%; color: #333333">
           <b>
-            <textarea class="text-center" id="cost_header" name="cost_header" style="max-width: 100%;"  rows="1" cols="130"><%=
+            <div contenteditable="true" class="text-center" id="cost_header" name="cost_header" style="max-width: 100%; background-color: white;"  rows="1" cols="130">
+            <%=
               (URI.decode(@params[:cost_header]) rescue nil) ||
               'Modify the estimates below to match your costs and see what your company is currently spending on errors.' %>
-            </textarea>
+            </div>
           </b>
         </h4>
       </div>
