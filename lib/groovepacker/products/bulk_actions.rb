@@ -13,7 +13,10 @@ module Groovepacker
         begin
           products =
             list_selected_products(params)
-            .includes(:product_kit_skuss, :product_barcodes, :product_skus, :product_kit_activities)
+            .includes(
+              :product_kit_skuss, :product_barcodes,
+              :product_skus, :product_kit_activities, :product_inventory_warehousess
+            )
 
           products.update_all(status: params[:status])
           products.reload

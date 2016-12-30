@@ -193,7 +193,10 @@ class ProductsController < ApplicationController
   def generate_barcode
     @products =
       list_selected_products(params)
-      .includes(:product_kit_skuss, :product_barcodes, :product_skus, :product_kit_activities)
+      .includes(
+        :product_kit_skuss, :product_barcodes, :product_skus,
+        :product_kit_activities, :product_inventory_warehousess
+      )
 
     eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
 
