@@ -24,7 +24,8 @@ module ScanPack
       @scanpack_settings = ScanPackSetting.first
     end
 
-    def run(clicked, serial_added)
+    def run(clicked, serial_added, multibarcode=false)
+      @multibarcode = multibarcode
       case true
       when @id.blank? || @input.blank?
         set_error_messages('Please specify barcode and order id to confirm purchase code')
@@ -145,7 +146,11 @@ module ScanPack
             type_in_count = @typein_count.to_i + 1
           end
         end
-        @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1
+        if @multibarcode
+          @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity}", @current_user.username)
+        else
+          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1
+        end
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1

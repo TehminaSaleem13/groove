@@ -52,6 +52,7 @@ groovepacks_controllers.
             myscope.single = {};
             angular.copy(scope.products.single, myscope.single);
           }
+          scope.multipackbarcode_count = Object.keys(scope.products.single.basicinfo.multibarcode).length
         });
       };
 
@@ -97,6 +98,7 @@ groovepacks_controllers.
             }
           }
         });
+
         kit_modal.result.finally(function () {
           myscope.product_single_details(scope.products.single.basicinfo.id);
           myscope.add_hotkeys();
@@ -217,6 +219,32 @@ groovepacks_controllers.
         }
       };
 
+      myscope.right_key = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var tabs_len = scope.modal_tabs.length - 1;
+        for (var i = 0; i <= tabs_len; i++) {
+          if (scope.modal_tabs[i].active) {
+            //scope.modal_tabs[i].active = false;
+            scope.modal_tabs[((i == tabs_len) ? 0 : (i + 1))].active = true;
+            break;
+          }
+        }
+      };
+
+      myscope.left_key = function (event) {
+        event.preventDefault();
+        event.stopPropagation();
+        var tabs_len = scope.modal_tabs.length - 1;
+        for (var i = 0; i <= tabs_len; i++) {
+          if (scope.modal_tabs[i].active) {
+            //scope.modal_tabs[i].active = false;
+            scope.modal_tabs[((i == 0) ? tabs_len : (i - 1))].active = true;
+            break;
+          }
+        }
+      };
+
       myscope.add_hotkeys = function () {
         hotkeys.del('up');
         hotkeys.del('down');
@@ -226,11 +254,18 @@ groovepacks_controllers.
             combo: 'up',
             description: 'Previous product',
             callback: myscope.up_key
-          })
-            .add({
+          }).add({
               combo: 'down',
               description: 'Next product',
               callback: myscope.down_key
+            }).add({
+              combo: 'left',
+              description: 'Previous tab',
+              callback: myscope.left_key
+            }).add({
+              combo: 'right',
+              description: 'Next tab',
+              callback: myscope.right_key
             }).add({
               combo: 'esc',
               description: 'Save and close modal',
@@ -247,6 +282,11 @@ groovepacks_controllers.
           myscope.product_single_details(scope.products.single.basicinfo.id);
         });
       };
+
+      scope.append_multipack_barcode = function(){
+        scope.multipackbarcode_count = scope.multipackbarcode_count + 1;
+        scope.products.single.basicinfo.multibarcode[scope.multipackbarcode_count] = {"barcode":null,"packcount":null, "id":null};
+      }
 
       scope.update_product_sync_options = function (post_fn, auto) {
         //console.log(scope.products.single);
@@ -322,6 +362,8 @@ groovepacks_controllers.
         }
       };
 
+
+
       myscope.init = function () {
         scope.translations = {
           "tooltips": {
@@ -342,7 +384,7 @@ groovepacks_controllers.
         };
         groov_translator.translate('products.modal', scope.translations);
 
-
+        scope.multipackbarcode_count = 1;
         scope.confirmation_setting_text = "Ask someone with \"Edit General Preferences\" permission to change the setting in <b>General Settings</b> page if you need to override it per product";
         if (auth.can('edit_general_prefs')) {
           scope.general_settings = generalsettings.model.get();
@@ -369,7 +411,6 @@ groovepacks_controllers.
         scope.custom_identifier = Math.floor(Math.random() * 1000);
         scope.products = product_data;
         scope.products.single.post_fn = null;
-
         /**
          * Public properties
          */
@@ -378,12 +419,34 @@ groovepacks_controllers.
         scope.kit_products = products.model.get();
         scope.$watch('products.single.productkitskus', function () {
           if (typeof scope.products.single.basicinfo != "undefined" && scope.products.single.basicinfo.is_kit == 1) {
+            if (scope.warehouses.list.length != 1){
+              scope.modal_tabs[2].active = true;
+            }
             scope.kit_products.list = [];
             for (var i = 0; i < scope.products.single.productkitskus.length; i++) {
               scope.kit_products.list.push({id: scope.products.single.productkitskus[i].option_product_id});
             }
           }
         });
+        
+        //All tabs
+        scope.modal_tabs = [
+          {
+            active: true,
+            heading: "Product Info",
+            templateUrl: '/assets/views/modals/product/product_info.html'
+          },
+          {
+            active: false,
+            heading: "Scan & Pack Options",
+            templateUrl: '/assets/views/modals/product/scan_and_pack.html'
+          },
+          {
+            active: false,
+            heading: "Inventory/Kit Options",
+            templateUrl: '/assets/views/modals/product/inventory_and_kit.html'
+          }
+        ];
 
 
         /**

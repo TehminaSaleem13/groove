@@ -1,0 +1,204 @@
+<div class="container-fluid form-horizontal">
+      <div class="row" ng-show="products.single.unacknowledged_kit_activities.length > 0">
+        <div class="col-sm-12">
+          <fieldset>
+            <h4>There have been changes to the kit. Kindly acknowledge the activity if the change is expected or contact
+              your administrator</h4>
+                  <span ng-repeat="activity in products.single.unacknowledged_kit_activities">
+                      <div class="alert alert-acknowledge" ng-show="activity.activity_type=='deleted_item'">
+                        <div class="pull-right">
+                          <button class="btn btn-info btn-xs"
+                                  ng-click="acknowledge_activity(activity.id)">Acknowledge
+                          </button>
+                        </div>
+                        <h5>{{ activity.activitytime | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+                        {{ activity.activity_message}} - by: {{ activity.username }}
+                      </div>
+                  </span>
+          </fieldset>
+        </div>
+      </div>
+      <table class="product_single_top_table">
+        <tr>
+          <td>
+            <h4>{{products.single.basicinfo.name}}</h4>
+            <h4>SKU# {{products.single.skus[0].sku}}</h4>
+          </td>
+          <td class="col-sm-6">
+            <p ng-show="products.single.basicinfo.is_kit==0">
+              <i class="icon-large glyphicon glyphicon-briefcase"></i>
+              <a href="" ng-click="products.single.basicinfo.is_kit=1;update_single_product();">Change this product to
+                a kit</a>
+            </p>
+
+            <p ng-show="products.single.basicinfo.is_kit==1">
+              <i class="icon-large glyphicon glyphicon-random"></i>
+              <a href="" ng-click="products.single.basicinfo.is_kit=0;update_single_product();">Change this kit back to
+                a product</a>
+            </p>
+
+            <p ng-show="products.single.basicinfo.is_kit==0">
+              <i class="icon-large glyphicon glyphicon-export"></i>
+              <a href="" ng-click="product_alias('alias',[],products.single.basicinfo.id)">Make this product an alias of
+                another product</a>
+            </p>
+
+            <p><i class="icon-large glyphicon glyphicon-import"></i>
+              <a href="" ng-click="product_alias('master_alias',[],products.single.basicinfo.id)">Choose aliases of this
+                product</a> &nbsp;&nbsp;
+              <i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                 popover-placement="bottom" groov-popover="{{translations.tooltips.master_alias}}"></i></p>
+          </td>
+          <td>
+            <h5>&nbsp;&nbsp;<b> Product Status </b></h5>
+          <!--   <div class="controls col-sm-1" dropdown>
+              <button class="dropdown-toggle groove-button">
+                {{products.single.basicinfo.status}}
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="update_single_product()" ng-model="products.single.basicinfo.status" value="active">Active</a></li>
+                <li><a class="dropdown-toggle" ng-click="update_single_product()" ng-model="products.single.basicinfo.status" value="inactive">Inactive</a></li>
+                <li><a class="dropdown-toggle" ng-click="update_single_product()" ng-model="products.single.basicinfo.status" value="new">New</a></li>
+              </ul>
+            </div> -->
+            <div class="col-sm-2 col-lg-2" dropdown ng-show="products.single.basicinfo.status">
+              <button style="border-radius: 4px;" class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':products.single.basicinfo.status=='active',
+                         'label-warning':products.single.basicinfo.status=='inactive',
+                         'label-default':products.single.basicinfo.status=='new'}">
+                <span ng-show="products.single.basicinfo.status=='active'">Active</span>
+                <span ng-show="products.single.basicinfo.status=='inactive'">Inactive</span>
+                <span ng-show="products.single.basicinfo.status=='new'">New</span>
+                <span class="caret"></span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_setting('status','active')">Active</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('status','inactive')">Inactive</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('status','new')"> New</a></li>
+              </ul>
+              &nbsp;
+            </div>
+
+
+
+
+<!-- 
+            <div class="radio">
+              <label class="control-label"><input type="radio" ng-change="update_single_product()"
+                                                  ng-model="products.single.basicinfo.status" value="active"> Active
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label"><input type="radio" ng-change="update_single_product()"
+                                                  ng-model="products.single.basicinfo.status" value="inactive"> Inactive
+              </label>
+            </div>
+            <div class="radio">
+              <label class="control-label"><input type="radio" ng-change="update_single_product()"
+                                                  ng-model="products.single.basicinfo.status" value="new"> New </label>
+            </div> -->
+          </td>
+        </tr>
+      </table>
+
+      <h4>Product Images</h4>
+
+      <div class="form-group">
+
+        <div class="col-sm-12">
+
+          <div ui-sortable="arrayEditableOptions.sortableOptions" ng-model="products.single.images">
+            <div class="single-image" ng-class="{'primary-image': $index==0}"
+                 ng-repeat="image in products.single.images">
+              <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"/>
+              <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
+            </div>
+          </div>
+          <div class="alert alert-info"
+               ng-show="products.single.store.store_type =='Shipstation' && !products.single.images.length">If a product
+            image is available for this item it will be imported automatically when this product occurs in an order. You
+            can also upload images manually at any time.
+          </div>
+          <div ng-hide="true">
+            <input name="product_image" id="product_image{{custom_identifier}}" file-upload type="file"
+                   value="Add Image" required/>
+          </div>
+          <div>
+            <button class="modal-save-button" ng-click="add_image()">Add Image</button>
+          </div>
+        </div>
+      </div>
+
+      <h4>Product Details</h4>
+
+      <div class="form-group">
+        <label class="control-label col-sm-2">Name</label>
+
+        <div class="controls col-sm-8">
+          <input type="text" ng-model="products.single.basicinfo.name" ng-focus="check_remove_prod_name()"
+                 ng-blur="update_single_product()" class="form-control input-style"/>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">SKUs</label>
+
+        <div class="controls col-sm-8">
+          <div groov-editable="arraySkuEditableOptions" prop="sku" identifier="product_single_skus"
+               ng-model="products.single.skus" class="form-control input-style"></div>
+        </div>
+        <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                      groov-popover="{{translations.tooltips.sku}}"></i></div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">Barcodes</label>
+
+        <div class="controls col-sm-8">
+          <div groov-editable="arrayEditableOptions" identifier="product_single_barcodes" prop="barcode"
+               ng-model="products.single.barcodes" class="form-control input-style"></div>
+          <!-- <label ng-show="products.single.barcodes == ''" class="checkbox inline col-sm-8">
+            <input type="checkbox" ng-change="update_single_product()"
+                   ng-model="products.single.basicinfo.disable_conf_req"/> Disable Confirmation Requests
+          </label> -->
+        </div>
+        <div class="info col-sm-2"><i class="icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
+                                      groov-popover="{{translations.tooltips.barcode}}"></i>
+          &nbsp;&nbsp;
+          <a href="/products/{{products.single.basicinfo.id}}/generate_barcode_slip.pdf" target="_blank">
+            <i class="glyphicon glyphicon-print icon-large"></i>
+          </a>
+        </div>
+      </div>
+      <div class="form-group">
+        <label class="control-label col-sm-2">Categories</label>
+
+        <div class="controls col-sm-8">
+          <div groov-editable="arrayCatEditableOptions" identifier="product_single_cats" prop="category"
+               ng-model="products.single.cats" class="form-control input-style"></div>
+        </div>
+      </div>
+
+
+      <div class="form-group"
+           ng-show="products.single.store.store_type!='Amazon' || (products.single.store.store_type=='Amazon' && products.single.amazon_product.show_shipping_weight_only==false)">
+        <label class="control-label col-sm-2">Product Weight</label>
+
+        <div class="col-sm-8 controls">
+          <div class="input-group col-sm-12">
+            <input class="form-control input-style" ng-model="products.single.weight" ng-blur="update_single_product()"
+                   onclick="select()">
+
+            <div class="input-group-btn dropdown">
+              <button class="btn btn-default dropdown-toggle input-style" type="button" data-toggle="dropdown"
+                      aria-expanded="false"><span>{{products.single.basicinfo.weight_format}}</span> <span
+                class="caret"></span></button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','lb')">lb</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','oz')">oz</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','kg')">kg</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_setting('weight_format','g')">g</a></li>
+              </ul>
+            </div>
+          </div>
+        </div>
+      </div>
+</div>

@@ -46,9 +46,9 @@ groovepacks_services.factory('scanPack', ['$http', 'notification', '$state', '$w
     };
   };
 
-  var input = function (input, state, id) {
+  var input = function (input, state, id, rem_qty) {
     set_order_scanned('push');
-    return $http.post('/scan_pack/scan_barcode.json', {input: input, state: state, id: id}).success(function (data) {
+    return $http.post('/scan_pack/scan_barcode.json', {input: input, state: state, id: id, rem_qty: rem_qty}).success(function (data) {
       if (data.notice_messages.length == 0){
         notification.close(2);
         notification.notify(data.notice_messages, 2);
