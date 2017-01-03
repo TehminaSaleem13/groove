@@ -85,7 +85,7 @@ class Product < ActiveRecord::Base
   end
 
   def check_inventory_warehouses
-    if product_inventory_warehousess.all.empty?
+    if product_inventory_warehousess.empty?
       inventory = ProductInventoryWarehouses.new
       inventory.product_id = id
       inventory.inventory_warehouse = InventoryWarehouse.where(is_default: true).first
@@ -105,7 +105,11 @@ class Product < ActiveRecord::Base
         )
       multi_product_order_items =
         OrderItem.where(product_id: product_ids, scanned_status: 'notscanned')
-        .includes(order: [order_items: [:product, :order_item_kit_products]])
+        .includes(
+          :order_item_kit_products,
+          :product,
+          order: [order_items: :product]
+        )
 
       kit_skus_if_kit_zero =
         ProductKitSkus.where(option_product_id: products.where(is_kit: 0).pluck(:id))
@@ -133,7 +137,12 @@ class Product < ActiveRecord::Base
     else
       OrderItem.where(
         product_id: id, scanned_status: 'notscanned'
-      ).includes(order: [order_items: [:product, :order_item_kit_products]])
+      )
+      .includes(
+        :order_item_kit_products,
+        :product,
+        order: [order_items: :product]
+      )
     end
 
     if status != 'inactive' || force_from_inactive_state

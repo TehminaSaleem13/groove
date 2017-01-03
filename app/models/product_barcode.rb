@@ -1,7 +1,7 @@
 class ProductBarcode < ActiveRecord::Base
   belongs_to :product
   belongs_to :order_item
-  attr_accessible :barcode
+  attr_accessible :barcode, :product_id, :packing_count
   validates_uniqueness_of :barcode
   after_save :delete_empty
 

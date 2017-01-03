@@ -38,23 +38,28 @@
               </div>
             </div>              
             <div class="text-center ng-scope active" style="margin-top: 40px;">
-	            <a href="{{cost_calculator_url + '&from_app=true'}}"><span style="background-color: #558641;color: #fff; padding: 3px 10px; cursor: pointer; border-radius: 11px; font-size: 18px;"><b>Refine Calculator Link</b></span>
+	            <a href="{{cost_calculator_url + '&from_app=true'}}" target="_blank" class="cost_calculator_subtab"><span style="background-color: #558641;color: #fff; padding: 3px 10px; cursor: pointer; border-radius: 11px; font-size: 18px;"><b>Refine Cost Variables</b></span>
 	            </a>
 	   				</div>
         	</div>
 
-          <div ng-if="cost_calculator_url == null" class="col-md-12 col-sm-12 col-xs-12 pd-none text-center" style="margin-left: 80px; width:85%; padding-right: 50px; padding-left: 50px; padding: 15px; line-height: 25px; margin-bottom: 20px; background-color: #d0cfcf; margin-top: 20px;">
-          	<span class="text-center" style="text-align: center; font-size: 15px;"><b>The cost calculator allows you to quickly estimate the cost of shipping errors for your business so you can see what is saved by eliminating them. Please enter your shipping error percentage prior to implementing GroovePacker. In a coming release we will include your current packing accuracy rate calculated using the actual exceptions that you record for orders in GroovePacker. If you are not already recording packing exceptions in GroovePacker you can begin doing so now and this data will be available for the calculator. </b></span>
+          <div ng-if="cost_calculator_url == null" class="col-md-12 col-sm-12 col-xs-12 pd-none" style="margin-left: 80px; width:85%; padding-right: 50px; padding-left: 50px; padding: 15px; line-height: 25px; margin-bottom: 20px; background-color: #d0cfcf; margin-top: 20px;">
+          	<span style="text-align: center; font-size: 15px;"><b>The cost calculator allows you to quickly estimate the cost of shipping errors for your business so you can see what is saved by eliminating them. Please enter your shipping error percentage prior to implementing GroovePacker. In a coming release we will include your current packing accuracy rate calculated using the actual exceptions that you record for orders in GroovePacker. If you are not already recording packing exceptions in GroovePacker you can begin doing so now and this data will be available for the calculator. </b></span>
           </div>
           <div ng-if="cost_calculator_url == null" class="text-center" style="display: table;width: 100%; padding-top: 40px;">
-          	<a href="{{'/cost_calculator?from_app=true'}}"><span style="background-color: #558641;color: #fff; padding: 3px 10px; cursor: pointer; border-radius: 11px; font-size: 18px;"><b>Click Here to Calculate Costs</b></span>
+          	<a href="{{'/cost_calculator?from_app=true'}}" target="_blank" class="cost_calculator_subtab"><span style="background-color: #558641;color: #fff; padding: 3px 10px; cursor: pointer; border-radius: 11px; font-size: 18px;"><b>Click Here to Calculate Costs</b></span>
 	   			</a>
 	   	  </div>
         </div>
  </div>
 
 <style type="text/css">
-	.grey_color{
+	
+  .cost_calculator_subtab:hover {
+    text-decoration: none !important;
+  }
+
+  .grey_color{
 		background-color: #d1d3d4;
 	} 
 

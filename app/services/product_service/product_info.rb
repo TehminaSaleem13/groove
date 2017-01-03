@@ -56,6 +56,18 @@ module ProductService
                                                         'sync_option' => sync_option_attrs,
                                                         'access_restrictions' => get_access_restriction_info
                                                      })
+        @result['product']['basicinfo']['multibarcode'] = {}
+        barcodes = @result['product']['basicinfo']['multibarcode']
+        # @product.product_barcodes.where("packing_count IS NOT NULL")
+        @product.product_barcodes.each_with_index do |barcode, index|
+          packcount = barcode.packing_count 
+          if packcount.present? || barcode.barcode.present? 
+            barcodes["#{index + 1}"] = {}
+            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['barcode'] = barcode.barcode    
+            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['packcount'] = barcode.packing_count.to_i 
+            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['id'] = barcode.id
+          end
+        end
         @result['product']['basicinfo']['weight_format'] = @product.get_show_weight_format
         @result['product']['basicinfo']['contains_intangible_string'] = @product.contains_intangible_string
       end

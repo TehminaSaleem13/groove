@@ -53,16 +53,33 @@ module ScanPack
     end
 
     def do_scan_now
-      @matcher[@params[:state]].each do |state_func|
-        output = send(
-          state_func, @params[:input], @params[:state], @params[:id],
-          {
-            current_user: @current_user, session: @session
-          }
-        )
-        do_set_result(output)
-        update_activity(output)
-        break if output["matched"]
+      rem_qty = @params["scan_pack"]["rem_qty"]
+      barcode = ProductBarcode.find_by_barcode(@params[:input])
+      packing_count = barcode.try(:packing_count)
+      if packing_count.present?
+        if rem_qty >= packing_count.to_i
+          product_scan_object = ScanPack::ProductScanService.new(
+            [
+              @current_user, @session,
+              @params[:input], @params[:state], @params[:id], barcode.packing_count.to_i || 1
+            ]
+          )
+          @result = product_scan_object.run(false, false, true)
+        else
+          @result['error_messages'].push("The pack barcode scanned exceeds the number of units of SKU #{@params[:input]} in this order")
+        end
+      else
+        @matcher[@params[:state]].each do |state_func|
+          output = send(
+            state_func, @params[:input], @params[:state], @params[:id],
+            {
+              current_user: @current_user, session: @session
+            }
+          )
+          do_set_result(output)
+          update_activity(output)
+          break if output["matched"]
+        end
       end
     end
 

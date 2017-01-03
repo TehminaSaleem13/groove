@@ -2,9 +2,23 @@ module Groovepacker
   module Products
     class Products < Groovepacker::Products::Base
 
-      def update_product_attributes
+      def update_product_attributes        
         @product = Product.find_by_id(@params[:basicinfo][:id]) rescue nil
         @result['params'] = @params
+        multi_barcode = @params[:basicinfo][:multibarcode] rescue []
+        multi_barcode.try(:values).each do |barcode|
+          multi = barcode
+          barcode = ProductBarcode.find_by_id(multi[:id]) rescue nil
+          if multi.present?
+            if barcode.blank?
+              ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount]) 
+            elsif multi[:packcount].present?
+              barcode.barcode = multi[:barcode]
+              barcode.packing_count = multi[:packcount] 
+              barcode.save
+            end
+          end
+        end
 
         if @product.blank?
           @result.merge({'status' => false, 'message' => 'Cannot find product information.'})
@@ -244,11 +258,11 @@ module Groovepacker
         def update_product_basic_info
           basic_info = @params[:basicinfo]
           attrs_to_update.each {|attr| @product[attr] = basic_info[attr] }
-
           @product.packing_placement = basic_info[:packing_placement] if basic_info[:packing_placement].is_a?(Integer)
           @product.weight = @product.get_product_weight(@params[:weight])
           @product.shipping_weight = @product.get_product_weight(@params[:shipping_weight])
           @product.weight_format = get_weight_format(basic_info[:weight_format])
+          @product.status = basic_info[:status] if basic_info[:status].present?
           @result['status'] &= false unless @product.save
         end
 

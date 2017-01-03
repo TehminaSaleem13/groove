@@ -197,7 +197,10 @@ class ProductsController < ApplicationController
   def generate_barcode
     @products =
       list_selected_products(params)
-      .includes(:product_kit_skuss, :product_barcodes, :product_skus, :product_kit_activities)
+      .includes(
+        :product_kit_skuss, :product_barcodes, :product_skus,
+        :product_kit_activities, :product_inventory_warehousess
+      )
 
     eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
 
@@ -275,6 +278,7 @@ class ProductsController < ApplicationController
   def generate_barcode_slip
     require 'wicked_pdf'
     @product = Product.find(params[:id])
+<<<<<<< HEAD
 
     scan_pack_object = ScanPack::Base.new
     action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
@@ -297,6 +301,19 @@ class ProductsController < ApplicationController
     )
     File.open(reader_file_path, 'wb') do |file|
       file << doc_pdf
+=======
+    @barcode = params["barcode"]
+    respond_to do |format|
+      format.html
+      format.pdf {
+        render :pdf => "file_name",
+               :template => "products/#{get_barcode_slip_template}",
+               :orientation => 'Portrait',
+               :page_height => '1in',
+               :page_width => '3in',
+               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
+      }
+>>>>>>> production
     end
     base_file_name = File.basename(pdf_path)
     pdf_file = File.open(reader_file_path)
