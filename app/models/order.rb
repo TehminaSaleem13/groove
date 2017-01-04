@@ -379,21 +379,27 @@ class Order < ActiveRecord::Base
   end
 
   def scanning_count
-    kits = order_items
+    Order.multiple_orders_scanning_count([self])[self.id]
+  end
+
+  def self.multiple_orders_scanning_count(orders)
+    kits = OrderItem
       .joins(:product, order_item_kit_products: [:product_kit_skus])
       .where(
+        order_id: orders.map(&:id),
         products: { is_kit: 1, kit_parsing: %w(individual)}
       )
       .select([
         'order_items.qty as order_item_qty', 'order_items.kit_split_qty',
         'order_items.kit_split_scanned_qty', 'order_items.kit_split',
-        'product_kit_skus.qty as product_kit_skus_qty',
+        'product_kit_skus.qty as product_kit_skus_qty', 'order_id',
         'order_item_kit_products.scanned_qty as kit_product_scanned_qty',
         'kit_parsing', 'order_items.scanned_qty as order_item_scanned_qty',
         'is_kit', 'is_intangible', 'order_items.id', 'single_scanned_qty'
       ]).as_json
 
-    single_kit_or_individual_items = order_items.joins(:product)
+    single_kit_or_individual_items = OrderItem.joins(:product)
+      .where(order_id: orders.map(&:id))
       .where(
         "(products.kit_parsing = 'single' AND products.is_kit IN (0,1) ) OR "\
         "(products.kit_parsing = 'individual' AND products.is_kit = 0 ) OR "\
@@ -402,61 +408,71 @@ class Order < ActiveRecord::Base
       .select([
         'is_kit', 'kit_parsing', 'order_items.qty as order_item_qty',
         'order_items.scanned_qty as order_item_scanned_qty', 'is_intangible',
-        'order_items.id', 'single_scanned_qty'
+        'order_items.id', 'single_scanned_qty', 'order_id'
       ]).as_json
 
-    data = kits.push(*single_kit_or_individual_items)
+    grouped_data =
+      kits
+      .push(*single_kit_or_individual_items)
+      .group_by { |oi| oi['order_id'] }
 
-    data.reduce({scanned: 0, unscanned: 0}) do |tmp_hash, data_hash|
-      if data_hash['is_kit'] == 1
-        case data_hash['kit_parsing']
-        when 'single'
-          tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
-          tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
-        when 'individual'
-          tmp_hash[:unscanned] += (
-            data_hash['order_item_qty'] * data_hash['product_kit_skus_qty']
-          ) - data_hash['kit_product_scanned_qty']
-          tmp_hash[:scanned] += data_hash['kit_product_scanned_qty']
-        when 'depends'
-          if data_hash['kit_split']
+    orders_scanning_count = Hash.new(0)
 
-            if data_hash['kit_split_qty'] > data_hash['kit_split_scanned_qty']
+    grouped_data.each do |order_id, order_data|
+      orders_scanning_count[order_id] =
+        order_data.reduce({scanned: 0, unscanned: 0}) do |tmp_hash, data_hash|
+          if data_hash['is_kit'] == 1
+            case data_hash['kit_parsing']
+            when 'single'
+              tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+              tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+            when 'individual'
               tmp_hash[:unscanned] += (
-                data_hash['kit_split_qty'] * data_hash['product_kit_skus_qty']
+                data_hash['order_item_qty'] * data_hash['product_kit_skus_qty']
               ) - data_hash['kit_product_scanned_qty']
-            end
+              tmp_hash[:scanned] += data_hash['kit_product_scanned_qty']
+            when 'depends'
+              if data_hash['kit_split']
 
-            if data_hash['order_item_qty'] > data_hash['kit_split_qty']
-              tmp_hash[:unscanned] += (
-                data_hash['order_item_qty'] - data_hash['kit_split_qty']
-              ) - (
-                data_hash['order_item_scanned_qty'] - data_hash['kit_split_scanned_qty']
-              )
-            end
+                if data_hash['kit_split_qty'] > data_hash['kit_split_scanned_qty']
+                  tmp_hash[:unscanned] += (
+                    data_hash['kit_split_qty'] * data_hash['product_kit_skus_qty']
+                  ) - data_hash['kit_product_scanned_qty']
+                end
 
-            if data_hash['kit_split_qty'] > 0
-              tmp_hash[:scanned] += data_hash['kit_split_scanned_qty']
-            end
+                if data_hash['order_item_qty'] > data_hash['kit_split_qty']
+                  tmp_hash[:unscanned] += (
+                    data_hash['order_item_qty'] - data_hash['kit_split_qty']
+                  ) - (
+                    data_hash['order_item_scanned_qty'] - data_hash['kit_split_scanned_qty']
+                  )
+                end
 
-            if data_hash['single_scanned_qty'] != 0
-              tmp_hash[:scanned] += data_hash['single_scanned_qty']
+                if data_hash['kit_split_qty'] > 0
+                  tmp_hash[:scanned] += data_hash['kit_split_scanned_qty']
+                end
+
+                if data_hash['single_scanned_qty'] != 0
+                  tmp_hash[:scanned] += data_hash['single_scanned_qty']
+                end
+              else
+                tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+                tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+              end
             end
           else
-            tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+            # for individual items
+            unless data_hash['is_intangible'] == 1
+              tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+            end
+
             tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
           end
+          tmp_hash
         end
-      else
-        # for individual items
-        unless data_hash['is_intangible'] == 1
-          tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
-        end
-
-        tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
-      end
-      tmp_hash
     end
+
+    orders_scanning_count
   end
 
   def get_unscanned_items(

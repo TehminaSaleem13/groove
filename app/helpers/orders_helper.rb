@@ -227,14 +227,17 @@ module OrdersHelper
   def make_orders_list(orders)
     @orders_result = []
 
+    orders_scanning_count = Order.multiple_orders_scanning_count(orders)
+
     orders.each do |order|
-      generate_order_hash(order)
+      itemslength = orders_scanning_count[order.id].values.sum
+      generate_order_hash(order, itemslength)
     end
     return @orders_result
   end
 
-  def generate_order_hash(order)
-    if order.store != nil
+  def generate_order_hash(order, itemslength)
+  	if order.store != nil
       store_name = order.store.name
     else
       store_name = ""
@@ -244,7 +247,7 @@ module OrdersHelper
                           'notes' => order.notes_internal,
                           'ordernum' => order.increment_id,
                           'order_date' => order.order_placed_time,
-                          'itemslength' => order.scanning_count.values.sum,
+                          'itemslength' => itemslength,
                           'status' => order.status,
                           'recipient' => "#{order.firstname} #{order.lastname}",
                           'email' => order.email,
