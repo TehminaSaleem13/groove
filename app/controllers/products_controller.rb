@@ -1,5 +1,4 @@
 class ProductsController < ApplicationController
-  before_filter :groovepacker_authorize!
   include ProductConcern
 
   def import_products
@@ -278,30 +277,6 @@ class ProductsController < ApplicationController
   def generate_barcode_slip
     require 'wicked_pdf'
     @product = Product.find(params[:id])
-<<<<<<< HEAD
-
-    scan_pack_object = ScanPack::Base.new
-    action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
-    reader_file_path = scan_pack_object.do_get_pdf_file_path(@product)
-    @tenant_name = Apartment::Tenant.current
-    file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
-    pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-    pdf_html = action_view.render :template => "products/#{get_barcode_slip_template}", :layout => nil, :locals => {:@product => @product}
-    doc_pdf = WickedPdf.new.pdf_from_string(
-       pdf_html,
-      :inline => true,
-      :save_only => false,
-      :orientation => 'Portrait',
-      :page_height => '1in',
-      :page_width => '3in',
-      :margin => {:top => '0',
-                  :bottom => '0',
-                  :left => '0',
-                  :right => '0'}
-    )
-    File.open(reader_file_path, 'wb') do |file|
-      file << doc_pdf
-=======
     @barcode = params["barcode"]
     respond_to do |format|
       format.html
@@ -313,14 +288,13 @@ class ProductsController < ApplicationController
                :page_width => '3in',
                :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
       }
->>>>>>> production
     end
-    base_file_name = File.basename(pdf_path)
-    pdf_file = File.open(reader_file_path)
-    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
-    pdf_file.close
-    generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
-    render json: {url: generate_barcode}
+    # base_file_name = File.basename(pdf_path)
+    # pdf_file = File.open(reader_file_path)
+    # GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+    # pdf_file.close
+    # generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+    # render json: {url: generate_barcode}
   end
 
   def update_product_list
