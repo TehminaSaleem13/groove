@@ -137,7 +137,7 @@ Groovepacks::Application.configure do
   ENV['STRIPE_API_KEY'] = "sk_test_4QS2OJ8BkMWcuzCWrHrKGlz9"
   ENV['STRIPE_PUBLIC_KEY'] = "pk_test_4QS2UN3famIPlHtp2Q7ykpDf"
   ENV['ONE_TIME_PAYMENT'] = '50000'
-  ENV['BC_ONE_TIME_PAYMENT'] = '0'
+  ENV['BC_ONE_TIME_PAYMENT'] = '50000'
 
   ENV['S3_ACCESS_KEY_ID'] = 'AKIAIBDKVKEM7HNZUQAA'
   ENV['S3_ACCESS_KEY_SECRET'] = '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'
@@ -154,6 +154,7 @@ Groovepacks::Application.configure do
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
   ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
+  ENV["UNSCANNED_ORDERS_EMAILS"] = "kcpatel006@gmail.com, groovepacker@gmail.com"
 
   #Campaign-Monitoring API_KEY and CLIENT_ID
   ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
@@ -164,4 +165,6 @@ Groovepacks::Application.configure do
   ENV['CAMPAIGN_MONITOR_NEW_CUSTOMER_LIST_ID'] = "464989f6a5e27cd8319ac9114f76213c"
   #List Name - Staging All Customers
   ENV['CAMPAIGN_MONITOR_ALL_CUSTOMERS_LIST_ID'] = "45a479e1e3f422b0bdef6c2118ce02a5"
+  #List Name - Cost Calculator
+  ENV['CAMPAIGN_MONITOR_CALCULATOR_LIST_ID'] = "32f3305dd47772a437b50caea89d4dd7"
 end

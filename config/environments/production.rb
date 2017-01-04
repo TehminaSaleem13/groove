@@ -155,6 +155,7 @@ Groovepacks::Application.configure do
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
   ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
+  ENV["UNSCANNED_ORDERS_EMAILS"] = "kcpatel006@gmail.com, groovepacker@gmail.com"
 
   #Campaign-Monitoring API_KEY and CLIENT_ID
   ENV['CAMPAIGN_MONITOR_API_KEY'] = "0319589f90c1b2f6a1034c2d8cd47604"
