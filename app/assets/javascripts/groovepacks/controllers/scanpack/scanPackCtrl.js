@@ -145,7 +145,12 @@ groovepacks_controllers.
           myscope.last_scanned_barcode = $scope.data.input;
         }
         $window.increment_id = $scope.data.order.increment_id;
-        scanPack.input($scope.data.input, $scope.current_state, id, $scope.data.order.next_item.qty_remaining).success($scope.handle_scan_return);
+        try{
+         qty_remaining = $scope.data.order.next_item.qty_remaining  
+        }catch(e){
+          qty_remaining = null
+        }
+        scanPack.input($scope.data.input, $scope.current_state, id, qty_remaining).success($scope.handle_scan_return);
           // scanPack.update_chrome_tab();
         // var barcodes = [];
         // if (typeof $scope.data.order.next_item != "undefined" ){
