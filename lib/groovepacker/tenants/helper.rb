@@ -22,6 +22,18 @@ module Groovepacker
         offset = params[:offset].to_i || 0
         limit = params[:limit].to_i || 10
         tenants_result = []
+
+        @tenants = tenants
+        @tenant_names = tenants.map(&:name)
+
+        ActiveRecord::Associations::Preloader.new(tenants, :subscription).run
+
+        latest_scanned_order_for_all_tenants
+        latest_scanned_order_packing_user_for_all_tenants
+        get_access_restrictions_for_all_tenants
+        recent_login_all_tenants
+        parent_tenant_for_all_tenants
+
         tenants.each do |tenant|
           tenant_hash = {}
           tenant_name = tenant.name
@@ -57,11 +69,12 @@ module Groovepacker
 
       def get_subscription_data(name, state)
         subscription_result = subscription_result_hash
-        @tenant = Tenant.where(name: name).first
+        @tenant = @tenants.find{ |t| t.name.eql?(name)}
+
         rec_subscription(@tenant, subscription_result)
         begin
           if state == "show"
-            subscriptions = Stripe::Customer.retrieve(@tenant.subscription.stripe_customer_id).subscriptions  
+            subscriptions = Stripe::Customer.retrieve(@tenant.subscription.stripe_customer_id).subscriptions
             subscription_ids = subscriptions.data.map(&:id) 
             subscription_result['verified_stripe_account'] = subscription_ids.include? @tenant.subscription.customer_subscription_id
           end
@@ -369,13 +382,29 @@ module Groovepacker
 
       def retrieve_shipping_data(tenant_name, tenant_hash)
         get_shipping_data = Groovepacker::Dashboard::Stats::ShipmentStats.new
-        shipping_data = get_shipping_data.get_shipment_stats(tenant_name, true)
+        access_restrictions = @access_restrictions_per_tenant[tenant_name]
+        shipping_data = get_shipping_data.get_shipment_stats(tenant_name, true, @tenants, access_restrictions)
         tenant_hash['total_shipped'] = shipping_data['shipped_current']
         tenant_hash['shipped_last'] = shipping_data['shipped_last']
         tenant_hash['max_allowed'] = shipping_data['max_allowed']
         tenant_hash['average_shipped'] = shipping_data['average_shipped']
         tenant_hash['average_shipped_last'] = shipping_data['average_shipped_last']
         tenant_hash['shipped_last6'] = shipping_data['shipped_last6']
+      end
+
+      def get_access_restrictions_for_all_tenants
+        @access_restrictions_per_tenant = Hash.new([])
+
+        query = "(select *,'#{@tenant_names.first}' as 'tenant_name' from #{@tenant_names.first}.access_restrictions ORDER BY created_at)"
+
+        query = @tenant_names.reduce(query) do |_query, t_name|
+          _query += " union (select *,'#{t_name}' as 'tenant_name' from #{t_name}.access_restrictions ORDER BY created_at)"
+        end
+
+        return unless query.present?
+
+        @access_restrictions_per_tenant.merge!(
+          AccessRestriction.find_by_sql(query).group_by { |order| order.tenant_name })
       end
 
       def construct_query_and_get_result(params, search, sort_key, sort_order, query_add)
@@ -468,9 +497,8 @@ module Groovepacker
         tenant_hash['last_activity'] = activity_data_hash
         current_tenant = Apartment::Tenant.current
         begin
-          Apartment::Tenant.switch(tenant_name)
-          tenant_hash['last_activity']['most_recent_login'] = most_recent_login
-          tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan
+          tenant_hash['last_activity']['most_recent_login'] = most_recent_login(tenant_name)
+          tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan(tenant_name)
           tenant_hash['most_recent_activity'] = most_recent_login['date_time']
         rescue => e
           tenant_hash['most_recent_activity'] = nil
@@ -491,9 +519,9 @@ module Groovepacker
         }
       end
 
-      def most_recent_login
+      def most_recent_login(tenant_name)
         most_recent_login_data = {}
-        @user = User.where('username != ? and current_sign_in_at IS NOT NULL', 'gpadmin').order('current_sign_in_at desc').first
+        @user = @recent_login_per_tenant[tenant_name].first
         if @user
           most_recent_login_data['date_time'] = @user.current_sign_in_at
           most_recent_login_data['user'] = @user.username
@@ -501,14 +529,72 @@ module Groovepacker
         most_recent_login_data
       end
 
-      def most_recent_scan
+      def recent_login_all_tenants
+        @recent_login_per_tenant = Hash.new([])
+
+        query = @tenant_names.reduce('') do |_query, t_name|
+          _query += %Q(\
+            #{'union' if _query.present?} (select *,'#{t_name}' as 'tenant_name' \
+            from #{t_name}.users \
+            where(username!='gpadmin' and current_sign_in_at is not null) \
+            ORDER BY current_sign_in_at desc LIMIT 1)\
+          )
+        end
+
+        return unless query.present?
+
+        @recent_login_per_tenant.merge!(
+          User.find_by_sql(query).group_by { |order| order.tenant_name })
+      end
+
+      def most_recent_scan(tenant_name)
         most_recent_scan_data = {}
-        @order = Order.where('status = ?', 'scanned').order('scanned_on desc').first
+        
+        @order = @latest_scanned_orders_per_tenant[tenant_name].first
+
         if @order
           most_recent_scan_data['date_time'] = @order.scanned_on
-          most_recent_scan_data['user'] = User.find_by_id(@order.packing_user_id).username rescue nil
+          most_recent_scan_data['user'] = @latest_scanned_order_packing_user_per_tenant[tenant_name].first rescue nil
         end
         most_recent_scan_data
+      end
+
+      def latest_scanned_order_for_all_tenants
+        @latest_scanned_orders_per_tenant = Hash.new([])
+
+        query = @tenant_names.reduce('') do |_query, t_name|
+          _query += %Q(\
+            #{'union' if _query.present?} (select *,'#{t_name}' as 'tenant_name' \
+            from #{t_name}.orders \
+            where(status='scanned') ORDER BY scanned_on desc LIMIT 1)\
+          )
+        end
+
+        return unless query.present?
+
+        @latest_scanned_orders_per_tenant.merge!(
+          Order.find_by_sql(query).group_by { |order| order.tenant_name })
+      end
+
+      def latest_scanned_order_packing_user_for_all_tenants
+        @latest_scanned_order_packing_user_per_tenant = Hash.new([])
+
+        query = @tenant_names.reduce('') do |_query, t_name|
+          user_id = @latest_scanned_orders_per_tenant[t_name].first.try(:packing_user_id)
+
+          next _query unless user_id
+
+          _query += %Q(\
+            #{'union' if _query.present?} (select *,'#{t_name}' as 'tenant_name' \
+            from #{t_name}.users \
+            where(id=#{user_id}))\
+          )
+        end
+
+        return unless query.present?
+
+        @latest_scanned_order_packing_user_per_tenant.merge!(
+          User.find_by_sql(query).group_by { |user| user.tenant_name})
       end
 
       def rec_subscription(tenant, subscription_result)
@@ -517,10 +603,14 @@ module Groovepacker
           if @subscription
             retrieve_subscription_result(subscription_result, @subscription)
           else
-            parent_tenant = Tenant.find_by_duplicate_tenant_id(tenant.id)
+            parent_tenant = @parent_tenants.find{|pt| pt.duplicate_tenant_id.eql?(tenant.id)}
             rec_subscription(parent_tenant, subscription_result)
           end
         end
+      end
+
+      def parent_tenant_for_all_tenants
+        @parent_tenants = Tenant.where(duplicate_tenant_id: @tenants.pluck(:id))
       end
 
       def sort_param(params)

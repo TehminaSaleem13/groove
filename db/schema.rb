@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20160915111705) do
+ActiveRecord::Schema.define(:version => 20170104093943) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -582,10 +582,12 @@ ActiveRecord::Schema.define(:version => 20160915111705) do
     t.string   "custom_field_two"
     t.boolean  "traced_in_dashboard",                                     :default => false
     t.boolean  "scanned_by_status_change",                                :default => false
+    t.string   "shipment_id"
   end
 
   add_index "orders", ["increment_id"], :name => "index_orders_on_increment_id"
   add_index "orders", ["non_hyphen_increment_id"], :name => "index_orders_on_non_hyphen_increment_id"
+  add_index "orders", ["scanned_on"], :name => "index_orders_on_scanned_on"
   add_index "orders", ["status"], :name => "index_orders_on_status"
   add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
   add_index "orders", ["tracking_num"], :name => "index_orders_on_tracking_num"
@@ -805,6 +807,7 @@ ActiveRecord::Schema.define(:version => 20160915111705) do
     t.datetime "updated_at",                                   :null => false
     t.datetime "last_imported_at"
     t.boolean  "includes_product",          :default => false
+    t.boolean  "popup_shipping_label",      :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|
@@ -832,6 +835,9 @@ ActiveRecord::Schema.define(:version => 20160915111705) do
     t.boolean  "gen_barcode_from_sku",             :default => false
     t.boolean  "shall_import_pending_fulfillment", :default => false
     t.datetime "quick_import_last_modified"
+    t.boolean  "use_chrome_extention",             :default => false
+    t.boolean  "switch_back_button",               :default => false
+    t.boolean  "auto_click_create_label",          :default => false
   end
 
   create_table "shipworks_credentials", :force => true do |t|
@@ -846,14 +852,16 @@ ActiveRecord::Schema.define(:version => 20160915111705) do
     t.boolean  "shall_import_no_status",    :default => false
     t.boolean  "import_store_order_number", :default => false
     t.boolean  "gen_barcode_from_sku",      :default => false
+    t.boolean  "shall_import_ignore_local", :default => false
   end
 
   create_table "shopify_credentials", :force => true do |t|
     t.string   "shop_name"
     t.string   "access_token"
     t.integer  "store_id"
-    t.datetime "created_at",   :null => false
-    t.datetime "updated_at",   :null => false
+    t.datetime "created_at",       :null => false
+    t.datetime "updated_at",       :null => false
+    t.datetime "last_imported_at"
   end
 
   create_table "stores", :force => true do |t|
@@ -889,6 +897,9 @@ ActiveRecord::Schema.define(:version => 20160915111705) do
     t.string   "user_name",                                                                              :null => false
     t.string   "coupon_id"
     t.string   "progress",                                                    :default => "not_started"
+    t.boolean  "shopify_customer",                                            :default => false
+    t.boolean  "all_charges_paid",                                            :default => false
+    t.string   "interval"
   end
 
   create_table "sync_options", :force => true do |t|

@@ -4,14 +4,21 @@ module Groovepacker
       class ShipmentStats
         include ApplicationHelper
         
-        def get_shipment_stats(name, avg_data = false)
+        def get_shipment_stats(name, avg_data = false, tenants = [], access_restrictions = nil)
           shipping_result = default_result
-          @tenant = Tenant.where(name: name).first
+          
+          @tenant =
+            tenants.find{ |tenant| tenant.name.eql?(name) } ||
+            Tenant.where(name: name).first
+          
           current_tenant = Apartment::Tenant.current_tenant
           if @tenant
-            return shipping_result unless switch_tenant(@tenant.name)
-            Apartment::Tenant.switch(@tenant.name)
-            @access_restrictions = AccessRestriction.order('created_at')
+            return shipping_result unless !access_restrictions && switch_tenant(@tenant.name)
+
+            Apartment::Tenant.switch(@tenant.name) unless access_restrictions
+
+            @access_restrictions = access_restrictions || AccessRestriction.order('created_at')
+
             @access_record_count = @access_restrictions.length
             unless @access_restrictions.empty?
               shipping_result['shipped_last6'] = []
@@ -19,7 +26,7 @@ module Groovepacker
               get_avg_data(shipping_result) if avg_data
               get_old_shipped_count(shipping_result)
             end
-            Apartment::Tenant.switch(current_tenant)
+            Apartment::Tenant.switch(current_tenant) unless access_restrictions
           end
 
           shipping_result
