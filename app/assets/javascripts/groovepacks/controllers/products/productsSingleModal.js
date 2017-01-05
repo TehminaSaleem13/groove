@@ -281,6 +281,9 @@ groovepacks_controllers.
         products.single.update(scope.products, auto).then(function () {
           myscope.product_single_details(scope.products.single.basicinfo.id);
         });
+        if (scope.products.single.basicinfo.update_to_kit==true){
+          scope.modal_tabs[2].active = true;
+        }
       };
 
       scope.append_multipack_barcode = function(){
@@ -379,7 +382,9 @@ groovepacks_controllers.
             "intangible_item": "",
             "add_to_any_order": "",
             "type_in_scan_setting": "",
-            "click_scanning_setting": ""
+            "click_scanning_setting": "",
+            "multi_pack_barcode": ""
+
           }
         };
         groov_translator.translate('products.modal', scope.translations);
@@ -419,9 +424,6 @@ groovepacks_controllers.
         scope.kit_products = products.model.get();
         scope.$watch('products.single.productkitskus', function () {
           if (typeof scope.products.single.basicinfo != "undefined" && scope.products.single.basicinfo.is_kit == 1) {
-            if (scope.warehouses.list.length != 1){
-              scope.modal_tabs[2].active = true;
-            }
             scope.kit_products.list = [];
             for (var i = 0; i < scope.products.single.productkitskus.length; i++) {
               scope.kit_products.list.push({id: scope.products.single.productkitskus[i].option_product_id});

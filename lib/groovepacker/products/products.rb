@@ -6,13 +6,13 @@ module Groovepacker
         @product = Product.find_by_id(@params[:basicinfo][:id]) rescue nil
         @result['params'] = @params
         multi_barcode = @params[:basicinfo][:multibarcode] rescue []
-        multi_barcode.try(:values).each do |barcode|
+        (multi_barcode.try(:values) || []).each do |barcode|
           multi = barcode
           barcode = ProductBarcode.find_by_id(multi[:id]) rescue nil
           if multi.present?
             if barcode.blank?
-              ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount]) 
-            elsif multi[:packcount].present?
+              ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount], is_multipack_barcode: true) 
+            elsif barcode.is_multipack_barcode #multi[:packcount].present?
               barcode.barcode = multi[:barcode]
               barcode.packing_count = multi[:packcount] 
               barcode.save
