@@ -69,7 +69,8 @@ module Groovepacker
 
       def get_subscription_data(name, state)
         subscription_result = subscription_result_hash
-        @tenant = @tenants.find{ |t| t.name.eql?(name)}
+
+        @tenant = @tenants ? @tenants.find{ |t| t.name.eql?(name)} : Tenant.find_by_name(name)
 
         rec_subscription(@tenant, subscription_result)
         begin
@@ -603,14 +604,20 @@ module Groovepacker
           if @subscription
             retrieve_subscription_result(subscription_result, @subscription)
           else
-            parent_tenant = @parent_tenants.find{|pt| pt.duplicate_tenant_id.eql?(tenant.id)}
+            parent_tenant = find_parent_tenant(tenant.id)
             rec_subscription(parent_tenant, subscription_result)
           end
         end
       end
 
+      def find_parent_tenant(id)
+        @parent_tenants ?
+        @parent_tenants.find{|pt| pt.duplicate_tenant_id.eql?(id)} :
+        Tenant.find_by_duplicate_tenant_id(id)
+      end
+
       def parent_tenant_for_all_tenants
-        @parent_tenants = Tenant.where(duplicate_tenant_id: @tenants.pluck(:id))
+        @parent_tenants = Tenant.where(duplicate_tenant_id: @tenants.map(&:id))
       end
 
       def sort_param(params)
