@@ -51,7 +51,7 @@ module ScanPack
         @orders =
           Order
           .where(
-            'status IN ("awaiting","serviceissue") AND (tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%"))',
+            'status IN ("awaiting","onhold") AND (tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%"))',
             @input, @input
           )
       end
