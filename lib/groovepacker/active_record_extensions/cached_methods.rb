@@ -75,7 +75,7 @@ module CachedMethods
   def delete_cache
     cached = Rails.cache.read(multi_key)
     return unless cached
-    cached.each { |key| Rails.cache.delete(key) }
+    Rails.cache.delete_matched([cached])
     Rails.cache.delete(multi_key)
   end
 

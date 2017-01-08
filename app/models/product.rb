@@ -98,6 +98,10 @@ class Product < ActiveRecord::Base
   def self.generate_eager_loaded_obj(products)
     product_ids = products.pluck(:id)
 
+
+    #delete all caches
+    Rails.cache.delete_matched("*for_tenant_#{Apartment::Tenant.current}")
+
     # To reduce individual product query fire on order items
 
       option_products_if_kit_one = Product.where(
@@ -242,7 +246,7 @@ class Product < ActiveRecord::Base
       #                                      !%w(awaiting onhold)
       #                                      .include?(item.order.status)
       bulkaction.process(item) if general_setting.inventory_tracking?
-      item.delete_cache_for_associated_obj
+      # item.delete_cache_for_associated_obj
     end
     result
   end
