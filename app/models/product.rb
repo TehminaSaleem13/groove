@@ -237,29 +237,37 @@ class Product < ActiveRecord::Base
       end
     end
     # update order items status from onhold to awaiting
-    @order_items.each do |item|
-      # item.order.update_order_status unless item.order.nil? ||
-      #                                      !%w(awaiting onhold)
-      #                                      .include?(item.order.status)
-      bulkaction.process(item) if general_setting.inventory_tracking?
-      item.delete_cache_for_associated_obj
+    if @order_items.count > 50
+      process_order_item
+    else
+      @order_items.each do |item|
+        # item.order.update_order_status unless item.order.nil? ||
+        #                                      !%w(awaiting onhold)
+        #                                      .include?(item.order.status)
+        bulkaction.process(item) if general_setting.inventory_tracking?
+        item.delete_cache_for_associated_obj
+      end
     end
     result
   end
 
+  def process_order_item
+    obj = self
+    obj.update_column(:status_updated, true)
+    updated_products = Product.where(status_updated: true)
+    orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+    return if orders.length<1
+    action = GrooveBulkActions.where(identifier: "order", activity: "status_update", status: "pending").first
+    if action.blank?
+      action = GrooveBulkActions.new(identifier: "order", activity: "status_update", status: "pending")
+    end
+    action.total = orders.count
+    action.save
+  end
+
   def check_and_update_status_updated_column
     if self.changes["status"].present?
-      obj = self
-      obj.update_column(:status_updated, true)
-      updated_products = Product.where(status_updated: true)
-      orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
-      return if orders.length<1
-      action = GrooveBulkActions.where(identifier: "order", activity: "status_update", status: "pending").first
-      if action.blank?
-        action = GrooveBulkActions.new(identifier: "order", activity: "status_update", status: "pending")
-      end
-        action.total = orders.count
-        action.save
+      process_order_item
     end
   end
 
