@@ -24,7 +24,7 @@ class SendStatStream
         order.set_traced_in_dashboard
       end
     rescue => e
-      GroovelyticsMailer.groovelytics_request_failed(tenant, e).deliver
+      # GroovelyticsMailer.groovelytics_request_failed(tenant, e).deliver
     end
   end
 
