@@ -4,6 +4,19 @@ module Groovepacker
       include ProductsHelper
       include SettingsHelper
 
+      def update_ordere_item_kit_product(tenant, product_id, product_kit_sku_id)
+        Apartment::Tenant.switch tenant 
+        order_items = OrderItem.where(:product_id => product_id)
+        order_items.each do |order_item|
+          if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => product_kit_sku_id).length == 0
+            order_item_kit_product = OrderItemKitProduct.new
+            order_item_kit_product.product_kit_skus = ProductKitSkus.find(product_kit_sku_id)
+            order_item_kit_product.order_item = order_item
+            order_item_kit_product.save
+          end
+        end
+      end
+
       def status_update(tenant, params, bulk_actions_id, username)
         Apartment::Tenant.switch(tenant)
         result = Hash.new
