@@ -92,7 +92,9 @@ module Groovepacker
 
           accepted_data.keys.each do |key|
             if key == 'shipped_last'
-              shipping_result[key] = @access_restrictions[-2][accepted_data[key]] if @access_record_count > 1
+              shipping_result[key] = @access_restrictions[-1][accepted_data[key]] if @access_record_count > 1
+            elsif key == "shipped_current"
+              shipping_result[key] = @access_restrictions[0][accepted_data[key]] if @access_record_count > 1
             else
               shipping_result[key] = latest_access_data[accepted_data[key]]
             end
@@ -100,7 +102,7 @@ module Groovepacker
         end
 
         def get_old_shipped_count(shipping_result)
-          (2..7).each do |i|
+          (1..6).each do |i|
             if @access_record_count - i >= 0
               shipped = {}
               access_data = @access_restrictions[-i]
