@@ -59,9 +59,9 @@ module ProductService
         @result['product']['basicinfo']['multibarcode'] = {}
         barcodes = @result['product']['basicinfo']['multibarcode']
         # @product.product_barcodes.where("packing_count IS NOT NULL")
-        @product.product_barcodes.each_with_index do |barcode, index|
-          packcount = barcode.packing_count 
-          if packcount.present? || barcode.barcode.present? 
+        @product.product_barcodes.where(:is_multipack_barcode => true).each_with_index do |barcode, index|
+          # packcount = barcode.packing_count 
+          if barcode.is_multipack_barcode
             barcodes["#{index + 1}"] = {}
             @result['product']['basicinfo']['multibarcode']["#{index+1}"]['barcode'] = barcode.barcode    
             @result['product']['basicinfo']['multibarcode']["#{index+1}"]['packcount'] = barcode.packing_count.to_i 

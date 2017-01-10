@@ -96,7 +96,11 @@ module Groovepacker
               result = check_single_row_order_item(order_items_ar, index, current_inc_id, order_map, result)
               break if result[:order_reimported] == true
             end
-            @order.update_attribute(increment_id: "#{origional_order_id}") if origional_order_id
+            if origional_order_id
+              @order.increment_id = "#{origional_order_id}"
+              @order.save
+            end
+            # @order.update_attribute(increment_id: "#{origional_order_id}") 
             result
           end
 

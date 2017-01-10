@@ -25,4 +25,10 @@ class CsvExportMailer < ActionMailer::Base
     subject = "Products Export Report."
     mail to: recipients, subject: subject
   end
+
+  def unscanned_csv(filename, tenant)
+    Apartment::Tenant.switch(tenant)
+    attachments[filename] = File.read("public/#{filename}")
+    mail to: ENV["UNSCANNED_ORDERS_EMAILS"], subject: "GroovePacker Unscanned Export Report"
+  end
 end

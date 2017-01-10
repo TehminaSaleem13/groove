@@ -55,7 +55,8 @@ module Groovepacker
           unless item["imageUrl"].nil? || product.product_images.length > 0
             product.product_images.create(image: item["imageUrl"])
           end
-          product.save
+          product.reload rescue nil
+          # product.save
           unless item["warehouseLocation"].nil?
             product.primary_warehouse.update_column( 'location_primary', item["warehouseLocation"] )
           end

@@ -98,7 +98,7 @@ class UsersController < ApplicationController
           result['user']['role'] = @user.role.attributes
           result['user']['current_user'] = current_user
           # send user data to groovelytics server if the user is newly created.
-          if !Rails.env.test?
+          if new_user && !Rails.env.test?
             tenant_name = Apartment::Tenant.current
             send_user_info_obj = SendUsersInfo.new()
             send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
@@ -269,7 +269,6 @@ class UsersController < ApplicationController
   end
 
   def duplicate_user
-
     result = {}
     result['status'] = true
     if current_user.can? 'add_edit_users'
@@ -290,12 +289,14 @@ class UsersController < ApplicationController
           @newuser.password = @user.password
           @newuser.password_confirmation = @user.password_confirmation
           @newuser.confirmation_code = @user.confirmation_code+'1'
-          @newuser.last_sign_in_at = ''
-
+          @newuser.last_sign_in_at = '' 
           if !@newuser.save(:validate => false)
             result['status'] = false
             result['messages'] = @newuser.errors.full_messages
           end
+          tenant_name = Apartment::Tenant.current
+          send_user_info_obj = SendUsersInfo.new()
+          send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
         else
           result['status'] = false
           result['messages'] = "You have reached the maximum limit of number of users for your subscription."
