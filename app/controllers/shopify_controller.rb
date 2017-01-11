@@ -108,7 +108,11 @@ class ShopifyController < ApplicationController
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if recurring_application_charge.save
-      redirect_to recurring_application_charge.confirmation_url and return 
+      begin
+        redirect_to recurring_application_charge.confirmation_url and return 
+      rescue
+        redirect_to recurring_application_charge.confirmation_url rescue nil
+      end
     end
   end
 
