@@ -141,13 +141,13 @@ RSpec.describe ProductsController, :type => :controller do
       product_orig = FactoryGirl.create(:product)
       product_orig_sku = FactoryGirl.create(:product_sku, :product=> product_orig)
       product_orig_barcode = FactoryGirl.create(:product_barcode, :product=> product_orig)
-
+      product_orig.reload    
       product_orig_inv_wh = product_orig.primary_warehouse
       product_orig_inv_wh.update_attributes(:available_inv => 25, :allocated_inv => 5, :inventory_warehouse_id =>inv_wh.id)
       product_alias = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
       product_alias_sku = FactoryGirl.create(:product_sku, :product=> product_alias, :sku=>'iPhone5C')
       product_alias_barcode = FactoryGirl.create(:product_barcode, :product=> product_alias, :barcode=>"2456789")
-
+      product_alias.reload
       product_alias_inv_wh = product_alias.primary_warehouse
       product_alias_inv_wh.update_attributes(:allocated_inv => 5, :inventory_warehouse_id =>inv_wh.id)
 
@@ -185,17 +185,20 @@ RSpec.describe ProductsController, :type => :controller do
 
       kit_product_orig_sku = FactoryGirl.create(:product_sku, :product=> kit_product_orig)
       kit_product_orig_barcode = FactoryGirl.create(:product_barcode, :product=> kit_product_orig)
+      kit_product_orig.reload
       kit_product_orig_inv_wh = kit_product_orig.primary_warehouse
       kit_product_orig_inv_wh.update_attributes(:available_inv => 25, :allocated_inv => 5, :inventory_warehouse_id =>inv_wh.id)
+      product1.reload
       product1_inv_wh = product1.primary_warehouse
       product1_inv_wh.update_attributes(:available_inv => 25, :allocated_inv => 5, :inventory_warehouse_id =>inv_wh.id)
+      product2.reload
       product2_inv_wh = product2.primary_warehouse
       product2_inv_wh.update_attributes(:available_inv => 50, :allocated_inv => 10, :inventory_warehouse_id =>inv_wh.id)
 
       product_alias = FactoryGirl.create(:product, :name=>"Apple iPhone5C")
       product_alias_sku = FactoryGirl.create(:product_sku, :product=> product_alias, :sku=>'iPhone5C')
       product_alias_barcode = FactoryGirl.create(:product_barcode, :product=> product_alias, :barcode=>"2456789")
-
+      product_alias.reload
       product_alias_inv_wh = product_alias.primary_warehouse
       product_alias_inv_wh.update_attributes(:allocated_inv => 5, :inventory_warehouse_id =>inv_wh.id)
 

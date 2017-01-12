@@ -102,14 +102,12 @@ RSpec.describe ExportsettingsController, type: :controller do
         export_orders_option: "on_same_day", order_export_type: "include_all", 
         order_export_email: "success@simulator.amazonses.com", start_time: "2016-07-04 16:41:16", 
         end_time: "2016-07-04 16:41:16", manual_export: false)
-
        get :order_exports, {:start=>"Tue Jul 05 2016 12:58:40 GMT 0530 (IST)", :end=>"Tue Jul 05 2016 12:58:40 GMT 0530 (IST)"} 
        expect(response.status).to eq(200)
-
-       filename = File.new("#{Rails.root}/public/csv/" + export_setting.export_data, "w+")
-       open("#{Rails.root}/public/csv/" + export_setting.export_data, "w+") do |f|
-         f << response.body.chomp
-       end
+       # filename = File.new("#{Rails.root}/public/csv/#{export_setting.export_data}", "w+")
+       # open("#{Rails.root}/public/csv/" + export_setting.export_data, "w+") do |f|
+       #   f << response.body.chomp
+       # end
        # content = File.read("#{Rails.root}/public/csv/" + export_setting.export_data)
        # expect(content).to have_content("order_date,order_number,barcode,primary_sku,product_name,packing_user,order_item_count,scanned_date,warehouse_name,item_sale_price,kit_name,customer_name,address1,address2,city,state,zip")
        # File.delete("#{Rails.root}/public/csv/" + export_setting.export_data)
