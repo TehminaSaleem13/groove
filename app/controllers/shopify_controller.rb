@@ -60,7 +60,12 @@ class ShopifyController < ApplicationController
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if recurring_application_charge.save
-      redirect_to recurring_application_charge.confirmation_url and return
+      check_acitve_url(recurring_application_charge.confirmation_url)
+      if @result
+        redirect_to recurring_application_charge.confirmation_url and return
+      else
+        redirect_to finalize_payment_shopify_index_path
+      end
     end
   end
 
@@ -79,7 +84,25 @@ class ShopifyController < ApplicationController
     }
     app_charges.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if app_charges.save
-      redirect_to app_charges.attributes["confirmation_url"] and return
+      check_acitve_url(app_charges.attributes["confirmation_url"])
+      if @result
+        redirect_to app_charges.attributes["confirmation_url"] and return
+      else
+        redirect_to finalize_payment_shopify_index_path
+      end
+    end
+  end
+
+  def check_acitve_url(confirmation_url)
+    i=0
+    @result = false
+    while(i<5)
+      resp = HTTParty.get(confirmation_url) rescue nil
+      if resp and resp.code == 200
+        @result = true
+        break
+      end
+      sleep 1     
     end
   end
 
@@ -108,10 +131,11 @@ class ShopifyController < ApplicationController
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if recurring_application_charge.save
-      begin
+      check_acitve_url(recurring_application_charge.confirmation_url)
+      if @result
         redirect_to recurring_application_charge.confirmation_url and return 
-      rescue
-        redirect_to recurring_application_charge.confirmation_url rescue nil
+      else
+        redirect_to finalize_payment_shopify_index_path
       end
     end
   end
@@ -124,30 +148,34 @@ class ShopifyController < ApplicationController
 
 
   def finalize_payment
-    @tenant_fee = ShopifyAPI::RecurringApplicationCharge.find(params["charge_id"])
-    @tenant_fee.activate if @tenant_fee.status == "accepted" 
-    existing_store = $redis.get("#{params['shop_name']}_existing_store")
-    plan = $redis.get("#{params['shop_name']}_plan_id").split(".")[0] rescue nil
-    redis_data_delete(params['shop_name'])
-    $redis.set("#{params['shop_name']}_rtc", params["charge_id"])
-    if existing_store.present?
-      tenant = Tenant.find_by_name(Apartment::Tenant.current)
-      tenant.update_attribute(:is_modified, true)
-      subsc = Subscription.find_by_tenant_name(tenant.name)
-      tenant_data = subsc.tenant_data.split("-")
-      access_restriction =  AccessRestriction.last
-      access_restriction.update_attributes(:num_shipments => tenant_data[1], :num_users => tenant_data[2], :num_import_sources => tenant_data[3])
-      subsc.update_attributes(:subscription_plan_id => plan, :tenant_charge_id => params["charge_id"], :shopify_payment_token => nil, :tenant_data => nil, :amount => tenant_data[0].to_f*100)
-      if @tenant_fee.status == "declined"
-        render "payment_failed" and return
-      else
-        render "updated_plan" and return
+    begin
+      @tenant_fee = ShopifyAPI::RecurringApplicationCharge.find(params["charge_id"])
+      @tenant_fee.activate if @tenant_fee.status == "accepted" 
+      existing_store = $redis.get("#{params['shop_name']}_existing_store")
+      plan = $redis.get("#{params['shop_name']}_plan_id").split(".")[0] rescue nil
+      redis_data_delete(params['shop_name'])
+      $redis.set("#{params['shop_name']}_rtc", params["charge_id"])
+      if existing_store.present?
+        tenant = Tenant.find_by_name(Apartment::Tenant.current)
+        tenant.update_attribute(:is_modified, true)
+        subsc = Subscription.find_by_tenant_name(tenant.name)
+        tenant_data = subsc.tenant_data.split("-")
+        access_restriction =  AccessRestriction.last
+        access_restriction.update_attributes(:num_shipments => tenant_data[1], :num_users => tenant_data[2], :num_import_sources => tenant_data[3])
+        subsc.update_attributes(:subscription_plan_id => plan, :tenant_charge_id => params["charge_id"], :shopify_payment_token => nil, :tenant_data => nil, :amount => tenant_data[0].to_f*100)
+        if @tenant_fee.status == "declined"
+          render "payment_failed" and return
+        else
+          render "updated_plan" and return
+        end
+      else  
+        response_status = check_if_paid_all_the_charges
+        unless response_status
+          render "payment_failed" and return
+        end
       end
-    else  
-      response_status = check_if_paid_all_the_charges
-      unless response_status
-        render "payment_failed" and return
-      end
+    rescue
+      render "payment_failed" and return
     end
   end
 
