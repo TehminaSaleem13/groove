@@ -97,6 +97,7 @@ class ShopifyController < ApplicationController
     i=0
     @result = false
     while(i<5)
+      i = i + 1
       resp = HTTParty.get(confirmation_url) rescue nil
       if resp and resp.code == 200
         @result = true
@@ -107,6 +108,10 @@ class ShopifyController < ApplicationController
   end
 
   def recurring_tenant_charges
+    token = $redis.get("#{params['shop_name']}")
+    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
+    session = ShopifyAPI::Session.new(params["shop_name"], token)
+    ShopifyAPI::Base.activate_session(session)
     otf = ShopifyAPI::ApplicationCharge.find(params["charge_id"])
     if otf.attributes["status"] == "accepted"
       otf.activate
@@ -117,10 +122,7 @@ class ShopifyController < ApplicationController
     price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f rescue nil
     $redis.set("#{params['shop_name']}_otf", params["charge_id"])      #saf -> Recurring Shopify App Fee
     $redis.set("#{params['shop_name']}_ready_to_be_deployed", false)
-    token = $redis.get("#{params['shop_name']}")
-    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
-    session = ShopifyAPI::Session.new(params["shop_name"], token)
-    ShopifyAPI::Base.activate_session(session)
+    # 
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
     recurring_application_charge.attributes = {
             "name" =>  "Tenant and App charges",
@@ -149,6 +151,10 @@ class ShopifyController < ApplicationController
 
   def finalize_payment
     begin
+      token = $redis.get("#{params['shop_name']}")
+      ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
+      session = ShopifyAPI::Session.new(params["shop_name"], token)
+      ShopifyAPI::Base.activate_session(session)
       @tenant_fee = ShopifyAPI::RecurringApplicationCharge.find(params["charge_id"])
       @tenant_fee.activate if @tenant_fee.status == "accepted" 
       existing_store = $redis.get("#{params['shop_name']}_existing_store")
