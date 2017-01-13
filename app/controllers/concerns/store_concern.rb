@@ -89,7 +89,6 @@ module StoreConcern
       params[:type] = 'both' if params[:type].nil? || !['both', 'order', 'product', 'kit'].include?(params[:type])
       if (params[:type] == 'order' && current_user.can?('import_orders')) || (params[:type] == 'both' && current_user.can?('import_orders') && current_user.can?('import_products')) || (['product', 'kit'].include?(params[:type]) && current_user.can?('import_products'))
         @result['store_id'] = @store.id
-        #check if previous mapping exists #else fill in defaults
         default_csv_map = { 'name' => '', 'map' => {'rows' => 2,'sep' => ',','other_sep' => 0,'delimiter' => '"','fix_width' => 0,'fixed_width' => 4, 'contains_unique_order_items' => false,'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil,'order_date_time_format' => 'Default','day_month_sequence' => 'MM/DD','map' => {}}}
         csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
         csv_directory = 'uploads/csv'
@@ -143,7 +142,6 @@ module StoreConcern
       if csv_map.product_csv_map_id.nil?
         map_data = CsvMap.create(:kind => 'product', :name => params[:name], :map => {})
         csv_map.product_csv_map_id = map_data.id
-        # csv_map.save
       else
         map_data = csv_map.product_csv_map
       end
@@ -152,7 +150,6 @@ module StoreConcern
       if csv_map.kit_csv_map_id.nil?
         map_data = CsvMap.create(:kind => 'kit', :name => params[:name], :map => {})
         csv_map.kit_csv_map_id = map_data.id
-        # csv_map.save
       else
         map_data = csv_map.kit_csv_map
       end
@@ -161,7 +158,6 @@ module StoreConcern
       if csv_map.order_csv_map_id.nil?
         map_data = CsvMap.create(:kind => 'order', :name => params[:name], :map => {})
         csv_map.order_csv_map_id = map_data.id
-        # csv_map.save
       else
         map_data = csv_map.order_csv_map
       end

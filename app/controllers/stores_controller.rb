@@ -351,16 +351,15 @@ class StoresController < ApplicationController
   end
 
   def duplicate_store
-
-    @result = Hash.new
-    @result['status'] = true
-    @result['messages'] = []
+    @result = {"status"=>true, "messages"=>[]}
+    # @result = Hash.new
+    # @result['status'] = true
+    # @result['messages'] = []
 
     if current_user.can? 'add_edit_stores'
       params['_json'].each do |store|
         if Store.can_create_new?
           @store = Store.find(store["id"])
-
           @newstore = @store.dup
           index = 0
           @newstore.name = @store.name+"(duplicate"+index.to_s+")"
@@ -370,7 +369,6 @@ class StoresController < ApplicationController
             @newstore.name = @store.name+"(duplicate"+index.to_s+")"
             @storeslist = Store.where(:name => @newstore.name)
           end while (!@storeslist.nil? && @storeslist.length > 0)
-
           if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
             @result['status'] = false
             @result['messages'] = @newstore.errors.full_messages
@@ -379,18 +377,17 @@ class StoresController < ApplicationController
           @result['status'] = false
           @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
         end
-
       end
     else
       @result["status"] = false
       @result["messages"].push("User does not have permissions to duplicate store")
     end
+    render json: @result
 
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: @result }
+    # end
   end
 
   def delete_store
@@ -421,18 +418,16 @@ class StoresController < ApplicationController
       @result["status"] = false
       @result["messages"].push("User does not have permissions to delete store")
     end
-
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: @result }
+    # end
   end
 
   def show
     @store = Store.find_by_id(params[:id])
     @result = Hash.new
-
     if !@store.nil? then
       @result['status'] = true
       @result['store'] = @store
@@ -448,28 +443,27 @@ class StoresController < ApplicationController
     else
       @result['status'] = false
     end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: @result }
+    # end
   end
 
   def get_system
     @store = Store.find_by_store_type('system')
     @result = Hash.new
-
     if @store.nil?
       @result['status'] = false
     else
       @result['status'] = true
       @result['store'] = @store
     end
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: @result }
+    # end
   end
 
   def get_ebay_signin_url
@@ -527,10 +521,11 @@ class StoresController < ApplicationController
       session[:ebay_auth_expiration] = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
       @result['status'] = true
     end
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
+    # respond_to do |format|
+    #   format.html # show.html.erb
+    #   format.json { render json: @result }
+    # end
   end
 
   def update_ebay_user_token
@@ -614,10 +609,7 @@ class StoresController < ApplicationController
         end
       end
     end
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def handle_ebay_redirect
@@ -635,7 +627,6 @@ class StoresController < ApplicationController
     importproducts = params['importproducts']
     messagetocustomer = params['messagetocustomer']
     tenant_name = params['tenantname']
-
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
     redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/")) + (URI::encode("stores/#{storeid}/update_ebay_user_token"))
   end
@@ -660,7 +651,6 @@ class StoresController < ApplicationController
     store = Store.find(params[:id])
     result = { status: true, messages: [], data: { update_status: false, message: "" }}
     order_summary = OrderImportSummary.where(status: 'in_progress')
-
     if order_summary.empty? && store.store_type == 'Shipstation API 2'
       tenant = Apartment::Tenant.current
       Delayed::Job.where(queue: "importing_orders_"+tenant).destroy_all
@@ -669,7 +659,6 @@ class StoresController < ApplicationController
       result[:status] = false
       result[:error_messages] << "Import/Update is in progress"
     end
-
     render json: result
   end
 
@@ -691,20 +680,8 @@ class StoresController < ApplicationController
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
-
     if @store && current_user.can?('update_inventories')
-      case @store.store_type
-      when "BigCommerce"
-        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-      when "Magento API 2"
-        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-      when "Shopify"
-        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-      when "Teapplix"
-        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-      end
-
-      context = Groovepacker::Stores::Context.new(handler)
+      context = create_handler
       context.delay(:run_at => 1.seconds.from_now).pull_inventory
       #context.pull_inventory
       @result['message'] = "Your request for innventory pull has beed queued"
@@ -712,40 +689,38 @@ class StoresController < ApplicationController
       @result['status'] = false
       @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
     end
-
     render json: @result
+  end
+
+  def create_handler
+    case @store.store_type
+    when "BigCommerce"
+      handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+    when "Magento API 2"
+      handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+    when "Shopify"
+      handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+    when "Teapplix"
+      handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+    end
+    context = Groovepacker::Stores::Context.new(handler)
+    context
   end
 
   def push_store_inventory
     @store = Store.find(params[:id])
-
     @result = Hash.new
     @result['status'] = true
-
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
-
     if @store && current_user.can?('update_inventories')
-      case @store.store_type
-      when "BigCommerce"
-        handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-      when "Magento API 2"
-        handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-      when "Shopify"
-        handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-      when "Teapplix"
-        handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-      end
-
-      context = Groovepacker::Stores::Context.new(handler)
+      context = create_handler
       context.delay(:run_at => 1.seconds.from_now).push_inventory
-      #context.push_inventory
     else
       @result['status'] = false
       @result['message'] = "Either the store is not present or you don't have permissions to update inventories."
     end
-
     render json: @result
   end
 
