@@ -249,7 +249,7 @@ class Product < ActiveRecord::Base
         #                                      !%w(awaiting onhold)
         #                                      .include?(item.order.status)
         bulkaction.process(item) if general_setting.inventory_tracking?
-        item.delete_cache_for_associated_obj
+        # item.delete_cache_for_associated_obj
       end
     end
     result
