@@ -19,29 +19,38 @@
     </div>
   </div>
 <%end%>
-
-<div class="form-group">
-  <div class="control-label">
-    <i class="fa fa-check-square-o"></i>
-    Only the one time startup fee explained on the previous page will be charged today. It is fully refundable should you not decide to continue please email <a href="mailto:suport@groovepacker.com">suport@groovepacker.com</a> any time during the free trial.
-    <!-- Your creditcard will not be charged during the trial. -->
+<%if params["shop_type"] == "BigCommerce" %>
+  <div class="form-group">
+    <div class="control-label">
+      <i class="fa fa-check-square-o"></i>
+      Only the one time startup fee explained on the previous page will be charged today. It is fully refundable should you not decide to continue please email <a href="mailto:suport@groovepacker.com">suport@groovepacker.com</a> any time during the free trial.
+      <!-- Your creditcard will not be charged during the trial. -->
+    </div>
   </div>
-</div>
 
-<!-- <div class="form-group">
-  <div class="control-label">
-    <i class="fa fa-check-square-o"></i>
-    You’ll have access to remove your card information at any time, if you do not wish to continue the trial.
-  </div>
-</div> -->
+  <!-- <div class="form-group">
+    <div class="control-label">
+      <i class="fa fa-check-square-o"></i>
+      You’ll have access to remove your card information at any time, if you do not wish to continue the trial.
+    </div>
+  </div> -->
 
-<div class="form-group">
-  <div class="control-label">
-    <i class="fa fa-check-square-o"></i>
-    Your details are encrypted and secured by Stripe, a certified. Level 1 PCI Service Provider
-    <small>(the most stringent level of certification)</small>
+  <div class="form-group">
+    <div class="control-label">
+      <i class="fa fa-check-square-o"></i>
+      Your details are encrypted and secured by Stripe, a certified. Level 1 PCI Service Provider
+      <small>(the most stringent level of certification)</small>
+    </div>
   </div>
-</div>
+<%else%>
+  <div class="form-group">
+    <div class="control-label">
+      <i class="fa fa-check-square-o"></i>
+      Only the one time startup fee explained on the previous page will be charged today. NOTE: When confirming the charge in a moment Shopify's Billing API will say it is Non-Refundable but in fact it can be refunded on request during the trial period. If you should you not decide to continue please email <a href="mailto:suport@groovepacker.com">suport@groovepacker.com</a>  any time during the free trial.
+      <!-- Your creditcard will not be charged during the trial. -->
+    </div>
+  </div>
+<%end%>
 
 <div class="text-center">
   <script src="https://checkout.stripe.com/checkout.js"></script>
