@@ -157,8 +157,11 @@ module Groovepacker
               #find_or_create_order_item_product is defined in products importer module
               order_item_product = find_or_create_order_item_product(item, @credential.store)
               order_item.product = order_item_product
-              s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
-              order_item.product.product_images.create(image: s3_image_url) if s3_image_url.present?
+              begin
+                s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
+                order_item.product.product_images.create(image: s3_image_url) if s3_image_url.present?
+              rescue
+              end
               make_product_intangible(order_item.product)
             end
 
