@@ -34,7 +34,7 @@ module ScanPack
       else
         product_scan(clicked, serial_added)
       end
-      order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"])
+      order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"]) rescue nil
       @result["data"]["order"]["store_type"] = order.store.store_type rescue nil
       @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy"
       @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2"
