@@ -174,24 +174,27 @@ module Groovepacker
       end
 
       def destroy_tenant(customer_id, tenant, subscription_data, result)
-        if subscription_data && customer_id
-          duplicate_tenant_id = tenant.duplicate_tenant_id
-          tenant_name = tenant.name
-          unless duplicate_tenant_id
-            delete_customer(customer_id)
-          else
-            duplicate_tenant_name = Tenant.find(duplicate_tenant_id).name
+        # if subscription_data && customer_id
+        duplicate_tenant_id = tenant.duplicate_tenant_id
+        tenant_name = tenant.name
+        unless duplicate_tenant_id
+          delete_customer(customer_id) rescue nil
+        else
+          begin
+            duplicate_tenant_name = Tenant.find(duplicate_tenant_id).name 
             create_subscription(subscription_data, duplicate_tenant_name, tenant)
             subscription_data.is_active = false
             subscription_data.save
+          rescue
           end
-          Apartment::Tenant.drop(tenant_name)
-          if tenant.destroy
-            result['success_messages'].push('Removed ' + tenant_name + ' from tenants table')
-          end
-        else
-          update_fail_status(result, 'The tenant does not have a valid subscription')
         end
+        Apartment::Tenant.drop(tenant_name)
+        if tenant.destroy
+          result['success_messages'].push('Removed ' + tenant_name + ' from tenants table')
+        end
+        # else
+        #   update_fail_status(result, 'The tenant does not have a valid subscription')
+        # end
       end
 
       def create_subscription(subscription_data, duplicate_tenant_name, tenant)
