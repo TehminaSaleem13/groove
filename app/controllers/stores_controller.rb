@@ -15,7 +15,8 @@ class StoresController < ApplicationController
   def update_include_product
     result = {}
     shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
-    shippingeasy_cred.update_attribute(:includes_product, !shippingeasy_cred.includes_product)
+    shippingeasy_cred.includes_product = !shippingeasy_cred.includes_product
+    shippingeasy_cred.save
     result["includes_product"] = shippingeasy_cred.includes_product  
     render json: result
   end
@@ -23,7 +24,8 @@ class StoresController < ApplicationController
   def popup_shipping_label
     result = {}
     shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
-    shippingeasy_cred.update_attribute(:popup_shipping_label, !shippingeasy_cred.popup_shipping_label)
+    shippingeasy_cred.popup_shipping_label = !shippingeasy_cred.popup_shipping_label
+    shippingeasy_cred.save
     result["popup_shipping_label"] = shippingeasy_cred.popup_shipping_label  
     render json: result
   end
@@ -68,16 +70,7 @@ class StoresController < ApplicationController
   end
 
   def init_update_store_data(params)
-    params[:name]=nil if params[:name]=='undefined'
-    @store.name = params[:name] || get_default_warehouse_name
-    @store.store_type = params[:store_type]
-    @store.status = params[:status]
-    @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
-    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-    @store.auto_update_products = params[:auto_update_products]
-    @store.on_demand_import = params[:on_demand_import]
-    @store.update_inv = params[:update_inv]
-    @store.save
+    init_store_data
   end
 
   def create_update_store
@@ -164,7 +157,7 @@ class StoresController < ApplicationController
 
   def csv_import_data
     @result = {"status"=>true, "messages"=>[]}
-    general_settings = GeneralSetting.all.first
+    # general_settings = GeneralSetting.all.first
     if !params[:id].nil?
       @store = Store.find(params[:id])
     else
@@ -179,102 +172,9 @@ class StoresController < ApplicationController
     @result = {"status"=>true, "last_row"=>0, "messages"=>[]}
     check_store
     check_store_status
-    # unless @store.status
-    #   if params["flag"]=="ftp_download"
-    #     @result['status'] = false
-    #     @result['messages'].push('Store is not active')
-    #   end
-    # end
-
-    # if params[:type].nil? || !['order', 'product', 'kit'].include?(params[:type])
-    #   @result['status'] = false
-    #   @result['messages'].push('No Type specified to import')
-    # end
-
-    # if (params[:type] == 'order' && !current_user.can?('import_orders')) ||(['product', 'kit'].include?(params[:type]) && !current_user.can?('import_products'))
-    #   @result['status'] = false
-    #   @result['messages'].push("User does not have permissions to import #{params[:type]}")
-    # end
-
-    # if @result['status']
     csv_store_map_data if @result['status']
-      #store mapping for later
-      # csv_map = CsvMapping.find_by_store_id(@store.id)
-      # if params[:type] =='product'
-      #   params[:name] = csv_map.store.name+' - Default Product Map' if params[:name].blank?
-      #   if csv_map.product_csv_map_id.nil?
-      #     map_data = CsvMap.create(:kind => 'product', :name => params[:name], :map => {})
-      #     csv_map.product_csv_map_id = map_data.id
-      #     # csv_map.save
-      #   else
-      #     map_data = csv_map.product_csv_map
-      #   end
-      # elsif params[:type] =='kit'
-      #   params[:name] = csv_map.store.name+' - Default Kit Map' if params[:name].blank?
-      #   if csv_map.kit_csv_map_id.nil?
-      #     map_data = CsvMap.create(:kind => 'kit', :name => params[:name], :map => {})
-      #     csv_map.kit_csv_map_id = map_data.id
-      #     # csv_map.save
-      #   else
-      #     map_data = csv_map.kit_csv_map
-      #   end
-      # elsif params[:type] == 'order'
-      #   params[:name] = csv_map.store.name+' - Default Order Map' if params[:name].blank?
-      #   if csv_map.order_csv_map_id.nil?
-      #     map_data = CsvMap.create(:kind => 'order', :name => params[:name], :map => {})
-      #     csv_map.order_csv_map_id = map_data.id
-      #     # csv_map.save
-      #   else
-      #     map_data = csv_map.order_csv_map
-      #   end
-      # end
-
-      # map_data.name = params[:name]
-      # map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence], :map => params[:map] }
-      # begin
-      #   map_data.save!
-      #   csv_map.save!
-      # rescue ActiveRecord::RecordInvalid => e
-      #   @result['status'] = false
-      #   @result['messages'].push(csv_map.errors.full_messages)
-      #   @result['messages'].push(map_data.errors.full_messages)
-      #   @result['messages'] = @result['messages'].reject(&:empty?)
-      # rescue ActiveRecord::StatementInvalid => e
-      #   @result['status'] = false
-      #   @result['messages'].push(e.message)
-      # end
-    # end
     if @result['status']
-      data = {:flag=>params[:flag], :type=>params[:type], :fix_width=>params[:fix_width], :fixed_width=>params[:fixed_width], :sep=>params[:sep], :delimiter=>params[:delimiter], :rows=>params[:rows], :map=>params[:map], :store_id=>params[:store_id], :import_action=>params[:import_action], :contains_unique_order_items=>params[:contains_unique_order_items], :generate_barcode_from_sku=>params[:generate_barcode_from_sku], :use_sku_as_product_name=>params[:use_sku_as_product_name], :order_placed_at=>params[:order_placed_at],  :order_date_time_format=>params[:order_date_time_format], :day_month_sequence=>params[:day_month_sequence]}
-      # data[:flag] = params[:flag]
-      # data[:type] = params[:type]
-      # data[:fix_width] = params[:fix_width]
-      # data[:fixed_width] = params[:fixed_width]
-      # data[:sep] = params[:sep]
-      # data[:delimiter] = params[:delimiter]
-      # data[:rows] = params[:rows]
-      # data[:map] = params[:map]
-      # data[:store_id] = params[:store_id]
-      # data[:import_action] = params[:import_action]
-      # data[:contains_unique_order_items] = params[:contains_unique_order_items]
-      # data[:generate_barcode_from_sku] = params[:generate_barcode_from_sku]
-      # data[:use_sku_as_product_name] = params[:use_sku_as_product_name]
-      # data[:order_placed_at] = params[:order_placed_at]
-      # data[:order_date_time_format] = params[:order_date_time_format]
-      # data[:day_month_sequence] = params[:day_month_sequence]
-
-      # Uncomment this when everything is moved to bulk actions
-      # groove_bulk_actions = GrooveBulkActions.new
-      # groove_bulk_actions.identifier = 'csv_import'
-      # groove_bulk_actions.activity = params[:type]
-      # groove_bulk_actions.save
-      #
-      # data[:bulk_action_id] = groove_bulk_actions.id
-      #
-      # import_csv = ImportCsv.new
-      # import_csv.delay(:run_at =>1.seconds.from_now).import Apartment::Tenant.current, data
-
-
+      data = {:flag=>params[:flag], :type=>params[:type], :fix_width=>params[:fix_width], :fixed_width=>params[:fixed_width], :sep=>params[:sep], :delimiter=>params[:delimiter], :rows=>params[:rows], :map=>params[:map], :store_id=>params[:store_id], :import_action=>params[:import_action], :contains_unique_order_items=>params[:contains_unique_order_items], :generate_barcode_from_sku=>params[:generate_barcode_from_sku], :use_sku_as_product_name=>params[:use_sku_as_product_name], :order_placed_at=>params[:order_placed_at],  :order_date_time_format=>params[:order_date_time_format], :day_month_sequence=>params[:day_month_sequence]}    
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
         if OrderImportSummary.where(status: 'in_progress').empty?
@@ -305,12 +205,6 @@ class StoresController < ApplicationController
         delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
         # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
         product_import.update_attributes(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
-        # product_import.delayed_job_id = delayed_job.id
-        # product_import.total = 0
-        # product_import.success = 0
-        # product_import.cancel = false
-        # product_import.status = 'scheduled'
-        # product_import.save
       end
       # Comment everything before this line till previous comment (i.e. the entire if block) when everything is moved to bulk actions
     end
@@ -351,134 +245,37 @@ class StoresController < ApplicationController
   end
 
   def duplicate_store
-    @result = {"status"=>true, "messages"=>[]}
-    # @result = Hash.new
-    # @result['status'] = true
-    # @result['messages'] = []
-
-    if current_user.can? 'add_edit_stores'
-      params['_json'].each do |store|
-        if Store.can_create_new?
-          @store = Store.find(store["id"])
-          @newstore = @store.dup
-          index = 0
-          @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-          @storeslist = Store.where(:name => @newstore.name)
-          begin
-            index = index + 1
-            @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-            @storeslist = Store.where(:name => @newstore.name)
-          end while (!@storeslist.nil? && @storeslist.length > 0)
-          if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
-            @result['status'] = false
-            @result['messages'] = @newstore.errors.full_messages
-          end
-        else
-          @result['status'] = false
-          @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
-        end
-      end
-    else
-      @result["status"] = false
-      @result["messages"].push("User does not have permissions to duplicate store")
-    end
+    store_duplicate
     render json: @result
-
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: @result }
-    # end
   end
 
   def delete_store
-    @result = Hash.new
-    @result['status'] = false
-    @result['messages'] = []
-    if current_user.can? 'add_edit_stores'
-      system_store_id = Store.find_by_store_type('system').id.to_s
-      params['_json'].each do |store|
-        @store = Store.where(id: store["id"]).first
-        unless @store.nil?
-          Product.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
-          Order.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
-          if @store.store_type == 'CSV'
-            csv_mapping = CsvMapping.find_by_store_id(@store.id)
-            unless csv_mapping.nil?
-              csv_mapping.destroy
-            end
-            ftp_credential = FtpCredential.find_by_store_id(@store.id)
-            ftp_credential.destroy unless ftp_credential.nil?
-          end
-          if @store.deleteauthentications && @store.destroy
-            @result['status'] = true
-          end
-        end
-      end
-    else
-      @result["status"] = false
-      @result["messages"].push("User does not have permissions to delete store")
-    end
+    store_delete
     render json: @result
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: @result }
-    # end
   end
 
   def show
     @store = Store.find_by_id(params[:id])
     @result = Hash.new
-    if !@store.nil? then
-      @result['status'] = true
-      @result['store'] = @store
-      access_restrictions = AccessRestriction.last
-      @result['general_settings'] = GeneralSetting.first
-      @result['current_tenant'] = Apartment::Tenant.current
-      @result['host_url'] = get_host_url
-      @result['access_restrictions'] = access_restrictions
-      @result['credentials'] = @store.get_store_credentials
-      if @store.store_type == 'CSV'
-        @result['mapping'] = CsvMapping.find_by_store_id(@store.id)
-      end
-    else
-      @result['status'] = false
-    end
+    show_store
     render json: @result
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: @result }
-    # end
   end
 
   def get_system
     @store = Store.find_by_store_type('system')
     @result = Hash.new
-    if @store.nil?
-      @result['status'] = false
-    else
-      @result['status'] = true
-      @result['store'] = @store
-    end
+    get_system_store
     render json: @result
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: @result }
-    # end
   end
 
   def get_ebay_signin_url
     @result = Hash.new
     @result[:status] = true
-
     @store = Store.new
     @result = @store.get_ebay_signin_url
     session[:ebay_session_id] = @result['ebay_sessionid']
     @result['current_tenant'] = Apartment::Tenant.current
-
-    respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @result }
-    end
+    render json: @result
   end
 
   def ebay_user_fetch_token
@@ -489,13 +286,8 @@ class StoresController < ApplicationController
     appName = ENV['EBAY_APP_ID']
     certName = ENV['EBAY_CERT_ID']
     @result['status'] = false
-    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-      url = "https://api.sandbox.ebay.com/ws/api.dll"
-    else
-      url = "https://api.ebay.com/ws/api.dll"
-    end
+    ENV['EBAY_SANDBOX_MODE'] == 'YES' ? url = "https://api.sandbox.ebay.com/ws/api.dll" : url = "https://api.ebay.com/ws/api.dll"
     url = URI.parse(url)
-
     req = Net::HTTP::Post.new(url.path)
     req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
     req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
@@ -504,7 +296,6 @@ class StoresController < ApplicationController
     req.add_field("X-EBAY-API-CERT-NAME", certName)
     req.add_field("X-EBAY-API-SITEID", 0)
     req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
-
     req.body ='<?xml version="1.0" encoding="utf-8"?>'+
       '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
       '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
@@ -522,10 +313,6 @@ class StoresController < ApplicationController
       @result['status'] = true
     end
     render json: @result
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: @result }
-    # end
   end
 
   def update_ebay_user_token
@@ -536,11 +323,7 @@ class StoresController < ApplicationController
     appName = ENV['EBAY_APP_ID']
     certName = ENV['EBAY_CERT_ID']
     @result['status'] = false
-    if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-      url = "https://api.sandbox.ebay.com/ws/api.dll"
-    else
-      url = "https://api.ebay.com/ws/api.dll"
-    end
+    url = ENV['EBAY_SANDBOX_MODE'] == 'YES' ? "https://api.sandbox.ebay.com/ws/api.dll" : "https://api.ebay.com/ws/api.dll" 
     url = URI.parse(url)
     @store = EbayCredentials.where(:store_id => params[:id])
 
@@ -554,11 +337,7 @@ class StoresController < ApplicationController
       req.add_field("X-EBAY-API-CERT-NAME", certName)
       req.add_field("X-EBAY-API-SITEID", 0)
       req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
-
-      req.body ='<?xml version="1.0" encoding="utf-8"?>'+
-        '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
-        '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
-        '</FetchTokenRequest>'
+      req.body ='<?xml version="1.0" encoding="utf-8"?>'+ '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+ '<SessionID>'+session[:ebay_session_id]+'</SessionID>' + '</FetchTokenRequest>'
       http = Net::HTTP.new(url.host, url.port)
       http.use_ssl = true
       res = http.start do |http_runner|
@@ -567,15 +346,10 @@ class StoresController < ApplicationController
       ebaytoken_resp = MultiXml.parse(res.body)
       @result['response'] = ebaytoken_resp
       if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
-        @store.auth_token =
-          ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
-        @store.productauth_token =
-          ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
-        @store.ebay_auth_expiration =
-          ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
-        if @store.save
-          @result['status'] = true
-        end
+        @store.auth_token = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+        @store.productauth_token = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+        @store.ebay_auth_expiration = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
+        @result['status'] = true if @store.save
       end
     else
       @result['status'] = false;
@@ -589,7 +363,6 @@ class StoresController < ApplicationController
   def delete_ebay_token
     @result = Hash.new
     @result['status'] = false
-
     if params[:id] == 'undefined'
       session[:ebay_auth_token] = nil
       session[:ebay_auth_expiration] = nil
@@ -604,9 +377,7 @@ class StoresController < ApplicationController
         @ebaycredentials.ebay_auth_expiration = ''
         session[:ebay_auth_token] = nil
         session[:ebay_auth_expiration] = nil
-        if @ebaycredentials.save
-          @result['status'] = true
-        end
+        @result['status'] = true if @ebaycredentials.save
       end
     end
     render json: @result
@@ -676,7 +447,7 @@ class StoresController < ApplicationController
   def pull_store_inventory
     @store = Store.find(params[:id])
     @result = {"status"=>true}
-    access_restriction = AccessRestriction.last
+    # access_restriction = AccessRestriction.last
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new
     import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
@@ -725,8 +496,7 @@ class StoresController < ApplicationController
   end
 
   def update_store_list
-    @result = Hash.new
-    @result['status'] = true
+    @result = {"status"=>true}
     @store = Store.find(params[:id])
     if @store.nil?
       @result['status'] = false
