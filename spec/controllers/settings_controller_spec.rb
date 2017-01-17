@@ -51,6 +51,7 @@ RSpec.describe SettingsController, type: :controller do
       xhr :get, :order_serials, start: time_now.ago(1.day), end: time_now.end_of_day,
                                 serial: 'serial'
       first_record = CSV.parse(response.body)[1]
+      product.reload
       match_array = [
         order.increment_id, order_serial.serial, product.primary_sku,
         product.primary_barcode, product.name, order_item.price.to_f.to_s, order_item.qty.to_s,

@@ -73,7 +73,7 @@ module Groovepacker
             def create_s3_image(item)
               image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
               # image_data = IO.read(open(item["product"]["image"]["original"]))
-              file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item["ext_line_item_id"]}"
+              file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['ext_line_item_id']}"
               tenant = Apartment::Tenant.current
               GroovS3.create_image(tenant, file_name, image_data, 'public_read')
               s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
@@ -102,9 +102,13 @@ module Groovepacker
                 product.product_skus.create(sku: sku)
                 product.product_cats.create(category: product_hash["product_category_name"])
                 product.product_lots.create(lot_number: product_hash["bin_picking_number"])
-                product.set_product_status
               end
-              product.product_barcodes.create(barcode: product_hash["upc"]) if product.product_barcodes.blank? 
+              product.product_barcodes.create(barcode: product_hash["upc"]) if product_hash["upc"].present? && product.product_barcodes.blank? 
+              if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty? && product.product_barcodes.blank?
+                product.product_barcodes.create(barcode: sku)
+              end
+              make_product_intangible(product)
+              product.set_product_status
               product
             end
 
@@ -153,6 +157,11 @@ module Groovepacker
               #find_or_create_order_item_product is defined in products importer module
               order_item_product = find_or_create_order_item_product(item, @credential.store)
               order_item.product = order_item_product
+              begin
+                s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
+                order_item.product.product_images.create(image: s3_image_url) if s3_image_url.present?
+              rescue
+              end
               make_product_intangible(order_item.product)
             end
 

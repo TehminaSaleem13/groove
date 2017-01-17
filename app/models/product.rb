@@ -241,17 +241,17 @@ class Product < ActiveRecord::Base
       end
     end
     # update order items status from onhold to awaiting
-    if @order_items.count > 50
-      process_order_item
-    else
-      @order_items.each do |item|
+    # if @order_items.count > 50
+    #   process_order_item
+    # else
+    #   @order_items.each do |item|
         # item.order.update_order_status unless item.order.nil? ||
         #                                      !%w(awaiting onhold)
         #                                      .include?(item.order.status)
-        bulkaction.process(item) if general_setting.inventory_tracking?
-        # item.delete_cache_for_associated_obj
-      end
-    end
+    #     bulkaction.process(item) if general_setting.inventory_tracking?
+    #     item.delete_cache_for_associated_obj
+    #   end
+    # end
     result
   end
 
