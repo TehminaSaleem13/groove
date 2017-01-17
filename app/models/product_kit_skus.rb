@@ -11,13 +11,19 @@ class ProductKitSkus < ActiveRecord::Base
   after_save :delete_cache
 
   def add_product_in_order_items
+    tenant = Apartment::Tenant.current
     @order_items = OrderItem.where(:product_id => self.product_id)
-    @order_items.each do |order_item|
-      if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => self.id).length == 0
-        order_item_kit_product = OrderItemKitProduct.new
-        order_item_kit_product.product_kit_skus = self
-        order_item_kit_product.order_item = order_item
-        order_item_kit_product.save
+    if @order_items.count > 50
+      kit_sku = Groovepacker::Products::BulkActions.new
+      kit_sku.delay.update_ordere_item_kit_product(tenant, self.product_id, self.id)
+    else
+      @order_items.each do |order_item|
+        if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => self.id).length == 0
+          order_item_kit_product = OrderItemKitProduct.new
+          order_item_kit_product.product_kit_skus = self
+          order_item_kit_product.order_item = order_item
+          order_item_kit_product.save
+        end
       end
     end
     true
