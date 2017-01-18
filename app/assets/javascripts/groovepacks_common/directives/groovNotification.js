@@ -11,6 +11,10 @@ groovepacks_directives.directive('groovNotification', function () {
         scope.notifs = args.data;
       });
 
+      scope.close = function(notif){
+        notif.show = false;
+      };
+
       //import All Orders function
       //scope.groovImport = function () {
       //$('#importOrders').modal('show');
