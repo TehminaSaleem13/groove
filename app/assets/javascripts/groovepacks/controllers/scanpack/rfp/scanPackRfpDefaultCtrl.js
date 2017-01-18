@@ -43,7 +43,7 @@ groovepacks_controllers.
           var barcode_found = false;
           if ($scope.data.order.next_item.barcodes.length) {
             for (var i = 0; i < $scope.data.order.next_item.barcodes.length; i++) {
-              if (myscope.last_scanned_barcode == $scope.data.order.next_item.barcodes[i].barcode || $scope.get_last_scanned() == $scope.data.order.next_item.barcodes[i].barcode) {
+              if (angular.lowercase(myscope.last_scanned_barcode) == angular.lowercase($scope.data.order.next_item.barcodes[i].barcode) || angular.lowercase($scope.get_last_scanned()) == angular.lowercase($scope.data.order.next_item.barcodes[i].barcode)) {
                 barcode_found = true;
               }
             }
