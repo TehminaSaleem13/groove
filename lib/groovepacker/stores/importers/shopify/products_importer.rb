@@ -11,8 +11,6 @@ module Groovepacker
             return if response["products"].blank?
             response["products"].each do |product|
               create_single_product(product)
-              product = product.reload rescue product 
-              product.set_product_status
             end
             update_orders_status
           end
@@ -55,7 +53,9 @@ module Groovepacker
               shopify_product["variants"].each do |variant|
                 variant_title = variant["title"]=="Default Title" ? "" : " - #{variant["title"]}"
                 variant["title"] = shopify_product["title"] + variant_title
-                create_product_from_variant(variant, shopify_product)    
+                product = create_product_from_variant(variant, shopify_product)   
+                product = product.reload rescue product 
+                product.set_product_status 
               end
             end
             
