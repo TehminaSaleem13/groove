@@ -354,6 +354,12 @@ groovepacks_directives.directive('groovDataGrid', ['$timeout', '$http', '$sce', 
         scope.$watch('theads', myscope.add_double_scrollbar);
       };
       myscope.init();
+
+      $(document).ready(function(){
+        $(window).on('resize', function(){
+          myscope.add_double_scrollbar();
+        });
+      });
     }
   };
 }]);

@@ -294,7 +294,8 @@ groovepacks_controllers.
 
       myscope.update_table_accordian_width = function () {
         if($('.accordion-parent').width() > 200){
-          $('.table-parent').width($('.table-parent').first().width() + $('.accordion-parent').width() - 170);
+          //$('.table-parent').width($('.table-parent').first().width() + $('.accordion-parent').width() - 170);
+          $('.table-parent').css('width', '100%');
           $('.accordion-parent').width(170)
         }
       }
