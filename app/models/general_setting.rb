@@ -217,6 +217,8 @@ class GeneralSetting < ActiveRecord::Base
         export_setting = ExportSetting.all.first
         if export_setting.should_export_orders(date)
           Delayed::Job.where(queue: "order_export_email_scheduled_#{tenant}").destroy_all
+          export_setting.manual_export = false
+          export_setting.save
           ExportOrder.delay(:run_at => time_diff.seconds.from_now, :queue => "order_export_email_scheduled_#{tenant}").export(tenant)
           # ExportOrder.export(tenant).deliver
           job_scheduled = true
