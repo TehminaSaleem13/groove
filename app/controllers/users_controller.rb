@@ -101,10 +101,11 @@ class UsersController < ApplicationController
           if new_user && !Rails.env.test?
             tenant_name = Apartment::Tenant.current
             send_user_info_obj = SendUsersInfo.new()
+            # send_user_info_obj.build_send_users_stream(tenant_name)
             send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
           else
             HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
-                  query: { username: @user.username, packing_user_id: @user.id },
+                  query: { username: @user.username, packing_user_id: @user.id, active: @user.active },
                   headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
           end
 
@@ -325,6 +326,9 @@ class UsersController < ApplicationController
           @user.is_deleted = true
           @user.active = false
           @user.save
+          HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
+                  query: { username: @user.username, packing_user_id: @user.id },
+                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
         end
       end
     else

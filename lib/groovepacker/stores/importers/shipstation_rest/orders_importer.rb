@@ -267,7 +267,8 @@ module Groovepacker
             end
 
             def destroy_nil_import_items
-              ImportItem.where("status IS NULL").destroy_all
+              ImportItem.where(:store_id => @store.id , :order_import_summary_id => nil).destroy_all rescue nil
+              # ImportItem.where("status IS NULL").destroy_all
             end
 
         end
