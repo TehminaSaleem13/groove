@@ -13,49 +13,44 @@ class StoresController < ApplicationController
   end
 
   def update_include_product
-    result = {}
-    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
-    shippingeasy_cred.includes_product = !shippingeasy_cred.includes_product
-    shippingeasy_cred.save
-    result["includes_product"] = shippingeasy_cred.includes_product  
+    result = check_include_pro_or_shipping_label("update_include_product")  
     render json: result
   end
 
   def popup_shipping_label
-    result = {}
-    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
-    shippingeasy_cred.popup_shipping_label = !shippingeasy_cred.popup_shipping_label
-    shippingeasy_cred.save
-    result["popup_shipping_label"] = shippingeasy_cred.popup_shipping_label  
+    result = check_include_pro_or_shipping_label("popup_shipping_label")  
     render json: result
   end
 
   def create_update_ftp_credentials
     result = {"status"=>true, "messages"=>[], "has_credentials"=>false}
     store = Store.find_by_id(params[:id])
-    unless store.nil?
-      if store.store_type == 'CSV'
-        ftp = store.ftp_credential
-        if ftp.nil?
-          ftp = FtpCredential.new
-          new_record = true
-        end
-        params[:host] = nil if params[:host] === 'null'
-        ftp.assign_attributes(host: params[:host], username: params[:username], password: params[:password], connection_method: params[:connection_method], connection_established: false, use_ftp_import: params[:use_ftp_import])
-        store.ftp_credential = ftp
-        begin
-          store.save!
-          store.ftp_credential.save if !new_record
-        rescue ActiveRecord::RecordInvalid => e
-          result['status'] = false
-          result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
-        rescue ActiveRecord::StatementInvalid => e
-          result['status'] = false
-          result['messages'] = [e.message]
-        end
-      end
-    end
+    # unless store.nil?
+    result = ftp_update(store, result) if store.present? && store.store_type == 'CSV'
+    # end
     render json: result
+  end
+
+  def ftp_update(store, result)
+    ftp = store.ftp_credential
+    if ftp.nil?
+      ftp = FtpCredential.new
+      new_record = true
+    end
+    params[:host] = nil if params[:host] === 'null'
+    ftp.assign_attributes(host: params[:host], username: params[:username], password: params[:password], connection_method: params[:connection_method], connection_established: false, use_ftp_import: params[:use_ftp_import])
+    store.ftp_credential = ftp
+    begin
+      store.save!
+      store.ftp_credential.save if !new_record
+    rescue ActiveRecord::RecordInvalid
+      result['status'] = false
+      result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
+    rescue ActiveRecord::StatementInvalid => e
+      result['status'] = false
+      result['messages'] = [e.message]
+    end
+    result
   end
 
   def connect_and_retrieve
@@ -69,7 +64,7 @@ class StoresController < ApplicationController
     render json: result
   end
 
-  def init_update_store_data(params)
+  def init_update_store_data
     init_store_data
   end
 
@@ -79,8 +74,8 @@ class StoresController < ApplicationController
       if params[:id].nil?
         if Store.can_create_new?
           @store = Store.new
-          init_update_store_data(params)
-          ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
+          init_update_store_data
+          # ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
           params[:id] = @store.id
         else
           @result['status'] = false
@@ -95,11 +90,16 @@ class StoresController < ApplicationController
   def update_create_store
     @store ||= Store.find(params[:id])
     FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV' && @store.ftp_credential.nil?
+    create_and_update_store
+    @result["store_id"] = @store.id if !@store.nil? && @store.id.present? rescue nil
+  end
+
+  def create_and_update_store
     if params[:store_type].nil?
       @result['status'] = false
       @result['messages'].push('Please select a store type to create a store')
     else
-      init_update_store_data(params)
+      init_update_store_data
     end
     if @result['status']
       params[:import_images] = false if params[:import_images].nil?
@@ -109,7 +109,6 @@ class StoresController < ApplicationController
       @result['status'] = false
       @result['messages'].push("Current user does not have permission to create or edit a store")
     end
-    @result["store_id"] = @store.id if !@store.nil? && @store.id.present? rescue nil
   end
 
   def csv_map_data
@@ -177,14 +176,15 @@ class StoresController < ApplicationController
       data = {:flag=>params[:flag], :type=>params[:type], :fix_width=>params[:fix_width], :fixed_width=>params[:fixed_width], :sep=>params[:sep], :delimiter=>params[:delimiter], :rows=>params[:rows], :map=>params[:map], :store_id=>params[:store_id], :import_action=>params[:import_action], :contains_unique_order_items=>params[:contains_unique_order_items], :generate_barcode_from_sku=>params[:generate_barcode_from_sku], :use_sku_as_product_name=>params[:use_sku_as_product_name], :order_placed_at=>params[:order_placed_at],  :order_date_time_format=>params[:order_date_time_format], :day_month_sequence=>params[:day_month_sequence]}    
       # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
       if params[:type] == 'order'
-        if OrderImportSummary.where(status: 'in_progress').empty?
-          bulk_actions = Groovepacker::Orders::BulkActions.new
-          bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-          # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
-        else
-          @result['status'] = false
-          @result['messages'].push("Import is in progress. Try after it is complete")
-        end
+        order_csv_import(data)
+        # if OrderImportSummary.where(status: 'in_progress').empty? 
+        #   bulk_actions = Groovepacker::Orders::BulkActions.new
+        #   bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+        #   # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+        # else
+        #   @result['status'] = false
+        #   @result['messages'].push("Import is in progress. Try after it is complete")
+        # end
       elsif params[:type] == 'kit'
         groove_bulk_actions = GrooveBulkActions.new(:identifier=>'csv_import', :activity=>'kit')
         # groove_bulk_actions.identifier = 'csv_import'
@@ -196,11 +196,12 @@ class StoresController < ApplicationController
         # import_csv.import(Apartment::Tenant.current, data.to_s)
       elsif params[:type] == 'product'
         product_import = CsvProductImport.find_by_store_id(@store.id)
-        if product_import.nil?
-          product_import = CsvProductImport.new
-          product_import.store_id = @store.id
-          product_import.save
-        end
+        product_import = CsvProductImport.create(store_id: @store.id) if product_import.nil?
+        # if product_import.nil?
+        #   product_import = CsvProductImport.new
+        #   product_import.store_id = @store.id
+        #   product_import.save
+        # end
         import_csv = ImportCsv.new
         delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
         # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
@@ -209,6 +210,17 @@ class StoresController < ApplicationController
       # Comment everything before this line till previous comment (i.e. the entire if block) when everything is moved to bulk actions
     end
     render json: @result
+  end
+
+  def order_csv_import(data)
+    if OrderImportSummary.where(status: 'in_progress').empty? 
+      bulk_actions = Groovepacker::Orders::BulkActions.new
+      bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+      # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
+    else
+      @result['status'] = false
+      @result['messages'].push("Import is in progress. Try after it is complete")
+    end
   end
 
   def csv_product_import_cancel
@@ -282,24 +294,21 @@ class StoresController < ApplicationController
     require "net/http"
     require "uri"
     @result = Hash.new
-    devName = ENV['EBAY_DEV_ID']
-    appName = ENV['EBAY_APP_ID']
-    certName = ENV['EBAY_CERT_ID']
+    # devName = ENV['EBAY_DEV_ID']
+    # appName = ENV['EBAY_APP_ID']
+    # certName = ENV['EBAY_CERT_ID']
     @result['status'] = false
     ENV['EBAY_SANDBOX_MODE'] == 'YES' ? url = "https://api.sandbox.ebay.com/ws/api.dll" : url = "https://api.ebay.com/ws/api.dll"
     url = URI.parse(url)
     req = Net::HTTP::Post.new(url.path)
     req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
     req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
-    req.add_field("X-EBAY-API-DEV-NAME", devName)
-    req.add_field("X-EBAY-API-APP-NAME", appName)
-    req.add_field("X-EBAY-API-CERT-NAME", certName)
+    req.add_field("X-EBAY-API-DEV-NAME", ENV['EBAY_DEV_ID'])
+    req.add_field("X-EBAY-API-APP-NAME", ENV['EBAY_APP_ID'])
+    req.add_field("X-EBAY-API-CERT-NAME", ENV['EBAY_CERT_ID'])
     req.add_field("X-EBAY-API-SITEID", 0)
     req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
-    req.body ='<?xml version="1.0" encoding="utf-8"?>'+
-      '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+
-      '<SessionID>'+session[:ebay_session_id]+'</SessionID>' +
-      '</FetchTokenRequest>'
+    req.body ='<?xml version="1.0" encoding="utf-8"?>'+ '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+ '<SessionID>'+session[:ebay_session_id]+'</SessionID>' + '</FetchTokenRequest>'
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
     res = http.start do |http_runner|
@@ -319,9 +328,9 @@ class StoresController < ApplicationController
     require "net/http"
     require "uri"
     @result = Hash.new
-    devName = ENV['EBAY_DEV_ID']
-    appName = ENV['EBAY_APP_ID']
-    certName = ENV['EBAY_CERT_ID']
+    # devName = ENV['EBAY_DEV_ID']
+    # appName = ENV['EBAY_APP_ID']
+    # certName = ENV['EBAY_CERT_ID']
     @result['status'] = false
     url = ENV['EBAY_SANDBOX_MODE'] == 'YES' ? "https://api.sandbox.ebay.com/ws/api.dll" : "https://api.ebay.com/ws/api.dll" 
     url = URI.parse(url)
@@ -332,9 +341,9 @@ class StoresController < ApplicationController
       req = Net::HTTP::Post.new(url.path)
       req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
       req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
-      req.add_field("X-EBAY-API-DEV-NAME", devName)
-      req.add_field("X-EBAY-API-APP-NAME", appName)
-      req.add_field("X-EBAY-API-CERT-NAME", certName)
+      req.add_field("X-EBAY-API-DEV-NAME", ENV['EBAY_DEV_ID'])
+      req.add_field("X-EBAY-API-APP-NAME", ENV['EBAY_APP_ID'])
+      req.add_field("X-EBAY-API-CERT-NAME", ENV['EBAY_CERT_ID'])
       req.add_field("X-EBAY-API-SITEID", 0)
       req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
       req.body ='<?xml version="1.0" encoding="utf-8"?>'+ '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+ '<SessionID>'+session[:ebay_session_id]+'</SessionID>' + '</FetchTokenRequest>'
@@ -384,22 +393,22 @@ class StoresController < ApplicationController
   end
 
   def handle_ebay_redirect
-    ebaytkn = params['ebaytkn']
-    tknexp = params['tknexp']
-    username = params['username']
-    redirect = params['redirect']
-    editstatus = params['editstatus']
-    name = params['name']
-    status = params['status']
-    storetype = params['storetype']
+    # ebaytkn = params['ebaytkn']
+    # tknexp = params['tknexp']
+    # username = params['username']
+    # redirect = params['redirect']
+    # editstatus = params['editstatus']
+    # name = params['name']
+    # status = params['status']
+    # storetype = params['storetype']
     storeid = params['storeid']
-    inventorywarehouseid = params['inventorywarehouseid']
-    importimages = params['importimages']
-    importproducts = params['importproducts']
-    messagetocustomer = params['messagetocustomer']
+    # inventorywarehouseid = params['inventorywarehouseid']
+    # importimages = params['importimages']
+    # importproducts = params['importproducts']
+    # messagetocustomer = params['messagetocustomer']
     tenant_name = params['tenantname']
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
-    redirect_to (URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/")) + (URI::encode("stores/#{storeid}/update_ebay_user_token"))
+    redirect_to URI::encode("https://#{tenant_name}.#{ENV['HOST_NAME']}/") + URI::encode("stores/#{storeid}/update_ebay_user_token")
   end
 
   def let_store_be_created

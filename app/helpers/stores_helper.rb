@@ -109,4 +109,19 @@ module StoresHelper
     end
   end
 
+  def check_include_pro_or_shipping_label(flag)
+    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
+    result = {}
+    if flag == "update_include_product"
+      shippingeasy_cred.includes_product = !shippingeasy_cred.includes_product
+      shippingeasy_cred.save
+      result["includes_product"] = shippingeasy_cred.includes_product
+    elsif flag == "popup_shipping_label"
+      shippingeasy_cred.popup_shipping_label = !shippingeasy_cred.popup_shipping_label
+      shippingeasy_cred.save
+      result["popup_shipping_label"] = shippingeasy_cred.popup_shipping_label
+    end
+    result
+  end
+
 end

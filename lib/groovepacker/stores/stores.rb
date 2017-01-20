@@ -55,6 +55,7 @@ module Groovepacker
 		    end
 		    @result['store_id'] = @store.id
 		    @result['tenant_name'] = Apartment::Tenant.current
+		    @result
 			end
 
 			def csv_update_create
