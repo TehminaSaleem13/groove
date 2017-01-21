@@ -179,4 +179,76 @@ module StoreConcern
     end
 	end
 
+  def nil_csv_map(result)
+    if params[:kind].nil? || params[:id].nil?
+      result['status'] = false
+      result['messages'].push('You need kind and store id to delete csv map')
+    else
+      mapping = CsvMapping.find_or_create_by_store_id(params[:id])
+      if params[:kind] == 'order'
+        mapping.order_csv_map_id = nil
+      elsif params[:kind] == 'product'
+        mapping.product_csv_map_id = nil
+      elsif params[:kind] == 'kit'
+        mapping.kit_csv_map_id = nil
+      end
+      mapping.save
+    end
+    result
+  end
+
+  def update_map(result)
+    if params[:map].nil? || params[:id].nil?
+      result['status'] = false
+      result['messages'].push('You need map and store id to update csv map')
+    else
+      mapping = CsvMapping.find_or_create_by_store_id(params[:id])
+      if params[:map]['kind'] == 'order'
+        mapping.order_csv_map_id = params[:map]['id']
+      elsif params[:map]['kind'] == 'product'
+        mapping.product_csv_map_id = params[:map]['id']
+      elsif params[:map]['kind'] == 'kit'
+        mapping.kit_csv_map_id = params[:map]['id']
+      end
+      mapping.save
+    end
+    result
+  end
+
+  def update_ftp(store, result)
+    ftp = store.ftp_credential
+    if ftp.nil?
+      ftp = FtpCredential.new
+      new_record = true
+    end
+    params[:host] = nil if params[:host] === 'null'
+    ftp.assign_attributes(host: params[:host], username: params[:username], password: params[:password], connection_method: params[:connection_method], connection_established: false, use_ftp_import: params[:use_ftp_import])
+    store.ftp_credential = ftp
+    begin
+      store.save!
+      store.ftp_credential.save if !new_record
+    rescue ActiveRecord::RecordInvalid
+      result['status'] = false
+      result['messages'] = [store.errors.full_messages, store.ftp_credential.errors.full_messages]
+    rescue ActiveRecord::StatementInvalid => e
+      result['status'] = false
+      result['messages'] = [e.message]
+    end
+    result
+  end
+
+  def create_handler
+    case @store.store_type
+    when "BigCommerce"
+      handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+    when "Magento API 2"
+      handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+    when "Shopify"
+      handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+    when "Teapplix"
+      handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+    end
+    context = Groovepacker::Stores::Context.new(handler)
+    context
+  end
 end

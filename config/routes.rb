@@ -33,6 +33,7 @@ Groovepacks::Application.routes.draw do
   get 'stores/export_active_products' => 'stores#export_active_products'
   get 'stores/update_include_product' => 'stores#update_include_product'
   get 'stores/popup_shipping_label' => 'stores#popup_shipping_label'
+  get 'stores/amazon_fba' => 'stores#amazon_fba'
   get 'shipstation_rest_credentials/use_chrome_extention' => 'shipstation_rest_credentials#use_chrome_extention'
   get 'shipstation_rest_credentials/switch_back_button' => 'shipstation_rest_credentials#switch_back_button'
   get 'shipstation_rest_credentials/auto_click_create_label' => 'shipstation_rest_credentials#auto_click_create_label'
