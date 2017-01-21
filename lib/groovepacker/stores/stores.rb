@@ -55,6 +55,7 @@ module Groovepacker
 		    end
 		    @result['store_id'] = @store.id
 		    @result['tenant_name'] = Apartment::Tenant.current
+		    @result
 			end
 
 			def csv_update_create
@@ -74,7 +75,14 @@ module Groovepacker
 		      current_tenant = Apartment::Tenant.current
 		      unless params[:orderfile].nil?
 		        path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
-		        order_file_data = params[:orderfile].read
+		        order_file_data = params[:orderfile].read 
+		        begin
+			      	if @store.fba_import
+			      		amazon_fba = Groovepacker::Stores::AmazonFbaStore.new(@store, params, @result) 
+			      		order_file_data = amazon_fba.fba_csv_data(order_file_data)  
+			      	end
+			      rescue
+			      end
 		        File.open(path, "wb") { |f| f.write(order_file_data) }
 		        GroovS3.create_public_csv(current_tenant, 'order', @store.id, order_file_data)
 		        @result['csv_import'] = true

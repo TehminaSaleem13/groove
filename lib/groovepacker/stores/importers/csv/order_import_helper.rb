@@ -85,7 +85,7 @@ module Groovepacker
             import_item.previous_imported = 0
             import_item.current_order_items = -1
             import_item.current_order_imported_item = -1
-            import_item.to_import = final_record.length
+            import_item.to_import = final_record.reject(&:blank?).length
             import_item.save
             import_item
           end
