@@ -169,15 +169,16 @@ class StoresController < ApplicationController
   end
 
   def csv_import_data
-    @result = {"status"=>true, "messages"=>[]}
-    # general_settings = GeneralSetting.all.first
-    if !params[:id].nil?
-      @store = Store.find(params[:id])
-    else
-      @result["status"] = false
-      @result["messages"].push("No store selected")
-    end
-    csv_data_import if @result["status"]
+    data_import
+    # @result = {"status"=>true, "messages"=>[]}
+    # # general_settings = GeneralSetting.all.first
+    # if !params[:id].nil?
+    #   @store = Store.find(params[:id])
+    # else
+    #   @result["status"] = false
+    #   @result["messages"].push("No store selected")
+    # end
+    # csv_data_import if @result["status"]
     render json: @result
   end
 
@@ -191,19 +192,20 @@ class StoresController < ApplicationController
   end
 
   def csv_product_import_cancel
-    result = {"status"=>true, "success_messages"=>[], "notice_messages"=>[], "error_messages"=>[]}
-    if params[:id].nil?
-      result['status'] = false
-      result['error_messages'].push('No id given. Can not cancel product import')
-    else
-      product_import = CsvProductImport.find_by_id(params[:id])
-      product_import.cancel = true
-      unless product_import.status == 'in_progress'
-        product_import.status = 'cancelled'
-        Delayed::Job.find(product_import.delayed_job_id).destroy rescue nil
-      end
-      result['notice_messages'].push('Product Import marked for cancellation. Please wait for acknowledgement.') if product_import.save
-    end
+    result = cancel_product_import
+    # result = {"status"=>true, "success_messages"=>[], "notice_messages"=>[], "error_messages"=>[]}
+    # if params[:id].nil?
+    #   result['status'] = false
+    #   result['error_messages'].push('No id given. Can not cancel product import')
+    # else
+    #   product_import = CsvProductImport.find_by_id(params[:id])
+    #   product_import.cancel = true
+    #   unless product_import.status == 'in_progress'
+    #     product_import.status = 'cancelled'
+    #     Delayed::Job.find(product_import.delayed_job_id).destroy rescue nil
+    #   end
+    #   result['notice_messages'].push('Product Import marked for cancellation. Please wait for acknowledgement.') if product_import.save
+    # end
     render json: result
   end
 
@@ -423,38 +425,40 @@ class StoresController < ApplicationController
   end
 
   def pull_store_inventory
-    @store = Store.find(params[:id])
-    @result = {"status"=>true}
-    # access_restriction = AccessRestriction.last
-    tenant = Apartment::Tenant.current
-    import_orders_obj = ImportOrders.new
-    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
-    if @store && current_user.can?('update_inventories')
-      context = create_handler
-      context.delay(:run_at => 1.seconds.from_now).pull_inventory
-      #context.pull_inventory
-      @result['message'] = "Your request for innventory pull has beed queued"
-    else
-      @result['status'] = false
-      @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
-    end
+    push_pull_inventory("pull")
+    # @store = Store.find(params[:id])
+    # @result = {"status"=>true}
+    # # access_restriction = AccessRestriction.last
+    # tenant = Apartment::Tenant.current
+    # import_orders_obj = ImportOrders.new
+    # import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+    # if @store && current_user.can?('update_inventories')
+    #   context = create_handler
+    #   context.delay(:run_at => 1.seconds.from_now).pull_inventory
+    #   #context.pull_inventory
+    #   @result['message'] = "Your request for innventory pull has beed queued"
+    # else
+    #   @result['status'] = false
+    #   @result['message'] = "Either the the BigCommerce store is not setup properly or you don't have permissions to update inventories."
+    # end
     render json: @result
   end
 
   def push_store_inventory
-    @store = Store.find(params[:id])
-    @result = Hash.new
-    @result['status'] = true
-    tenant = Apartment::Tenant.current
-    import_orders_obj = ImportOrders.new
-    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
-    if @store && current_user.can?('update_inventories')
-      context = create_handler
-      context.delay(:run_at => 1.seconds.from_now).push_inventory
-    else
-      @result['status'] = false
-      @result['message'] = "Either the store is not present or you don't have permissions to update inventories."
-    end
+    push_pull_inventory("push")
+    # @store = Store.find(params[:id])
+    # @result = {"status"=>true}
+    # @result['status'] = true
+    # tenant = Apartment::Tenant.current
+    # import_orders_obj = ImportOrders.new
+    # import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+    # if @store && current_user.can?('update_inventories')
+    #   context = create_handler
+    #   context.delay(:run_at => 1.seconds.from_now).push_inventory
+    # else
+    #   @result['status'] = false
+    #   @result['message'] = "Either the store is not present or you don't have permissions to update inventories."
+    # end
     render json: @result
   end
 
