@@ -949,9 +949,7 @@ class Order < ActiveRecord::Base
 
   def partially_load_order_item(order_item_status, limit, offset)
     order_items
-      .where(scanned_status: order_item_status)
-      # .limit(limit)
-      # .offset(offset)
+      .where(scanned_status: order_item_status).limit(limit).offset(offset)
   end
 
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
