@@ -23,6 +23,7 @@ class Order < ActiveRecord::Base
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
+  after_save :delete_if_order_exist
   validates_uniqueness_of :increment_id
 
   include ProductsHelper
@@ -982,5 +983,10 @@ class Order < ActiveRecord::Base
 
   def delete_cached_order_items_keys
     order_items.map(&:delete_cache)
+  end
+
+  def delete_if_order_exist
+    orders = Order.where(increment_id: increment_id)
+    self.destroy if orders.count > 1
   end
 end
