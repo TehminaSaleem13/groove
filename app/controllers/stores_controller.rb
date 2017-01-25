@@ -148,6 +148,11 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def delete_map
+    CsvMap.find(params["map"]["id"]).destroy
+    render json: {result: true}
+  end
+
   def update_csv_map
     result = {'status' => true, 'messages' => []}
     update_map(result)
@@ -238,7 +243,7 @@ class StoresController < ApplicationController
 
   def show
     @store = Store.find_by_id(params[:id])
-    @result = Hash.new
+    @result = {"is_fba" => Tenant.find_by_name(Apartment::Tenant.current).try(:is_fba)}
     show_store
     render json: @result
   end
@@ -251,8 +256,9 @@ class StoresController < ApplicationController
   end
 
   def get_ebay_signin_url
-    @result = Hash.new
-    @result[:status] = true
+    @result = {:status=>true}
+    # @result = Hash.new
+    # @result[:status] = true
     @store = Store.new
     @result = @store.get_ebay_signin_url
     session[:ebay_session_id] = @result['ebay_sessionid']
@@ -263,11 +269,12 @@ class StoresController < ApplicationController
   def ebay_user_fetch_token
     require "net/http"
     require "uri"
-    @result = Hash.new
+    @result = {"status"=>false}
+    # @result = Hash.new
     # devName = ENV['EBAY_DEV_ID']
     # appName = ENV['EBAY_APP_ID']
     # certName = ENV['EBAY_CERT_ID']
-    @result['status'] = false
+    # @result['status'] = false
     ENV['EBAY_SANDBOX_MODE'] == 'YES' ? url = "https://api.sandbox.ebay.com/ws/api.dll" : url = "https://api.ebay.com/ws/api.dll"
     url = URI.parse(url)
     req = Net::HTTP::Post.new(url.path)
@@ -297,11 +304,11 @@ class StoresController < ApplicationController
   def update_ebay_user_token
     require "net/http"
     require "uri"
-    @result = Hash.new
+    @result = {"status"=>false}
     # devName = ENV['EBAY_DEV_ID']
     # appName = ENV['EBAY_APP_ID']
     # certName = ENV['EBAY_CERT_ID']
-    @result['status'] = false
+    # @result['status'] = false
     url = ENV['EBAY_SANDBOX_MODE'] == 'YES' ? "https://api.sandbox.ebay.com/ws/api.dll" : "https://api.ebay.com/ws/api.dll" 
     url = URI.parse(url)
     @store = EbayCredentials.where(:store_id => params[:id])
@@ -341,8 +348,7 @@ class StoresController < ApplicationController
   end
 
   def delete_ebay_token
-    @result = Hash.new
-    @result['status'] = false
+    @result = {"status"=>false}
     if params[:id] == 'undefined'
       session[:ebay_auth_token] = nil
       session[:ebay_auth_expiration] = nil

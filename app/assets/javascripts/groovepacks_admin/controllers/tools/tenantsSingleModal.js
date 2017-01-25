@@ -36,6 +36,10 @@ groovepacks_admin_controllers.
         });
       };
 
+      $scope.update_fba = function(){
+        tenants.single.update_fba($scope.tenants.single.basicinfo.id);
+      }
+
       $scope.delete_orders = function () {
         $scope.delete('orders');
       };

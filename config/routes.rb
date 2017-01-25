@@ -57,6 +57,7 @@ Groovepacks::Application.routes.draw do
   post '/delayed_jobs_update' => 'delayed_jobs#update'
   get '/tenants/delete_summary' => 'tenants#delete_summary' 
   get '/tenants/update_import_mode' => 'tenants#update_import_mode'
+  get '/tenants/update_fba' => 'tenants#update_fba'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
@@ -174,6 +175,7 @@ Groovepacks::Application.routes.draw do
       post 'csv_product_import_cancel'
       post 'update_csv_map'
       post 'delete_csv_map'
+      post 'delete_map'
       get 'pull_store_inventory'
       get 'push_store_inventory'
     end

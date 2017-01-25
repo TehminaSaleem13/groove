@@ -156,6 +156,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       stores.import.product.status_show = false;
       stores.import.order.status_show = false;
       if (data.status) {
+        stores.single.is_fba = data.is_fba;
         // stores.single = data.store;
         for (var key in data.store) {
           stores.single[key] = data.store[key];
@@ -606,6 +607,11 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       };
     }).error(notification.server_error);
   };
+
+  var delete_map = function(stores, map){
+    $http.post('/stores/'+stores.single.id+'/delete_map.json', {map: map})
+  };
+
   var get_csv_maps = function (stores) {
     return $http.get('/stores/csv_map_data.json').success(function (data) {
       stores.csv.maps = data;
@@ -756,7 +762,8 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
       map: {
         get: get_csv_maps,
         update: update_csv_map,
-        delete: delete_csv_map
+        delete: delete_csv_map,
+        delete_map: delete_map
       }
     },
     update: {

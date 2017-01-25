@@ -533,6 +533,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
       stores.csv.map.update(scope.stores, map);
     };
 
+    scope.delete_map = function (map) {
+      stores.csv.map.delete_map(scope.stores, map);
+      stores.csv.map.get(scope.stores)
+    };
+
     scope.clear_map = function (kind) {
       stores.csv.map.delete(scope.stores, kind);
     };

@@ -281,6 +281,10 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
     $http.get('tenants/update_import_mode.json?tenant=' + tenant); 
   }
 
+  var update_fba = function(tenant_id){
+    $http.get('tenants/update_fba.json?tenant_id=' + tenant_id);  
+  }
+
   //Public facing API
   return {
     model: {
@@ -306,7 +310,8 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
       duplicate: duplicate_tenant,
       popover: construct_popover,
       delete_summary: delete_import_summary,
-      update_import_mode: update_import_mode
+      update_import_mode: update_import_mode,
+      update_fba: update_fba 
     }
   };
 }]);
