@@ -52,11 +52,50 @@ module StoreConcern
       end
       order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
       if File.exist? order_file_path
-        order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+        order_file_data = order_data
         @result['order']['data'] = order_file_data
         File.delete(order_file_path)
       end
     end
+  end
+
+  def order_data
+    i = 0
+    loop do
+      puts "#{i}"
+      current_tenant = Apartment::Tenant.current
+      @order_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+      i = i + 1
+      break if i > 2 || @order_file_data.present?
+      sleep(1)
+    end
+    @order_file_data
+  end
+
+  def product_data
+    i = 0
+    loop do
+      puts "#{i}"
+      current_tenant = Apartment::Tenant.current
+      @product_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+      i = i + 1
+      break if i > 2 || @product_file_data.present?
+      sleep(1)
+    end
+    @product_file_data
+  end
+
+  def kit_data
+    i = 0
+    loop do
+      puts "#{i}"
+      current_tenant = Apartment::Tenant.current
+      @kit_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+      i = i + 1
+      break if i > 2 || @kit_file_data.present?
+      sleep(1)
+    end
+    @kit_file_data
   end
 
   def product_kit_csv_map(csv_map, csv_directory, current_tenant, default_csv_map)
@@ -66,7 +105,8 @@ module StoreConcern
       @result['product']['settings'] = csv_map.product_csv_map.nil? ? default_csv_map : csv_map.product_csv_map
       product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
       if File.exist? product_file_path
-        product_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+        product_file_data = product_data
+        # product_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
         @result['product']['data'] = product_file_data
         File.delete(product_file_path)
       end
@@ -77,7 +117,8 @@ module StoreConcern
       @result['kit']['settings'] = csv_map.kit_csv_map.nil? ? default_csv_map : csv_map.kit_csv_map
       kit_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.kit.csv")
       if File.exist? kit_file_path
-        kit_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+        kit_file_data = kit_data
+        # kit_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
         @result['kit']['data'] = kit_file_data
         File.delete(kit_file_path)
       end
