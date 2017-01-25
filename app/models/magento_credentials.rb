@@ -1,6 +1,6 @@
 class MagentoCredentials < ActiveRecord::Base
 
-  attr_accessible :host, :password, :username, :api_key, :import_products, :import_images
+  attr_accessible :host, :password, :username, :api_key, :import_products, :import_images, :push_tracking_number, :status_to_update, :enable_status_update, :shall_import_fraud, :shall_import_complete, :shall_import_closed, :shall_import_pending, :shall_import_processing
 
   validates_presence_of :host, :username, :api_key
 

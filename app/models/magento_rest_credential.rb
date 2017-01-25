@@ -1,5 +1,5 @@
 class MagentoRestCredential < ActiveRecord::Base
-  attr_accessible :api_key, :api_secret, :host, :import_categories, :import_images, :store_id, :access_token
+  attr_accessible :api_key, :api_secret, :host, :import_categories, :import_images, :store_id, :access_token, :store_version, :gen_barcode_from_sku
   belongs_to :store
 
   before_save :check_api_key_and_secret_values

@@ -471,6 +471,13 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
       });
     }
 
+    scope.update_fba = function(){
+      store_id = scope.stores.single.id
+      $http.get('/stores/amazon_fba.json?store_id=' + store_id).success(function (data) {
+        stores.single.amazon_fba = data.amazon_fba
+      });
+    }
+
     scope.import_ftp = function() {
       scope.stores.single.type = 'order';
       if (scope.stores.csv.mapping[scope.stores.single.type + '_csv_map_id'] && !scope.start_editing_map) {
@@ -524,6 +531,11 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
 
     scope.select_map = function (map) {
       stores.csv.map.update(scope.stores, map);
+    };
+
+    scope.delete_map = function (map) {
+      stores.csv.map.delete_map(scope.stores, map);
+      stores.csv.map.get(scope.stores)
     };
 
     scope.clear_map = function (kind) {

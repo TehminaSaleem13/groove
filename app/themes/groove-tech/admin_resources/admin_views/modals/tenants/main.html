@@ -252,10 +252,10 @@
       </div>
       <div style="clear:both;"></div>
       <hr>
-      <h4 class="control-label" style="width: 100%; text-align: center;">Allow Tracking Number Push </h4><br/>
+      <h4 class="control-label" style="width: 100%; text-align: center;"><span style="margin-right: 92px;">Allow Tracking Number Push</span> <span style="margin-left: 50px;">FBA Import Option </span></h4><br/>
       <div>
         <div class="col-sm-2"></div>
-        <div class="col-sm-2"></div>
+        <!-- <div class="col-sm-2"></div> -->
         <div class="col-sm-4">
           <center>
             <label class="control-label">Magento SOAP</label>
@@ -265,7 +265,15 @@
             </div>
           </center>
         </div>
-        <div class="col-sm-2"></div>
+        <div class="col-sm-4">
+          <center>
+            <label class="control-label">Amazon FBA</label>
+            <br/>
+            <div class="controls">
+              <div toggle-switch ng-model="tenants.single.basicinfo.is_fba" ng-click="update_fba(true)"></div>
+            </div>
+          </center>
+        </div>
         <div class="col-sm-2"></div>
       </div>
 

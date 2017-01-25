@@ -26,8 +26,9 @@
           ng-repeat="map in stores.csv.maps['order']"
           ng-if="map.id == stores.csv.mapping.order_csv_map_id">{{map.name}}</span> <span class="caret"></span></button>
         <ul class="dropdown-menu">
-          <li ng-repeat="map in stores.csv.maps['order']"><a class="dropdown-toggle text-center"
-                                                             ng-click="select_map(map)">{{map.name}}</a></li>
+          <li ng-repeat="map in stores.csv.maps['order']" style="position: relative;"><a class="dropdown-toggle text-center" ng-click="select_map(map)">{{map.name}}</a>
+            <i class="fa fa-times" aria-hidden="true" ng-click="delete_map(map)" style="position: absolute; top: 10px; right: 4px;"></i>
+          </li>
         </ul>
       </div>
     </div>
@@ -43,7 +44,14 @@
       </div>
     </div>
   </div>
+
   <div class="col-sm-6">
+    <div class="form-group" ng-if="stores.single.is_fba == true">
+      <label class="control-label col-sm-7 remove_padding_left">FBA Import</label>
+      <div class="controls col-sm-5">
+        <div toggle-switch ng-model="stores.single.fba_import" ng-click="update_fba()"></div>
+      </div>
+    </div>
     <br/><br/></br>
     <div class="form-group">
       <label class="control-label col-sm-7 remove_padding_left">FTP/SFTP Order Import</label>
@@ -125,8 +133,8 @@
           ng-repeat="map in stores.csv.maps['product']" ng-if="map.id == stores.csv.mapping.product_csv_map_id">{{map.name}}</span>
           <span class="caret"></span></button>
         <ul class="dropdown-menu">
-          <li ng-repeat="map in stores.csv.maps['product']"><a class="dropdown-toggle text-center"
-                                                               ng-click="select_map(map)">{{map.name}}</a></li>
+          <li ng-repeat="map in stores.csv.maps['product']" style="position: relative;"><a class="dropdown-toggle text-center" ng-click="select_map(map)">{{map.name}}</a>
+          <i class="fa fa-times" aria-hidden="true" ng-click="delete_map(map)" style="position: absolute; top: 10px; right: 4px;"></i></li>
         </ul>
       </div>
     </div>
@@ -174,11 +182,12 @@
       <div class="controls col-sm-12" dropdown>
         <button class="groove-button dropdown-toggle"><span
           ng-hide="stores.csv.mapping.kit_csv_map_id">Select Map</span> <span ng-repeat="map in stores.csv.maps['kit']"
-                                                                              ng-if="map.id == stores.csv.mapping.kit_csv_map_id">{{map.name}}</span>
+          ng-if="map.id == stores.csv.mapping.kit_csv_map_id">{{map.name}}</span>
           <span class="caret"></span></button>
         <ul class="dropdown-menu">
-          <li ng-repeat="map in stores.csv.maps['kit']"><a class="dropdown-toggle text-center"
-                                                           ng-click="select_map(map)">{{map.name}}</a></li>
+          <li ng-repeat="map in stores.csv.maps['kit']" style="position: relative;"><a class="dropdown-toggle text-center" ng-click="select_map(map)">{{map.name}}</a>
+          <i class="fa fa-times" aria-hidden="true" ng-click="delete_map(map)" style="position: absolute; top: 10px; right: 4px;"></i>
+          </li>
         </ul>
       </div>
     </div>
