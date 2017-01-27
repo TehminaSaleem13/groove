@@ -480,7 +480,7 @@ class Order < ActiveRecord::Base
     if most_recent_scanned_product
       chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
     end
-
+    
     limited_order_items.each do |order_item|
       if order_item.cached_product.is_kit == 1
         option_products = order_item.cached_option_products
@@ -596,7 +596,7 @@ class Order < ActiveRecord::Base
     ).first
 
     if oi
-      limited_order_items.unshift(oi) unless oi.scanned_status != 'scanned'
+      limited_order_items.unshift(oi) # unless oi.scanned_status != 'scanned'
     else
       item = order_items
         .joins(order_item_kit_products: :product_kit_skus)
