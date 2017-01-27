@@ -194,6 +194,12 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
           orders.setup.orderArray.push({id: orders.selected[i].id});
         }
       }
+
+      if (orders.setup.orderArray.length<1 && !orders.setup.select_all) {
+        notification.notify("Please select orders to perform this action.", 0);
+        return;
+      }
+
       var url = '';
       if (action == "delete") {
         url = '/orders/delete_orders.json';

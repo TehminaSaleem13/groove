@@ -119,7 +119,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   };
 
   var select_notification = function () {
-    notification.notify("Please select atleast one product", 0);
+    notification.notify("Please select products to perform this action.", 0);
   }
 
   var update_list = function (action, products) {
@@ -130,6 +130,12 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
           products.setup.productArray.push({id: products.selected[i].id});
         }
       }
+
+      if (products.setup.productArray<1 && !products.setup.select_all) {
+        notification.notify("Please select products to perform this action.", 0);
+        return;
+      }
+
       var url = '';
       if (action == "delete") {
         url = '/products/delete_product.json';
