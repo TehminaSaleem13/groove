@@ -27,6 +27,7 @@ module Groovepacker
             return result if @import_item.status=='cancelled'
             @import_item.status = 'completed'
             @import_item.save
+            Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(result, nil, Apartment::Tenant.current)
             result
           end
 
