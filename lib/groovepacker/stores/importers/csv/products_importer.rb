@@ -14,9 +14,13 @@ module Groovepacker
             @success_imported = @products_to_import.length
             @usable_records.clear
             @found_skus = nil
-
             Product.import @products_to_import
-            found_products_raw = Product.find_all_by_store_product_id(@all_unique_ids)
+            found_products_raw = []
+            @all_unique_ids.each_slice(20000) do |ids|
+              found_products_raw << Product.find_all_by_store_product_id(ids)  
+            end
+            found_products_raw = found_products_raw.flatten
+            # found_products_raw = Product.find_all_by_store_product_id(@all_unique_ids)
             found_products = {}
             found_products_raw.each do |product|
               found_products[product.store_product_id] = product.id
@@ -262,9 +266,19 @@ module Groovepacker
           end
 
           def prepare_to_import
-            found_skus_raw = ProductSku.find_all_by_sku(@all_skus)
+            found_skus_raw = []
+            @all_skus.each_slice(20000) do |skus|
+              found_skus_raw << ProductSku.find_all_by_sku(skus)  
+            end
+            found_skus_raw = found_skus_raw.flatten
+            # found_skus_raw = ProductSku.find_all_by_sku(@all_skus)
             @found_skus = {}
-            found_barcodes_raw = ProductBarcode.find_all_by_barcode(@all_barcodes)
+            found_barcodes_raw = []
+            @all_barcodes.each_slice(20000) do |barcodes|
+              found_barcodes_raw << ProductBarcode.find_all_by_barcode(barcodes)  
+            end
+            found_barcodes_raw = found_barcodes_raw.flatten
+            # found_barcodes_raw = ProductBarcode.find_all_by_barcode(@all_barcodes)
             @found_barcodes = []
             found_skus_raw.each do |found_sku|
               @found_skus[found_sku.sku] = found_sku

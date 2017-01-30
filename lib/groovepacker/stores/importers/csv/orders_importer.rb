@@ -70,7 +70,7 @@ module Groovepacker
               end
               next if @helper.blank_or_invalid(single_row)
               inc_id = @helper.get_row_data(single_row, 'increment_id').strip
-              if index!=0 and current_inc_id != inc_id
+              if index!=0 and current_inc_id.present? and current_inc_id != inc_id
                 check_order_with_item(order_items_ar, index, current_inc_id, order_map, result) rescue nil
                 order_items_ar = []
               end
@@ -80,6 +80,10 @@ module Groovepacker
               update_import_item(-1, -1)
               result[:order_reimported] = false
               import_single_order(single_row, index, inc_id, order_map, result)
+              if final_records.count==index+1
+                check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result) rescue nil
+                order_items_ar = []
+              end
             end
             GC.start
           end
@@ -92,10 +96,10 @@ module Groovepacker
           def check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
             order = Order.includes(:order_items).find_by_increment_id("#{current_inc_id}-currupted")
             items_array = get_item_array(order_items_ar)
-            items_array.each do |row|        
-              result = check_single_row_order_item(order_items_ar, index, current_inc_id, order_map, result)
-              break if result[:order_reimported] == true
-            end
+            #items_array.each do |row|        
+              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) rescue nil
+              #break if result[:order_reimported] == true
+            #end
             if origional_order_id
               @order.increment_id = "#{origional_order_id}"
               @order.save
@@ -139,14 +143,16 @@ module Groovepacker
 
           def import_single_order(single_row, index, inc_id, order_map, result)
             if @helper.not_imported?(@imported_orders, inc_id)
-              @order = Order.find_or_initialize_by_increment_id(inc_id)
+              @order = Order.find_or_initialize_by_increment_id("#{inc_id}-currupted")
               order_persisted = @order.persisted? ? true : false
               @order.store_id = params[:store_id]
               @order_required = %w(qty sku increment_id price)
               @order.save
-              @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
-              @order.update_attributes(increment_id: "#{inc_id}-currupted") unless order_persisted 
               import_order_data(order_map, single_row)
+              @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
+              @order.update_attributes(increment_id: "#{inc_id}-currupted")
+              @order.save
+              @order.reload
               update_result(result, single_row) if result[:order_reimported] == false
               import_item_failed_result(result, index) unless result[:status]
               @order.set_order_status

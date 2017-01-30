@@ -23,6 +23,7 @@ class Order < ActiveRecord::Base
   before_save :perform_pre_save_checks
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
+  after_save :delete_if_order_exist
   validates_uniqueness_of :increment_id
 
   include ProductsHelper
@@ -495,7 +496,7 @@ class Order < ActiveRecord::Base
     if most_recent_scanned_product
       chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
     end
-
+    
     limited_order_items.each do |order_item|
       if order_item.cached_product.is_kit == 1
         option_products = order_item.cached_option_products
@@ -611,7 +612,7 @@ class Order < ActiveRecord::Base
     ).first
 
     if oi
-      limited_order_items.unshift(oi) unless oi.scanned_status != 'scanned'
+      limited_order_items.unshift(oi) # unless oi.scanned_status != 'scanned'
     else
       item = order_items
         .joins(order_item_kit_products: :product_kit_skus)
@@ -964,9 +965,7 @@ class Order < ActiveRecord::Base
 
   def partially_load_order_item(order_item_status, limit, offset)
     order_items
-      .where(scanned_status: order_item_status)
-      # .limit(limit)
-      # .offset(offset)
+      .where(scanned_status: order_item_status).limit(limit).offset(offset)
   end
 
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
@@ -998,5 +997,10 @@ class Order < ActiveRecord::Base
 
   def delete_cached_order_items_keys
     order_items.map(&:delete_cache)
+  end
+
+  def delete_if_order_exist
+    orders = Order.where(increment_id: increment_id)
+    self.destroy if orders.count > 1
   end
 end

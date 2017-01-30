@@ -82,6 +82,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_fba
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.is_fba = !tenant.is_fba
+    tenant.save
+    render json: {}
+  end
+
   def create_duplicate
     result = create_single_duplicate
 
