@@ -498,7 +498,7 @@ class Order < ActiveRecord::Base
     end
     
     limited_order_items.each do |order_item|
-      if order_item.cached_product.is_kit == 1
+      if order_item.cached_product.try(:is_kit) == 1
         option_products = order_item.cached_option_products
         if order_item.cached_product.kit_parsing == 'single'
           #if single, then add order item to unscanned list
