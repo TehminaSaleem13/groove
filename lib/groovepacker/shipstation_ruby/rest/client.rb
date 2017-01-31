@@ -190,7 +190,7 @@ module Groovepacker
         end
 
         def union(orders, second_set)
-          orders += second_set unless second_set.length == 0
+          orders += second_set unless second_set.try(:length) == 0
           orders
         end
       end

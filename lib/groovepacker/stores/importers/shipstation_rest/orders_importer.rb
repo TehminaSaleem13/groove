@@ -55,7 +55,7 @@ module Groovepacker
             # check_or_assign_import_item
             response["orders"].each do |order|
               @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
-              break if @import_item.status == 'cancelled'
+              break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
               @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
               shipstation_order = find_or_init_new_order(order)
               ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
@@ -70,11 +70,18 @@ module Groovepacker
               if tracking_info.blank?
                 response = @client.get_shipments_by_orderno(order["orderNumber"])
                 tracking_info = {}
-                (response || []).each do |shipment|
-                  tracking_info = shipment if shipment["voided"] == false
+                if response.present?
+                  response.each do |shipment|
+                    tracking_info = shipment if shipment["voided"] == false
+                  end
                 end
               end
-              shipstation_order.tracking_num = tracking_info["trackingNumber"]
+              begin
+                shipstation_order.dup
+                shipstation_order = _
+                shipstation_order.tracking_num = tracking_info["trackingNumber"]
+              rescue
+              end
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
               update_order_activity_log(shipstation_order)
