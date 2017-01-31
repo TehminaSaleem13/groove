@@ -18,7 +18,7 @@ module Groovepacker
             @base_products = []
             @import_item = @helper.initialize_import_item
             index_no = mapping["increment_id"][:position]
-            final_records = @helper.build_final_records.sort_by{|k|k[index_no]}
+            final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}
             Order.where("increment_id like '%\-currupted'").destroy_all
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
