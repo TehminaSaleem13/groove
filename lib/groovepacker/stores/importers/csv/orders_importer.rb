@@ -113,7 +113,7 @@ module Groovepacker
             new_sku = []
             items_array = []
             order_items_ar.each do |single_row|
-              qty = @helper.get_row_data(single_row, 'qty').strip.to_i
+              qty = @helper.get_row_data(single_row, 'qty').strip.to_i rescue nil
               sku = @helper.get_row_data(single_row, 'sku').strip
               if new_sku.include? sku 
                 items_array.last[1] = items_array.last[1] + qty rescue nil
