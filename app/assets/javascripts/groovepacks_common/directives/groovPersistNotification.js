@@ -90,9 +90,13 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
        }
        },2000);
        */
-      myscope.generate_barcode_status = function (message, hash) {
+      myscope.generate_barcode_status = function (message, hash, post_scanning_option) {
         scope.notifications[hash].percent = (message['current_order_position'] / message['total_orders']) * 100;
-        var notif_message = '<b>Generating&nbsp;Packing&nbsp;Slips:</b>&nbsp;';
+        if (post_scanning_option == "Barcode"){
+          var notif_message = '<b>Generating&nbsp;order&nbsp;number&nbsp;barcode:</b>&nbsp;';
+        } else { 
+          var notif_message = '<b>Generating&nbsp;Packing&nbsp;Slips:</b>&nbsp;';
+        }
         var notif_details = '';
         notif_details += ' <b>Next Order&nbsp;#' + message['next_order_increment_id'] + '</b>';
         scope.notifications[hash].type = message['status'];
@@ -379,7 +383,7 @@ groovepacks_directives.directive('groovPersistNotification', ['$window', '$docum
                 scope.bar_glow = true;
               }
             }
-            myscope[message['type']](message['data'], message['hash']);
+            myscope[message['type']](message['data'], message['hash'], message['post_scanning_option']);
           }
         });
       });
