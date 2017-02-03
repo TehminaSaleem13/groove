@@ -62,6 +62,7 @@ module Groovepacker
                 import_order_form_response(shipstation_order, order, shipments_response) 
               rescue 
               end
+              break if Rails.env == "test"
               sleep 0.3
             end
           end
