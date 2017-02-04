@@ -155,7 +155,8 @@
           "cue_orders_optons": "In most cases a packing slip with an order number barcode is scanned to cue orders for packing. If you are printing shipping labels which include the order packing list before importing orders you can choose to cue orders by scanning the the tracking number from the shipping label using this option.",
           "intangible_setting": "Items that do not get physically packed can be hidden from Scan & Pack and packing slips using the intangible opiton on the products page.<br><br>This setting allows GroovePacker to automatically identify intangible items based on a string that is always included in their product name or SKU. This allows new items that have never been imported to be properly set to intangible.<br>For exmaple if all coupons start with: DISC- You would enter that as the identifier. If you have multiple coupons and require multiple identifiers you can list them separated by commas, and with no spaces: DISC-,OFFR-,SP-",
           "intangible_setting_gen_barcode_from_sku": "Coupon codes and other intangible items are often imported without barcodes and set to 'New'.  When enabled, this option will generate a barcode from the sku for any intangible items found during an order import. Enable this option of you find orders are being set to 'Action Required' due to intangible items.",
-          "post_scan_pause": "This option should only be enabled if GroovePacker indicates the barcodes being scanned are incorrect and the incorrect value submitted would be right except that it's missing the last digit or two."
+          "post_scan_pause": "This option should only be enabled if GroovePacker indicates the barcodes being scanned are incorrect and the incorrect value submitted would be right except that it's missing the last digit or two.",
+          "display_location_on_scanning_page": "When enabled the primary location will display just below the sku during scan and pack."
         }
       }
     },
