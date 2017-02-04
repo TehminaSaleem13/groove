@@ -94,7 +94,8 @@ module Groovepacker
           end
 
           def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
-            if order.order_items.count == items_array.count 
+            if order.order_items.count == order_items_ar.count 
+            #if order.order_items.count == items_array.count 
               #order_item = order.order_items.where(:sku => row[0]).first
               #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
             else
@@ -116,11 +117,11 @@ module Groovepacker
             order_items_ar.each do |single_row|
               qty = @helper.get_row_data(single_row, 'qty').to_s.strip.to_i
               sku = @helper.get_row_data(single_row, 'sku').strip
-              if new_sku.include? sku 
-                items_array.last[1] = items_array.last[1] + qty rescue nil
-              else
+              #if new_sku.include? sku 
+                #items_array.last[1] = items_array.last[1] + qty rescue nil
+              #else
                 items_array << [sku, qty]
-              end
+              #end
               new_sku = sku 
             end
             return items_array 
