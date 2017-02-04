@@ -21,6 +21,7 @@ groovepacks_services.factory('backup', ['$http', 'notification', function ($http
         for (var key in data) {
           if (data.hasOwnProperty(key)) {
             request.append(key, data[key]);
+            notification.notify("Your request has been queued", 1);
           }
         }
         return request;
