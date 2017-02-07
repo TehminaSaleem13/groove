@@ -4,7 +4,7 @@ class GenerateBarcode < ActiveRecord::Base
   after_save :emit_data_to_user
 
   def emit_data_to_user
-    GroovRealtime::user_emit('pnotif', {type: 'generate_barcode_status', data: self}, self.user_id)
+    GroovRealtime::user_emit('pnotif', {type: 'generate_barcode_status', data: self, post_scanning_option: ScanPackSetting.last.post_scanning_option}, self.user_id)
   end
 
   def self.generate_barcode_for(orders, current_user)
@@ -15,6 +15,6 @@ class GenerateBarcode < ActiveRecord::Base
     g_barcode.next_order_increment_id = orders.first[:increment_id] unless orders.first.nil?
     g_barcode.status = 'scheduled'
     g_barcode.save
-    return g_barcode
+    return g_barcode 
   end
 end

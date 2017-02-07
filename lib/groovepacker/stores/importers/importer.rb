@@ -62,7 +62,18 @@ module Groovepacker
                                             :current_order_imported_item => -1, 
                                             :to_import => total_imported)
           sleep 0.5
-          @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
+          import_item_fix
+        end
+
+        def import_item_fix
+          new_import_item = @import_item
+          @import_item = (ImportItem.find_by_id(@import_item.id) || nil) rescue new_import_item
+        end
+
+        def fix_import_item(import_item)
+          new_import_item = import_item
+          import_item = (ImportItem.find_by_id(import_item.id) || nil) rescue new_import_item
+          import_item
         end
 
         def update_success_import_count

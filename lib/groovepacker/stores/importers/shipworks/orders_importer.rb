@@ -142,7 +142,7 @@ module Groovepacker
             if !sku.nil? && ProductSku.find_by_sku(sku)
               product = ProductSku.find_by_sku(sku).product
             else
-              product = import_product(item, store)
+              product = import_product(item, store) rescue nil
             end
 
             order.order_items.create(

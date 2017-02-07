@@ -209,11 +209,17 @@ module Groovepacker
         end
         updated_products.update_all(status_updated: false)
         bulk_action_update_status(bulk_action, "completed")
+        update_all_pending_order_bulk_actions rescue nil
       end
 
       def bulk_action_update_status(bulk_action, status)
         bulk_action.status = status
         bulk_action.save
+      end
+
+      def update_all_pending_order_bulk_actions
+        bulk_actions = GrooveBulkActions.where("identifier='order' and activity='status_update' and (status!='cancelled' or status='completed' and total!=completed)")
+        bulk_actions.update_all("status='completed', completed=total")
       end
     end
   end

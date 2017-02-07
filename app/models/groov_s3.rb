@@ -29,6 +29,12 @@ class GroovS3
       object
     end
 
+    def create_public_zip(tenant, data, privacy = :public_read)
+      object = self.create(tenant, "products/restore.zip", 'zip', privacy)
+      self.save(object, data)
+      object
+    end
+
     def create_teapplix_csv(dir, name, data, privacy = :public_read)
       object = self.create(dir, "#{name}.csv", 'text/csv', privacy)
       self.save(object, data)

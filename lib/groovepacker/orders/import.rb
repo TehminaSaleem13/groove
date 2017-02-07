@@ -83,7 +83,8 @@ module Groovepacker
         @import_item = @order_summary.import_items.build(store_id: store.id)
         @import_item.status = 'not_started'
         @import_item.save
-        @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
+        new_import_item = @import_item
+        @import_item = (ImportItem.find_by_id(@import_item.id) || nil) rescue new_import_item
       end
 
       def import_shipworks(auth_token, request, status = 200)
@@ -113,7 +114,7 @@ module Groovepacker
           import_orders_obj = ImportOrders.new
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
           import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}").import_orders tenant
-          #import_orders_obj.import_orders tenant
+          # import_orders_obj.import_orders tenant
         end
 
         def create_or_update_item(credential, status)

@@ -76,7 +76,7 @@ module ScanPack
         \) or \
         non_hyphen_increment_id IN \(\
           '#{input_without_special_char}', '\##{input_without_special_char}'\
-        \)) and status IN #{status}
+        \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
       )
     end
 

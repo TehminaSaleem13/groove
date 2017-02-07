@@ -3,10 +3,14 @@ class SettingsController < ApplicationController
   include SettingsHelper
 
   def restore
-    @result = SettingsService::Restore.call(
+    data = File.read(params[:file].path)
+    params[:file] = GroovS3.create_public_zip(Apartment::Tenant.current, data).url
+    restore = SettingsService::Restore.new(
       current_user: current_user,
-      params: params
-    ).result
+      params: params,
+      tenant: Apartment::Tenant.current
+    )  
+    @result = restore.delay.call
     respond_to do |format|
       format.json { render json: @result }
     end

@@ -31,4 +31,10 @@ class CsvExportMailer < ActionMailer::Base
     attachments[filename] = File.read("public/#{filename}")
     mail to: ENV["UNSCANNED_ORDERS_EMAILS"], subject: "GroovePacker Unscanned Export Report"
   end
+
+  def product_restore(tenant)
+    Apartment::Tenant.switch(tenant)
+    recipients = GeneralSetting.all.first.export_csv_email.split(',') rescue []
+    mail to: recipients, subject: "GroovePacker Product Restore Is Completed"
+  end
 end

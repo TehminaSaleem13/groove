@@ -68,7 +68,8 @@ module SettingsHelper
         :show_customer_notes, :show_internal_notes,
         :scan_by_tracking_number, :intangible_setting_enabled,
         :intangible_string, :intangible_setting_gen_barcode_from_sku,
-        :post_scan_pause_enabled, :post_scan_pause_time
+        :post_scan_pause_enabled, :post_scan_pause_time,
+        :display_location
       ]
     )
   end

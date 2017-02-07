@@ -18,7 +18,7 @@ module Groovepacker
             @base_products = []
             @import_item = @helper.initialize_import_item
             index_no = mapping["increment_id"][:position]
-            final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}
+            final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}.reject{ |arr| arr.all?(&:blank?) }
             Order.where("increment_id like '%\-currupted'").destroy_all
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
@@ -47,7 +47,8 @@ module Groovepacker
             order_items_ar = [];
             final_records.each_with_index do |single_row, index|
               #check_or_assign_import_item
-              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
+              import_item = @import_item
+              @import_item = (ImportItem.find_by_id(@import_item.id) || nil) rescue import_item
               if @import_item.status == 'cancelled'
                 check_and_destroy_order(single_row)
                 break
@@ -93,7 +94,8 @@ module Groovepacker
           end
 
           def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
-            if order.order_items.count == items_array.count 
+            if order.order_items.count == order_items_ar.count 
+            #if order.order_items.count == items_array.count 
               #order_item = order.order_items.where(:sku => row[0]).first
               #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
             else
@@ -115,11 +117,11 @@ module Groovepacker
             order_items_ar.each do |single_row|
               qty = @helper.get_row_data(single_row, 'qty').to_s.strip.to_i
               sku = @helper.get_row_data(single_row, 'sku').strip
-              if new_sku.include? sku 
-                items_array.last[1] = items_array.last[1] + qty rescue nil
-              else
+              #if new_sku.include? sku 
+                #items_array.last[1] = items_array.last[1] + qty rescue nil
+              #else
                 items_array << [sku, qty]
-              end
+              #end
               new_sku = sku 
             end
             return items_array 

@@ -112,6 +112,26 @@ describe OrdersController do
       expect(result['status']).to eq(true)
     end
 
+    it "Should import order with tracking_num" do
+      request.accept = "application/json"
+      inv_wh = FactoryGirl.create(:inventory_warehouse)
+      general_setting = FactoryGirl.create(:general_setting, :inventory_tracking=>true)
+      @store = FactoryGirl.create(:store, :name=>'shipstation_store', :inventory_warehouse=>inv_wh, :store_type=> 'Shipstation API 2', :status=> true)
+      @shipstation_rest_credentials = FactoryGirl.create(:shipstation_rest_credential, :store_id=>@store.id, :shall_import_shipped=>true, :shall_import_awaiting_shipment=>false)
+      scan_pack_setting = ScanPackSetting.create
+      intengible_option = false
+      status = true
+      @user_role.add_edit_order_items = true
+      @user_role.save
+      get :import_all  
+      expect(response.status).to eq(200)
+      order = Order.last
+      if order.present?
+        tracking_num = order.try(:tracking_num).present?
+        expect(tracking_num).to eq(true)
+      end
+    end
+
     it "Should allow editing notes with add_edit order items permissions" do
       request.accept = "application/json"
       order = FactoryGirl.create(:order, :status=>'awaiting', :packing_user_id=> @user.id)

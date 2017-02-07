@@ -3,9 +3,10 @@ module SettingsService
     attr_reader :current_user, :params, :products_to_check_later,
                 :result
 
-    def initialize(current_user: nil, params: nil)
+    def initialize(current_user: nil, params: nil, tenant: nil)
       @current_user = current_user
       @params = params
+      @tenant = tenant
       @products_to_check_later = []
       @result = {
         'status' => true,
@@ -14,6 +15,7 @@ module SettingsService
     end
 
     def call
+      Apartment::Tenant.switch @tenant
       if current_user.can? 'restore_backups'
         process_restore if valid_params?
       else
@@ -34,24 +36,23 @@ module SettingsService
 
       require 'zip'
       require 'csv'
-
       # Clear tables if delete method is invoked
       delete_table_data(mapping)
-
       # Open uploaded zip file
-      Zip::File.open(params[:file].path) do |zipfile|
+      File.open("/tmp/#{Apartment::Tenant.current}_product_restore", "wb") { |f| f.write(Net::HTTP.get(URI.parse(params[:file]))) }
+      Zip::File.open("/tmp/#{Apartment::Tenant.current}_product_restore") do |zipfile|
         # For each csv in the zip
         zipfile.each do |file|
           # Remove .csv extension to check if we have mapping defined for it
-          current_mapping = file.name.chomp('.csv')
+          current_mapping = file.name.chomp('.csv') 
 
           next unless mapping.key?(current_mapping)
           # Parse the file by it's data
           parse_csv_file(file, zipfile, mapping, default_warehouse_map, current_mapping)
         end
       end
-
       products_to_check_later.each(&:update_product_status)
+      CsvExportMailer.product_restore(@tenant).deliver
     end
 
     def load_mappings

@@ -54,11 +54,15 @@ module Groovepacker
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
             response["orders"].each do |order|
-              @import_item = ImportItem.find_by_id(@import_item.id) rescue @import_item
+              import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
-              @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
-              shipstation_order = find_or_init_new_order(order)
-              ActiveRecord::Base.transaction { import_order_form_response(shipstation_order, order, shipments_response) }
+              begin
+                @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
+                shipstation_order = find_or_init_new_order(order)
+                import_order_form_response(shipstation_order, order, shipments_response) 
+              rescue 
+              end
+              break if Rails.env == "test"
               sleep 0.3
             end
           end
@@ -76,12 +80,18 @@ module Groovepacker
                   end
                 end
               end
-              begin
-                shipstation_order.dup
-                shipstation_order = _
-                shipstation_order.tracking_num = tracking_info["trackingNumber"]
-              rescue
-              end
+              shipstation_order = Order.find_by_id(shipstation_order.id) if shipstation_order.frozen?
+              # if shipstation_order.frozen?
+              #   new_shipstation_order = shipstation_order.dup
+              #   new_shipstation_order.order_items = shipstation_order.order_items
+              #   new_shipstation_order.order_shipping = shipstation_order.order_shipping
+              #   new_shipstation_order.order_exception = shipstation_order.order_exception
+              #   new_shipstation_order.order_activities = shipstation_order.order_serials
+              #   shipstation_order.destroy
+              #   shipstation_order = new_shipstation_order
+              #   shipstation_order.save
+              # end
+              shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
               update_order_activity_log(shipstation_order)
