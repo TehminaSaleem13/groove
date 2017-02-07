@@ -172,10 +172,13 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_item.update_attributes(status: 'in_progress')
     result = Groovepacker::Stores::Context.new(handler).import_orders
     new_import_item = import_item
-    import_item = (ImportItem.find_by_id(import_item.id) || nil) rescue new_import_item
-    import_item.previous_imported = result[:previous_imported]
-    import_item.success_imported = result[:success_imported]
-    update_status(import_item, result)
+    begin
+      import_item = (ImportItem.find_by_id(import_item.id) || nil) rescue new_import_item
+      import_item.previous_imported = result[:previous_imported]
+      import_item.success_imported = result[:success_imported]
+      update_status(import_item, result)
+    rescue
+    end
   end
 
   def update_status(import_item, result)
