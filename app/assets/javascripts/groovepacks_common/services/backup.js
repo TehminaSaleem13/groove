@@ -21,7 +21,7 @@ groovepacks_services.factory('backup', ['$http', 'notification', function ($http
         for (var key in data) {
           if (data.hasOwnProperty(key)) {
             request.append(key, data[key]);
-            notification.notify("Your request has been queued", 1);
+            notification.notify("Request for Product restore has been queued. You will be notified via email once restore is complete.", 1);
           }
         }
         return request;
@@ -29,7 +29,7 @@ groovepacks_services.factory('backup', ['$http', 'notification', function ($http
       data: backup_data
     }).success(function (data) {
       if (data.status) {
-        notification.notify("Imported Successfully", 1);
+        // notification.notify("Imported Successfully", 1);
       } else {
         notification.notify(data.messages);
       }

@@ -51,8 +51,8 @@ module SettingsService
           parse_csv_file(file, zipfile, mapping, default_warehouse_map, current_mapping)
         end
       end
-
       products_to_check_later.each(&:update_product_status)
+      CsvExportMailer.product_restore(@tenant).deliver
     end
 
     def load_mappings
