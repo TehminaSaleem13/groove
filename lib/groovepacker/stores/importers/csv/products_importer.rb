@@ -27,19 +27,16 @@ module Groovepacker
             end
             found_products_raw = nil
             @all_unique_ids.clear
-
             @success = 0
             @product_import.status = 'processing_rest'
             @product_import.success = @success
             @product_import.current_sku = ''
             @product_import.total = @to_import_records.length
             @product_import.save
-
             collect_related_data_for_new_prod(found_products)
             @to_import_records.clear
             found_products = nil
             @found_barcodes.clear
-
             import_product_related_data
             update_orders_status
             @result
@@ -202,10 +199,11 @@ module Groovepacker
             if !self.mapping['receiving_instructions'].nil? && self.mapping['receiving_instructions'][:position] >= 0 && !single_row[self.mapping['receiving_instructions'][:position]].blank?
               usable_record[:product_receiving_instructions] = single_row[self.mapping['receiving_instructions'][:position]]
             end
-
+            usable_record[:all_barcodes] = {}
             if !self.mapping['barcode'].nil? && self.mapping['barcode'][:position] >= 0
               unless single_row[self.mapping['barcode'][:position]].nil?
                 barcodes = single_row[self.mapping['barcode'][:position]].split(',')
+                usable_record[:all_barcodes]["0"] = barcodes  
                 barcodes.each do |single_barcode|
                   break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!@all_barcodes.include? single_barcode.strip)
                   @all_barcodes << single_barcode.strip
@@ -214,6 +212,7 @@ module Groovepacker
               end
             elsif self.params[:generate_barcode_from_sku]
               barcodes = single_row[self.mapping['sku'][:position]].split(',')
+              usable_record[:all_barcodes]["0"] = barcodes
               barcodes.each do |single_barcode|
                 @all_barcodes << single_barcode.strip
                 usable_record[:barcodes] << single_barcode.strip
@@ -223,6 +222,7 @@ module Groovepacker
             if !self.mapping['secondary_barcode'].nil? && self.mapping['secondary_barcode'][:position] >= 0
               unless single_row[self.mapping['secondary_barcode'][:position]].nil?
                 secondary_barcodes = single_row[self.mapping['secondary_barcode'][:position]].split(',')
+                usable_record[:all_barcodes]["1"] = secondary_barcodes
                 secondary_barcodes.each do |single_secondary_barcode|
                   break unless ProductBarcode.where(:barcode => single_secondary_barcode.strip).empty? && (!@all_barcodes.include? single_secondary_barcode.strip)
                   @all_barcodes << single_secondary_barcode.strip
@@ -234,6 +234,7 @@ module Groovepacker
             if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0
               unless single_row[self.mapping['tertiary_barcode'][:position]].nil?
                 tertiary_barcodes = single_row[self.mapping['tertiary_barcode'][:position]].split(',')
+                usable_record[:all_barcodes]["2"] = tertiary_barcodes
                 tertiary_barcodes.each do |single_tertiary_barcode|
                   break unless ProductBarcode.where(:barcode => single_tertiary_barcode.strip).empty? && (!@all_barcodes.include? single_tertiary_barcode.strip)
                   @all_barcodes << single_tertiary_barcode.strip
@@ -336,7 +337,7 @@ module Groovepacker
 
           def update_existing_prod(duplicate_found, record, index)
             single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
-            duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
+            duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id) 
             if record[:name] == "`[DELETE]`"
               delete_existing_prod(duplicate_product)
               return true
@@ -352,10 +353,10 @@ module Groovepacker
             if !self.mapping['product_type'].nil? #&& self.mapping['product_type'][:action] == 'overwrite'
               duplicate_product.product_type = record[:product_type]
             end
-            if !self.mapping['product_instructions'].nil? #&& self.mapping['product_instructions'][:action] == 'overwrite'
+            if !self.mapping['product_instructions'].nil? && record[:spl_instructions_4_packer] != "[DELETE]"  #&& self.mapping['product_instructions'][:action] == 'overwrite'
               duplicate_product.spl_instructions_4_packer = record[:spl_instructions_4_packer]
             end
-            if !self.mapping['receiving_instructions'].nil? #&& self.mapping['receiving_instructions'][:action] == 'overwrite'
+            if !self.mapping['receiving_instructions'].nil? && record[:product_receiving_instructions] != "[DELETE]" #&& self.mapping['receiving_instructions'][:action] == 'overwrite'
               duplicate_product.product_receiving_instructions = record[:product_receiving_instructions]
             end
 
@@ -366,16 +367,16 @@ module Groovepacker
             if (!self.mapping['inv_wh1'].nil? || !self.mapping['location_primary'].nil? || !self.mapping['location_secondary'].nil? || !self.mapping['location_tertiary'].nil?)
               default_inventory = ProductInventoryWarehouses.find_or_create_by_inventory_warehouse_id_and_product_id(@default_inventory_warehouse_id, duplicate_product.id)
               updatable_record = record[:inventory].first
-              if !self.mapping['inv_wh1'].nil? #&& self.mapping['inv_wh1'][:action] =='overwrite'
+              if !self.mapping['inv_wh1'].nil? && updatable_record[:quantity_on_hand] != "[DELETE]" #&& self.mapping['inv_wh1'][:action] =='overwrite'
                 default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
               end
-              if !self.mapping['location_primary'].nil? #&& self.mapping['location_primary'][:action] =='overwrite'
+              if !self.mapping['location_primary'].nil? && updatable_record[:location_primary] != "[DELETE]" #&& self.mapping['location_primary'][:action] =='overwrite'
                 default_inventory.location_primary = updatable_record[:location_primary]
               end
-              if !self.mapping['location_secondary'].nil? #&& self.mapping['location_secondary'][:action] =='overwrite'
+              if !self.mapping['location_secondary'].nil? && updatable_record[:location_secondary] != "[DELETE]" #&& self.mapping['location_secondary'][:action] =='overwrite'
                 default_inventory.location_secondary = updatable_record[:location_secondary]
               end
-              if !self.mapping['location_tertiary'].nil? #&& self.mapping['location_tertiary'][:action] =='overwrite'
+              if !self.mapping['location_tertiary'].nil? && updatable_record[:location_tertiary] != "[DELETE]" #&& self.mapping['location_tertiary'][:action] =='overwrite'
                 default_inventory.location_tertiary = updatable_record[:location_tertiary]
               end
               default_inventory.save
@@ -396,7 +397,7 @@ module Groovepacker
                 end
               end
               record[:cats].each do |single_to_add_cat|
-                unless to_not_add_cats.include?(single_to_add_cat)
+                if !to_not_add_cats.include?(single_to_add_cat) && single_to_add_cat != "[DELETE]"
                   to_add_cat = ProductCat.new
                   to_add_cat.category = single_to_add_cat
                   to_add_cat.product_id = duplicate_product.id
@@ -418,7 +419,7 @@ module Groovepacker
                 end
               end
               record[:barcodes].each_with_index do |single_to_add_barcode, index|
-                unless to_not_add_barcodes.include?(single_to_add_barcode)
+                if !to_not_add_barcodes.include?(single_to_add_barcode) && single_to_add_barcode != "[DELETE]"
                   to_add_barcode = ProductBarcode.new
                   to_add_barcode.barcode = single_to_add_barcode
                   to_add_barcode.order = index
@@ -442,7 +443,7 @@ module Groovepacker
                 end
               end
               record[:skus].each_with_index do |single_to_add_sku, index|
-                unless to_not_add_skus.include?(single_to_add_sku)
+                if !to_not_add_skus.include?(single_to_add_sku) && single_to_add_sku != "[DELETE]" 
                   to_add_sku = ProductSku.new
                   to_add_sku.sku = single_to_add_sku
                   to_add_sku.order = index
@@ -542,11 +543,17 @@ module Groovepacker
                   usable_record = init_usable_record(index)
                   @all_skus += single_row_skus
                   usable_record[:skus] = single_row_skus
+                  begin
+                    usable_record[:new_sku] = []
+                    usable_record[:new_sku] <<  single_row[self.mapping['sku'][:position]].split(',')[0]
+                    usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0]
+                    usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0]
+                  rescue
+                  end
                   @usable_records << build_usable_record(usable_record,single_row)
                   @success += 1
                 end
               end
-
               if (index + 1) % @check_length === 0 || index === (self.final_record.length - 1)
                 @product_import.reload
                 @product_import.success = @success
@@ -577,15 +584,51 @@ module Groovepacker
                   break
                 end
               end
-
+              product = Product.find_by_name(record[:name])
               if duplicate_found === false && @new_action == 'create'
-                @products_to_import << create_single_import(record)
-                @to_import_records << record
-                @all_unique_ids << record[:store_product_id]
+                if product.present?
+                 delete_product(record) rescue nil
+                else
+                  @products_to_import << create_single_import(record)
+                  @to_import_records << record
+                  @all_unique_ids << record[:store_product_id]
+                end
               elsif duplicate_found === false && @duplicate_action == 'overwrite'
                 #skip the current record and move on to the next one.
                 next
               elsif @duplicate_action == 'overwrite'
+                delete_product(record)
+                record[:images].each_with_index do |image, new_order|
+                  product.product_images.find_by_order(new_order).destroy if image == "[DELETE]" rescue nil
+                end
+                (product.try(:product_images) || []).each do |image, index|
+                  image.order = index
+                  image.save
+                end
+                pro_barcodes = product.try(:product_barcodes)
+                barcodes = record[:all_barcodes]
+                (pro_barcodes || []).each_with_index do |barcode, index|
+                  pro_barcodes.where(:order => index)[0].destroy if barcodes["#{index}"][0] == "[DELETE]"  rescue nil
+                end
+                (product.try(:product_barcodes) || []).each_with_index do |barcode, index|
+                  barcode.update_attribute(:order, index)
+                end 
+                record[:cats].each_with_index do |cat, index|
+                  product.product_cats[index].destroy if cat == "[DELETE]" rescue nil
+                end
+                product.update_attribute(:spl_instructions_4_packer, nil) if record[:spl_instructions_4_packer] == "[DELETE]"
+                product.update_attribute(:product_receiving_instructions, nil) if record[:product_receiving_instructions] == "[DELETE]"
+                product.update_attribute(:weight, nil) if record[:weight] == "[DELETE]"
+                record[:inventory].each_with_index do |inventory, index|
+                  product_inv = product.product_inventory_warehousess[index]
+                  begin
+                    product_inv.update_attribute(:location_primary, nil) if inventory[:location_primary] == "[DELETE]"
+                    product_inv.update_attribute(:location_secondary, nil) if inventory[:location_secondary] == "[DELETE]"
+                    product_inv.update_attribute(:location_tertiary, nil) if inventory[:location_tertiary] == "[DELETE]"
+                    product_inv.update_attribute(:quantity_on_hand, nil) if inventory[:quantity_on_hand] == "[DELETE]"
+                  rescue
+                  end
+                end
                 #update the product directly
                 next if update_existing_prod(duplicate_found, record, index)
               end
@@ -612,56 +655,72 @@ module Groovepacker
               product_id = found_products[record[:store_product_id]]
               if product_id > 0
                 if record[:skus].length > 0
-                  record[:skus].each_with_index do |sku, sku_order|
-                    product_sku = ProductSku.new
-                    product_sku.sku = sku
-                    product_sku.order = sku_order
-                    product_sku.product_id = product_id
-                    @import_product_skus << product_sku
+                  new_order = 0
+                  record[:skus].each do |sku|
+                    if sku != "[DELETE]"
+                      product_sku = ProductSku.new
+                      product_sku.sku = sku
+                      product_sku.order = new_order
+                      product_sku.product_id = product_id
+                      @import_product_skus << product_sku  
+                      new_order = new_order + 1      
+                    end
                   end
                 end
 
                 if record[:barcodes].length > 0
-                  record[:barcodes].each_with_index do |barcode, barcode_order|
-                    unless @found_barcodes.include? barcode
-                      product_barcode = ProductBarcode.new
-                      product_barcode.barcode = barcode
-                      product_barcode.order = barcode_order
-                      product_barcode.product_id = product_id
-                      @import_product_barcodes << product_barcode
+                  new_order = 0
+                  record[:barcodes].each do |barcode|
+                    if barcode != "[DELETE]"
+                      unless @found_barcodes.include? barcode
+                        product_barcode = ProductBarcode.new
+                        product_barcode.barcode = barcode
+                        product_barcode.order = new_order
+                        product_barcode.product_id = product_id
+                        @import_product_barcodes << product_barcode
+                        new_order = new_order + 1
+                      end
                     end
                   end
                 end
 
                 if record[:images].length > 0
-                  record[:images].each_with_index do |image, image_order|
-                    product_image = ProductImage.new
-                    product_image.image = image
-                    product_image.order = image_order
-                    product_image.product_id = product_id
-                    @import_product_images << product_image
+                  new_order = 0
+                  record[:images].each do |image|
+                    if image != "[DELETE]" 
+                      new_order = new_order + 1
+                      product_image = ProductImage.new
+                      product_image.image = image
+                      product_image.order = new_order
+                      product_image.product_id = product_id
+                      @import_product_images << product_image
+                    end
                   end
                 end
 
                 if record[:cats].length > 0
                   record[:cats].each do |cat|
-                    product_cat = ProductCat.new
-                    product_cat.category = cat
-                    product_cat.product_id = product_id
-                    @import_product_cats << product_cat
+                    if cat != "[DELETE]" 
+                      product_cat = ProductCat.new
+                      product_cat.category = cat
+                      product_cat.product_id = product_id
+                      @import_product_cats << product_cat
+                    end
                   end
                 end
 
                 if record[:inventory].length > 0
                   record[:inventory].each do |warehouse|
-                    product_inv_wh = ProductInventoryWarehouses.new
-                    product_inv_wh.inventory_warehouse_id = warehouse[:inventory_warehouse_id]
-                    product_inv_wh.location_primary = warehouse[:location_primary]
-                    product_inv_wh.location_secondary = warehouse[:location_secondary]
-                    product_inv_wh.location_tertiary = warehouse[:location_tertiary]
-                    product_inv_wh.quantity_on_hand = warehouse[:quantity_on_hand]
-                    product_inv_wh.product_id = product_id
-                    @import_product_inventory_warehouses << product_inv_wh
+                    if warehouse != "[DELETE]" 
+                      product_inv_wh = ProductInventoryWarehouses.new
+                      product_inv_wh.inventory_warehouse_id = warehouse[:inventory_warehouse_id]
+                      product_inv_wh.location_primary = warehouse[:location_primary] if warehouse[:location_primary] != "[DELETE]"
+                      product_inv_wh.location_secondary = warehouse[:location_secondary] if warehouse[:location_secondary] != "[DELETE]"
+                      product_inv_wh.location_tertiary = warehouse[:location_tertiary] if warehouse[:location_tertiary] != "[DELETE]"
+                      product_inv_wh.quantity_on_hand  = warehouse[:quantity_on_hand] if warehouse[:quantity_on_hand] != "[DELETE]"
+                      product_inv_wh.product_id = product_id
+                      @import_product_inventory_warehouses << product_inv_wh
+                    end
                   end
                 end
               end
@@ -741,6 +800,17 @@ module Groovepacker
           def delete_existing_images(images)
             images.each do |image|
               image.destroy
+            end
+          end
+
+          def delete_product(record)
+            product = Product.find_by_name(record[:name])
+            record[:new_sku].each_with_index do |sku, new_order|
+              product.product_skus.find_by_order(new_order).destroy if sku == "[DELETE]" && product.product_skus.count > 1 rescue nil
+            end
+            (product.try(:product_skus) || []).each_with_index do |sku, index|
+              sku.order = index
+              sku.save
             end
           end
 
