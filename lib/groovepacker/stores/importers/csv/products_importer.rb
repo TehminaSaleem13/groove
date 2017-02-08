@@ -620,8 +620,8 @@ module Groovepacker
                 product.update_attribute(:product_receiving_instructions, nil) if record[:product_receiving_instructions] == "[DELETE]"
                 product.update_attribute(:weight, nil) if record[:weight] == "[DELETE]"
                 record[:inventory].each_with_index do |inventory, index|
-                  product_inv = product.product_inventory_warehousess[index]
                   begin
+                    product_inv = product.product_inventory_warehousess[index]
                     product_inv.update_attribute(:location_primary, nil) if inventory[:location_primary] == "[DELETE]"
                     product_inv.update_attribute(:location_secondary, nil) if inventory[:location_secondary] == "[DELETE]"
                     product_inv.update_attribute(:location_tertiary, nil) if inventory[:location_tertiary] == "[DELETE]"
