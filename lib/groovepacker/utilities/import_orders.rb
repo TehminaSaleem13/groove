@@ -12,6 +12,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
     order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
     initiate_import(tenant)
+    # Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) #if GrooveBulkActions.last.status != "completed" 
   end
 
   def add_import_item_for_active_stores(store)
@@ -154,7 +155,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     result = import_csv.import(tenant, data.to_s)
     #check_or_assign_import_item(import_item)
     new_import_item = import_item
-    import_item = (ImportItem.find_by_id(import_item.id) || nil) rescue new_import_item
+    import_item = ImportItem.find(import_item.id) rescue new_import_item
     update_status(import_item, result)
     import_item.update_attributes(message: result[:messages]) unless result[:status]
   end
@@ -173,7 +174,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     result = Groovepacker::Stores::Context.new(handler).import_orders
     new_import_item = import_item
     begin
-      import_item = (ImportItem.find_by_id(import_item.id) || nil) rescue new_import_item
+      import_item = ImportItem.find(import_item.id) rescue new_import_item
       import_item.previous_imported = result[:previous_imported]
       import_item.success_imported = result[:success_imported]
       update_status(import_item, result)
