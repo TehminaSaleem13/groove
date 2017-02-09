@@ -343,7 +343,7 @@ module Groovepacker
               return true
             end
             duplicate_product.store_id = self.params[:store_id]
-            if !self.mapping['product_name'].nil? && record[:name]!=''
+            if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
               duplicate_product.name = record[:name]
             end
             if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
@@ -634,8 +634,9 @@ module Groovepacker
                   break
                 end
               end
-              product = Product.find_by_name(record[:name])
+              # product = Product.find_by_name(record[:name])
               if duplicate_found === false && @new_action == 'create'
+                product = find_product(record)
                 if product.present?
                  delete_product(record) rescue nil
                 else
@@ -647,6 +648,7 @@ module Groovepacker
                 #skip the current record and move on to the next one.
                 next
               elsif @duplicate_action == 'overwrite'
+                product = find_product(record)
                 delete_product(record)
                 record[:images].each_with_index do |image, new_order|
                   product.product_images.find_by_order(new_order).destroy if image == "[DELETE]" rescue nil
@@ -655,6 +657,7 @@ module Groovepacker
                   image.order = index
                   image.save
                 end
+                product.update_attribute(:name, "Product created from CSV import") if record[:name] == "[DELETE]"
                 pro_barcodes = product.try(:product_barcodes)
                 barcodes = record[:all_barcodes]
                 (pro_barcodes || []).each_with_index do |barcode, index|
@@ -853,8 +856,18 @@ module Groovepacker
             end
           end
 
+          def find_product(record)
+            record[:skus].each do |sku|
+              if sku != "[DELETE]"
+                sku = ProductSku.find_by_sku(sku)
+                @product = Product.find_by_id(sku.try(:product_id))
+              end
+            end
+            @product
+          end
+
           def delete_product(record)
-            product = Product.find_by_name(record[:name])
+            product = find_product(record)
             record[:new_sku].each_with_index do |sku, new_order|
               product.product_skus.find_by_order(new_order).destroy if sku == "[DELETE]" && product.product_skus.count > 1 rescue nil
             end
