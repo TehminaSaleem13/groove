@@ -13,6 +13,7 @@ module Groovepacker
           else
             product = ProductSku.where(sku: r_product["sku"]).first.product
           end
+
           product.reload
           make_product_intangible(product)
           product.set_product_status
@@ -47,7 +48,9 @@ module Groovepacker
           product = Product.create(name: item["name"], store: @credential.store, store_product_id: 0)
           product.product_skus.create(sku: sku)
 
-          if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
+          if item["upc"].present?
+            product.product_barcodes.create(barcode: item["upc"])
+          elsif @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
             product.product_barcodes.create(barcode: sku)
           end
 
