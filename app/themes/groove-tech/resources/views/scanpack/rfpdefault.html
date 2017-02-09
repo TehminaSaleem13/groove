@@ -111,7 +111,7 @@
             <span class="pull-left"><strong tooltip="{{data.order.next_item.name}}">{{data.order.next_item.name | limitTo:45}}</strong></span>
             <span class="pull-right" ng-class="{pointer: scan_pack.settings.enable_click_sku}"
                   ng-click="autoscan_barcode()"><strong>{{data.order.next_item.sku}}</strong></span><br/><br/>
-            <span ng-if="scan_pack.settings.display_location==true" class="pull-right">{{data.order.next_item.location | cut:true:25:'...'}}</span>
+            <span ng-if="scan_pack.settings.display_location==true" class="pull-right"><h4>{{data.order.next_item.location | cut:true:25:'...'}}</h4></span>
           </h5>
           <h4>{{data.order.next_item.qty_remaining}} more to scan.</h4>
 
