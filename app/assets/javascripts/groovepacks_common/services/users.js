@@ -196,6 +196,14 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
     }).error(notification.server_error);
   };
 
+  var status_update = function(user){
+    return $http.post('/users/update_user_status.json', user).success(function(data){
+      if (data.status) {
+        notification.notify("Successfully Updated", 1);
+      }
+    });
+  }
+
   //Public facing API
   return {
     model: {
@@ -217,7 +225,8 @@ groovepacks_services.factory('users', ['$http', 'notification', '$filter', funct
       get: get_single,
       can_create: can_create_single,
       validate: validate_single,
-      update: create_update_single
+      update: create_update_single,
+      update_status: status_update
     }
   };
 }]);

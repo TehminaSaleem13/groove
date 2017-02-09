@@ -1,6 +1,6 @@
 <div bindonce="options" class="binder row">
   <div bo-if="options.select_all !== false" class="select_all_box col-md-2 col-lg-2" dropdown
-       ng-mouseenter="show_dropdown()" ng-mouseleave="start_dropdown_timer()" is-open="dropdown.show">
+       ng-mouseenter="show_dropdown()" ng-mouseleave="start_dropdown_timer()" is-open="dropdown.show" style="padding-left: 30px;">
     <button ng-click="options.select_all(!options.setup.select_all)" type="button" class="btn groove-button"
             ng-class="{active:options.setup.select_all, inverted: options.setup.inverted}">
       <span ng-hide="options.setup.select_all" translate>common.select_all</span>
@@ -79,6 +79,7 @@
             </div>
             <div style="display:inline-block;"
               bo-if="options.editable == false || options.all_fields[field].editable == false"
+              hm-press="compile($parent.$parent.$index,field)" groov-rt-click="compile($parent.$parent.$index,field)"
               >
               <div ng-class='{"grid-copyable-field": options.all_fields[field].copyable, "grid-simple-text": !options.all_fields[field].copyable}'
                 ng-style="{'min-width' : (row[field].toString().length > (options.all_fields[field].col_length || options.col_length) ? ((options.all_fields[field].col_length || options.col_length)) : (row[field].toString().length || 5)) + 'rem'}">

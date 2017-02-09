@@ -63,6 +63,11 @@ groovepacks_controllers.
         });
       };
 
+      myscope.update_single_user = function(user){
+        users.single.update_status(user);
+        myscope.get_users();
+      }
+
       myscope.init = function () {
         $scope.setup_page("show_users");
         $scope.users = users.model.get();
@@ -77,21 +82,35 @@ groovepacks_controllers.
           selectable: true,
           sort_func: myscope.handlesort,
           setup: $scope.users.setup,
+          editable: {
+            update: myscope.update_single_user,
+            elements: {
+              active: {
+                type: 'select',
+                options: [
+                  {name: "Active", value: 'active'},
+                  {name: "Inactive", value: 'inactive'}
+                ]
+              }
+            }
+          },
           all_fields: {
             username: {
               name: "Username",
+              editable: false,
               class: ''
             },
             active: {
               name: "Status",
+              col_length: 5,
               transclude: '<span class="label label-default" ng-class="{\'label-success\': row.active}">' +
-              '<span ng-show="row.active" class="active">Active</span>' +
-              '<span ng-hide="row.active" class="inactive">Inactive</span>' +
-              '</span>',
-              class: ''
+                '<span ng-show="row.active" class="active">Active</span>' +
+                '<span ng-hide="row.active" class="inactive">Inactive</span>' +
+                '</span>'
             },
             last_sign_in_at: {
               name: "Last Login",
+              editable: false,
               transclude: "<span>{{row[field] | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</span>",
               class: ''
             },
@@ -105,6 +124,7 @@ groovepacks_controllers.
             //},
             'role.name': {
               name: "Type",
+              editable: false,
               transclude: '<span class=\'label label-default\' ng-class="{' +
               '\'label-danger\': row.role.name==\'Super Admin\',' +
               '\'label-warning\': row.role.name==\'Admin\',' +
