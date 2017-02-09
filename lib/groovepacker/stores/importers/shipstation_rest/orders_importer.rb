@@ -119,8 +119,10 @@ module Groovepacker
             @import_item.update_attributes(current_order_items: order["items"].length, current_order_imported_item: 0)
             order["items"].each do |item|
               product = product_importer_client.find_or_create_product(item)
-              images = product.product_images
-              product.product_images.create(image: item["imageUrl"]) if item["imageUrl"].present? && images.blank? && @is_download_image
+              if @is_download_image
+                images = product.product_images
+                product.product_images.create(image: item["imageUrl"]) if item["imageUrl"].present? && images.blank?
+              end
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
