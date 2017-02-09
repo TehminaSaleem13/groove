@@ -53,6 +53,7 @@ module Groovepacker
 
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
+            @is_download_image = ScanPackSetting.last.download_ss_image
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
@@ -118,6 +119,10 @@ module Groovepacker
             @import_item.update_attributes(current_order_items: order["items"].length, current_order_imported_item: 0)
             order["items"].each do |item|
               product = product_importer_client.find_or_create_product(item)
+              if @is_download_image
+                images = product.product_images
+                product.product_images.create(image: item["imageUrl"]) if item["imageUrl"].present? && images.blank?
+              end
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end

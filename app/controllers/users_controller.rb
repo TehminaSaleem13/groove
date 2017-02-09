@@ -206,6 +206,18 @@ class UsersController < ApplicationController
     end
   end
 
+  def update_user_status
+    if current_user.can? 'add_edit_users'
+      user = User.find(params["id"])
+      params["active"] == "active" ? user.active = true : user.active = false
+      user.save
+      HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
+                  query: { username: user.username, packing_user_id: user.id, active: user.active },
+                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if user.present?
+    end
+    render json: {status: true}
+  end
+
   def delete_role
     result = {}
     result['status'] = true

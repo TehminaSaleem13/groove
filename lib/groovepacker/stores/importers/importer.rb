@@ -67,12 +67,12 @@ module Groovepacker
 
         def import_item_fix
           new_import_item = @import_item
-          @import_item = (ImportItem.find_by_id(@import_item.id) || nil) rescue new_import_item
+          @import_item = ImportItem.find(@import_item.id) rescue new_import_item
         end
 
         def fix_import_item(import_item)
           new_import_item = import_item
-          import_item = (ImportItem.find_by_id(import_item.id) || nil) rescue new_import_item
+          import_item = ImportItem.find(import_item.id) rescue new_import_item
           import_item
         end
 

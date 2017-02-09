@@ -190,6 +190,7 @@ Groovepacks::Application.routes.draw do
       post 'change_user_status'
       post 'delete_role'
       post 'createUpdateUser'
+      post 'update_user_status'
     end
     member do
       put 'create_role'
