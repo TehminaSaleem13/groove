@@ -571,7 +571,7 @@ module Groovepacker
                   @product_import.total = @usable_records.length
                 end
                 @product_import.save
-                return true
+                # return true
               end
               @product_import.save
             end
