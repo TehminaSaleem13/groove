@@ -417,7 +417,7 @@ class Order < ActiveRecord::Base
       .push(*single_kit_or_individual_items)
       .group_by { |oi| oi['order_id'] }
 
-    orders_scanning_count = Hash.new(0)
+    orders_scanning_count = {scanned: 0, unscanned: 0}
 
     grouped_data.each do |order_id, order_data|
       orders_scanning_count[order_id] =
