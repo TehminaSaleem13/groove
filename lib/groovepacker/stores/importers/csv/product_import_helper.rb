@@ -26,11 +26,11 @@ module Groovepacker
             return unless @helper.verify_single_item(single_row, prop)
             if prop_type == 'barcode'
               barcode = ProductBarcode.new
-              barcode.barcode = @helper.get_row_data(single_row, prop)
+              barcode.barcode = @helper.get_row_data(single_row, prop).strip
               product.product_barcodes << barcode
             elsif prop_type == 'sku'
               sku = ProductSku.new
-              sku.sku = @helper.get_row_data(single_row, prop)
+              sku.sku = @helper.get_row_data(single_row, prop).strip
               product.product_skus << sku
             elsif prop_type == 'category'
               cat = ProductCat.new
