@@ -34,6 +34,11 @@ class ExportOrder < ActionMailer::Base
     end
   end
 
+  def not_scheduled_emails(tenants)
+    @tenants = tenants
+    mail to: ENV["UNSCANNED_ORDERS_EMAILS"], subject: "[#{Rails.env}] Not queued tenants" 
+  end
+
   def failed_export(exception)
     export_settings = ExportSetting.first
     maunual_or_auto = export_settings.manual_export ? "Manual" : "Auto" 
