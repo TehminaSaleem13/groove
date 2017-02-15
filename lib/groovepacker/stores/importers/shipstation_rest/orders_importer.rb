@@ -53,7 +53,7 @@ module Groovepacker
 
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
-            @is_download_image = ScanPackSetting.last.download_ss_image
+            @is_download_image = @store.shipstation_rest_credential.download_ss_image
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
@@ -66,6 +66,9 @@ module Groovepacker
               break if Rails.env == "test"
               sleep 0.3
             end
+            cred = @store.shipstation_rest_credential
+            cred.download_ss_image = false
+            cred.save
           end
 
           def import_order_form_response(shipstation_order, order, shipments_response)

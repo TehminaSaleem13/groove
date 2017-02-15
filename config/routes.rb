@@ -43,6 +43,7 @@ Groovepacks::Application.routes.draw do
   get '/order_import_summary/fix_imported_at' => 'OrderImportSummaries#fix_imported_at'
   get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
+  put '/shipstation_rest_credentials/:store_id/update_product_image' => 'shipstation_rest_credentials#update_product_image'
   post 'settings/search_by_product' => 'settings#search_by_product'
   post '/settings/fetch_and_update_time_zone'  => "settings#fetch_and_update_time_zone"
   get 'settings/update_stat_status' => 'settings#update_stat_status'

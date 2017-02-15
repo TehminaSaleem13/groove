@@ -15,6 +15,19 @@ class ShipstationRestCredentialsController < ApplicationController
   	render json: @result
   end
 
+  def update_product_image
+    @result = {"status" => true, "messages" => ""}
+    @credential = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    @credential.download_ss_image = true
+    if @credential.save
+      @result["messages"] = "Images will be imported for existing items during the next order import."
+    else
+      @result["messages"] = "Something went wrong"
+      @result["status"] = false
+    end
+    render json: @result
+  end
+
   def use_chrome_extention
     result = {}
     shipstation_cred = ShipstationRestCredential.find_by_store_id(params["store_id"])

@@ -84,6 +84,10 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
       });
     }
 
+    scope.update_product_image = function(){
+      stores.shipstation.update_product_image(scope.stores.single.id);
+    }
+
     scope.show_hide_images = function(element_class, link_class) {
       $('.'+element_class).toggle('slow');
       if($('.'+link_class).hasClass('fa-caret-down')) {
