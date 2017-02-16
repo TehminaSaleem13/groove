@@ -171,7 +171,7 @@ class SubscriptionsController < ApplicationController
 
   def create_subscription(params)
     plan_price = params[:plan_id].split("-").last.to_i rescue 0
-    params[:plan_id] = params[:plan_id].gsub("groove", params[:tenant_name])
+    params[:plan_id] = params[:plan_id].gsub("GROOV", params[:tenant_name])
     if params[:radio_subscription]=="monthly"
       params[:amount] = plan_price*100
       interval = "month"

@@ -1,0 +1,6 @@
+<h3>These tenants are not queued for <%= (DateTime.now + 1.day).strftime('%F')%></h3>
+<% @tenants.each do |tenant|%>
+<h4><%= tenant%></h4>
+<%end%>
+
+

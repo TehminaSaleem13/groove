@@ -115,7 +115,7 @@ module Groovepacker
         def host_url
           credential = get_credential
           host_url = credential.host
-          host_url = host_url.gsub("http", "https") unless host_url.include?("https")
+          host_url = host_url.gsub("http", "https") unless host_url.present? && host_url.include?("https")
           return host_url
         end
 

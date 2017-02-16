@@ -139,6 +139,7 @@ module Groovepacker
                 sku = item["Code"] if item["Code"].present? && item["Code"] != item["SKU"]
               end
             end
+            sku = sku.try(:strip)
             if !sku.nil? && ProductSku.find_by_sku(sku)
               product = ProductSku.find_by_sku(sku).product
             else
