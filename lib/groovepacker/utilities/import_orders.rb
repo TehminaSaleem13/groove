@@ -12,7 +12,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
     order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
     initiate_import(tenant)
-    # Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) #if GrooveBulkActions.last.status != "completed" 
+    last_status = GrooveBulkActions.last.try(:status)
+    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending") 
   end
 
   def add_import_item_for_active_stores(store)
