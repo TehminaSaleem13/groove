@@ -131,6 +131,16 @@ groovepacks_controllers.
         }
       };
 
+      $scope.broken_image_export = function(){
+        if($scope.products.selected.length>0){
+          products.list.generate_broken_image($scope.products).then(function (data) {
+            myscope.get_products();
+          });
+        } else {
+          products.list.select_notification();
+        }
+      };
+
       $scope.setup_child = function (childStateParams) {
         $scope.product_type = childStateParams['type'];
 

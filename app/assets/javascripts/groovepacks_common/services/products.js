@@ -187,6 +187,22 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     });
   };
 
+  var generate_broken_image = function(products){
+    products.setup.productArray = [];
+    for (var i = 0; i < products.selected.length; i++) {
+      if (products.selected[i].checked == true) {
+        products.setup.productArray.push({id: products.selected[i].id});
+      }
+    }
+    return $http.post('/products/generate_broken_image', products.setup).success(function (data) {
+      if (data.status) {
+        $window.open(data.filename); 
+      } else {
+        notification.notify(data.messages, 0);
+      };
+    });
+  };
+
   var select_list = function (products, from, to, state) {
     var url = '';
     var setup = products.setup;
@@ -458,6 +474,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       select: select_list,
       update_node: update_list_node,
       generate: generate_csv,
+      generate_broken_image: generate_broken_image, 
       select_notification: select_notification
     },
     single: {

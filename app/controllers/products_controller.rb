@@ -340,6 +340,36 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  def generate_broken_image
+    result = {};
+    products = list_selected_products(params)
+    filter_products = []
+    nil_images_products = Product.joins("LEFT OUTER JOIN product_images ON product_images.product_id = products.id").where("product_images.id IS NULL and products.id IN (?)", products.map(&:id))
+    check_broken_images_products = products - nil_images_products
+    check_broken_images_products.each do |product|
+      filter_products << product if (check_broken_image(product.product_images.map(&:image)) rescue true)
+    end
+    products = filter_products + nil_images_products
+    result['filename'] = 'products-'+Time.now.to_s+'.csv'
+    CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+      data = ProductsHelper.products_csv(products, csv)
+      result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url
+      result['status'] = true
+    end
+    render json: result
+  end
+
+  def check_broken_image(images)
+    @result = true
+    images.each do |image|
+      if Net::HTTP.get_response(URI.parse(image)).code == "200"
+        @result = false 
+        return @result
+      end
+    end
+    @result
+  end
+
   def update_intangibleness
     Product.update_action_intangibleness(params)
 
