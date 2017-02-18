@@ -48,7 +48,7 @@
         <tbody>
         <% for i in 1..(@csv_data.size - 1) do %>
          <% order = Order.where(increment_id: @csv_data[i][1]).try(:first) %>
-          <tr style="text-align:center;<%= order.scanned_by_status_change.present? ? 'background:#FF0000;' : ((i % 2) == 0) ? 'background:#dcdcdc;' : '' %>">
+          <tr style="text-align:center;<%= order.try(:scanned_by_status_change).present? ? 'background:#FF0000;' : ((i % 2) == 0) ? 'background:#dcdcdc;' : '' %>">
             <% if @csv_data[i] %>
               <% @csv_data[i].each_with_index do |td, td_index| %>
                 <% if td_index == @order_number %>
