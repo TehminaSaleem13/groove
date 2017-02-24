@@ -49,6 +49,9 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'ho
         url: '/{product_id:[0-9]+}', params: {new_product: {value: false}}, template: "<div ui-view></div>",
         controller: 'productsSingleCtrl'
       })
+      .state('products.inventory_report', {
+        url: '/inventory_report', params: {inventory: {value: true}}, templateUrl: '/assets/views/show_inventory.html', controller: 'productsCtrl'
+      })
 
       .state('scanpack', {
         url: '/scanandpack', templateUrl: '/assets/views/scanpack/base.html', controller: 'scanPackCtrl'

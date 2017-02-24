@@ -68,15 +68,16 @@
           </accordion-group>
           <accordion-group is-open="tabs[2].open">
             <accordion-heading>
-              <a ng-click="recount_or_receive_inventory()">Inventory</a>
+              <a>Inventory</a>
             </accordion-heading>
             <li ng-click="recount_or_receive_inventory()">Receive or Recount Inventory</li>
+            <li ui-sref="products.inventory_report" ng-click="inventory_report()"> Inventory Report </li>
           </accordion-group>
         </accordion>
       </div>
     </div>
     <div class="col-lg-10 col-md-10">
-      <div class="row">
+      <div class="row" ng-if="inventory_report_page != true">
         <div class="col-lg-9 col-md-9">
           <div class="col-lg-offset-3 col-md-offset-3 col-lg-9 col-md-9 pull-left">
             <input type="text" id="product-search-query" autofocus="autofocus" class="form-control search-box"
@@ -127,7 +128,7 @@
         </div>
 
       </div>
-      <div class="row">
+      <div class="row" ng-if="inventory_report_page != true">
         <div class="col-xs-12">
           <div groov-data-grid="gridOptions" groov-list="products.list"></div>
         </div>

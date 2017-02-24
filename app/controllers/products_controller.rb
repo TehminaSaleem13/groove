@@ -386,6 +386,76 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  def get_inventory_setting
+    @result["setting"] = JSON.parse(InventoryReportsSetting.last.to_json)
+    products = Product.where(is_inventory_product: true)
+    @result["products"] = {}
+    products.each_with_index do |product, index|
+      @result["products"][index] = {} 
+      product_hash = @result["products"][index]
+      product_hash["id"] = product.id
+      product_hash["name"] = product.name
+      product_hash["sku"] = product.primary_sku
+      product_hash["category"] = product.product_cats[0].category rescue nil
+      product_hash["available_inv"] = product.product_inventory_warehousess[0].available_inv rescue nil
+      product_hash["qoh"] = product.product_inventory_warehousess[0].available_inv rescue nil
+      product_hash["status"] = product.status
+      product_hash["location"] = product.product_inventory_warehousess[0].location_primary rescue nil
+    end
+    render json: @result
+  end
+
+  def update_inventory_settings
+    @result= {}
+    setting = InventoryReportsSetting.last
+    if setting.blank?
+      setting = InventoryReportsSetting.new
+    else
+      setting = InventoryReportsSetting.last
+    end
+    params_setting = params["setting"]
+    setting.assign_attributes(auto_email_report: params_setting["auto_email_report"], end_time: params_setting["end_time"],report_email: params_setting["report_email"],send_email_on_mon: params_setting["send_email_on_mon"],send_email_on_tue:  params_setting["send_email_on_tue"],send_email_on_wed: params_setting["send_email_on_wed"],send_email_on_thurs: params_setting["send_email_on_thurs"], send_email_on_fri: params_setting["send_email_on_fri"], send_email_on_sat: params_setting["send_email_on_sat"], send_email_on_sun: params_setting["send_email_on_sun"], start_time: params_setting["start_time"], time_to_send_report_email: params_setting["time_to_send_report_email"])
+    setting.save
+    @result["status"] = true
+    render json: @result
+  end
+
+  def update_inventory_record
+    selected_ids = params["data"]["selected"]
+    products = Product.where("id in (?)", selected_ids)
+    products.update_all(is_inventory_product: true) if products.present?
+    @result["status"] = true
+    render json: @result
+  end
+
+  def remove_inventory_record
+    ids = params["selected_ids"]
+    products = Product.where("id in (?)", ids)
+    products.update_all(is_inventory_product: false) if products.present?
+    @result["status"] = true
+    render json: @result
+  end
+
+  def update_inventory_option
+    product_inv_setting = InventoryReportsSetting.last
+    begin
+      product_inv_setting.report_option = params["option"]
+      product_inv_setting.save
+    rescue 
+    end
+    render json: @result
+  end
+
+  def update_inventory_days_option
+    product_inv_setting = InventoryReportsSetting.last
+    begin
+      product_inv_setting.report_days_option =  params["option"].to_b
+      product_inv_setting.save
+    rescue 
+    end
+    render json: @result
+  end
+
   private
   def execute_groove_bulk_action(activity)
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)

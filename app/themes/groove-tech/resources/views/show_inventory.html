@@ -1,0 +1,212 @@
+<div class="">
+  <h3>Report Options</h3>
+    <div class="form-group col-sm-6">
+      <label class="control-label">Start Date</label>
+      <div class="container-fluid form-horizontal">
+        <div class="row">
+          <div class="control-label timepicker-label col-md-8" groov-click="update_inventory_report_settings()">
+            <p class=" input-group">
+              <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy"
+              ng-model="inventory_report_settings.start_time" is-open="inventory_record_time.start.open" ng-required="true" close-text="Close"/>
+              <span class="input-group-btn">
+                <button type="button" class="btn btn-default"
+                    ng-click="open_picker($event,inventory_record_time.start)"><i
+                    class="glyphicon glyphicon-calendar"></i></button>
+              </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="form-group col-sm-6">
+      <label class="control-label">End Date</label>
+      <div class="container-fluid form-horizontal">
+        <div class="row">
+          <div class="control-label timepicker-label col-md-8" groov-click="update_inventory_report_settings()">
+            <p class=" input-group">
+              <input type="text" class="form-control" datepicker-popup="dd-MMMM-yyyy" ng-model="inventory_report_settings.end_time"
+                is-open="inventory_record_time.end.open" ng-required="true" close-text="Close"/>
+                <span class="input-group-btn">
+                  <button type="button" class="btn btn-default"
+                      ng-click="open_picker($event,inventory_record_time.end)"><i
+                      class="glyphicon glyphicon-calendar"></i></button>
+                </span>
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="controls col-sm-3" dropdown>
+      <button class="dropdown-toggle groove-button">
+        <span ng-show="inventory_report_settings.report_option ==nil">Choose Products For Report</span>
+        <span ng-show="inventory_report_settings.report_option =='active'">Include all active products in Report</span>
+        <span ng-show="inventory_report_settings.report_option =='total'">Include all products in Report</span>
+        <span class="caret"></span>
+      </button>
+
+      <ul class="dropdown-menu" role="menu">
+        <li><a class="dropdown-toggle" ng-click="change_opt(nil)">Choose Products For Report</a></li>
+        <li><a class="dropdown-toggle" ng-click="change_opt('active')">Include all active products in Report</a></li>
+        <li><a class="dropdown-toggle" ng-click="change_opt('total')">Include all products in Report</a></li>
+      </ul>     
+    </div>
+
+    <div class="form-group" style="float: right;">
+      <div class="controls col-sm-12" ng-click="update_report_day_option(inventory_report_settings.report_days_option)">
+        <input type="radio" name="report_days_option" value=true ng-model="inventory_report_settings.report_days_option" ng-checked="inventory_report_settings.report_days_option == true"> Give totals day by day <br/>
+        <input type="radio" name="report_days_option" value=false ng-model="inventory_report_settings.report_days_option" ng-checked="inventory_report_settings.report_days_option == false"> Provide a total for the Date Range
+      </div>
+    </div>
+
+    <div class="col-sm-2 text-center col-sm-offset-4">
+      <button ng_click="download_csv()" class="modal-save-button">Download</button>
+    </div>
+
+    <div class="row">
+      <div class="col-xs-12">
+        <div groov-data-grid="newoptions" groov-list="inventory_report_products"></div>
+      </div>
+    </div>
+
+    <div class="form-group">
+      <div class="controls col-sm-8">
+        <button class="modal-save-button"
+                ng-click="product_inventory_record('kit',kit_products.list,products.single.basicinfo.id)">Add product
+        </button>
+        <button ng-click="remove_skus_from_kit(inventory_report_products)" class="modal-remove-button">Remove selected</button>
+      </div>
+    </div>
+    <span ng-show="products.single.unacknowledged_kit_activities.length > 0">
+        <h4>Activity Log</h4>
+        <div class="form-group">
+          <div class="controls col-sm-8"
+               ng-repeat="activity in products.single.unacknowledged_kit_activities">
+            <h5>{{ activity.created_at | date:'EEEE MM/dd/yyyy hh:mm:ss a'}}</h5>
+            {{ activity.activity_message}} - by: {{ activity.username }}
+          </div>
+        </div>
+    </span>
+    <br/><br/>
+
+
+  <div class="row">
+    <div class="col-xs-12">
+      <div class="form-horizontal general-settings-form">
+        <fieldset>
+          <div class="form-group">
+            <label class="control-label col-sm-3">Auto Email Export</label>
+
+            <div class="controls col-sm-2 form-inline">
+              <div toggle-switch ng-model="inventory_report_settings.auto_email_report"
+                   groov-click="update_inventory_report_settings()"></div>
+            </div>
+          </div>
+          <div ng-show="inventory_report_settings.auto_email_report=='1'">
+            <div class="form-group">
+              <div class="controls col-sm-offset-3 col-sm-5">
+                <input type="text" class="form-control input-style" ng-model="inventory_report_settings.report_email"
+                       placeholder="Email address" ng-blur="update_inventory_report_settings()"/>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3">Time for sending order export email</label>
+
+              <div class="controls col-sm-7">
+                <timepicker ng-model="inventory_report_settings.time_to_send_report_email" ng-change="show_button=true"
+                            show-meridian="false"></timepicker>
+              </div>
+
+            </div>
+            <div class="row" ng-show="show_button">
+              <div class="col-sm-4 col-sm-offset-3">
+                <button class="modal-save-button" ng-click="update_inventory_report_settings()">Update</button>
+              </div>
+            </div>
+            <div class="form-group">
+              <label class="control-label col-sm-3">Send Email On</label>
+
+              <div class="controls col-sm-9 form-inline">
+                <label class="checkbox col-sm-2">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_mon"
+                         ng-change="update_inventory_report_settings()"> mon
+                </label>
+                <label class="checkbox col-sm-2">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_tue"
+                         ng-change="update_inventory_report_settings()"> tue
+                </label>
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_wed"
+                         ng-change="update_inventory_report_settings()"> wed
+                </label>
+              </div>
+              <div class="controls col-sm-9 col-sm-offset-3 form-inline">
+                <label class="checkbox col-sm-2">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_thurs"
+                         ng-change="update_inventory_report_settings()"> thu
+                </label>
+                <label class="checkbox col-sm-2">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_fri"
+                         ng-change="update_inventory_report_settings()"> fri
+                </label>
+                <label class="checkbox col-sm-2">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_sat"
+                         ng-change="update_inventory_report_settings()"> sat
+                </label>
+                <label class="checkbox">
+                  <input type="checkbox" ng-model="inventory_report_settings.send_email_on_sun"
+                         ng-change="update_inventory_report_settings()"> sun
+                </label>
+              </div>
+            </div> 
+            <!-- <div class="form-group">
+              <label class="control-label col-sm-3">The email will include all orders scanned </label>
+
+              <div class="controls col-sm-3 well-main " dropdown>
+                <button class="dropdown-toggle groove-button label label-default" ng-class="{'label-success':export_settings.single.export_orders_option=='on_same_day',
+                                    'label-warning':export_settings.single.export_orders_option=='since_last_export'}">
+                  <span
+                    ng-show="export_settings.single.export_orders_option=='on_same_day'">on the same calendar day</span>
+                  <span
+                    ng-show="export_settings.single.export_orders_option=='since_last_export'">since the last export</span>
+                </button>
+                <ul class="dropdown-menu" role="menu">
+                  <li><a class="dropdown-toggle" ng-click="change_option('export_orders_option','on_same_day')">on the
+                    same calendar day</a></li>
+                  <li><a class="dropdown-toggle" ng-click="change_option('export_orders_option','since_last_export')">since
+                    the last export</a></li>
+                </ul>
+              </div>
+            </div> -->
+          </div>
+       <!--    <div class="form-group">
+            <label class="control-label col-sm-3">Order export type </label>
+
+            <div class="controls col-sm-3 form-inline" dropdown>
+              <button class="dropdown-toggle groove-button label label-default" ng-class="{
+                                'label-warning':export_settings.single.order_export_type=='order_with_serial_lot',
+                                'label-success':export_settings.single.order_export_type=='include_all'}">
+                <span
+                  ng-show="export_settings.single.order_export_type=='do_not_include'">Do not include order items</span>
+                <span ng-show="export_settings.single.order_export_type=='order_with_serial_lot'">Only include order items with Serial/Lot numbers</span>
+                <span ng-show="export_settings.single.order_export_type=='include_all'">Include all order items</span>
+              </button>
+              <ul class="dropdown-menu" role="menu">
+                <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','do_not_include')">Do not
+                  include order items</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','order_with_serial_lot')">Only
+                  include order items with Serial/Lot numbers</a></li>
+                <li><a class="dropdown-toggle" ng-click="change_option('order_export_type','include_all')">Include all
+                  order items</a></li>
+              </ul>
+            </div>
+          </div> -->
+          <!-- <div class="col-sm-2 text-center col-sm-offset-4">
+            <button ng_click="download_csv('exports')" class="modal-save-button">Export Now</button>
+          </div> -->
+        </fieldset>
+      </div>
+    </div>
+  </div>
+</div>
+
+
