@@ -170,7 +170,7 @@ class OrdersController < ApplicationController
     @result, @pick_list, @depends_pick_list  =
                             gp_orders_module.generate_pick_list( list_selected_orders )
 
-    file_name = 'pick_list_'+Time.now.strftime('%d_%b_%Y')
+    file_name = 'pick_list_'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%p')
     @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf"}
 
     respond_to do |format|
