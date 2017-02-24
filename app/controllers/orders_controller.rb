@@ -172,12 +172,18 @@ class OrdersController < ApplicationController
 
     file_name = 'pick_list_'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%p')
     @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf"}
-
+    render_pdf(file_name)
+    pdf_file = File.open(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"), 'rb')
+    base_file_name = File.basename(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"))
+    tenant_name = Apartment::Tenant.current
+    GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
+    pdf_file.close
+    @result["url"] = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
     respond_to do |format|
       format.html {}
       format.pdf {}
       format.json {
-        render_pdf(file_name) #defined in application helper
+        # render_pdf(file_name) #defined in application helper
         render json: @result
       }
     end

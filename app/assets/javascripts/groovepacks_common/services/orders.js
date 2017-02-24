@@ -163,7 +163,8 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     return $http.post(url, orders.setup)
       .success(function (response) {
         if (action == "pick_list") {
-          $window.open(response.data.pick_list_file_paths);
+          $window.open(response.url);
+          //$window.open(response.data.pick_list_file_paths);
         } else if (action == 'items_list') {
           if (response['status']) {
             if (response.filename != '') {
