@@ -30,6 +30,12 @@ groovepacks_admin_controllers.
         });
       };
 
+      $scope.update_zero_plan = function () {
+        tenants.single.update_zero_plan($scope.tenants).then(function () {
+          myscope.load_item($scope.tenants.current);
+        });
+      };
+
       $scope.allowinventory_pull_push_all = function () {
         tenants.single.update_access($scope.tenants).then(function () {
           myscope.load_item($scope.tenants.current);

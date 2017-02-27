@@ -228,6 +228,17 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
     }).error(notification.server_error);
   };
 
+  var update_zero_plan = function (tenants) {
+    return $http.post('/tenants/' + tenants.single.basicinfo.id + '/update_zero_subscription.json', tenants.single).success(function (data) {
+      if (data.status) {
+        notification.notify("Successfully Updated.", 1);
+      } else {
+        notification.notify(data.error_messages, 0);
+      }
+      ;
+    }).error(notification.server_error);
+  };
+
   var update_tenant_data = function (tenants) {
     return $http.put('/tenants/' + tenants.single.basicinfo.id + '.json', tenants.single).success(function (data) {
       if (data.status) {
@@ -311,7 +322,8 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
       popover: construct_popover,
       delete_summary: delete_import_summary,
       update_import_mode: update_import_mode,
-      update_fba: update_fba 
+      update_fba: update_fba,
+      update_zero_plan: update_zero_plan 
     }
   };
 }]);

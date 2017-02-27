@@ -87,8 +87,8 @@
         </div>
 
         <div class="col-md-12">
-          <div class="col-sm-4"></div>
-          <div class="col-sm-2">
+          <div class="col-sm-3"></div>
+          <div class="col-sm-1">
             <br/>
             <center>
               <div class='btn btn-lg' ng-class="{'btn-primary': tenants.single.basicinfo.is_modified == false, 'btn-info': tenants.single.basicinfo.is_modified == true}">{{tenants.single.basicinfo.initial_plan_id}}
@@ -102,14 +102,20 @@
                      class="form-control input-style"/>
             </div> -->
           </div>
-          <div class="col-sm-2">
+          <div class="col-sm-3">
             <br>
             <button ng-click="update_access_restrictions()" 
                     class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
             </button>
           </div>
+          <div class="col-sm-3">
+            <br>
+            <button ng-click="update_zero_plan()" 
+                    class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update Zero Subscription Plan
+            </button>
+          </div>
         </div>
-        <div class="col-sm-4"></div>
+        <div class="col-sm-2"></div>
       </div>
       <div style="clear:both;"><br/></div>
       

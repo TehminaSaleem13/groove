@@ -64,6 +64,19 @@ module TenantsHelper
         result = helper.update_subscription_plan(@tenant, params) if result['status'] == true
       when 'update_node'
         result = helper.update_node(@tenant, params)
+      when 'update_zero_subscription'
+        subsc = @tenant.subscription
+        new_plan = "#{@tenant.name}-zero-plan"
+        if !subsc.subscription_plan_id.include?("-zero-plan")
+          Stripe::Plan.create(amount: 0, interval: "month", name: new_plan.gsub("-", " ").capitalize, currency: "usd", id: new_plan, trial_period_days: 0) rescue nil
+          stripe_subsc = Stripe::Customer.retrieve(subsc.stripe_customer_id).subscriptions
+          stripe_subsc["data"][0].delete if stripe_subsc.data.present?
+          new_subsc = stripe_subsc.create(:plan => new_plan)
+          subsc.interval = "month"
+          subsc.customer_subscription_id =  new_subsc.id
+          subsc.subscription_plan_id = new_plan
+          subsc.save
+        end
       end
     else
       result['status'] = false
