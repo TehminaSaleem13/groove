@@ -108,7 +108,7 @@
                     class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
             </button>
           </div>
-          <div class="col-sm-3">
+          <div class="col-sm-3" ng-if="tenants.single.subscription_info.shopify_customer == false">
             <br>
             <button ng-click="update_zero_plan()" 
                     class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update Zero Subscription Plan

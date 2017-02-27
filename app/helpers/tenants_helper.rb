@@ -68,13 +68,21 @@ module TenantsHelper
         subsc = @tenant.subscription
         new_plan = "#{@tenant.name}-zero-plan"
         if !subsc.subscription_plan_id.include?("-zero-plan")
-          Stripe::Plan.create(amount: 0, interval: "month", name: new_plan.gsub("-", " ").capitalize, currency: "usd", id: new_plan, trial_period_days: 0) rescue nil
+          time_diff = DateTime.now.mjd - DateTime.parse(subsc.created_at.strftime("%d-%m-%Y")).mjd rescue 30
+          trial_period_days = time_diff >= 30 ? 0 : (30 - time_diff)
           stripe_subsc = Stripe::Customer.retrieve(subsc.stripe_customer_id).subscriptions
-          stripe_subsc["data"][0].delete if stripe_subsc.data.present?
-          new_subsc = stripe_subsc.create(:plan => new_plan)
+          if stripe_subsc.data.present?
+            subsc_data = stripe_subsc["data"][0]
+            trial_end = subsc_data.trial_end
+            trial_period_days = Time.at(trial_end).to_datetime < Time.now ? 0 : DateTime.parse(Time.at(trial_end).strftime("%d-%m-%Y")).mjd - DateTime.now.mjd rescue 0 
+            subsc_data.delete 
+          end
+          Stripe::Plan.create(amount: 0, interval: "month", name: new_plan.gsub("-", " ").capitalize, currency: "usd", id: new_plan) rescue nil
+          new_subsc = stripe_subsc.create(:plan => new_plan, trial_period_days: trial_period_days)
           subsc.interval = "month"
           subsc.customer_subscription_id =  new_subsc.id
           subsc.subscription_plan_id = new_plan
+          subsc.amount = 0
           subsc.save
         end
       end
