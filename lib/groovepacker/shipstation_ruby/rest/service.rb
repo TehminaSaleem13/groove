@@ -55,7 +55,7 @@ module Groovepacker
             query = @query
             end_point = @endpoint
             current_tenant = Apartment::Tenant.current
-            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "islandwatersports", "gunmagwarehouse", "warmyourfloor"].include?(current_tenant)
+            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "islandwatersports", "gunmagwarehouse", "warmyourfloor", "icracked"].include?(current_tenant)
             sleep(2)
           else
             successful_response = true
