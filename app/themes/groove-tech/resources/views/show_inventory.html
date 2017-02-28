@@ -36,7 +36,15 @@
         </div>
       </div>
     </div>
-    <div class="controls col-sm-3" dropdown>
+
+    <div class="form-group">
+      <label class="form-group col-sm-4" style="top: 7px;">Recipient Email(s) comma separated </label>
+      <div class="controls col-sm-7">
+        <input type="text" class="form-control input-style" ng-model="inventory_report_settings.report_email"
+               placeholder="Email address" ng-blur="update_inventory_report_settings()"/>
+      </div>
+    </div>
+    <!-- <div class="controls col-sm-3" dropdown>
       <button class="dropdown-toggle groove-button">
         <span ng-show="inventory_report_settings.report_option ==nil">Choose Products For Report</span>
         <span ng-show="inventory_report_settings.report_option =='active'">Include all active products in Report</span>
@@ -49,18 +57,18 @@
         <li><a class="dropdown-toggle" ng-click="change_opt('active')">Include all active products in Report</a></li>
         <li><a class="dropdown-toggle" ng-click="change_opt('total')">Include all products in Report</a></li>
       </ul>     
-    </div>
+    </div> -->
 
-    <div class="form-group" style="float: right;">
+    <!-- <div class="form-group" style="float: right;">
       <div class="controls col-sm-12" ng-click="update_report_day_option(inventory_report_settings.report_days_option)">
         <input type="radio" name="report_days_option" value=true ng-model="inventory_report_settings.report_days_option" ng-checked="inventory_report_settings.report_days_option == true"> Give totals day by day <br/>
         <input type="radio" name="report_days_option" value=false ng-model="inventory_report_settings.report_days_option" ng-checked="inventory_report_settings.report_days_option == false"> Provide a total for the Date Range
       </div>
-    </div>
+    </div> -->
 
-    <div class="col-sm-2 text-center col-sm-offset-4">
+    <!-- <div class="col-sm-2 text-center col-sm-offset-4">
       <button ng_click="download_csv()" class="modal-save-button">Download</button>
-    </div>
+    </div> -->
 
     <div class="row">
       <div class="col-xs-12">
@@ -102,12 +110,12 @@
             </div>
           </div>
           <div ng-show="inventory_report_settings.auto_email_report=='1'">
-            <div class="form-group">
+            <!-- <div class="form-group">
               <div class="controls col-sm-offset-3 col-sm-5">
                 <input type="text" class="form-control input-style" ng-model="inventory_report_settings.report_email"
                        placeholder="Email address" ng-blur="update_inventory_report_settings()"/>
               </div>
-            </div>
+            </div> -->
             <div class="form-group">
               <label class="control-label col-sm-3">Time for sending order export email</label>
 

@@ -21,8 +21,10 @@
                       items-per-page="paginate.items_per_page" class="pagination-sm" rotate="false"></pagination>
         </div>
       </div>
+
       <div class="row top-buffer">
-        <div class="col-lg-offset-10 col-lg-2 col-md-offset-9 col-md-3">
+        <div  style="display: flex; float: right;">
+          <input class="col-md-6" type="text" autofocus="autofocus" ng-model="products.setup.report_name" class="form-control search-box"/>&nbsp;
           <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
           <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
         </div>

@@ -445,43 +445,43 @@ groovepacks_controllers.
           selectable: true,
           all_fields: {
             name: {
-              name: "Item Name",
+              name: "Report Name",
               col_length: 25,
               editable: false,
               transclude: '<a href="" ng-click="options.editable.functions.name(row, event)" tooltip="{{row.name}}">{{row.name | cut:false:25}}</a>'
             },
             sku: {
-              name: "Item SKU",
+              name: "Number of items",
               col_length: 15,
               editable: false
             },
             category: {
-              name: "Category",
+              name: "Scheduled",
               col_length: 5
             },
             available_inv: {
-              name: "Available Inv",
+              name: "Report Type",
               editable: false,
               col_length: 5
             },
-            qoh: {
-              name: "QTY On Hand",
-              col_length: 5,
-              editable: false
-            },
-            status: {
-              name: "Status",
-              col_length: 5,
-              transclude: "<span class='label label-default' ng-class=\"{" +
-              "'label-success': row.product_status == 'active', " +
-              "'label-info': row.product_status == 'new' }\">" +
-              "{{row.product_status}}</span>",
-              editable: false
-            },
-            location1: {
-              name: "location 1",
-              col_length: 5
-            },
+            // qoh: {
+            //   name: "QTY On Hand",
+            //   col_length: 5,
+            //   editable: false
+            // },
+            // status: {
+            //   name: "Status",
+            //   col_length: 5,
+            //   transclude: "<span class='label label-default' ng-class=\"{" +
+            //   "'label-success': row.product_status == 'active', " +
+            //   "'label-info': row.product_status == 'new' }\">" +
+            //   "{{row.product_status}}</span>",
+            //   editable: false
+            // },
+            // location1: {
+            //   name: "location 1",
+            //   col_length: 5
+            // },
           }
         };
 
@@ -513,6 +513,33 @@ groovepacks_controllers.
       };
 
       $scope.product_inventory_record = function (type, exceptions, id) {
+        var inventory_products_modal = $modal.open({
+          templateUrl: '/assets/views/modals/product/inventory_record.html',
+          controller: 'inventoryRecordModal',
+          size: 'lg',
+          resolve: {
+            type: function () {
+              return type
+            },
+            exceptions: function () {
+              return exceptions
+            },
+            id: function () {
+              return id;
+            }
+          }
+        });
+        inventory_products_modal.result.then(function (data) {
+          myscope.add_inventory_product(data);
+          $http.get('/products/get_inventory_setting.json').success(function(data){
+            $scope.inventory_report_settings = data.setting;
+            $scope.inventory_report_products = data.products;
+          });   
+          // scope.alias_added = true;
+        });
+      };
+
+      $scope.update_inventory_record = function (type, exceptions, id) {
         var inventory_products_modal = $modal.open({
           templateUrl: '/assets/views/modals/product/inventory_record.html',
           controller: 'inventoryRecordModal',
