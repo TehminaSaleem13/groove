@@ -416,7 +416,7 @@ groovepacks_controllers.
               name: "Primary Image",
               col_length: 15,
               editable: false,
-              transclude: "<div ng-show=\"row.productinfo.is_intangible == false\" " +
+              transclude: "<div ng-show=\"row.productinfo.is_intangible == false || row.productinfo.is_intangible == nil\" " +
               "ng-click=\"options.editable.functions.name(row,$event)\"" +
               " class=\"pointer single-image\"><img class=\"img-responsive\" ng-src=\"{{row.image}}\" /></div>" +
               "<div ng-show=\"row.productinfo.is_intangible\" " +
