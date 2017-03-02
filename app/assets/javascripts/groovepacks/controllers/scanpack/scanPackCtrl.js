@@ -146,11 +146,18 @@ groovepacks_controllers.
         }
         $window.increment_id = $scope.data.order.increment_id;
         try{
-         qty_remaining = $scope.data.order.next_item.qty_remaining  
+          obj = $scope.data.order.unscanned_items;
+          angular.forEach(obj, function(value, key) {
+            angular.forEach(value.barcodes, function(v, k) {
+              if (v.barcode == $scope.data.input){
+                scope.qty_remaining = value.qty_remaining;
+              }
+            });
+          });
         }catch(e){
-          qty_remaining = null
+          scope.qty_remaining = null
         }
-        scanPack.input($scope.data.input, $scope.current_state, id, qty_remaining).success($scope.handle_scan_return);
+        scanPack.input($scope.data.input, $scope.current_state, id, scope.qty_remaining).success($scope.handle_scan_return);
           // scanPack.update_chrome_tab();
         // var barcodes = [];
         // if (typeof $scope.data.order.next_item != "undefined" ){
