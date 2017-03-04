@@ -153,6 +153,7 @@ Groovepacks::Application.configure do
   # ENV["GROOV_ANALYTIC_URL"] = "https://api.lockingaccelerator.com"
 
   ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com"
+  ENV["SHIPSTATION_IMPORT_FAILURE_EMAILS"] = "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, kcpatel006@gmail.com, jared.jones@shipstation.com"
   ENV["PRODUCTS_IMPORT_EMAILS"] = "svisamsetty@navaratan.com, kcpatel006@gmail.com, groovepacker@gmail.com"
   ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"] = "kcpatel006@gmail.com"
   ENV["UNSCANNED_ORDERS_EMAILS"] = "kcpatel006@gmail.com, groovepacker@gmail.com"
