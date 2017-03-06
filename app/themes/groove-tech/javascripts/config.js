@@ -32,7 +32,7 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'ho
 
       .state('products', {url: '/products', templateUrl: '/assets/views/showproducts.html', controller: 'productsCtrl'})
       .state('products.type', {
-        url: '/{type:product|kit}',
+        url: '/{type:product|kit|inventory}',
         params: {type: 'product'},
         template: "<div ui-view></div>",
         abstract: true
@@ -50,7 +50,7 @@ groovepacks.config(['$stateProvider', '$urlRouterProvider', '$httpProvider', 'ho
         controller: 'productsSingleCtrl'
       })
       .state('products.inventory_report', {
-        url: '/inventory_report', params: {inventory: {value: true}}, templateUrl: '/assets/views/show_inventory.html', controller: 'productsCtrl'
+        url: '/inventory_report', params: {inventory: {value: true}, type: 'inventory'}, templateUrl: '/assets/views/show_inventory.html', controller: 'productsCtrl'
       })
 
       .state('scanpack', {

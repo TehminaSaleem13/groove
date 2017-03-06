@@ -95,6 +95,7 @@ class SettingsController < ApplicationController
     @result['notice_messages'] = []
     @result['data'] = {}
     @result['scheduled_import_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).scheduled_import_toggle rescue false
+    @result['inventory_report_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
     @result['current_time'] = (Time.current + GeneralSetting.all.first.try(:time_zone).to_i ).strftime('%I:%M %p')

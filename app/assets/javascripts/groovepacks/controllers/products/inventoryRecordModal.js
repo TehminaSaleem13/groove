@@ -1,10 +1,13 @@
-groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'exceptions', 'id', '$timeout', '$modalInstance', '$q', 'notification', 'products',
-  function (scope, type, exceptions, id, $timeout, $modalInstance, $q, notification, products) {
+groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'exceptions', 'id', '$timeout', '$modalInstance', '$q', 'notification', 'products', 'selected_report',
+  function (scope, type, exceptions, id, $timeout, $modalInstance, $q, notification, products, selected_report) {
 
     var myscope = {};
     //Definitions
-    scope.ok = function () {
-      $modalInstance.close({selected: scope.selected_products});
+    scope.ok = function (flag) {
+      if (flag == false){
+        scope.selected_products = []
+      }
+      $modalInstance.close({selected: scope.selected_products, report_name: scope.products.setup.report_name});
     };
     scope.cancel = function () {
       $modalInstance.dismiss();
@@ -24,17 +27,10 @@ groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'e
 
     scope.add_alias_product = function (product) {
       product.checked = !product.checked;
-      if (scope.is_kit || scope.is_order || type == 'master_alias') {
-        if (product.checked) {
-          scope.selected_products.push(product.id);
-        } else {
-          scope.selected_products.splice(scope.selected_products.indexOf(product.id), 1);
-        }
+      if (product.checked) {
+        scope.selected_products.push(product.id);
       } else {
-        if (confirm("Are you sure? This can not be undone!")) {
-          scope.selected_products.push(product.id);
-          scope.ok();
-        }
+        scope.selected_products.splice(scope.selected_products.indexOf(product.id), 1);
       }
     };
 
@@ -97,7 +93,13 @@ groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'e
       scope.custom_identifier = Math.floor(Math.random() * 1000);
       scope.is_kit = false;
       scope.is_order = false;
-      scope.selected_products = [];
+      if (selected_report != undefined){
+        scope.selected_products = selected_report.selected_id;
+        scope.products.setup.report_name = selected_report.name;
+      } else {
+        scope.selected_products = [];
+      }
+      
       scope.load_disabled = false;
 
       //Private properties

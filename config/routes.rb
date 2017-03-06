@@ -129,7 +129,7 @@ Groovepacks::Application.routes.draw do
       put 'update_inventory_record'
       put 'remove_inventory_record'
       post 'update_inventory_option'
-      post 'update_inventory_days_option'
+      post 'generate_product_inventory_report'
     end
     member do
       get 'generate_barcode_slip'

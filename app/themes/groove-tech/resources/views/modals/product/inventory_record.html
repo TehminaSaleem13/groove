@@ -21,12 +21,20 @@
                       items-per-page="paginate.items_per_page" class="pagination-sm" rotate="false"></pagination>
         </div>
       </div>
-
       <div class="row top-buffer">
-        <div  style="display: flex; float: right;">
-          <input class="col-md-6" type="text" autofocus="autofocus" ng-model="products.setup.report_name" class="form-control search-box"/>&nbsp;
-          <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>
-          <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+        <div class="col-md-12">
+          <div ng-click="ok(false)" style="cursor: pointer;" class="col-md-4">
+            <i class="fa fa-eraser" aria-hidden="true"></i>
+            <label>Clear Selection</label> 
+          </div>
+          <div style="display: flex; float: right;" class="col-md-6">
+            <label >Save Report As: &nbsp;&nbsp;</label>
+            <div style="display: flex;">
+              <input class="col-md-4 form-control search-box ng-pristine ng-valid" type="text" autofocus="autofocus" ng-model="products.setup.report_name" class="form-control search-box"/>&nbsp;&nbsp;
+              <button ng-click="ok(true)" class="modal-save-button" translate>modal.save_close</button>&nbsp;&nbsp;
+              <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+            </div>
+          </div>
         </div>
       </div>
       <div class="row">

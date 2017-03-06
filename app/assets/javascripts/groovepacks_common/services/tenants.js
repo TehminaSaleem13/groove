@@ -278,7 +278,9 @@ groovepacks_services.factory('tenants', ['$http', 'notification', 'editable', '$
   }
 
   var update_import_mode = function(tenant){
-    $http.get('tenants/update_import_mode.json?tenant=' + tenant); 
+    scheduled_import_toggle = tenant.scheduled_import_toggle
+    inventory_report_toggle = tenant.inventory_report_toggle
+    $http.get('tenants/update_import_mode.json?scheduled_import_toggle='+ scheduled_import_toggle + '&inventory_report_toggle='+ inventory_report_toggle +'&tenant='+tenant.id); 
   }
 
   var update_fba = function(tenant_id){
