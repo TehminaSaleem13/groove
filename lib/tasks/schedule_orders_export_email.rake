@@ -10,6 +10,11 @@ namespace :doo do
         Apartment::Tenant.switch tenant.name
         export_settings = ExportSetting.all.first
         failed_tenant << tenant.name if Delayed::Job.where("queue LIKE ? and created_at >= ?", "%order_export_email_scheduled_#{tenant.name}%", DateTime.now.strftime('%F')).blank? && export_settings.present? && export_settings.auto_email_export? && export_settings.order_export_email.present? && export_settings.should_export_orders(DateTime.now + 1.day)
+        if failed_tenant.present?
+          failed_tenant.each do |tenant|
+            import_orders_obj.reschedule_job('export_order', tenant)
+          end
+        end
       rescue
       end
     end
