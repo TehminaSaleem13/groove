@@ -362,7 +362,9 @@ class ProductsController < ApplicationController
   def check_broken_image(images)
     @result = true
     images.each do |image|
-      if Net::HTTP.get_response(URI.parse(image)).code == "200"
+      response = Net::HTTP.get_response(URI.parse(image))
+      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
+      if response.code == "200"
         @result = false 
         return @result
       end
