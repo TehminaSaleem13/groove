@@ -20,8 +20,12 @@ module Groovepacker
             fetch_product(item)
             if @shopify_product.present?
               variant = @shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
-              variant["title"] = item["name"]
-              product = create_product_from_variant(variant, @shopify_product)
+              begin
+                variant["title"] = item["name"] 
+                product = create_product_from_variant(variant, @shopify_product)
+              rescue
+                product = nil
+              end
             end
 
             return product

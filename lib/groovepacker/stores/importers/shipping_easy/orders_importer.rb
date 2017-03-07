@@ -14,9 +14,10 @@ module Groovepacker
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)
             return @result if response["orders"].nil?
-            @result[:total_imported] = response["orders"].length
+            @result[:total_imported] = response["orders"].uniq.length
             update_import_item_obj_values
-            response["orders"].each do |order|
+            uniq_response = response["orders"].uniq rescue []
+            uniq_response.each do |order|
               order_copy = order["order"]
               order = order_copy unless order_copy.blank? 
               @order_to_update = false 
@@ -37,8 +38,7 @@ module Groovepacker
               update_current_import_item(order)
               
               shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
-              shiping_easy_order ||= Order.new
-
+              shiping_easy_order = Order.new if shiping_easy_order.blank?
               return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
               @order_to_update = true if shiping_easy_order.persisted?
               shiping_easy_order.order_items.destroy_all
@@ -51,7 +51,7 @@ module Groovepacker
             end
 
             def create_alias_and_product(order_item, item)
-              s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
+              s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present? && order_item.try(:product).try(:product_images).blank?
               sku = item["product"]["sku"]
               alias_skus = item["product"]["sku_aliases"]
               store_product_id =  item["ext_line_item_id"]
@@ -140,8 +140,8 @@ module Groovepacker
                   import_item_count
                 end
               end
-              
               return unless shiping_easy_order.save
+              shiping_easy_order = Order.find_by_increment_id(shiping_easy_order.increment_id)
               add_order_activity(shiping_easy_order)
               shiping_easy_order.set_order_status
             end
@@ -158,8 +158,10 @@ module Groovepacker
               order_item_product = find_or_create_order_item_product(item, @credential.store)
               order_item.product = order_item_product
               begin
-                s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
-                order_item.product.product_images.create(image: s3_image_url) if s3_image_url.present?
+                if order_item.product.product_images.blank?
+                  s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
+                  order_item.product.product_images.create(image: s3_image_url) if s3_image_url.present?
+                end
               rescue
               end
               make_product_intangible(order_item.product)

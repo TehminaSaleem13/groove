@@ -55,7 +55,7 @@ module Groovepacker
             query = @query
             end_point = @endpoint
             current_tenant = Apartment::Tenant.current
-            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "islandwatersports", "gunmagwarehouse", "warmyourfloor"].include?(current_tenant)
+            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "islandwatersports", "gunmagwarehouse", "warmyourfloor", "icracked"].include?(current_tenant)
             sleep(2)
           else
             successful_response = true
@@ -88,7 +88,13 @@ module Groovepacker
           # fail Exception, JSON.parse(response.inspect) if response.code == 401
           # fail Exception, 'Authorization with Shipstation store failed.' \
           #   ' Please check your API credentials' if response.code == 401
-          fail Exception, response.inspect if response.code == 500
+          if response.code == 500
+            query = @query
+            end_point = @endpoint
+            current_tenant = Apartment::Tenant.current
+            ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if ["morgan", "icracked", "toktokcase", "gunmagwarehouse"].include?(current_tenant)
+            fail Exception, response.inspect 
+          end
           fail Exception, 'Please contact support team. Gateway timeout error'\
             ' from Shipstation API.' if response.code == 504
         end 

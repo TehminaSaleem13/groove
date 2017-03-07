@@ -75,8 +75,10 @@ module Groovepacker
                 order_item = import_order_item(order_item, item)
                 @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
                 product = shopify_context.import_shopify_single_product(item)
-                order_item.product = product
-                shopify_order.order_items << order_item
+                if product.present?
+                  order_item.product = product 
+                  shopify_order.order_items << order_item
+                end
               end
               shopify_order.save
               return shopify_order

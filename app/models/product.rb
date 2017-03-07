@@ -392,7 +392,7 @@ class Product < ActiveRecord::Base
   def primary_sku_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds
-    product_skus.sort { |a, b| a.order <=> b.order }.first
+    product_skus.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
   end
 
   def primary_sku=(value)
@@ -411,7 +411,7 @@ class Product < ActiveRecord::Base
   def primary_image_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds
-    product_images.sort { |a, b| a.order <=> b.order }.first
+    product_images.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
   end
 
   def primary_image=(value)
@@ -430,7 +430,7 @@ class Product < ActiveRecord::Base
   def primary_barcode_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds
-    product_barcodes.sort { |a, b| a.order <=> b.order }.first
+    product_barcodes.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
   end
 
   def base_product
