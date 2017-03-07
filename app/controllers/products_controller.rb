@@ -397,7 +397,9 @@ class ProductsController < ApplicationController
   end
 
   def get_inventory_setting
-    @result["setting"] = JSON.parse(InventoryReportsSetting.last.to_json)
+    setting = InventoryReportsSetting.last
+    setting = setting.blank? ? InventoryReportsSetting.create : setting
+    @result["setting"] = JSON.parse(setting.to_json)
     @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
     @result["products"] = {}
     reports = ProductInventoryReport.all
