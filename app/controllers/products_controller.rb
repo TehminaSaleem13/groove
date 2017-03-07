@@ -396,6 +396,85 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  def get_inventory_setting
+    @result["setting"] = JSON.parse(InventoryReportsSetting.last.to_json)
+    @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
+    @result["products"] = {}
+    reports = ProductInventoryReport.all
+    reports.each_with_index do |report, index|
+    @result["products"][index] = {"id" => report.id, "name" => report.name,
+                                  "no_of_items" => get_item_count(report),
+                                  "scheduled" => report.scheduled, "type" => report.type,
+                                  "selected_id" => report.products.map(&:id),
+                                  "is_locked" => report.is_locked }
+    end 
+    render json: @result
+  end
+
+  def get_item_count(report)
+    if report.name == "All_Products_Report"
+      count = Product.count
+    elsif report.name == "All_Active_Products_Report"
+      count = Product.where(status: "active").count
+    else
+      count = report.products.count
+    end
+    count
+  end
+
+  def update_inventory_settings
+    @result= {}
+    setting = InventoryReportsSetting.last
+    setting = setting.blank? ? InventoryReportsSetting.new : InventoryReportsSetting.last
+    atrs = params["setting"].except("updated_at", "created_at", "id")
+    setting.assign_attributes(atrs)
+    setting.save
+    @result["status"] = true
+    render json: @result
+  end
+
+  def update_inventory_record
+    data = params["data"]
+    selected_ids = data["selected"] || data["selected_id"]
+    products = Product.where("id in (?)", selected_ids) 
+    id = data["report_id"] || params["data"]["id"]
+    report = id.present? ? ProductInventoryReport.find(id) : ProductInventoryReport.new
+    report_name = data["report_name"] || data["name"]
+    report.name = report_name.present? ? report_name : "Default Report"
+    report.scheduled = data["scheduled"] 
+    report.type = data["type"] 
+    report.products = products
+    report.save
+    @result["status"] = true
+    render json: @result
+  end
+
+  def remove_inventory_record
+    ids = params["selected_ids"]
+    inventory_reports = ProductInventoryReport.where("id in (?)", ids)
+    if inventory_reports.present?
+      inventory_reports.each { |report| report.products.destroy_all}
+      inventory_reports.destroy_all 
+    end
+    @result["status"] = true
+    render json: @result
+  end
+
+  def update_inventory_option
+    product_inv_setting = InventoryReportsSetting.last
+    begin
+      product_inv_setting.report_days_option = params["option"]
+      product_inv_setting.save
+    rescue 
+    end
+    render json: @result
+  end
+
+  def generate_product_inventory_report
+    generate_report(params["report_ids"])
+    render json: @result
+  end
+
   private
   def execute_groove_bulk_action(activity)
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)

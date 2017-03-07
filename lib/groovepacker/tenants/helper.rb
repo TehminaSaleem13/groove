@@ -371,6 +371,7 @@ module Groovepacker
         tenant_hash['url'] = tenant.name + '.groovepacker.com'
         tenant_hash['is_modified'] = tenant.is_modified
         tenant_hash['scheduled_import_toggle'] = tenant.scheduled_import_toggle
+        tenant_hash['inventory_report_toggle'] = tenant.reload.inventory_report_toggle
       end
 
       def retrieve_plan_data(tenant_name, tenant_hash)
