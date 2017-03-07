@@ -1,6 +1,6 @@
 namespace :doo do
   desc "Schedule orders export email"
-  task :schedule_inventory_report => :environment do
+  task :create_default_inventory_report => :environment do
     failed_tenant = []
     tenants = Tenant.order(:name) rescue Tenant.all
     tenants.each do |tenant|
