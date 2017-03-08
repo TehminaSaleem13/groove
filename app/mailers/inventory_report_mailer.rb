@@ -1,12 +1,12 @@
 class InventoryReportMailer < ActionMailer::Base
-    default from: "app@groovepacker.com"
+	  default from: "app@groovepacker.com"
 
-    def manual_inventory_report(id)
-    	product_inv_setting = InventoryReportsSetting.last
-      selected_reports = ProductInventoryReport.where("id in (?)", id)
-	    start_time = product_inv_setting.start_time.strftime("%m-%d-%Y")
-	    end_time = product_inv_setting.end_time.strftime("%m-%d-%Y")
-	    headers = "DATE_RANGE,SKU,PRODUCT_NAME,QTY_SCANNED_IN_RANGE, QTY_SCANNED_LAST_90, CURRENT_QOH, PROJECTED_DAYS_REMAINING, CATEGORY, LOCATION1, LOCATION2, LOCATION3\n"
+	  def manual_inventory_report(id)
+	  	product_inv_setting = InventoryReportsSetting.last
+	    selected_reports = ProductInventoryReport.where("id in (?)", id)
+	    start_time = product_inv_setting.start_time.strftime("%m-%d-%Y") rescue nil
+	    end_time = product_inv_setting.end_time.strftime("%m-%d-%Y") rescue nil
+	    headers = "DATE_RANGE,SKU,PRODUCT_NAME,QTY_SCANNED_IN_RANGE, QTY_SCANNED_LAST_90, CURRENT_AVAILABLE,CURRENT_QOH, PROJECTED_DAYS_REMAINING, CATEGORY, LOCATION1, LOCATION2, LOCATION3\n"
 	    selected_reports.each do |report|	
 	    	products = get_products(report)
 	    	if !report.type
@@ -19,7 +19,10 @@ class InventoryReportMailer < ActionMailer::Base
 				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",orders.map(&:id), Time.now-90.days)
 			      	csv << headers if index.eql? 0 
 			      	row = ""
-			      	row << "#{start_time} to #{end_time},#{pro.primary_sku},#{pro.name.gsub(',',' ')},#{orders.count},#{orders_90.count},#{inv.map(&:available_inv).sum}, 0,#{pro.product_cats[0].try(:category)},#{inv[0].try(:location_primary)},#{inv[0].try(:location_secondary)},#{inv[0].try(:location_tertiary)}\n"
+			      	available_inv = inv.map(&:available_inv).sum
+			      	quantity_on_hand = inv.map(&:quantity_on_hand).sum
+			      	projected_days_remaining = orders_90.count.to_f/(quantity_on_hand.to_f/90) rescue 0
+			      	row << "#{start_time} to #{end_time},#{pro.primary_sku},#{pro.name.gsub(',',' ')},#{orders.count},#{orders_90.count},#{available_inv},#{quantity_on_hand},#{projected_days_remaining},#{pro.product_cats[0].try(:category)},#{inv[0].try(:location_primary)},#{inv[0].try(:location_secondary)},#{inv[0].try(:location_tertiary)}\n"
 			      	csv << row 
 			      end
 			    end
@@ -32,18 +35,18 @@ class InventoryReportMailer < ActionMailer::Base
 		    	auto_inventory_report(flag, report)
 		    end
 	    end
-    end
+	  end
 
-    def auto_inventory_report(flag, report)
-    	reports = report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
-    	@product_inv_setting = InventoryReportsSetting.last
-    	headers = "DATE_FOR_DAILY_TOTAL,SKU,PRODUCT_NAME,DAILY_SKU_QTY\n"
-    	reports.each do |report|
-    		file_name = "sku_per_day_report_#{Time.now.strftime("%y%m%d_%H%M%S")}.csv"
-    		products = get_products(report)
-    		File.open("public/#{file_name}", 'a+', {force_quotes: true}) do |csv|	
-    			csv << headers 
-    			days = get_days(flag)
+	  def auto_inventory_report(flag, report)
+	  	reports = report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
+	  	@product_inv_setting = InventoryReportsSetting.last
+	  	headers = "DATE_FOR_DAILY_TOTAL,SKU,PRODUCT_NAME,DAILY_SKU_QTY\n"
+	  	reports.each do |report|
+	  		file_name = "sku_per_day_report_#{Time.now.strftime("%y%m%d_%H%M%S")}.csv"
+	  		products = get_products(report)
+	  		File.open("public/#{file_name}", 'a+', {force_quotes: true}) do |csv|	
+	  			csv << headers 
+	  			days = get_days(flag)
 		    	days.times do |i| 	
 		    		products.each do |pro|
 		    			orders = pro.order_items.map(&:order)
@@ -64,27 +67,27 @@ class InventoryReportMailer < ActionMailer::Base
 	     	subject = "Sku Per Day Report"
 	      email = @product_inv_setting.report_email
 	      mail to: email, subject: subject
-    	end
-    end
+	  	end
+	  end
 
-    def get_days(flag)
-    	if flag==true
+	  def get_days(flag)
+	  	if flag==true
 				days = (@product_inv_setting.end_time.to_date - @product_inv_setting.start_time.to_date).to_i
 				days = 0 if days<0 			
 			else
 				days = @product_inv_setting.report_days_option
 			end
 			days
-    end
+	  end
 
-    def get_products(report)
-    	if (report.name == "All_Products_Report") && report.is_locked
-    		products = Product.all
-    	elsif  (report.name == "All_Active_Products_Report") && report.is_locked
-    		products = Product.where(status: "active")
-    	else
-      	products = report.products
-      end
-      products
-    end
+	  def get_products(report)
+	  	if (report.name == "All_Products_Report") && report.is_locked
+	  		products = Product.all
+	  	elsif  (report.name == "All_Active_Products_Report") && report.is_locked
+	  		products = Product.where(status: "active")
+	  	else
+	    	products = report.products
+	    end
+	    products
+	  end
 end
