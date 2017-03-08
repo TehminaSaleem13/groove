@@ -100,7 +100,7 @@ gem 'ng-rails-csrf'
 gem 'doorkeeper'
 gem 'oauth'
 gem 'rubocop', require: false
-gem 'shipping_easy'
+gem 'shipping_easy', '0.7.0'
 gem 'delayed_job_recurring'
 gem 'aws_cf_signer'
 gem 'aws-sdk', '~> 2'
