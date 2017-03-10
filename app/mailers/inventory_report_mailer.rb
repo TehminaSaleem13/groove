@@ -15,14 +15,15 @@ class InventoryReportMailer < ActionMailer::Base
 			    	products.each_with_index do |pro, index|			    		
 				    	orders = pro.order_items.map(&:order)
 				    	inv = pro.product_inventory_warehousess
-							orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), @product_inv_setting.try(:start_time).try(:beginning_of_day), @product_inv_setting.try(:end_time).try(:end_of_day))
-				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",orders.map(&:id), Time.now-90.days)
+				    	orders_id = orders.map(&:id) rescue [] 
+							orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders_id, @product_inv_setting.try(:start_time).try(:beginning_of_day), @product_inv_setting.try(:end_time).try(:end_of_day)) rescue 0
+				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",orders_id, Time.now-90.days)  rescue 0
 			      	csv << headers if index.eql? 0 
 			      	row = ""
-			      	available_inv = inv.map(&:available_inv).sum
-			      	quantity_on_hand = inv.map(&:quantity_on_hand).sum
+			      	available_inv = inv.map(&:available_inv).sum rescue 0
+			      	quantity_on_hand = inv.map(&:quantity_on_hand).sum rescue 0
 			      	projected_days_remaining = orders_90.count.to_f/(quantity_on_hand.to_f/90) rescue 0
-			      	row << "#{start_time} to #{end_time},#{pro.primary_sku},#{pro.name.gsub(',',' ')},#{orders.count},#{orders_90.count},#{available_inv},#{quantity_on_hand},#{projected_days_remaining},#{pro.product_cats[0].try(:category)},#{inv[0].try(:location_primary)},#{inv[0].try(:location_secondary)},#{inv[0].try(:location_tertiary)}\n"
+			      	row << "#{start_time} to #{end_time},#{pro.primary_sku},#{pro.name.gsub(',',' ')},#{orders.try(:count)},#{orders_90.try(:count)},#{available_inv},#{quantity_on_hand},#{projected_days_remaining},#{pro.product_cats[0].try(:category)},#{inv[0].try(:location_primary)},#{inv[0].try(:location_secondary)},#{inv[0].try(:location_tertiary)}\n"
 			      	csv << row 
 			      end
 			    end
