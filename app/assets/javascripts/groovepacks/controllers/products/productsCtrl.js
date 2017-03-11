@@ -522,7 +522,7 @@ groovepacks_controllers.
         $http.get('/products/get_inventory_setting.json').success(function(data){
           $scope.inventory_report_settings = data.setting;
           $scope.inventory_report_products = data.products;
-          myscope.init();
+          // myscope.init();
         }); 
       }
 
@@ -688,13 +688,15 @@ groovepacks_controllers.
       $scope.remove_report = function (inv_products) {
         var selected_ids = [];
         //console.log(scope.products.single.productkitskus);
-        for (var i = 0; i < Object.keys(inv_products).length; i++) {
+        arr_length = Object.keys(inv_products).length;
+        for (var i = 0; i < arr_length; i++) {
           if (inv_products[i].checked && (inv_products[i].is_locked == false)) {
             selected_ids.push(inv_products[i].id);
           }
         }
         if (selected_ids.length != 0){
           products.list.remove_inventory_record(selected_ids).then(function (data) {
+            $scope.inventory_report_products = {};
             myscope.get_settings();
           });
         } else {
