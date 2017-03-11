@@ -195,7 +195,8 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_item_message = "Authorization with Shipstation store failed. Please check your API credentials"
       import_item.update_attributes(status: 'failed', message: import_item_message, import_error: import_item_message)
     else
-      import_item.update_attributes(status: 'failed', message: import_item_message, import_error: e)
+      error = ([e.message] << e.backtrace.first(3)).flatten.join(',') rescue e
+      import_item.update_attributes(status: 'failed', message: import_item_message, import_error: error)
       Rollbar.error(e, e.message)
     end
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
