@@ -75,7 +75,8 @@ class TenantsController < ApplicationController
     tenant = Tenant.find(params["tenant"])
     Apartment::Tenant.switch tenant.name
     setting = GeneralSetting.last
-    tenant.scheduled_import_toggle = !tenant.scheduled_import_toggle
+    tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
+    tenant.inventory_report_toggle = params["inventory_report_toggle"]
     tenant.save
     if tenant.scheduled_import_toggle == false
       setting.schedule_import_mode = "Daily"

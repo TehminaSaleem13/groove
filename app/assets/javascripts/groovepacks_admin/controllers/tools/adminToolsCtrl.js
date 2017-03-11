@@ -225,7 +225,7 @@ groovepacks_admin_controllers.
 
 
       myscope.update_import_mode = function(tenant){
-        tenant = tenant["id"]
+        // tenant = tenant["id"]
         tenants.single.update_import_mode(tenant);
       }
 
@@ -418,7 +418,12 @@ groovepacks_admin_controllers.
               name: "Import Option",
               editable: false,
               transclude: '<div toggle-switch ng-model=row["scheduled_import_toggle"] ng-change="options.editable.functions.update_import_mode(row)"></div>'
-            }
+            },
+            inventory_report_toggle: {
+              name: "Inventory Report Option",
+              editable: false,
+              transclude: '<div toggle-switch ng-model=row["inventory_report_toggle"] ng-change="options.editable.functions.update_import_mode(row)"></div>'
+            },
           }
         }; 
 

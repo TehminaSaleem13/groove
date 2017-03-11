@@ -76,4 +76,10 @@ module ProductsHelper
     g_setting.show_primary_bin_loc_in_barcodeslip ? "generate_barcode_slip_with_binloc.html.erb" 
                                                   : 'generate_barcode_slip.html.erb'
   end
+
+  def generate_report(ids)
+    tenant = Apartment::Tenant.current
+    InventoryReportMailer.delay.manual_inventory_report(ids, tenant)
+    # InventoryReportMailer.manual_inventory_report(ids).deliver
+  end
 end

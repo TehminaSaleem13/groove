@@ -113,6 +113,7 @@ Groovepacks::Application.routes.draw do
       get 'search'
       get 'import_images'
       get 'import_product_details'
+      get 'get_inventory_setting'
       post 'delete_product'
       post 'duplicate_product'
       post 'change_product_status'
@@ -124,6 +125,11 @@ Groovepacks::Application.routes.draw do
       post 'update_image'
       post 'update_intangibleness'
       post 'print_receiving_label'
+      put 'update_inventory_settings'
+      put 'update_inventory_record'
+      put 'remove_inventory_record'
+      post 'update_inventory_option'
+      post 'generate_product_inventory_report'
     end
     member do
       get 'generate_barcode_slip'

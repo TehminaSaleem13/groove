@@ -460,6 +460,61 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }).error(notification.server_error);
   };
 
+  var update_inventory_settings = function(settings){
+    return $http.put('/products/update_inventory_settings.json', {setting: settings}).success(function(data){
+      if (data.status) {
+        notification.notify("Successfully Updated.", 1);
+      }
+      else{
+        notification.notify("Some error occurred.", 0);
+      }
+    });
+  };
+
+  var update_record = function(data){
+    return $http.put('/products/update_inventory_record.json', {data: data}).success(function(res){
+      if (res.status) {
+        notification.notify("Successfully Added.", 1);
+      }
+      else{
+        notification.notify("Some error occurred.", 0);
+      }
+    });
+  }
+
+  var remove_inventory_record = function(selected_ids){
+    return $http.put('/products/remove_inventory_record.json', {selected_ids: selected_ids}).success(function(res){
+      if (res.status) {
+        notification.notify("Successfully Removed.", 1);
+      }
+      else{
+        notification.notify("Some error occurred.", 0);
+      }
+    });
+  }
+
+  var update_record_option = function(option){
+    $http.post('/products/update_inventory_option.json', {option: option}).success(function(res){
+      if (res.status) {
+        notification.notify("Successfully Updated.", 1);
+      }
+      else{
+        notification.notify("Some error occurred.", 0);
+      }
+    });
+  }
+
+  var generate_inventory_record = function(report_ids){
+    $http.post('/products/generate_product_inventory_report.json', {report_ids: report_ids}).success(function(res){
+      if (res.status) {
+        notification.notify("Your request has been queued", 1);
+      }
+      else{
+        notification.notify("Some error occurred.", 0);
+      }
+    });;    
+  }
+
   //Public facing API
   return {
     model: {
@@ -476,7 +531,10 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       update_node: update_list_node,
       generate: generate_csv,
       generate_broken_image: generate_broken_image, 
-      select_notification: select_notification
+      select_notification: select_notification,
+      update_record: update_record,
+      remove_inventory_record: remove_inventory_record,
+      generate_inventory_record: generate_inventory_record
     },
     single: {
       get: get_single,
@@ -490,6 +548,8 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       alias: set_alias,
       master_alias: master_alias,
       reset_obj: reset_single_obj,
+      update_inventory_settings: update_inventory_settings,
+      update_record_option: update_record_option,
       kit: {
         add: add_to_kit,
         remove: remove_from_kit

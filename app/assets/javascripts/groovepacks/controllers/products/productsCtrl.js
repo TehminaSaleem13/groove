@@ -239,6 +239,7 @@ groovepacks_controllers.
       };
 
       myscope.load_page_number = function (page) {
+        $scope.inventory_report_page = false;
         if (page > 0 && page <= Math.ceil($scope.gridOptions.paginate.total_items / $scope.gridOptions.paginate.items_per_page)) {
           if ($scope.products.setup.search == '') {
             var toParams = {};
@@ -281,13 +282,26 @@ groovepacks_controllers.
           //accordian inventory tab
           {open: false}
         ];
-
-
+        $scope.inventory_report_page = $state.params.inventory 
+        if ($state.params.inventory == true){
+          $scope.tabs = [{open: false},{open: false},{open: true}]
+          $state.params.filter = 'active'
+          $scope.page_type = $state.params.type 
+        }
         //Private properties
-
+        $scope.inventory_record_time = myscope.defaults()
         myscope.do_load_products = false;
         $scope._can_load_products = true;
 
+        $http.get('/products/get_inventory_setting.json').success(function(data){
+          $scope.inventory_report_toggle = data.inventory_report_toggle;
+          $scope.inventory_report_settings = data.setting;
+          $scope.inventory_report_products = data.products;
+          $scope.inventory_record_time.start.time = $scope.inventory_report_settings.start_time
+          $scope.inventory_record_time.end.time = $scope.inventory_report_settings.end_time 
+        });
+
+        // $scope.inventory_report_settings = products.single.get_inventory_setting();
         //Cache current page
         myscope.page_exists = -1;
         $scope.gridOptions = {
@@ -423,6 +437,42 @@ groovepacks_controllers.
           }
         };
 
+        $scope.newoptions = {
+          scrollbar: true,
+          no_of_lines: 1,
+          selectable: true,
+          functions: {
+            name: myscope.handle_click_func
+          },
+          all_fields: {
+            is_locked: {
+              name: "",
+              transclude: '<i tooltip="These default report can not be modified" class="fa fa-lock" aria-hidden="true" ng-if="row.is_locked==true"></i>'
+            },
+            name: {
+              name: "Report Name",
+              col_length: 25,
+              editable: false
+            },
+            no_of_items: {
+              name: "Number of items",
+              col_length: 15,
+              editable: false
+            },
+            scheduled: {
+              name: "Scheduled",
+              col_length: 5,
+              transclude: '<div toggle-switch ng-model="row.scheduled" ng-click="options.functions.name(row, event, undefined)"></div>'
+            },
+            type: {
+              name: "Report Type",
+              editable: false,
+              col_length: 5,
+              transclude: '<div class="controls dropdown"> <button class="dropdown-toggle groove-button"> {{row.type==true ? "Orders Containing SKU Report" : "Inventory Projection Report"}} <span class="caret"></span> </button> <ul class="dropdown-menu" role="menu"> <li><a class="dropdown-toggle" ng-click="options.functions.name(row, event, true)">Orders Containing SKU Report</a></li> <li><a class="dropdown-toggle" ng-click="options.functions.name(row, event, false)">Inventory Projection Report</a></li> </ul> </div>'
+            },
+          }
+        };
+
         myscope.initializing = true;
 
         //Register watchers
@@ -448,6 +498,75 @@ groovepacks_controllers.
           myscope.get_products();
         });
         //$("#product-search-query").focus();
+      };
+
+      $scope.product_inventory_record = function (type, exceptions, id) {
+        var inventory_products_modal = $modal.open({
+          templateUrl: '/assets/views/modals/product/inventory_record.html',
+          controller: 'inventoryRecordModal',
+          size: 'lg',
+          resolve: {
+            type: function () {return type},
+            exceptions: function () {return exceptions},
+            id: function () {return id;},
+            selected_report: function(){ return null;}  
+          }
+        });
+        inventory_products_modal.result.then(function (data) {
+          myscope.add_inventory_product(data);
+          myscope.get_settings();
+        });
+      };
+
+      myscope.get_settings =function(){
+        $http.get('/products/get_inventory_setting.json').success(function(data){
+          $scope.inventory_report_settings = data.setting;
+          $scope.inventory_report_products = data.products;
+          // myscope.init();
+        }); 
+      }
+
+      $scope.update_inventory_record = function (type, exceptions, id, selected_report) {
+        var selected_ids = [];
+        for (var i = 0; i < Object.keys(selected_report).length; i++) {
+          if (selected_report[i].checked && (selected_report[i].is_locked == false)) {
+            selected_ids.push(selected_report[i]);
+          }
+        }
+        first_selected_obj = selected_ids[0]
+        if (first_selected_obj != undefined) {
+          var inventory_products_modal = $modal.open({
+            templateUrl: '/assets/views/modals/product/inventory_record.html',
+            controller: 'inventoryRecordModal',
+            size: 'lg',
+            resolve: { 
+              type: function () { return type },
+              exceptions: function () { return exceptions },
+              id: function () { return id; },
+              selected_report: function(){ return first_selected_obj;},
+            }
+          });
+          inventory_products_modal.result.then(function (data) {
+            data["report_id"] = first_selected_obj.id
+            myscope.add_inventory_product(data);
+            myscope.get_settings();
+          });
+        } else {
+          $scope.notify('Please select unlock report to edit');
+        }
+      };
+
+      myscope.handle_click_func = function(row, event, type){
+        if (type != undefined){
+          row.type = type;
+        }
+        myscope.add_inventory_product(row);
+      };
+
+      myscope.add_inventory_product = function(data){
+        if (typeof data != "undefined") {
+          products.list.update_record(data);
+        }
       };
 
       myscope.get_products = function (page) {
@@ -511,6 +630,7 @@ groovepacks_controllers.
         if (typeof event != 'undefined') {
           event.stopPropagation();
         }
+
         var toState = 'products.type.filter.page.single';
         var toParams = {};
         for (var key in $state.params) {
@@ -534,6 +654,19 @@ groovepacks_controllers.
         }
       };
 
+      myscope.defaults = function () {
+        return {
+          start: {
+            open: false,
+            time: new Date()
+          },
+          end: {
+            open: false,
+            time: new Date()
+          }
+        }
+      };
+
       $scope.recount_or_receive_inventory = function () {
         $modal.open({
           templateUrl: '/assets/views/modals/product/inventory.html',
@@ -542,6 +675,69 @@ groovepacks_controllers.
         });
       };
 
+      $scope.inventory_report = function(){
+        $scope.inventory_report_page = true;
+      };
+
+      $scope.open_picker = function (event, object) {
+        event.preventDefault();
+        event.stopPropagation();
+        object.open = true;
+      };
+
+      $scope.remove_report = function (inv_products) {
+        var selected_ids = [];
+        //console.log(scope.products.single.productkitskus);
+        arr_length = Object.keys(inv_products).length;
+        for (var i = 0; i < arr_length; i++) {
+          if (inv_products[i].checked && (inv_products[i].is_locked == false)) {
+            selected_ids.push(inv_products[i].id);
+          }
+        }
+        if (selected_ids.length != 0){
+          products.list.remove_inventory_record(selected_ids).then(function (data) {
+            $scope.inventory_report_products = {};
+            myscope.get_settings();
+          });
+        } else {
+          $scope.notify('Please select unlock report to destroy');
+        }
+      };
+
+      $scope.generate_report = function(selected_report){
+        var selected_ids = [];
+        for (var i = 0; i < Object.keys(selected_report).length; i++) {
+          if (selected_report[i].checked) {
+            selected_ids.push(selected_report[i].id);
+          };
+        };
+        if (selected_ids.length != 0){
+          products.list.generate_inventory_record(selected_ids);
+        } else{
+          $scope.notify('Please select report');
+        }
+
+      };
+
+      $scope.update_inventory_report_settings = function () {
+        $scope.show_button = false;
+        products.single.update_inventory_settings($scope.inventory_report_settings);
+      };
+
+      $scope.change_opt = function(option){
+        products.single.update_record_option(option);
+        myscope.get_settings();
+      }
+
+      $scope.download_csv = function () {
+        if ($scope.inventory_report_settings.start.time <= $scope.inventory_report_settings.end.time) {
+          // $window.open('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
+          $http.get('/exportsettings/order_exports?start=' + $scope.inventory_report_settings.start.time + '&end=' + $scope.inventory_report_settings.end.time);
+          //$scope.notify('It will be emailed to ' + $scope.export_settings.single.order_export_email, 1);
+        } else {
+          $scope.notify('Start time can not be after End time');
+        }
+      };
 
       //Definitions end above this line
       /*
