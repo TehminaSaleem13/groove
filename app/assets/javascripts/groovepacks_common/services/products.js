@@ -506,7 +506,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
   var generate_inventory_record = function(report_ids){
     $http.post('/products/generate_product_inventory_report.json', {report_ids: report_ids}).success(function(res){
       if (res.status) {
-        notification.notify("Successfully Updated.", 1);
+        notification.notify("Your request has been queued", 1);
       }
       else{
         notification.notify("Some error occurred.", 0);
