@@ -447,7 +447,7 @@ groovepacks_controllers.
           all_fields: {
             is_locked: {
               name: "",
-              transclude: '<i tooltip="These default report can not be modified" class="fa fa-lock" aria-hidden="true" ng-if="row.is_locked==true"></i>'
+              transclude: '<i tooltip="The default reports can not be modified" class="fa fa-lock" aria-hidden="true" ng-if="row.is_locked==true"></i>'
             },
             name: {
               name: "Report Name",
@@ -552,7 +552,7 @@ groovepacks_controllers.
             myscope.get_settings();
           });
         } else {
-          $scope.notify('Please select unlock report to edit');
+          $scope.notify('The default reports can not be modified');
         }
       };
 
@@ -700,7 +700,7 @@ groovepacks_controllers.
             myscope.get_settings();
           });
         } else {
-          $scope.notify('Please select unlock report to destroy');
+          $scope.notify('The default reports can not be modified');
         }
       };
 
