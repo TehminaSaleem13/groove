@@ -44,6 +44,39 @@ class ExportSsProductsCsv
     generate_csv(result, data, filename, products)
   end
 
+  def export_broken_image(tenant, params)
+    Apartment::Tenant.switch tenant
+    products = ProductsService::ListSelectedProducts.call(params, true)
+    result = {}
+    filter_products = []
+    nil_images_products = Product.joins("LEFT OUTER JOIN product_images ON product_images.product_id = products.id").where("product_images.id IS NULL and products.id IN (?)", products.map(&:id))
+    check_broken_images_products = products - nil_images_products
+    check_broken_images_products.each do |product|
+      filter_products << product if (check_broken_image(product.product_images.map(&:image), result) rescue true)
+    end
+    products = filter_products + nil_images_products
+    result['filename'] = 'products-'+Time.now.to_s+'.csv'
+    CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
+      data = ProductsHelper.products_csv(products, csv)
+      result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url
+    end
+    result['status'] = true
+    CsvExportMailer.send_s3_broken_image_url(result['filename'], tenant).deliver
+  end
+
+  def check_broken_image(images, result)
+    result["broken_image"] = true
+    images.each do |image|
+      response = Net::HTTP.get_response(URI.parse(image))
+      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
+      if response.code == "200"
+        result["broken_image"] = false 
+        return result["broken_image"]
+      end
+    end
+    result["broken_image"]
+  end
+
   def generate_csv(result, data, filename, products)
     unless result['status']
       data = CSV.generate { |csv| csv << result['messages'] }

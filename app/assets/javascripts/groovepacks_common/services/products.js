@@ -196,7 +196,8 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }
     return $http.post('/products/generate_broken_image', products.setup).success(function (data) {
       if (data.status) {
-        $window.open(data.filename); 
+        notification.notify("Product CSV Queued Successfully", 0);
+        // $window.open(data.filename); 
       } else {
         notification.notify(data.messages, 0);
       };
