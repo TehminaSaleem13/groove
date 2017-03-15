@@ -395,7 +395,7 @@ class ProductsController < ApplicationController
   def get_item_count(report)
     if report.name == "All_Products_Report"
       count = Product.count
-    elsif report.name == "All_Active_Products_Report"
+    elsif report.name == "Active_Products_Report"
       count = Product.where(status: "active").count
     else
       count = report.products.count
