@@ -43,6 +43,7 @@ groovepacks_controllers.controller('aliasModal', ['$scope', 'type', 'exceptions'
       if (typeof page == 'undefined') {
         page = scope.paginate.current_page;
       }
+      scope.paginate.ctrlKey = event.ctrlKey;
       if (scope._can_load_products) {
         scope._can_load_products = false;
         return products.list.get(scope.products, page).success(function (response) {
@@ -52,6 +53,9 @@ groovepacks_controllers.controller('aliasModal', ['$scope', 'type', 'exceptions'
           scope.products.list = [];
           for (var i = 0; i < tmp_list.length; i++) {
             if (myscope.exceptions.indexOf(tmp_list[i].id) == -1) {
+              if (scope.paginate.ctrlKey == true && scope.selected_aliases.indexOf(tmp_list[i].id) == -1){
+                scope.selected_aliases.push(tmp_list[i].id); 
+              };
               if (scope.selected_aliases.indexOf(tmp_list[i].id) != -1) {
                 tmp_list[i].checked = true
               }

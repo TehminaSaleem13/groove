@@ -345,6 +345,7 @@ class ProductsController < ApplicationController
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
     export_product.delay.export_broken_image(tenant, params)
+    result["status"] = true
     render json: result
   end
 

@@ -63,6 +63,9 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     } else {
       page = 0;
     }
+    try{
+      object.ctrlKey = event.ctrlKey;
+    } catch(e){}
     object.setup.offset = page * object.setup.limit;
     if (setup.search == '') {
       url = '/products.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
@@ -81,6 +84,9 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
             object.selected = [];
           }
           for (var i = 0; i < object.list.length; i++) {
+            if (object.ctrlKey == true){
+              object.list[i].checked =  true;
+            }
             if (object.single && typeof object.single['basicinfo'] != "undefined") {
               if (object.list[i].id == object.single.basicinfo.id) {
                 object.current = i;
@@ -194,13 +200,18 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
         products.setup.productArray.push({id: products.selected[i].id});
       }
     }
-    return $http.post('/products/generate_broken_image', products.setup).success(function (data) {
-      if (data.status) {
-        notification.notify("Product CSV Queued Successfully", 0);
-        // $window.open(data.filename); 
+    $http.get('/settings/get_settings').success(function(response){
+      email = response.data.settings.email_address_for_packer_notes;
+      if (email == ''){
+        notification.notify("Please add a notification email address, you can do so  " + "<a href = '#/settings/system/general'>  here.</a>", 0);
       } else {
-        notification.notify(data.messages, 0);
-      };
+        return $http.post('/products/generate_broken_image', products.setup).success(function (data) {
+          if (data.status) {
+            notification.notify('Successfully Queued to ' + email, 1);
+            // $window.open(data.filename); 
+          };
+        });
+      }
     });
   };
 
@@ -218,7 +229,6 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     }
     var from_offset = (from_page * setup.limit) + from.index;
     var to_limit = (to_page * setup.limit) + to.index + 1 - from_offset;
-
     if (setup.search == '') {
       url = '/products.json?filter=' + setup.filter + '&sort=' + setup.sort + '&order=' + setup.order;
     } else {

@@ -23,7 +23,7 @@
       </div>
       <div class="row top-buffer">
         <div class="col-md-12">
-          <div ng-click="ok(false)" style="cursor: pointer;" class="col-md-4">
+          <div ng-click="clear()" style="cursor: pointer;" class="col-md-4">
             <i class="fa fa-eraser" aria-hidden="true"></i>
             <label>Clear Selection</label> 
           </div>
@@ -31,7 +31,7 @@
             <label >Save Report As: &nbsp;&nbsp;</label>
             <div style="display: flex;">
               <input class="col-md-4 form-control search-box ng-pristine ng-valid" type="text" autofocus="autofocus" ng-model="products.setup.report_name" class="form-control search-box"/>&nbsp;&nbsp;
-              <button ng-click="ok(true)" class="modal-save-button" translate>modal.save_close</button>&nbsp;&nbsp;
+              <button ng-click="ok()" class="modal-save-button" translate>modal.save_close</button>&nbsp;&nbsp;
               <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
             </div>
           </div>
@@ -44,7 +44,7 @@
             <thead>
             <tr>
               <th ng-class="{active: products.setup.sort=='name'}">
-                <div ng-click="handlesort('name')" ng-class="products.setup.order">Item Name</div>
+                <div ng-click="handlesort('name')" ng-class="products.setup.order" style="float: right;">Item Name</div>
               </th>
               <th ng-class="{active: products.setup.sort=='sku'}">
                 <div ng-click="handlesort('sku')" ng-class="products.setup.order">Primary Sku</div>
@@ -60,7 +60,7 @@
             <tbody>
             <tr ng-click="add_alias_product(product)" ng-class="{selected: product.checked}"
                 ng-repeat="product in products.list">
-              <td>{{product.name}}</td>
+              <td style="float: right;">{{product.name}}</td>
               <td>{{product.sku}}</td>
               <td>{{product.status}}</td>
               <td>{{product.barcode}}</td>

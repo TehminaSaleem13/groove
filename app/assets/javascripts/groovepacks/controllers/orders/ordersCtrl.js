@@ -260,12 +260,18 @@ groovepacks_controllers.
         if (typeof page == 'undefined') {
           page = $state.params.page;
         }
-
+        try{
+          $scope.ctrlKey = event.ctrlKey;
+        } catch (e){}
         myscope.reset_change_status();
         if ($scope._can_load_orders) {
           $scope._can_load_orders = false;
           product_search_toggle = $scope.general_settings.single.search_by_product;
           return orders.list.get($scope.orders, page, product_search_toggle).success(function (data) {
+            if ($scope.ctrlKey == true){
+              $scope.orders.selected.push($scope.orders.list);
+              $scope.orders.selected = [].concat.apply([], $scope.orders.selected);
+            }
             $scope.gridOptions.paginate.total_items = orders.list.total_items($scope.orders);
             myscope.update_selected_count();
             myscope.update_table_accordian_width();

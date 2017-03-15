@@ -133,9 +133,8 @@ groovepacks_controllers.
 
       $scope.broken_image_export = function(){
         if($scope.products.selected.length>0){
-          products.list.generate_broken_image($scope.products).then(function (data) {
-            myscope.get_products();
-          });
+          products.list.generate_broken_image($scope.products)
+          myscope.get_products();
         } else {
           products.list.select_notification();
         }
@@ -183,7 +182,6 @@ groovepacks_controllers.
 
       myscope.invert = function (val) {
         $scope.products.setup.inverted = !!val;
-
         if ($scope.products.setup.inverted) {
           if ($scope.products.setup.select_all) {
             $scope.select_all_toggle(false);
@@ -570,20 +568,24 @@ groovepacks_controllers.
       };
 
       myscope.get_products = function (page) {
-
         // Don't send page no to skip cached data
         if(typeof page != 'undefined' && myscope.page_exists.toString() === page.toString()){
           return;
         }
-
         if (typeof page == 'undefined') {
           page = $state.params.page;
         }
-
+        try{
+          $scope.ctrlKey = event.ctrlKey;
+        } catch(e){}
         $scope.gridOptions.selections.show_delete = myscope.show_delete();
         if ($scope._can_load_products) {
           $scope._can_load_products = false;
           return products.list.get($scope.products, page).success(function (response) {
+            if ($scope.ctrlKey == true){
+              $scope.products.selected.push($scope.products.list);
+              $scope.products.selected = [].concat.apply([], $scope.products.selected);
+            }
             $scope.gridOptions.paginate.total_items = products.list.total_items($scope.products);
             if ($scope.gridOptions.paginate.current_page != page) {
               $scope.gridOptions.paginate.current_page = page;
@@ -601,7 +603,6 @@ groovepacks_controllers.
           req.resolve();
           return req.promise;
         }
-
       };
 
       myscope.update_table_accordian_width = function () {

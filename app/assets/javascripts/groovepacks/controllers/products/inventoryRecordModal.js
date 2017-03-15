@@ -3,15 +3,17 @@ groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'e
 
     var myscope = {};
     //Definitions
-    scope.ok = function (flag) {
-      if (flag == false){
-        scope.selected_products = []
-      }
+    scope.ok = function () {
       $modalInstance.close({selected: scope.selected_products, report_name: scope.products.setup.report_name});
     };
     scope.cancel = function () {
       $modalInstance.dismiss();
     };
+    scope.clear = function(){
+      scope.selected_products = [];
+      myscope.get_products();
+    };
+
     /*
      * Public methods
      */
@@ -35,10 +37,10 @@ groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'e
     };
 
     myscope.get_products = function (page) {
-
       if (typeof page == 'undefined') {
         page = scope.paginate.current_page;
       }
+      scope.paginate.ctrlKey = event.ctrlKey;
       if (scope._can_load_products) {
         scope._can_load_products = false;
         return products.list.get(scope.products, page).success(function (response) {
@@ -48,6 +50,9 @@ groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'e
           scope.products.list = [];
           for (var i = 0; i < tmp_list.length; i++) {
             if (myscope.exceptions.indexOf(tmp_list[i].id) == -1) {
+              if (scope.paginate.ctrlKey == true && scope.selected_products.indexOf(tmp_list[i].id) == -1){
+                scope.selected_products.push(tmp_list[i].id); 
+              };
               if (scope.selected_products.indexOf(tmp_list[i].id) != -1) {
                 tmp_list[i].checked = true
               }
@@ -103,7 +108,6 @@ groovepacks_controllers.controller('inventoryRecordModal', ['$scope', 'type', 'e
       scope.load_disabled = false;
 
       //Private properties
-
       myscope.exceptions = [];
       myscope.do_load_products = false;
       scope._can_load_products = true;

@@ -22,7 +22,7 @@ class InventoryReportMailer < ActionMailer::Base
 			      	row = ""
 			      	available_inv = inv.map(&:available_inv).sum 
 			      	quantity_on_hand = inv.map(&:quantity_on_hand).sum
-			      	projected_days_remaining = orders_90.count.to_f/(quantity_on_hand.to_f/90) rescue 0
+			      	projected_days_remaining = quantity_on_hand.to_f/(orders_90.count.to_f/90) rescue 0
 			      	row << "#{start_time} to #{end_time},#{pro.primary_sku},#{pro.name.gsub(',',' ')},#{orders.try(:count)},#{orders_90.try(:count)},#{available_inv},#{quantity_on_hand},#{projected_days_remaining},#{pro.product_cats[0].try(:category)},#{inv[0].try(:location_primary)},#{inv[0].try(:location_secondary)},#{inv[0].try(:location_tertiary)}\n"
 			      	csv << row 
 			      end

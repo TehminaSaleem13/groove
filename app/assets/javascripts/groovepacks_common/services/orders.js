@@ -90,6 +90,9 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
     } else {
       page = 0;
     }
+    try{
+      object.ctrlKey = event.ctrlKey;
+    } catch(e){}
     object.setup.offset = page * object.setup.limit;
     if (setup.search == '') {
       url = '/orders.json?' + $.param({filter: setup.filter, sort: setup.sort, order: setup.order});
@@ -108,6 +111,9 @@ groovepacks_services.factory('orders', ['$http', '$window', 'notification', '$q'
             object.selected = [];
           }
           for (var i = 0; i < object.list.length; i++) {
+            if (object.ctrlKey == true){
+              object.list[i].checked =  true;
+            }
             if (object.single && typeof object.single['basicinfo'] != "undefined") {
               if (object.list[i].id == object.single.basicinfo.id) {
                 object.current = i;
