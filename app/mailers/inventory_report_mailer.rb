@@ -1,7 +1,8 @@
 class InventoryReportMailer < ActionMailer::Base
 	  default from: "app@groovepacker.com"
 
-	  def manual_inventory_report(id)
+	  def manual_inventory_report(id, tenant)
+	  	Apartment::Tenant.switch tenant
 	  	@product_inv_setting = InventoryReportsSetting.last
 	    selected_reports = ProductInventoryReport.where("id in (?)", id)
 	    start_time = @product_inv_setting.start_time.strftime("%m-%d-%Y") rescue nil
@@ -15,14 +16,13 @@ class InventoryReportMailer < ActionMailer::Base
 			    	products.each_with_index do |pro, index|			    		
 				    	orders = pro.order_items.map(&:order)
 				    	inv = pro.product_inventory_warehousess
-				    	orders_id = orders.map(&:id) rescue [] 
-							orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders_id, @product_inv_setting.try(:start_time).try(:beginning_of_day), @product_inv_setting.try(:end_time).try(:end_of_day)) rescue 0
-				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",orders_id, Time.now-90.days)  rescue 0
+							orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), @product_inv_setting.try(:start_time).try(:beginning_of_day), @product_inv_setting.try(:end_time).try(:end_of_day)) rescue 0
+				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",orders.map(&:id), Time.now-90.days) rescue 0
 			      	csv << headers if index.eql? 0 
 			      	row = ""
-			      	available_inv = inv.map(&:available_inv).sum rescue 0
-			      	quantity_on_hand = inv.map(&:quantity_on_hand).sum rescue 0
-			      	projected_days_remaining = orders_90.count.to_f/(quantity_on_hand.to_f/90) rescue 0
+			      	available_inv = inv.map(&:available_inv).sum 
+			      	quantity_on_hand = inv.map(&:quantity_on_hand).sum
+			      	projected_days_remaining = quantity_on_hand.to_f/(orders_90.count.to_f/90) rescue 0
 			      	row << "#{start_time} to #{end_time},#{pro.primary_sku},#{pro.name.gsub(',',' ')},#{orders.try(:count)},#{orders_90.try(:count)},#{available_inv},#{quantity_on_hand},#{projected_days_remaining},#{pro.product_cats[0].try(:category)},#{inv[0].try(:location_primary)},#{inv[0].try(:location_secondary)},#{inv[0].try(:location_tertiary)}\n"
 			      	csv << row 
 			      end
@@ -33,12 +33,13 @@ class InventoryReportMailer < ActionMailer::Base
 		      mail to: email, subject: subject
 		    else
 		    	flag = true
-		    	auto_inventory_report(flag, report)
+		    	auto_inventory_report(flag, report, tenant)
 		    end
 	    end
 	  end
 
-	  def auto_inventory_report(flag, report=nil)
+	  def auto_inventory_report(flag, report=nil, tenant)
+	  	Apartment::Tenant.switch tenant if tenant.present?
 	  	reports = report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
 	  	@product_inv_setting = InventoryReportsSetting.last
 	  	headers = "DATE_FOR_DAILY_TOTAL,SKU,PRODUCT_NAME,DAILY_SKU_QTY\n"

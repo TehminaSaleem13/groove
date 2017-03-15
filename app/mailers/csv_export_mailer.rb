@@ -37,4 +37,10 @@ class CsvExportMailer < ActionMailer::Base
     recipients = GeneralSetting.all.first.export_csv_email.split(',') rescue []
     mail to: recipients, subject: "GroovePacker Product Restore Is Completed"
   end
+
+  def send_s3_broken_image_url(url, tenant)
+    recipients = GeneralSetting.all.first.export_csv_email.split(',') rescue []
+    @url = url
+    mail to: recipients, subject: "[#{tenant}] Product Broken Images CSV" if recipients.present? 
+  end
 end

@@ -21,7 +21,7 @@ class ImportMailer < ActionMailer::Base
     else
       subject = "[#{Apartment::Tenant.current}] [#{Rails.env}] SS Failed request data"
     end
-    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
+    mail to: ENV["SHIPSTATION_IMPORT_FAILURE_EMAILS"], subject: subject
   end
 
   def send_products_import_email(products_count, credential)

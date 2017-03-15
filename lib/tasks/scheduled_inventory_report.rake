@@ -1,5 +1,5 @@
 namespace :doo do
-  desc "Schedule orders export email"
+  desc "Schedule inventory email"
   task :schedule_inventory_report => :environment do
     failed_tenant = []
     tenants = Tenant.order(:name) rescue Tenant.all
@@ -25,7 +25,8 @@ namespace :doo do
 		      result = true
 		    end
     		time = product_inv_setting.time_to_send_report_email
-				InventoryReportMailer.delay(run_at: time.strftime("%H:%M:%S")).auto_inventory_report(false) if result == true
+    		tenant_name = tenant.name
+				InventoryReportMailer.delay(run_at: time.strftime("%H:%M:%S")).auto_inventory_report(false,nil,tenant_name) if result == true
     	rescue
     	end
     end

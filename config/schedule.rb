@@ -41,7 +41,7 @@ every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   end
 end
 
-every 1.day, :at => '7:50 am' do
+every 1.day, :at => '7:40 am' do
   rake "doo:schedule_inventory_email"
 end
 

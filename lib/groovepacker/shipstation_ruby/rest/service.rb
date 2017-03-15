@@ -42,12 +42,12 @@ module Groovepacker
         end
 
         def error_status_codes
-          [500]
+          [500, 504, 401]
         end
 
         def handle_response(response, trial_count)
           successful_response = false
-          if error_status_codes.include?(response.code) || (response.code == 504 && trial_count == 4) || (response.code == 401 && trial_count == 4) 
+          if error_status_codes.include?(response.code) && trial_count==4 
             handle_exceptions(response)
           elsif response.code == 504  
             sleep(5)
