@@ -86,7 +86,7 @@ class Product < ActiveRecord::Base
   end
 
   def check_inventory_warehouses
-    if product_inventory_warehousess.empty?
+    if Product.find(self.id).product_inventory_warehousess.empty?
       inventory = ProductInventoryWarehouses.new
       inventory.product_id = id
       inventory.inventory_warehouse = InventoryWarehouse.where(is_default: true).first
