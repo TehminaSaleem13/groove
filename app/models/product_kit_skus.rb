@@ -104,14 +104,16 @@ class ProductKitSkus < ActiveRecord::Base
       @productkitsku.option_product_id = item.id
       @productkitsku.qty = 1
       kit.product_kit_skuss << @productkitsku
-      return result if kit.save
+      if kit.save
+        kit.update_product_status
+        return result 
+      end
       result['messages'].push("Could not save kit with sku: "+@product_skus.first.sku)
       result['status'] &= false
     else
       result['messages'].push("The product with id #{item.id} has already been added to the kit")
       result['status'] &= false
     end
-
     item.update_product_status
     return result
   end
