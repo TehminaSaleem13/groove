@@ -112,4 +112,29 @@ class TenantsController < ApplicationController
     result[:status] = true
     render json: result
   end
+
+  def activity_log
+    store_id = "complete"
+    current_tenant = Apartment::Tenant.current
+    header = "Tenant,Event,Time(EST),Store Type,User Name\n"
+    file_data = header
+    
+    Tenant.find_each do |tenant|
+      Apartment::Tenant.switch(tenant.name)
+      file_data +=
+        Ahoy::Event
+        .where('time > ?', Time.now.ago(7.days))
+        .reduce('') do |data, record|
+          properties = record.properties
+          data += "#{properties['tenant']},#{properties['title']},"
+          data += "#{record.time.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p')},"
+          data += "#{Store.find(properties['store_id']).store_type},"
+          data += "#{User.find(properties['user_id']).name}\n"
+        end
+    end
+
+    GroovS3.create_csv(current_tenant, 'activity_log', store_id, file_data, :public_read)
+    url = GroovS3.find_csv(current_tenant, 'activity_log', store_id).url
+    render json: {url: url}
+  end
 end

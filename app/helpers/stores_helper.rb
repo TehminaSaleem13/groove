@@ -174,7 +174,25 @@ module StoresHelper
   # end
 
   def csv_import
-    data = {:flag=>params[:flag], :type=>params[:type], :fix_width=>params[:fix_width], :fixed_width=>params[:fixed_width], :sep=>params[:sep], :delimiter=>params[:delimiter], :rows=>params[:rows], :map=>params[:map], :store_id=>params[:store_id], :import_action=>params[:import_action], :contains_unique_order_items=>params[:contains_unique_order_items], :generate_barcode_from_sku=>params[:generate_barcode_from_sku], :use_sku_as_product_name=>params[:use_sku_as_product_name], :order_placed_at=>params[:order_placed_at],  :order_date_time_format=>params[:order_date_time_format], :day_month_sequence=>params[:day_month_sequence]}    
+    data = {
+      flag: params[:flag],
+      type: params[:type],
+      fix_width: params[:fix_width],
+      fixed_width: params[:fixed_width],
+      sep: params[:sep],
+      delimiter: params[:delimiter],
+      rows: params[:rows],
+      map: params[:map],
+      store_id: params[:store_id],
+      user_id: current_user.id,
+      import_action: params[:import_action],
+      contains_unique_order_items: params[:contains_unique_order_items],
+      generate_barcode_from_sku: params[:generate_barcode_from_sku],
+      use_sku_as_product_name: params[:use_sku_as_product_name],
+      order_placed_at: params[:order_placed_at],
+      order_date_time_format: params[:order_date_time_format],
+      day_month_sequence: params[:day_month_sequence]
+    }    
     # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
     if params[:type] == 'order'
       order_csv_import(data)
