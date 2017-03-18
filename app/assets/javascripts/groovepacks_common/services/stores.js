@@ -214,6 +214,7 @@ groovepacks_services.factory('stores', ['$http', 'notification', '$filter', func
             stores.single.api_key = data.credentials.shipping_easy_credentials.api_key;
             stores.single.api_secret = data.credentials.shipping_easy_credentials.api_secret;
             stores.single.import_ready_for_shipment = data.credentials.shipping_easy_credentials.import_ready_for_shipment;
+            stores.single.ready_to_ship = data.credentials.shipping_easy_credentials.ready_to_ship;
             stores.single.import_shipped = data.credentials.shipping_easy_credentials.import_shipped;
             stores.single.gen_barcode_from_sku = data.credentials.shipping_easy_credentials.gen_barcode_from_sku;
 

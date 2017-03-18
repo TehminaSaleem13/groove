@@ -24,19 +24,26 @@
   <div class="col-md-6">
     <legend>Import Orders with following statuses</legend>
     <div class="form-group">
-      <label class="control-label col-md-4">Ready for Shipment</label>
+      <label class="control-label col-md-4">Orders List</label>
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.import_ready_for_shipment"
              groov-click="update_single_store(true)"></div>
         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter"
              groov-popover="Orders with the statuses enabled here will be imported during each import. Existing orders will be recognized by order number and skipped. The date range included in the import can be extended by using the Deep Import option in the Import Orders popover.<br/><br/>&nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp; &nbsp;If all statuses are disabled here only orders with the GP Ready tag will be imported, otherwise the tagged orders will be imported in addition to orders of the enabled status."></i>
       </div>
+    </div> 
+     <div class="form-group">
+      <label class="control-label col-md-4">Ready to Ship</label>
+      <div class="controls col-md-8">
+        <div toggle-switch ng-model="stores.single.ready_to_ship" groov-click="update_single_store(true)"></div>
+         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="orders in the Ready to Ship list"></i>
+      </div>
     </div>
-    
     <div class="form-group">
       <label class="control-label col-md-4">Shipped</label>
       <div class="controls col-md-8">
         <div toggle-switch ng-model="stores.single.import_shipped" groov-click="update_single_store(true)"></div>
+         <i class="pull-right icon-large glyphicon glyphicon-info-sign" popover-trigger="mouseenter" groov-popover="Orders for which the shipping label has been created"></i>
       </div>
     </div>
     <legend></legend>

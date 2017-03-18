@@ -60,7 +60,7 @@ module Groovepacker
               (item["product"]["bundled_products"] || []).each do |kit_product|
                 kit_pro = Product.joins(:product_skus).where("sku = ?", kit_product["sku"]) 
                 new_kit_product = kit_pro.blank? ? create_product(kit_product["sku"], kit_product, store_product_id) : kit_pro[0]
-                product.product_kit_skuss.create(option_product_id: new_kit_product.id, qty: 1) rescue nil if ProductKitSkus.where(product_id: product.id, option_product_id: new_kit_product.id).blank?
+                product.product_kit_skuss.create(option_product_id: new_kit_product.id, qty: kit_product["quantity"]) rescue nil if ProductKitSkus.where(product_id: product.id, option_product_id: new_kit_product.id).blank?
                 kit_alias = kit_product["sku_aliases"]
                 create_alias(kit_alias, new_kit_product) if kit_alias 
                 product.update_attribute(:is_kit, 1)
@@ -191,6 +191,7 @@ module Groovepacker
               status = ["cleared"]
               status << "ready_for_shipment" if @credential.import_ready_for_shipment
               status << "shipped" if @credential.import_shipped
+              status << "pending_shipment" if @credential.ready_to_ship
               status
             end
 
