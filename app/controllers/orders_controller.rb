@@ -256,6 +256,16 @@ class OrdersController < ApplicationController
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
       change_status_to_cancel
+      ahoy.track(
+        "Order Import",
+        {
+          title: "Order Import Canceled",
+          tenant: Apartment::Tenant.current,
+          user_id: current_user.id,
+          store_id: params[:store_id]
+        },
+        time: Time.now,
+      )
     end
     render json: @result
   end
@@ -282,6 +292,7 @@ class OrdersController < ApplicationController
 
   private
   def execute_groove_bulk_action(activity)
+    params[:user_id] = current_user.id
     if current_user.can?('add_edit_order_items')
       GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user, list_selected_orders)
     else

@@ -16,8 +16,8 @@ class GrooveBulkActions < ActiveRecord::Base
     $redis.set("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] == "delete_orders"
     $redis.set("bulk_action_duplicate_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] == "duplicate_orders"
     $redis.set("bulk_action_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] ==  "change_orders_status"
-    self.delay(run_at: 1.seconds.from_now).execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
-    #self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
+    # self.delay(run_at: 1.seconds.from_now).execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
+    self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
   end
 
   def self.update_groove_bulk_actions(activity, params)
@@ -36,6 +36,7 @@ class GrooveBulkActions < ActiveRecord::Base
       bulk_actions.status_update(current_tenant, params, bulkaction_id, username)
     when activity=='delete' && params["controller"]=="orders"
       bulk_actions.delete(current_tenant, bulkaction_id)
+      track_user(current_tenant, params, "Order Delete", "#{params["controller"].capitalize} Delete")
     when activity=='delete' && params["controller"]=="products"
       bulk_actions.delete(current_tenant, params, bulkaction_id, username)
     when activity=='duplicate' && params["controller"]=="orders"
@@ -45,6 +46,19 @@ class GrooveBulkActions < ActiveRecord::Base
     when activity=='export'
       bulk_actions.export(current_tenant, params, bulkaction_id, username)
     end
+  end
+
+  def self.track_user(tenant, params, name, title)
+    ahoy = Ahoy::Event.new
+    ahoy.name = name
+    ahoy.properties = {
+      title: title,
+      tenant: tenant,
+      store_id: nil,
+      user_id: params[:user_id]
+    }
+    ahoy.time = Time.now
+    ahoy.save!
   end
 
 end

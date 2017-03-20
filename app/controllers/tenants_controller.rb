@@ -128,8 +128,8 @@ class TenantsController < ApplicationController
           properties = record.properties
           data += "#{properties['tenant']},#{properties['title']},"
           data += "#{record.time.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p')},"
-          data += "#{Store.find(properties['store_id']).store_type},"
-          data += "#{User.find(properties['user_id']).name}\n"
+          data += "#{Store.where(id: properties['store_id']).first.try(:store_type)},"
+          data += "#{User.where(id: properties['user_id']).first.try(:name)}\n"
         end
     end
 
