@@ -11,7 +11,7 @@
 #
 # It's strongly recommended to check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20170316024018) do
+ActiveRecord::Schema.define(:version => 20170318094320) do
 
   create_table "access_restrictions", :force => true do |t|
     t.integer  "num_users",                           :default => 0,     :null => false
@@ -858,6 +858,7 @@ ActiveRecord::Schema.define(:version => 20170316024018) do
     t.datetime "last_imported_at"
     t.boolean  "includes_product",          :default => false
     t.boolean  "popup_shipping_label",      :default => false
+    t.boolean  "ready_to_ship",             :default => false
   end
 
   create_table "shipstation_credentials", :force => true do |t|
