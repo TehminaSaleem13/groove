@@ -106,6 +106,19 @@ class SubscriptionsController < ApplicationController
   def login
   end
 
+  def get_one_time_payment_fee
+    result = {}
+    if params[:shop_name].present? && params["shop_type"]=="BigCommerce"
+      result["one_time_payment"] = ENV['BC_ONE_TIME_PAYMENT']
+    elsif params[:shop_name].present? && params["shop_type"]=="Shopify"
+      result["one_time_payment"] = ENV['SHOPIFY_ONE_TIME_PAYMENT']
+    else
+      result["one_time_payment"] = ENV['ONE_TIME_PAYMENT']
+    end
+    result["stripe_public_key"] = ENV['STRIPE_PUBLIC_KEY']
+    render json: result
+  end
+
   private
 
   def create_store_and_credential

@@ -56,7 +56,7 @@ module TenantsHelper
           subsc.tenant_data = "#{params["subscription_info"]["amount"]}-#{access['max_allowed']}-#{access['max_users']}-#{access['max_import_sources']}"
           subsc.shopify_payment_token = SecureRandom.hex #(0...20).map { ('a'..'z').to_a[rand(15)] }.join
           subsc.save
-          ShopifyMailer.recurring_payment(@tenant, "http://#{@tenant.name}.localpacker.com/shopify/update_customer_plan.json?one_time_token=#{subsc.shopify_payment_token}").deliver
+          ShopifyMailer.recurring_payment(@tenant, "#{ENV['PROTOCOL']}#{@tenant.name}.#{ENV['HOST_NAME']}/shopify/update_customer_plan.json?one_time_token=#{subsc.shopify_payment_token}").deliver
         else
           result = helper.update_restrictions(@tenant, params)
         end

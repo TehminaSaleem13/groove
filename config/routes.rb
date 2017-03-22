@@ -274,6 +274,8 @@ Groovepacks::Application.routes.draw do
       get 'finalize_payment'
       get 'invalid_request'
       get 'payment_failed'
+      post 'store_subscription_data'
+      get 'get_store_data'
     end
   end
 
@@ -319,6 +321,7 @@ Groovepacks::Application.routes.draw do
       get 'validate_coupon_id'
       get 'complete'
       get 'shopify_final_process'
+      get 'get_one_time_payment_fee'
     end
   end
 
