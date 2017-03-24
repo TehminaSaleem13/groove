@@ -69,6 +69,7 @@ class ExportSsProductsCsv
     images.each do |image|
       response = Net::HTTP.get_response(URI.parse(image))
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
+      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
       if response.code == "200"
         result["broken_image"] = false 
         return result["broken_image"]

@@ -10,6 +10,7 @@
       <% if @counts %>
         <div style="background: #a8a9a8; margin: 0 auto; padding: 10px; border-radius: 12px; border: #95af5e solid 1px; color: #333; max-width: 93%">
           <div style="width: 50%; float: left;">
+            <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Click Scan Items: <span><%= @counts["clicked_scanned_items"] %></span></h2>
             <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">New Orders Imported Today: <span><%= @counts['imported'] %></span></h2>
             <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">New & Existing Orders Scanned Today: <span><%= @counts['scanned'] %></span></h2>
             <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Items Scanned Today (New & Existing Orders): <span><%= @counts['item_scanned'] %></span></h2>
