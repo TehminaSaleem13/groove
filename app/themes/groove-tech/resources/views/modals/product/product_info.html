@@ -111,7 +111,11 @@
             <div class="single-image" ng-class="{'primary-image': $index==0}"
                  ng-repeat="image in products.single.images">
               <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"/>
+              <i ng-if="image.placeholder == false" class="fa fa-flag-o" ng-click="generic_image($index, true)" style="cursor: pointer;"></i>
+              <i ng-if="image.placeholder == true" class="fa fa-flag" ng-click="generic_image($index, false)" style="cursor: pointer;"></i>
               <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
+
+
             </div>
           </div>
           <div class="alert alert-info"

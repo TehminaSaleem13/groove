@@ -525,6 +525,20 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     });;    
   }
 
+  var update_generic = function(flag, id){
+    $http.post('/products/update_generic.json', {flag: flag, id: id}).success(function(res){
+        if (res.status){
+          if (res.placeholder){
+            notification.notify("Updated this image to be broken", 0);  
+          }else{
+            notification.notify("Updated this image to correct", 1);  
+          }
+        } else {
+          notification.notify("Some error occurred.", 0);
+        };
+    });
+  }
+
   //Public facing API
   return {
     model: {
@@ -560,6 +574,7 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       reset_obj: reset_single_obj,
       update_inventory_settings: update_inventory_settings,
       update_record_option: update_record_option,
+      update_generic: update_generic,
       kit: {
         add: add_to_kit,
         remove: remove_from_kit

@@ -152,6 +152,11 @@ groovepacks_controllers.
         scope.products.single.images.splice(index, 1);
         scope.update_single_product();
       };
+      scope.generic_image = function(index, flag){
+        id = scope.products.single.images[index].id;
+        products.single.update_generic(flag, id);
+        scope.update_single_product();
+      };
       scope.remove_instruction_image = function (image) {
         image.added_to_receiving_instructions = false;
         products.single.update_image(image).then(function () {
