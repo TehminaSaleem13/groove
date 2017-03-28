@@ -230,7 +230,7 @@ module OrdersHelper
     orders_scanning_count = Order.multiple_orders_scanning_count(orders)
 
     orders.each do |order|
-      itemslength = orders_scanning_count[order.id].values.sum
+      itemslength = orders_scanning_count[order.id].values.sum rescue 0
       generate_order_hash(order, itemslength)
     end
     return @orders_result
