@@ -2,6 +2,11 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   def do_if_product_type_is_individual(params)
     item, clean_input, serial_added, clicked, barcode_found = params
     item['child_items'].each do |child_item|
+      item = OrderItem.find_by_id(child_item["order_item_id"])
+      if child_item["qty_remaining"] == 1 && clicked && item.product.is_kit == 1 
+        item.clicked_qty = item.clicked_qty + 1
+        item.save
+      end
       if child_item['barcodes'].present?
         barcode_found = do_if_child_item_has_barcodes(params, child_item)
       end
