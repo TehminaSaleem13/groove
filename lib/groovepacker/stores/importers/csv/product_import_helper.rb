@@ -78,8 +78,7 @@ module Groovepacker
           end
 
           def import_product_weight(product, single_row)
-            product.weight = @helper.get_row_data(single_row, 'product_weight') if
-            @helper.verify_single_item(single_row, 'product_weight')
+            product.weight = @helper.get_row_data(single_row, 'product_weight') if @helper.verify_single_item(single_row, 'product_weight') && @helper.get_row_data(single_row, 'product_weight') != ""
           end
 
           def push_barcode(product, barcode)

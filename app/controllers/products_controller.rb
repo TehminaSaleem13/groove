@@ -456,6 +456,14 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  def update_generic
+    image = ProductImage.find_by_id(params["id"])
+    image.placeholder = params["flag"]
+    image.save
+    @result["placeholder"] = image.placeholder
+    render json: @result
+  end
+
   private
   def execute_groove_bulk_action(activity)
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
