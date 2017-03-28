@@ -52,7 +52,7 @@ class ExportSsProductsCsv
     nil_images_products = Product.joins("LEFT OUTER JOIN product_images ON product_images.product_id = products.id").where("product_images.id IS NULL and products.id IN (?)", products.map(&:id))
     check_broken_images_products = products - nil_images_products
     check_broken_images_products.each do |product|
-      filter_products << product if (check_broken_image(product.product_images.map(&:image), result) rescue true)
+      filter_products << product if (check_broken_image(product.product_images, result) rescue true)
     end
     products = filter_products + nil_images_products
     result['filename'] = 'products-'+Time.now.to_s+'.csv'
@@ -67,7 +67,7 @@ class ExportSsProductsCsv
   def check_broken_image(images, result)
     result["broken_image"] = true
     images.each do |image|
-      response = Net::HTTP.get_response(URI.parse(image))
+      response = Net::HTTP.get_response(URI.parse(image.image))
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
       if response.code == "200" && !image.placeholder
