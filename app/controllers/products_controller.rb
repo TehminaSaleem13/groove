@@ -304,7 +304,7 @@ class ProductsController < ApplicationController
 
   #This action will remove the entry for this product (the Alias) and the SKU of this new
   #product will be added to the list of skus for the existing product that the user is linking it to.
-  #Any product can be turned into an alias, it doesn’t have to have the status of new, although most if the time it probably will.
+  #Any product can be turned into an alias, it doesn?t have to have the status of new, although most if the time it probably will.
   #The operation can not be undone.
   #If you had a situation where the newly imported product was actually the one you wanted to keep you could
   #find the original product and make it an alias of the new product...
@@ -458,8 +458,9 @@ class ProductsController < ApplicationController
 
   def update_generic
     image = ProductImage.find_by_id(params["id"])
-    image.placeholder = params["flag"]
-    image.save
+    images = ProductImage.where(image: image.try(:image))
+    images.update_all(placeholder: params["flag"])
+    image = image.reload rescue image
     @result["placeholder"] = image.placeholder
     render json: @result
   end
