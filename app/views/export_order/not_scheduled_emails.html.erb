@@ -1,6 +1,11 @@
-<h3>These tenants are not queued for <%= (DateTime.now + 1.day).strftime('%F')%></h3>
-<% @tenants.each do |tenant|%>
-<h4><%= tenant%></h4>
+<%if @tenants.present?%>
+  h3>These tenants are not queued for <%= (DateTime.now + 1.day).strftime('%F')%></h3>
+  <% @tenants.each do |tenant|%>
+    <h4><%= tenant%></h4>
+  <%end%>
+<% else %>
+  <h3>These tenants are queued for <%= (DateTime.now + 1.day).strftime('%F')%></h3>
+  <% @scheduled_tenants.each do |sch_tenant|%>
+    <h4><%= sch_tenant%></h4>
+  <%end%>
 <%end%>
-
-
