@@ -111,11 +111,11 @@
             <div class="single-image" ng-class="{'primary-image': $index==0}"
                  ng-repeat="image in products.single.images">
               <img ng-src="{{ image.image }}" class="img-polaroid img-thumb img-responsive"/>
-              <i ng-if="image.placeholder == false" class="fa fa-flag-o" ng-click="generic_image($index, true)" style="cursor: pointer;"></i>
-              <i ng-if="image.placeholder == true" class="fa fa-flag" ng-click="generic_image($index, false)" style="cursor: pointer;"></i>
+              <i ng-if="image.placeholder == false" class="fa fa-flag-o" ng-click="generic_image($index, true)" style="
+              position: absolute; top: 3px; border-radius: 15px; padding: 4px; cursor: pointer;" popover-placement='right' groov-popover="If the image shown here is a generic placeholder image, ie 'Image coming Soon', you can flag it as such and products which display it will be added to the broken/missing image report. This report can be generated from the edit drop down in the products section."></i>
+              <i ng-if="image.placeholder == true" class="fa fa-flag" ng-click="generic_image($index, false)" style="
+              position: absolute; top: 3px; border-radius: 15px; padding: 4px; cursor: pointer;" popover-placement='right' groov-popover="If the image shown here is a generic placeholder image, ie 'Image coming Soon', you can flag it as such and products which display it will be added to the broken/missing image report. This report can be generated from the edit drop down in the products section."></i>
               <i class="glyphicon glyphicon-remove" ng-click="remove_image($index)"></i>
-
-
             </div>
           </div>
           <div class="alert alert-info"

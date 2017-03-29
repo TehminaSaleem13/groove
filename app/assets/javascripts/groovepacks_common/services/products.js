@@ -529,9 +529,9 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
     $http.post('/products/update_generic.json', {flag: flag, id: id}).success(function(res){
         if (res.status){
           if (res.placeholder){
-            notification.notify("Updated this image to be broken", 0);  
+            notification.notify("Products with this image will be included in the missing image report.", 0);  
           }else{
-            notification.notify("Updated this image to correct", 1);  
+            notification.notify("Products with this image will be removed from the missing image report.", 1);  
           }
         } else {
           notification.notify("Some error occurred.", 0);

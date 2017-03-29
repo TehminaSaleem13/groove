@@ -448,8 +448,9 @@ class ProductsController < ApplicationController
 
   def update_generic
     image = ProductImage.find_by_id(params["id"])
-    image.placeholder = params["flag"]
-    image.save
+    images = ProductImage.where(image: image.image)
+    images.update_all(placeholder: params["flag"])
+    image = image.reload
     @result["placeholder"] = image.placeholder
     render json: @result
   end
