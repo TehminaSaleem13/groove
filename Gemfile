@@ -113,3 +113,4 @@ gem 'rollbar'
 gem 'whenever', :require => false
 gem "skylight"
 gem 'scout_apm', '~> 3.0.x'
+gem 'ahoy_matey', require: false

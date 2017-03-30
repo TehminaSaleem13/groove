@@ -484,6 +484,24 @@ groovepacks_admin_controllers.
         $window.location.href = '/delayed_job'
       };
 
+      $scope.download_activity_log = function(){
+        var url = '';
+        url = '/tenants/activity_log';
+        $http.post(url).then(function successCallback(response) {
+          window.location = response.data.url;
+        }); 
+      };
+
+      $scope.clear_all_imports = function(){
+        if(confirm("Are you sure you want to CLEAR ALL IMPORTS?")) {
+          var url = '';
+          url = '/tenants/clear_all_imports'
+          $http.get(url).then(function successCallback(response) {
+            notification.notify(response.data.status);
+          }); 
+        }
+      };
+
       myscope.common_setup_opt = function (type, value, selector) {
         tenants.setup.update($scope.tenants.setup, type, value);
         myscope.get_tenants($state.params.page);

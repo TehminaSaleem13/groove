@@ -7,6 +7,7 @@ class ImportCsv
       Apartment::Tenant.switch(tenant)
       params = eval(params)
       #download CSV and save
+      track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
       response = nil
       file_path = nil
       store = Store.find(params[:store_id])
@@ -94,6 +95,7 @@ class ImportCsv
     rescue Exception => e
       raise e
     end
+    track_user(tenant, params, "Import Finished", "#{params[:type].capitalize} Import Finished")
     result
   end
 
@@ -107,5 +109,20 @@ class ImportCsv
       result[:messages].push(response[:error_messages])
     end
     result
+  end
+
+  private
+
+  def track_user(tenant, params, name, title)
+    ahoy = Ahoy::Event.new
+    ahoy.name = name
+    ahoy.properties = {
+      title: title,
+      tenant: tenant,
+      store_id: params[:store_id],
+      user_id: params[:user_id]
+    }
+    ahoy.time = Time.now
+    ahoy.save!
   end
 end

@@ -56,6 +56,8 @@ Groovepacks::Application.routes.draw do
   post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
   post '/delayed_job_reset' => 'delayed_jobs#reset'
   post '/delayed_jobs_update' => 'delayed_jobs#update'
+  post '/tenants/activity_log' => 'tenants#activity_log'
+  get '/tenants/clear_all_imports' => 'tenants#clear_all_imports'
   get '/tenants/delete_summary' => 'tenants#delete_summary' 
   get '/tenants/update_import_mode' => 'tenants#update_import_mode'
   get '/tenants/update_fba' => 'tenants#update_fba'
