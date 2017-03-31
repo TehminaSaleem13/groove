@@ -4,6 +4,7 @@ class CostCalculatorsController < ApplicationController
 	  @params = cost_calculation
 	  setting = GeneralSetting.last
 	  @calculator_url = setting.cost_calculator_url
+	  render json: @params
 	end
 
 	def email_calculations
