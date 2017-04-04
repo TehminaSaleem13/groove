@@ -158,11 +158,32 @@ groovepacks_controllers.controller('storeSingleModal', ['$http', '$scope', 'stor
     }
 
     scope.import_products = function (report_id) {
-      scope.stores.import.product.status = "Import in progress";
-      scope.stores.import.product.status_show = true;
-      scope.update_single_store(false).then(function () {
-        stores.import.products(scope.stores, scope.stores.single.productgenerated_report_id);
-      });
+      if (scope.stores.general_settings.email_address_for_packer_notes == ""){
+        scope.stores.general_settings
+        var notification_modal = $modal.open({
+          templateUrl: '/assets/views/modals/settings/stores/bc_notification.html',
+          controller: 'bcNotificationCtrl',
+          size: 'lg',
+          resolve: {
+            store_data: function() {
+             return scope.stores;
+            }
+          }
+        });
+        notification_modal.result.then(
+          function () {
+            scope.update_single_store(false).then(function () {
+              stores.import.products(scope.stores, scope.stores.single.productgenerated_report_id);
+            });
+          }
+        );
+      } else {
+        scope.stores.import.product.status = "Import in progress";
+        scope.stores.import.product.status_show = true;
+        scope.update_single_store(false).then(function () {
+          stores.import.products(scope.stores, scope.stores.single.productgenerated_report_id);
+        });
+      }
     };
 
     scope.request_import_products = function () {

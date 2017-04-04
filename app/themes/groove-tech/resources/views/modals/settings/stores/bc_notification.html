@@ -1,0 +1,22 @@
+<div>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">Update Email : </div>
+  </div>
+
+  <div class="modal-body">
+    <div class="tabbable">
+      <label class="radio inline">
+        System Notifications
+        <input type="text"
+               ng-model="system_notification" class="form-control input-style"/>
+      </label>
+    </div>
+  </div>
+</div>
+
+  <div class="modal-footer" style="padding-top: 15px;">
+    <button ng-click="update_sys_notification(system_notification)" class="modal-save-button" translate>modal.save_close</button>
+    <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+  </div>
+</div>
