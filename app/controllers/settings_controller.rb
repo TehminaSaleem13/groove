@@ -277,6 +277,13 @@ class SettingsController < ApplicationController
     render json: result
   end
 
+  def update_email_address_for_packer_notes
+    setting = GeneralSetting.all.first
+    setting.email_address_for_packer_notes = params["email"]
+    setting.save
+    render json: {}
+  end
+
   # def execute_in_bulk_action(activity)
   #   result = {}
   #   result['status'] = true

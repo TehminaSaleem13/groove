@@ -14,7 +14,7 @@ groovepacks_controllers.
           $scope.stores.import.product.status = "Import in progress";
           $scope.stores.import.product.status_show = true;
           $scope.stores.general_settings.email_address_for_packer_notes = email;
-          generalsettings.single.update($scope.stores.general_settings);
+          $http.put('/settings/update_email_address_for_packer_notes.json', {email: email});
           notification.notify("Email is succesfully updated.", 1);
           $modalInstance.close("ok-button-click");
         } else {
