@@ -425,7 +425,7 @@ class Product < ActiveRecord::Base
   end
 
   def primary_barcode_qty
-    primary_barcode_obj.packing_count
+    primary_barcode_obj.try(:packing_count)
   end
 
   def primary_barcode_obj
