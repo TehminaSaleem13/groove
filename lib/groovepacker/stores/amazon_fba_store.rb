@@ -42,9 +42,10 @@ module Groovepacker
 							csv[index] = "Shipment ID\t"+row.join("\t")
 						else	
 							csv[index] = "#{order_file_data.split("\r\n")[0].split("\t")[1]}\t"+row.join("\t")
+							csv[index] = csv[index].gsub(",", " ")
 						end		
 					end
-					order_file_data = csv.join("\n\r").gsub("\t",",")
+					order_file_data = csv.join("\n\r").gsub("\t",",").gsub('"', "")
 				else
 					new_csv = "Shipment ID," + csv[0]
 					csv.drop(1).each do |c|
