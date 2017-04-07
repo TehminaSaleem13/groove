@@ -8,6 +8,7 @@ class ImportCsv
       params = eval(params)
       track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
       #download CSV and save
+      track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
       response = nil
       file_path = nil
       store = Store.find(params[:store_id])

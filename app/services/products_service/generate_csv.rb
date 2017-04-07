@@ -55,10 +55,10 @@ module ProductsService
 
     def set_header
       @headers = [
-        'ID', 'Name', 'SKU 1', 'Barcode 1', 'BinLocation 1', 'QOH',
+        'ID', 'Name', 'SKU 1', 'Barcode 1','Barcode 1 qty', 'BinLocation 1', 'QOH',
         'Primary Image', 'Weight', 'Primary Category',
-        'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 3', 'BinLocation 2',
-        'BinLocation 3'
+        'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 2 qty', 'Barcode 3', 'Barcode 3 qty', 'BinLocation 2',
+        'BinLocation 3', 'Barcode 4', 'Barcode 4 qty', 'Barcode 5', 'Barcode 5 qty', 'Barcode 6', 'Barcode 6 qty'
       ]
     end
 
@@ -94,6 +94,7 @@ module ProductsService
           'Name' => 'name',
           'SKU 1' => 'primary_sku',
           'Barcode 1' => 'primary_barcode',
+          'Barcode 1 qty' => 'primary_barcode_qty',
           'Primary Image' => 'primary_image',
           'Weight' => 'weight',
           'Primary Category' => 'primary_category'
@@ -102,7 +103,15 @@ module ProductsService
           'SKU 2' => 'sku',
           'SKU 3' => 'sku',
           'Barcode 2' => 'barcode',
-          'Barcode 3' => 'barcode'
+          'Barcode 2 qty' => 'packing_count',
+          'Barcode 3' => 'barcode',
+          'Barcode 3 qty' => 'packing_count',
+          'Barcode 4' => 'barcode',
+          'Barcode 4 qty' => 'packing_count',
+          'Barcode 5' => 'barcode',
+          'Barcode 5 qty' => 'packing_count',
+          'Barcode 6' => 'barcode',
+          'Barcode 6 qty' => 'packing_count'
         },
         'inventory_wh' => {
           'BinLocation 1' => 'location_primary',
@@ -144,9 +153,13 @@ module ProductsService
     end
 
     def find_other_skus_barcodes(item, title, attribute)
-      collection = item.send("product_#{attribute}s")
-      index = title.gsub(/[^\d]/, '').to_i
-      collection.length > 1 ? collection[index - 2].send(attribute) : ''
+      begin
+        collection = attribute == "packing_count" ? item.send("product_barcodes") : item.send("product_#{attribute}s")
+        index = title.gsub(/[^\d]/, '').to_i
+        collection.length > 1 ? collection[index - 2].send(attribute) : ''
+      rescue
+        collection[collection.count - 2].send(attribute)
+      end
     end
 
     def do_if_bulk_action

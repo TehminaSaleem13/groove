@@ -428,6 +428,10 @@ class Product < ActiveRecord::Base
     primary_barcode_obj.try :barcode
   end
 
+  def primary_barcode_qty
+    primary_barcode_obj.try(:packing_count)
+  end
+
   def primary_barcode_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds

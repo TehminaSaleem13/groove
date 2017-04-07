@@ -150,6 +150,7 @@ Groovepacks::Application.routes.draw do
       get 'get_settings'
       get 'get_columns_state'
       put 'update_settings'
+      put 'update_email_address_for_packer_notes'
       get 'get_scan_pack_settings'
       get 'order_exceptions'
       get 'order_serials'

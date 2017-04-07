@@ -55,6 +55,7 @@ module StoreConcern
         order_file_data = csv_data('order')
         @result['order']['data'] = order_file_data
         File.delete(order_file_path)
+        $redis.del("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")
       end
     end
   end
@@ -62,7 +63,8 @@ module StoreConcern
   def csv_data(kind)
     3.times do
       current_tenant = Apartment::Tenant.current
-      @file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+      # @file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
+      @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv")
       break if @file_data.present?
       sleep(1)
     end
@@ -80,6 +82,7 @@ module StoreConcern
         # product_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
         @result['product']['data'] = product_file_data
         File.delete(product_file_path)
+        $redis.del("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")
       end
     end
     if ['both', 'kit'].include?(params[:type])
@@ -92,6 +95,7 @@ module StoreConcern
         # kit_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
         @result['kit']['data'] = kit_file_data
         File.delete(kit_file_path)
+        $redis.del("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/kit.#{@store.id}.csv")
       end
     end
   end
