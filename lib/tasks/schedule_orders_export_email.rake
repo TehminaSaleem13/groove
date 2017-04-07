@@ -7,11 +7,12 @@ namespace :doo do
     tenants.each do |tenant|
       begin
         scheduled = ImportOrders.new.reschedule_job('export_order', tenant.name)
-        scheduled_tenants << tenant.name if scheduled[0]
         Apartment::Tenant.switch tenant.name
         export_settings = ExportSetting.all.first
         setting = export_settings.present? && export_settings.auto_email_export? && export_settings.order_export_email.present? && export_settings.should_export_orders(DateTime.now + 1.day) 
-        failed_tenant << tenant.name if Delayed::Job.where("queue LIKE ? and created_at >= ?", "%order_export_email_scheduled_#{tenant.name}%", DateTime.now.strftime('%F')).blank? && setting
+        job = Delayed::Job.where("queue LIKE ? and created_at >= ?", "%order_export_email_scheduled_#{tenant.name}%", DateTime.now.strftime('%F'))
+        failed_tenant << tenant.name if job.blank? && setting
+        scheduled_tenants << "#{tenant.name} - #{job[0].id}" if scheduled[0]
         if failed_tenant.present?
           failed_tenant.each do |t|
             ImportOrders.new.reschedule_job('export_order', t)
