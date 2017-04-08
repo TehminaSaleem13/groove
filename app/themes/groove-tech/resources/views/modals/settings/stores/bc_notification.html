@@ -1,20 +1,20 @@
 <div>
   <div class="modal-header">
     <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
-    <div class="modal-title">Update Email to import products : </div>
+    <div class="modal-title">Update Email </div>
   </div>
 
-  <div class="modal-body">
+  <div class="modal-body" style="padding-top: 40px;">
     <div class="tabbable">
       <label class="radio inline" style="display: flex;">
-        &emsp;&emsp; System Notifications : &emsp;&emsp;&emsp;
+        &emsp;&emsp; We'll email you when your import completes : &emsp;&emsp;
         <input style="width: 50%" type="text"
                ng-model="system_notification" class="form-control input-style"/>
       </label>
     </div>
+    <label style="float: right; margin-right: 392px">Future notifications will be sent to this address. &emsp;&emsp; </label>
   </div>
 </div>
-
   <div class="modal-footer" style="padding-top: 15px;">
     <button ng-click="update_sys_notification(system_notification)" class="modal-save-button" translate>Continue</button>
     <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
