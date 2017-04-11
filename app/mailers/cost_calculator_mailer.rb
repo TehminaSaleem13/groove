@@ -5,7 +5,7 @@ class CostCalculatorMailer < ActionMailer::Base
     @reciepient_name = params["recipient_name"]
   	@body = params["email_text"].gsub("6904.5", params[:monthly_shipping])
   	follow_up_email = params[:follow_up_email]
-    recipients = [params[:recipient_one], params[:recipient_two], params[:recipient_three]]	
+    recipients = [params[:recipient_one], params[:recipient_two], params[:recipient_three], "groovepacker+calculator@gmail.com"]	
     emails = []
     recipients.each do |recipient| 
       emails << recipient if recipient != "undefined"   

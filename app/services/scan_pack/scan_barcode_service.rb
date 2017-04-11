@@ -55,8 +55,8 @@ module ScanPack
     def do_scan_now
       rem_qty = @params["scan_pack"]["rem_qty"] rescue nil
       barcode = ProductBarcode.find_by_barcode(@params[:input])
-      packing_count = barcode.try(:packing_count)
-      if packing_count.present?
+      packing_count = barcode.packing_count rescue 1
+      if packing_count.present? && packing_count.to_i > 1
         if rem_qty >= packing_count.to_i
           product_scan_object = ScanPack::ProductScanService.new(
             [

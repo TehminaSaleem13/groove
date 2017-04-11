@@ -52,7 +52,7 @@ module SettingsService
         end
       end
       products_to_check_later.each(&:update_product_status)
-      CsvExportMailer.product_restore(@tenant).deliver
+      CsvExportMailer.product_restore(@tenant).deliver rescue nil
     end
 
     def load_mappings

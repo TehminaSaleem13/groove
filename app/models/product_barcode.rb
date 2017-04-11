@@ -22,6 +22,6 @@ class ProductBarcode < ActiveRecord::Base
 
   def update_packing_count
     self.is_multipack_barcode = true
-    self.packing_count = 1 if self.packing_count.blank?
+    self.packing_count = 1 if self.packing_count.blank? && self.barcode.present?
   end
 end

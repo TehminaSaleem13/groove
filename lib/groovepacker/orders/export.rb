@@ -81,11 +81,16 @@ module Groovepacker
         def add_barcode_info(single_row_list, product_barcodes)
           return single_row_list if product_barcodes.length == 0
           single_row_list[:primary_barcode] = product_barcodes[0].barcode
-
           if product_barcodes.length == 2
             single_row_list[:secondary_barcode] = product_barcodes[1].barcode
-          elsif product_barcodes.length >= 3
+          elsif product_barcodes.length == 3
             single_row_list[:tertiary_barcode] = product_barcodes[2].barcode
+          elsif  product_barcodes.length == 4
+            single_row_list[:quaternary_barcode] = product_barcodes[3].barcode
+          elsif  product_barcodes.length == 5
+            single_row_list[:quinary_barcode] = product_barcodes[4].barcode
+          elsif  product_barcodes.length == 6
+            single_row_list[:senary_barcode] = product_barcodes[5].barcode
           end
           single_row_list
         end
