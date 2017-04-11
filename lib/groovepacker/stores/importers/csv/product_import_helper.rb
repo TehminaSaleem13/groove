@@ -88,7 +88,7 @@ module Groovepacker
           end
 
           def import_sec_ter_barcode(product, single_row)
-            %w(secondary_barcode tertiary_barcode).each do |prop|
+            %w(secondary_barcode tertiary_barcode quaternary_barcode quinary_barcode senary_barcode).each do |prop|
               import_product_info(product, single_row, prop, 'barcode')
             end
           end

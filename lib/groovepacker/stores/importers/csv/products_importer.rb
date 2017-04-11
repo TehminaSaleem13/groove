@@ -200,11 +200,14 @@ module Groovepacker
               usable_record[:product_receiving_instructions] = single_row[self.mapping['receiving_instructions'][:position]]
             end
             usable_record[:all_barcodes] = {}
+            usable_record[:all_barcodes_qty] ={}
             if !self.mapping['barcode'].nil? && self.mapping['barcode'][:position] >= 0
               unless single_row[self.mapping['barcode'][:position]].nil?
                 barcodes = single_row[self.mapping['barcode'][:position]].split(',')
+                barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',')
                 usable_record[:all_barcodes]["0"] = barcodes  
                 barcodes.each do |single_barcode|
+                  usable_record[:all_barcodes_qty][single_barcode] = barcode_qty
                   break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!@all_barcodes.include? single_barcode.strip)
                   @all_barcodes << single_barcode.strip
                   usable_record[:barcodes] << single_barcode.strip
@@ -212,18 +215,21 @@ module Groovepacker
               end
             elsif self.params[:generate_barcode_from_sku]
               barcodes = single_row[self.mapping['sku'][:position]].split(',')
+              barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',')
               usable_record[:all_barcodes]["0"] = barcodes
               barcodes.each do |single_barcode|
+                usable_record[:all_barcodes_qty][single_barcode] = barcode_qty
                 @all_barcodes << single_barcode.strip
                 usable_record[:barcodes] << single_barcode.strip
               end
             end
-
             if !self.mapping['secondary_barcode'].nil? && self.mapping['secondary_barcode'][:position] >= 0
               unless single_row[self.mapping['secondary_barcode'][:position]].nil?
                 secondary_barcodes = single_row[self.mapping['secondary_barcode'][:position]].split(',')
+                secondary_barcodes_qty = single_row[self.mapping['secondary_barcode_qty'][:position]].split(',')
                 usable_record[:all_barcodes]["1"] = secondary_barcodes
                 secondary_barcodes.each do |single_secondary_barcode|
+                  usable_record[:all_barcodes_qty][single_secondary_barcode] = secondary_barcodes_qty
                   break unless ProductBarcode.where(:barcode => single_secondary_barcode.strip).empty? && (!@all_barcodes.include? single_secondary_barcode.strip)
                   @all_barcodes << single_secondary_barcode.strip
                   usable_record[:barcodes] << single_secondary_barcode.strip
@@ -234,14 +240,20 @@ module Groovepacker
             if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0
               unless single_row[self.mapping['tertiary_barcode'][:position]].nil?
                 tertiary_barcodes = single_row[self.mapping['tertiary_barcode'][:position]].split(',')
+                tertiary_barcodes_qty = single_row[self.mapping['tertiary_barcode_qty'][:position]].split(',')
                 usable_record[:all_barcodes]["2"] = tertiary_barcodes
                 tertiary_barcodes.each do |single_tertiary_barcode|
+                  usable_record[:all_barcodes_qty][single_tertiary_barcode] = tertiary_barcodes_qty
                   break unless ProductBarcode.where(:barcode => single_tertiary_barcode.strip).empty? && (!@all_barcodes.include? single_tertiary_barcode.strip)
                   @all_barcodes << single_tertiary_barcode.strip
                   usable_record[:barcodes] << single_tertiary_barcode.strip
                 end
               end
             end
+
+            usable_record[:barcodes] = map_barcodes('quaternary_barcode', "4", single_row, usable_record)
+            usable_record[:barcodes] = map_barcodes('quinary_barcode', "5", single_row, usable_record)
+            usable_record[:barcodes] = map_barcodes('senary_barcode', "6", single_row, usable_record)
 
             if !self.mapping['product_type'].nil? && self.mapping['product_type'][:position] >= 0
               usable_record[:product_type] = single_row[self.mapping['product_type'][:position]]
@@ -264,6 +276,23 @@ module Groovepacker
               end
             end
             usable_record
+          end
+
+          def map_barcodes(barcode, order, single_row, usable_record)
+            if !self.mapping[barcode].nil? && self.mapping[barcode][:position] >= 0
+              unless single_row[self.mapping[barcode][:position]].nil?
+                barcodes = single_row[self.mapping[barcode][:position]].split(',')
+                barcodes_qty = single_row[self.mapping["#{barcode}_qty"][:position]].split(',')
+                usable_record[:all_barcodes][order] = barcodes
+                barcodes.each do |single_barcode|
+                  usable_record[:all_barcodes_qty][single_barcode] = barcodes_qty
+                  break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!@all_barcodes.include? single_barcode.strip)
+                  @all_barcodes << single_barcode.strip
+                  usable_record[:barcodes] << single_barcode.strip
+                end
+              end
+            end 
+            usable_record[:barcodes]
           end
 
           def prepare_to_import
@@ -422,6 +451,7 @@ module Groovepacker
                 if !to_not_add_barcodes.include?(single_to_add_barcode) && single_to_add_barcode != "[DELETE]"
                   to_add_barcode = ProductBarcode.new
                   to_add_barcode.barcode = single_to_add_barcode
+                  to_add_barcode.packing_count = record[:all_barcodes_qty][single_to_add_barcode][0].to_i
                   to_add_barcode.order = index
                   to_add_barcode.product_id = duplicate_product.id
                   @import_product_barcodes << to_add_barcode
@@ -678,6 +708,8 @@ module Groovepacker
                       unless @found_barcodes.include? barcode
                         product_barcode = ProductBarcode.new
                         product_barcode.barcode = barcode
+                        product_barcode.packing_count = record[:all_barcodes_qty][barcode][0]
+                        product_barcode.is_multipack_barcode = true
                         product_barcode.order = new_order
                         product_barcode.product_id = product_id
                         @import_product_barcodes << product_barcode
@@ -745,7 +777,7 @@ module Groovepacker
             @import_product_skus.clear
             @product_import.status = 'importing_barcodes'
             @product_import.save
-
+            
             ProductBarcode.import @import_product_barcodes
 
             @import_product_barcodes.clear

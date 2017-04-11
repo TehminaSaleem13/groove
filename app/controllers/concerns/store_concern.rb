@@ -5,7 +5,7 @@ module StoreConcern
  def check_store_type
   init_store = Groovepacker::Stores::Stores.new(@store, params, @result)
   case @store.store_type
-  when 'Magento'		
+  when 'Magento'    
   @result = init_store.magento_update_create
   when "Magento API 2"
     @result = init_store.magento_rest_update_create
@@ -13,7 +13,7 @@ module StoreConcern
     @result = init_store.amazon_update_create 
   when 'Ebay'
     @result = init_store.ebay_update_create(session)
-  when	'CSV' || 'system'
+  when  'CSV' || 'system'
     @result = init_store.csv_update_create
   when 'Shipstation API 2'
     @result = init_store.shipstation_rest_update_create
@@ -42,8 +42,8 @@ module StoreConcern
     if ['both', 'order'].include?(params[:type])
       @result['order'] = Hash.new
       @result['order']['map_options'] = [{value: 'increment_id', name: 'Order number'},{value: 'order_placed_time', name: 'Order Date/Time'},{value: 'sku', name: 'SKU'}, {value: 'product_name', name: 'Product Name'}, {value: 'barcode', name: 'Barcode/UPC'}, {value: 'qty', name: 'QTY'}, {value: 'category', name: 'Product Category'}, {value: 'product_weight', name: 'Weight Oz'}, {value: 'product_instructions', name: 'Product Instructions'}, {value: 'image', name: 'Image Absolute URL'}, {value: 'firstname', name: '(First)Full Name'}, {value: 'lastname', name: 'Last Name'}, {value: 'email', name: 'Email'}, {value: 'address_1', name: 'Address 1'}, {value: 'address_2', name: 'Address 2'}, {value: 'city', name: 'City'}, {value: 'state', name: 'State'}, {value: 'postcode', name: 'Postal Code'}, {value: 'country', name: 'Country'}, {value: 'method', name: 'Shipping Method'}, {value: 'price', name: 'Order Total'}, {value: 'customer_comments', name: 'Customer Comments'}, {value: 'notes_internal', name: 'Internal Notes'}, {value: 'notes_toPacker', name: 'Notes to Packer'}, {value: 'tracking_num', name: 'Tracking Number'}, {value: 'item_sale_price', name: 'Item Sale Price'}, {value: 'secondary_sku', name: 'SKU 2'}, {value: 'tertiary_sku', name: 'SKU 3'}, {value: 'secondary_barcode', name: 'Barcode 2'}, {value: 'tertiary_barcode', name: 'Barcode 3'}, {value: 'custom_field_one', name: general_settings.custom_field_one}, {value: 'custom_field_two', name: general_settings.custom_field_two}]
-      if csv_map.order_csv_map.nil?
-        @result['order']['settings'] = default_csv_map
+      if csv_map.order_csv_map.blank?
+        @result['order']['settings'] = default_csv_map 
       else
         temp_mapping = csv_map.order_csv_map[:map]
         new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
@@ -69,7 +69,7 @@ module StoreConcern
   def product_kit_csv_map(csv_map, csv_directory, current_tenant, default_csv_map)
     if ['both', 'product'].include?(params[:type])
       @result['product'] = Hash.new
-      @result['product']['map_options'] = [ {value: 'sku', name: 'SKU'}, {value: 'barcode', name: 'Barcode'}, {value: 'product_name', name: 'Name'}, {value: 'inv_wh1', name: 'QTY On Hand'}, {value: 'location_primary', name: 'Bin Location'}, {value: 'product_images', name: 'Image Absolute URL'}, {value: 'product_weight', name: 'Weight Oz'}, {value: 'category_name', name: 'Category'}, {value: 'product_instructions', name: 'Packing Instructions'}, {value: 'receiving_instructions', name: 'Receiving Instructions'}, {value: 'secondary_sku', name: 'SKU 2'}, {value: 'tertiary_sku', name: 'SKU 3'}, {value: 'secondary_barcode', name: 'Barcode 2'}, {value: 'tertiary_barcode', name: 'Barcode 3'}, {value: 'location_secondary', name: 'Bin Location 2'}, {value: 'location_tertiary', name: 'Bin Location 3'}]
+      @result['product']['map_options'] = [ {value: 'sku', name: 'SKU'}, {value: 'barcode', name: 'Barcode'}, {value: 'barcode_qty', name: 'Barcode Qty 1'}, {value: 'product_name', name: 'Name'}, {value: 'inv_wh1', name: 'QTY On Hand'}, {value: 'location_primary', name: 'Bin Location'}, {value: 'product_images', name: 'Image Absolute URL'}, {value: 'product_weight', name: 'Weight Oz'}, {value: 'category_name', name: 'Category'}, {value: 'product_instructions', name: 'Packing Instructions'}, {value: 'receiving_instructions', name: 'Receiving Instructions'}, {value: 'secondary_sku', name: 'SKU 2'}, {value: 'tertiary_sku', name: 'SKU 3'}, {value: 'secondary_barcode', name: 'Barcode 2'}, {value: 'secondary_barcode_qty', name: 'Barcode 2 qty'}, {value: 'tertiary_barcode', name: 'Barcode 3'}, {value: 'tertiary_barcode_qty', name: 'Barcode 3 qty'}, {value: 'quaternary_barcode', name: 'Barcode 4'}, {value: 'quaternary_barcode_qty', name: 'Barcode 4 qty'}, {value: 'quinary_barcode', name: 'Barcode 5'}, {value: 'quinary_barcode_qty', name: 'Barcode 5 qty'}, {value: 'senary_barcode', name: 'Barcode 6'}, {value: 'senary_barcode_qty', name: 'Barcode 6 qty'}, {value: 'location_secondary', name: 'Bin Location 2'}, {value: 'location_tertiary', name: 'Bin Location 3'}]
       @result['product']['settings'] = csv_map.product_csv_map.nil? ? default_csv_map : csv_map.product_csv_map
       product_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.product.csv")
       if File.exist? product_file_path
@@ -108,7 +108,7 @@ module StoreConcern
         csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
         csv_directory = 'uploads/csv'
         current_tenant = Apartment::Tenant.current
-        order_csv_mapping(csv_map, csv_directory, current_tenant, default_csv_map)
+        order_csv_mapping(csv_map, csv_directory, current_tenant, default_csv_map) 
         product_kit_csv_map(csv_map, csv_directory, current_tenant, default_csv_map)
       else
         @result['status'] = false
@@ -188,11 +188,10 @@ module StoreConcern
       else
         map_data = csv_map.order_csv_map
       end
-    end
-    
-    map_data.name = params[:name]
-    map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence], :map => params[:map] }
+    end  
     begin
+      map_data.name = params[:name]
+      map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence], :map => params[:map] }
       map_data.save!
       csv_map.save!
     rescue ActiveRecord::RecordInvalid
