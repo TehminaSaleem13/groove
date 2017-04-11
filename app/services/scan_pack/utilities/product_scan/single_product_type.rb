@@ -9,7 +9,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
           order_item = OrderItem.find(item['order_item_id'])
 
           # from LotNumber Module
-          # store_lot_number(order_item, serial_added)
+          store_lot_number(order_item, serial_added)
 
           # unless serial_added
           #   @result['data']['serial']['order_item_id'] = order_item.id
