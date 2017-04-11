@@ -204,7 +204,7 @@ module Groovepacker
             if !self.mapping['barcode'].nil? && self.mapping['barcode'][:position] >= 0
               unless single_row[self.mapping['barcode'][:position]].nil?
                 barcodes = single_row[self.mapping['barcode'][:position]].split(',')
-                barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',')
+                barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',') rescue 1
                 usable_record[:all_barcodes]["0"] = barcodes  
                 barcodes.each do |single_barcode|
                   usable_record[:all_barcodes_qty][single_barcode] = barcode_qty
@@ -215,7 +215,7 @@ module Groovepacker
               end
             elsif self.params[:generate_barcode_from_sku]
               barcodes = single_row[self.mapping['sku'][:position]].split(',')
-              barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',')
+              barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',') rescue 1
               usable_record[:all_barcodes]["0"] = barcodes
               barcodes.each do |single_barcode|
                 usable_record[:all_barcodes_qty][single_barcode] = barcode_qty
@@ -226,7 +226,7 @@ module Groovepacker
             if !self.mapping['secondary_barcode'].nil? && self.mapping['secondary_barcode'][:position] >= 0
               unless single_row[self.mapping['secondary_barcode'][:position]].nil?
                 secondary_barcodes = single_row[self.mapping['secondary_barcode'][:position]].split(',')
-                secondary_barcodes_qty = single_row[self.mapping['secondary_barcode_qty'][:position]].split(',')
+                secondary_barcodes_qty = single_row[self.mapping['secondary_barcode_qty'][:position]].split(',') rescue 1
                 usable_record[:all_barcodes]["1"] = secondary_barcodes
                 secondary_barcodes.each do |single_secondary_barcode|
                   usable_record[:all_barcodes_qty][single_secondary_barcode] = secondary_barcodes_qty
@@ -240,7 +240,7 @@ module Groovepacker
             if !self.mapping['tertiary_barcode'].nil? && self.mapping['tertiary_barcode'][:position] >= 0
               unless single_row[self.mapping['tertiary_barcode'][:position]].nil?
                 tertiary_barcodes = single_row[self.mapping['tertiary_barcode'][:position]].split(',')
-                tertiary_barcodes_qty = single_row[self.mapping['tertiary_barcode_qty'][:position]].split(',')
+                tertiary_barcodes_qty = single_row[self.mapping['tertiary_barcode_qty'][:position]].split(',') rescue 1
                 usable_record[:all_barcodes]["2"] = tertiary_barcodes
                 tertiary_barcodes.each do |single_tertiary_barcode|
                   usable_record[:all_barcodes_qty][single_tertiary_barcode] = tertiary_barcodes_qty
@@ -282,7 +282,7 @@ module Groovepacker
             if !self.mapping[barcode].nil? && self.mapping[barcode][:position] >= 0
               unless single_row[self.mapping[barcode][:position]].nil?
                 barcodes = single_row[self.mapping[barcode][:position]].split(',')
-                barcodes_qty = single_row[self.mapping["#{barcode}_qty"][:position]].split(',')
+                barcodes_qty = single_row[self.mapping["#{barcode}_qty"][:position]].split(',') rescue 1
                 usable_record[:all_barcodes][order] = barcodes
                 barcodes.each do |single_barcode|
                   usable_record[:all_barcodes_qty][single_barcode] = barcodes_qty
