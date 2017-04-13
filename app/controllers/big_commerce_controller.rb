@@ -15,7 +15,7 @@ class BigCommerceController < ApplicationController
     @auth_hash = generate_access_token
     key = "groovehacks:bigcommerce:session"
     app_session = $redis.get(key)
-    app_session = JSON.parse(app_session)
+    app_session = JSON.parse(app_session) rescue {}
     unless app_session["tenant"].blank?
       @store_id = app_session["store_id"] 
       Apartment::Tenant.switch(app_session["tenant"])
