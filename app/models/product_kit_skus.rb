@@ -59,13 +59,23 @@ class ProductKitSkus < ActiveRecord::Base
       result['status'] &= false
     else
       params[:kit_products].reject! { |a| a=="" }
-      params[:kit_products].each {|kit_product| result = self.remove_single_kit_product(kit, kit_product, params, result) }
+      tenant = Apartment::Tenant.current
+      params[:kit_products].each do  |kit_product| 
+        count = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id).order_item_kit_products.count
+        if count > 200
+          result["success_messages"] = "Your request for 'remove item' has been queued"
+          result["job"] = self.delay.remove_single_kit_product(kit, kit_product, params, result, tenant) 
+        else
+          result =self.remove_single_kit_product(kit, kit_product, params, result, tenant) 
+        end
+      end
     end
     kit.update_product_status
     return result
   end
 
-  def self.remove_single_kit_product(kit, kit_product, params, result)
+  def self.remove_single_kit_product(kit, kit_product, params, result, tenant)
+    Apartment::Tenant.switch tenant
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id)
     if product_kit_sku.nil?
       result['messages'].push("Product #{kit_product} not found in item")
@@ -97,13 +107,12 @@ class ProductKitSkus < ActiveRecord::Base
       result['status'] &= false
       return result
     end
-
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, kit.id)
     if product_kit_sku.nil?
       @productkitsku = ProductKitSkus.new
       @productkitsku.option_product_id = item.id
       @productkitsku.qty = 1
-      kit.product_kit_skuss << @productkitsku
+      kit.product_kit_skuss << @productkitsku unless kit.product_kit_skuss.map(&:option_product_id).include?(@productkitsku.option_product_id)
       if kit.save
         kit.update_product_status
         return result 

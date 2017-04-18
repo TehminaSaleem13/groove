@@ -449,7 +449,11 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
       kit_products: skus
     }).success(function (data) {
       if (data.status) {
-        notification.notify("Successfully Removed", 1);
+        if (data.success_messages){
+          notification.notify(data.success_messages, 1);
+        } else{
+          notification.notify("Successfully Removed", 1);
+        }
       } else {
         notification.notify(data.messages, 0);
       }
