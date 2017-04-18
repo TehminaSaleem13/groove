@@ -101,7 +101,7 @@ module Groovepacker
         end
 
         def get_old_shipped_count(shipping_result)
-          (1..6).each do |i|
+          (2..6).each do |i|
             if @access_record_count - i >= 0
               shipped = {}
               access_data = @access_restrictions[-i]
