@@ -51,7 +51,7 @@ module TenantsHelper
       case type
       when 'update_restriction'
         subsc = @tenant.subscription
-        if subsc.shopify_customer
+        if subsc.try(:shopify_customer)
           access = params["access_restrictions_info"]
           subsc.tenant_data = "#{params["subscription_info"]["amount"]}-#{access['max_allowed']}-#{access['max_users']}-#{access['max_import_sources']}"
           subsc.shopify_payment_token = SecureRandom.hex #(0...20).map { ('a'..'z').to_a[rand(15)] }.join
