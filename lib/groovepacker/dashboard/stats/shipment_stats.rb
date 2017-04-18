@@ -89,12 +89,11 @@ module Groovepacker
 
         def get_shipping_result(shipping_result)
           latest_access_data = @access_restrictions.last
-
           accepted_data.keys.each do |key|
             if key == 'shipped_last'
               shipping_result[key] = @access_restrictions[-2][accepted_data[key]] if @access_record_count > 1
             elsif key == "shipped_current"
-              shipping_result[key] = @access_restrictions[-1][accepted_data[key]] if @access_record_count > 1
+              shipping_result[key] = @access_restrictions[-1][accepted_data[key]] if @access_record_count >= 1
             else
               shipping_result[key] = latest_access_data[accepted_data[key]]
             end
@@ -108,8 +107,8 @@ module Groovepacker
               access_data = @access_restrictions[-i]
               next if access_data.created_at.nil?
               shipped['shipping_duration'] =
-                (access_data.created_at - 1.month).strftime('%d %b') +
-                ' - ' + access_data.created_at.strftime('%d %b')
+                (access_data.created_at).strftime('%d %b') +
+                ' - ' + (access_data.created_at + 1.month).strftime('%d %b')
               shipped['shipped_count'] = access_data.total_scanned_shipments.to_s
               shipping_result['shipped_last6'] << shipped
             else
