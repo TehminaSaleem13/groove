@@ -80,7 +80,7 @@
             <br/><br/>
             <center>
               <input type="radio" name="interval" value="month" ng-model="tenants.single.subscription_info.interval"> Monthly 
-              <shopifytag ng-if="tenants.single.subscription_info.shopify_customer == false"><input type="radio" name="interval" value="year"
+              <shopifytag ng-if="tenants.single.subscription_info.shopify_customer != true"><input type="radio" name="interval" value="year"
               ng-model="tenants.single.subscription_info.interval"> Yearly</shopifytag>
             </center>
           </div>
@@ -108,7 +108,7 @@
                     class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update
             </button>
           </div>
-          <div class="col-sm-3" ng-if="tenants.single.subscription_info.shopify_customer == false">
+          <div class="col-sm-3" ng-if="tenants.single.subscription_info.shopify_customer != true">
             <br>
             <button ng-click="update_zero_plan()" 
                     class="dropdown-toggle groove-button label label-default label-success pull-right" style="margin-right: 30px;" translate>Update Zero Subscription Plan
@@ -125,7 +125,7 @@
           <textarea class="form-control input-style"
             rows="5" ng-model="tenants.single.basicinfo.addon_notes" placeholder="Unfocus will save data..." ng-blur="update_access_restrictions()"></textarea>
         </div>
-        <div class="col-sm-4" ng-if="tenants.single.subscription_info.shopify_customer == false">
+        <div class="col-sm-4" ng-if="tenants.single.subscription_info.shopify_customer != true">
           <div style="clear:both;"></div>
           <div>
             <h4>Stripe Customer <i class="fa fa-circle" aria-hidden="true" 
