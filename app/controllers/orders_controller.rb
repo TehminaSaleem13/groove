@@ -188,13 +188,6 @@ class OrdersController < ApplicationController
         render json: @result
       }
     end
-    base_file_name = File.basename(pdf_path)
-    pdf_file = File.open(reader_file_path)
-    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
-    pdf_file.close
-    generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
-    # generate_barcode.save
-    render json: {url: generate_barcode}
   end
 
   def generate_packing_slip
