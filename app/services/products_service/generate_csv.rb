@@ -158,7 +158,6 @@ module ProductsService
         index = title.gsub(/[^\d]/, '').to_i
         collection.length > 1 ? collection[index - 2].send(attribute) : ''
       rescue
-        collection[collection.count - 2].send(attribute)
       end
     end
 
