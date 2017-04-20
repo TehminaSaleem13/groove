@@ -57,8 +57,8 @@ module ProductsService
       @headers = [
         'ID', 'Name', 'SKU 1', 'Barcode 1','Barcode 1 qty', 'BinLocation 1', 'QOH',
         'Primary Image', 'Weight', 'Primary Category',
-        'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 2 qty', 'Barcode 3', 'Barcode 3 qty', 'BinLocation 2',
-        'BinLocation 3', 'Barcode 4', 'Barcode 4 qty', 'Barcode 5', 'Barcode 5 qty', 'Barcode 6', 'Barcode 6 qty'
+        'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 2 qty', 'Barcode 3', 'Barcode 3 qty', 'Barcode 4', 'Barcode 4 qty', 'Barcode 5', 'Barcode 5 qty', 'Barcode 6', 'Barcode 6 qty', 'BinLocation 2',
+        'BinLocation 3'
       ]
     end
 
@@ -156,7 +156,7 @@ module ProductsService
       begin
         collection = attribute == "packing_count" ? item.send("product_barcodes") : item.send("product_#{attribute}s")
         index = title.gsub(/[^\d]/, '').to_i
-        collection.length > 1 ? collection[index - 2].send(attribute) : ''
+        collection.length > 1 ? collection[index - 1].send(attribute) : ''
       rescue
       end
     end
