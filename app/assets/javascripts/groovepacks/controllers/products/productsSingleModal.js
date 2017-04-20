@@ -53,6 +53,9 @@ groovepacks_controllers.
             angular.copy(scope.products.single, myscope.single);
           }
           scope.multipackbarcode_count = Object.keys(scope.products.single.basicinfo.multibarcode).length
+          if (scope.multipackbarcode_count == 0){
+            scope.products.single.basicinfo.multibarcode[1] = {"barcode":null,"packcount":null, "id":null};
+          }
         });
       };
 
