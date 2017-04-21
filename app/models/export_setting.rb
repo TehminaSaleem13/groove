@@ -45,8 +45,7 @@ class ExportSetting < ActiveRecord::Base
     return with_error_filename if start_time.blank?
 
     orders = Order.where(scanned_on: start_time..end_time)
-    self.last_exported = Time.zone.now
-    save
+    ExportSetting.update_all(:last_exported => Time.zone.now)
     filename = generate_file_name
     if order_export_type == 'do_not_include'
       do_export_if_orders_not_included(orders, filename)
