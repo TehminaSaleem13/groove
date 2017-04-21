@@ -61,7 +61,7 @@ class ProductKitSkus < ActiveRecord::Base
       params[:kit_products].reject! { |a| a=="" }
       tenant = Apartment::Tenant.current
       params[:kit_products].each do  |kit_product| 
-        count = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id).order_item_kit_products.count
+        count = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id).order_item_kit_products.count rescue 0
         if count > 200
           result["success_messages"] = "Your request for 'remove item' has been queued"
           result["job"] = self.delay.remove_single_kit_product(kit, kit_product, params, result, tenant) 
