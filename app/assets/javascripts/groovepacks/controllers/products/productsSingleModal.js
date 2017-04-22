@@ -54,7 +54,7 @@ groovepacks_controllers.
           }
           scope.multipackbarcode_count = Object.keys(scope.products.single.basicinfo.multibarcode).length
           if (scope.multipackbarcode_count == 0){
-            scope.products.single.basicinfo.multibarcode[1] = {"barcode":null,"packcount":null, "id":null};
+            scope.products.single.basicinfo.multibarcode[1] = {"barcode":null,"packcount":1, "id":null};
           }
         });
       };
@@ -296,7 +296,7 @@ groovepacks_controllers.
 
       scope.append_multipack_barcode = function(){
         scope.multipackbarcode_count = scope.multipackbarcode_count + 1;
-        scope.products.single.basicinfo.multibarcode[scope.multipackbarcode_count] = {"barcode":null,"packcount":null, "id":null};
+        scope.products.single.basicinfo.multibarcode[scope.multipackbarcode_count] = {"barcode":null,"packcount":1, "id":null};
       }
 
       scope.update_product_sync_options = function (post_fn, auto) {
