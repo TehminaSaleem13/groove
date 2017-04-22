@@ -62,7 +62,7 @@ module StoreConcern
   
   def csv_data(kind)
     current_tenant = Apartment::Tenant.current
-    @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").encode("UTF-8")
+    @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").encode("UTF-8").split("\n").first(30).join("\n")
     @file_data
   end
 
