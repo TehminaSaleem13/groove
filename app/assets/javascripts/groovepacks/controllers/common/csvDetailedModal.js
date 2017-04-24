@@ -192,8 +192,12 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
         if ("product" in data && "data" in data["product"]) {
           scope.csv.importer.product = data["product"];
           scope.csv.importer.type = "product";
+        };
+        try{
+          scope.csv.current = scope.csv.importer[scope.csv.importer.typeof]["settings"].map;
+        } catch(e){
+          scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
         }
-        scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
         scope.csv.current.store_id = data["store_id"];
         scope.csv.current.name = scope.csv.importer[scope.csv.importer.type]["settings"].name;
         scope.csv.current.type = scope.csv.importer.type;
