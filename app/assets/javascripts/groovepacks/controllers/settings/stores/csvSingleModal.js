@@ -199,7 +199,7 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
 
     };
 
-    myscope.init = function () {
+    myscope.init = function (tried) {
       scope.csv = {};
       scope.stores = store_data;
       scope.translations = {
@@ -215,16 +215,22 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
       stores.csv.import(scope.stores, scope.stores.single.id).success(function (data) {
         scope.csv.importer = {};
         scope.csv.importer.default_map = {value: 'none', name: "Unmapped"};
-        if (data["kit"]!=undefined) {
+        if (data["kit"]!=undefined && data["kit"]["data"]!=undefined) {
           scope.csv.importer.kit = data["kit"];
           scope.csv.importer.type = "kit";
         }
-        if (data["order"]!=undefined) {
+        if (data["order"]!=undefined && data["order"]["data"]!=undefined) {
           scope.csv.importer.order = data["order"];
           scope.csv.importer.type = "order";
         }
-
-        scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
+        try{
+          scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
+        }catch(e){
+          if (tried < 2){
+            tried += 1;
+            myscope.init(tried);
+          }
+        }
         scope.csv.current.store_id = data["store_id"];
         scope.csv.current.type = scope.csv.importer.type;
         scope.csv.current.name = scope.csv.importer[scope.csv.importer.type]["settings"].name;
@@ -237,5 +243,5 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
       });
     };
 
-    myscope.init();
+    myscope.init(0);
   }]);

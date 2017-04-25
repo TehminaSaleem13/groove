@@ -118,6 +118,7 @@ module StoreConcern
       @result['status'] = false
       @result['messages'].push('Cannot find store')
     end 
+    @result
   end
 
   def data_import

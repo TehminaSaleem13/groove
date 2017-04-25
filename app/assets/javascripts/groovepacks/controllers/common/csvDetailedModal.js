@@ -173,7 +173,7 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
       }, 1000);
     };
 
-    myscope.init = function () {
+    myscope.init = function (tried) {
       scope.csv = {};
       scope.stores = store_data;
       scope.translations = {
@@ -196,7 +196,14 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
         try{
           scope.csv.current = scope.csv.importer[scope.csv.importer.typeof]["settings"].map;
         } catch(e){
-          scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
+          try{
+            scope.csv.current = scope.csv.importer[scope.csv.importer.type]["settings"].map;
+          }catch(e){
+            if (tried < 2){
+              tried += 1;
+              myscope.init(tried);
+            }
+          }
         }
         scope.csv.current.store_id = data["store_id"];
         scope.csv.current.name = scope.csv.importer[scope.csv.importer.type]["settings"].name;
@@ -213,5 +220,5 @@ groovepacks_controllers.controller('csvDetailedModal', ['$scope', 'store_data', 
       });
     };
 
-    myscope.init();
+    myscope.init(0);
   }]);
