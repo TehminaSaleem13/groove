@@ -185,7 +185,8 @@ groovepacks_services.factory('products', ['$http', 'notification', 'editable', '
         products.setup.select_all = false;
         products.setup.inverted = false;
         products.selected = [];
-        $window.open(data.filename);
+        notification.notify("Your request has been queued. you will receive an email when products export is complete", 1);
+        // $window.open(data.filename);
       } else {
         notification.notify(data.messages, 0);
       }

@@ -43,4 +43,10 @@ class CsvExportMailer < ActionMailer::Base
     @url = url
     mail to: recipients, subject: "[#{tenant}] Product Broken Images CSV" if recipients.present? 
   end
+
+  def send_s3_export_product_url(url, tenant)
+    recipients = GeneralSetting.all.first.email_address_for_packer_notes.split(',') rescue []
+    @url = url
+    mail to: recipients, subject: "[#{tenant}] Product Export CSV" if recipients.present? 
+  end
 end
