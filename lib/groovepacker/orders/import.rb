@@ -111,7 +111,8 @@ module Groovepacker
           order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started', display_summary: true)
           # call delayed job
           tenant = Apartment::Tenant.current
-          import_orders_obj = ImportOrders.new
+          @params[:user_id] = @current_user.id
+          import_orders_obj = ImportOrders.new(@params)
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
           import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}").import_orders tenant
           # import_orders_obj.import_orders tenant
