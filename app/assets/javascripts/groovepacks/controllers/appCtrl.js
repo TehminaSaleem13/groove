@@ -383,6 +383,10 @@ groovepacks_controllers.
         notification.notify(resp.message);
       });
 
+      groovIO.on('csv_already_imported_warning', function (resp) {
+        notification.notify(resp.message);
+      });
+
       $scope.show_logout_box = false;
       groovIO.on('ask_logout', function (msg) {
         if (!$scope.show_logout_box) {

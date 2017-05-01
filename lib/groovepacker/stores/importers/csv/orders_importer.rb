@@ -11,6 +11,8 @@ module Groovepacker
           def import
             initialize_helpers
             result = build_result
+            @csv_import_summary_exists = true
+            @csv_import_summary = find_or_create_csvimportsummary
             order_map = @helper.create_order_map
             @imported_orders = {}
             @created_order_items = []
@@ -19,6 +21,7 @@ module Groovepacker
             @import_item = @helper.initialize_import_item
             index_no = mapping["increment_id"][:position]
             final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}.reject{ |arr| arr.all?(&:blank?) }
+            final_records = remove_already_imported_rows(final_records)
             Order.where("increment_id like '%\-currupted'").destroy_all
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
@@ -46,6 +49,7 @@ module Groovepacker
             current_inc_id = nil;
             order_items_ar = [];
             final_records.each_with_index do |single_row, index|
+              next if row_already_imported(final_records, single_row, index)
               #check_or_assign_import_item
               import_item = @import_item
               @import_item = ImportItem.find(@import_item.id) rescue import_item
@@ -134,7 +138,7 @@ module Groovepacker
               @order.store_id = params[:store_id]
               @order_required = %w(qty sku increment_id price)
               @order.save
-              import_order_data(order_map, single_row)
+              import_order_data(order_map, single_row, index)
               @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
               @order.update_attributes(increment_id: "#{inc_id}-currupted")
               @order.save
@@ -145,6 +149,7 @@ module Groovepacker
             else
               @import_item.previous_imported += 1
               @import_item.save # Skipped because of duplicate order
+              CsvImportLogEntry.create(index: index, csv_import_summary_id: @csv_import_summary.id)
             end
           end
 
@@ -185,7 +190,7 @@ module Groovepacker
             end
           end
 
-          def import_for_nonunique_order_items(single_row)
+          def import_for_nonunique_order_items(single_row, index)
             return if mapping['sku'].nil?
             update_import_item(1, 0)
             single_sku = @helper.get_row_data(single_row, 'sku')
@@ -201,15 +206,16 @@ module Groovepacker
               product = Product.new
               set_product_info(product, single_row)
             end
+            CsvImportLogEntry.create(index: index, csv_import_summary_id: @csv_import_summary.id)
             update_import_item(nil, 1)
           end
 
-          def import_order_data(order_map, single_row)
+          def import_order_data(order_map, single_row, index)
             order_map.each do |single_map|
               next unless @helper.verify_single_item(single_row, single_map)
               # if sku, create order item with product id, qty
               if @helper.import_nonunique_items?(single_map)
-                import_for_nonunique_order_items(single_row)
+                import_for_nonunique_order_items(single_row, index)
               elsif single_map == 'firstname'
                 @helper.import_first_name(@order, single_row, single_map)
               elsif @helper.import_unique_items?(single_map)
@@ -304,6 +310,46 @@ module Groovepacker
 
           def origional_order_id
             @order.increment_id.split("-currupted").first rescue nil
+          end
+
+          def find_or_create_csvimportsummary
+            summary_params = {file_name: params[:file_name].strip, import_type: "Order"}
+            summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).destroy_all
+            summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=?", params[:file_name].strip, "Order", DateTime.now.beginning_of_day, DateTime.now.end_of_day).last
+            if summary.blank?
+              summary_params[:file_size] = params[:file_size]
+              summary = CsvImportSummary.create(summary_params)
+              @csv_import_summary_exists = false
+            end
+            summary
+          end
+
+          def remove_already_imported_rows(final_records)
+            new_records = final_records
+            final_records_size = (final_records.join("\n").bytesize.to_f/1024).round(4)
+            return final_records unless @csv_import_summary_exists
+            if (final_records_size == @csv_import_summary.file_size.to_f) && params[:file_name].strip==@csv_import_summary.file_name
+              Order.csv_already_imported_warning
+              log_entries = @csv_import_summary.csv_import_log_entries.map(&:index).uniq rescue []
+              log_entries.each do |entry|
+                new_records[entry]=["already_imported"]
+              end
+              new_records = new_records.reject(&:empty?)
+              if (new_records.count+log_entries.count) == final_records.count
+                final_records = new_records
+              end
+            end
+            final_records
+          end
+
+          def row_already_imported(final_records, single_row, index)
+            if single_row.count==1 and single_row.last=="already_imported"
+              return true
+            elsif final_records[index-1]==["already_imported"]
+              @import_item.previous_imported = index+1
+              @import_item.save # Skipped because of duplicate order
+              return false
+            end
           end
         end
       end
