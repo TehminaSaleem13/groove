@@ -98,7 +98,10 @@ class SettingsController < ApplicationController
     @result['inventory_report_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
-    @result['current_time'] = (Time.current + GeneralSetting.all.first.try(:time_zone).to_i ).strftime('%I:%M %p')
+    general_settings = GeneralSetting.all.first
+    offset = general_settings.try(:time_zone).to_i
+    offset = general_settings.dst ? offset : offset+3600
+    @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
     general_setting = GeneralSetting.all.first
 
     if general_setting.present?
@@ -247,6 +250,7 @@ class SettingsController < ApplicationController
 
   def fetch_and_update_time_zone
     setting = GeneralSetting.first
+    setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
     if params["add_time_zone"].present?
       if params["auto_detect"] == "true" || params["auto_detect"] == "false" && (params["add_time_zone"].include? ":")
         params["add_time_zone"] = convert_offset_in_second(params["add_time_zone"])
@@ -255,9 +259,12 @@ class SettingsController < ApplicationController
         setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: false)
       end
       @result = {};
-      @result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
+      offset = params["add_time_zone"].to_i
+      offset = setting.dst ? offset : offset+3600
+      @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
+      #@result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
     end
-    setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
+    
     render json: @result
   end
 
