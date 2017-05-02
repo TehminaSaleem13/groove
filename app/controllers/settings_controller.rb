@@ -100,7 +100,7 @@ class SettingsController < ApplicationController
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_settings = GeneralSetting.all.first
     offset = general_settings.try(:time_zone).to_i
-    offset = general_settings.dst ? offset : offset+3600
+    offset = general_settings.try(:dst) ? offset : offset+3600
     @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
     general_setting = GeneralSetting.all.first
 
