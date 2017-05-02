@@ -314,7 +314,8 @@ module Groovepacker
 
           def find_or_create_csvimportsummary
             summary_params = {file_name: params[:file_name].strip, import_type: "Order"}
-            summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).destroy_all
+            CsvImportLogEntry.where("created_at<?", DateTime.now.beginning_of_day).delete_all
+            summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).delete_all
             summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=?", params[:file_name].strip, "Order", DateTime.now.beginning_of_day, DateTime.now.end_of_day).last
             if summary.blank?
               summary_params[:file_size] = params[:file_size]
