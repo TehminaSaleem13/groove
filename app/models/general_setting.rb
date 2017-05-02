@@ -21,7 +21,7 @@ class GeneralSetting < ActiveRecord::Base
                   :tracking_error_info_not_found, :custom_field_one,
                   :custom_field_two, :export_csv_email,
                   :show_primary_bin_loc_in_barcodeslip,
-                  :time_zone, :auto_detect, :schedule_import_mode
+                  :time_zone, :auto_detect, :schedule_import_mode, :master_switch
   # validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
   validates :email_address_for_packer_notes, :format => { :with => /(\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})(,\s*([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,}))*\z)/i }, :allow_blank => true
   after_save :send_low_inventory_alert_email
@@ -193,8 +193,7 @@ class GeneralSetting < ActiveRecord::Base
   def schedule_job (date, time, job_type)
     job_scheduled = false
     run_at_date = date.getutc
-    run_at_date = run_at_date.change({:hour => time.hour,
-                                      :min => time.min, :sec => time.sec})
+    run_at_date = run_at_date.change({:hour => time.hour, :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i + Random.rand(120)
     time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
     time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
@@ -216,9 +215,8 @@ class GeneralSetting < ActiveRecord::Base
       elsif job_type == 'export_order'
         export_setting = ExportSetting.all.first
         if export_setting.should_export_orders(date)
-          Delayed::Job.where("queue =? and run_at >= ? and run_at <= ?", "order_export_email_scheduled_#{tenant}", time_diff.seconds.from_now.beginning_of_day , time_diff.seconds.from_now.end_of_day).destroy_all
-          export_setting.manual_export = false
-          export_setting.save
+          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time_diff.seconds.from_now.beginning_of_day , time_diff.seconds.from_now.end_of_day).destroy_all
+          ExportSetting.update_all(manual_export: false)
           ExportOrder.delay(:run_at => time_diff.seconds.from_now, :queue => "order_export_email_scheduled_#{tenant}").export(tenant)
           # ExportOrder.export(tenant).deliver
           job_scheduled = true

@@ -1,5 +1,6 @@
 class ImportOrders < Groovepacker::Utilities::Base
   include Connection
+  include AhoyEvent
 
   def import_orders(tenant)
     Apartment::Tenant.switch(tenant)
@@ -33,6 +34,7 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   def initiate_import(tenant)
     #delete existing completed and cancelled order import summaries
+    track_user(tenant, {store_id: nil, user_id: import_params[:user_id]}, "Import Started", "Order Import Started")
     delete_existing_order_import_summaries
     return if @order_import_summary.nil? || @order_import_summary.id.nil?
     @order_import_summary.import_items.reload.find_each(:batch_size => 100) do |import_item|
@@ -70,6 +72,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     ImportItem.where(store_id: params[:store].id).destroy_all
     import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
+    track_user(params[:tenant], params, "Import Started", "Order Import Started")
     Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
   end
 

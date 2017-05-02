@@ -6,7 +6,11 @@ namespace :doo do
     #DeleteOrders.new(tenant: "demo").schedule!
     #DeleteOrders.new.perform
     # t1 = Time.now
-    DeleteOrders.new.delay(run_at: 1.seconds.from_now).perform
+    if $redis.get("delete_old_orders").blank?
+      $redis.set("delete_old_orders", true) 
+      $redis.expire("delete_old_orders", 5400) 
+      DeleteOrders.new.delay(run_at: 1.seconds.from_now).perform
+    end
     # DeleteOrders.new.perform
     # p Time.now - t1
 

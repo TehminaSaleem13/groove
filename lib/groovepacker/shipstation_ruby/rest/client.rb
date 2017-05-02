@@ -120,7 +120,7 @@ module Groovepacker
           loop do
             response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
             orders += response['orders'] unless response['orders'].nil?
-            total_pages = response.parsed_response['pages']
+            total_pages = response.parsed_response['pages'] rescue nil
             page_index += 1
             return orders if page_index > total_pages.to_i
           end

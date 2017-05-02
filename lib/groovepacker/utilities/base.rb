@@ -1,7 +1,12 @@
 module Groovepacker
   module Utilities
     class Base
+      attr_accessor :import_params
       
+      def initialize(params={})
+        self.import_params = params
+      end
+
       def init_import(tenant)
         Apartment::Tenant.switch(tenant)
       end
