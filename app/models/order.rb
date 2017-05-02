@@ -64,6 +64,11 @@ class Order < ActiveRecord::Base
 
   end
 
+  def self.csv_already_imported_warning
+    result = {"status" => false, "message" => "Looks like the CSV file with this name has already been imported before. Please make changes in file contents to try uploading again"}
+    GroovRealtime::emit('csv_already_imported_warning', result, :tenant)
+  end
+
   def process_unprocessed_orders
     bulkaction = Groovepacker::Inventory::BulkActions.new
     bulkaction.process_unprocessed

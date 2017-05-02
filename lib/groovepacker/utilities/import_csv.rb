@@ -26,6 +26,8 @@ class ImportCsv
         if response[:status]
           file_path = response[:file_info][:file_path]
           csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options) rescue nil
+          
+          set_file_name(params, response[:file_info][:ftp_file_name])
         else
           result[:status] = false
           result[:messages].push(response[:error_messages])
@@ -33,6 +35,7 @@ class ImportCsv
       else
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
         csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) rescue nil
+        set_file_name(params, file.url)
       end
       if csv_file.nil?
         result[:status] = false
@@ -76,6 +79,8 @@ class ImportCsv
           end
         end
 
+        set_file_size(params, final_record)
+
         if params[:type] == 'order'
           import_order = Groovepacker::Stores::Importers::CSV::OrdersImporter.new(params, final_record, mapping, nil)
           result = import_order.import()
@@ -114,5 +119,13 @@ class ImportCsv
   end
 
   private
+
+  def set_file_name(params, file_url)
+    params[:file_name] = file_url.split("/").last
+  end
+
+  def set_file_size(params, final_record)
+    params[:file_size] = (final_record.join("\n").bytesize.to_f/1024).round(4)
+  end
 
 end
