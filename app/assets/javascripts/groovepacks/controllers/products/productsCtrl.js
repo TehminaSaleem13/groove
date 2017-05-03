@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('productsCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$q', '$modal', 'products', '$rootScope', '$window',
-    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $q, $modal, products, $rootScope, $window) {
+  controller('productsCtrl', ['$scope', '$http', '$timeout', '$stateParams', '$location', '$state', '$cookies', '$q', '$modal', 'products', '$rootScope', '$window', 'generalsettings',
+    function ($scope, $http, $timeout, $stateParams, $location, $state, $cookies, $q, $modal, products, $rootScope, $window, generalsettings) {
       //Definitions
 
       var myscope = {};
@@ -122,13 +122,33 @@ groovepacks_controllers.
       };
 
       $scope.backup_product_csv = function () {
-        if($scope.products.selected.length>0){
-          products.list.generate($scope.products).then(function (data) {
-            myscope.get_products();
-          });
-        } else {
-          products.list.select_notification();
-        }
+        $scope.general_settings = generalsettings.model.get();
+        generalsettings.single.get($scope.general_settings).success(function(response){
+          if ($scope.products.selected.length == 0) {
+            products.list.select_notification();
+          } else if(response.data.settings.email_address_for_packer_notes == ""){ 
+            var notification_modal = $modal.open({
+              templateUrl: '/assets/views/modals/settings/product_export_popup.html',
+              controller: 'productExportNotificationCtrl',
+              size: 'lg',
+              resolve: {
+                settings_data: function() {
+                  return response.data.settings;
+                }
+              }
+            });
+            notification_modal.result.then(function () {
+                products.list.generate($scope.products).then(function (data) {
+                  myscope.get_products();
+                });
+              }
+            );
+          } else {
+            products.list.generate($scope.products).then(function (data) {
+              myscope.get_products();
+            });
+          }
+        });
       };
 
       $scope.broken_image_export = function(){
