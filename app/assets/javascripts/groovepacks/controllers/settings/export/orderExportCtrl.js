@@ -1,6 +1,6 @@
 groovepacks_controllers.
-  controller('orderExportCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$window', 'exportsettings',
-    function ($scope, $http, $timeout, $location, $state, $cookies, $window, exportsettings) {
+  controller('orderExportCtrl', ['$scope', '$http', '$timeout', '$location', '$state', '$cookies', '$window', 'exportsettings', '$modal',
+    function ($scope, $http, $timeout, $location, $state, $cookies, $window, exportsettings, $modal) {
       var myscope = {};
       myscope.defaults = function () {
         return {
@@ -39,12 +39,33 @@ groovepacks_controllers.
       };
 
       $scope.download_csv = function () {
-        if ($scope.exports.start.time <= $scope.exports.end.time) {
-          // $window.open('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
-          $http.get('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
-          $scope.notify('It will be emailed to ' + $scope.export_settings.single.order_export_email, 1);
+        if ($scope.export_settings.single.order_export_email == ""){
+          var notification_modal = $modal.open({
+            templateUrl: '/assets/views/modals/settings/export_popup.html',
+            controller: 'exportNotificationCtrl',
+            size: 'lg',
+            resolve: {
+              settings_data: function() {
+                return $scope.export_settings.single;
+              }
+            }
+          });
+          notification_modal.result.then(function () {
+            if ($scope.exports.start.time <= $scope.exports.end.time) {
+              $http.get('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
+              $scope.notify('export will be emailed to this address.', 1);
+            } else {
+              $scope.notify('Start time can not be after End time');
+            }
+          });
         } else {
-          $scope.notify('Start time can not be after End time');
+          if ($scope.exports.start.time <= $scope.exports.end.time) {
+            // $window.open('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
+            $http.get('/exportsettings/order_exports?start=' + $scope.exports.start.time + '&end=' + $scope.exports.end.time);
+            $scope.notify('It will be emailed to ' + $scope.export_settings.single.order_export_email, 1);
+          } else {
+            $scope.notify('Start time can not be after End time');
+          }
         }
       };
 

@@ -124,6 +124,7 @@ groovepacks_controllers.
       $scope.backup_product_csv = function () {
         $scope.general_settings = generalsettings.model.get();
         generalsettings.single.get($scope.general_settings).success(function(response){
+          $scope.products.email_address_for_packer_notes = response.data.settings.email_address_for_packer_notes;
           if ($scope.products.selected.length == 0) {
             products.list.select_notification();
           } else if(response.data.settings.email_address_for_packer_notes == ""){ 

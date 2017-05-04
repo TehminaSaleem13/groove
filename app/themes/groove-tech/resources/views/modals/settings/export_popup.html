@@ -1,0 +1,21 @@
+<div>
+  <div class="modal-header">
+    <button type="button" class="close-btn" ng-click="cancel()"><i class="glyphicon glyphicon-remove"></i></button>
+    <div class="modal-title">Update Email </div>
+  </div>
+
+  <div class="modal-body" style="padding-top: 40px;">
+    <div class="tabbable">
+      <label class="radio inline">
+      &emsp; Please add an email for export address below. We'll send your export to this address when it is complete.
+        <input style="width: 50%; margin-top:20px; margin-left: 15px;" type="text"
+               ng-model="export_address" class="form-control input-style"/>
+      </label>
+    </div>
+  </div>
+</div>
+  <div class="modal-footer" style="padding-top: 15px;">
+    <button ng-click="update_export_address(export_address)" class="modal-save-button" translate>Continue</button>
+    <button ng-click="cancel()" class="modal-cancel-button" translate>modal.cancel</button>
+  </div>
+</div>
