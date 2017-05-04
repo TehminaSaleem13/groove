@@ -708,7 +708,7 @@ module Groovepacker
                       unless @found_barcodes.include? barcode
                         product_barcode = ProductBarcode.new
                         product_barcode.barcode = barcode
-                        product_barcode.packing_count = record[:all_barcodes_qty][barcode][0]
+                        product_barcode.packing_count = record[:all_barcodes_qty][barcode][0] rescue 1
                         product_barcode.is_multipack_barcode = true
                         product_barcode.order = new_order
                         product_barcode.product_id = product_id

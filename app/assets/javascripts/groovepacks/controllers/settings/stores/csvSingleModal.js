@@ -139,7 +139,11 @@ groovepacks_controllers.controller('csvSingleModal', ['$scope', 'store_data', '$
           final_record.push(row_array);
           row_array = [];
         } else {
-          secondary_split = initial_split[i].split(separator);
+          if (separator.includes("t") == true) {
+            secondary_split = initial_split[i].split("\t");
+          }else {
+            secondary_split = initial_split[i].split(separator);
+          }
           for (var j = 0; j < secondary_split.length; j++) {
             if (secondary_split[j].charAt(0) == scope.csv.current.delimiter && secondary_split[j].charAt(secondary_split[j].length - 1) != scope.csv.current.delimiter) {
               in_entry = true;

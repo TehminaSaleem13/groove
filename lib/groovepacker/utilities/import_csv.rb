@@ -49,6 +49,7 @@ class ImportCsv
           end
         else
           require 'csv'
+          params[:sep] = params[:sep] == "\\t" ? "\t" : params[:sep]
           final_record = begin
                            CSV.parse(
                              csv_file, :col_sep => params[:sep],
