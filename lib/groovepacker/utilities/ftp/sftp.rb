@@ -138,7 +138,8 @@ module FTP
 
     def find_file(connection_obj)
     	file = nil
-    	files = connection_obj.dir.glob(self.directory, "*.csv").sort_by {|f| f.attributes.mtime}.reverse
+    	files = connection_obj.dir.glob(self.directory, "*.csv") + connection_obj.dir.glob(self.directory, "*.CSV")
+      files = files.sort_by {|f| f.attributes.mtime}.reverse
       files.each do |individual_file|
         unless '-imported'.in? individual_file.name
           file = individual_file.name
