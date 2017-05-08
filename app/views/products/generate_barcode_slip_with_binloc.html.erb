@@ -17,14 +17,13 @@
 
   <div style="font-size: 12px; margin-left: 10px; margin-top:-5px; margin-bottom: 4px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= @product.name %>
   </div>
-
-  <% barcode_string = generate_barcode(@product.primary_barcode) %>
+  <% barcode_string = @barcode.present? ?  generate_barcode(@barcode) : generate_barcode(@product.primary_barcode) %>
   <div style="margin-top:3px;">
     <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 35}) %></center>
   </div>
 
   <div style="line-height: 8px; font-size:8px;">
-    <center>*<%= @product.primary_barcode %>*</center>
+    <center>*<%= @barcode.present? ? @barcode : @product.primary_barcode %>*</center>
   </div>
 <% else %>
   <br/>
