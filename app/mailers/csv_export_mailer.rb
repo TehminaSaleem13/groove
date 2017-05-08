@@ -11,7 +11,7 @@ class CsvExportMailer < ActionMailer::Base
     end
     @filename = filename
     @object_url = object_url
-    subject = "Backup successful."
+    subject = "GroovePacker #{tenant} Backup successful."
     mail to: recipients, subject: subject if recipients.compact.present?
   end
 

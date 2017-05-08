@@ -25,7 +25,7 @@ class ExportOrder < ActionMailer::Base
       end
       attachments["#{filename}"] = Net::HTTP.get(URI.parse(url)) rescue nil
       mail to: export_settings.order_export_email,
-           subject: "GroovePacker Order Export Report"
+           subject: "GroovePacker #{tenant} Order Export Report"
       #import_orders_obj = ImportOrders.new
       #import_orders_obj.reschedule_job('export_order', tenant)
       #File.delete(file_locatin) rescue nil

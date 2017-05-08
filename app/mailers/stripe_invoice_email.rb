@@ -13,7 +13,7 @@ class StripeInvoiceEmail < ActionMailer::Base
           @tenant_name = tenant
           @invoice = invoice
           mail to: [@email, 'groovepacker@gmail.com'],
-               subject: "GroovePacker Invoice Email"
+               subject: "GroovePacker #{tenant} Invoice Email"
         end
       end
     end
