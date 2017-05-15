@@ -330,7 +330,6 @@ module Groovepacker
             final_records_size = (final_records.join("\n").bytesize.to_f/1024).round(4)
             return final_records unless @csv_import_summary_exists
             if (final_records_size == @csv_import_summary.file_size.to_f) && params[:file_name].strip==@csv_import_summary.file_name
-              Order.csv_already_imported_warning
               log_entries = @csv_import_summary.csv_import_log_entries.map(&:index).uniq rescue []
               log_entries.each do |entry|
                 new_records[entry]=["already_imported"]
@@ -339,6 +338,7 @@ module Groovepacker
               if (new_records.count+log_entries.count) == final_records.count
                 final_records = new_records
               end
+              Order.csv_already_imported_warning if final_records.flatten.uniq.count == 1 rescue nil
             end
             final_records
           end
