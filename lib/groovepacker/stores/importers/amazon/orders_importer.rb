@@ -8,15 +8,23 @@ module Groovepacker
             begin
               @orders = []
               first_call=true
-              
+              response = {}
               while 1 do
                 if first_call
                   first_call = false
-                  response = @mws.orders.list_orders :last_updated_after => 7.days.ago, :order_status => ['Unshipped', 'PartiallyShipped']
+                  shipped_response = @mws.orders.list_orders :last_updated_after => 7.days.ago, :order_status => ['Shipped'] if @credential.shipped_status
+                  unshipped_response = @mws.orders.list_orders :last_updated_after => 7.days.ago, :order_status => ['Unshipped' , 'PartiallyShipped'] if @credential.unshipped_status
+                  if @credential.shipped_status && @credential.unshipped_status
+                    response["orders"] = (shipped_response.orders).push(unshipped_response.orders).flatten
+                  elsif shipped_response.present?
+                    response = shipped_response
+                  else
+                    response = unshipped_response
+                  end
                 else
                   response = @mws.orders.next
                 end
-                response.orders.kind_of?(Array) && !response.orders.nil? ? @orders.push(response.orders) : @orders = response.orders
+                response["orders"].kind_of?(Array) && !response["orders"].nil? ? @orders.push(response["orders"]) : @orders = response["orders"]
                 break if response["orders"].try(:count).to_i < 100 
               end
               @orders = @orders.flatten rescue []
