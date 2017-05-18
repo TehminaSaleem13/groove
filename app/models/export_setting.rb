@@ -48,7 +48,7 @@ class ExportSetting < ActiveRecord::Base
     ExportSetting.update_all(:last_exported => Time.zone.now)
     filename = generate_file_name
     if order_export_type == 'do_not_include'
-      return do_export_if_orders_not_included(orders, filename)
+      do_export_if_orders_not_included(orders, filename)
     else
       do_export_with_orders(orders, filename, tenant)
     end
