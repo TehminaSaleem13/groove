@@ -519,6 +519,12 @@ module Groovepacker
         db_name.include?("split") ? Apartment::Tenant.switch('scadmintools') : Apartment::Tenant.switch('admintools')
       end
 
+      def check_split_or_production
+        Apartment::Tenant.switch
+        db_name = Apartment::Tenant.current
+        db_name.include?("split") ? Apartment::Tenant.switch('scadmintools') : Apartment::Tenant.switch('admintools')
+      end
+
       def activity_data_hash
         {
           'most_recent_login' => {
