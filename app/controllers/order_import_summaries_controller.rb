@@ -33,6 +33,8 @@ class OrderImportSummariesController < ApplicationController
       cred = ShopifyCredential.find_by_store_id(params["store_id"])
     elsif store.store_type == "Magento API 2"
       cred = MagentoRestCredential.find_by_store_id(params["store_id"])
+    elsif store.store_type == "Amazon"
+      cred = AmazonCredentials.find_by_store_id(params["store_id"])
     end
     if cred   
       cred.last_imported_at = nil

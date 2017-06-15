@@ -21,7 +21,7 @@ module Groovepacker
             @import_item = @helper.initialize_import_item
             index_no = mapping["increment_id"][:position]
             final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}.reject{ |arr| arr.all?(&:blank?) }
-            final_records = remove_already_imported_rows(final_records)
+            final_records = remove_already_imported_rows(final_records) if params[:reimport_from_scratch] != true
             Order.where("increment_id like '%\-currupted'").destroy_all
             iterate_and_import_rows(final_records, order_map, result)
             result unless result[:status]
@@ -142,7 +142,7 @@ module Groovepacker
               @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
               @order.update_attributes(increment_id: "#{inc_id}-currupted")
               @order.save
-              @order.reload
+              @order = Order.find_by_increment_id(@order.increment_id)
               update_result(result, single_row) if result[:order_reimported] == false
               import_item_failed_result(result, index) unless result[:status]
               @order.set_order_status
@@ -315,8 +315,8 @@ module Groovepacker
           def find_or_create_csvimportsummary
             summary_params = {file_name: params[:file_name].strip, import_type: "Order"}
             CsvImportLogEntry.where("created_at<?", DateTime.now.beginning_of_day).delete_all
-            summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).delete_all
-            summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=?", params[:file_name].strip, "Order", DateTime.now.beginning_of_day, DateTime.now.end_of_day).last
+            summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).destroy_all
+            summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=? and file_size=?", params[:file_name].strip, "Order", DateTime.now.beginning_of_day, DateTime.now.end_of_day, params[:file_size]).last
             if summary.blank?
               summary_params[:file_size] = params[:file_size]
               summary = CsvImportSummary.create(summary_params)

@@ -505,10 +505,18 @@ module Groovepacker
           tenant_hash['last_activity']['most_recent_login'] = most_recent_login(tenant_name)
           tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan(tenant_name)
           tenant_hash['most_recent_activity'] = most_recent_login['date_time']
+          check_split_or_production
         rescue => e
           tenant_hash['most_recent_activity'] = nil
+          check_split_or_production          
         end
         Apartment::Tenant.switch(current_tenant)
+      end
+
+      def check_split_or_production
+        Apartment::Tenant.switch
+        db_name = Apartment::Tenant.current
+        db_name.include?("split") ? Apartment::Tenant.switch('scadmintools') : Apartment::Tenant.switch('admintools')
       end
 
       def activity_data_hash

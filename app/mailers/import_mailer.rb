@@ -11,6 +11,13 @@ class ImportMailer < ActionMailer::Base
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
 
+  def import_hung(tenant, import_item)
+    @tenant = tenant
+    @import = import_item
+    subject = "[#{@tenant}] [#{Rails.env}] Import Hung"
+    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"] , subject: subject
+  end
+
   def shipstation_unauthorized(import_exception, query, header, end_point)
     @end_point = end_point
     @header = header

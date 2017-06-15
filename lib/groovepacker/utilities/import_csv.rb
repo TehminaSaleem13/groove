@@ -54,22 +54,18 @@ class ImportCsv
         else
           require 'csv'
           params[:sep] = params[:sep] == "\\t" ? "\t" : params[:sep]
-          final_record = begin
-                           CSV.parse(
-                             csv_file, :col_sep => params[:sep],
-                             :quote_char => params[:delimiter],
-                             :encoding => 'windows-1251:utf-8'
-                           )
-                         rescue
-                           []
-                         end
+          final_record =  begin
+                            CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8')
+                          rescue
+                            CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => "|", :encoding => 'windows-1251:utf-8') rescue []
+                          end
         end
         if params[:rows].to_i && params[:rows].to_i > 1
           final_record.shift(params[:rows].to_i - 1)
         end
         mapping = {}
         params[:map].each do |map_single|
-          if map_single[1]['value'] != 'none'
+          if map_single[1].present? && map_single[1]['value'] != 'none'
             mapping[map_single[1]['value']] = {}
             mapping[map_single[1]['value']][:position] = map_single[0].to_i
             if map_single[1][:action].nil?

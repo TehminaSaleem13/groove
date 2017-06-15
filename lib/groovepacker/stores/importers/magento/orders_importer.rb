@@ -26,7 +26,7 @@
                   import_item = fix_import_item(import_item)
                   break if import_item.status == 'cancelled'
                   next unless item.class.to_s.include?("Hash")
-                  import_single_order(item, import_item, client, credential, session, result)
+                  import_single_order(item, import_item, client, credential, session, result) rescue nil
                 end
               end
             rescue Exception => e
@@ -87,7 +87,10 @@
               elsif credential.last_imported_at.to_s != ""
                 item1['key'] = 'created_at'
                 item1['value'] = [{'key' => 'from', 'value' => credential.last_imported_at.to_s}]
-              end       
+              else
+                item1['key'] = 'created_at'
+                item1['value'] = [{'key' => 'from', 'value' => (Time.now - 4.days).utc.to_s}]
+              end     
               if item1.present?
                 @filter1['item'] = item1
                 @filters1['complex_filter'] = @filter1
@@ -101,6 +104,7 @@
               statuses = get_statuses_to_import(credential)
               statuses.each do |status|
                 filters_array = get_filters(status, credential, import_item)
+                filters_array["complex_filter"]["item"]["key"] = "updated_at"
                 response = client.call(:sales_order_list, message: {sessionId: session, filters: filters_array})
                 next if response.body[:sales_order_list_response][:result][:item].blank?
                 orders << response.body[:sales_order_list_response][:result][:item]
@@ -117,24 +121,24 @@
               loop do
                 begin
                   @order_info = client.call(:sales_order_info, message: {sessionId: session, orderIncrementId: item[:increment_id]})
-                  attempts = 5
+                  attempts = 8
                 rescue Exception => ex
                   attempts = attempts + 1
                 end
-                break if attempts >= 5
+                break if attempts >= 8
               end
               order_info = @order_info
               @order_info = nil
-              order_info = order_info.body[:sales_order_info_response][:result] rescue nil
+              order_info = order_info.body[:sales_order_info_response][:result] 
               if Order.where(:increment_id => item[:increment_id]).length == 0
                 @order = Order.new
                 @order.increment_id = item[:increment_id]
-                @order.store_order_id = order_info[:order_id]
+                @order.store_order_id = order_info[:order_id] 
                 @order.status = 'awaiting'
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
                 @order.store = credential.store
-                line_items = order_info[:items]
+                line_items = order_info[:items] 
                 if line_items[:item].is_a?(Hash)
                   import_item.current_order_items = 1
                   import_item.current_order_imported_item = 0
@@ -168,7 +172,7 @@
                   import_item.current_order_imported_item = 1
                   import_item.save
                 else
-                  import_item.current_order_items = line_items[:item].length
+                  import_item.current_order_items = line_items[:item].length rescue 0
                   import_item.current_order_imported_item = 0
                   import_item.save
                   line_items[:item].each do |line_item|

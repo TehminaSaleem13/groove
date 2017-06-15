@@ -17,7 +17,7 @@ module Groovepacker
 		    else
 		      @amazon = @amazon.first
 		    end
-		    @amazon.assign_attributes(:marketplace_id => params[:marketplace_id], :merchant_id => params[:merchant_id], :mws_auth_token => params[:mws_auth_token], :import_products => params[:import_products], :import_images => params[:import_images], :show_shipping_weight_only => params[:show_shipping_weight_only])
+		    @amazon.assign_attributes(:marketplace_id => params[:marketplace_id], :merchant_id => params[:merchant_id], :mws_auth_token => params[:mws_auth_token], :import_products => params[:import_products], :import_images => params[:import_images], :show_shipping_weight_only => params[:show_shipping_weight_only], :unshipped_status => params[:unshipped_status], :shipped_status => params[:shipped_status], :afn_fulfillment_channel => params[:afn_fulfillment_channel], :mfn_fulfillment_channel => params[:mfn_fulfillment_channel])
 		    @store.amazon_credentials = @amazon
 		    begin
 		      @store.save!
@@ -41,6 +41,8 @@ module Groovepacker
 		    @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
 		    @ebay.import_products = params[:import_products]
 		    @ebay.import_images = params[:import_images]
+		    @ebay.shipped_status = params[:shipped_status]
+		    @ebay.unshipped_status = params[:unshipped_status]
 		    @store.ebay_credentials = @ebay
 		    new_record = true if @ebay.id.blank?
 		    begin

@@ -63,7 +63,7 @@ module StoreConcern
   def csv_data(kind)
     current_tenant = Apartment::Tenant.current
     begin
-      @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").encode("UTF-8").split("\n").first(30).join("\n").gsub("\r\n", "\n")
+      @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").encode("UTF-8").split("\n").first(30).join("\n").gsub("\r\n", "\n").gsub("\r", "\n")
     rescue
       @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv")
       @file_data = @file_data.gsub("\r\n", "\n") rescue @file_data unless @file_data == nil

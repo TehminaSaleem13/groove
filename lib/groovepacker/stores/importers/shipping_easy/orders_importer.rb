@@ -158,7 +158,7 @@ module Groovepacker
               order_item_product = find_or_create_order_item_product(item, @credential.store)
               order_item.product = order_item_product
               begin
-                if order_item.product.product_images.blank?
+                if item["product"].present? && ProductSku.find_by_sku(item["product"]["sku"]).try(:product).try(:product_images).blank?
                   s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present?
                   order_item.product.product_images.create(image: s3_image_url) if s3_image_url.present?
                 end

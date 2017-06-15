@@ -9,11 +9,21 @@ module Groovepacker
             ebay = handler[:store_handle]
             import_item = handler[:import_item]
             result = self.build_result
-
             begin
-              seller_list = ebay.GetMyeBaySelling(:soldList =>
-                                                    {:orderStatusFilter => 'AwaitingShipment'})
-
+              if credential.shipped_status && credential.unshipped_status
+                begin
+                  awaiting = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'AwaitingShipment'})
+                  shipped = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'PaidAndShipped'})
+                  shipped.soldList.orderTransactionArray = shipped.soldList.orderTransactionArray.push(awaiting.soldList.orderTransactionArray).flatten
+                  seller_list = shipped
+                rescue
+                  seller_list = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'AwaitingShipment'})
+                end
+              elsif credential.shipped_status
+                seller_list = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'PaidAndShipped'})
+              else
+                seller_list = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'AwaitingShipment'})
+              end             
               if (seller_list.soldList != nil &&
                 seller_list.soldList.orderTransactionArray != nil)
                 order_or_transactionArray =
@@ -55,9 +65,9 @@ module Groovepacker
                         order = build_order_with_single_item_from_ebay(order, transaction,
                                                                        order_transaction, handler)
                         if order.save
-                          order.addactivity("Order Import", credential.store.name+" Import")
+                          order.addactivity("Order Import", "#{credential.store.name} Import")
                           order.order_items.each do |item|
-                            order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                            order.addactivity("Item with SKU: #{item.sku} Added", "#{credential.store.name} Import")
                           end
                           order.set_order_status
                           result[:success_imported] = result[:success_imported] + 1
@@ -71,8 +81,8 @@ module Groovepacker
                       end
                     else # transactions Array is not equal to 1
                       result[:status] &= false
-                      result[:messages].push('There was an error importing the order transactions from Ebay,
-                        Order transactions length: '+ item_transactions.transactionArray.length)
+                      result[:messages].push("There was an error importing the order transactions from Ebay,
+                        Order transactions length: #{item_transactions.transactionArray.length}")
                     end
                   elsif !order_transaction.order.nil?
                     # for orders with multiple line items
@@ -97,9 +107,9 @@ module Groovepacker
                         order = Order.new
                         order = build_order_with_multiple_items_from_ebay(order, order_detail, handler)
                         if order.save
-                          order.addactivity("Order Import", credential.store.name+" Import")
+                          order.addactivity("Order Import", "#{credential.store.name} Import")
                           order.order_items.each do |item|
-                            order.addactivity("Item with SKU: "+item.sku+" Added", credential.store.name+" Import")
+                            order.addactivity("Item with SKU: #{item.sku} Added", "#{credential.store.name} Import")
                           end
                           order.set_order_status
                           result[:success_imported] = result[:success_imported] + 1

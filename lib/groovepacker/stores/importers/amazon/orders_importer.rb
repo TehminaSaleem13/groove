@@ -10,22 +10,51 @@ module Groovepacker
               first_call=true
               response = {}
               while 1 do
-                if first_call
-                  first_call = false
-                  shipped_response = @mws.orders.list_orders :last_updated_after => 7.days.ago, :order_status => ['Shipped'] if @credential.shipped_status
-                  unshipped_response = @mws.orders.list_orders :last_updated_after => 7.days.ago, :order_status => ['Unshipped' , 'PartiallyShipped'] if @credential.unshipped_status
-                  if @credential.shipped_status && @credential.unshipped_status
-                    response["orders"] = (shipped_response.orders).push(unshipped_response.orders).flatten
-                  elsif shipped_response.present?
-                    response = shipped_response
+                begin
+                  if first_call 
+                    first_call = false
+                    last_imported_at = @credential.last_imported_at
+                    if last_imported_at.present? && @import_item.import_type == "regular"
+                      days_count = (DateTime.now.to_date - @credential.last_imported_at.to_date).to_i 
+                      days_count = days_count == 0 ? 1 : days_count
+                    elsif @import_item.import_type == "deep"
+                      days_count = @import_item.days
+                    else
+                      days_count = 5
+                    end
+                    shipped_response = @mws.orders.list_orders :last_updated_after => days_count.days.ago, :order_status => ['Shipped'] if @credential.shipped_status
+                    unshipped_response = @mws.orders.list_orders :last_updated_after => days_count.days.ago, :order_status => ['Unshipped' , 'PartiallyShipped'] if @credential.unshipped_status
+                    if @credential.shipped_status && @credential.unshipped_status
+                      response["orders"] = (shipped_response.orders).push(unshipped_response.orders).flatten
+                    elsif shipped_response.present?
+                      response = shipped_response
+                    else
+                      response = unshipped_response
+                    end
                   else
-                    response = unshipped_response
+                    while 1 do 
+                      begin
+                        response = @mws.orders.next
+                        break
+                      rescue
+                        response = @mws.orders.next
+                      end
+                    end
                   end
-                else
-                  response = @mws.orders.next
+                rescue
+                  response
                 end
-                response["orders"].kind_of?(Array) && !response["orders"].nil? ? @orders.push(response["orders"]) : @orders = response["orders"]
-                break if response["orders"].try(:count).to_i < 100 
+                orders_count = response["orders"].try(:count)
+                grouped_response = response["orders"].group_by { |d| d["fulfillment_channel"] } rescue {}
+                if !@credential.afn_fulfillment_channel && !@credential.mfn_fulfillment_channel
+                  response = {}
+                elsif @credential.afn_fulfillment_channel && !@credential.mfn_fulfillment_channel
+                  response["orders"] = grouped_response["AFN"]
+                elsif @credential.mfn_fulfillment_channel && !@credential.afn_fulfillment_channel
+                  response["orders"] = grouped_response["MFN"]
+                end        
+                response["orders"].kind_of?(Array) && !response["orders"].nil? ? (@orders || []).push(response["orders"]) : @orders = response["orders"]
+                break if orders_count.to_i < 100 
               end
               @orders = @orders.flatten rescue []
               @result[:total_imported] = @orders.count rescue 0
@@ -35,6 +64,10 @@ module Groovepacker
               @result[:messages].push(e.message)
               @import_item.message = e.message
               @import_item.save
+            end
+            if @result[:status]
+              @credential.last_imported_at = DateTime.now()
+              @credential.save
             end
             update_orders_status
             @result

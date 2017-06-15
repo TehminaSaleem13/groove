@@ -12,6 +12,7 @@ module ProductConcern
   end
 
   def check_permissions
+    return if params["var"]=="barcode" && params["action"]=="update_product_list" rescue nil
     unless current_user.can?('add_edit_products')
       @result['status'] = false
       @result['messages'] = add_error_message

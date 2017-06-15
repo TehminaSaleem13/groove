@@ -8,7 +8,7 @@ class HomeController < ApplicationController
     if !user_signed_in?
       redirect_to new_user_session_path
     else
-      @groovepacks_admin = (Apartment::Tenant.current == 'admintools')
+      @groovepacks_admin = (Apartment::Tenant.current == 'admintools') || (Apartment::Tenant.current == 'scadmintools')
     end
     @current_tenant = Apartment::Tenant.current 
   end

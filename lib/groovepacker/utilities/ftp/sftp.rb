@@ -1,3 +1,4 @@
+
 module FTP  
   class SFTP < FTPBase
     include ApplicationHelper

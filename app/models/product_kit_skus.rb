@@ -17,8 +17,8 @@ class ProductKitSkus < ActiveRecord::Base
       kit_sku = Groovepacker::Products::BulkActions.new
       kit_sku.delay.update_ordere_item_kit_product(tenant, self.product_id, self.id)
     else
-      @order_items.each do |order_item|
-        if OrderItemKitProduct.where(:order_item_id => order_item.id).where(:product_kit_skus_id => self.id).length == 0
+      @order_items.each do |order_item| 
+        if !OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(self.id)
           order_item_kit_product = OrderItemKitProduct.new
           order_item_kit_product.product_kit_skus = self
           order_item_kit_product.order_item = order_item

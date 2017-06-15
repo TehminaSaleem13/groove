@@ -13,7 +13,9 @@ class ExportOrder < ActionMailer::Base
       @csv_data = []
       file_data = Net::HTTP.get(URI.parse(url)) rescue []
       file_data = file_data.split("\n")
-      file_data.each {|row| @csv_data << row.split(",")}
+      file_data.each do |row| 
+        @csv_data << CSV.parse_line(row)
+      end
       # @csv_data = Net::HTTP.get(URI.parse(url)) rescue []
       @csv_data.try(:first).try(:each_with_index) do |value, index|
         case value

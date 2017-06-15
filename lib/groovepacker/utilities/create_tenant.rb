@@ -26,6 +26,9 @@ class CreateTenant
                                       subscription.user_name,
                                       subscription.email,
                                       subscription.password)
+    setting = GeneralSetting.all.first
+    setting.email_address_for_packer_notes = subscription.email
+    setting.save
   end
 
   def send_transaction_emails(subscription)

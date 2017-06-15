@@ -17,7 +17,7 @@
   <%= yield(:head) %>
 </head>
 <body class="container-well"
-      ng-app="<%= (Apartment::Tenant.current == 'admintools')? 'groovepacks_admin' : 'groovepacks' %>"
+      ng-app="<%= (Apartment::Tenant.current == 'admintools' || Apartment::Tenant.current == 'scadmintools')? 'groovepacks_admin' : 'groovepacks' %>"
       ng-controller="appCtrl">
 <input id="socket_server" type="hidden" value="<%= socket_server %>"/>
 <div class="logout-box fade" ng-show="show_logout_box">
