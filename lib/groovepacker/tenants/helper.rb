@@ -388,7 +388,7 @@ module Groovepacker
       def retrieve_shipping_data(tenant_name, tenant_hash)
         get_shipping_data = Groovepacker::Dashboard::Stats::ShipmentStats.new
         access_restrictions = @access_restrictions_per_tenant[tenant_name]
-        shipping_data = get_shipping_data.get_shipment_stats(tenant_name, true, @tenants, access_restrictions)
+        shipping_data = get_shipping_data.get_shipment_stats(tenant_name, true)
         tenant_hash['total_shipped'] = shipping_data['shipped_current']
         tenant_hash['shipped_last'] = shipping_data['shipped_last']
         tenant_hash['max_allowed'] = shipping_data['max_allowed']
