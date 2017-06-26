@@ -1,5 +1,7 @@
 class AddErrorMessageToGenerateBarcodes < ActiveRecord::Migration
   def change
-    add_column :generate_barcodes, :error_message, :text
+    unless column_exists? :generate_barcodes, :error_message
+      add_column :generate_barcodes, :error_message, :text
+    end
   end
 end
