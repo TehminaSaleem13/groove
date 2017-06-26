@@ -128,8 +128,8 @@ module Groovepacker
               credential.last_imported_at = importing_time
               credential.save
             end
-            ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
-            OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all 
+            # ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
+            # OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all 
             update_orders_status
             result
           end

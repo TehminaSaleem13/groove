@@ -237,7 +237,7 @@ class ImportDeletedData
 
 	def import_order_item_kit_products(ordo)
 		ordo[1].each do |oitp|
-			next unless OrderItemKitProduct.where(id: oitp['id'].to_i).empty?
+			next unless OrderItemKitProduct.where(id: oitp['id'].to_i, product_kit_skus_id: oitp['product_kit_skus_id'].to_i, order_item_id: oitp['order_item_id'].to_i).empty?
       item_kit_prod = OrderItemKitProduct.new
       item_kit_prod.id = oitp['id'].to_i
       item_kit_prod.order_item_id = oitp['order_item_id'].to_i

@@ -77,7 +77,6 @@ class ImportCsv
         end
 
         set_file_size(params, final_record)
-
         if params[:type] == 'order'
           import_order = Groovepacker::Stores::Importers::CSV::OrdersImporter.new(params, final_record, mapping, nil)
           result = import_order.import()
@@ -91,7 +90,7 @@ class ImportCsv
           result = import_kit.import()
         end
         #File.delete(file_path)
-        if params[:flag] == 'ftp_download'
+        if params[:flag] == 'ftp_download' && result[:add_imported]
           rename_ftp_file(store, result, response)
           File.delete(file_path) rescue nil
         end

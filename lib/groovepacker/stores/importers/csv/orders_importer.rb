@@ -21,6 +21,7 @@ module Groovepacker
             @import_item = @helper.initialize_import_item
             index_no = mapping["increment_id"][:position]
             final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}.reject{ |arr| arr.all?(&:blank?) }
+            final_records_test = final_records
             final_records = remove_already_imported_rows(final_records) if params[:reimport_from_scratch] != true
             Order.where("increment_id like '%\-currupted'").destroy_all
             iterate_and_import_rows(final_records, order_map, result)
@@ -34,6 +35,9 @@ module Groovepacker
             @import_item.status = 'completed'
             @import_item.save
             Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(result, nil, Apartment::Tenant.current)
+            find_or_create_csvimportsummary
+            final_records_test = remove_already_imported_rows(final_records_test)
+            result[:add_imported] = true if final_records.uniq.count == 1
             result
           end
 
@@ -98,7 +102,8 @@ module Groovepacker
           end
 
           def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
-            if order.order_items.count == order_items_ar.count 
+            qty = items_array.flatten.reject { |c| c.is_a?(String) }
+            if order.order_items.count == order_items_ar.count && qty.sum == order.order_items.map(&:qty).sum
             #if order.order_items.count == items_array.count 
               #order_item = order.order_items.where(:sku => row[0]).first
               #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
@@ -145,7 +150,7 @@ module Groovepacker
               @order = Order.find_by_increment_id(@order.increment_id)
               update_result(result, single_row) if result[:order_reimported] == false
               import_item_failed_result(result, index) unless result[:status]
-              @order.set_order_status
+              @order.set_order_status rescue nil
             else
               @import_item.previous_imported += 1
               @import_item.save # Skipped because of duplicate order
@@ -317,6 +322,7 @@ module Groovepacker
             CsvImportLogEntry.where("created_at<?", DateTime.now.beginning_of_day).delete_all
             summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).destroy_all
             summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=? and file_size=?", params[:file_name].strip, "Order", DateTime.now.beginning_of_day, DateTime.now.end_of_day, params[:file_size]).last
+            @csv_import_summary_exists = true
             if summary.blank?
               summary_params[:file_size] = params[:file_size]
               summary = CsvImportSummary.create(summary_params)

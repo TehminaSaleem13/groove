@@ -18,6 +18,8 @@ module Groovepacker
             end
             update_orders_status
             destroy_nil_import_items
+            ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
+            OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all
             @result
           end
 
