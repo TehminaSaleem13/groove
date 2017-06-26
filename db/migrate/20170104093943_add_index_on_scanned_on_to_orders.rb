@@ -1,5 +1,7 @@
 class AddIndexOnScannedOnToOrders < ActiveRecord::Migration
   def change
-  	add_index :orders, [:scanned_on]
+  	unless index_exists? :orders, :scanned_on
+  		add_index :orders, [:scanned_on]
+  	end
   end
 end
