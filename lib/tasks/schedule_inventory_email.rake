@@ -3,7 +3,7 @@ namespace :doo do
   task :schedule_inventory_email => :environment do
     if $redis.get("schedule_inventory_email").blank?
       $redis.set("schedule_inventory_email", true) 
-      $redis.expire("schedule_inventory_email", 5400) 
+      $redis.expire("schedule_inventory_email", 54) 
 	    tenants = Tenant.order(:name) rescue Tenant.all
 	    import_orders_obj = ImportOrders.new
 	    tenants.each do |tenant|
