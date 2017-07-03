@@ -28,58 +28,60 @@
           <div style="clear: both;"></div>
         </div>
       <% end %>
-      <table style="margin:0 auto;margin-top: 20px; border-spacing: 0; background-color:#e8e7e7;border-radius:15px;">
-        <thead>
-        <% @csv_data.try(:first).try(:each_with_index) do |th, index| %>
-          <% if index == 0 %>
-            <th style="border-top-left-radius:15px;-webkit-border-top-left-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007; white-space: nowrap;">
-              <%= th.try(:titleize) %>
-            </th>
-          <% elsif index == (@csv_data.first.size - 1) %>
-            <th style="border-top-right-radius:15px;-webkit-border-top-right-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px; white-space: nowrap;">
-              <%= th.try(:titleize) %>
-            </th>
-          <% else %>
-            <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007; white-space: nowrap;">
-              <%= th.try(:titleize) %>
-            </th>
+      <%if (@csv_data.count < 1000) %>
+        <table style="margin:0 auto;margin-top: 20px; border-spacing: 0; background-color:#e8e7e7;border-radius:15px;">
+          <thead>
+          <% @csv_data.try(:first).try(:each_with_index) do |th, index| %>
+            <% if index == 0 %>
+              <th style="border-top-left-radius:15px;-webkit-border-top-left-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007; white-space: nowrap;">
+                <%= th.try(:titleize) %>
+              </th>
+            <% elsif index == (@csv_data.first.size - 1) %>
+              <th style="border-top-right-radius:15px;-webkit-border-top-right-radius:15px;width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px; white-space: nowrap;">
+                <%= th.try(:titleize) %>
+              </th>
+            <% else %>
+              <th style="width:150px;text-align: center;line-height: 0.9;vertical-align: middle;position: relative;font-size: 14px;font-family: 'Play', sans-serif;color: #ffffff;border-bottom: 2px solid #8AC007;background-color: #2D2D2C;padding: 14px 10px;border-right: 2px solid #8AC007; white-space: nowrap;">
+                <%= th.try(:titleize) %>
+              </th>
+            <% end %>
           <% end %>
-        <% end %>
-        </thead>
-        <tbody>
-        <% for i in 1..(@csv_data.size - 1) do %>
-         <% order = Order.where(increment_id: @csv_data[i][1]).try(:first) %>
-          <tr style="text-align:center;<%= order.try(:scanned_by_status_change).present? ? 'background:#FF0000;' : ((i % 2) == 0) ? 'background:#dcdcdc;' : '' %>">
-            <% if @csv_data[i] %>
-              <% @csv_data[i].each_with_index do |td, td_index| %>
-                <% if td_index == @order_number %>
-                  <% order=Order.where(increment_id: td).first %>
-                  <td>
-                    <a href="https://<%= @tenant_name %>.groovepacker.com/#/orders/scanned/1/<%= order.id %>" style="font-weight:bold; color:#66A909;"><%= td %></a>
-                  </td>
-                <%elsif td_index == 0 %>
-                  <td>
-                    <%= td.to_date.strftime("%Y-%m-%d") rescue nil %> 
-                  </td>
-                <% else %>
-                  <% if i == (@csv_data.size - 1) %>
-                    <% if td_index == 0 %>
-                      <td style="border-bottom-left-radius:15px;-webkit-border-bottom-left-radius:15px;"><%= td %></td>
-                    <% elsif td_index == (@csv_data[i].size-1) %>
-                      <td style="border-bottom-right-radius:15px;-webkit-border-bottom-right-radius:15px;"><%= td %></td>
+          </thead>
+          <tbody>
+          <% for i in 1..(@csv_data.size - 1) do %>
+           <% order = Order.where(increment_id: @csv_data[i][1]).try(:first) %>
+            <tr style="text-align:center;<%= order.try(:scanned_by_status_change).present? ? 'background:#FF0000;' : ((i % 2) == 0) ? 'background:#dcdcdc;' : '' %>">
+              <% if @csv_data[i] %>
+                <% @csv_data[i].each_with_index do |td, td_index| %>
+                  <% if td_index == @order_number %>
+                    <% order=Order.where(increment_id: td).first %>
+                    <td>
+                      <a href="https://<%= @tenant_name %>.groovepacker.com/#/orders/scanned/1/<%= order.id %>" style="font-weight:bold; color:#66A909;"><%= td %></a>
+                    </td>
+                  <%elsif td_index == 0 %>
+                    <td>
+                      <%= td.to_date.strftime("%Y-%m-%d") rescue nil %> 
+                    </td>
+                  <% else %>
+                    <% if i == (@csv_data.size - 1) %>
+                      <% if td_index == 0 %>
+                        <td style="border-bottom-left-radius:15px;-webkit-border-bottom-left-radius:15px;"><%= td %></td>
+                      <% elsif td_index == (@csv_data[i].size-1) %>
+                        <td style="border-bottom-right-radius:15px;-webkit-border-bottom-right-radius:15px;"><%= td %></td>
+                      <% else %>
+                        <td><%= td %></td>
+                      <% end %>
                     <% else %>
                       <td><%= td %></td>
                     <% end %>
-                  <% else %>
-                    <td><%= td %></td>
                   <% end %>
                 <% end %>
               <% end %>
-            <% end %>
-          </tr>
-        <% end %>
-        </tbody>
-      </table>
+            </tr>
+          <% end %>
+          </tbody>
+        </table>
+      <%end%>
     </div>
   </div>
 </div>
