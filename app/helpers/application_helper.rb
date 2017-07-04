@@ -120,7 +120,7 @@ module ApplicationHelper
 
   def socket_server
     return "" if ENV['SOCKET_ENDPOINT'].nil?
-    request.protocol + "socket." + ENV['SOCKET_ENDPOINT']
+    request.protocol + "splitsocket." + ENV['SOCKET_ENDPOINT']
     #request.protocol + "#{Apartment::Tenant.current}.localpacker.com"
   end
 end
