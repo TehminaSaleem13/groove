@@ -41,7 +41,8 @@ class StripeController < ApplicationController
       invoice.period_start = time_utc(@period.start)
       invoice.period_end = time_utc(@period.end)
       if object.starting_balance == 0
-        invoice.amount = @line_data.amount.to_f / 100
+        invoice.amount = object.total.to_f / 100
+        # invoice.amount = @line_data.amount.to_f / 100
       else
         invoice.amount = object.starting_balance.to_f / 100
       end
