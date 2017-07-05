@@ -21,7 +21,7 @@ class Order < ActiveRecord::Base
   has_and_belongs_to_many :order_tags
   after_update :update_inventory_levels_for_items
   before_save :perform_pre_save_checks
-  before_save :unique_order_items
+  # before_save :unique_order_items
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
   after_save :delete_if_order_exist
