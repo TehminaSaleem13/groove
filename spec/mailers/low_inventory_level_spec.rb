@@ -24,7 +24,7 @@ RSpec.describe LowInventoryLevel do
       it 'Should notify user when inventry level goes low through email' do
         general_setting = FactoryGirl.create :low_inventory_alert_settings
 
-        mail.subject.should eq("GroovePacker Low Inventory Alert")
+        mail.subject.should eq("GroovePacker groovepacks_test Low Inventory Alert")
         mail.from.should eq(["app@groovepacker.com"])
         mail.to.should eq([GeneralSetting.all.first.low_inventory_email_address])
 
@@ -36,7 +36,7 @@ RSpec.describe LowInventoryLevel do
       it 'Should notify user when inventry level goes low through email including products' do
         general_setting = FactoryGirl.create :low_inventory_alert_settings
 
-        mail.subject.should eq("GroovePacker Low Inventory Alert")
+        mail.subject.should eq("GroovePacker groovepacks_test Low Inventory Alert")
         mail.from.should eq(["app@groovepacker.com"])
         mail.to.should eq([GeneralSetting.all.first.low_inventory_email_address])
 
@@ -50,7 +50,7 @@ RSpec.describe LowInventoryLevel do
       it 'Should notify user when inventry level goes lower then default limit through email including products' do
         general_setting = FactoryGirl.create( :low_inventory_alert_settings, :default_low_inventory_alert_limit => 10 )
 
-        mail.subject.should eq("GroovePacker Low Inventory Alert")
+        mail.subject.should eq("GroovePacker groovepacks_test Low Inventory Alert")
         mail.from.should eq(["app@groovepacker.com"])
         mail.to.should eq([GeneralSetting.all.first.low_inventory_email_address])
 

@@ -15,13 +15,12 @@ RSpec.describe ExportOrder do
         general_setting = FactoryGirl.create :general_setting
         export_setting = FactoryGirl.create :export_order_setting
 
-        mail.subject.should eq("GroovePacker Order Export Report")
+        mail.subject.should eq("GroovePacker groovepacks_test Order Export Report")
         mail.from.should eq(["app@groovepacker.com"])
         mail.to.should eq([ExportSetting.all.first.order_export_email])
         mail.attachments.count.should eq(1)
-
         last_delivery = ActionMailer::Base.deliveries.count
-        expect(last_delivery).to eq(1)
+        expect(last_delivery).to eq(2)
       end
 
       it 'Should not send mail when orders gets exported and auto email export set to false' do
