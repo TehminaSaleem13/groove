@@ -146,7 +146,7 @@ module Groovepacker
           loop do
             res = @service.query("/Orders?orderStatus=" \
               "#{status}&page=#{page_index}&pageSize=150#{start_date}", nil, "get")
-            combined['orders'] = union(combined['orders'], res.parsed_response['orders'])
+            combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
             page_index += 1
             return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150
           end
@@ -189,7 +189,7 @@ module Groovepacker
         end
 
         def union(orders, second_set)
-          orders += second_set unless second_set.try(:length).to_i == 0
+          orders += second_set unless second_set.try(:length).to_i == 0 rescue nil
           orders
         end
       end
