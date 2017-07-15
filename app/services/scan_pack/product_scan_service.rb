@@ -70,11 +70,29 @@ module ScanPack
 
     def do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
       escape_string = ''
-      if @scanpack_settings.escape_string_enabled && !@input.index(@scanpack_settings.escape_string).nil?
-        clean_input = @input.slice(0..(@input.index(@scanpack_settings.escape_string)-1))
+      @input = @input.gsub(@scanpack_settings.string_removal, "") if @scanpack_settings.string_removal_enabled && !@input.index(@scanpack_settings.string_removal).nil?
+      if @scanpack_settings.escape_string_enabled  
+        first_escape_string = @scanpack_settings.escape_string
+        second_escape_string = @scanpack_settings.second_escape_string
+        first_escape = @scanpack_settings.first_escape_string_enabled && !@input.index(first_escape_string).nil?
+        second_escape = @scanpack_settings.second_escape_string_enabled && !@input.index(second_escape_string).nil?
+        if first_escape && second_escape
+          clean_input = @input.split(first_escape_string)[0].split(second_escape_string)[0]
+        elsif first_escape
+          clean_input = @input.slice(0..(@input.index(first_escape_string)-1))
+        elsif second_escape
+          clean_input = @input.slice(0..(@input.index(second_escape_string)-1)) 
+        else
+          clean_input = @input   
+        end
       else
-        clean_input = @input
+        clean_input = @input 
       end
+      # if @scanpack_settings.escape_string_enabled && !@input.index(@scanpack_settings.escape_string).nil?
+      #   clean_input = @input.slice(0..(@input.index(@scanpack_settings.escape_string)-1))
+      # else
+      #   clean_input = @input
+      # end
 
       @result['data'].merge!({
         'serial' => {

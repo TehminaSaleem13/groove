@@ -69,7 +69,9 @@ module SettingsHelper
         :scan_by_tracking_number, :intangible_setting_enabled,
         :intangible_string, :intangible_setting_gen_barcode_from_sku,
         :post_scan_pause_enabled, :post_scan_pause_time,
-        :display_location
+        :display_location, :string_removal_enabled, :string_removal,
+        :first_escape_string_enabled, :second_escape_string_enabled,
+        :second_escape_string
       ]
     )
   end
