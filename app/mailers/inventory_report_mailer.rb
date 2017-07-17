@@ -14,10 +14,10 @@ class InventoryReportMailer < ActionMailer::Base
 		    	file_name = "inventory_report_#{Time.now.strftime("%y%m%d_%H%M%S")}.csv"
 			    File.open("public/#{file_name}", 'a+', {force_quotes: true}) do |csv|	
 			    	products.each_with_index do |pro, index|			    		
-				    	orders = pro.order_items.map(&:order)
+				    	pro_orders = pro.order_items.map(&:order)
 				    	inv = pro.product_inventory_warehousess
-							orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), @product_inv_setting.try(:start_time).try(:beginning_of_day), @product_inv_setting.try(:end_time).try(:end_of_day)) rescue 0
-				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",orders.map(&:id), Time.now-90.days) rescue 0
+							orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",pro_orders.map(&:id), @product_inv_setting.try(:start_time).try(:beginning_of_day), @product_inv_setting.try(:end_time).try(:end_of_day)) rescue 0
+				      orders_90 = Order.where("id IN (?) and scanned_on >= ?",pro_orders.map(&:id), Time.now-90.days) rescue 0
 			      	csv << headers if index.eql? 0 
 			      	row = ""
 			      	available_inv = inv.map(&:available_inv).sum 
