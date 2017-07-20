@@ -70,12 +70,12 @@ module ScanPack
 
     def do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
       escape_string = ''
-      @input = @input.gsub(@scanpack_settings.string_removal, "") if @scanpack_settings.string_removal_enabled && !@input.index(@scanpack_settings.string_removal).nil?
+      @input = @input.gsub(@scanpack_settings.string_removal, "") if @scanpack_settings.string_removal_enabled && !@input.index(@scanpack_settings.string_removal || "").nil?
       if @scanpack_settings.escape_string_enabled  
         first_escape_string = @scanpack_settings.escape_string
         second_escape_string = @scanpack_settings.second_escape_string
-        first_escape = @scanpack_settings.first_escape_string_enabled && !@input.index(first_escape_string).nil?
-        second_escape = @scanpack_settings.second_escape_string_enabled && !@input.index(second_escape_string).nil?
+        first_escape = @scanpack_settings.first_escape_string_enabled && !@input.index(first_escape_string || "").nil?
+        second_escape = @scanpack_settings.second_escape_string_enabled && !@input.index(second_escape_string || "").nil?
         if first_escape && second_escape
           clean_input = @input.split(first_escape_string)[0].split(second_escape_string)[0]
         elsif first_escape
