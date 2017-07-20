@@ -79,9 +79,9 @@ module ScanPack
         if first_escape && second_escape
           clean_input = @input.split(first_escape_string)[0].split(second_escape_string)[0]
         elsif first_escape
-          clean_input = @input.slice(0..(@input.index(first_escape_string)-1))
+          clean_input = @input.slice(0..(@input.index(first_escape_string || "")-1))
         elsif second_escape
-          clean_input = @input.slice(0..(@input.index(second_escape_string)-1)) 
+          clean_input = @input.slice(0..(@input.index(second_escape_string || "")-1)) 
         else
           clean_input = @input   
         end
