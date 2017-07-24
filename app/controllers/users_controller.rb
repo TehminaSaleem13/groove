@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_filter :groovepacker_authorize! , except: [:get_user_email,:update_password]
   include UsersHelper
 
   def index
@@ -38,6 +38,7 @@ class UsersController < ApplicationController
       if result['status']
         @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
         @user.username = params[:username]
+        @user.email = params[:email]
         @user.other = params[:other] if !params[:other].nil?
         @user.password_confirmation = params[:conf_password] if !params[:conf_password].nil? && params[:conf_password] != ''
         if params[:active].blank?
@@ -398,5 +399,38 @@ class UsersController < ApplicationController
     render json: {
              can_create: User.can_create_new?
            }
+  end
+
+  def get_user_email
+    result = {}
+    user = User.find_by_username(params["user"])
+    if user == nil
+      result[:msg] = "Not a Valid User"
+      result[:code] = 0
+    else
+      email = user.send_reset_password_instructions
+      user.reset_token = email
+      user.save!
+      result[:msg] = "A password reset link has been emailed to the address associated with your user account: #{user.email}"
+      result[:code] = 1
+    end
+      render json: result
+  end
+
+  def update_password
+    result = {}
+    user = User.find(params["user_id"])
+    if user.reset_token == params["reset_password_token"]
+      user.password = params["password"]
+      user.password_confirmation = params["password_confirmation"]
+      user.reset_token = nil
+      user.save
+      result[:msg] = "Updated successfully"
+      result[:code] = 1
+    else
+      result[:msg] = "Token is expired"
+      result[:code] = 0
+    end
+    render json: result
   end
 end

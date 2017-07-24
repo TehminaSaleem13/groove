@@ -203,6 +203,8 @@ Groovepacks::Application.routes.draw do
       post 'delete_role'
       post 'createUpdateUser'
       post 'update_user_status'
+      get 'get_user_email'
+      put 'update_password'
     end
     member do
       put 'create_role'
