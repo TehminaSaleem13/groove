@@ -41,6 +41,7 @@ module ScanPack
         @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2"
         @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if @result["data"]["order"]["store_type"] == "Shipstation API 2"
         @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2"
+        @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2"
       rescue
       end
       @result

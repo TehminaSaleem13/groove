@@ -129,6 +129,7 @@ module Groovepacker
 		    @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
 		    @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
 		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku]
+		    @shipstation.return_to_order = params[:return_to_order]
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
 		      @store.save!
