@@ -68,7 +68,9 @@ module Groovepacker
                 order_items_ar = []
               end
               current_inc_id = inc_id
+              single_row << index
               order_items_ar << single_row
+              order_items_ar = order_items_ar.uniq
               @import_item.current_increment_id = inc_id
               update_import_item(-1, -1)
               result[:order_reimported] = false
