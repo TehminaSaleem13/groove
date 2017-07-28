@@ -7,7 +7,7 @@ class ImportCsv
     begin
       Apartment::Tenant.switch(tenant)
       params = eval(params)
-      track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
+      # track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
       #download CSV and save
       track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
       response = nil
@@ -96,6 +96,9 @@ class ImportCsv
         end
       end
     rescue Exception => e
+      on_demand_logger = Logger.new("#{Rails.root}/log/import_log_for_#{Apartment::Tenant.current}.log")
+      on_demand_logger.info("=========================================")
+      on_demand_logger.info(e)
       raise e
     end
     track_user(tenant, params, "Import Finished", "#{params[:type].capitalize} Import Finished")

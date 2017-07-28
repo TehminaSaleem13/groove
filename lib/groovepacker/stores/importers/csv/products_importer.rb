@@ -578,7 +578,10 @@ module Groovepacker
                     usable_record[:new_sku] <<  single_row[self.mapping['sku'][:position]].split(',')[0]
                     usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0]
                     usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0]
-                  rescue
+                  rescue Exception => e
+                    on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
+                    on_demand_logger.info("=========================================")
+                    on_demand_logger.info(e)
                   end
                   @usable_records << build_usable_record(usable_record,single_row)
                   @success += 1
@@ -668,7 +671,7 @@ module Groovepacker
               if duplicate_found === false && @new_action == 'create'
                 product = find_product(record)
                 if product.present?
-                 delete_product(record) rescue nil
+                  delete_product(record) rescue nil
                 else
                   @products_to_import << create_single_import(record)
                   @to_import_records << record

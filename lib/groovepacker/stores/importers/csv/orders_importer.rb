@@ -7,7 +7,6 @@ module Groovepacker
         # for each order from a csv file.
         class OrdersImporter < CsvBaseImporter
           include ProductsHelper
-
           def import
             initialize_helpers
             result = build_result
@@ -64,7 +63,13 @@ module Groovepacker
               next if @helper.blank_or_invalid(single_row)
               inc_id = @helper.get_row_data(single_row, 'increment_id').strip
               if index!=0 and current_inc_id.present? and current_inc_id != inc_id
-                check_order_with_item(order_items_ar, index, current_inc_id, order_map, result) rescue nil
+                begin
+                  check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
+                rescue Exception => e
+                  on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
+                  on_demand_logger.info("=========================================")
+                  on_demand_logger.info(e)
+                end
                 order_items_ar = []
               end
               current_inc_id = inc_id
@@ -76,7 +81,13 @@ module Groovepacker
               result[:order_reimported] = false
               import_single_order(single_row, index, inc_id, order_map, result)
               if final_records.count==index+1
-                check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result) rescue nil
+                begin
+                  check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result)
+                rescue Exception => e
+                  on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
+                  on_demand_logger.info("=========================================")
+                  on_demand_logger.info(e)
+                end 
                 order_items_ar = []
               end
             end
@@ -92,7 +103,13 @@ module Groovepacker
             order = Order.includes(:order_items).find_by_increment_id("#{current_inc_id}-currupted")
             items_array = get_item_array(order_items_ar)
             #items_array.each do |row|        
-              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) rescue nil
+            begin
+              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) 
+            rescue Exception => e
+              on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
+              on_demand_logger.info("=========================================")
+              on_demand_logger.info(e)
+            end
               #break if result[:order_reimported] == true
             #end
             if origional_order_id
