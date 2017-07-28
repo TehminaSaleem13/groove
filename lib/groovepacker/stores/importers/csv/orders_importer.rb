@@ -73,20 +73,20 @@ module Groovepacker
                 order_items_ar = []
               end
               current_inc_id = inc_id
-              single_row << index
+              # single_row << index
               order_items_ar << single_row
-              order_items_ar = order_items_ar.uniq
+              # order_items_ar = order_items_ar.uniq
               @import_item.current_increment_id = inc_id
               update_import_item(-1, -1)
               result[:order_reimported] = false
               import_single_order(single_row, index, inc_id, order_map, result)
               if final_records.count==index+1
                 begin
-                  check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result)
+                  check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result) 
                 rescue Exception => e
                   on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
                   on_demand_logger.info("=========================================")
-                  on_demand_logger.info(e)
+                  on_demand_logger.info(e)                  
                 end 
                 order_items_ar = []
               end
@@ -104,11 +104,12 @@ module Groovepacker
             items_array = get_item_array(order_items_ar)
             #items_array.each do |row|        
             begin
-              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) 
+              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
             rescue Exception => e
               on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
               on_demand_logger.info("=========================================")
               on_demand_logger.info(e)
+              result = nil
             end
               #break if result[:order_reimported] == true
             #end
