@@ -407,8 +407,8 @@ class UsersController < ApplicationController
     result[:code] = 0
     if user == nil
       result[:msg] = "Not a Valid User"
-    elsif user.email.blank?
-      result[:msg] = "There is no email address saved for this user"
+    elsif (user.email.blank? || user.email.split("@")[1].blank?)
+      result[:msg] = "There is no email address saved for #{user.username}"
     else
       email = user.send_reset_password_instructions
       user.reset_token = email
