@@ -404,9 +404,11 @@ class UsersController < ApplicationController
   def get_user_email
     result = {}
     user = User.find_by_username(params["user"])
+    result[:code] = 0
     if user == nil
       result[:msg] = "Not a Valid User"
-      result[:code] = 0
+    elsif user.email.blank?
+      result[:msg] = "There is no email address saved for this user"
     else
       email = user.send_reset_password_instructions
       user.reset_token = email
