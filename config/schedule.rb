@@ -37,7 +37,7 @@ every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
 end
 
 every '*/5 5-12,0 * * *' do # 1.minute 1.day 1.week 1.month 1.year is also supported
-  rake "check:umi_import" if Rails.env=='production'
+  rake "check:umi_import" if environment=='production'
 end
 
 every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
@@ -69,7 +69,7 @@ every 1.day, :at => '03:00 am' do
 end
 
 every '*/30 8-17,0 * * *' do # 1.minute 1.day 1.week 1.month 1.year is also supported
-  rake "doo:remove_duplicate_order_item_kit_products['lairdsuperfood']" if Rails.env=='production'
+  rake "doo:remove_duplicate_order_item_kit_products['lairdsuperfood']" if environment=='production'
 end
 
 # every 1.day, :at => '03:00 am' do
