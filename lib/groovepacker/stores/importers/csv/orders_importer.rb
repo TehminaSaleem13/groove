@@ -255,6 +255,7 @@ module Groovepacker
           def update_import_item(items = nil, imported_items = nil)
             @import_item.current_order_items = items unless items.nil?
             @import_item.current_order_imported_item = imported_items unless imported_items.nil?
+            @import_item = @import_item.dup if ImportItem.find_by_id(@import_item.try(:id)).blank?
             @import_item.save
           end
 
