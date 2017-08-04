@@ -42,7 +42,18 @@ class ExportsettingsController < ApplicationController
           send_export_email_on_thu: params[:send_export_email_on_thu],
           send_export_email_on_fri: params[:send_export_email_on_fri],
           send_export_email_on_sat: params[:send_export_email_on_sat],
-          send_export_email_on_sun: params[:send_export_email_on_sun]
+          send_export_email_on_sun: params[:send_export_email_on_sun],
+          send_stat_export_email_on_mon: params[:send_stat_export_email_on_mon],
+          send_stat_export_email_on_tue: params[:send_stat_export_email_on_tue],
+          send_stat_export_email_on_wed: params[:send_stat_export_email_on_wed],
+          send_stat_export_email_on_thu: params[:send_stat_export_email_on_thu],
+          send_stat_export_email_on_fri: params[:send_stat_export_email_on_fri],
+          send_stat_export_email_on_sat: params[:send_stat_export_email_on_sat],
+          send_stat_export_email_on_sun: params[:send_stat_export_email_on_sun],
+          auto_stat_email_export: params[:auto_stat_email_export],
+          time_to_send_stat_export_email: params[:time_to_send_stat_export_email],
+          stat_export_type: params[:stat_export_type],
+          stat_export_email: params[:stat_export_email]
           )
         @result['success_messages'].push('Export settings updated successfully.')
         # else

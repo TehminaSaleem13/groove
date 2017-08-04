@@ -5,7 +5,10 @@ class ExportSetting < ActiveRecord::Base
                   :send_export_email_on_tue, :send_export_email_on_wed, :send_export_email_on_thu,
                   :send_export_email_on_fri, :send_export_email_on_sat, :send_export_email_on_sun,
                   :last_exported, :export_orders_option, :order_export_type, :order_export_email,
-                  :start_time, :end_time, :manual_export
+                  :start_time, :end_time, :manual_export, :auto_stat_email_export, :time_to_send_stat_export_email,
+                  :send_stat_export_email_on_mon, :send_stat_export_email_on_tue, :send_stat_export_email_on_wed,
+                  :send_stat_export_email_on_thu, :send_stat_export_email_on_fri, :send_stat_export_email_on_sat,
+                  :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email
 
   after_save :scheduled_export
 
