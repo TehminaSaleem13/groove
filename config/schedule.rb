@@ -68,6 +68,10 @@ every 1.day, :at => '03:00 am' do
   rake "doo:schedule_inventory_report"
 end
 
+every 1.day, :at => '04:00 am' do
+  rake "doo:scheduled_stat_export"
+end
+
 every '*/30 8-17,0 * * *' do # 1.minute 1.day 1.week 1.month 1.year is also supported
   rake "doo:remove_duplicate_order_item_kit_products['lairdsuperfood']"
 end
