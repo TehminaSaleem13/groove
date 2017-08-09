@@ -237,6 +237,8 @@ module Groovepacker
 
           def import_order_data(order_map, single_row, index)
             order_map.each do |single_map|
+              single_sku = single_row[mapping['sku'][:position]]
+              single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku if single_sku.blank?
               next unless @helper.verify_single_item(single_row, single_map)
               # if sku, create order item with product id, qty
               if @helper.import_nonunique_items?(single_map)
