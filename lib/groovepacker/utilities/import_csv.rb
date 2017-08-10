@@ -97,8 +97,8 @@ class ImportCsv
       end
     rescue Exception => e
       on_demand_logger = Logger.new("#{Rails.root}/log/import_log_for_#{Apartment::Tenant.current}.log")
-      on_demand_logger.info("=========================================")
-      on_demand_logger.info(e)
+      on_demand_logger.info("1 =========================================")
+      on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
       raise e
     end
     track_user(tenant, params, "Import Finished", "#{params[:type].capitalize} Import Finished")

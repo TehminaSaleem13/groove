@@ -67,8 +67,8 @@ module Groovepacker
                   check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
                 rescue Exception => e
                   on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-                  on_demand_logger.info("=========================================")
-                  on_demand_logger.info(e)
+                  on_demand_logger.info("3 =========================================")
+                  on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
                 end
                 order_items_ar = []
               end
@@ -85,8 +85,8 @@ module Groovepacker
                   check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result) 
                 rescue Exception => e
                   on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-                  on_demand_logger.info("=========================================")
-                  on_demand_logger.info(e)                  
+                  on_demand_logger.info("4 =========================================")
+                  on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)                  
                 end 
                 order_items_ar = []
               end
@@ -107,8 +107,8 @@ module Groovepacker
               result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
             rescue Exception => e
               on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-              on_demand_logger.info("=========================================")
-              on_demand_logger.info(e)
+              on_demand_logger.info("5 =========================================")
+              on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
               result = nil
             end
               #break if result[:order_reimported] == true
@@ -237,7 +237,7 @@ module Groovepacker
 
           def import_order_data(order_map, single_row, index)
             order_map.each do |single_map|
-              single_sku = single_row[mapping['sku'][:position]]
+              single_sku = single_row[mapping['sku'][:position]] 
               single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku if single_sku.blank?
               next unless @helper.verify_single_item(single_row, single_map)
               # if sku, create order item with product id, qty

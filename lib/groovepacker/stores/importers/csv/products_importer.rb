@@ -580,8 +580,8 @@ module Groovepacker
                     usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0]
                   rescue Exception => e
                     on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-                    on_demand_logger.info("=========================================")
-                    on_demand_logger.info(e)
+                    on_demand_logger.info("2 =========================================")
+                    on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
                   end
                   @usable_records << build_usable_record(usable_record,single_row)
                   @success += 1
