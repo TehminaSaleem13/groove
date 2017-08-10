@@ -250,7 +250,8 @@ module Groovepacker
                 end
               end
             end
-
+            usable_record[:product_second_record_serial] = single_row[self.mapping['product_second_record_serial'][:position]] if self.mapping['product_second_record_serial']
+            usable_record[:product_record_serial] = single_row[self.mapping['product_record_serial'][:position]] if self.mapping['product_record_serial']
             usable_record[:barcodes] = map_barcodes('quaternary_barcode', "4", single_row, usable_record)
             usable_record[:barcodes] = map_barcodes('quinary_barcode', "5", single_row, usable_record)
             usable_record[:barcodes] = map_barcodes('senary_barcode', "6", single_row, usable_record)
@@ -338,7 +339,9 @@ module Groovepacker
 
           def create_single_import(record)
             record[:name] = 'Product from CSV Import' if record[:name].blank?
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight])
+            record[:product_record_serial] = record[:product_record_serial] == "1" ? true : false
+            record[:product_second_record_serial] = record[:product_second_record_serial] == "1" ? true : false
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial])
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
             if record[:skus].length > 0 && record[:barcodes].length > 0

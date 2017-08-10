@@ -19,7 +19,9 @@ class Product < ActiveRecord::Base
                   :add_to_any_order,
                   :is_intangible,
                   :base_sku,
-                  :product_receiving_instructions
+                  :product_receiving_instructions,
+                  :second_record_serial,
+                  :record_serial
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy

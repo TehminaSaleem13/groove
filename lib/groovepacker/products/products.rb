@@ -281,7 +281,7 @@ module Groovepacker
           [ "disable_conf_req", "is_kit", "is_skippable", "record_serial", "kit_parsing", "name", "product_type",
             "spl_instructions_4_confirmation", "spl_instructions_4_packer", "store_id", "store_product_id",
             "type_scan_enabled", "click_scan_enabled", "add_to_any_order", "product_receiving_instructions",
-            "is_intangible", "pack_time_adj" ]
+            "is_intangible", "pack_time_adj" , "second_record_serial"]
         end
 
         def update_product_location

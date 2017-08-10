@@ -6,7 +6,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   end
 
   def do_if_order_item_present
-    if @order_item.product.record_serial
+    if @order_item.product.record_serial || @order_item.product.second_record_serial
       do_if_record_serial_is_set
     else
       @order_item.process_item(@clicked, @current_user.username, @typein_count)
@@ -24,7 +24,8 @@ module ScanPack::Utilities::ProductScan::ProcessScan
         @session[:parent_order_item] = @order_item.id
       end
     else
-      @result['data']['serial']['ask'] = true
+      @result['data']['serial']['ask'] = @order_item.product.record_serial
+      @result['data']['serial']['ask_2'] = @order_item.product.second_record_serial
       @result['data']['serial']['product_id'] = @order_item.product_id
     end
   end

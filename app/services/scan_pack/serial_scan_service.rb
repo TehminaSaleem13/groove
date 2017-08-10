@@ -44,8 +44,7 @@ module ScanPack
       else
         do_if_product_lot_id_present(order_serial)
       end
-
-      do_product_scan(serial_added)
+      do_product_scan(serial_added) if @params["scan_pack"]["is_scan"]
     end
 
     def do_check_serial_added
