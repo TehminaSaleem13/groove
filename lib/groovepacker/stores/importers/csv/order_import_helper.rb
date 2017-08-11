@@ -22,8 +22,9 @@ module Groovepacker
 
           def blank_or_invalid(single_row)
             blank_row?(single_row) ||
-              !verify_single_item(single_row, 'increment_id') ||
-              !verify_single_item(single_row, 'sku')
+              !verify_single_item(single_row, 'increment_id')
+               # ||
+              # !verify_single_item(single_row, 'sku')
           end
 
           def build_final_records
