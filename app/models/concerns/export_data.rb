@@ -58,6 +58,7 @@ module ExportData
     return '' if order_serial.blank?
     fetch_product_data(single_row, order_serial, order_item)
     single_row[:serial_number] = order_serial.serial
+    single_row[:serial_number_2] = order_serial.second_serial
     calculate_scan_order(single_row, order_serial, order_item)
   end
 

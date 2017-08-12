@@ -7,7 +7,8 @@
 :lot_number: lot_number
 :primary_sku: primary_sku
 :part_sku: part_sku
-:serial_number: serial_number
+:serial_number: serial_number_1
+:serial_number_2: serial_number_2
 :product_name: product_name
 :packing_user: packing_user
 :order_item_count: order_item_count

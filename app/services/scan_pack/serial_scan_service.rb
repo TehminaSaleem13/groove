@@ -57,17 +57,22 @@ module ScanPack
     end
 
     def do_find_or_create_order_serial
-      order_serials = OrderSerial.where(
-        order_id: @order.id, product_id: @product.id, serial: @params[:serial]
-      )
-
+      if @params["second_serial"]
+        order_serials = OrderSerial.where( order_id: @order.id, product_id: @product.id)
+        order_serials.last.update_attribute(:second_serial,  @params[:serial])
+      elsif @params["ask"]
+        order_serials = OrderSerial.where( order_id: @order.id, product_id: @product.id, serial: @params[:serial])
+      else
+        order_serials = OrderSerial.where( order_id: @order.id, product_id: @product.id, second_serial: @params[:serial])
+      end
       order_serial =  unless order_serials.empty?
         order_serials.first
       else
-        OrderSerial.create!(
-          order_id: @order.id, product_id: @product.id,
-          serial: @params[:serial]
-        )
+        if @params["ask"]
+          OrderSerial.create!(order_id: @order.id, product_id: @product.id, serial: @params[:serial])
+        else
+          OrderSerial.create!(order_id: @order.id, product_id: @product.id, second_serial: @params[:serial])
+        end
       end
     end
 
