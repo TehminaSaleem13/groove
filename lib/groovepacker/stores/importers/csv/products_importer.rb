@@ -14,6 +14,7 @@ module Groovepacker
             @success_imported = @products_to_import.length
             @usable_records.clear
             @found_skus = nil
+            
             Product.import @products_to_import
             found_products_raw = []
             @all_unique_ids.each_slice(20000) do |ids|
@@ -378,6 +379,8 @@ module Groovepacker
             if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
               duplicate_product.name = record[:name]
             end
+            duplicate_product.second_record_serial = record[:product_second_record_serial].to_i if record[:product_second_record_serial] != nil
+            duplicate_product.record_serial = record[:product_record_serial].to_i if record[:product_record_serial] != nil
             if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
               duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
             end
@@ -864,7 +867,6 @@ module Groovepacker
               status_update_product.reload
               status_update_product.update_product_status
             end
-
 
             Product.where(:store_id => self.params[:store_id]).update_all(:store_product_id => 0)
             @product_import.success_imported = @success_imported
