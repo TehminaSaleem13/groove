@@ -44,7 +44,11 @@ module ScanPack
       else
         do_if_product_lot_id_present(order_serial)
       end
-      do_product_scan(serial_added) if @params["scan_pack"]["is_scan"]
+      if @params["scan_pack"]["is_scan"]
+        @order.addactivity("Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"", @current_user.name)
+      else
+        do_product_scan(serial_added) 
+      end
     end
 
     def do_check_serial_added
@@ -81,16 +85,17 @@ module ScanPack
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
         order_serial_id: order_serial.id
       )
-
-      if order_item_serial_lots.empty?
-        OrderItemOrderSerialProductLot.create!(
-          order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
-          order_serial_id: order_serial.id, qty: 1
-        )
-      else
-        existing_serial = order_item_serial_lots.first
-        existing_serial.qty += 1
-        existing_serial.save
+      if !@params["is_scan"]
+        if order_item_serial_lots.empty?
+          OrderItemOrderSerialProductLot.create!(
+            order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
+            order_serial_id: order_serial.id, qty: 1
+          )
+        else
+          existing_serial = order_item_serial_lots.first
+          existing_serial.qty += 1
+          existing_serial.save
+        end
       end
     end
 
