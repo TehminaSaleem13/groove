@@ -197,16 +197,25 @@ module ScanPack
       # PROCESS based on Order Status
       #-----------------------------
       # search in orders that have status of Scanned
-      do_if_already_been_scanned if single_order_status.eql?('scanned')
-      do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
-      # process orders that have status of Service Issue
-      do_if_single_order_status_serviceissue if single_order_status.eql?('serviceissue')
-      # search in orders that have status of Cancelled
-      do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
-      # if order has status of Awaiting Scanning
-      do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
+      if single_order_status.eql?('scanned')
+        do_if_already_been_scanned 
+      elsif @single_order.already_scanned && @scanpack_settings.order_verification
+        @single_order_result['scanned_on'] = @single_order.scanned_on
+        @single_order_result['next_state'] = 'scanpack.rfo'
+        @single_order.status = "scanned"
+        @single_order.save
+        @single_order.addactivity("Order with order number: #{@single_order.increment_id} was scanned using Single Scan Verification", @current_user.username)
+        @result['notice_messages'].push('This order marked as scanned')
+      else
+        do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
+        # process orders that have status of Service Issue
+        do_if_single_order_status_serviceissue if single_order_status.eql?('serviceissue')
+        # search in orders that have status of Cancelled
+        do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
+        # if order has status of Awaiting Scanning
+        do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
       #----------------------------
-
+      end
       do_if_single_order_present_and_under_max_limit_of_shipment if @single_order
     end
 

@@ -75,6 +75,7 @@ class ScanPackController < ApplicationController
   end
 
   def click_scan
+
     render json: product_scan(
         params[:barcode], 'scanpack.rfp.default', params[:id],
         {
@@ -109,6 +110,13 @@ class ScanPackController < ApplicationController
     response = ::ShippingEasy::Resources::Order.find(filters) rescue nil
     result[:shipment_id] = response["order"]["shipments"][0]["id"] rescue nil
     render json: result 
+  end
+
+  def update_scanned
+    order = Order.find_by_increment_id(params["increment_id"])
+    order.already_scanned =  true
+    order.save
+    render json: {}
   end
 
   private

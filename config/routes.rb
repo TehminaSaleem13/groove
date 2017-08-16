@@ -217,6 +217,7 @@ Groovepacks::Application.routes.draw do
       get 'get_export_settings'
       put 'update_export_settings'
       get 'order_exports'
+      get 'email_stats'
     end
   end
 
@@ -232,6 +233,7 @@ Groovepacks::Application.routes.draw do
       post 'add_note'
       post 'reset_order_scan'
       post 'get_shipment'
+      post 'update_scanned'
     end
     member do
     end
