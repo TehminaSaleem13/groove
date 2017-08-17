@@ -85,7 +85,7 @@ module ScanPack
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
         order_serial_id: order_serial.id
       )
-      if !@params["is_scan"]
+      if !(@params["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"])
         if order_item_serial_lots.empty?
           OrderItemOrderSerialProductLot.create!(
             order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
