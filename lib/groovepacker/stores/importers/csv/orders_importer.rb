@@ -104,7 +104,7 @@ module Groovepacker
             items_array = get_item_array(order_items_ar)
             #items_array.each do |row|        
             begin
-              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
+              result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) if order.present?
             rescue Exception => e
               on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
               on_demand_logger.info("5 =========================================")
@@ -124,10 +124,18 @@ module Groovepacker
           def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
             qty = items_array.flatten.reject { |c| c.is_a?(String) }
             if order.order_items.count == order_items_ar.count && qty.sum == order.order_items.map(&:qty).sum
+              log = {}
             #if order.order_items.count == items_array.count 
               #order_item = order.order_items.where(:sku => row[0]).first
               #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
+              if ["unitedmedco", "sunlessinc", "janinetait"].include?(Apartment::Tenant.current)
+                on_demand_logger = Logger.new("#{Rails.root}/log/qty_csv_import_1_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("1=========================================1")
+                log[current_inc_id] = order_items_ar.flatten.join(",")
+                on_demand_logger.info(log) 
+              end
             else
+              log = {}
               order.destroy
               @created_order_items.pop(order_items_ar.count)
               new_index = (index - order_items_ar.count + 1)
@@ -135,6 +143,12 @@ module Groovepacker
                 result[:order_reimported] = true
                 import_single_order(order_item, new_index, current_inc_id, order_map, result)
                 new_index = new_index + 1
+              end
+              if ["unitedmedco", "sunlessinc", "janinetait"].include?(Apartment::Tenant.current)
+                on_demand_logger = Logger.new("#{Rails.root}/log/qty_csv_import_2_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("2=========================================2")
+                log[current_inc_id] = order_items_ar.flatten.join(",")
+                on_demand_logger.info(log) 
               end
             end
             result
