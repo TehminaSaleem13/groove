@@ -17,9 +17,9 @@
 #   runner "AnotherModel.prune_old_records"
 # end
 
-every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
-  rake "doo:check_monit_process"
-end
+# every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
+#   rake "doo:check_monit_process"
+# end
 # Learn more: http://github.com/javan/whenever
 
 # set :output, Rails.root.join('log', 'cron.log')
@@ -56,9 +56,9 @@ every 1.day, :at => '7:50 am' do
   rake "doo:schedule_orders_export_email"
 end
 
-every 1.day, :at => '12:00 am' do
-  rake "doo:delete_old_orders"
-end
+# every 1.day, :at => '12:00 am' do
+#   rake "doo:delete_old_orders"
+# end
 
 every 60.minutes  do
   rake "doo:schedule_hourly_import"
