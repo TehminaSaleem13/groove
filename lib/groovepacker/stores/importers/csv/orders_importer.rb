@@ -61,6 +61,8 @@ module Groovepacker
                 break
               end
               next if @helper.blank_or_invalid(single_row)
+              product_name = single_row[mapping['product_name'][:position]] rescue nil
+              next if single_row[mapping['sku'][:position]].blank? && product_name.blank?
               inc_id = @helper.get_row_data(single_row, 'increment_id').strip
               if index!=0 and current_inc_id.present? and current_inc_id != inc_id
                 begin
@@ -252,7 +254,7 @@ module Groovepacker
           def import_order_data(order_map, single_row, index)
             single_sku = single_row[mapping['sku'][:position]]
             if single_sku.blank?
-              existing_product = Product.find_by_name(single_row[mapping['product_name'][:position]])
+              existing_product = Product.find_by_name(single_row[mapping['product_name'][:position]]) rescue nil
               if existing_product.present?
                 single_row[mapping['sku'][:position]] = existing_product.primary_sku
               else
