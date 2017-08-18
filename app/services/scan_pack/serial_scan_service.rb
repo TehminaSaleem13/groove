@@ -44,7 +44,7 @@ module ScanPack
       else
         do_if_product_lot_id_present(order_serial)
       end
-      if @params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]
+      if !@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]
         @order.addactivity("Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"", @current_user.name)
       else
         do_product_scan(serial_added) 
