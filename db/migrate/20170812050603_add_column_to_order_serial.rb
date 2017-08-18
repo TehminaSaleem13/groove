@@ -1,5 +1,7 @@
 class AddColumnToOrderSerial < ActiveRecord::Migration
   def change
-  	add_column :order_serials, :second_serial, :string
+  	unless column_exists? :order_serials, :second_serial
+  		add_column :order_serials, :second_serial, :string
+  	end
   end
 end
