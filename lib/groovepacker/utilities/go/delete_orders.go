@@ -3,6 +3,7 @@ package main
 import (
 	"database/sql"
 	"fmt"
+
 	sq "github.com/Masterminds/squirrel"
 	_ "github.com/go-sql-driver/mysql"
 	"github.com/joho/godotenv"
@@ -38,9 +39,9 @@ var (
 
 func main() {
 
-	f, err := os.OpenFile("log/go.log", os.O_RDWR | os.O_CREATE | os.O_APPEND, 0666)
+	f, err := os.OpenFile("log/go.log", os.O_RDWR|os.O_CREATE|os.O_APPEND, 0666)
 	if err != nil {
-	    log.Println("error opening file: %v", err)
+		log.Println("error opening file: %v", err)
 	}
 	defer f.Close()
 

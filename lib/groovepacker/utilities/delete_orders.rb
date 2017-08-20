@@ -1,26 +1,30 @@
 class DeleteOrders
-  #include Delayed::RecurringJob
-  #run_every 1.day
-  #run_at '12:00am'
-  #timezone 'US/Pacific'
-  #queue 'delete orders'
-  #priority 10
+  # include Delayed::RecurringJob
+  # run_every 1.day
+  # run_at '12:00am'
+  # timezone 'US/Pacific'
+  # queue 'delete orders'
+  # priority 10
 
-  def initialize(attrs={})
+  def initialize(attrs = {})
     # @tenant = attrs[:tenant]
     # @delete_count = attrs[:delete_count]
   end
 
   def perform
-    database = Rails.configuration.database_configuration[Rails.env]["database"]
+    database = Rails.configuration.database_configuration[Rails.env]['database']
     # unless @tenant.blank?
     #   tenant = Tenant.find_by_name(@tenant)
     #   system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
     #   destroy_order_items(@tenant)
     # else
-      tenants = Tenant.order(:name) rescue Tenant.all
-      system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
-      tenants.each{ |tenant| destroy_order_items(tenant) }
+    tenants = begin
+                  Tenant.order(:name)
+                rescue
+                  Tenant.all
+                end
+    system("go run #{Rails.root}/lib/groovepacker/utilities/go/delete_orders.go #{database}")
+    tenants.each { |tenant| destroy_order_items(tenant) }
     # end
   end
 
@@ -28,22 +32,17 @@ class DeleteOrders
     Apartment::Tenant.switch(tenant.name)
     OrderItem
       .where(is_deleted: true)
-      .includes(
-        :order_item_scan_times,
-        order_item_kit_products: [
-          product_kit_skus: [
-            product: [
-              :product_skus, :product_images,
-              :product_barcodes
-            ]
-          ]
-        ],
-        product: [
-          :product_skus, :product_images,
-          :product_barcodes
-        ]
-      )
-      .destroy_all
+      .find_in_batches(batch_size: 1000) do |order_items|
+        order_items_ids = order_items.map(&:id)
+        OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
+        OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
+        OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
+        # Update inventory
+        order_items.map(&:delete_inventory)
+        #  Removed destroy, for avioding the callbacks
+        # as child associations are already deleted
+        OrderItem.delete_all(['id IN (?)', order_items_ids])
+      end
   end
 
   # def perform_for_single_tenant(tenant)
