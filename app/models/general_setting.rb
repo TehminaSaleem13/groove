@@ -218,6 +218,17 @@ class GeneralSetting < ActiveRecord::Base
           # ExportOrder.export(tenant).deliver
           job_scheduled = true
         end
+      elsif job_type == 'stat_export'
+        export_setting = ExportSetting.all.first
+        if export_setting.should_stat_export_orders(date)
+          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_stat_export_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
+          ExportSetting.update_all(manual_export: false)
+          params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
+          time = export_setting.time_to_send_stat_export_email
+          stat_stream_obj = SendStatStream.new()
+          stat_stream_obj.delay(:run_at => time_diff.seconds.from_now, :queue => "generate_stat_export_#{tenant}").generate_export(tenant, params)
+          job_scheduled = true
+        end
       end
     end
     job_scheduled

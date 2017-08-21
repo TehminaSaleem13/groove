@@ -13,8 +13,13 @@ class ExportSetting < ActiveRecord::Base
   after_save :scheduled_export
 
   def scheduled_export
+    if auto_stat_email_export_with_changed_hash
+      schedule_job("stat_export", time_to_send_stat_export_email)
+    else
+      destroy_stat_export_email_scheduled
+    end
     if auto_email_export_with_changed_hash
-      schedule_job
+      schedule_job("export_order", time_to_send_export_email)
     else
       destroy_order_export_email_scheduled
     end
@@ -30,6 +35,12 @@ class ExportSetting < ActiveRecord::Base
     day = date.strftime('%a')
     # Returns True/False
     send("send_export_email_on_#{day.downcase}")
+  end
+
+  def should_stat_export_orders(date)
+    day = date.strftime('%a')
+    # Returns True/False
+    send("send_stat_export_email_on_#{day.downcase}")
   end
 
   def calculate_row_data(single_row, order_item)
@@ -66,13 +77,17 @@ class ExportSetting < ActiveRecord::Base
       order_export_email.present?
   end
 
-  def schedule_job
+  def auto_stat_email_export_with_changed_hash
+    auto_stat_email_export && changes[:time_to_send_stat_export_email].present? && stat_export_email.present?
+  end
+
+  def schedule_job(type, time)
     job_scheduled = false
     date = DateTime.now
     general_settings = GeneralSetting.all.first
     7.times do
       job_scheduled = general_settings.schedule_job(
-        date, time_to_send_export_email, 'export_order'
+        date, time, type
       )
       date += 1.day
       break if job_scheduled
@@ -83,6 +98,13 @@ class ExportSetting < ActiveRecord::Base
     tenant = Apartment::Tenant.current
     Delayed::Job.where(
       queue: "order_export_email_scheduled_#{tenant}"
+    ).destroy_all
+  end
+
+  def destroy_stat_export_email_scheduled
+    tenant = Apartment::Tenant.current
+    Delayed::Job.where(
+      queue: "generate_stat_export_#{tenant}"
     ).destroy_all
   end
 

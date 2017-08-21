@@ -102,6 +102,14 @@ class ExportsettingsController < ApplicationController
     # send_file filename, :type => 'text/csv'
   end
 
+  def email_stats
+    stat_stream_obj = SendStatStream.new()
+    export_setting = ExportSetting.first
+    params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
+    stat_stream_obj.delay(:queue => "generate_stat_export_#{Apartment::Tenant.current}").generate_export(Apartment::Tenant.current, params)
+    render json: {}
+  end
+
   private
 
   def update_false_status(result, message)
