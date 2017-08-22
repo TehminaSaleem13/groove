@@ -25,10 +25,12 @@ namespace :doo do
 		    end
 		    params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
 		    time = export_setting.time_to_send_stat_export_email
-		    stat_stream_obj = SendStatStream.new()
-			stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant.name)
-		    stat_stream_obj = SendStatStream.new()
-		    stat_stream_obj.delay(:run_at => time.strftime("%H:%M:%S"), :queue => 'generate_export').generate_export(tenant.name, params)
+		    if result
+			    stat_stream_obj = SendStatStream.new()
+				stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant.name)
+			    stat_stream_obj = SendStatStream.new()
+			    stat_stream_obj.delay(:run_at => time.strftime("%H:%M:%S"), :queue => "generate_stat_export_#{tenant.name}").generate_export(tenant.name, params)
+			end   
 		  end
 		rescue
 		end
