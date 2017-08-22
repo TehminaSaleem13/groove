@@ -23,7 +23,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         )
         barcode_found = true
         #process product barcode scan
-        order_item_kit_product = OrderItemKitProduct.find(child_item['kit_product_id'])
+        order_item_kit_product = OrderItemKitProduct.find_by_id(child_item['kit_product_id'])
 
         order_item = order_item_kit_product.order_item if order_item_kit_product.order_item.present?
 
