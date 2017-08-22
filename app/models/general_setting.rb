@@ -194,13 +194,16 @@ class GeneralSetting < ActiveRecord::Base
     time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i + Random.rand(120)
     time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
     time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
+    gn_setting = GeneralSetting.first
+    time_diff = time_diff - 3600 if !gn_setting.dst 
+    time = time_diff.seconds.from_now - gn_setting.time_zone.to_i.seconds
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
         if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(date)
-          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "low_inventory_email_scheduled_#{tenant}", time_diff.seconds.from_now.beginning_of_day, time_diff.seconds.from_now.end_of_day).destroy_all unless self.changes.blank?
+          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "low_inventory_email_scheduled_#{tenant}", time, time).destroy_all unless self.changes.blank?
           # LowInventoryLevel.notify(self,tenant).deliver
-          LowInventoryLevel.delay(:run_at => time_diff.seconds.from_now, :queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
+          LowInventoryLevel.delay(:run_at => time, :queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
           job_scheduled = true
         end
       elsif job_type == 'import_orders'
@@ -209,12 +212,12 @@ class GeneralSetting < ActiveRecord::Base
           self.delay(:run_at => time_diff.seconds.from_now, :queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
           job_scheduled = true
         end
-      elsif job_type == 'export_order'
+      elsif job_type == 'export_order'        
         export_setting = ExportSetting.all.first
         if export_setting.should_export_orders(date)
-          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time_diff.seconds.from_now.beginning_of_day , time_diff.seconds.from_now.end_of_day).destroy_all
+          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
           ExportSetting.update_all(manual_export: false)
-          ExportOrder.delay(:run_at => time_diff.seconds.from_now, :queue => "order_export_email_scheduled_#{tenant}").export(tenant)
+          ExportOrder.delay(:run_at => time, :queue => "order_export_email_scheduled_#{tenant}").export(tenant)
           # ExportOrder.export(tenant).deliver
           job_scheduled = true
         end
@@ -224,9 +227,8 @@ class GeneralSetting < ActiveRecord::Base
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_stat_export_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
           ExportSetting.update_all(manual_export: false)
           params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
-          time = export_setting.time_to_send_stat_export_email
           stat_stream_obj = SendStatStream.new()
-          stat_stream_obj.delay(:run_at => time_diff.seconds.from_now, :queue => "generate_stat_export_#{tenant}").generate_export(tenant, params)
+          stat_stream_obj.delay(:run_at => time, :queue => "generate_stat_export_#{tenant}").generate_export(tenant, params)
           job_scheduled = true
         end
       end
