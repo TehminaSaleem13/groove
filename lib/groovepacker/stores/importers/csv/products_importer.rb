@@ -582,8 +582,8 @@ module Groovepacker
                   begin
                     usable_record[:new_sku] = []
                     usable_record[:new_sku] <<  single_row[self.mapping['sku'][:position]].split(',')[0]
-                    usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0]
-                    usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0]
+                    usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0] rescue nil
+                    usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0] rescue nil
                   rescue Exception => e
                     on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
                     on_demand_logger.info("2 =========================================")
