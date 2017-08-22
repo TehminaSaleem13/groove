@@ -114,9 +114,13 @@ class ScanPackController < ApplicationController
 
   def update_scanned
     order = Order.find_by_increment_id(params["increment_id"])
-    order.already_scanned =  true
-    order.save
-    render json: {}
+    if order.present?
+      order.already_scanned =  true
+      order.save
+    else
+      @result["notice_messages"] = "Order not found"  
+    end
+    render json: @result
   end
 
   private
