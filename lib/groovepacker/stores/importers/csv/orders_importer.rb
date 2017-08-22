@@ -62,7 +62,8 @@ module Groovepacker
               end
               next if @helper.blank_or_invalid(single_row)
               product_name = single_row[mapping['product_name'][:position]] rescue nil
-              next if single_row[mapping['sku'][:position]].blank? && product_name.blank?
+              product_sku = single_row[mapping['sku'][:position]] rescue nil
+              next if product_sku.blank? && product_name.blank?
               inc_id = @helper.get_row_data(single_row, 'increment_id').strip
               if index!=0 and current_inc_id.present? and current_inc_id != inc_id
                 begin
