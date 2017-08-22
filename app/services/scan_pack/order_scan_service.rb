@@ -147,7 +147,7 @@ module ScanPack
       end
       @result['matched'] = false
       @result['do_on_demand_import'] = true
-      @result['notice_messages'].push(message)
+      @result['error_messages'].push(message)
     end
 
     def do_if_single_order_present
@@ -193,7 +193,6 @@ module ScanPack
         @single_order.packing_user_id = @current_user.id
         @single_order.save
       end
-
       # PROCESS based on Order Status
       #-----------------------------
       # search in orders that have status of Scanned
@@ -205,7 +204,7 @@ module ScanPack
         @single_order.status = "scanned"
         @single_order.save
         @single_order.addactivity("Order with order number: #{@single_order.increment_id} was scanned using Single Scan Verification", @current_user.username)
-        @result['notice_messages'].push('This order marked as scanned')
+        @result['success_messages'].push('This order marked as scanned')
       else
         do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
         # process orders that have status of Service Issue
