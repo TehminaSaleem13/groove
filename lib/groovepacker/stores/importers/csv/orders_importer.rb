@@ -253,13 +253,13 @@ module Groovepacker
           end
 
           def import_order_data(order_map, single_row, index)
-            single_sku = single_row[mapping['sku'][:position]]
+            single_sku = single_row[mapping['sku'][:position]] rescue nil
             if single_sku.blank?
               existing_product = Product.find_by_name(single_row[mapping['product_name'][:position]]) rescue nil
               if existing_product.present?
                 single_row[mapping['sku'][:position]] = existing_product.primary_sku
               else
-                single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku 
+                single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku rescue nil
               end
             end
             order_map.each do |single_map|
