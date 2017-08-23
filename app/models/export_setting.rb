@@ -96,16 +96,15 @@ class ExportSetting < ActiveRecord::Base
 
   def destroy_order_export_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where(
-      queue: "order_export_email_scheduled_#{tenant}"
-    ).destroy_all
+    Delayed::Job.where("queue =? && run_at < ?", "order_export_email_scheduled_#{tenant}", Time.now()).destroy_all
+    # Delayed::Job.where(
+    #   queue: "order_export_email_scheduled_#{tenant}"
+    # ).destroy_all
   end
 
   def destroy_stat_export_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where(
-      queue: "generate_stat_export_#{tenant}"
-    ).destroy_all
+    Delayed::Job.where("queue =? && run_at < ?", "generate_stat_export_#{tenant}", Time.now()).destroy_all
   end
 
   def update_single_row(single_row, order)
