@@ -1,6 +1,7 @@
 module Groovepacker
   module Utilities
     class Base
+      require 'import_orders'
       attr_accessor :import_params
       
       def initialize(params={})

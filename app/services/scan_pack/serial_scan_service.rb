@@ -121,17 +121,17 @@ module ScanPack
     end
 
     def do_product_scan(serial_added)
+      @order.addactivity(
+        "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
+        @current_user.name
+      )
+
       @result = product_scan(
         @params[:barcode], 'scanpack.rfp.default', @params[:order_id],
         {
           clicked: @params[:clicked], serial_added: serial_added,
           current_user: @current_user, session: @session
         }
-      )
-
-      @order.addactivity(
-        "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
-        @current_user.name
       )
 
       @result
