@@ -50,7 +50,11 @@ module Groovepacker
           Rails.logger.info 'Getting orders with order No: ' + orderno
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
           response = (response.class == String ? {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1} : response)
-          response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
+          begin
+            response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno } 
+          rescue
+            response = {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1}
+          end
           log_on_demand_order_import(orderno, response, using_tracking_number)
           import_item.update_attributes(:status => "completed",:current_increment_id => orderno, :updated_orders_import => response["orders"].count) rescue nil
           if using_tracking_number
