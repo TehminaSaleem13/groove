@@ -197,6 +197,7 @@ class GeneralSetting < ActiveRecord::Base
     gn_setting = GeneralSetting.first
     time_diff = time_diff - 3600 if !gn_setting.dst 
     time = time_diff.seconds.from_now - gn_setting.time_zone.to_i.seconds
+    time = time - 1.day if Time.now().utc + 1.day < time
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
