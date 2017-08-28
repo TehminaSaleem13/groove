@@ -121,6 +121,7 @@ module ScanPack
     end
 
     def do_product_scan(serial_added)
+      count = ProductBarcode.find_by_barcode(@params["barcode"]).packing_count rescue 1
       @order.addactivity(
         "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
         @current_user.name
@@ -130,7 +131,7 @@ module ScanPack
         @params[:barcode], 'scanpack.rfp.default', @params[:order_id],
         {
           clicked: @params[:clicked], serial_added: serial_added,
-          current_user: @current_user, session: @session
+          current_user: @current_user, session: @session, typein_count: count.to_i
         }
       )
 
