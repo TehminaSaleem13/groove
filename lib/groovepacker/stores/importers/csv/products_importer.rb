@@ -457,7 +457,7 @@ module Groovepacker
                 if !to_not_add_barcodes.include?(single_to_add_barcode) && single_to_add_barcode != "[DELETE]"
                   to_add_barcode = ProductBarcode.new
                   to_add_barcode.barcode = single_to_add_barcode
-                  to_add_barcode.packing_count = record[:all_barcodes_qty][single_to_add_barcode][0].to_i
+                  to_add_barcode.packing_count = record[:all_barcodes_qty][single_to_add_barcode][0].to_i rescue 1
                   to_add_barcode.order = index
                   to_add_barcode.product_id = duplicate_product.id
                   @import_product_barcodes << to_add_barcode
