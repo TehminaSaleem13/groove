@@ -435,4 +435,13 @@ class UsersController < ApplicationController
     end
     render json: result
   end
+
+  def update_login_date 
+    user = User.find_by_name(params["username"])
+    if user.present?
+      user.current_sign_in_at = DateTime.now
+      user.save
+    end
+    render json: {}
+  end
 end
