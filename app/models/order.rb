@@ -125,6 +125,7 @@ class Order < ActiveRecord::Base
 
   def set_order_to_scanned_state(username)
     self.status = 'scanned'
+    self.already_scanned = true
     self.scanned_on = current_time_from_proper_timezone
     self.addactivity('Order Scanning Complete', username)
     self.packing_score = self.compute_packing_score
