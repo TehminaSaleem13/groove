@@ -53,7 +53,7 @@ module Groovepacker
           set_status_and_message(false, 'Order has already been scanned and cannot be modified', ['push'])
           return
         end
-        @products = Product.find_by_id(@params[:productids])
+        @products = Product.find(@params[:productids]) rescue []
         add_if_products_exist
         return @result
       end
