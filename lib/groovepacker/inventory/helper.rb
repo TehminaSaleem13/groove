@@ -13,9 +13,15 @@ module Groovepacker
         # 	end
         # end
         # Thread.current[:inventory_tracking_enabled]
-        inventory_tracking_enabled = Thread.current[:inventory_tracking_enabled]
-        return inventory_tracking_enabled unless inventory_tracking_enabled.nil?
-        Thread.current[:inventory_tracking_enabled] = GeneralSetting.setting.try(:inventory_tracking?) || false
+        #inventory_tracking_enabled = Thread.current[:inventory_tracking_enabled]
+        #return inventory_tracking_enabled unless inventory_tracking_enabled.nil?
+        #Thread.current[:inventory_tracking_enabled] = GeneralSetting.setting.try(:inventory_tracking?) || false
+        result = false
+        general_setting = GeneralSetting.setting
+        unless general_setting.nil?
+          result = general_setting.inventory_tracking?
+        end
+        result
       end
 
       def hold_orders_due_to_inventory?
