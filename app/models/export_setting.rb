@@ -57,7 +57,6 @@ class ExportSetting < ActiveRecord::Base
     # result = set_result_hash
     start_time, end_time = set_start_and_end_time
     return with_error_filename if start_time.blank?
-
     orders = Order.where(scanned_on: start_time..end_time)
     ExportSetting.update_all(:last_exported => Time.zone.now)
     filename = generate_file_name
@@ -110,7 +109,7 @@ class ExportSetting < ActiveRecord::Base
   def update_single_row(single_row, order)
     single_row[:order_number] = order.increment_id
     single_row[:order_date] = order.order_placed_time
-    single_row[:scanned_date] = order.scanned_on
+    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).to_s.gsub("UTC", "") rescue order.scanned_on
     single_row[:address1] = order.address_1
     single_row[:address2] = order.address_2
     single_row[:city] = order.city
@@ -141,8 +140,8 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def set_start_and_end_time
-    start_time = self.start_time.beginning_of_day rescue DateTime.now-1.days
-    end_time = self.end_time.end_of_day rescue DateTime.now
+    start_time = self.start_time.beginning_of_day + GeneralSetting.last.time_zone.to_i rescue (DateTime.now-1.days + GeneralSetting.last.time_zone.to_i)
+    end_time = self.end_time.end_of_day + GeneralSetting.last.time_zone.to_i rescue (DateTime.now + GeneralSetting.last.time_zone.to_i)
     return [start_time, end_time] if manual_export
 
     start_time = same_day_or_last_exported(start_time)
@@ -208,7 +207,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_number] = order.increment_id
     single_row[:scanned_qty] = order.scanned_items_count
     single_row[:order_date] = order.order_placed_time
-    single_row[:scanned_date] = order.scanned_on
+    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).to_s.gsub("UTC", "") rescue order.scanned_on
     single_row
   end
 
