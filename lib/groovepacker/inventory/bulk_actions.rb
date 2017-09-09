@@ -8,7 +8,7 @@ module Groovepacker
         unless inventory_tracking_enabled?
           return true
         end
-        order_items = OrderItem.where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
+        order_items = OrderItem.includes(:order).where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
         order_items.each do |single_order_item|
           process(single_order_item)
           # if single_order_item.is_not_ghost?
@@ -58,7 +58,6 @@ module Groovepacker
             bulk_action.save
             orders.each_with_index do |single_order, index|
               do_process_single(single_order)
-
               if (index + 1) % check_length === 0 || index === (orders.length - 1)
                 bulk_action.reload
                 if bulk_action.cancel?
