@@ -504,7 +504,7 @@ module Groovepacker
         begin
           tenant_hash['last_activity']['most_recent_login'] = most_recent_login(tenant_name)
           tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan(tenant_name)
-          tenant_hash['most_recent_activity'] = most_recent_login['date_time']
+          tenant_hash['most_recent_activity'] = most_recent_login(tenant_name)['date_time']
           check_split_or_production
         rescue => e
           tenant_hash['most_recent_activity'] = nil
