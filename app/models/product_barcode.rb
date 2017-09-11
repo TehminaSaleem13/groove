@@ -5,6 +5,7 @@ class ProductBarcode < ActiveRecord::Base
   validates_uniqueness_of :barcode
   after_save :delete_empty
   before_save :update_packing_count
+  after_save :update_multibarcode
 
   def delete_empty
     destroy if barcode.blank?
@@ -23,5 +24,9 @@ class ProductBarcode < ActiveRecord::Base
   def update_packing_count
     self.is_multipack_barcode = true
     self.packing_count = 1 if self.packing_count.blank? && self.barcode.present?
+  end
+
+  def update_multibarcode
+    self.update_column(:is_multipack_barcode, true)
   end
 end
