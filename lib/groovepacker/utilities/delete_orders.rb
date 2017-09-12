@@ -32,11 +32,15 @@ class DeleteOrders
     Apartment::Tenant.switch(tenant.name)
     OrderItem
       .where(is_deleted: true)
+      .includes(:order)
       .find_in_batches(batch_size: 1000) do |order_items|
         order_items_ids = order_items.map(&:id)
-        OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
-        OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
-        OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
+        
+        # Already deleted in go code
+        # OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
+        # OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
+        # OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
+        
         # Update inventory
         order_items.map(&:delete_inventory)
         #  Removed destroy, for avioding the callbacks
