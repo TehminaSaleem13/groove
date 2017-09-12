@@ -23,7 +23,7 @@ class DeleteOrders
                 rescue
                   Tenant.all
                 end
-    system("go run #{Rails.root}/lib/groovepacker/utilities/go/delete_orders.go #{database}")
+    system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
     tenants.each { |tenant| destroy_order_items(tenant) }
     # end
   end
