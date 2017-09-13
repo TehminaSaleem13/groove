@@ -44,7 +44,7 @@ module Groovepacker
                 rescue
                   response
                 end
-                orders_count = response["orders"].try(:count)
+                orders_count = response["orders"].try(:count) rescue 0
                 grouped_response = response["orders"].group_by { |d| d["fulfillment_channel"] } rescue {}
                 if !@credential.afn_fulfillment_channel && !@credential.mfn_fulfillment_channel
                   response = {}
