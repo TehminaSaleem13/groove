@@ -213,7 +213,7 @@ module Groovepacker
               if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
                 on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_tag_order_import_#{Apartment::Tenant.current}.log")
                 on_demand_logger.info("=========================================")
-                on_demand_logger.info(response["orders"].map {|a| a["orderId"]})
+                on_demand_logger.info(response["orders"].map {|a| a["orderId"]}.join(", ")) rescue on_demand_logger.info("")
               end
               return response
             end
