@@ -125,6 +125,11 @@ module Groovepacker
           end
 
           def check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result)
+            record_hash = []
+            new_array = []
+            order_items_ar.each { |row| record_hash << @helper.get_row_data(row, 'increment_id') }
+            final_record.each { |row| new_array << row if @helper.get_row_data(row, 'increment_id').delete(' ').include?(record_hash[0].delete(' ')) }
+            order_items_ar = new_array
             qty = items_array.flatten.reject { |c| c.is_a?(String) }
             if order.order_items.count == order_items_ar.count && qty.sum == order.order_items.map(&:qty).sum
               log = {}
