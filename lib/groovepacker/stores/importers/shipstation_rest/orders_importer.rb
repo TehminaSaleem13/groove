@@ -64,9 +64,11 @@ module Groovepacker
                 shipstation_order = find_or_init_new_order(order)
                 import_order_form_response(shipstation_order, order, shipments_response) 
               rescue Exception => e
-                on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_order_import_#{Apartment::Tenant.current}.log")
-                on_demand_logger.info("=========================================")
-                on_demand_logger.info(e.backtrace.first(10).join(","))
+                if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
+                  on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_order_import_#{Apartment::Tenant.current}.log")
+                  on_demand_logger.info("=========================================")
+                  on_demand_logger.info(e.backtrace.first(10).join(","))
+                end
               end
               break if Rails.env == "test"
               sleep 0.3
@@ -208,6 +210,11 @@ module Groovepacker
               response = {"orders" => nil}
               response = fetch_orders_if_import_type_is_not_tagged(response)
               response = fetch_tagged_orders(response)
+              if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
+                on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_tag_order_import_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("=========================================")
+                on_demand_logger.info(response["orders"].map {|a| a["orderId"]})
+              end
               return response
             end
 
