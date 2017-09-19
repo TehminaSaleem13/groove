@@ -136,15 +136,12 @@ module Groovepacker
             #if order.order_items.count == items_array.count 
               #order_item = order.order_items.where(:sku => row[0]).first
               #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
-              # if ["unitedmedco", "sunlessinc", "janinetait", "brokencoast"].include?(Apartment::Tenant.current)
+              if ["unitedmedco", "sunlessinc", "janinetait", "brokencoast"].include?(Apartment::Tenant.current)
                 on_demand_logger = Logger.new("#{Rails.root}/log/qty_csv_import_1_#{Apartment::Tenant.current}.log")
                 on_demand_logger.info("1=========================================1")
                 log[current_inc_id] = order_items_ar.flatten.join(",")
                 on_demand_logger.info(log) 
-                file_response = File.read("#{Rails.root}/log/qty_csv_import_1_#{Apartment::Tenant.current}.log")
-                
-              # end
-              binding.pry
+              end
             else
               log = {}
               order.destroy
