@@ -49,4 +49,9 @@ class CsvExportMailer < ActionMailer::Base
     @url = url
     mail to: recipients, subject: "[#{tenant}] Product Export CSV" if recipients.present? 
   end
+
+  def import_log(url, tenant, order) 
+    @url = url
+    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "[#{tenant}] #{order} CSV Log" 
+  end
 end
