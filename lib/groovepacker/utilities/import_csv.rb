@@ -8,25 +8,29 @@ class ImportCsv
       Apartment::Tenant.switch(tenant)
       params = eval(params)
       # track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
-      #download CSV and save
-      track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
+      # download CSV and save
+      track_user(tenant, params, 'Import Started', "#{params[:type].capitalize} Import Started")
       response = nil
       file_path = nil
       store = Store.find(params[:store_id])
       credential = store.ftp_credential
       encoding_options = {
-        :invalid           => :replace,  # Replace invalid byte sequences
-        :undef             => :replace,  # Replace anything not defined in ASCII
-        :replace           => '',        # Use a blank for those replacements
-        :universal_newline => true       # Always break lines with \n
+        invalid: :replace, # Replace invalid byte sequences
+        undef: :replace, # Replace anything not defined in ASCII
+        replace: '', # Use a blank for those replacements
+        universal_newline: true # Always break lines with \n
       }
       if params[:flag] == 'ftp_download'
         groove_ftp = FTP::FtpConnectionManager.get_instance(store)
         response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
-          csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options) rescue nil
-          
+          csv_file = begin
+                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
+                     rescue
+                       nil
+                     end
+
           set_file_name(params, response[:file_info][:ftp_file_name])
         else
           result[:status] = false
@@ -34,38 +38,21 @@ class ImportCsv
         end
       else
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
-        csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) rescue nil
+        csv_file = begin
+                     file.content.encode(Encoding.find('ASCII'), encoding_options)
+                   rescue
+                     nil
+                   end
         set_file_name(params, file.url)
       end
       if csv_file.nil?
         result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
-        final_record = []
-        if params[:fix_width] == 1
-          if params[:flag] == 'ftp_download'
-            initial_split = csv_file.split(/\n/).reject(&:empty?)
-          else
-            initial_split = csv_file.content.split(/\n/).reject(&:empty?)
-          end
-          initial_split.each do |single|
-            final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
-          end
-        else
-          require 'csv'
-          params[:sep] = params[:sep] == "\\t" ? "\t" : params[:sep]
-          final_record =  begin
-                            CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => params[:delimiter], :encoding => 'windows-1251:utf-8')
-                          rescue
-                            CSV.parse(csv_file, :col_sep => params[:sep], :quote_char => "|", :encoding => 'windows-1251:utf-8') rescue []
-                          end
-        end
-        if params[:rows].to_i && params[:rows].to_i > 1
-          final_record.shift(params[:rows].to_i - 1)
-        end
-        mapping = {}
-        params[:map].each do |map_single|
-          if map_single[1].present? && map_single[1]['value'] != 'none'
+        if params[:type] == 'order'
+          mapping = {}
+          params[:map].each do |map_single|
+            next unless map_single[1].present? && map_single[1]['value'] != 'none'
             mapping[map_single[1]['value']] = {}
             mapping[map_single[1]['value']][:position] = map_single[0].to_i
             if map_single[1][:action].nil?
@@ -74,40 +61,99 @@ class ImportCsv
               mapping[map_single[1]['value']][:action] = map_single[1][:action]
             end
           end
-        end
+          HTTParty.post(
+            'http://0.0.0.0:4000/api/process/import', body: {
+              'for' => 'order',
+              'csv' => 'true',
+              'order_params' => {
+                'data' => csv_file,
+                'tenant' => tenant,
+                'params' => params,
+                'mapping' => mapping
+              }
+            }.to_json,
+            headers: {'Content-Type' => 'application/json'}
+          )
+        else
+          final_record = []
+          if params[:fix_width] == 1
+            if params[:flag] == 'ftp_download'
+              initial_split = csv_file.split(/\n/).reject(&:empty?)
+            else
+              initial_split = csv_file.content.split(/\n/).reject(&:empty?)
+            end
+            initial_split.each do |single|
+              final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
+            end
+          else
+            require 'csv'
+            params[:sep] = params[:sep] == '\\t' ? "\t" : params[:sep]
+            final_record = begin
+                              CSV.parse(csv_file, col_sep: params[:sep], quote_char: params[:delimiter], encoding: 'windows-1251:utf-8')
+                            rescue
+                              begin
+                                CSV.parse(csv_file, col_sep: params[:sep], quote_char: '|', encoding: 'windows-1251:utf-8')
+                              rescue
+                                []
+                              end
+                            end
+          end
+          if params[:rows].to_i && params[:rows].to_i > 1
+            final_record.shift(params[:rows].to_i - 1)
+          end
+          mapping = {}
+          params[:map].each do |map_single|
+            next unless map_single[1].present? && map_single[1]['value'] != 'none'
+            mapping[map_single[1]['value']] = {}
+            mapping[map_single[1]['value']][:position] = map_single[0].to_i
+            if map_single[1][:action].nil?
+              mapping[map_single[1]['value']][:action] = 'skip'
+            else
+              mapping[map_single[1]['value']][:action] = map_single[1][:action]
+            end
+          end
 
-        set_file_size(params, final_record)
-        if params[:type] == 'order'
-          import_order = Groovepacker::Stores::Importers::CSV::OrdersImporter.new(params, final_record, mapping, nil)
-          result = import_order.import()
-          #result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
-        elsif params[:type] == 'product'
-          #result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
-          import_product = Groovepacker::Stores::Importers::CSV::ProductsImporter.new(params, final_record, mapping, params[:import_action])
-          result = import_product.import()
-        elsif params[:type] == 'kit'
-          import_kit = Groovepacker::Stores::Importers::CSV::KitsImporter.new(params, final_record, mapping, params[:bulk_action_id])
-          result = import_kit.import()
-        end
-        #File.delete(file_path)
-        if params[:flag] == 'ftp_download' && result[:add_imported]
-          rename_ftp_file(store, result, response)
-          File.delete(file_path) rescue nil
+          set_file_size(params, final_record)
+          if params[:type] == 'order'
+            import_order = Groovepacker::Stores::Importers::CSV::OrdersImporter.new(params, final_record, mapping, nil)
+            result = import_order.import
+            # result = Groovepacker::Stores::Importers::CSV::OrdersImporter.new.import(params,final_record,mapping)
+          elsif params[:type] == 'product'
+            # result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
+            import_product = Groovepacker::Stores::Importers::CSV::ProductsImporter.new(params, final_record, mapping, params[:import_action])
+            result = import_product.import
+          elsif params[:type] == 'kit'
+            import_kit = Groovepacker::Stores::Importers::CSV::KitsImporter.new(params, final_record, mapping, params[:bulk_action_id])
+            result = import_kit.import
+          end
+          # File.delete(file_path)
+          if params[:flag] == 'ftp_download' && result[:add_imported]
+            rename_ftp_file(store, result, response)
+            begin
+              File.delete(file_path)
+            rescue
+              nil
+            end
+          end
         end
       end
     rescue Exception => e
       on_demand_logger = Logger.new("#{Rails.root}/log/import_log_for_#{Apartment::Tenant.current}.log")
-      on_demand_logger.info("1 =========================================")
-      on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
+      on_demand_logger.info('1 =========================================')
+      begin
+        on_demand_logger.info(e.backtrace.first(10).join(','))
+      rescue
+        on_demand_logger.info(e)
+      end
       raise e
     end
-    track_user(tenant, params, "Import Finished", "#{params[:type].capitalize} Import Finished")
+    track_user(tenant, params, 'Import Finished', "#{params[:type].capitalize} Import Finished")
     result
   end
 
   def rename_ftp_file(store, result, response)
     import_item = ImportItem.where(store_id: store.id).last
-    return result if import_item.status=="cancelled"
+    return result if import_item.status == 'cancelled'
     groove_ftp = FTP::FtpConnectionManager.get_instance(store)
     response = groove_ftp.update(response[:file_info][:ftp_file_name])
     unless response[:status]
@@ -120,11 +166,10 @@ class ImportCsv
   private
 
   def set_file_name(params, file_url)
-    params[:file_name] = file_url.split("/").last
+    params[:file_name] = file_url.split('/').last
   end
 
   def set_file_size(params, final_record)
-    params[:file_size] = (final_record.join("\n").bytesize.to_f/1024).round(4)
+    params[:file_size] = (final_record.join("\n").bytesize.to_f / 1024).round(4)
   end
-
 end
