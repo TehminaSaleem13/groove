@@ -54,4 +54,9 @@ class CsvExportMailer < ActionMailer::Base
     @url = url
     mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "[#{tenant}] #{order} CSV Log" 
   end
+
+  def export_scanned_time_log(url)
+    @url = url
+    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "Export log with fetching time" 
+  end
 end

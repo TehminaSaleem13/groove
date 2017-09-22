@@ -7,7 +7,7 @@ class ExportOrder < ActionMailer::Base
     begin
       @counts = get_order_counts(export_settings) if export_settings.export_orders_option == 'on_same_day'
       filename = export_settings.export_data(tenant)
-      @tenant_name = tenant    
+      @tenant_name = tenant
       url = GroovS3.find_export_csv(tenant, filename)
       # file_locatin = "#{Rails.root}/public/csv/#{filename}"
       @csv_data = []
@@ -59,6 +59,10 @@ class ExportOrder < ActionMailer::Base
       day_begin = (Time.now.beginning_of_day - 1.day) + seconds
       end_time = Time.now.beginning_of_day + seconds
     end
+    on_demand_logger = Logger.new("#{Rails.root}/log/export_report_scanned_on_time.log")
+    on_demand_logger.info("=========================================")
+    log = { tenant: Apartment::Tenant.current, manual_export: export_settings.manual_export, start_time: day_begin, end_time: end_time }
+    on_demand_logger.info(log) 
     scanned_orders = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time)
     result['imported'] = Order.where("created_at >= ? and created_at <= ?", day_begin, end_time).size
     result['scanned'] = scanned_orders.size

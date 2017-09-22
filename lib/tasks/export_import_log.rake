@@ -25,6 +25,13 @@ namespace :doo do
 		    end
 	    end
 	end
+    file_response = File.read("#{Rails.root}/log/export_report_scanned_on_time.log") rescue nil
+    Apartment::Tenant.switch 
+    if file_response.present?
+      GroovS3.create_csv(Apartment::Tenant.current, "export_log_#{DateTime.now}", 1, file_response, :public_read)
+      url = GroovS3.find_csv(Apartment::Tenant.current, "export_log_#{DateTime.now}", 1).url
+      CsvExportMailer.export_scanned_time_log(url).deliver
+    end
     exit(1)
   end  
 end
