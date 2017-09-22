@@ -145,13 +145,14 @@ module Groovepacker
             else
               product = import_product(item, store) rescue nil
             end
-
-            order.order_items.create(
-              product: product,
-              price: item["UnitPrice"].to_f,
-              qty: item["Quantity"],
-              row_total: item["TotalPrice"]
-            )
+            if item.present?
+	            order.order_items.create(
+	              product: product,
+	              price: item["UnitPrice"].to_f,
+	              qty: item["Quantity"],
+	              row_total: item["TotalPrice"]
+	            )
+	        end
             import_item.current_order_imported_item = import_item.current_order_imported_item + 1
             import_item.save
             #make_product_intangible(product)
