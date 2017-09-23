@@ -56,8 +56,8 @@ class ExportOrder < ActionMailer::Base
     else
       time = export_settings.time_to_send_export_email.strftime("%H:%M")
       seconds = Time.parse(time).seconds_since_midnight
-      day_begin = (Time.now.beginning_of_day - 1.day) + seconds
-      end_time = Time.now.beginning_of_day + seconds
+      day_begin = ((Time.now.utc.beginning_of_day - 1.day) + seconds - GeneralSetting.last.time_zone.to_i).end_of_day
+      end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
     end
     on_demand_logger = Logger.new("#{Rails.root}/log/export_report_scanned_on_time.log")
     on_demand_logger.info("=========================================")
