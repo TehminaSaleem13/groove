@@ -419,6 +419,19 @@ class UsersController < ApplicationController
       render json: result
   end
 
+  def update_email
+    user = User.find_by_username(params["username"])
+    user.email = params["email"]
+    user.save
+    render json: {}
+  end
+
+  def get_email
+    
+    user = User.find_by_username(params["username"])
+    render json: {email: user.email}
+  end
+
   def update_password
     result = {}
     user = User.find(params["user_id"])
