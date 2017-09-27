@@ -58,6 +58,7 @@ class ExportSetting < ActiveRecord::Base
     start_time, end_time = set_start_and_end_time
     return with_error_filename if start_time.blank?
     orders = Order.where(scanned_on: start_time..end_time)
+
     ExportSetting.update_all(:last_exported => Time.zone.now)
     filename = generate_file_name
     if order_export_type == 'do_not_include'
@@ -143,9 +144,12 @@ class ExportSetting < ActiveRecord::Base
     start_time = self.start_time.beginning_of_day - GeneralSetting.last.time_zone.to_i rescue (DateTime.now-1.days)
     end_time = self.end_time.end_of_day - GeneralSetting.last.time_zone.to_i rescue DateTime.now
     return [start_time, end_time] if manual_export
-
-    start_time = same_day_or_last_exported(start_time)
-    end_time = Time.zone.now
+    time = time_to_send_export_email.strftime("%H:%M")
+    seconds = Time.parse(time).seconds_since_midnight
+    start_time = ((Time.now.utc.beginning_of_day - 1.day) + seconds - GeneralSetting.last.time_zone.to_i).end_of_day
+    end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
+    # start_time = same_day_or_last_exported(start_time)
+    # end_time = Time.zone.now
     [start_time, end_time]
   end
 
