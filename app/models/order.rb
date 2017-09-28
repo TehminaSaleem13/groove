@@ -978,7 +978,11 @@ class Order < ActiveRecord::Base
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
     # key = "order_items_#{id}_was_egar_loaded"
     limited_order_items = partially_load_order_item(order_item_status, limit, offset)
-    if limited_order_items.map(&:keys?).include? true
+    if !(
+      %w(lairdsuperfood).include?(Apartment::Tenant.current)
+    ) && (
+      limited_order_items.map(&:keys?).include? true
+    )
       limited_order_items
     else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
