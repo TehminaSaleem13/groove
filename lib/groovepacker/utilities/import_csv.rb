@@ -50,29 +50,10 @@ class ImportCsv
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
         if params[:type] == 'order'
-          mapping = {}
-          params[:map].each do |map_single|
-            next unless map_single[1].present? && map_single[1]['value'] != 'none'
-            mapping[map_single[1]['value']] = {}
-            mapping[map_single[1]['value']][:position] = map_single[0].to_i
-            if map_single[1][:action].nil?
-              mapping[map_single[1]['value']][:action] = 'skip'
-            else
-              mapping[map_single[1]['value']][:action] = map_single[1][:action]
-            end
-          end
-          HTTParty.post(
-            'http://0.0.0.0:4000/api/process/import', body: {
-              'for' => 'order',
-              'csv' => 'true',
-              'order_params' => {
-                'data' => csv_file,
-                'tenant' => tenant,
-                'params' => params,
-                'mapping' => mapping
-              }
-            }.to_json,
-            headers: {'Content-Type' => 'application/json'}
+          ElixirApi::Processor::CSV::OrdersToXML.call(
+            'data' => csv_file,
+            'tenant' => tenant,
+            'params' => params
           )
         else
           final_record = []
