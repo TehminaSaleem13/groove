@@ -156,10 +156,10 @@ class ExportSetting < ActiveRecord::Base
       # start_time = Time.now+GeneralSetting.last.time_zone.to_i
     else
       last_exported || '2000-01-01 00:00:00'
+      end_time = Time.zone.now
     end
-    end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
+    # end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
     # start_time = same_day_or_last_exported(start_time)
-    # end_time = Time.zone.now
     [start_time, end_time]
   end
 
