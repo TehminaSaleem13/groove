@@ -146,14 +146,18 @@ class ExportSetting < ActiveRecord::Base
     end_time = self.end_time.end_of_day - GeneralSetting.last.time_zone.to_i rescue DateTime.now
     return [start_time, end_time] if manual_export
     if export_orders_option.eql? 'on_same_day'
-      job_time = Delayed::Job.where(queue: "order_export_email_scheduled_#{Apartment::Tenant.current}").map(&:locked_at).compact[0]
-      job_time = DateTime.now.utc if job_time.blank?
-      start_time = job_time - time_to_send_export_email.strftime("%H").to_i.hours - time_to_send_export_email.strftime("%M").to_i.minutes
-      end_time = job_time
-      # time = time_to_send_export_email.strftime("%H:%M")
-      # seconds = Time.parse(time).seconds_since_midnight
-      # start_time = ((Time.now.utc.beginning_of_day - 1.day) + seconds).end_of_day - GeneralSetting.last.time_zone.to_i
-      # start_time = Time.now+GeneralSetting.last.time_zone.to_i
+      begin
+        job_time = Delayed::Job.where(queue: "order_export_email_scheduled_#{Apartment::Tenant.current}").map(&:locked_at).compact[0]
+        job_time = DateTime.now.utc if job_time.blank?
+        start_time = job_time - time_to_send_export_email.strftime("%H").to_i.hours - time_to_send_export_email.strftime("%M").to_i.minutes
+        end_time = job_time
+      rescue
+        time = time_to_send_export_email.strftime("%H:%M")
+        seconds = Time.parse(time).seconds_since_midnight
+        start_time = ((Time.now.utc.beginning_of_day - 1.day) + seconds).end_of_day - GeneralSetting.last.time_zone.to_i
+        start_time = Time.now+GeneralSetting.last.time_zone.to_i
+        end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
+      end
     else
       last_exported || '2000-01-01 00:00:00'
       end_time = Time.zone.now
