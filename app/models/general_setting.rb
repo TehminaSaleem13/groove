@@ -215,7 +215,7 @@ class GeneralSetting < ActiveRecord::Base
         end
       elsif job_type == 'export_order'        
         export_setting = ExportSetting.all.first
-        if export_setting.should_export_orders(date)
+        if export_setting.should_export_orders(time)
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
           ExportSetting.update_all(manual_export: false)
           ExportOrder.delay(:run_at => time, :queue => "order_export_email_scheduled_#{tenant}").export(tenant)
@@ -224,7 +224,7 @@ class GeneralSetting < ActiveRecord::Base
         end
       elsif job_type == 'stat_export'
         export_setting = ExportSetting.all.first
-        if export_setting.should_stat_export_orders(date)
+        if export_setting.should_stat_export_orders(time)
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_stat_export_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
           ExportSetting.update_all(manual_export: false)
           params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
