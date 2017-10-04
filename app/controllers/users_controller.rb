@@ -427,8 +427,10 @@ class UsersController < ApplicationController
   end
 
   def get_email
+    status = false
     user = User.find_by_username(params["username"])
-    render json: {email: user.email}
+    status = true if user.role.id == 1 || user.role.id == 2
+    render json: {email: user.email, status: status}
   end
 
   def update_password
@@ -456,5 +458,10 @@ class UsersController < ApplicationController
       user.save
     end
     render json: {}
+  end
+
+  def get_super_admin_email
+    email = Role.find_by_name("Super Super Admin").users[0].email rescue nil
+    render json: {email: email}
   end
 end

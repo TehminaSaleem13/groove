@@ -208,6 +208,7 @@ Groovepacks::Application.routes.draw do
       put 'update_password'
       post 'update_login_date'
       get 'get_email'
+      get 'get_super_admin_email'
     end
     member do
       put 'create_role'
