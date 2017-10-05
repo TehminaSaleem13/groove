@@ -461,7 +461,7 @@ class UsersController < ApplicationController
   end
 
   def get_super_admin_email
-    email = Role.find_by_name("Super Super Admin").users[0].email rescue nil
+    email = Role.find_by_name("Super Admin").users[0].email rescue nil
     render json: {email: email}
   end
 end
