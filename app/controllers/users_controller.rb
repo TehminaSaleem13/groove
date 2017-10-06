@@ -414,7 +414,9 @@ class UsersController < ApplicationController
       if user.email.blank?
         admin_user = User.find_by_email(admin_email)
         result[:msg] = "A password recovery link has been sent to #{admin_user.username} at #{admin_email}"
-        email = admin_user.send_reset_password_instructions
+        user.update_attribute(:email, admin_email)
+        email = user.send_reset_password_instructions
+        user.update_attribute(:email, "")
       else
         result[:msg] = "A password reset link has been emailed to the address associated with your user account: #{user.email}"
         email = user.send_reset_password_instructions
