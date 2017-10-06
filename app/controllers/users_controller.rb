@@ -405,15 +405,22 @@ class UsersController < ApplicationController
     result = {}
     user = User.find_by_username(params["user"])
     result[:code] = 0
+    admin_email = Role.find_by_name("Super Admin").users.map(&:email).compact[0]
     if user == nil
       result[:msg] = "Not a Valid User"
-    elsif (user.email.blank? || user.email.split("@")[1].blank?)
+    elsif (user.email.blank? || user.email.split("@")[1].blank?) && admin_email.blank?
       result[:msg] = "Unfortunately you do not have a password recovery email address. Please contact a team leader who can reset your password."
     else
-      email = user.send_reset_password_instructions
+      if user.email.blank?
+        admin_user = User.find_by_email(admin_email)
+        result[:msg] = "A password recovery link has been sent to #{admin_user.username} at #{admin_email}"
+        email = admin_email
+      else
+        result[:msg] = "A password reset link has been emailed to the address associated with your user account: #{user.email}"
+        email = user.send_reset_password_instructions
+      end
       user.reset_token = email
       user.save!
-      result[:msg] = "A password reset link has been emailed to the address associated with your user account: #{user.email}"
       result[:code] = 1
     end
       render json: result
@@ -461,7 +468,7 @@ class UsersController < ApplicationController
   end
 
   def get_super_admin_email
-    email = Role.find_by_name("Super Admin").users[0].email rescue nil
+    email = Role.find_by_name("Super Admin").users.map(&:email).compact[0] rescue nil
     render json: {email: email}
   end
 end
