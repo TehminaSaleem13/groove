@@ -28,6 +28,7 @@ namespace :doo do
 		    if result
 			    stat_stream_obj = SendStatStream.new()
 				stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant.name)
+				Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_stat_export_#{tenant.name}%", time.beginning_of_day , time.end_of_day).destroy_all
 			    stat_stream_obj = SendStatStream.new()
 			    stat_stream_obj.delay(:run_at => time.strftime("%H:%M:%S"), :queue => "generate_stat_export_#{tenant.name}").generate_export(tenant.name, params)
 			end   
