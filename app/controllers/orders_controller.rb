@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_filter :groovepacker_authorize!, except: :import_xml
   include OrderConcern
 
   # Import orders from store based on store id
@@ -242,6 +242,23 @@ class OrdersController < ApplicationController
       set_status_and_message(false, "Import is in progress", ['push', 'error_messages'])
     end
     render json: @result
+  end
+
+  def import_xml
+    puts "IMPORT XML"
+    # import the XML
+    puts params[:order].inspect
+
+    order_xml = params[:order]
+    file_name = Time.now.to_i.to_s + "_" + order_xml.original_filename
+    File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+      file.write(order_xml.read)
+    end
+    order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
+    order_importer.process
+    File.delete(Rails.root.join('public', 'csv', file_name))
+    #store to s3
+    render json: {status: "OK"}
   end
 
   def cancel_import

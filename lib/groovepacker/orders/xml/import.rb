@@ -1,0 +1,170 @@
+module Groovepacker
+    module Orders
+      module Xml
+        class Import
+          attr_accessor :order
+
+          def initialize(file_name)
+            @order = Groovepacker::Orders::Xml::OrderXml.new(file_name)
+          end
+
+          def process
+            result = {status: true, errors: [], order: nil}
+            order = Order.find_by_increment_id(@order.increment_id)        
+            # if order exists, update the order and order items
+            # order does not exist create order
+            if order.nil?
+              order = Order.new
+              order.increment_id = @order.increment_id
+            end
+
+            ["store_id", "firstname", "lastname", "email", "address_1",
+                "city", "state", "country", "postcode"].each do |attr|
+                order[attr] = @order.send(attr)
+            end
+
+            # update all order related info
+            puts order.inspect
+
+            puts @order.order_items.inspect
+            if order.save
+              # @order[:order_items] = @order.order_items
+              order_item_result = process_order_items(order, @order)
+              if order_item_result[:status]
+                # update order status
+                order.update_order_status
+              else
+                # order.destroy
+              end
+              result[:status] = order_item_result[:status]
+              result[:errors] = order_item_result[:errors]
+            else
+              result[:status] = false
+              result[:errors] = order.errors.full_messages
+              result[:order] = nil
+            end
+
+            result
+            # if order is successfully created/updated, then upload to S3 and 
+            # update the importsummary if import summary is available
+          end
+
+          private
+          def process_order_items(order, orderXML)
+            result = { status: true, errors: [] }
+            if order.order_items.empty?
+              # create order items
+              orderXML.order_items.each do |order_item_XML|
+                create_update_order_item(order, order_item_XML)
+              end
+            else
+              # if order item exists in the current order but does not exist in XML order
+              # then delete the order item
+              delete_existing_order_items(order, orderXML)
+
+              orderXML.order_items.each do |order_item_XML|
+                create_update_order_item(order, order_item_XML)
+              end
+            end
+            result
+          end
+
+          def delete_existing_order_items(order, orderXML)
+            order.order_items.each do |order_item|
+              found = false
+              first_sku = order_item.product.product_skus.first
+              unless first_sku.nil?
+                first_sku = first_sku.sku
+                orderXML.order_items.each do |order_item_XML|
+                  unless order_item_XML[:product][:skus].index(first_sku).nil?
+                    found = true
+                  end
+                end
+              end
+              unless found
+                order_item.destroy
+              end
+            end
+          end
+
+          def create_update_order_item(order, order_item_XML)
+            first_sku = order_item_XML[:product][:skus].first
+            unless first_sku.nil?
+              product_sku = ProductSku.find_by_sku(first_sku)
+              if product_sku.nil?
+                # add product
+                product = Product.new
+                product.store = order.store
+              else
+                product = product_sku.product
+              end
+
+              result = create_update_product(product, order_item_XML[:product])
+
+              if result[:status]
+                if order.order_items.where(product_id: product.id).empty?
+                  order.order_items.create(sku: first_sku, qty: order_item_XML[:qty],
+                  product_id: product.id, price: order_item_XML[:price])
+                else
+                  order_item = order.order_items.where(product_id: product.id)
+                  unless order_item.empty?
+                    order_item = order_item.first
+                    order_item.sku = first_sku
+                    order_item.qty = order_item_XML[:qty]
+                    order_item.price = order_item_XML[:price]
+                    order_item.save
+                  end
+                end
+              end
+            end
+          end
+
+          def create_update_product(product, product_xml)
+            result = {  status: true, errors: [], product: nil }
+            #product information
+            product.name = product_xml[:name]
+            product.spl_instructions_4_packer = product_xml[:instructions]
+            product.is_kit = product_xml[:is_kit]
+            product.kit_parsing = product_xml[:kit_parsing]
+            product.weight = product_xml[:weight]
+            product.weight_format = product_xml[:weight_format]
+            if product.save
+              #images
+              product_xml[:images].each do |product_image|
+                if product.product_images.where(image: product_image).empty?
+                  product.product_images.create(image: product_image)
+                end
+              end
+
+              #categories
+              product_xml[:categories].each do |product_category|
+                if product.product_cats.where(category: product_category).empty?
+                  product.product_cats.create(category: product_category)
+                end
+              end
+
+              #skus
+              product_xml[:skus].each do |product_sku|
+                if product.product_skus.where(sku: product_sku).empty?
+                  product.product_skus.create(sku: product_sku)
+                end
+              end
+
+              #barcodes
+              product_xml[:barcodes].each do |product_barcode|
+                if product.product_barcodes.where(barcode: product_barcode).empty?
+                  product.product_barcodes.create(barcode: product_barcode)
+                end
+              end
+              #product.update_product_status
+              result[:product] = product
+            else
+              result[:status] = false
+              result[:errors] = product.errors.full_messages
+            end
+            result
+          end
+        end
+      end
+    end
+end

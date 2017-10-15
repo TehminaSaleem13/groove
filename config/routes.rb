@@ -100,6 +100,7 @@ Groovepacks::Application.routes.draw do
       get 'import'
       put 'cancel_import'
       post 'get_id'
+      post 'import_xml'
     end
     member do
       post 'add_item_to_order'
