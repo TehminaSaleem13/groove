@@ -201,8 +201,8 @@ class GeneralSetting < ActiveRecord::Base
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
-        if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(date)
-          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "low_inventory_email_scheduled_#{tenant}", time, time).destroy_all unless self.changes.blank?
+        if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(time)
+          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "low_inventory_email_scheduled_#{tenant}", time, time).destroy_all #unless self.changes.blank?
           # LowInventoryLevel.notify(self,tenant).deliver
           LowInventoryLevel.delay(:run_at => time, :queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
           job_scheduled = true
@@ -213,7 +213,7 @@ class GeneralSetting < ActiveRecord::Base
           self.delay(:run_at => time_diff.seconds.from_now, :queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
           job_scheduled = true
         end
-      elsif job_type == 'export_order'        
+      elsif job_type == 'export_order'
         export_setting = ExportSetting.all.first
         if export_setting.should_export_orders(time)
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
