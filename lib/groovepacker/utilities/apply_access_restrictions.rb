@@ -5,14 +5,14 @@ class ApplyAccessRestrictions
       if @subscription && @subscription.tenant
         plan_id = @subscription.subscription_plan_id
         Apartment::Tenant.switch(tenant_name)
-        tenant = Tenant.find_by_name(tenant_name)
-        day = tenant.created_at.strftime("%d").to_i
+        # tenant = Tenant.find_by_name(tenant_name)
+        # day = tenant.created_at.strftime("%d").to_i
         apply(plan_id)
-        Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
-        ApplyAccessRestrictions.new.delay(
-          run_at: (Time.now.change(day: "#{day}") + 1.month).beginning_of_day,
-          queue: "reset_access_restrictions_#{tenant_name}"
-        ).apply_access_restrictions(tenant_name)
+        # Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
+        # ApplyAccessRestrictions.new.delay(
+        #   run_at: (Time.now.change(day: "#{day}") + 1.month).beginning_of_day,
+        #   queue: "reset_access_restrictions_#{tenant_name}"
+        # ).apply_access_restrictions(tenant_name)
       end
     rescue Exception => e
       Rails.logger.info e.backtrace.join("\n")
