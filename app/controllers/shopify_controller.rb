@@ -119,7 +119,7 @@ class ShopifyController < ApplicationController
       redis_data_delete(params['shop_name'])
       redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/shopify/payment_failed"
     end
-    price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f rescue nil
+    price = $redis.get("#{params['shop_name']}_plan_id").split("-")[1].to_f rescue 0
     $redis.set("#{params['shop_name']}_otf", params["charge_id"])      #saf -> Recurring Shopify App Fee
     $redis.set("#{params['shop_name']}_ready_to_be_deployed", false)
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
