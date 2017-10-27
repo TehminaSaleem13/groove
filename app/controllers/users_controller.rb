@@ -460,7 +460,7 @@ class UsersController < ApplicationController
   end
 
   def update_login_date 
-    user = User.find_by_username(params["username"])
+    user = User.find_by_username(params["username"]) rescue nil
     if user.present?
       user.current_sign_in_at = DateTime.now
       user.last_sign_in_at = DateTime.now
