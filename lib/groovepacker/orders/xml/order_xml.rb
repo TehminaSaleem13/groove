@@ -86,7 +86,7 @@ module Groovepacker
             product[:name] = text(node, "//product/name")
             product[:price] = text(node, "//product/price")
             product[:instructions] = text(node, "//product/instructions")
-            product[:weight] = text(node, "//product/weight")
+            product[:weight] = text(node, "//product/weight").nil? ? 0 : text(node, "//product/weight")
             product[:is_kit] = text(node, "//product/isKit")
             product[:kit_parsing] = text(node, "//product/kitParsing")
             product[:skus] = []
