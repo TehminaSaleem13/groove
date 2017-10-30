@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_filter :groovepacker_authorize!, except: :import_xml
+  before_filter :groovepacker_authorize!
   include OrderConcern
 
   # Import orders from store based on store id
@@ -248,11 +248,18 @@ class OrdersController < ApplicationController
     puts "IMPORT XML"
     # import the XML
     puts params[:order].inspect
-
-    order_xml = params[:order]
-    file_name = Time.now.to_i.to_s + "_" + order_xml.original_filename
-    File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
-      file.write(order_xml.read)
+    if params[:order].nil? || params[:order][:original_filename].nil?
+      # params[:xml] has content
+      file_name = Time.now.to_i.to_s + ".xml"
+      File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+        file.write(params[:xml])
+      end
+    else
+      order_xml = params[:order]
+      file_name = Time.now.to_i.to_s + "_" + order_xml.original_filename
+      File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+        file.write(order_xml.read)
+      end
     end
     order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
     order_importer.process
