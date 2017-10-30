@@ -1,0 +1,92 @@
+<xs:schema attributeFormDefault="unqualified" elementFormDefault="qualified" xmlns:xs="http://www.w3.org/2001/XMLSchema">
+  <xs:element name="order" type="orderType"/>
+  <xs:complexType name="customerInformationType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="email"/>
+      <xs:element type="xs:string" name="firstName"/>
+      <xs:element type="xs:string" name="lastName"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="shippingAddressType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="address1"/>
+      <xs:element type="xs:string" name="city"/>
+      <xs:element type="xs:string" name="country"/>
+      <xs:element type="xs:string" name="postcode"/>
+      <xs:element type="xs:string" name="state"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="priceType">
+    <xs:simpleContent>
+      <xs:extension base="xs:float">
+        <xs:attribute type="xs:string" name="currency"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="weightType">
+    <xs:simpleContent>
+      <xs:extension base="xs:byte">
+        <xs:attribute type="xs:string" name="unit"/>
+      </xs:extension>
+    </xs:simpleContent>
+  </xs:complexType>
+  <xs:complexType name="imagesType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="image"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="skusType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="sku" maxOccurs="unbounded" minOccurs="1"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="categoriesType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="category"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="barcodesType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="barcode" maxOccurs="unbounded" minOccurs="0"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="productType">
+    <xs:choice maxOccurs="unbounded" minOccurs="1">
+      <xs:element type="xs:string" name="name"/>
+      <xs:element type="priceType" name="price"/>
+      <xs:element type="xs:string" name="instructions"/>
+      <xs:element type="weightType" name="weight"/>
+      <xs:element type="xs:string" name="isKit"/>
+      <xs:element type="xs:string" name="kitParsing"/>
+      <xs:element type="xs:string" name="inv_wh"/>
+      <xs:element type="imagesType" name="images"/>
+      <xs:element type="skusType" name="skus"/>
+      <xs:element type="categoriesType" name="categories"/>
+      <xs:element type="barcodesType" name="barcodes"/>
+    </xs:choice>
+  </xs:complexType>
+  <xs:complexType name="orderItemType">
+    <xs:sequence>
+      <xs:element type="xs:byte" name="qty"/>
+      <xs:element type="xs:float" name="price"/>
+      <xs:element type="productType" name="product"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="orderItemsType">
+    <xs:sequence>
+      <xs:element type="orderItemType" name="orderItem"/>
+    </xs:sequence>
+  </xs:complexType>
+  <xs:complexType name="orderType">
+    <xs:sequence>
+      <xs:element type="xs:string" name="importSummaryId"/>
+      <xs:element type="xs:byte" name="storeId"/>
+      <xs:element type="customerInformationType" name="customerInformation"/>
+      <xs:element type="xs:short" name="incrementId"/>
+      <xs:element type="xs:byte" name="qty"/>
+      <xs:element type="shippingAddressType" name="shippingAddress"/>
+      <xs:element type="xs:string" name="sku"/>
+      <xs:element type="orderItemsType" name="orderItems"/>
+    </xs:sequence>
+  </xs:complexType>
+</xs:schema>

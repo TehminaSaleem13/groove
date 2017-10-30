@@ -247,15 +247,15 @@ class OrdersController < ApplicationController
   def import_xml
     puts "IMPORT XML"
     # import the XML
-    puts params[:order].inspect
-    if params[:order].nil? || params[:order][:original_filename].nil?
+    puts params[:order_xml].inspect
+    if params[:order_xml].nil?
       # params[:xml] has content
       file_name = Time.now.to_i.to_s + ".xml"
       File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
         file.write(params[:xml])
       end
     else
-      order_xml = params[:order]
+      order_xml = params[:order_xml]
       file_name = Time.now.to_i.to_s + "_" + order_xml.original_filename
       File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
         file.write(order_xml.read)
@@ -265,6 +265,7 @@ class OrdersController < ApplicationController
     order_importer.process
     File.delete(Rails.root.join('public', 'csv', file_name))
     #store to s3
+
     render json: {status: "OK"}
   end
 

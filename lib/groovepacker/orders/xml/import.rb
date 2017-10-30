@@ -43,6 +43,16 @@ module Groovepacker
               result[:errors] = order.errors.full_messages
               result[:order] = nil
             end
+            if result[:status]
+              upload_res = @order.save
+              if upload_res.nil?
+                result[:status] = false 
+                result[:errors] = ["Error uploading to S3."]
+              else
+                order.import_s3_key = upload_res
+                order.save
+              end
+            end
 
             result
             # if order is successfully created/updated, then upload to S3 and 

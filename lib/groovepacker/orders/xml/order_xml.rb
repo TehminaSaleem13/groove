@@ -2,15 +2,21 @@ module Groovepacker
     module Orders
       module Xml
         class OrderXml
-          attr_accessor :doc
+          attr_accessor :doc, :file_handle, :file_name
           
           def initialize(file_name)
+            @file_name = file_name
+            @file_handle = File.open(Rails.root.join('public', 'csv', file_name))
             @doc = File.open(Rails.root.join('public', 'csv', file_name)) { |f| Nokogiri::XML(f) }
             # puts doc.xpath("//order/storeId").text.inspect
         
             # doc.xpath("//order/orderItems").each do |order_item|
             # puts order_item.xpath("//orderItem/qty").text.inspect
             # end
+          end
+
+          def save
+            GroovS3.create_order_xml(Apartment::Tenant.current, @file_name, @file_handle.read)
           end
 
           def store_id

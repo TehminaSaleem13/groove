@@ -83,6 +83,24 @@ class GroovS3
       self.save(object, data)
     end
 
+    def create_order_xml(tenant, name, data, privacy = :private)
+      object = self.create(tenant, "orders/#{name}", 'text/xml', privacy)
+      if self.save(object, data)
+        "orders/#{name}"
+      else
+        nil
+      end
+    end
+
+    def find_order_xml(tenant, name)
+      begin
+        object = self.bucket.objects.find(tenant + "/orders/#{name}.xml")
+        return object
+      rescue S3::Error::NoSuchKey => e
+        return nil
+      end
+    end
+    
     def get_bucket
       creds = Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET'])
       s3 = Aws::S3::Resource.new(region:ENV['S3_BUCKET_REGION'], credentials: creds)
