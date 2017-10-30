@@ -27,9 +27,11 @@ namespace :doo do
 			      result = true
 			    end
 			    # params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
-			    if result
-				    stat_stream_obj = SendStatStream.new()
+			    if User.all.map(&:view_dashboard).include?(true)
+			    	stat_stream_obj = SendStatStream.new()
 					stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant.name)
+				end
+			    if result
 					# Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_stat_export_#{tenant.name}%", time.beginning_of_day , time.end_of_day).destroy_all
 				    export_setting.method("schedule_job").call("stat_export", export_setting.time_to_send_stat_export_email)
 				    # stat_stream_obj = SendStatStream.new()
