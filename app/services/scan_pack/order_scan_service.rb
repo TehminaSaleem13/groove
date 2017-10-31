@@ -198,11 +198,21 @@ module ScanPack
       # search in orders that have status of Scanned
       if single_order_status.eql?('scanned')
         do_if_already_been_scanned 
-      elsif @single_order.already_scanned && @scanpack_settings.order_verification
-        @single_order_result['scanned_on'] = @single_order.scanned_on
-        @single_order_result['next_state'] = 'scanpack.rfo'
-        @single_order.status = "scanned"
-        @single_order.save
+      # elsif @single_order.already_scanned && @scanpack_settings.order_verification
+      #   @single_order_result['scanned_on'] = @single_order.scanned_on
+      #   do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
+      #   @single_order_result['next_state'] = 'scanpack.rfo'
+      #   @single_order.status = "scanned"
+      #   @single_order.save
+      elsif @scanpack_settings.order_verification && single_order_status.eql?('awaiting')
+        @single_order.order_items.each do |order_item|
+          barcode = order_item.product.product_barcodes.map(&:barcode)[0]
+          product_scan_object = ScanPack::ProductScanService.new(
+            [ @current_user, {},
+              barcode, 'scanpack.rfp.default', @single_order.id, order_item.qty || 1]
+          )
+          product_scan_object.run(true, "")
+        end 
         @single_order.addactivity("Order with order number: #{@single_order.increment_id} was scanned using Single Scan Verification", @current_user.username)
         @result['success_messages'].push('This order marked as scanned')
       else
