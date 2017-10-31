@@ -204,17 +204,17 @@ module ScanPack
       #   @single_order_result['next_state'] = 'scanpack.rfo'
       #   @single_order.status = "scanned"
       #   @single_order.save
-      elsif @scanpack_settings.order_verification && single_order_status.eql?('awaiting')
-        @single_order.order_items.each do |order_item|
-          barcode = order_item.product.product_barcodes.map(&:barcode)[0]
-          product_scan_object = ScanPack::ProductScanService.new(
-            [ @current_user, {},
-              barcode, 'scanpack.rfp.default', @single_order.id, order_item.qty || 1]
-          )
-          product_scan_object.run(true, "")
-        end 
-        @single_order.addactivity("Order with order number: #{@single_order.increment_id} was scanned using Single Scan Verification", @current_user.username)
-        @result['success_messages'].push('This order marked as scanned')
+      # elsif @scanpack_settings.order_verification && single_order_status.eql?('awaiting')
+      #   @single_order.order_items.each do |order_item|
+      #     barcode = order_item.product.product_barcodes.map(&:barcode)[0]
+      #     product_scan_object = ScanPack::ProductScanService.new(
+      #       [ @current_user, {},
+      #         barcode, 'scanpack.rfp.default', @single_order.id, order_item.qty || 1]
+      #     )
+      #     product_scan_object.run(true, "")
+      #   end 
+      #   @single_order.addactivity("Order with order number: #{@single_order.increment_id} was scanned using Single Scan Verification", @current_user.username)
+      #   @result['success_messages'].push('This order marked as scanned')
       else
         do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
         # process orders that have status of Service Issue
