@@ -206,15 +206,20 @@ module ScanPack
       #   @single_order.save
       elsif @scanpack_settings.order_verification && single_order_status.eql?('awaiting')
         @single_order.order_items.each do |order_item|
-          barcode = order_item.product.product_barcodes.map(&:barcode)[0]
-          product_scan_object = ScanPack::ProductScanService.new(
-            [ @current_user, {},
-              barcode, 'scanpack.rfp.default', @single_order.id, order_item.qty || 1]
-          )
-          product_scan_object.run(true, "")
+          product = order_item.product
+          if product.is_kit == 1
+            product.product_kit_skuss.each do |kit_item|
+              barcode = Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode rescue nil
+              single_scan(barcode, order_item)
+            end
+          else  
+            barcode = order_item.product.product_barcodes.map(&:barcode)[0] rescue nil
+            single_scan(barcode, order_item)
+          end
         end 
         @single_order.addactivity("Order with order number: #{@single_order.increment_id} was scanned using Single Scan Verification", @current_user.username)
         @result['success_messages'].push('This order marked as scanned')
+        @single_order_result['next_state'] = 'scanpack.rfp.default'
       else
         do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
         # process orders that have status of Service Issue
@@ -227,6 +232,13 @@ module ScanPack
       end
       do_if_single_order_present_and_under_max_limit_of_shipment if @single_order
     end
+
+    def single_scan(barcode, order_item)
+      product_scan_object = ScanPack::ProductScanService.new(
+        [ @current_user, {}, barcode, 'scanpack.rfp.default', @single_order.id, order_item.qty || 1]
+      )
+      product_scan_object.run(true, "")
+    end    
 
     def do_if_single_order_present_and_under_max_limit_of_shipment
       unless @single_order.save
