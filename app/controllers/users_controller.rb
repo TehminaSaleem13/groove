@@ -438,7 +438,7 @@ class UsersController < ApplicationController
   def get_email
     status = false
     user = User.find_by_username(params["username"])
-    status = true if user.role.id == 1 || user.role.id == 2
+    status = true if (user.role.id == 1 || user.role.id == 2 rescue false)
     render json: {email: user.email, status: status}
   end
 
