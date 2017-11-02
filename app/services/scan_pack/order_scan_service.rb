@@ -209,8 +209,10 @@ module ScanPack
           product = order_item.product
           if product.is_kit == 1
             product.product_kit_skuss.each do |kit_item|
-              barcode = Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode rescue nil
-              single_scan(barcode, order_item)
+              kit_item.qty.times do 
+                barcode = Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode rescue nil
+                single_scan(barcode, order_item)
+              end
             end
           else  
             barcode = order_item.product.product_barcodes.map(&:barcode)[0] rescue nil
