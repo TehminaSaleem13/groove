@@ -93,7 +93,7 @@ module PaymentsHelper
   def delete_customer(customer_id)
     customer = get_stripe_customer(customer_id)
     if (defined?(customer.deleted).nil?)
-      customer.delete()
+      #customer.delete()
     end
   end
 
