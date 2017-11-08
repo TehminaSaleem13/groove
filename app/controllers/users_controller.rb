@@ -439,7 +439,7 @@ class UsersController < ApplicationController
     status = false
     user = User.find_by_username(params["username"])
     status = true if (user.role.id == 1 || user.role.id == 2 rescue false)
-    render json: {email: user.email, status: status}
+    render json: {email: user.try(:email), status: status}
   end
 
   def update_password
