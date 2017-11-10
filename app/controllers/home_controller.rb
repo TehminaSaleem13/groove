@@ -47,7 +47,7 @@ class HomeController < ApplicationController
 
   def check_tenant
     result = true
-    tenant = params["tenant"].split(".")[0]
+    tenant = params["tenant"]
     begin
       Apartment::Tenant.switch tenant
       result = true
