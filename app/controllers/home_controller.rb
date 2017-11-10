@@ -1,7 +1,7 @@
 class HomeController < ApplicationController
   layout 'angular'
 
-  before_filter :groovepacker_authorize!
+  before_filter :groovepacker_authorize!, except: [:check_tenant]
 
   def index
     #if current user is not signed in, show login page
@@ -43,5 +43,17 @@ class HomeController < ApplicationController
       import_summary.emit_data_to_user(true)
     end
     render json: {status: true}
+  end
+
+  def check_tenant
+    result = true
+    tenant = params["tenant"].split(".")[0]
+    begin
+      Apartment::Tenant.switch tenant
+      result = true
+    rescue
+      result = false
+    end
+    render json: {status: result}
   end
 end
