@@ -19,15 +19,14 @@ module Groovepacker
             end
 
             ["store_id", "firstname", "lastname", "email", "address_1",
-                "city", "state", "country", "postcode"].each do |attr|
+                "city", "state", "country", "postcode", "order_placed_time", "tracking_num"].each do |attr|
                 order[attr] = @order.send(attr)
             end
 
             # update all order related info
-            puts order.inspect
-
-            puts @order.order_items.inspect
+            order_persisted = order.persisted? ? true : false
             if order.save
+              order.addactivity("Order Import", "#{order.store.name} Import") unless order_persisted
               # @order[:order_items] = @order.order_items
               order_item_result = process_order_items(order, @order)
               if order_item_result[:status]
@@ -53,6 +52,7 @@ module Groovepacker
                 order.save
               end
             end
+            
 
             result
             # if order is successfully created/updated, then upload to S3 and 
@@ -115,6 +115,8 @@ module Groovepacker
                 if order.order_items.where(product_id: product.id).empty?
                   order.order_items.create(sku: first_sku, qty: order_item_XML[:qty],
                   product_id: product.id, price: order_item_XML[:price])
+                  order.addactivity("Item with SKU: #{product.primary_sku} Added", 
+                    "#{order.store.name} Import")
                 else
                   order_item = order.order_items.where(product_id: product.id)
                   unless order_item.empty?

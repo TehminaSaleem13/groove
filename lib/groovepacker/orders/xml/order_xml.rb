@@ -59,6 +59,14 @@ module Groovepacker
             text(@doc, "//order/shippingAddress/postcode")
           end
 
+          def order_placed_time
+            date(@doc, "//order/orderPlacedTime")
+          end
+
+          def tracking_num
+            text(@doc, "//order/trackingNum")
+          end
+
           def order_items
             orderItems = []
             @doc.xpath("//order/orderItems/orderItem").each do |orderItemXml|
@@ -72,6 +80,10 @@ module Groovepacker
           end
 
           private
+
+          def date(node, xpath)
+            node.xpath(xpath).text == "" ? nil : DateTime.parse(node.xpath(xpath).text)
+          end
 
           def text(node, xpath)
             node.xpath(xpath).text == "" ? nil : node.xpath(xpath).text
