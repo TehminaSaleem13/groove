@@ -8,9 +8,8 @@ module ElixirApi
 
         def initialize(order_params)
           @order_params = order_params
-          set_file_size
           @order_params['params'].merge!(
-            import_summary_id: find_or_create_csvimportsummary.id
+            import_summary_id: find_summary.id
           )
         end
 
@@ -32,45 +31,31 @@ module ElixirApi
 
         private
 
-        def find_or_create_csvimportsummary
-          summary_params = { file_name: file_name.strip, import_type: 'Order' }
-          summary = find_summary
-          return summary if summary.present?
-
-          summary_params[:file_size] = file_size
-          CsvImportSummary.create(summary_params)
-        end
-
-        def set_file_size
-          order_params['params'].merge!(
-            file_size: (order_params['data'].bytesize.to_f / 1024).round(4)
-          )
-        end
+        # def set_file_size
+        #   order_params['params'].merge!(
+        #     file_size: (order_params['data'].bytesize.to_f / 1024).round(4)
+        #   )
+        # end
 
         def find_summary
-          CsvImportLogEntry.where('created_at<?', today_start).delete_all
-          CsvImportSummary.where('created_at<?', today_start).destroy_all
-          CsvImportSummary.where(
-            'file_name=? and import_type=? and created_at>=? and created_at<=? and file_size=?',
-            file_name.strip, 'Order', today_start, today_end, file_size
-          ).last
+          OrderImportSummary.find_by_status('not_started')
         end
 
-        def today_start
-          DateTime.now.beginning_of_day
-        end
+        # def today_start
+        #   DateTime.now.beginning_of_day
+        # end
 
-        def today_end
-          DateTime.now.end_of_day
-        end
+        # def today_end
+        #   DateTime.now.end_of_day
+        # end
 
-        def file_name
-          order_params['params'][:file_name]
-        end
+        # def file_name
+        #   order_params['params'][:file_name]
+        # end
 
-        def file_size
-          order_params['params'][:file_size]
-        end
+        # def file_size
+        #   order_params['params'][:file_size]
+        # end
       end
     end
   end
