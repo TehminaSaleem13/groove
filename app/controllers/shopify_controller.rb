@@ -10,13 +10,15 @@ class ShopifyController < ApplicationController
   #  "id"=>"1" 
   # }
   def auth
-    if cookies[:tenant_name].blank?
+    # if cookies[:tenant_name].blank?
+    if $redis.get("tenant_name").blank?  
       ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
       session = ShopifyAPI::Session.new(params["shop"])
       token = session.request_token(params.except(:id))
       $redis.set(params["shop"], token)
       @result = true if token.present?
       subsc = Subscription.where(shopify_shop_name: params["shop"].split('.')[0]).last
+
       if $redis.get("#{params['shop']}_existing_store").present?
         update_plan(token, params["shop"])
       else  
@@ -24,8 +26,10 @@ class ShopifyController < ApplicationController
       end
     else  
       #@tenant_name, @is_admin = params[:tenant_name].split('&')
-      @tenant_name = cookies[:tenant_name]
-      @store_id = cookies[:store_id]
+      # @tenant_name = cookies[:tenant_name]
+      # @store_id = cookies[:store_id]
+      @tenant_name = $redis.get("tenant_name")
+      @store_id = $redis.get("store_id")
       Apartment::Tenant.switch(@tenant_name)
       store = Store.find(@store_id) rescue nil
       @shopify_credential = store.shopify_credential
@@ -281,8 +285,10 @@ class ShopifyController < ApplicationController
   end
 
   def destroy_cookies
-    cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
-    cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+    $redis.expire("tenant_name", 20)
+    $redis.expire("store_id", 20)
+    # cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+    # cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
   end
 
   def check_if_paid_all_the_charges
