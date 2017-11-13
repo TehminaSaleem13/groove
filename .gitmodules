@@ -1,3 +1,6 @@
 [submodule "nodeserver"]
 	path = nodeserver
 	url = git@bitbucket.org:groovepacker/nodeserver.git
+[submodule "vendor/groove-data-processor"]
+	path = vendor/groove-data-processor
+	url = git@bitbucket-ashish:groovepacker/groove-data-processor.git
