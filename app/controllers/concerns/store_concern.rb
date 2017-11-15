@@ -24,8 +24,12 @@ module StoreConcern
   when 'Shopify'
     @result = init_store.shopify_update_create
     current_tenant = Apartment::Tenant.current
-    cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+10.minutes}
-    cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+10.minutes}
+    $redis.set("tenant_name", current_tenant)
+    $redis.set("store_id", @store.id)
+    $redis.expire("tenant_name", 600)
+    $redis.expire("store_id", 600)
+    # cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.now+10.minutes}
+    # cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.now+10.minutes}
    when 'BigCommerce'
      @result = init_store.bigcommerce_update_create
      current_tenant = Apartment::Tenant.current

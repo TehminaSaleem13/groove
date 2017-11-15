@@ -56,7 +56,6 @@ module ScanPack
       else
         do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
       end
-
       do_if_single_order_present if @single_order.present?
 
       update_session
@@ -171,7 +170,7 @@ module ScanPack
         if @multibarcode
           @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity}", @current_user.username)
         else
-          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1
+          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
         end
         do_if_barcode_found
       else

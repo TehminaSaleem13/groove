@@ -17,7 +17,7 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
   gem 'jquery-fileupload-rails'
   gem 'jquery-ui-rails'
-  gem 'therubyracer', :platform => :ruby
+  gem 'therubyracer','~> 0.11.4', :platform => :ruby
   gem 'angularjs-rails','>= 1.2.18'
   gem 'jquery-rails'
   gem 'less-rails-bootstrap'

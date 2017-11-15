@@ -372,8 +372,7 @@ class OrderItem < ActiveRecord::Base
   def set_clicked_quantity(clicked, sku, username)
     if clicked
       self.clicked_qty = self.clicked_qty + 1
-      self.order.addactivity("Item with SKU: " +
-                               sku + " has been click scanned", username)
+      self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
     end
   end
 
