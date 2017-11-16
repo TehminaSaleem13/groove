@@ -112,6 +112,6 @@ gem "delayed_job_web"
 gem 'rack-cors', :require => 'rack/cors'
 gem 'rollbar'
 gem 'whenever', :require => false
-# gem "skylight", '~> 0.10.6'
+gem "skylight", '~> 0.10.6'
 gem 'scout_apm', '~> 3.0.x'
 gem 'ahoy_matey', require: false
