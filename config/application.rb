@@ -54,7 +54,7 @@ module Groovepacks
     # in your app. As such, your models will need to explicitly whitelist or blacklist accessible
     # parameters by using an attr_accessible or attr_protected declaration.
     config.active_record.whitelist_attributes = true
-
+    config.skylight.environments += ["staging"]
     # Enable the asset pipeline
     config.assets.enabled = true
 
@@ -63,7 +63,6 @@ module Groovepacks
     #config.assets.precompile += %w( font-awesome-ie7.min.css )
 
     config.serve_static_assets = true
-    # config.skylight.environments += ["staging"]
 
     # Autoload lib/ folder including all subdirectories
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
