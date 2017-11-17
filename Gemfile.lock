@@ -669,7 +669,7 @@ DEPENDENCIES
   shipping_easy (= 0.7.0)
   shopify_api
   simple_form (>= 2.0.4)
-  skylight (~> 0.10.6)
+  skylight
   soap2r!
   spring-commands-rspec
   stripe
