@@ -1,12 +1,3 @@
 ---
 # The authentication token for the application.
-# authentication: aKCewGaidFSzunZrJRZD3jNLPXlhKVwZj6T-fC9InbQ
-
-
-production:
-
-  authentication: aKCewGaidFSzunZrJRZD3jNLPXlhKVwZj6T-fC9InbQ
-
-staging:
-
-  authentication: 5VBp3MftfNTs3P5FDJCMThTCxNQWgZSd2v1sqkbXK-E
+authentication: aKCewGaidFSzunZrJRZD3jNLPXlhKVwZj6T-fC9InbQ
