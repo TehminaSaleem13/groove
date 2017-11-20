@@ -97,14 +97,14 @@ class Store < ActiveRecord::Base
     end
     if self.store_type == 'Shipworks'
       @result['shipworks_credentials'] = shipworks_credential
-      @result['shipworks_hook_url'] = "https://"+Apartment::Database.current+"."+ENV['HOST_NAME']+"/orders/import_shipworks?auth_token="
+      @result['shipworks_hook_url'] = "https://"+Apartment::Tenant.current+"."+ENV['HOST_NAME']+"/orders/import_shipworks?auth_token="
       @result['status'] =true
     end
     if self.store_type == 'Shopify'
       @result['shopify_credentials'] = shopify_credential
       if shopify_credential.access_token.nil?
         shopify_handle = Groovepacker::ShopifyRuby::Utilities.new(shopify_credential)
-        @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Database.current)
+        @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Tenant.current)
       end
       @result['status'] =true
     end

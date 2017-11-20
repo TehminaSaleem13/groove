@@ -49,7 +49,7 @@ module Groovepacker
             def initialize_import_objects
               handler = self.get_handler
               @credential = handler[:credential]
-              @store = @credential.store
+              @store = @credential.try(:store)
               @client = handler[:store_handle]
             end
 

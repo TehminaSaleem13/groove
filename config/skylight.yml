@@ -7,6 +7,6 @@ production:
 
   authentication: aKCewGaidFSzunZrJRZD3jNLPXlhKVwZj6T-fC9InbQ
 
-staging:
+# staging:
 
-  authentication: 5VBp3MftfNTs3P5FDJCMThTCxNQWgZSd2v1sqkbXK-E
+#   authentication: 5VBp3MftfNTs3P5FDJCMThTCxNQWgZSd2v1sqkbXK-E
