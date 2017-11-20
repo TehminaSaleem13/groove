@@ -83,7 +83,14 @@ class OrderItem < ActiveRecord::Base
     result = Hash.new
     result['name'] = item.name
     sort_by_order = Proc.new do |collection|
-      collection.sort{|a,b| a.order <=> b.order}
+      begin
+        collection.sort{|a,b| a.order <=> b.order}
+      rescue
+        puts "*******************************"
+        puts collection
+        puts "###############################"
+        collection
+      end
     end
     result['instruction'] = item.spl_instructions_4_packer
     result['confirmation'] = item.spl_instructions_4_confirmation
@@ -372,8 +379,7 @@ class OrderItem < ActiveRecord::Base
   def set_clicked_quantity(clicked, sku, username)
     if clicked
       self.clicked_qty = self.clicked_qty + 1
-      self.order.addactivity("Item with SKU: " +
-                               sku + " has been click scanned", username)
+      self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
     end
   end
 

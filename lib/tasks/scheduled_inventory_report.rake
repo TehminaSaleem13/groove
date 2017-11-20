@@ -1,16 +1,19 @@
 namespace :doo do
   desc "Schedule inventory email"
   task :schedule_inventory_report => :environment do
-    if $redis.get("schedule_inventory_report").blank?
-      $redis.set("schedule_inventory_report", true) 
-      $redis.expire("schedule_inventory_report", 5400)
+    # if $redis.get("schedule_inventory_report").blank?
+    #   $redis.set("schedule_inventory_report", true) 
+    #   $redis.expire("schedule_inventory_report", 5400)
 	    failed_tenant = []
 	    tenants = Tenant.order(:name) rescue Tenant.all
 	    tenants.each do |tenant|
 	    	begin	
 	    		Apartment::Tenant.switch tenant.name 
 	    		product_inv_setting = InventoryReportsSetting.last
-			    day = DateTime.now.strftime("%A")
+			    gn_setting = GeneralSetting.first
+	    		time = product_inv_setting.time_to_send_report_email - gn_setting.time_zone.to_i.seconds
+			    time = time - 3600 if !gn_setting.dst 
+			    day = time.strftime("%A")
 			    result = false
 			    if day=='Sunday' && product_inv_setting.send_email_on_sun
 			      result = true
@@ -27,13 +30,12 @@ namespace :doo do
 			    elsif day=='Saturday' && product_inv_setting.send_email_on_sat
 			      result = true
 			    end
-	    		time = product_inv_setting.time_to_send_report_email
 	    		tenant_name = tenant.name
-					InventoryReportMailer.delay(run_at: time.strftime("%H:%M:%S")).auto_inventory_report(false,nil,tenant_name) if result == true
+				InventoryReportMailer.delay(run_at: time.strftime("%H:%M:%S")).auto_inventory_report(false,nil,tenant_name) if result == true
 	    	rescue
 	    	end
 	    end
-	  end
+	# end
     exit(1)
   end
 end

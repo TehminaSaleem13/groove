@@ -18,7 +18,7 @@ module Groovepacker
             @imported_products = []
             @base_products = []
             @import_item = @helper.initialize_import_item
-            index_no = mapping["increment_id"][:position]
+            index_no = mapping["increment_id"][:position] rescue 0
             final_records = @helper.build_final_records.sort_by{|k|k[index_no].to_s}.reject{ |arr| arr.all?(&:blank?) }
             final_records_test = final_records
             final_records = remove_already_imported_rows(final_records) if params[:reimport_from_scratch] != true

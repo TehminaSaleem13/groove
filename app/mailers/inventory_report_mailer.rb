@@ -52,6 +52,7 @@ class InventoryReportMailer < ActionMailer::Base
 		    	days.times do |i| 	
 		    		products.each do |pro|
 		    			orders = pro.order_items.map(&:order)
+		    			orders = [] if orders.blank?
 		    			if flag==true
 			    			orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), (@product_inv_setting.start_time+"#{i}".to_i.days).beginning_of_day, (@product_inv_setting.start_time+"#{i}".to_i.days).end_of_day)
 			    			date = (@product_inv_setting.start_time+"#{i}".to_i.days).strftime("%m/%d/%y")

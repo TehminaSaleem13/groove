@@ -44,7 +44,7 @@ module ScanPack::Utilities::ProductScan::Barcode
 
   def do_if_barcode_found
     if !@single_order.has_unscanned_items
-      if @scanpack_settings.post_scanning_option != "None"
+      if @scanpack_settings.post_scanning_option != "None" && !@scanpack_settings.order_verification
         do_if_post_scanning_option_is_not_none
       else
         @single_order.set_order_to_scanned_state(@current_user.username)

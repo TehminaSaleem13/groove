@@ -103,7 +103,7 @@ class Product < ActiveRecord::Base
 
 
     #delete all caches
-    Rails.cache.delete_matched("*for_tenant_#{Apartment::Tenant.current}")
+    Rails.cache.delete_matched("*for_tenant_#{Apartment::Tenant.current}") rescue nil
 
     # To reduce individual product query fire on order items
 
