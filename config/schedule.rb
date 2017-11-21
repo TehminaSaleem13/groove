@@ -80,6 +80,14 @@ every '*/30 8-17,0 * * *' do # 1.minute 1.day 1.week 1.month 1.year is also supp
   rake "doo:remove_duplicate_order_item_kit_products['lairdsuperfood']"
 end
 
+every 15.day, :at => '03:00 am' do
+  rake "doo:clear_redis"
+end
+
+every '0 1 1 * *' do
+  rake "doo:schedule_access_restriction"
+end
+
 # every 1.day, :at => '03:00 am' do
 #   runner "backup perform --trigger db_backup"
 # end

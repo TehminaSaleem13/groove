@@ -19,9 +19,9 @@ module Groovepacker
 
       def redirect_url
         if Rails.env=="development"
-          return "http://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/auth"
+          return "http://admin.#{ENV["HOST_NAME"]}/shopify/auth"
         else
-          return "https://admin.#{ENV["SHOPIFY_REDIRECT_HOST"]}/shopify/auth"
+          return "https://admin.#{ENV["HOST_NAME"]}/shopify/auth"
         end
       end
     end

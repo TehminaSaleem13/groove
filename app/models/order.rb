@@ -127,7 +127,7 @@ class Order < ActiveRecord::Base
     self.status = 'scanned'
     self.already_scanned = true
     self.scanned_on = current_time_from_proper_timezone
-    self.addactivity('Order Scanning Complete', username)
+    self.addactivity('Order Scanning Complete', username) if !ScanPackSetting.last.order_verification
     self.packing_score = self.compute_packing_score
     self.save
     restriction = AccessRestriction.order("created_at").last
