@@ -156,7 +156,7 @@ module StoreConcern
   end
 
   def check_store_status
-    unless @store.status
+    unless @store.try(:status)
       if params["flag"]=="ftp_download"
         @result['status'] = false
         @result['messages'].push('Store is not active')

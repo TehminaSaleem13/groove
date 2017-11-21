@@ -29,7 +29,7 @@ namespace :doo do
     Apartment::Tenant.switch 
     if file_response.present?
       GroovS3.create_csv(Apartment::Tenant.current, "export_log_#{DateTime.now}", 1, file_response, :public_read)
-      url = GroovS3.find_csv(Apartment::Tenant.current, "export_log_#{DateTime.now}", 1).url
+      url = GroovS3.find_csv(Apartment::Tenant.current, "export_log_#{DateTime.now}", 1).try(:url)
       CsvExportMailer.export_scanned_time_log(url).deliver
     end
     exit(1)
