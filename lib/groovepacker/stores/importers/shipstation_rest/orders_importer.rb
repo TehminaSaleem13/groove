@@ -25,6 +25,7 @@ module Groovepacker
 
           def initialize_orders_import
             response = get_orders_response
+            response["orders"] = response["orders"].sort {|vn1, vn2| vn2["orderDate"] <=> vn1["orderDate"]}
             return @result if response["orders"].blank?
             shipments_response = @client.get_shipments(import_from-1.days)
             @result[:total_imported] = response["orders"].length
