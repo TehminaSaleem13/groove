@@ -19,6 +19,10 @@ module Groovepacker
             GroovS3.create_order_xml(Apartment::Tenant.current, @file_name, @file_handle.read)
           end
 
+          def total_count
+            number(@doc, "//order/@total")
+          end
+
           def store_id
             text(@doc, "//order/storeId")
           end
@@ -67,6 +71,10 @@ module Groovepacker
             text(@doc, "//order/trackingNum")
           end
 
+          def import_summary_id
+            number(@doc, "//order/importSummaryId")
+          end
+
           def order_items
             orderItems = []
             @doc.xpath("//order/orderItems/orderItem").each do |orderItemXml|
@@ -87,6 +95,10 @@ module Groovepacker
 
           def text(node, xpath)
             node.xpath(xpath).text == "" ? nil : node.xpath(xpath).text
+          end
+
+          def number(node, xpath)
+            node.xpath(xpath).text == "" ? nil : node.xpath(xpath).text.to_i
           end
 
           def parse_text(text)
