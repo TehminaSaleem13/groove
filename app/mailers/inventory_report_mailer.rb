@@ -54,10 +54,10 @@ class InventoryReportMailer < ActionMailer::Base
 		    			orders = pro.order_items.map(&:order)
 		    			orders = [] if orders.blank?
 		    			if flag==true
-			    			orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), (@product_inv_setting.start_time+"#{i}".to_i.days).beginning_of_day, (@product_inv_setting.start_time+"#{i}".to_i.days).end_of_day)
+			    			orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), (@product_inv_setting.start_time+"#{i}".to_i.days).beginning_of_day, (@product_inv_setting.start_time+"#{i}".to_i.days).end_of_day) rescue []
 			    			date = (@product_inv_setting.start_time+"#{i}".to_i.days).strftime("%m/%d/%y")
 			    		else
-			    			orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), (DateTime.now-"#{i}".to_i.days).beginning_of_day, (DateTime.now-"#{i}".to_i.days).end_of_day)
+			    			orders = Order.where("id IN (?) and scanned_on >= ? and scanned_on <= ?",orders.map(&:id), (DateTime.now-"#{i}".to_i.days).beginning_of_day, (DateTime.now-"#{i}".to_i.days).end_of_day) rescue []
 			    			date = (DateTime.now.beginning_of_day-"#{i}".to_i.days).strftime("%m/%d/%y")
 		    			end
 		    			row = ""
