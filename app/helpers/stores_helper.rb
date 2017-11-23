@@ -175,8 +175,6 @@ module StoresHelper
 
   def csv_import
     data = {
-      authorization: request.headers['Authorization'],
-      refresh_token: doorkeeper_token.refresh_token,
       flag: params[:flag],
       type: params[:type],
       fix_width: params[:fix_width],
