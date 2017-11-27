@@ -13,8 +13,17 @@ module ElixirApi
           )
         end
 
-        def call
+        def self.cancel_import(tenant)
           HTTParty.post(
+            "#{ENV['ELIXIR_API']}/api/process/terminate_process",
+            body: {
+              pid_list: Rails.cache.read("#{tenant}_elixir_order_import_pid")
+            }
+          )
+        end
+
+        def call
+          response = HTTParty.post(
             "#{ENV['ELIXIR_API']}/api/process/import",
             body: {
               'for' => 'order', 'csv' => 'true',
@@ -27,9 +36,25 @@ module ElixirApi
             }.to_json,
             headers: { 'Content-Type' => 'application/json' }
           )
+
+          save_elixir_process_pid(response)
         end
 
         private
+
+        def redis_key_for_elixir_pid
+          "#{order_params['tenant']}_elixir_order_import_pid"
+        end
+
+        def save_elixir_process_pid(response)
+          key = redis_key_for_elixir_pid
+          val = response['data']['pid'].to_s
+          Rails.cache.write(key, val)
+        end
+
+        def find_elixir_process_pid
+          Rails.cache.read(redis_key_for_elixir_pid)
+        end
 
         # def set_file_size
         #   order_params['params'].merge!(

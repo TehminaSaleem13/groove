@@ -274,6 +274,7 @@ class OrdersController < ApplicationController
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
       change_status_to_cancel
+      ElixirApi::Processor::CSV::OrdersToXML.cancel_import(request.subdomain)
       ahoy.track(
         "Order Import",
         {
