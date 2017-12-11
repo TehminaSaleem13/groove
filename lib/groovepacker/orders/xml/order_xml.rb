@@ -96,19 +96,19 @@ module Groovepacker
           end
 
           def customer_comments
-            text(@doc, "//order/customerComments")
+            text(@doc, "//order/notes/customerComments")
           end
 
           def notes_toPacker
-            text(@doc, "//order/notesToPacker")
+            text(@doc, "//order/notes/notesToPacker")
           end
 
           def notes_fromPacker
-            text(@doc, "//order/notesFromPacker")
+            text(@doc, "//order/notes/notesFromPacker")
           end
 
           def notes_internal
-            text(@doc, "//order/notesInternal")
+            text(@doc, "//order/notes/notesInternal")
           end
 
           def order_items
