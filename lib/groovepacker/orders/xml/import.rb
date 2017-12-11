@@ -91,7 +91,6 @@ module Groovepacker
         private
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
-          puts orderXML.order_items.inspect
           if order.order_items.empty?
             # create order items
             orderXML.order_items.each do |order_item_XML|

@@ -113,7 +113,6 @@ module Groovepacker
 
           def order_items
             orderItems = []
-            puts @doc.xpath("//order/orderItems/orderItem").length
             @doc.xpath("//order/orderItems/orderItem").each do |orderItemXml|
               orderItem = {}
               orderItem[:qty] = text(orderItemXml, "qty")
