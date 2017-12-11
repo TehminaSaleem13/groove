@@ -91,6 +91,26 @@ module Groovepacker
             text(@doc, "//order/method")
           end
 
+          def order_total
+            text(@doc, "//order/orderTotal")
+          end
+
+          def customer_comments
+            text(@doc, "//order/customerComments")
+          end
+
+          def notes_toPacker
+            text(@doc, "//order/notesToPacker")
+          end
+
+          def notes_fromPacker
+            text(@doc, "//order/notesFromPacker")
+          end
+
+          def notes_internal
+            text(@doc, "//order/notesInternal")
+          end
+
           def order_items
             orderItems = []
             puts @doc.xpath("//order/orderItems/orderItem").length
