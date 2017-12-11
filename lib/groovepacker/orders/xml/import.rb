@@ -18,8 +18,9 @@ module Groovepacker
             order.increment_id = @order.increment_id
           end
 
-          ["store_id", "firstname", "lastname", "email", "address_1",
-              "city", "state", "country", "postcode", "order_placed_time", "tracking_num"].each do |attr|
+          ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
+              "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
+              "custom_field_one", "custom_field_two", "method"].each do |attr|
               order[attr] = @order.send(attr)
           end
 
@@ -54,28 +55,32 @@ module Groovepacker
           end
           # update the importsummary if import summary is available
           if !@order.import_summary_id.nil?
-            order_import_summary = OrderImportSummary.find(@order.import_summary_id)
-            import_item = order_import_summary.import_items.where(store_id: order.store_id)
-            unless import_item.empty?
-              import_item = import_item.first
-              import_item.with_lock do
-                import_item.to_import = 9
-                if result[:status]
-                  import_item.status = "in_progress"
-                  if order_persisted
-                    import_item.previous_imported += 1
+            begin
+              order_import_summary = OrderImportSummary.find(@order.import_summary_id)
+              import_item = order_import_summary.import_items.where(store_id: order.store_id)
+              unless import_item.empty?
+                import_item = import_item.first
+                import_item.with_lock do
+                  import_item.to_import = 9
+                  if result[:status]
+                    import_item.status = "in_progress"
+                    if order_persisted
+                      import_item.previous_imported += 1
+                    else
+                      import_item.success_imported += 1
+                    end
                   else
-                    import_item.success_imported += 1
+                    #import_summary.failed_imported += 1
                   end
-                else
-                  #import_summary.failed_imported += 1
+                  # if all are finished then mark as completed
+                  if import_item.previous_imported + import_item.success_imported == @order.total_count
+                    import_item.status = "completed"
+                  end
+                  import_item.save
                 end
-                # if all are finished then mark as completed
-                if import_item.previous_imported + import_item.success_imported == @order.total_count
-                  import_item.status = "completed"
-                end
-                import_item.save
               end
+            rescue Exception => ex
+              
             end
           end
 
@@ -85,6 +90,7 @@ module Groovepacker
         private
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
+          puts orderXML.order_items.inspect
           if order.order_items.empty?
             # create order items
             orderXML.order_items.each do |order_item_XML|
