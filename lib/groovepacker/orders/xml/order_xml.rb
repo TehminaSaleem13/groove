@@ -47,6 +47,10 @@ module Groovepacker
             text(@doc, "//order/shippingAddress/address1")           
           end
 
+          def address_2
+            text(@doc, "//order/shippingAddress/address2")           
+          end
+
           def city
             text(@doc, "//order/shippingAddress/city")            
           end
@@ -75,6 +79,38 @@ module Groovepacker
             number(@doc, "//order/importSummaryId")
           end
 
+          def custom_field_one
+            text(@doc, "//order/customFieldOne")
+          end
+
+          def custom_field_two
+            text(@doc, "//order/customFieldTwo")
+          end
+
+          def method
+            text(@doc, "//order/method")
+          end
+
+          def order_total
+            text(@doc, "//order/orderTotal")
+          end
+
+          def customer_comments
+            text(@doc, "//order/customerComments")
+          end
+
+          def notes_toPacker
+            text(@doc, "//order/notesToPacker")
+          end
+
+          def notes_fromPacker
+            text(@doc, "//order/notesFromPacker")
+          end
+
+          def notes_internal
+            text(@doc, "//order/notesInternal")
+          end
+
           def order_items
             orderItems = []
             @doc.xpath("//order/orderItems/orderItem").each do |orderItemXml|
@@ -97,6 +133,10 @@ module Groovepacker
             node.xpath(xpath).text == "" ? nil : node.xpath(xpath).text
           end
 
+          def text_at(node, path)
+            node.at(path).text == "" ? nil : node.at(path).text
+          end
+
           def number(node, xpath)
             node.xpath(xpath).text == "" ? nil : node.xpath(xpath).text.to_i
           end
@@ -107,27 +147,37 @@ module Groovepacker
 
           def product(node)
             product = {}
-            product[:name] = text(node, "//product/name")
-            product[:price] = text(node, "//product/price")
-            product[:instructions] = text(node, "//product/instructions")
-            product[:weight] = text(node, "//product/weight").nil? ? 0 : text(node, "//product/weight")
-            product[:is_kit] = text(node, "//product/isKit")
-            product[:kit_parsing] = text(node, "//product/kitParsing")
+            product[:name] = text_at(node, "product > name")
+            product[:price] = text_at(node, "product > price")
+            product[:instructions] = text_at(node, "product > instructions")
+            product[:weight] = text_at(node, "product > weight").nil? ? 0 : text_at(node, "product > weight")
+            puts text_at(node, "product > weight").inspect
+            product[:weight_format] = text_at(node, "product > weight > @unit")
+            product[:is_kit] = text_at(node, "product > isKit")
+            product[:kit_parsing] = text_at(node, "product > kitParsing")
             product[:skus] = []
-            node.xpath("//product/skus/sku").each do |skuElement|
-              product[:skus].push(parse_text(skuElement.text)) unless parse_text(skuElement.text).nil?
+            unless node.at("product > skus").nil?
+              node.at("product > skus").xpath("sku").each do |skuElement|
+                product[:skus].push(parse_text(skuElement.text)) unless parse_text(skuElement.text).nil?
+              end
             end
             product[:images] = []
-            node.xpath("//product/images/image").each do |imageElement|
-              product[:images].push(parse_text(imageElement.text)) unless parse_text(imageElement.text).nil?
+            unless node.at("product > images").nil?
+              node.at("product > images").xpath("image").each do |imageElement|
+                product[:images].push(parse_text(imageElement.text)) unless parse_text(imageElement.text).nil?
+              end
             end
             product[:categories] = []
-            node.xpath("//product/categories/category").each do |categoryElement|
-              product[:categories].push(parse_text(categoryElement.text)) unless parse_text(categoryElement.text).nil?
+            unless node.at("product > categories").nil?
+              node.at("product > categories").xpath("category").each do |categoryElement|
+                product[:categories].push(parse_text(categoryElement.text)) unless parse_text(categoryElement.text).nil?
+              end
             end
             product[:barcodes] = []
-            node.xpath("//product/barcodes/barcode").each do |barcodeElement|
-              product[:barcodes].push(parse_text(barcodeElement.text)) unless parse_text(barcodeElement.text).nil?
+            unless node.at("product > barcodes").nil?
+              node.at("product > barcodes").xpath("barcode").each do |barcodeElement|
+                product[:barcodes].push(parse_text(barcodeElement.text)) unless parse_text(barcodeElement.text).nil?
+              end
             end
             product
           end

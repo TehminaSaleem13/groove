@@ -411,6 +411,7 @@ class Order < ActiveRecord::Base
       .where(
         "(products.kit_parsing = 'single' AND products.is_kit IN (0,1) ) OR "\
         "(products.kit_parsing = 'individual' AND products.is_kit = 0 ) OR "\
+        "(products.is_kit IS NULL ) OR "\
         "(products.kit_parsing = 'depends' AND products.is_kit IN (0,1) )"
       )
       .select([
