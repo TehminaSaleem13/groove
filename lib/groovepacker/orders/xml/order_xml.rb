@@ -153,8 +153,8 @@ module Groovepacker
             product[:weight] = text_at(node, "product > weight").nil? ? 0 : text_at(node, "product > weight")
             puts text_at(node, "product > weight").inspect
             product[:weight_format] = text_at(node, "product > weight > @unit")
-            product[:is_kit] = text_at(node, "product > isKit")
-            product[:kit_parsing] = text_at(node, "product > kitParsing")
+            product[:is_kit] = text_at(node, "product > isKit").nil? ? 0 : text_at(node, "product > isKit")
+            product[:kit_parsing] = text_at(node, "product > kitParsing").nil? ? "individual" : text_at(node, "product > kitParsing")
             product[:skus] = []
             unless node.at("product > skus").nil?
               node.at("product > skus").xpath("sku").each do |skuElement|
