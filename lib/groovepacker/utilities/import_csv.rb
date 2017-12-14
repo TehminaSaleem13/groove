@@ -49,7 +49,7 @@ class ImportCsv
         result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
-        if params[:type] == 'order'
+        if false #params[:type] == 'order'
           ElixirApi::Processor::CSV::OrdersToXML.call(
             'data' => csv_file,
             'tenant' => tenant,
