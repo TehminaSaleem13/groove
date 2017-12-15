@@ -6,10 +6,9 @@ module Groovepacker
           magento_credential = MagentoCredentials.where(:store_id => self.store.id).first unless MagentoCredentials.where(:store_id => self.store.id).empty?
           client = nil
           session = nil
-          tenant = Apartment::Tenant.current
           if !magento_credential.nil?
             3.times do
-              if ["shopakira", "mftstamps"].include?(tenant)
+              if magento_credential.updated_patch
                 client = Savon.client( wsdl: magento_credential.host+"/api/v2_soap/?wsdl=1")
               else
                 client = Savon.client( wsdl: magento_credential.host+"/index.php/api/v2_soap/index/wsdl/1")

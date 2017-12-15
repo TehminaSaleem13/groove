@@ -271,7 +271,7 @@ module Groovepacker
 		      @magento = @magento.first
 		    end
 		    host_url = params[:host].sub(/(\/)+$/,'') rescue nil
-		    @magento.assign_attributes(:host => host_url, :username => params[:username], :api_key => params[:api_key], :shall_import_processing => params[:shall_import_processing],:shall_import_pending => params[:shall_import_pending], :shall_import_closed => params[:shall_import_closed], :shall_import_complete => params[:shall_import_complete], :shall_import_fraud => params[:shall_import_fraud], :enable_status_update => params[:enable_status_update], :status_to_update => params[:status_to_update], :push_tracking_number => params[:push_tracking_number], :import_products => params[:import_products], :import_images => params[:import_images])
+		    @magento.assign_attributes(:host => host_url, :username => params[:username], :api_key => params[:api_key], :shall_import_processing => params[:shall_import_processing],:shall_import_pending => params[:shall_import_pending], :shall_import_closed => params[:shall_import_closed], :shall_import_complete => params[:shall_import_complete], :shall_import_fraud => params[:shall_import_fraud], :enable_status_update => params[:enable_status_update], :status_to_update => params[:status_to_update], :push_tracking_number => params[:push_tracking_number], :import_products => params[:import_products], :import_images => params[:import_images], :updated_patch => params[:updated_patch])
 		    begin
 		      @store.save!
 		      @magento.save if !new_record
