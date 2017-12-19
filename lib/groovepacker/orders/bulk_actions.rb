@@ -109,16 +109,22 @@ module Groovepacker
         bulk_action = GrooveBulkActions.find(bulkaction_id)
         orders = $redis.get("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
         orders = Marshal.load(orders)
+        order_ids = orders.pluck(:id)
         init_results
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
-        orders.each do |order|
-          return if check_bulk_cancel(bulk_action)
-          bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
-          unless order.destroy
-            @result['status'] = false
-            @result['messages'].push('There was a problem deleting order '+ order.increment_id )
-          end
-        end
+        # orders.each do |order|
+        #   return if check_bulk_cancel(bulk_action)
+        #   bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
+        #   unless order.destroy
+        #     @result['status'] = false
+        #     @result['messages'].push('There was a problem deleting order '+ order.increment_id )
+        #   end
+        # end
+
+        Order.delete_all(['id IN (?)', order_ids])
+        destroy_orders_associations(order_ids)
+        bulk_action.update_attributes(completed: order_ids.count)
+
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}") 
       end
@@ -221,6 +227,35 @@ module Groovepacker
         bulk_actions = GrooveBulkActions.where("identifier='order' and activity='status_update' and (status!='cancelled' or status='completed' and total!=completed)")
         bulk_actions.update_all("status='completed', completed=total")
       end
+
+      private
+
+      def destroy_orders_associations(order_ids)
+        OrderActivity.delete_all(['order_id IN (?)', order_ids])
+        OrderException.delete_all(['order_id IN (?)', order_ids])
+        OrderSerial.delete_all(['order_id IN (?)', order_ids])
+        OrderShipping.delete_all(['order_id IN (?)', order_ids])
+        destroy_order_items(order_ids)
+      end
+
+
+      def destroy_order_items(order_ids)
+        OrderItem
+          .where(['order_id IN (?)', order_ids])
+          .find_in_batches(batch_size: 1000) do |order_items|
+            order_items_ids = order_items.map(&:id)
+            
+            OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
+            OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
+            OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
+            
+            # Update inventory
+            order_items.map(&:delete_inventory)
+            OrderItem.delete_all(['id IN (?)', order_items_ids])
+          end
+      end
+
+
     end
   end
 end
