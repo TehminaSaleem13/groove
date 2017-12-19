@@ -2,6 +2,8 @@ module Groovepacker
   module Orders
     class BulkActions
 
+      include Groovepacker::Inventory::Helper
+
       def init_results
         @result = Hash.new
         @result['messages'] = []
@@ -122,7 +124,8 @@ module Groovepacker
         # end
 
         Order.delete_all(['id IN (?)', order_ids])
-        destroy_orders_associations(order_ids, bulk_action)
+        destroy_orders_associations(order_ids)
+        bulk_action.update_attributes(completed: orders.count)
 
 
         check_bulk_action_completed_or_not(bulk_action)
@@ -230,31 +233,39 @@ module Groovepacker
 
       private
 
-      def destroy_orders_associations(order_ids, bulk_action)
+      def destroy_orders_associations(order_ids)
         OrderActivity.delete_all(['order_id IN (?)', order_ids])
         OrderException.delete_all(['order_id IN (?)', order_ids])
         OrderSerial.delete_all(['order_id IN (?)', order_ids])
         OrderShipping.delete_all(['order_id IN (?)', order_ids])
-        destroy_order_items(order_ids, bulk_action)
+        destroy_order_items(order_ids)
       end
 
 
-      def destroy_order_items(order_ids, bulk_action)
-        OrderItem
-          .where(['order_id IN (?)', order_ids])
-          .find_in_batches(batch_size: 1000) do |order_items|
-            order_items_ids = order_items.map(&:id)
-            
-            OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
-            OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
-            OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
-            
-            # Update inventory
-            order_items.map(&:delete_inventory)
-            OrderItem.delete_all(['id IN (?)', order_items_ids])
+      def destroy_order_items(order_ids)
+        order_items = OrderItem.where(['order_id IN (?)', order_ids])
 
-            bulk_action.update_attributes(completed: bulk_action.completed + order_items_ids.count)
+        if inventory_tracking_enabled?
+          order_items
+          .find_in_batches(batch_size: 1000) do |items|
+            items_ids = items.map(&:id)
+
+            # Update inventory
+            items.map(&:delete_inventory)
+            delete_order_items(items_ids)
           end
+        else
+          delete_order_items(order_items.pluck(:id))
+        end
+      end
+
+
+      def delete_order_items(order_items_ids)
+        OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
+        OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
+        OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
+
+        OrderItem.delete_all(['id IN (?)', order_items_ids])
       end
 
 
