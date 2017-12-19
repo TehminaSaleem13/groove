@@ -122,8 +122,8 @@ module Groovepacker
         # end
 
         Order.delete_all(['id IN (?)', order_ids])
-        destroy_orders_associations(order_ids)
-        bulk_action.update_attributes(completed: order_ids.count)
+        destroy_orders_associations(order_ids, bulk_action)
+
 
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}") 
@@ -230,16 +230,16 @@ module Groovepacker
 
       private
 
-      def destroy_orders_associations(order_ids)
+      def destroy_orders_associations(order_ids, bulk_action)
         OrderActivity.delete_all(['order_id IN (?)', order_ids])
         OrderException.delete_all(['order_id IN (?)', order_ids])
         OrderSerial.delete_all(['order_id IN (?)', order_ids])
         OrderShipping.delete_all(['order_id IN (?)', order_ids])
-        destroy_order_items(order_ids)
+        destroy_order_items(order_ids, bulk_action)
       end
 
 
-      def destroy_order_items(order_ids)
+      def destroy_order_items(order_ids, bulk_action)
         OrderItem
           .where(['order_id IN (?)', order_ids])
           .find_in_batches(batch_size: 1000) do |order_items|
@@ -252,6 +252,8 @@ module Groovepacker
             # Update inventory
             order_items.map(&:delete_inventory)
             OrderItem.delete_all(['id IN (?)', order_items_ids])
+
+            bulk_action.update_attributes(completed: bulk_action.completed + order_items_ids.count)
           end
       end
 
