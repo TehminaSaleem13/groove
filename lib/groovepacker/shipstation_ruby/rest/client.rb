@@ -115,7 +115,7 @@ module Groovepacker
               response['orders'] = response['orders'] + res unless res.nil?
             end
           end
-          response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') }.reverse rescue response['orders']
+          response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') } rescue response['orders']
           response
         end
 
@@ -150,7 +150,7 @@ module Groovepacker
           page_index = 1
           loop do
             res = @service.query("/Orders?orderStatus=" \
-              "#{status}&page=#{page_index}&pageSize=150#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, "get")
+              "#{status}&page=#{page_index}&pageSize=150#{start_date}&sortBy=OrderDate&sortDir=ASC", nil, "get")
             combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
             page_index += 1
             return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150
