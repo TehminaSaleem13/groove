@@ -140,7 +140,7 @@ module Groovepacker
             result = create_update_product(product, order_item_XML[:product])
             if result[:status]
               if order.order_items.where(product_id: product.id).empty?
-                order.order_items.create(sku: first_sku, qty: order_item_XML[:qty],
+                order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
                 order.addactivity("Item with SKU: #{product.primary_sku} Added", 
                   "#{order.store.name} Import")
@@ -149,7 +149,7 @@ module Groovepacker
                 unless order_item.empty?
                   order_item = order_item.first
                   order_item.sku = first_sku
-                  order_item.qty = order_item_XML[:qty]
+                  order_item.qty = order_item_XML[:qty] || 0
                   order_item.price = order_item_XML[:price]
                   order_item.save
                 end
