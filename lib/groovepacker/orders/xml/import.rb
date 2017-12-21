@@ -17,11 +17,10 @@ module Groovepacker
             order = Order.new
             order.increment_id = @order.increment_id
           end
-
           ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
               "custom_field_one", "custom_field_two", "method", "order_total",
-              "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal"].each do |attr|
+              "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
               order[attr] = @order.send(attr)
           end
           # update all order related info

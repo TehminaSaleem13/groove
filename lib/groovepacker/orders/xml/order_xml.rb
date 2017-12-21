@@ -71,6 +71,14 @@ module Groovepacker
             date(@doc, "//order/orderPlacedTime")
           end
 
+          def price
+            text(@doc, "//order/price")
+          end
+
+          def qty
+            text(@doc, "//order/qty")
+          end
+
           def tracking_num
             text(@doc, "//order/trackingNum")
           end
