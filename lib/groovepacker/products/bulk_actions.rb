@@ -8,11 +8,15 @@ module Groovepacker
         Apartment::Tenant.switch tenant 
         order_items = OrderItem.where(:product_id => product_id)
         order_items.each do |order_item|
-          if !OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(product_kit_sku_id)
-            order_item_kit_product = OrderItemKitProduct.new
-            order_item_kit_product.product_kit_skus = ProductKitSkus.find(product_kit_sku_id)
-            order_item_kit_product.order_item = order_item
-            order_item_kit_product.save
+          if $redis.get("duplicate_item_check_1").blank?
+            $redis.set("duplicate_item_check_1", true) 
+            $redis.expire("duplicate_item_check_1", 54)
+            if !OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(product_kit_sku_id)
+              order_item_kit_product = OrderItemKitProduct.new
+              order_item_kit_product.product_kit_skus = ProductKitSkus.find(product_kit_sku_id)
+              order_item_kit_product.order_item = order_item
+              order_item_kit_product.save
+            end
           end
         end
       end
