@@ -18,15 +18,11 @@ class ProductKitSkus < ActiveRecord::Base
       kit_sku.delay.update_ordere_item_kit_product(tenant, self.product_id, self.id)
     else
       @order_items.each do |order_item| 
-        if $redis.get("duplicate_item_check_2").blank?
-          $redis.set("duplicate_item_check_2", true) 
-          $redis.expire("duplicate_item_check_2", 54)
-          if !OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(self.id)
-            order_item_kit_product = OrderItemKitProduct.new
-            order_item_kit_product.product_kit_skus = self
-            order_item_kit_product.order_item = order_item
-            order_item_kit_product.save
-          end
+        if !OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(self.id)
+          order_item_kit_product = OrderItemKitProduct.new
+          order_item_kit_product.product_kit_skus = self
+          order_item_kit_product.order_item = order_item
+          order_item_kit_product.save
         end
       end
     end
