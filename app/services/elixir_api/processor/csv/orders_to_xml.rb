@@ -31,7 +31,8 @@ module ElixirApi
                 'mapping' => generate_mapping(order_params['params'][:map]),
                 'host_url' => host_url(order_params['tenant']),
                 'import_api_route' => IMPORT_ROUTES['order'],
-                'auth_params' => auth_params
+                'auth_params' => auth_params,
+                'db_config' => set_db_config
               )
             }.to_json,
             headers: { 'Content-Type' => 'application/json' }
@@ -41,6 +42,15 @@ module ElixirApi
         end
 
         private
+
+        def set_db_config
+          {
+            'db_user' => ENV['DB_USERNAME'],
+            'db_password' => ENV['DB_PASSWORD'],
+            'db_host' => ENV['DB_HOST'],
+            'db_port' => ENV['DB_PORT'] || 3306
+          }
+        end
 
         def redis_key_for_elixir_pid
           "#{order_params['tenant']}_elixir_order_import_pid"
