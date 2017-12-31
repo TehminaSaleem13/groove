@@ -97,7 +97,7 @@ class Store < ActiveRecord::Base
     end
     if self.store_type == 'Shipworks'
       @result['shipworks_credentials'] = shipworks_credential
-      @result['shipworks_hook_url'] = "https://"+Apartment::Tenant.current+"."+ENV['HOST_NAME']+"/orders/import_shipworks?auth_token="
+      @result['shipworks_hook_url'] = "https://"+Apartment::Tenant.current+"."+ENV['SITE_HOST']+"/orders/import_shipworks?auth_token="
       @result['status'] =true
     end
     if self.store_type == 'Shopify'

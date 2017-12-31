@@ -10,21 +10,19 @@ module Groovepacker
 
         def process
           result = {status: true, errors: [], order: nil}
-          order = Order.find_by_increment_id(@order.increment_id)        
+          order = Order.find_by_increment_id(@order.increment_id)
           # if order exists, update the order and order items
           # order does not exist create order
           if order.nil?
             order = Order.new
             order.increment_id = @order.increment_id
           end
-
           ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
               "custom_field_one", "custom_field_two", "method", "order_total",
-              "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal"].each do |attr|
+              "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
               order[attr] = @order.send(attr)
           end
-
           # update all order related info
           order_persisted = order.persisted? ? true : false
           if order.save
@@ -139,10 +137,9 @@ module Groovepacker
             end
 
             result = create_update_product(product, order_item_XML[:product])
-
             if result[:status]
               if order.order_items.where(product_id: product.id).empty?
-                order.order_items.create(sku: first_sku, qty: order_item_XML[:qty],
+                order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
                 order.addactivity("Item with SKU: #{product.primary_sku} Added", 
                   "#{order.store.name} Import")
@@ -151,7 +148,7 @@ module Groovepacker
                 unless order_item.empty?
                   order_item = order_item.first
                   order_item.sku = first_sku
-                  order_item.qty = order_item_XML[:qty]
+                  order_item.qty = order_item_XML[:qty] || 0
                   order_item.price = order_item_XML[:price]
                   order_item.save
                 end
@@ -163,12 +160,12 @@ module Groovepacker
         def create_update_product(product, product_xml)
           result = {  status: true, errors: [], product: nil }
           #product information
-          product.name = product_xml[:name]
-          product.spl_instructions_4_packer = product_xml[:instructions]
-          product.is_kit = product_xml[:is_kit]
-          product.kit_parsing = product_xml[:kit_parsing]
-          product.weight = product_xml[:weight]
-          product.weight_format = product_xml[:weight_format]
+          product.name = product_xml[:name] if product.name.blank?
+          product.spl_instructions_4_packer = product_xml[:instructions] if product.spl_instructions_4_packer.blank?
+          product.is_kit = product_xml[:is_kit] if product.is_kit == 0
+          product.kit_parsing = product_xml[:kit_parsing] if product.kit_parsing.blank?
+          product.weight = product_xml[:weight] if product.weight.blank?
+          product.weight_format = product_xml[:weight_format] if product.weight_format.blank?
           if product.save
             #images
             product_xml[:images].each do |product_image|

@@ -115,7 +115,7 @@ module Groovepacker
               response['orders'] = response['orders'] + res unless res.nil?
             end
           end
-          response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') }.reverse rescue response['orders']
+          # response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') }.reverse rescue response['orders']
           response
         end
 

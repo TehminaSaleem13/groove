@@ -274,7 +274,7 @@ class OrdersController < ApplicationController
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
       change_status_to_cancel
-      if Store.find_by_id(params[:store_id]).csv_beta
+      if Store.find_by_id(params[:store_id]).try(:csv_beta)
         ElixirApi::Processor::CSV::OrdersToXML.delay(:run_at => 1.seconds.from_now).cancel_import(request.subdomain)
       end
       ahoy.track(
