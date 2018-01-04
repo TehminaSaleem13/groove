@@ -27,7 +27,7 @@ namespace :doo do
 			      result = true
 			    end
 			    # params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
-			    if User.all.map(&:view_dashboard).include?(true)
+			    if User.all.map(&:view_dashboard).include?(true) && tenant.name != "unitedmedco" 
 			    	stat_stream_obj = SendStatStream.new()
 					stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant.name)
 				end
