@@ -49,12 +49,13 @@ class ImportCsv
         result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
-        if store.csv_beta && params[:type] == "order"  
+        if store.csv_beta && params[:type] == "order"
           ElixirApi::Processor::CSV::OrdersToXML.call(
             'data' => csv_file,
             'tenant' => tenant,
             'params' => params
           )
+          Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status({}, {}, Apartment::Tenant.current)
         else
           final_record = []
           if params[:fix_width] == 1
