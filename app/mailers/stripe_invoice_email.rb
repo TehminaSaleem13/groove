@@ -12,7 +12,7 @@ class StripeInvoiceEmail < ActionMailer::Base
           Apartment::Tenant.switch(tenant)
           @tenant_name = tenant
           @invoice = invoice
-          mail to: [@email, 'groovepacker@gmail.com'],
+          mail to: [@email, 'groovepacker@gmail.com'].flatten,
                subject: "GroovePacker #{tenant} Invoice Email"
         end
       end
@@ -41,7 +41,12 @@ class StripeInvoiceEmail < ActionMailer::Base
     unless subscription.stripe_customer_id.nil?
       begin
         customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
-        return customer.email
+        if subscription.tenant_name == "tessemaes"
+          email = ["paul.sheen@tessemaes.com", "youngest@tessemaes.com"]
+        else
+          email = customer.email
+        end
+        return email
       rescue Stripe::InvalidRequestError => er
         return nil
       end
