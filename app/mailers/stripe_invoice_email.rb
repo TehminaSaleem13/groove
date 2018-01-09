@@ -42,7 +42,7 @@ class StripeInvoiceEmail < ActionMailer::Base
       begin
         customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
         if subscription.tenant_name == "tessemaes"
-          email = ["paul.sheen@tessemaes.com", "youngest@tessemaes.com"]
+          email = ["paul.sheen@tessemaes.com", "ap@tessemaes.com"]
         else
           email = customer.email
         end

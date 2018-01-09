@@ -60,7 +60,7 @@ module Groovepacker
               unless import_item.empty?
                 import_item = import_item.first
                 import_item.with_lock do
-                  import_item.to_import = 9
+                  import_item.to_import = @order.total_count
                   if result[:status]
                     import_item.status = "in_progress"
                     if order_persisted
