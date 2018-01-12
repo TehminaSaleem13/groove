@@ -4,7 +4,7 @@ module ElixirApi
       # Keep generic methods for the Elixir services here
       class Base < ServiceInit
         IMPORT_ROUTES = {
-          'order' => '/orders/import_xml'
+          'order' => '/orders/bulk_import_xml'
         }.freeze
 
         def host_url(tenant)

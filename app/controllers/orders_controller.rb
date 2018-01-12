@@ -245,9 +245,6 @@ class OrdersController < ApplicationController
   end
 
   def import_xml
-    puts "IMPORT XML"
-    # import the XML
-    puts params[:order_xml].inspect
     if params[:order_xml].nil?
       # params[:xml] has content
       file_name = Time.now.to_i.to_s + ".xml"
@@ -267,6 +264,23 @@ class OrdersController < ApplicationController
     #store to s3
 
     render json: {status: "OK"}
+  end
+
+  def bulk_import_xml
+    bulk_xml_data = JSON.parse(params[:bulk_xml_data])
+    bulk_xml_data.each do |xml|
+      file_name = Time.now.to_i.to_s + ".xml"
+      File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+        file.write(xml)
+      end
+
+      order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
+      order_importer.process
+      File.delete(Rails.root.join('public', 'csv', file_name))
+    end
+
+    render json: {status: "OK"}
+
   end
 
   def cancel_import
