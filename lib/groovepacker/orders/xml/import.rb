@@ -52,6 +52,20 @@ module Groovepacker
               order.save
             end
           end
+          setting = ScanPackSetting.all.first
+          order.order_items.map(&:product).each do |product|  
+            intangible_strings = setting.intangible_string.split(",")
+            intangible_setting_enabled = setting.intangible_setting_enabled
+            if intangible_setting_enabled
+              intangible_strings.each do |string|
+                action_intangible = Groovepacker::Products::ActionIntangible.new
+                if ((product.name).downcase.include? (string.downcase)) || action_intangible.send(:sku_starts_with_intangible_string, product, string)
+                  product.is_intangible = true
+                  product.save
+                end
+              end
+            end
+          end
           # update the importsummary if import summary is available
           if !@order.import_summary_id.nil?
             begin
@@ -60,7 +74,7 @@ module Groovepacker
               unless import_item.empty?
                 import_item = import_item.first
                 import_item.with_lock do
-                  import_item.to_import = 9
+                  import_item.to_import = @order.total_count
                   if result[:status]
                     import_item.status = "in_progress"
                     if order_persisted
@@ -135,8 +149,8 @@ module Groovepacker
             else
               product = product_sku.product
             end
-
             result = create_update_product(product, order_item_XML[:product])
+            product.set_product_status
             if result[:status]
               if order.order_items.where(product_id: product.id).empty?
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),

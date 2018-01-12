@@ -21,7 +21,7 @@ module Groovepacker
         if Rails.env=="development"
           return "http://admin.#{ENV["HOST_NAME"]}/shopify/auth"
         else
-          return "https://admin.#{ENV["HOST_NAME"]}/shopify/auth"
+          return "https://admin.#{ENV["SITE_HOST"]}/shopify/auth"
         end
       end
     end

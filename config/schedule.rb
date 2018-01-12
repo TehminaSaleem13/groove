@@ -72,6 +72,10 @@ every 1.day, :at => '04:00 am' do
   rake "doo:scheduled_stat_export"
 end
 
+every 1.day, :at => '01:00 am' do
+  rake "doo:scheduled_stat_export_umi"
+end
+
 every 1.day, :at => '02:00 am' do
   rake "doo:export_import_log"
 end
