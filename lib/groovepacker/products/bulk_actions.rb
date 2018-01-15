@@ -30,7 +30,6 @@ module Groovepacker
               :product_kit_skuss, :product_barcodes,
               :product_skus, :product_kit_activities, :product_inventory_warehousess
             )
-
           products.update_all(status: params[:status])
           products.reload
 
@@ -50,6 +49,7 @@ module Groovepacker
             if product.status == params[:status]
               if product.status !='inactive'
                 if !product.update_product_status(nil, eager_loaded_obj) && params[:status] == 'active'
+                  current_status = product.status
                   result['status'] &= false
                   if product.is_kit == 1
                     result['messages'].push('There was a problem changing kit status for '+
