@@ -275,8 +275,13 @@ class OrdersController < ApplicationController
       end
 
       order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
-      order_importer.process
-      File.delete(Rails.root.join('public', 'csv', file_name))
+      begin
+        order_importer.process
+      rescue Exception => e
+        puts e.message
+      ensure
+        File.delete(Rails.root.join('public', 'csv', file_name))
+      end
     end
 
     render json: {status: "OK"}
