@@ -24,7 +24,7 @@ class ShopifyController < ApplicationController
       else  
         one_time_fee(token, params["shop"])
       end
-    else  
+    else 
       #@tenant_name, @is_admin = params[:tenant_name].split('&')
       # @tenant_name = cookies[:tenant_name]
       # @store_id = cookies[:store_id]
@@ -44,6 +44,7 @@ class ShopifyController < ApplicationController
       rescue Exception => ex
         @result = false
       end
+      redirect_to "#{ENV["PROTOCOL"]}admin.#{ENV["FRONTEND_HOST"]}/#/shopify/complete"
     end
   end
 
