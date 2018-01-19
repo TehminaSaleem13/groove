@@ -80,11 +80,12 @@ module Groovepacker
         def perform
           Apartment::Tenant.switch(tenant)
           ois = OrderImportSummary.find_by_id(order_import_summary_id)
-          ois.update_attributes(status: 'in_progress')
-
-          ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
-          ois.reload
-          ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
+          if ois
+            ois.update_attributes(status: 'in_progress')
+            ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
+            ois.reload
+            ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
+          end
           GC.start
         end
       end
