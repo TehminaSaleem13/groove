@@ -243,6 +243,8 @@ module Groovepacker
             end
 
             def destroy_cleared_orders(response)
+              skus = ProductKitSkus.where("option_product_id = product_id")
+              skus.destroy_all
               orders_to_clear = Order.where("store_id=? and status!=? and increment_id in (?)", @credential.store_id, "scanned", response["cleared_orders_ids"])
               orders_to_clear.destroy_all
             end
