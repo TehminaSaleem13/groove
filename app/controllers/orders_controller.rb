@@ -266,28 +266,6 @@ class OrdersController < ApplicationController
     render json: {status: "OK"}
   end
 
-  def bulk_import_xml
-    bulk_xml_data = JSON.parse(params[:bulk_xml_data])
-    bulk_xml_data.each do |xml|
-      file_name = Time.now.to_i.to_s + ".xml"
-      File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
-        file.write(xml)
-      end
-
-      order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
-      begin
-        order_importer.process
-      rescue Exception => e
-        puts e.message
-      ensure
-        File.delete(Rails.root.join('public', 'csv', file_name))
-      end
-    end
-
-    render json: {status: "OK"}
-
-  end
-
   def cancel_import
     if order_summary_to_cancel.nil?   #order_summary defined in application helper
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
