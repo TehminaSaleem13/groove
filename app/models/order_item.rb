@@ -99,6 +99,7 @@ class OrderItem < ActiveRecord::Base
     result['packing_placement'] = item.packing_placement
     result['barcodes'] = sort_by_order[item.cached_product_barcodes]
     result['product_id'] = item.id
+    result['location'] = item.product_inventory_warehousess[0].location_primary rescue nil
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
     result['click_scan_enabled'] = item.click_scan_enabled
@@ -227,7 +228,6 @@ class OrderItem < ActiveRecord::Base
 
   def process_item(clicked, username, typein_count=1)
     order_unscanned = false
-
     if self.scanned_qty < self.qty
       total_qty = 0
       if self.product.kit_parsing == 'depends'
@@ -240,9 +240,9 @@ class OrderItem < ActiveRecord::Base
         set_clicked_quantity(clicked, self.product.primary_sku, username)
         total_qty = self.qty - self.kit_split_qty
       end
-      scan_time = self.order_item_scan_times.create(
-        scan_start: self.order.last_suggested_at,
-        scan_end: DateTime.now)
+      scan_time = self.order_item_scan_times.build(
+        scan_start: self.order.last_suggested_at, scan_end: DateTime.now)
+      scan_time.save
       if typein_count > 1
         avg_time = avg_time_per_item(username)
         if avg_time
