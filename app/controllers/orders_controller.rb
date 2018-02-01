@@ -203,6 +203,10 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def generate_all_packing_slip
+    @orders = Order.all
+  end
+
   def cancel_packing_slip
     if params[:id].nil?
       set_status_and_message(false, 'No id given. Can not cancel generating', ['push', 'error_messages'])

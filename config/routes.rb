@@ -88,6 +88,7 @@ Groovepacks::Application.routes.draw do
       get 'import_all'
       post 'generate_pick_list'
       post 'generate_packing_slip'
+      get 'generate_all_packing_slip'
       post 'order_items_export'
       post 'cancel_packing_slip'
       post 'delete_orders'
