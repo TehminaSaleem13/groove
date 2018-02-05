@@ -9,7 +9,7 @@ module ElixirApi
         def initialize(order_params)
           @order_params = order_params
           @order_params['params'].merge!(
-            import_summary_id: find_summary.id
+            import_summary_id: find_summary
           )
         end
 
@@ -73,7 +73,7 @@ module ElixirApi
         # end
 
         def find_summary
-          OrderImportSummary.find_by_status('not_started')
+          OrderImportSummary.find_by_status('not_started').id rescue OrderImportSummary.create(import_summary_type: "import_orders", status: "not_started", user_id: 2).id
         end
 
         # def today_start
