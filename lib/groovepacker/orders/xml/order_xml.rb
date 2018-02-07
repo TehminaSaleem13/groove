@@ -134,7 +134,7 @@ module Groovepacker
           private
 
           def date(node, xpath)
-            node.xpath(xpath).text == "" ? nil : DateTime.parse(node.xpath(xpath).text)
+            node.xpath(xpath).text == "" ? nil : DateTime.parse(node.xpath(xpath).text) rescue nil
           end
 
           def text(node, xpath)
