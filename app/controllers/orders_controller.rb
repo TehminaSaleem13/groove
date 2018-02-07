@@ -204,7 +204,7 @@ class OrdersController < ApplicationController
   end
 
   def generate_all_packing_slip
-    @orders = Order.all
+    @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
   end
 
   def cancel_packing_slip
