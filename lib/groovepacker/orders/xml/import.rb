@@ -26,7 +26,7 @@ module Groovepacker
           # update all order related info
           order_persisted = order.persisted? ? true : false
           if order.save
-            order.addactivity("Order Import", "#{order.store.name} Import") unless order_persisted
+            order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
             # @order[:order_items] = @order.order_items
             order_item_result = process_order_items(order, @order)
             if order_item_result[:status]
