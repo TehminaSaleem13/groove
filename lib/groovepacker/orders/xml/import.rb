@@ -71,8 +71,8 @@ module Groovepacker
             begin
               order_import_summary = OrderImportSummary.find(@order.import_summary_id)
               import_item = order_import_summary.import_items.where(store_id: order.store_id)
-              unless import_item.empty?
-                import_item = import_item.first
+              import_item = import_item.first
+              if import_item && !import_item.status.eql?('cancelled')
                 import_item.with_lock do
                   import_item.to_import = @order.total_count
                   if result[:status]
