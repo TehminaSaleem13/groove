@@ -249,23 +249,29 @@ class OrdersController < ApplicationController
   end
 
   def import_xml
-    if params[:order_xml].nil?
-      # params[:xml] has content
-      file_name = Time.now.to_i.to_s + ".xml"
-      File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
-        file.write(params[:xml])
+    order_import_summary = OrderImportSummary.find(params[:import_summary_id])
+    import_item = order_import_summary.import_items.where(store_id: params[:store_id])
+    import_item = import_item.first
+    if import_item && !import_item.eql?('cancelled')
+      if params[:order_xml].nil?
+        # params[:xml] has content
+        file_name = Time.now.to_i.to_s + ".xml"
+        File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+          file.write(params[:xml])
+        end
+      else
+        order_xml = params[:order_xml]
+        file_name = Time.now.to_i.to_s + "_" + order_xml.original_filename
+        File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+          file.write(order_xml.read)
+        end
       end
+      order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
+      order_importer.process
+      File.delete(Rails.root.join('public', 'csv', file_name))
     else
-      order_xml = params[:order_xml]
-      file_name = Time.now.to_i.to_s + "_" + order_xml.original_filename
-      File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
-        file.write(order_xml.read)
-      end
+      import_item && import_item.save
     end
-    order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
-    order_importer.process
-    File.delete(Rails.root.join('public', 'csv', file_name))
-    #store to s3
 
     render json: {status: "OK"}
   end
