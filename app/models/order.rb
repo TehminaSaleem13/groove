@@ -472,7 +472,7 @@ class Order < ActiveRecord::Base
           else
             # for individual items
             unless data_hash['is_intangible'] == 1
-              tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+              tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'] rescue 0)
             end
 
             tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
@@ -500,7 +500,6 @@ class Order < ActiveRecord::Base
         limited_order_items.unshift(barcode_in_order_item) if order_item_id
       end
     end
-
     if most_recent_scanned_product
       chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
     end
@@ -561,15 +560,20 @@ class Order < ActiveRecord::Base
           # add order item to unscanned list
           unscanned_item = order_item.build_unscanned_single_item
           if unscanned_item['qty_remaining'] > 0
+            loc = unscanned_item["location"].present? ? unscanned_item["location"] : " "
+            unscanned_item["next_item"] = "#{unscanned_item['packing_placement']}#{loc}#{unscanned_item['sku']}"
             unscanned_list.push(unscanned_item)
           end
         end
       end
     end
+
     unscanned_list.sort do |a, b|
       o = (a['packing_placement'] <=> b['packing_placement']);
       o == 0 ? (a['name'] <=> b['name']) : o
     end
+    
+    unscanned_list = unscanned_list.sort {|a,b| a["next_item"] <=> b["next_item"]}
   end
 
   def find_unscanned_order_item_with_barcode(barcode)
