@@ -266,7 +266,8 @@ class OrdersController < ApplicationController
           file.write(order_xml.read)
         end
       end
-      order_importer = Groovepacker::Orders::Xml::Import.new(file_name)
+
+      order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params["file_name"], params["flag"])
       order_importer.process
       File.delete(Rails.root.join('public', 'csv', file_name))
     else

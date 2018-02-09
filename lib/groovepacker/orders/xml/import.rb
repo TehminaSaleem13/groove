@@ -4,8 +4,10 @@ module Groovepacker
       class Import
         attr_accessor :order
 
-        def initialize(file_name)
+        def initialize(file_name, csv_name, flag)
           @order = Groovepacker::Orders::Xml::OrderXml.new(file_name)
+          @file_name = csv_name
+          @ftp_flag = flag
         end
 
         def process
@@ -54,6 +56,7 @@ module Groovepacker
           end
           setting = ScanPackSetting.all.first
           order.order_items.map(&:product).each do |product|  
+            #product.set_product_status
             intangible_strings = setting.intangible_string.split(",")
             intangible_setting_enabled = setting.intangible_setting_enabled
             if intangible_setting_enabled
@@ -88,6 +91,10 @@ module Groovepacker
                   # if all are finished then mark as completed
                   if import_item.previous_imported + import_item.success_imported == @order.total_count
                     import_item.status = "completed"
+                    if @ftp_flag
+                      groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
+                      response = groove_ftp.update(@file_name)
+                    end
                   end
                   import_item.save
                 end
