@@ -91,8 +91,7 @@ module Groovepacker
                   # if all are finished then mark as completed
                   if import_item.previous_imported + import_item.success_imported == @order.total_count
                     import_item.status = "completed"
-                    flag = order.store.ftp_credential.use_ftp_import rescue false
-                    if flag #@ftp_flag
+                    if @ftp_flag == "true"
                       groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                       response = groove_ftp.update(@file_name)
                     end
