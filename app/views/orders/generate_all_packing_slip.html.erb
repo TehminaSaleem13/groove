@@ -6333,7 +6333,8 @@
         <div class="span8" style="margin-top: -60px;">
           <% barcode_string = generate_order_barcode(order.increment_id) rescue nil %>
           <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
-            <div style="position:absolute; top:0; left:0;"><%#= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+            <div style="position:absolute; top:0; left:0;">
+              <%= pdf_image_tag(barcode_string+".png", {:width => 100}) %></div>
           </div>
           <br>
         </div>
