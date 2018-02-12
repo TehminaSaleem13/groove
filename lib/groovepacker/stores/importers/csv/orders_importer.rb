@@ -256,7 +256,8 @@ module Groovepacker
               set_product_info(product, single_row)
             end
             warehouse = product.product_inventory_warehousess.first
-            warehouse.update_attribute(:location_primary, single_row[mapping['bin_location'][:position]])
+            loc = single_row[mapping['bin_location'][:position]] rescue nil
+            warehouse.update_attribute(:location_primary, loc) if warehouse.present?
             CsvImportLogEntry.create(index: index, csv_import_summary_id: @csv_import_summary.id)
             update_import_item(nil, 1)
           end
