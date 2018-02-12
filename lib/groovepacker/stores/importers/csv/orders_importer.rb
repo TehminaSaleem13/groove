@@ -255,6 +255,8 @@ module Groovepacker
               product = Product.new
               set_product_info(product, single_row)
             end
+            warehouse = product.product_inventory_warehousess.first
+            warehouse.update_attribute(:location_primary, single_row[mapping['bin_location'][:position]])
             CsvImportLogEntry.create(index: index, csv_import_summary_id: @csv_import_summary.id)
             update_import_item(nil, 1)
           end
@@ -263,6 +265,7 @@ module Groovepacker
             single_sku = single_row[mapping['sku'][:position]] rescue nil
             if single_sku.blank?
               existing_product = Product.find_by_name(single_row[mapping['product_name'][:position]]) rescue nil
+
               if existing_product.present?
                 single_row[mapping['sku'][:position]] = existing_product.primary_sku
               else
@@ -306,6 +309,7 @@ module Groovepacker
             end
             @base_products << @product_helper.create_update_base_prod(single_row, single_sku)
             product = Product.new
+
             set_product_info(product, single_row, true)
           end
 
