@@ -150,7 +150,11 @@ module FTP
 
     def find_file(connection_obj)
     	connection_obj.chdir(self.directory)
-      files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
+      begin
+        files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
+      rescue
+        files = connection_obj.nlst('*.csv') || connection_obj.nlst('*.CSV')
+      end
       fmtimes = []
       files.each do |individual_file|
         if '-imported'.in? individual_file
