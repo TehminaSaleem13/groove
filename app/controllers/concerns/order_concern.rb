@@ -310,7 +310,7 @@ module OrderConcern
       items.each {|item| item.update_attributes(status: 'cancelled')} rescue nil
       order_import_summary = OrderImportSummary.all
       order_import_summary.each do |import_summary|
-        import_summary.status = "completed"
+        import_summary.status = 'completed'
         import_summary.save
       end
     end

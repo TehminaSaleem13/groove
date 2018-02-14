@@ -269,7 +269,10 @@ class OrdersController < ApplicationController
 
       order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params["file_name"], params["flag"])
       order_importer.process
-      File.delete(Rails.root.join('public', 'csv', file_name))
+
+      if File.exists?(Rails.root.join('public', 'csv', file_name))
+        File.delete(Rails.root.join('public', 'csv', file_name))
+      end
     else
       import_item && import_item.save
     end
