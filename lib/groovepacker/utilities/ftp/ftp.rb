@@ -153,7 +153,7 @@ module FTP
       begin
         files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
       rescue
-        files = connection_obj.nlst('*.csv') || connection_obj.nlst('*.CSV')
+        files = connection_obj.nlst('*.csv') rescue connection_obj.nlst('*.CSV')
       end
       fmtimes = []
       files.each do |individual_file|
