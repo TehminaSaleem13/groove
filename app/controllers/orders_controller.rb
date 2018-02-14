@@ -249,9 +249,13 @@ class OrdersController < ApplicationController
   end
 
   def import_xml
-    order_import_summary = OrderImportSummary.find(params[:import_summary_id])
-    import_item = order_import_summary.import_items.where(store_id: params[:store_id])
-    import_item = import_item.first
+    begin
+      order_import_summary = OrderImportSummary.find(params[:import_summary_id])
+      import_item = order_import_summary.import_items.where(store_id: params[:store_id])
+      import_item = import_item.first
+    rescue
+      import_item = nil
+    end
     if import_item && !import_item.eql?('cancelled')
       if params[:order_xml].nil?
         # params[:xml] has content
@@ -276,7 +280,6 @@ class OrdersController < ApplicationController
     else
       import_item && import_item.save
     end
-
     render json: {status: "OK"}
   end
 
