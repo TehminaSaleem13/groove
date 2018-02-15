@@ -16,7 +16,6 @@ class UsersController < ApplicationController
     result = {}
     result['status'] = true
     result['messages'] = []
-
     if current_user.can? 'add_edit_users'
       new_user = false
       if params[:id].nil?
@@ -91,6 +90,9 @@ class UsersController < ApplicationController
 
             @user.role = user_role
           end
+          role = @user.role
+          role.import_orders = params[:role][:import_orders]
+          role.save
         end
 
 
