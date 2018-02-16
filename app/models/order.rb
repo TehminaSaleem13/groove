@@ -572,10 +572,10 @@ class Order < ActiveRecord::Base
       o = (a['packing_placement'] <=> b['packing_placement']);
       o == 0 ? (a['name'] <=> b['name']) : o
     end
-    unscanned_list = unscanned_list.sort do |a,b| 
-      a["next_item"] = ""  if a["next_item"].nil?
-      a["next_item"] <=> b["next_item"]
-    end
+    # unscanned_list = unscanned_list.sort do |a,b| 
+    #   a["next_item"] = ""  if a["next_item"].nil?
+    #   a["next_item"] <=> b["next_item"]
+    # end
   end
 
   def find_unscanned_order_item_with_barcode(barcode)
