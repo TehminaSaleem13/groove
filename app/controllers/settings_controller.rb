@@ -112,11 +112,16 @@ class SettingsController < ApplicationController
         'No general settings available for the system. Contact administrator.'
       ]
     end
-
+    @result["email_address_for_billing_notification"] = Stripe::Customer.retrieve(find_stripe_customer.stripe_customer_id).email rescue nil
     render json: @result
   end
 
-  def update_settings
+  def find_stripe_customer
+    tenant = Apartment::Tenant.current
+    customer = Subscription.find_by_tenant_name(tenant) rescue nil
+  end
+
+  def update_settings 
     @result = {}
     @result['status'] = true
     @result['error_messages'] = []
@@ -142,6 +147,17 @@ class SettingsController < ApplicationController
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
+    customer = find_stripe_customer
+    if customer.try(:stripe_customer_id).present?
+      stripe_customer = Stripe::Customer.retrieve(customer.stripe_customer_id)
+      stripe_customer.email = params["email_address_for_billing_notification"]
+      if params["email_address_for_billing_notification"].include?("@")
+        stripe_customer.save
+      else
+        @result['status'] &= false
+        @result['error_messages'] = ['Please update correct email address']
+      end
+    end
 
     render json: @result
   end
@@ -152,6 +168,7 @@ class SettingsController < ApplicationController
       'notice_messages' => [], 'error_messages' => [],
       'bulk_action_cancelled_ids' => []
     }
+
     if params[:id].present?
       params[:id].each do |bulk_action_id|
         update_bulk_action(bulk_action_id, result)
