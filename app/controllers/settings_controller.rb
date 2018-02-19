@@ -18,9 +18,7 @@ class SettingsController < ApplicationController
 
   def export_csv
     puts 'export_csv'
-    @result = {}
-    @result['status'] = true
-    @result['messages'] = []
+    @result = {'status' => true, 'messages' => []}
     if current_user.can?('create_backups')
       GrooveBulkActions.execute_groove_bulk_action('export', params, current_user)
     else
@@ -88,12 +86,7 @@ class SettingsController < ApplicationController
   end
 
   def get_settings
-    @result = {}
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-    @result['data'] = {}
+    @result = {'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'data'=> {}}
     @result['scheduled_import_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).scheduled_import_toggle rescue false
     @result['inventory_report_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
@@ -122,12 +115,7 @@ class SettingsController < ApplicationController
   end
 
   def update_settings 
-    @result = {}
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-
+    @result = {'status' => true, 'error_messages' =>[], 'success_messages'=> [], 'notice_messages' => []}
     general_setting = GeneralSetting.all.first
 
     if general_setting.present?
@@ -158,16 +146,11 @@ class SettingsController < ApplicationController
         @result['error_messages'] = ['Please update correct email address']
       end
     end
-
     render json: @result
   end
 
   def cancel_bulk_action
-    result = {
-      'status' => true, 'success_messages' => [],
-      'notice_messages' => [], 'error_messages' => [],
-      'bulk_action_cancelled_ids' => []
-    }
+    result = {'status' => true, 'success_messages' => [],'notice_messages' => [], 'error_messages' => [],'bulk_action_cancelled_ids' => []}
 
     if params[:id].present?
       params[:id].each do |bulk_action_id|
@@ -191,13 +174,7 @@ class SettingsController < ApplicationController
   end
 
   def get_scan_pack_settings
-    @result = {}
-    @result['status'] = true
-    @result['error_messages'] = []
-    @result['success_messages'] = []
-    @result['notice_messages'] = []
-    @result['settings'] = {}
-
+    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'settings'=> {}}
     scan_pack_setting = ScanPackSetting.all.first
 
     if scan_pack_setting.present?
@@ -230,10 +207,7 @@ class SettingsController < ApplicationController
       :orientation => 'Portrait',
       :page_height => '1in',
       :page_width => '3in',
-      :margin => {:top => '0',
-                  :bottom => '0',
-                  :left => '0',
-                  :right => '0'}
+      :margin => {:top => '0', :bottom => '0',:left => '0',:right => '0'}
     )
     File.open(reader_file_path, 'wb') do |file|
       file << doc_pdf
@@ -248,12 +222,7 @@ class SettingsController < ApplicationController
   end
 
   def update_scan_pack_settings
-    @result = {
-      'status' => true,
-      'error_messages' => [],
-      'success_messages' => [],
-      'notice_messages' => []
-    }
+    @result = {'status' => true,'error_messages' => [],'success_messages' => [],'notice_messages' => []}
 
     scan_pack_setting = ScanPackSetting.all.first
 
