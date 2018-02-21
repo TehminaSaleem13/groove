@@ -41,7 +41,7 @@ module Groovepacker
               next unless @helper.verify_single_item(single_row, item)
               case item
               when 'qty'
-                order_item.qty =  (order_item.qty.to_i +
+                order_item.qty =  (order_item.try(:qty).to_i +
                                   @helper.get_row_data(single_row, 'qty').to_i).to_s
               when 'item_sale_price'
                 order_item.price =
