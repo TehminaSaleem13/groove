@@ -8,7 +8,7 @@ module ElixirApi
         }.freeze
 
         def host_url(tenant)
-          "http://#{tenant}.#{ENV['IMPORT_SITE_HOST']}"
+          "https://#{tenant}.#{ENV['IMPORT_SITE_HOST']}"
         end
 
         def auth_params
