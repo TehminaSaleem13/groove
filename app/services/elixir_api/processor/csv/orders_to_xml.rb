@@ -48,8 +48,8 @@ module ElixirApi
             'db_user' => ENV['DB_USERNAME'],
             'db_password' => ENV['DB_PASSWORD'],
             'db_host' => ENV['DB_HOST'],
-            'db_port' => ENV['DB_PORT'] || 3306,
-            'database' => Rails.configuration.database_configuration[Rails.env]['database']
+            'db_port' => ENV['DB_PORT'] || 3306
+            # 'database' => Rails.configuration.database_configuration[Rails.env]['database']
           }
         end
 
