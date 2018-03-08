@@ -8,8 +8,17 @@ module FTP
       begin
         unless self.host.nil? || self.username.nil? || self.password.nil?
           Timeout.timeout(20) do
-            result[:connection_obj] = Net::FTP.new(self.host, self.username, self.password)
-            result[:connection_obj].passive = true
+            if self.host.include?(":")
+              string = self.host.split(":") 
+              ftp = Net::FTP.new
+              ftp.connect(string[0], string[1])
+              ftp.login(self.username, self.password)
+              ftp.passive = true
+              result[:connection_obj] = ftp
+            else 
+              result[:connection_obj] = Net::FTP.new(self.host, self.username, self.password)
+              result[:connection_obj].passive = true
+            end
           end
           return result
         else
