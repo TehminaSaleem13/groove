@@ -9,7 +9,13 @@ module FTP
       begin
         unless self.host.nil? || self.username.nil? || self.password.nil?
           Timeout.timeout(10) do
-            result[:connection_obj] = Net::SFTP.start(self.host, self.username, :password => self.password)
+            if self.host.include?(":")
+              host = self.host.split(":")[0]  
+              port = self.host.split(":")[1]
+              result[:connection_obj] = Net::SFTP.start(host, self.username, :password => self.password, :port => port)
+            else
+              result[:connection_obj] = Net::SFTP.start(self.host, self.username, :password => self.password)
+            end
           end
           return result
         else
