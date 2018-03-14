@@ -4,6 +4,7 @@
 <p><strong>Store type: </strong><%=@import.store.store_type %></p>
 <p><strong>Import Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
 <p><strong>Increment Id: </strong><%= @import.current_increment_id%></p>
+<p><strong>File Name: </strong><%= @file_name%></p>
 <p><strong>Message: </strong><%= @import.message%></p>
 <p><strong>Import Hung From: </strong><%=((Time.now.to_f - @import.updated_at.to_f)/60.0).to_i%> Mins</p>
 
