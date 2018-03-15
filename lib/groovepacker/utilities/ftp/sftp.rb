@@ -8,7 +8,7 @@ module FTP
       result = self.build_result
       begin
         unless self.host.nil? || self.username.nil? || self.password.nil?
-          Timeout.timeout(20) do
+          Timeout.timeout(15) do
             if self.host.include?(":")
               host = self.host.split(":")[0]  
               port = self.host.split(":")[1]
