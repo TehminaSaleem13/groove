@@ -32,6 +32,7 @@ module Groovepacker
             # @order[:order_items] = @order.order_items
             order_item_result = process_order_items(order, @order)
             if order_item_result[:status]
+              order.reload
               # update order status
               order.update_order_status
             else
