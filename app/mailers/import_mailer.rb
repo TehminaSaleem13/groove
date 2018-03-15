@@ -12,6 +12,7 @@ class ImportMailer < ActionMailer::Base
   end
 
   def import_hung(tenant, import_item)
+    @file_name = $redis.get("#{tenant}_csv_filename")
     @tenant = tenant
     @import = import_item
     subject = "[#{@tenant}] [#{Rails.env}] Import Hung"
