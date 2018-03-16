@@ -253,6 +253,13 @@ class OrdersController < ApplicationController
       order_import_summary = OrderImportSummary.find(params[:import_summary_id])
       import_item = order_import_summary.import_items.where(store_id: params[:store_id])
       import_item = import_item.first
+      if import_item.nil? && order_import_summary.present?
+        ImportItem.where(store_id: params[:store_id]).delete_all
+        import_item = ImportItem.new(store_id: params[:store_id]) 
+        import_item.order_import_summary_id = order_import_summary.id
+        import_item.status = 'in_progress'
+        import_item.save
+      end
     rescue
       import_item = nil
     end
