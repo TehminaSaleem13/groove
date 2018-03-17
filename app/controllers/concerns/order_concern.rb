@@ -314,7 +314,7 @@ module OrderConcern
         import_summary.save
       end
     end
-    ElixirApi::Processor::CSV::OrdersToXML.cancel_import(request.subdomain)
+    ElixirApi::Processor::CSV::OrdersToXML.delay(:run_at => 1.seconds.from_now).cancel_import(request.subdomain)
   end
 
   # def delete_selected_orders(orders)
