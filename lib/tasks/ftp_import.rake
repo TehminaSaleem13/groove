@@ -5,9 +5,9 @@ namespace :ftp_csv_file_import do
     Tenant.all.each do |tenant|
       begin
         Apartment::Tenant.switch "#{tenant.name}"
-        import_no_inprogress = OrderImportSummary.where(status: 'in_progress').blank?
-        cred = !Store.where("csv_beta = ? and status = ?", true, true).map(&:ftp_credential).map(&:use_ftp_import).include?(true) rescue true
-        if import_no_inprogress && cred
+        import_no_inprogress = OrderImportSummary.where(status: ['in_progress', "not_started"]).blank?
+        # cred = !Store.where("csv_beta = ? and status = ?", true, true).map(&:ftp_credential).map(&:use_ftp_import).include?(true) rescue true
+        if import_no_inprogress 
           puts "starting the rake task"
           ftp_csv_import = Groovepacker::Orders::Import.new
           if tenant.name == "unitedmedco" && current_time >= "05:00" && current_time <= "12:00"
