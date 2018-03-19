@@ -11,7 +11,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     # add import item for each store
     stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
     stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
-    order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
+    order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all    
     initiate_import(tenant)
     last_status = GrooveBulkActions.last.try(:status)
     Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending") 
@@ -152,7 +152,11 @@ class ImportOrders < Groovepacker::Utilities::Base
   def initiate_csv_import(tenant, store_type, store, import_item)
     mapping = CsvMapping.find_by_store_id(store.id)
     return unless check_connection_for_csv_import(mapping, store, import_item)
-    import_item.update_attributes(status: 'in_progress')
+    if store.csv_beta
+      import_item.order_import_summary.update_attributes(:status => "not_started", :display_summary => false)
+    else
+      import_item.update_attributes(status: 'in_progress')
+    end
     map = mapping.order_csv_map
     data = build_data(map,store)
     import_csv = ImportCsv.new
