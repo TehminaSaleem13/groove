@@ -50,7 +50,7 @@ class ImportCsv
       end
       $redis.set("#{Apartment::Tenant.current}_csv_filename", params[:file_name])
       $redis.expire("#{Apartment::Tenant.current}_csv_filename", 18000)
-      if csv_file.nil?
+      if csv_file.nil? && !store.csv_beta
         result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
