@@ -26,12 +26,12 @@ class ImportCsv
         if response[:status]
           file_path = response[:file_info][:file_path]
           csv_file = begin
-                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
+                      #File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
                        nil
                      end
-
           set_file_name(params, response[:file_info][:ftp_file_name])
+          set_file_path(params, file_path)
         else
           result[:status] = false
           result[:messages].push(response[:error_messages])
@@ -54,7 +54,7 @@ class ImportCsv
         if store.csv_beta && params[:type] == "order"
           begin
             ElixirApi::Processor::CSV::OrdersToXML.call(
-              'data' => csv_file,
+              'data' => nil,
               'tenant' => tenant,
               'params' => params
             )
@@ -157,6 +157,10 @@ class ImportCsv
 
   def set_file_name(params, file_url)
     params[:file_name] = file_url.split('/').last
+  end
+
+  def set_file_path(params, file_path)
+    params[:file_path] = file_path
   end
 
   def set_file_size(params, final_record)
