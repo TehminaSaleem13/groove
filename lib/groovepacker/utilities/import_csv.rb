@@ -26,10 +26,10 @@ class ImportCsv
         if response[:status]
           file_path = response[:file_info][:file_path]
           csv_file = begin
-                      #File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
+                      File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
                        nil
-                     end
+                     end if !store.csv_beta
           set_file_name(params, response[:file_info][:ftp_file_name])
           set_file_path(params, file_path)
         else
@@ -38,12 +38,15 @@ class ImportCsv
         end
       else
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
+        set_file_name(params,file.url)
+        file_path = download_csv(file,tenant, params)
+        File.write(file_path, file.content)             
         csv_file = begin
-                     file.content.encode(Encoding.find('ASCII'), encoding_options)
+                    file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
                      nil
-                   end
-        set_file_name(params, file.url)
+                   end if !store.csv_beta
+        set_file_path(params, file_path)
       end
       $redis.set("#{Apartment::Tenant.current}_csv_filename", params[:file_name])
       $redis.expire("#{Apartment::Tenant.current}_csv_filename", 18000)
@@ -53,11 +56,7 @@ class ImportCsv
       else
         if store.csv_beta && params[:type] == "order"
           begin
-            ElixirApi::Processor::CSV::OrdersToXML.call(
-              'data' => nil,
-              'tenant' => tenant,
-              'params' => params
-            )
+            ElixirApi::Processor::CSV::OrdersToXML.call('tenant' => tenant,'params' => params)
           rescue Net::ReadTimeout
             nil
           end
@@ -165,5 +164,11 @@ class ImportCsv
 
   def set_file_size(params, final_record)
     params[:file_size] = (final_record.join("\n").bytesize.to_f / 1024).round(4)
+  end
+
+  def download_csv(file, tenant, params)
+    system 'mkdir', '-p', "csv_files/#{tenant}"
+    file_path = nil
+    file_path = "#{Rails.root}/csv_files/#{tenant}/#{params[:file_name]}"
   end
 end
