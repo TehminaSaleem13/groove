@@ -560,8 +560,9 @@ class Order < ActiveRecord::Base
           # add order item to unscanned list
           unscanned_item = order_item.build_unscanned_single_item
           if unscanned_item['qty_remaining'] > 0
-            loc = unscanned_item["location"].present? ? unscanned_item["location"] : " "
-            unscanned_item["next_item"] = "#{unscanned_item['packing_placement']}#{loc}#{unscanned_item['sku']}"
+            loc = unscanned_item["location"].present? ? unscanned_item["location"] : " " 
+            placement = "%.3i" %unscanned_item['packing_placement'] rescue unscanned_item['packing_placement']
+            unscanned_item["next_item"] = "#{placement}#{loc}#{unscanned_item['sku']}"
             unscanned_list.push(unscanned_item)
           end
         end
