@@ -30,6 +30,7 @@ class ImportCsv
                      rescue
                        nil
                      end if !store.csv_beta
+                     
           set_file_name(params, response[:file_info][:ftp_file_name])
           set_file_path(params, file_path)
         else
@@ -40,7 +41,7 @@ class ImportCsv
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
         set_file_name(params,file.url)
         file_path = download_csv(file,tenant, params)
-        File.write(file_path, file.content)             
+        File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))             
         csv_file = begin
                     file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
@@ -62,6 +63,7 @@ class ImportCsv
           end
           Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status({}, {}, Apartment::Tenant.current)
         else
+         
           final_record = []
           if params[:fix_width] == 1
             if params[:flag] == 'ftp_download'
