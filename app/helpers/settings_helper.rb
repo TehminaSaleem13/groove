@@ -98,7 +98,8 @@ module SettingsHelper
         :import_orders_on_sun, :tracking_error_order_not_found,
         :tracking_error_info_not_found, :custom_field_one,
         :custom_field_two, :export_csv_email, :html_print,
-        :show_primary_bin_loc_in_barcodeslip, :time_to_send_email, :schedule_import_mode, :master_switch
+        :show_primary_bin_loc_in_barcodeslip, :time_to_send_email, :schedule_import_mode, :master_switch,
+        :idle_timeout
       ]
     )
   end
