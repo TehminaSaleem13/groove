@@ -41,7 +41,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       next if import_item.status == "cancelled"
       import_orders_with_import_item(import_item, tenant)
     end
-    update_import_summary if OrderImportSummary.find_by_id(@order_import_summary.id).present?
+    update_import_summary if OrderImportSummary.find_by_id(@order_import_summary.id).present? 
   end
 
   def update_import_summary
@@ -164,7 +164,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     #check_or_assign_import_item(import_item)
     new_import_item = import_item
     import_item = ImportItem.find(import_item.id) rescue new_import_item
-    update_status(import_item, result)
+    update_status(import_item, result) unless store.csv_beta
     import_item.update_attributes(message: result[:messages]) unless result[:status]
   end
 
