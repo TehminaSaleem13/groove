@@ -216,7 +216,8 @@ class ExportSetting < ActiveRecord::Base
       scanned_qty: '',
       packing_user: '',
       scanned_date: '',
-      click_scanned_qty: ''
+      click_scanned_qty: '',
+      tracking_num: ''
     }
   end
 
@@ -226,6 +227,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:scanned_qty] = order.scanned_items_count
     single_row[:order_date] = order.order_placed_time
     single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M %p")
+    single_row[:tracking_num] = order.tracking_num
     single_row
   end
 
