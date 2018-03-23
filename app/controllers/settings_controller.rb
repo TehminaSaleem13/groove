@@ -138,8 +138,8 @@ class SettingsController < ApplicationController
     customer = find_stripe_customer
     if customer.try(:stripe_customer_id).present?
       stripe_customer = Stripe::Customer.retrieve(customer.stripe_customer_id)
-      stripe_customer.email = params["email_address_for_billing_notification"]
-      if params["email_address_for_billing_notification"].include?("@")
+      stripe_customer.email = params["email_address_for_billing_notification"] 
+      if (params["email_address_for_billing_notification"].include?("@") rescue false)
         stripe_customer.save
       else
         @result['status'] &= false
