@@ -164,7 +164,10 @@ class ImportOrders < Groovepacker::Utilities::Base
     #check_or_assign_import_item(import_item)
     new_import_item = import_item
     import_item = ImportItem.find(import_item.id) rescue new_import_item
-    update_status(import_item, result) unless store.csv_beta
+
+    on_demand_logger = Logger.new("#{Rails.root}/log/import.log")
+    on_demand_logger.info(result[:messages])
+    update_status(import_item, result) if !store.csv_beta || result[:status] == false
     import_item.update_attributes(message: result[:messages]) unless result[:status]
   end
 
