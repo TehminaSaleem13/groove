@@ -95,6 +95,8 @@ module Groovepacker
                     if @ftp_flag == "true"
                       groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                       response = groove_ftp.update(@file_name)
+                      ftp_csv_import = Groovepacker::Orders::Import.new
+                      ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
                     end
                   end
                   import_item.save
