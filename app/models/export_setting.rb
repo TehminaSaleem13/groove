@@ -118,6 +118,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:state] = order.state
     single_row[:zip] = order.postcode
     single_row[:customer_name] = order.customer_name
+    single_row[:tracking_num] = order.tracking_num
   end
 
   def update_single_row_for_packing_user(single_row, order_item, order)
