@@ -186,7 +186,7 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def generate_file_name
-    "groove-order-export-#{Time.now}.csv"
+    "groove-order-export-#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
   end
 
   def file_path(filename)
