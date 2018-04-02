@@ -127,7 +127,6 @@ module Groovepacker
 		    @shipstation.warehouse_location_update = params[:warehouse_location_update]
 		    @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
 		    @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
-		    @shipstation.hex_barcode = params[:hex_barcode]
 		    @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
 		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku]
 		    @shipstation.return_to_order = params[:return_to_order]
