@@ -1,7 +1,6 @@
 class OrdersController < ApplicationController
   before_filter :groovepacker_authorize!
   include OrderConcern
-
   # Import orders from store based on store id
   def importorders
     if check_user_permissions('import_orders')
@@ -256,37 +255,44 @@ class OrdersController < ApplicationController
     rescue
       import_item = nil
     end
-    if import_item && !import_item.eql?('cancelled')
-      if params[:order_xml].nil?
-        # params[:xml] has content
-        file_name = Time.now.to_i.to_s  + "#{SecureRandom.random_number(100)}.xml"
-        File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
-          file.write(params[:xml])
+
+    if $redis.get("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}") != 'cancelled'
+      if import_item && !import_item.eql?('cancelled')
+        if params[:order_xml].nil?
+          # params[:xml] has content
+          file_name = Time.now.to_i.to_s  + "#{SecureRandom.random_number(100)}.xml"
+          File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+            file.write(params[:xml])
+          end
+        else
+          order_xml = params[:order_xml]
+          file_name = Time.now.to_i.to_s + "_#{SecureRandom.random_number(100)}" + order_xml.original_filename
+          File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
+            file.write(order_xml.read)
+          end
+        end
+      
+        order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params["file_name"], params["flag"])
+        order_importer.process
+      
+        if File.exists?(Rails.root.join('public', 'csv', file_name))
+          File.delete(Rails.root.join('public', 'csv', file_name))
         end
       else
-        order_xml = params[:order_xml]
-        file_name = Time.now.to_i.to_s + "_#{SecureRandom.random_number(100)}" + order_xml.original_filename
-        File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
-          file.write(order_xml.read)
-        end
-      end
-
-      order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params["file_name"], params["flag"])
-      order_importer.process
-
-      if File.exists?(Rails.root.join('public', 'csv', file_name))
-        File.delete(Rails.root.join('public', 'csv', file_name))
+        import_item && import_item.save
       end
     else
-      import_item && import_item.save
+      puts "=========================Import cancelled======================="
     end
-    render json: {status: "OK"}
+      render json: {status: "OK"}
   end
 
   def cancel_import
     if order_summary_to_cancel.nil?   #order_summary defined in application helper
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
+      $redis.set("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 'cancelled')
+      $redis.expire("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 10000)
       change_status_to_cancel
       ahoy.track(
         "Order Import",
