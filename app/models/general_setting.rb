@@ -21,7 +21,8 @@ class GeneralSetting < ActiveRecord::Base
                   :tracking_error_info_not_found, :custom_field_one,
                   :custom_field_two, :export_csv_email,
                   :show_primary_bin_loc_in_barcodeslip, :html_print,
-                  :time_zone, :auto_detect, :schedule_import_mode, :master_switch, :idle_timeout, :hex_barcode
+                  :time_zone, :auto_detect, :schedule_import_mode, :master_switch, :idle_timeout, :hex_barcode,
+                  :from_import, :to_import
   # validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
   validates :email_address_for_packer_notes, :format => { :with => /(\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})(,\s*([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,}))*\z)/i }, :allow_blank => true
   after_save :send_low_inventory_alert_email
