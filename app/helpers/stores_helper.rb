@@ -291,7 +291,7 @@ module StoresHelper
       if Store.can_create_new?
         @store = Store.new
         init_store_data
-        GeneralSetting.last.update_attribute(:hex_barcode, true) if params["store_type"] == "Shipstation API 2" rescue nil
+        # GeneralSetting.last.update_attribute(:hex_barcode, true) if params["store_type"] == "Shipstation API 2" rescue nil
         # init_update_store_data
         # ftp_credential = FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV'
         params[:id] = @store.id
