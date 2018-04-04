@@ -255,7 +255,7 @@ class OrdersController < ApplicationController
     rescue
       import_item = nil
     end
-
+    
     if $redis.get("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}") != 'cancelled'
       if import_item && !import_item.eql?('cancelled')
         if params[:order_xml].nil?
@@ -281,8 +281,6 @@ class OrdersController < ApplicationController
       else
         import_item && import_item.save
       end
-    else
-      puts "=========================Import cancelled======================="
     end
       render json: {status: "OK"}
   end
