@@ -105,8 +105,13 @@
               statuses.each do |status|
                 filters_array = get_filters(status, credential, import_item)
                 filters_array["complex_filter"]["item"]["key"] = "updated_at"
-                response = client.call(:sales_order_list, message: {sessionId: session, filters: filters_array})
-                next if response.body[:sales_order_list_response][:result][:item].blank?
+                response = ""
+                3.times do
+                  puts "==============================================================="
+                  response = client.call(:sales_order_list, message: {sessionId: session, filters: filters_array}) rescue nil
+                  break response if response.present? 
+                end
+                  next if response.body[:sales_order_list_response][:result][:item].blank?
                 orders << response.body[:sales_order_list_response][:result][:item]
               end
               orders.flatten
