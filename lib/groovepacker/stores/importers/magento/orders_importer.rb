@@ -106,7 +106,7 @@
                 filters_array = get_filters(status, credential, import_item)
                 filters_array["complex_filter"]["item"]["key"] = "updated_at"
                 response = ""
-                3.times do
+                6.times do
                   puts "==============================================================="
                   response = client.call(:sales_order_list, message: {sessionId: session, filters: filters_array}) rescue nil
                   break response if response.present? 
