@@ -90,6 +90,13 @@ class ImportCsv
           if params[:rows].to_i && params[:rows].to_i > 1
             final_record.shift(params[:rows].to_i - 1)
           end
+          delete_index = 0
+          params[:map].each_with_object({}) do |map_out|
+            map_single_first_name = map_out[1].present? && map_out[1]['name']
+            params[:map].delete(delete_index.to_s) if map_single_first_name == 'Unmapped'  
+            delete_index += 1
+          end
+         
           mapping = {}
           params[:map].each do |map_single|
             next unless map_single[1].present? && map_single[1]['value'] != 'none'
