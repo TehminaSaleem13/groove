@@ -232,7 +232,13 @@ module Groovepacker
               end
             elsif !params[:order_placed_at].nil?
               require 'time'
-              @order['order_placed_time'] = Time.parse(params[:order_placed_at])
+               begin
+                @order['order_placed_time'] = Time.parse(params[:order_placed_at])
+              rescue
+                result[:status] = false
+                result[:messages].push('Order Placed has bad parameter - ' \
+                  "#{@helper.get_row_data(single_row, 'order_placed_time')}")
+              end
             else
               result[:status] = false
               result[:messages].push('Order Placed is missing.')
