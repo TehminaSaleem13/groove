@@ -20,6 +20,7 @@ class ImportCsv
         replace: '', # Use a blank for those replacements
         universal_newline: true # Always break lines with \n
       }
+
       if params[:flag] == 'ftp_download'
         groove_ftp = FTP::FtpConnectionManager.get_instance(store)
         response = groove_ftp.download(tenant)
@@ -46,7 +47,7 @@ class ImportCsv
                     file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
                      nil
-                   end if !store.csv_beta
+                   end if !(store.csv_beta && params[:type] == "order") 
         set_file_path(params, file_path)
       end
       $redis.set("#{Apartment::Tenant.current}_csv_filename", params[:file_name])
@@ -63,7 +64,6 @@ class ImportCsv
           end
           Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status({}, {}, Apartment::Tenant.current)
         else
-         
           final_record = []
           if params[:fix_width] == 1
             if params[:flag] == 'ftp_download'
