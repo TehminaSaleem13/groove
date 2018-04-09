@@ -70,8 +70,9 @@ module ScanPack
     def generate_query(status)
       input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
+      id = GeneralSetting.last.hex_barcode ?  "store_order_id" : "increment_id"
       %(\
-        (increment_id IN \(\
+        (#{id} IN \(\
           '#{input_with_special_char}', '\##{input_with_special_char}'\
         \) or \
         non_hyphen_increment_id IN \(\
