@@ -290,7 +290,7 @@ class OrdersController < ApplicationController
       set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
     else
       $redis.set("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 'cancelled')
-      $redis.expire("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 10000)
+      $redis.expire("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 20000)
       change_status_to_cancel
       ahoy.track(
         "Order Import",
