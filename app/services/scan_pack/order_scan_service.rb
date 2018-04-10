@@ -70,7 +70,7 @@ module ScanPack
     def generate_query(status)
       input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
-      id = GeneralSetting.last.hex_barcode ?  "store_order_id" : "increment_id"
+      id = @scanpack_settings.scan_by_hex_number ?  "store_order_id" : "increment_id"
       %(\
         (#{id} IN \(\
           '#{input_with_special_char}', '\##{input_with_special_char}'\
