@@ -27,7 +27,6 @@ module ScanPack
 
       barcodes = next_item[:barcodes]
       first_barcode = barcodes[0]
-
       unless barcodes.blank? || first_barcode.blank? || first_barcode[:barcode].blank?
         @result['data'] = product_scan(
             first_barcode[:barcode], 'scanpack.rfp.default', @params[:id],

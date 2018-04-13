@@ -7,6 +7,9 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         item.clicked_qty = item.clicked_qty + 1
         item.save
       end
+
+      insert_in_box(item) if GeneralSetting.last.multi_box_shipments?
+
       if child_item['barcodes'].present?
         barcode_found = do_if_child_item_has_barcodes(params, child_item)
       end
@@ -29,6 +32,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
         #do_if_serial_not_added(order_item_kit_product) unless serial_added
         # from LotNumber Module
+
         store_lot_number(order_item, serial_added)
 
         do_if_order_item_kit_product_present(
@@ -87,6 +91,15 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
     order_item_kit_product.process_item(clicked, @current_user.username, @typein_count)
     @session[:most_recent_scanned_product] = child_item_product_id
     @session[:parent_order_item] = item['order_item_id']
+  end
+
+  def insert_in_box(item)
+    if @box_id.blank?
+      box = Box.create(name: "Box 1", order_id: item.order.id)
+      item.update_attributes(box_id: box.id)
+    else
+      item.update_attributes(box_id: @box_id)
+    end
   end
 
 end #module

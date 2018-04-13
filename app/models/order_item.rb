@@ -1,6 +1,7 @@
 class OrderItem < ActiveRecord::Base
   belongs_to :order
   belongs_to :product
+  belongs_to :box
 
   has_many :order_item_kit_products, :dependent => :destroy
   has_many :order_item_order_serial_product_lots
@@ -8,7 +9,7 @@ class OrderItem < ActiveRecord::Base
   has_one :product_barcode
   has_one :product_sku
   attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id,
-                  :cached_methods
+                  :cached_methods, :box_id
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
@@ -105,6 +106,7 @@ class OrderItem < ActiveRecord::Base
     result['click_scan_enabled'] = item.click_scan_enabled
     result['type_scan_enabled'] = item.type_scan_enabled
     result['order_item_id'] = self.id
+    result['box_id'] = self.box_id
 
     result
   end
@@ -232,12 +234,12 @@ class OrderItem < ActiveRecord::Base
       total_qty = 0
       if self.product.kit_parsing == 'depends'
         self.single_scanned_qty = self.single_scanned_qty + typein_count
-        set_clicked_quantity(clicked, self.product.primary_sku, username)
+        set_clicked_quantity(clicked, self.product.primary_sku, username, self.box_id)
         self.scanned_qty = self.single_scanned_qty + self.kit_split_scanned_qty
         total_qty = self.qty - self.kit_split_qty
       else
         self.scanned_qty = self.scanned_qty + typein_count
-        set_clicked_quantity(clicked, self.product.primary_sku, username)
+        set_clicked_quantity(clicked, self.product.primary_sku, username, self.box_id)
         total_qty = self.qty - self.kit_split_qty
       end
       scan_time = self.order_item_scan_times.build(
@@ -376,10 +378,14 @@ class OrderItem < ActiveRecord::Base
 
   private
 
-  def set_clicked_quantity(clicked, sku, username)
+  def set_clicked_quantity(clicked, sku, username, box_id)
     if clicked
       self.clicked_qty = self.clicked_qty + 1
-      self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
+      if box_id.blank?
+        self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
+      else
+        self.order.addactivity("Item with SKU: " + sku + " has been click scanned in Box id: #{box_id}", username) if !ScanPackSetting.last.order_verification
+      end
     end
   end
 

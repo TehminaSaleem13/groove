@@ -6302,128 +6302,263 @@
     text-rendering: geometricPrecision;
   }
 
+  @media print {
+    .page-split {
+      display: block;
+      page-break-before: always; 
+    }
+  }
+
 </style>
 
 <body>
-<div class="container" style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
-  <% if !@order.nil? %>
-    <% order_items = @order.order_items %>
-    <% order_count = 0 %>
-    <% order_items.each do |order_item| %>
-      <% unless order_item.product.is_intangible %>
-        <% order_count = order_count + order_item.qty %>
+<% unless @boxes.any? %>
+  <div class="container" style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
+    <% if !@order.nil? %>
+      <%  order_items = @order.order_items %>
+      <% order_count = 0 %>
+      <% order_items.each do |order_item| %>
+        <% unless order_item.product.is_intangible %>
+          <% order_count = order_count + order_item.qty %>
+        <% end %>
       <% end %>
-    <% end %>
 
-    <div class="row">
+      <div class="row">
+        <br>
+
+        <div class="span4">
+          <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
+          <br/><br/>
+          <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count %></span>
+        </div>
+        <div class="span8" style="margin-top: -60px;">
+          <% barcode_string = generate_order_barcode(@order.increment_id) %>
+          <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
+            <div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+          </div>
+          <br>
+        </div>
+      </div>
       <br>
 
-      <div class="span4">
-        <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
-        <br/><br/>
-        <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count %></span>
-      </div>
-      <div class="span8" style="margin-top: -60px;">
-        <% barcode_string = generate_order_barcode(@order.increment_id) %>
-        <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
-          <div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
-        </div>
-        <br>
-      </div>
-    </div>
-    <br>
-
-    <div class="row">
-      <div class="span6">
-          <span>
-            <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
-            <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%= @order.firstname %> <%= @order.lastname %>
-              <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
+      <div class="row">
+        <div class="span6">
+            <span>
+              <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
+              <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%= @order.firstname %> <%= @order.lastname %>
+                <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
+              </span>
             </span>
-          </span>
-      </div>
-      <% order_placed_time = @order.order_placed_time %>
-      <% date = order_placed_time.to_s.split(" ")[0] %>
-      <div class="span6">
-        <div class="row">
-          <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
+        </div>
+        <% order_placed_time = @order.order_placed_time %>
+        <% date = order_placed_time.to_s.split(" ")[0] %>
+        <div class="span6">
+          <div class="row">
+            <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
+            <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
+          </div>
+          <div class="row">
+            <span class="span2" style="font-size: 25px; text-align: right;"><strong>Date</strong></span>
+            <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
+          </div>
+        </div>
+        <!-- <div class="span2" style="text-align: right;">
+          <span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
+
+          <span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
+        </div>
+
+        <%# order_placed_time = @order.order_placed_time %>
+        <%# date = order_placed_time.to_s.split(" ")[0] %>
+        <div class="span4">
           <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
-        </div>
-        <div class="row">
-          <span class="span2" style="font-size: 25px; text-align: right;"><strong>Date</strong></span>
           <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
-        </div>
+        </div> -->
       </div>
-      <!-- <div class="span2" style="text-align: right;">
-        <span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
+      <br>
 
-        <span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
+      <div class="span12">
+        <table>
+          <thead>
+          <td> Item</td>
+          <td> Description</td>
+          <td style="white-space: nowrap;"> Pr Loc.</td>
+          <td>
+            <center> Qty</center>
+          </td>
+          </thead>
+
+          <% order_items.each do |order_item| %>
+            <% unless order_item.product.is_intangible %>
+              <tr>
+                <td><%= order_item.product.primary_sku %></td>
+                <td><%= order_item.product.name %></td>
+                <td>
+                  <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
+                    <%= warehouse.location_primary %>
+                  <% end %>
+                </td>
+                <td>
+                  <center><%= order_item.qty %></center>
+                </td>
+              </tr>
+            <% end %>
+          <% end %>
+        </table>
       </div>
 
-      <%# order_placed_time = @order.order_placed_time %>
-      <%# date = order_placed_time.to_s.split(" ")[0] %>
-      <div class="span4">
-        <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
-        <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
-      </div> -->
-    </div>
-    <br>
+      <% if !@order.store.nil? %>
+        <% if !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
+          <div style="page-break-inside: avoid;">
+            <p><%= GeneralSetting.get_packing_slip_message_to_customer.html_safe %></p>
+          </div>
+        <% end %>
+        <% if !@order.store.thank_you_message_to_customer.nil? %>
+          <div style="page-break-inside: avoid;">
+            <p><%= @order.store.thank_you_message_to_customer.html_safe %></p>
+          </div>
+        <% end %>
+      <% end %>
 
-    <div class="span12">
-      <table>
-        <thead>
-        <td> Item</td>
-        <td> Description</td>
-        <td style="white-space: nowrap;"> Pr Loc.</td>
-        <td>
-          <center> Qty</center>
-        </td>
-        </thead>
-
+      <% if !@order.nil? && !@order.customer_comments.nil? %>
+        <center>
+          <div style="page-break-inside: avoid;">
+                      <textarea>
+                          <%= @order.customer_comments %>
+                      </textarea>
+          </div>
+        </center>
+      <% end %>
+    <% else %>
+      <span>No orders</span>
+    <% end %>
+  </div>
+<% else %>
+  <% @boxes.each do |box| %>
+    <div class="container page-split" style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
+      <% if !@order.nil? %>
+        <%  order_items = @order.order_items.where(box_id: box.id) %>
+        <% order_count = 0 %>
         <% order_items.each do |order_item| %>
           <% unless order_item.product.is_intangible %>
-            <tr>
-              <td><%= order_item.product.primary_sku %></td>
-              <td><%= order_item.product.name %></td>
-              <td>
-                <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
-                  <%= warehouse.location_primary %>
-                <% end %>
-              </td>
-              <td>
-                <center><%= order_item.qty %></center>
-              </td>
-            </tr>
+            <% order_count = order_count + order_item.qty %>
           <% end %>
         <% end %>
-      </table>
+
+        <div class="row">
+          <br>
+
+          <div class="span4">
+            <span style="font-size: 80px;"><%= box.name %></span>
+            <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
+            <br/><br/>
+            <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count %></span>
+          </div>
+          <div class="span8" style="margin-top: -60px;">
+            <% barcode_string = generate_order_barcode(@order.increment_id) %>
+            <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+            </div>
+            <br>
+          </div>
+        </div>
+        <br>
+
+        <div class="row">
+          <div class="span6">
+              <span>
+                <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
+                <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%= @order.firstname %> <%= @order.lastname %>
+                  <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
+                </span>
+              </span>
+          </div>
+          <% order_placed_time = @order.order_placed_time %>
+          <% date = order_placed_time.to_s.split(" ")[0] %>
+          <div class="span6">
+            <div class="row">
+              <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
+              <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
+            </div>
+            <div class="row">
+              <span class="span2" style="font-size: 25px; text-align: right;"><strong>Date</strong></span>
+              <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
+            </div>
+          </div>
+          <!-- <div class="span2" style="text-align: right;">
+            <span class="span2" style="font-size: 25px;"><strong>Order#</strong></span>
+
+            <span class="span2" style="font-size: 25px;"><strong>Date</strong></span>
+          </div>
+
+          <%# order_placed_time = @order.order_placed_time %>
+          <%# date = order_placed_time.to_s.split(" ")[0] %>
+          <div class="span4">
+            <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
+            <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
+          </div> -->
+        </div>
+        <br>
+
+        <div class="span12">
+          <table>
+            <thead>
+            <td> Item</td>
+            <td> Description</td>
+            <td style="white-space: nowrap;"> Pr Loc.</td>
+            <td>
+              <center> Qty</center>
+            </td>
+            </thead>
+
+            <% order_items.each do |order_item| %>
+              <% unless order_item.product.is_intangible %>
+                <tr>
+                  <td><%= order_item.product.primary_sku %></td>
+                  <td><%= order_item.product.name %></td>
+                  <td>
+                    <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
+                      <%= warehouse.location_primary %>
+                    <% end %>
+                  </td>
+                  <td>
+                    <center><%= order_item.qty %></center>
+                  </td>
+                </tr>
+              <% end %>
+            <% end %>
+          </table>
+        </div>
+
+        <% if !@order.store.nil? %>
+          <% if !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
+            <div style="page-break-inside: avoid;">
+              <p><%= GeneralSetting.get_packing_slip_message_to_customer.html_safe %></p>
+            </div>
+          <% end %>
+          <% if !@order.store.thank_you_message_to_customer.nil? %>
+            <div style="page-break-inside: avoid;">
+              <p><%= @order.store.thank_you_message_to_customer.html_safe %></p>
+            </div>
+          <% end %>
+        <% end %>
+
+        <% if !@order.nil? && !@order.customer_comments.nil? %>
+          <center>
+            <div style="page-break-inside: avoid;">
+                        <textarea>
+                            <%= @order.customer_comments %>
+                        </textarea>
+            </div>
+          </center>
+        <% end %>
+      <% else %>
+        <span>No orders</span>
+      <% end %>
     </div>
-
-    <% if !@order.store.nil? %>
-      <% if !GeneralSetting.get_packing_slip_message_to_customer.nil? %>
-        <div style="page-break-inside: avoid;">
-          <p><%= GeneralSetting.get_packing_slip_message_to_customer.html_safe %></p>
-        </div>
-      <% end %>
-      <% if !@order.store.thank_you_message_to_customer.nil? %>
-        <div style="page-break-inside: avoid;">
-          <p><%= @order.store.thank_you_message_to_customer.html_safe %></p>
-        </div>
-      <% end %>
-    <% end %>
-
-    <% if !@order.nil? && !@order.customer_comments.nil? %>
-      <center>
-        <div style="page-break-inside: avoid;">
-                    <textarea>
-                        <%= @order.customer_comments %>
-                    </textarea>
-        </div>
-      </center>
-    <% end %>
-  <% else %>
-    <span>No orders</span>
   <% end %>
-</div>
+<% end %>
+
+
 </body>
 </html>

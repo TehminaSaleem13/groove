@@ -1,6 +1,7 @@
 module ScanPack::Utilities::ProductScan::ProcessScan
   def process_scan(clicked, order_item, serial_added)
     @clicked, @order_item, @serial_added = clicked, order_item, serial_added
+    insert_order_item_in_box if @order_item.present? && GeneralSetting.last.multi_box_shipments?
     do_if_order_item_present if @order_item.present?
     @result
   end
@@ -18,15 +19,25 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   def do_if_record_serial_is_set
     if @serial_added
       @order_item.process_item(@clicked, @current_user.username, @typein_count)
+
       @session[:most_recent_scanned_product] = @order_item.product_id
       @session[:parent_order_item] = false
       if @order_item.product.is_kit == 1
         @session[:parent_order_item] = @order_item.id
       end
-    else
+    else 
       @result['data']['serial']['ask'] = @order_item.product.record_serial
       @result['data']['serial']['ask_2'] = @order_item.product.second_record_serial
       @result['data']['serial']['product_id'] = @order_item.product_id
+    end
+  end
+
+  def insert_order_item_in_box
+    if @box_id.blank?
+      box = Box.create(name: "Box 1", order_id: @order_item.order.id)
+      @order_item.update_attributes(box_id: box.id)
+    else
+      @order_item.update_attributes(box_id: @box_id)
     end
   end
 end # module end

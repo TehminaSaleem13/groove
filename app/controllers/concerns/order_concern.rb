@@ -188,6 +188,7 @@ module OrderConcern
     add_a_nobody_user # Add nobody user info if user info not available
 
     @result['order']['tags'] = @order.order_tags
+    @result['order']['boxes'] = Box.where(order_id: @order.id).as_json(only: [:id, :name])
   end
 
   def retrieve_order_item(orderitem)
@@ -237,7 +238,7 @@ module OrderConcern
   def generate_barcode_for_packingslip
     GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
     generate_barcode = GenerateBarcode.generate_barcode_for(@orders, current_user)
-    delayed_job = GeneratePackingSlipPdf.delay(run_at: 1.seconds.from_now).generate_packing_slip_pdf(@orders, current_tenant, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id)
+    delayed_job = GeneratePackingSlipPdf.delay(run_at: 1.seconds.from_now).generate_packing_slip_pdf(@orders, current_tenant, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes)
     generate_barcode.delayed_job_id = delayed_job.id
     generate_barcode.save
   end

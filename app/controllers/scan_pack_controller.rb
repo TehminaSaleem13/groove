@@ -75,9 +75,8 @@ class ScanPackController < ApplicationController
   end
 
   def click_scan
-
     render json: product_scan(
-        params[:barcode], 'scanpack.rfp.default', params[:id],
+        params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id],
         {
           clicked: true, current_user: current_user, session: session
         }

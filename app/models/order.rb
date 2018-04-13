@@ -648,7 +648,6 @@ class Order < ActiveRecord::Base
 
   def get_scanned_items(order_item_status: ['scanned', 'partially_scanned'], limit: 10, offset: 0)
     scanned_list = []
-
     self.order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
       if order_item.cached_product.is_kit == 1
         option_products = order_item.cached_option_products
@@ -676,6 +675,7 @@ class Order < ActiveRecord::Base
       end
     end
 
+
     #transform scanned_list to move all child items into displaying as individual items
     scanned_list.each do |scanned_item|
       if scanned_item['product_type'] == 'individual'
@@ -693,20 +693,19 @@ class Order < ActiveRecord::Base
                 end
               end
             end
-
             #if not found, then add this child item as a new single item
             if !found_single_item
               new_item = build_pack_item(child_item['name'], 'single', child_item['images'], child_item['sku'],
                                          child_item['qty_remaining'],
                                          child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
-                                         child_item['product_id'], scanned_item['order_item_id'], nil, child_item['instruction'], child_item['confirmation'], child_item['skippable'], child_item['record_serial'])
+                                         child_item['product_id'], scanned_item['order_item_id'], nil, child_item['instruction'], child_item['confirmation'], child_item['skippable'], child_item['record_serial'],
+                                         child_item['box_id'], child_item['kit_product_id'])
               scanned_list.push(new_item)
             end
           end
         end
       end
     end
-
     scanned_list.sort do |a, b|
       sort_order = (b['packing_placement'] <=> a['packing_placement'])
       if sort_order == 0

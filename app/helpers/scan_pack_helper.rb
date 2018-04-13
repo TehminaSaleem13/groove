@@ -23,11 +23,11 @@ module ScanPackHelper
   #   true
   # end
 
-  def product_scan(input, state, id, options={})
+  def product_scan(input, state, id, box_id, options={})
     product_scan_object = ScanPack::ProductScanService.new(
       [
         options[:current_user], options[:session],
-        input, state, id, options[:typein_count] || 1
+        input, state, id, box_id, options[:typein_count] || 1
       ]
     )
     product_scan_object.run(options[:clicked], options[:serial_added])

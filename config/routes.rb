@@ -357,6 +357,12 @@ Groovepacks::Application.routes.draw do
   end
   post '/dashboard/update_to_avg_datapoint' => 'dashboard#update_to_avg_datapoint'
 
+  resources :box do
+    collection do
+      put 'remove_from_box'
+    end
+  end
+
   # Sample resource route with options:
   #   resources :products do
   #     member do

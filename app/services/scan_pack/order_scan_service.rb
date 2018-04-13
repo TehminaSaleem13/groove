@@ -238,7 +238,7 @@ module ScanPack
 
     def single_scan(barcode, order_item)
       product_scan_object = ScanPack::ProductScanService.new(
-        [ @current_user, {}, barcode, 'scanpack.rfp.default', @single_order.id, order_item.qty || 1]
+        [ @current_user, {}, barcode, 'scanpack.rfp.default', @single_order.id, nil, order_item.qty || 1]
       )
       product_scan_object.run(true, "")
     end    

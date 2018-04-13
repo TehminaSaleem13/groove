@@ -1,5 +1,5 @@
 class GeneratePackingSlipPdf
-  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header, gen_barcode_id)
+  def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header, gen_barcode_id, boxes)
     begin
       Apartment::Tenant.switch(tenant_name)
       packing_slip_obj =
@@ -27,7 +27,7 @@ class GeneratePackingSlipPdf
           file_name_order = Digest::MD5.hexdigest(order.increment_id)
           reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current}.#{file_name_order}.pdf")
 
-          GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, header)
+          GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, header, boxes)
           reader = PDF::Reader.new(reader_file_path)
           page_count = reader.page_count
 
@@ -35,7 +35,7 @@ class GeneratePackingSlipPdf
             # delete the pdf and regenerate if the pdf page-count exceeds 1
             File.delete(reader_file_path)
             multi_header = 'Multi-Slip Order # ' + order.increment_id
-            GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, multi_header)
+            GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, multi_header, boxes)
           end
           result['data']['packing_slip_file_paths'].push(reader_file_path)
         end
@@ -58,7 +58,7 @@ class GeneratePackingSlipPdf
     end
   end
 
-  def self.generate_pdf(order, page_height, page_width, orientation, pdf_path, header)
+  def self.generate_pdf(order, page_height, page_width, orientation, pdf_path, header, boxes)
     require 'wicked_pdf'
     ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
     av = ActionView::Base.new()
@@ -68,7 +68,7 @@ class GeneratePackingSlipPdf
       include ApplicationHelper
     end
     @order = order
-    pdf_html = av.render :template => 'orders/generate_packing_slip.html', :layout => nil, :locals => {:@order => @order}
+    pdf_html = av.render :template => 'orders/generate_packing_slip.html', :layout => nil, :locals => {:@order => @order, :@boxes => boxes}
     doc_pdf = WickedPdf.new.pdf_from_string(
       pdf_html,
       :orientation => orientation,

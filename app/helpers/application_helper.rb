@@ -90,6 +90,7 @@ module ApplicationHelper
     @page_height = (@page_height.to_f/2).to_s if @orientation == 'landscape'
     @header = ''
     @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    @boxes = Box.where(id: params[:box_ids])
   end
 
   def update_fail_status(result, message)

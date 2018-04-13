@@ -30,6 +30,7 @@ module ScanPack
         @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
+        @result["data"]["order"]["box"] = Box.where(order_id: order.id).as_json(only: [:id, :name])
       end
       if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
        stores = Store.where("status=? and on_demand_import=?", true, true)
@@ -59,10 +60,11 @@ module ScanPack
       packing_count = barcode.packing_count rescue 1
       if packing_count.present? && packing_count.to_i > 1
         if rem_qty.present? && rem_qty >= packing_count.to_i
+
           product_scan_object = ScanPack::ProductScanService.new(
             [
               @current_user, @session,
-              @params[:input], @params[:state], @params[:id], barcode.packing_count.to_i || 1
+              @params[:input], @params[:state], @params[:id], @params[:box_id], barcode.packing_count.to_i || 1
             ]
           )
           @result = product_scan_object.run(false, false, true)
@@ -71,12 +73,21 @@ module ScanPack
         end
       else
         @matcher[@params[:state]].each do |state_func|
-          output = send(
-            state_func, @params[:input], @params[:state], @params[:id],
-            {
-              current_user: @current_user, session: @session
-            }
-          )
+          if state_func == "product_scan"
+            output = send(
+              state_func, @params[:input], @params[:state], @params[:id], @params[:box_id],
+              {
+                current_user: @current_user, session: @session
+              }
+            )
+          else
+            output = send(
+              state_func, @params[:input], @params[:state], @params[:id],
+              {
+                current_user: @current_user, session: @session
+              }
+            )
+          end
           do_set_result(output)
           update_activity(output)
           break if output["matched"]
