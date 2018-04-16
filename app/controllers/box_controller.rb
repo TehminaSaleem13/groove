@@ -15,16 +15,13 @@ class BoxController < ApplicationController
       unless params[:kit_product_id].blank?
         kit = OrderItemKitProduct.find_by_id(params[:kit_product_id])
         if kit
-          # binding.pry
-          # order_item.scanned_qty = order_item.scanned_qty - kit.scanned_qty
+          order_item.scanned_qty = 0
           order_item.clicked_qty = order_item.clicked_qty - kit.clicked_qty
           order_item.scanned_status = 'partially_scanned'
           if order_item.order_item_kit_products.map(&:scanned_qty).sum == 0          
             order_item.scanned_status = "notscanned" 
             order_item.box_id = nil
-            order_item.scanned_qty = 0
           end
-          
           order_item.save
 
           kit.scanned_qty = 0
@@ -41,7 +38,8 @@ class BoxController < ApplicationController
       end
       unscanned_items = order_item.order.get_unscanned_items
       scanned_items = order_item.order.get_scanned_items
-      return render json: { scanned_items: scanned_items, unscanned_items: unscanned_items, status: true }
+      scanning_count = order_item.order.scanning_count
+      return render json: { scanned_items: scanned_items, unscanned_items: unscanned_items, scanning_count: scanning_count, status: true }
     end
     render json: { status: false }
   end

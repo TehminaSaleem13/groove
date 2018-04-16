@@ -133,7 +133,6 @@ class OrderItem < ActiveRecord::Base
     child_item = build_basic_item(option_product)
     #overwrite scanned qty from basic build
     child_item['scanned_qty'] = kit_product.scanned_qty
-
     if depends_kit
       child_item['qty_remaining'] = self.kit_split_qty * kit_product.cached_product_kit_skus.qty -
         kit_product.scanned_qty
@@ -315,6 +314,7 @@ class OrderItem < ActiveRecord::Base
     self.kit_split_qty = 0
     self.kit_split_scanned_qty = 0
     self.single_scanned_qty = 0
+    self.box_id = nil
     self.save
   end
 

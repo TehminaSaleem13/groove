@@ -183,7 +183,6 @@ module ScanPack
     def do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
       barcode_found = false
       unscanned_items.each do |item|
-        
         if item['product_type'] == 'individual'
           barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
         elsif item['product_type'] == 'single'

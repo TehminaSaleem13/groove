@@ -5,6 +5,9 @@ class GeneratePackingSlipPdf
       packing_slip_obj =
         Groovepacker::PackingSlip::PdfMerger.new
       generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
+      if boxes.any?
+        boxes = Box.where(id: boxes)
+      end
       unless generate_barcode.nil?
         generate_barcode.status = 'in_progress'
         generate_barcode.current_order_position = 0

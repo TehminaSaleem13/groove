@@ -8,11 +8,10 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         item.save
       end
 
-      insert_in_box(item) if GeneralSetting.last.multi_box_shipments?
-
       if child_item['barcodes'].present?
         barcode_found = do_if_child_item_has_barcodes(params, child_item)
       end
+      insert_in_box(item) if barcode_found && GeneralSetting.last.multi_box_shipments? 
       break if barcode_found
     end
     barcode_found
