@@ -360,6 +360,7 @@ Groovepacks::Application.routes.draw do
   resources :box do
     collection do
       put 'remove_from_box'
+      put 'remove_empty'
     end
   end
 

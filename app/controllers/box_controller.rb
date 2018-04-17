@@ -44,7 +44,11 @@ class BoxController < ApplicationController
     render json: { status: false }
   end
 
-  def destroy
-    
+  def remove_empty
+    boxes = Box.where(id: params[:ids])
+    if boxes.destroy_all
+      return render json:  { status: true }
+    end
+    render json:  { status: false }
   end
 end

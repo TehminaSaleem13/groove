@@ -24,6 +24,7 @@ module Groovepacker
               bulk_action.update_attribute(:current, order.increment_id)
               product_not_active = false
               change_order_status(order, params, username)
+              delete_boxes(order)
               product_not_active = check_inactive_product_exist(product_not_active, params, order)
               bulk_action.update_attribute(:completed, bulk_action.completed + 1) unless product_not_active.present?
             end
@@ -268,6 +269,9 @@ module Groovepacker
         OrderItem.delete_all(['id IN (?)', order_items_ids])
       end
 
+      def delete_boxes order
+        Box.where(order_id: order.id).destroy_all
+      end
 
     end
   end
