@@ -136,15 +136,24 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
     customer = find_stripe_customer
+
     if customer.try(:stripe_customer_id).present?
       stripe_customer = Stripe::Customer.retrieve(customer.stripe_customer_id)
       stripe_customer.email = params["email_address_for_billing_notification"] 
       if (params["email_address_for_billing_notification"].include?("@") rescue false)
-        stripe_customer.save
+        begin
+          stripe_customer.save
+        rescue
+          @result['status'] &= false
+          @result['error_messages'] = ['No customer found']
+        end
       else
         @result['status'] &= false
         @result['error_messages'] = ['Please update correct email address']
       end
+    else
+      @result['status'] &= false
+      @result['error_messages'] = ['Not having valid stripe customer id']
     end
     render json: @result
   end
