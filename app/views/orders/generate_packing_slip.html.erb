@@ -6301,14 +6301,6 @@
   body {
     text-rendering: geometricPrecision;
   }
-
-  @media print {
-    .page-split {
-      display: block;
-      page-break-before: always; 
-    }
-  }
-
 </style>
 
 <body>
@@ -6435,7 +6427,7 @@
   </div>
 <% else %>
   <% @boxes.each do |box| %>
-    <div class="container page-split" style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
+    <div class="container" style="page-break-after: always; margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
       <% if !@order.nil? %>
         <%  order_items = @order.order_items.where(box_id: box.id) %>
         <% order_count = 0 %>

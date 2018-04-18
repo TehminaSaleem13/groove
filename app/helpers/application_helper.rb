@@ -91,6 +91,7 @@ module ApplicationHelper
     @header = ''
     @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
     @boxes = params[:box_ids]
+    $redis.set("#{current_tenant}_packing_type", params[:packing_type]) unless params[:packing_type].blank?
   end
 
   def update_fail_status(result, message)

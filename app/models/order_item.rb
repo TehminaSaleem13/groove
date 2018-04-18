@@ -233,12 +233,12 @@ class OrderItem < ActiveRecord::Base
       total_qty = 0
       if self.product.kit_parsing == 'depends'
         self.single_scanned_qty = self.single_scanned_qty + typein_count
-        set_clicked_quantity(clicked, self.product.primary_sku, username, self.box_id)
+        set_clicked_quantity(clicked, self.product.primary_sku, username)
         self.scanned_qty = self.single_scanned_qty + self.kit_split_scanned_qty
         total_qty = self.qty - self.kit_split_qty
       else
         self.scanned_qty = self.scanned_qty + typein_count
-        set_clicked_quantity(clicked, self.product.primary_sku, username, self.box_id)
+        set_clicked_quantity(clicked, self.product.primary_sku, username)
         total_qty = self.qty - self.kit_split_qty
       end
       scan_time = self.order_item_scan_times.build(
@@ -378,13 +378,13 @@ class OrderItem < ActiveRecord::Base
 
   private
 
-  def set_clicked_quantity(clicked, sku, username, box_id)
+  def set_clicked_quantity(clicked, sku, username)
     if clicked
       self.clicked_qty = self.clicked_qty + 1
-      if box_id.blank?
+      if self.box.blank?
         self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
       else
-        self.order.addactivity("Item with SKU: " + sku + " has been click scanned in Box id: #{box_id}", username) if !ScanPackSetting.last.order_verification
+        self.order.addactivity("Item with SKU: " + sku + " has been click scanned in #{self.box.name}", username) if !ScanPackSetting.last.order_verification
       end
     end
   end

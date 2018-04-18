@@ -13,28 +13,9 @@ class BoxController < ApplicationController
     order_item = OrderItem.find_by_id(params["order_item_id"])
     if order_item
       unless params[:kit_product_id].blank?
-        kit = OrderItemKitProduct.find_by_id(params[:kit_product_id])
-        if kit
-          order_item.scanned_qty = 0
-          order_item.clicked_qty = order_item.clicked_qty - kit.clicked_qty
-          order_item.scanned_status = 'partially_scanned'
-          if order_item.order_item_kit_products.map(&:scanned_qty).sum == 0          
-            order_item.scanned_status = "notscanned" 
-            order_item.box_id = nil
-          end
-          order_item.save
-
-          kit.scanned_qty = 0
-          kit.clicked_qty = 0
-          kit.scanned_status = "notscanned"
-          kit.save
-        end
+        reset_individual_order_item(order_item)
       else
-        order_item.scanned_qty = 0
-        order_item.clicked_qty = 0
-        order_item.scanned_status = "notscanned"
-        order_item.box_id = nil
-        order_item.save
+        reset_single_order_item(order_item)
       end
       unscanned_items = order_item.order.get_unscanned_items
       scanned_items = order_item.order.get_scanned_items
@@ -50,5 +31,44 @@ class BoxController < ApplicationController
       return render json:  { status: true }
     end
     render json:  { status: false }
+  end
+
+  private
+  def addactivity order_item, box
+    order_item.order.addactivity("Item with SKU: " + order_item.product.primary_sku + " has been removed from #{box.name}", current_user.username)
+  end
+
+  def reset_single_order_item order_item
+    order_item.scanned_qty = 0
+    order_item.clicked_qty = 0
+    order_item.scanned_status = "notscanned"
+    box = order_item.box
+    order_item.box_id = nil
+    addactivity(order_item, box) if order_item.save
+  end
+
+  def reset_individual_order_item order_item
+    kit = OrderItemKitProduct.find_by_id(params[:kit_product_id])
+    if kit
+      reset_kit(kit)
+      order_item.scanned_qty = 0
+      order_item.clicked_qty = order_item.clicked_qty - kit.clicked_qty
+      order_item.scanned_status = 'partially_scanned'
+      if order_item.order_item_kit_products.map(&:scanned_qty).sum == 0          
+        order_item.scanned_status = "notscanned"
+        box = order_item.box
+        order_item.box_id = nil
+        addactivity(order_item, box) if order_item.save
+      else
+        order_item.save
+      end
+    end
+  end
+
+  def reset_kit kit
+    kit.scanned_qty = 0
+    kit.clicked_qty = 0
+    kit.scanned_status = "notscanned"
+    kit.order_item.order.addactivity("Kit Part item with SKU: " + kit.cached_product_kit_skus.cached_option_product.cached_primary_sku + " has been removed from #{kit.order_item.box.name}", current_user.username) if kit.save
   end
 end

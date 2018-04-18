@@ -99,6 +99,7 @@ class SettingsController < ApplicationController
 
     if general_setting.present?
       @result['data']['settings'] = general_setting
+      @result['data']['settings']['packing_type'] = $redis.get("#{Apartment::Tenant.current}_packing_type")
     else
       @result['status'] &= false
       @result['error_messages'] = [
