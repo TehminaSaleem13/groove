@@ -706,16 +706,7 @@ class Order < ActiveRecord::Base
         end
       end
     end
-    scanned_list.sort do |a, b|
-      sort_order = (b['packing_placement'] <=> a['packing_placement'])
-      if sort_order == 0
-        sort_order = (b['qty_remaining'] <=> a['qty_remaining'])
-        if sort_order == 0
-          sort_order = (b['name'] <=> a['name'])
-        end
-      end
-      sort_order
-    end
+    scanned_list
   end
 
   def reset_scanned_status(current_user)
@@ -984,8 +975,11 @@ class Order < ActiveRecord::Base
   end
 
   def partially_load_order_item(order_item_status, limit, offset)
-    order_items
-      .where(scanned_status: order_item_status).limit(limit).offset(offset)
+    if order_item_status == ["scanned", "partially_scanned"]
+      order_items.where(scanned_status: order_item_status).order('updated_at desc').offset(offset)
+    else
+      order_items.where(scanned_status: order_item_status).limit(limit).offset(offset)
+    end
   end
 
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
@@ -1030,5 +1024,9 @@ class Order < ActiveRecord::Base
 
   def unique_order_items
     self.order_items = self.order_items.uniq_by {|obj| obj.product_id} 
+  end
+
+  def destroy_boxes
+    Box.where(order_id: self.id).destroy_all
   end
 end

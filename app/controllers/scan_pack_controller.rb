@@ -18,6 +18,7 @@ class ScanPackController < ApplicationController
     if !@order.blank?
       if @order.status != 'scanned'
         @order.reset_scanned_status(current_user)
+        @order.destroy_boxes
         @result['data']['next_state'] = 'scanpack.rfo'
         session[:most_recent_scanned_product] = nil
       else
