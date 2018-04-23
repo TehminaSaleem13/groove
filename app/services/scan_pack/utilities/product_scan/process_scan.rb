@@ -10,7 +10,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
     if @order_item.product.record_serial || @order_item.product.second_record_serial
       do_if_record_serial_is_set
     else
-      @order_item.process_item(@clicked, @current_user.username, @typein_count)
+      @order_item.process_item(@clicked, @current_user.username, @typein_count, @box_id)
       @session[:most_recent_scanned_product] = @order_item.product_id
       @session[:parent_order_item] = @order_item.product.is_kit != 1 ? false : @order_item.id
     end
@@ -18,7 +18,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
 
   def do_if_record_serial_is_set
     if @serial_added
-      @order_item.process_item(@clicked, @current_user.username, @typein_count)
+      @order_item.process_item(@clicked, @current_user.username, @typein_count, @box_id)
 
       @session[:most_recent_scanned_product] = @order_item.product_id
       @session[:parent_order_item] = false
@@ -35,9 +35,15 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   def insert_order_item_in_box
     if @box_id.blank?
       box = Box.create(name: "Box 1", order_id: @order_item.order.id)
-      @order_item.update_attributes(box_id: box.id)
+      @box_id = box.id
+      OrderItemBox.create(order_item_id: @order_item.id, box_id: box.id, item_qty: @typein_count)
     else
-      @order_item.update_attributes(box_id: @box_id)
+      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
+      if order_item_box
+        order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+      else
+        OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
+      end
     end
   end
 end # module end

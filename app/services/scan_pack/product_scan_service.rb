@@ -42,7 +42,7 @@ module ScanPack
         @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if @result["data"]["order"]["store_type"] == "Shipstation API 2"
         @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2"
         @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2"
-        @result["data"]["order"]["box"] = Box.where(order_id: order.id).as_json(only: [:id, :name]) if @box_id.blank?
+        do_set_result_for_boxes(order)
       rescue
       end
       @result
@@ -191,6 +191,12 @@ module ScanPack
         break if barcode_found
       end
       barcode_found
+    end
+
+    def do_set_result_for_boxes order
+      result = order.get_boxes_data
+      @result["data"]["order"]["box"] = result[:box]
+      @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
     end
 
   end # class end

@@ -10,8 +10,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
       if child_item['barcodes'].present?
         barcode_found = do_if_child_item_has_barcodes(params, child_item)
-      end
-      insert_in_box(item) if barcode_found && GeneralSetting.last.multi_box_shipments? 
+      end 
       break if barcode_found
     end
     barcode_found
@@ -34,10 +33,12 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
         store_lot_number(order_item, serial_added)
 
-        do_if_order_item_kit_product_present(
-          [item, child_item, serial_added, clicked, order_item_kit_product]
-          ) if order_item_kit_product.present?
-
+        if order_item_kit_product.present?
+          do_if_order_item_kit_product_present(
+            [item, child_item, serial_added, clicked, order_item_kit_product]
+            ) 
+          insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments?
+        end
         break
       end
     end
@@ -92,12 +93,17 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
     @session[:parent_order_item] = item['order_item_id']
   end
 
-  def insert_in_box(item)
+  def insert_in_box(item, kit_id)
     if @box_id.blank?
       box = Box.create(name: "Box 1", order_id: item.order.id)
-      item.update_attributes(box_id: box.id)
+      OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id)
     else
-      item.update_attributes(box_id: @box_id)
+      order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
+      if order_item_box
+        order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+      else
+        OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id)
+      end
     end
   end
 

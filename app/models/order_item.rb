@@ -1,7 +1,8 @@
 class OrderItem < ActiveRecord::Base
   belongs_to :order
   belongs_to :product
-  belongs_to :box
+  has_many :order_item_boxes, dependent: :destroy
+  has_many :boxes, through: :order_item_boxes
 
   has_many :order_item_kit_products, :dependent => :destroy
   has_many :order_item_order_serial_product_lots
@@ -227,18 +228,18 @@ class OrderItem < ActiveRecord::Base
   end
 
 
-  def process_item(clicked, username, typein_count=1)
+  def process_item(clicked, username, typein_count=1, box_id)
     order_unscanned = false
     if self.scanned_qty < self.qty
       total_qty = 0
       if self.product.kit_parsing == 'depends'
         self.single_scanned_qty = self.single_scanned_qty + typein_count
-        set_clicked_quantity(clicked, self.product.primary_sku, username)
+        set_clicked_quantity(clicked, self.product.primary_sku, username, box_id)
         self.scanned_qty = self.single_scanned_qty + self.kit_split_scanned_qty
         total_qty = self.qty - self.kit_split_qty
       else
         self.scanned_qty = self.scanned_qty + typein_count
-        set_clicked_quantity(clicked, self.product.primary_sku, username)
+        set_clicked_quantity(clicked, self.product.primary_sku, username, box_id)
         total_qty = self.qty - self.kit_split_qty
       end
       scan_time = self.order_item_scan_times.build(
@@ -314,7 +315,6 @@ class OrderItem < ActiveRecord::Base
     self.kit_split_qty = 0
     self.kit_split_scanned_qty = 0
     self.single_scanned_qty = 0
-    self.box_id = nil
     self.save
   end
 
@@ -378,13 +378,14 @@ class OrderItem < ActiveRecord::Base
 
   private
 
-  def set_clicked_quantity(clicked, sku, username)
+  def set_clicked_quantity(clicked, sku, username, box_id)
     if clicked
       self.clicked_qty = self.clicked_qty + 1
-      if self.box.blank?
+      if box_id.blank?
         self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
       else
-        self.order.addactivity("Item with SKU: " + sku + " has been click scanned in #{self.box.name}", username) if !ScanPackSetting.last.order_verification
+        box = Box.find_by_id(box_id)
+        self.order.addactivity("Item with SKU: " + sku + " has been click scanned in #{box.try(:name)}", username) if !ScanPackSetting.last.order_verification
       end
     end
   end

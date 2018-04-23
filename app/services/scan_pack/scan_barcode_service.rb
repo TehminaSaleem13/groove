@@ -30,7 +30,7 @@ module ScanPack
         @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
-        @result["data"]["order"]["box"] = Box.where(order_id: order.id).as_json(only: [:id, :name])
+        do_set_result_for_boxes(order)
       end
       if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
        stores = Store.where("status=? and on_demand_import=?", true, true)
@@ -135,6 +135,12 @@ module ScanPack
           @result["notice_messages"]="Still checking on this order."
         end
       end
+    end
+
+    def do_set_result_for_boxes order
+      result = order.get_boxes_data
+      @result["data"]["order"]["box"] = result[:box]
+      @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
     end
   end
 end

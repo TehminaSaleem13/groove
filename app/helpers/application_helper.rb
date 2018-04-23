@@ -125,4 +125,8 @@ module ApplicationHelper
     request.protocol + "splitsocket." + ENV['SOCKET_ENDPOINT']
     #request.protocol + "#{Apartment::Tenant.current}.localpacker.com"
   end
+
+  def order_item_scanned_qty order_item, box
+    order_item.order_item_boxes.find_by_box_id(box.id).item_qty
+  end
 end

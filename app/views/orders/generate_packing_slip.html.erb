@@ -6429,7 +6429,7 @@
   <% @boxes.each do |box| %>
     <div class="container" style="page-break-after: always; margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
       <% if !@order.nil? %>
-        <%  order_items = @order.order_items.where(box_id: box.id) %>
+        <% order_items = box.order_items.uniq %>
         <% order_count = 0 %>
         <% order_items.each do |order_item| %>
           <% unless order_item.product.is_intangible %>
@@ -6514,7 +6514,11 @@
                     <% end %>
                   </td>
                   <td>
-                    <center><%= order_item.qty %></center>
+                    <% if order_item.product.is_kit? %>
+                      <center><%= order_item.qty %></center>
+                    <% else %>
+                      <center><%= order_item_scanned_qty(order_item, box) %></center>
+                    <% end %>
                   </td>
                 </tr>
               <% end %>

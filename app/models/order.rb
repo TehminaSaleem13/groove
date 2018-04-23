@@ -1029,4 +1029,13 @@ class Order < ActiveRecord::Base
   def destroy_boxes
     Box.where(order_id: self.id).destroy_all
   end
+
+  def get_boxes_data
+    boxes = Box.where(order_id: self.id)
+    order_item_boxes = []
+    boxes.each do |box|
+      order_item_boxes << box.order_item_boxes
+    end
+    result = { box: boxes.as_json(only: [:id, :name]), order_item_boxes: order_item_boxes.flatten }
+  end
 end

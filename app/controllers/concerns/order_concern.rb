@@ -188,7 +188,9 @@ module OrderConcern
     add_a_nobody_user # Add nobody user info if user info not available
 
     @result['order']['tags'] = @order.order_tags
-    @result['order']['boxes'] = Box.where(order_id: @order.id).as_json(only: [:id, :name])
+    box_data = @order.get_boxes_data
+    @result['order']['boxes'] = box_data[:box]
+    @result['order']['order_item_boxes'] = box_data[:order_item_boxes]
   end
 
   def retrieve_order_item(orderitem)
