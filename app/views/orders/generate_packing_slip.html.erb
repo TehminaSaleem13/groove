@@ -6304,7 +6304,7 @@
 </style>
 
 <body>
-<% unless @boxes.any? %>
+<% if @boxes.blank? %>
   <div class="container" style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
     <% if !@order.nil? %>
       <%  order_items = @order.order_items %>
