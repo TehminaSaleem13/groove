@@ -276,6 +276,7 @@ class ProductsController < ApplicationController
   #This method will genearte barcode pdf file and store it in S3 and return url of the file from S3.
   def generate_barcode_slip
     require 'wicked_pdf'
+    @item = OrderItem.find(params[:item_id]) rescue nil
     @product = Product.find(params[:id])
     @barcode = params["barcode"]
     respond_to do |format|
@@ -284,7 +285,7 @@ class ProductsController < ApplicationController
         render :pdf => "file_name",
                :template => "products/#{get_barcode_slip_template}",
                :orientation => 'Portrait',
-               :page_height => '1in',
+               :page_height => '1.2in',
                :page_width => '3in',
                :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
       }
@@ -295,6 +296,23 @@ class ProductsController < ApplicationController
     # pdf_file.close
     # generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
     # render json: {url: generate_barcode}
+  end
+
+  def bulk_barcode_generation
+    require 'wicked_pdf'
+    order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
+    @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
+    respond_to do |format|
+      format.html
+      format.pdf { 
+        render :pdf => "file_name",
+               :template => "products/bulk_barcode_generation.html.erb",
+               :orientation => 'Portrait',
+               :page_height => '1.15in',
+               :page_width => '3in',
+               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
+      }
+    end
   end
 
   def update_product_list
