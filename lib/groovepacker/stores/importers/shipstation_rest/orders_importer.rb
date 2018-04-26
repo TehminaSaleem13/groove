@@ -149,6 +149,11 @@ module Groovepacker
             order_item.row_total = item["unitPrice"].to_f * item["quantity"].to_f
           end
 
+          def verify_awaiting_tags
+            init_common_objects
+            @client.check_gpready_awating_order(gp_ready_tag_id)
+          end
+
           private
             def statuses
               @statuses ||= @credential.get_active_statuses

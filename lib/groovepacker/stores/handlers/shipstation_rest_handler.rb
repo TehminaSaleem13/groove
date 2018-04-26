@@ -43,6 +43,11 @@ module Groovepacker
             self.build_handle).verify_tags(tags)
         end
 
+        def verify_awaiting_tags(gp_ready_tag_name)
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
+            self.build_handle).verify_awaiting_tags
+        end
+
         def import_single_order_from(order_no)
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
             self.build_handle).import_single_order(order_no)

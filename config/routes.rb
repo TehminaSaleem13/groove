@@ -181,6 +181,7 @@ Groovepacks::Application.routes.draw do
     end
     member do
       get 'verify_tags'
+      get 'verify_awaiting_tags'
       put 'update_all_locations'
       get 'connect_and_retrieve'
       post 'create_update_ftp_credentials'

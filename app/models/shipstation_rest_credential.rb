@@ -7,7 +7,13 @@ class ShipstationRestCredential < ActiveRecord::Base
   def verify_tags
     context = Groovepacker::Stores::Context.new(
       Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
-    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name])
+    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name, "GP READY", "GP IMPORTED"]) 
+  end
+
+  def verify_awaits_tag
+    context = Groovepacker::Stores::Context.new(
+      Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
+    context.verify_awaiting_tags(gp_ready_tag_name) 
   end
 
   def gp_ready_tag_name

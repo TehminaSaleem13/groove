@@ -130,6 +130,10 @@ module Groovepacker
           end
         end
 
+        def check_gpready_awating_order(tag_id)
+          response = @service.query("/orders/listbytag?orderStatus=awaiting_payment&tagId=#{tag_id}&page=1&pageSize=1", nil, "get")
+        end
+
         def remove_tag_from_order(order_id, tag_id)
           @service.query("/orders/removetag", { orderId: order_id, tagId: tag_id }, "post")
         end

@@ -448,6 +448,18 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def verify_awaiting_tags
+    store = Store.find(params[:id])
+    result = { status: true, messages: [], data: { verification_result: false, message: ""} }
+    if store.store_type == 'Shipstation API 2'
+      result[:data] = store.shipstation_rest_credential.verify_awaits_tag
+    else
+      result[:status] = false
+      result[:messages] << "Cannot verify tags for this store"
+    end
+    render json: result
+  end
+
   def update_all_locations
     store = Store.find(params[:id])
     result = { status: true, messages: [], data: { update_status: false, message: "" }}
