@@ -1,7 +1,6 @@
 module ScanPack::Utilities::ProductScan::ProcessScan
   def process_scan(clicked, order_item, serial_added)
     @clicked, @order_item, @serial_added = clicked, order_item, serial_added
-    insert_order_item_in_box if @order_item.present? && GeneralSetting.last.multi_box_shipments?
     do_if_order_item_present if @order_item.present?
     @result
   end
@@ -11,6 +10,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
       do_if_record_serial_is_set
     else
       @order_item.process_item(@clicked, @current_user.username, @typein_count, @box_id)
+      insert_order_item_in_box if GeneralSetting.last.multi_box_shipments?
       @session[:most_recent_scanned_product] = @order_item.product_id
       @session[:parent_order_item] = @order_item.product.is_kit != 1 ? false : @order_item.id
     end
@@ -19,7 +19,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   def do_if_record_serial_is_set
     if @serial_added
       @order_item.process_item(@clicked, @current_user.username, @typein_count, @box_id)
-
+      insert_order_item_in_box if GeneralSetting.last.multi_box_shipments?
       @session[:most_recent_scanned_product] = @order_item.product_id
       @session[:parent_order_item] = false
       if @order_item.product.is_kit == 1

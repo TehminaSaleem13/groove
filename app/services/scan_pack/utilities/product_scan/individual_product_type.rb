@@ -37,7 +37,10 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
           do_if_order_item_kit_product_present(
             [item, child_item, serial_added, clicked, order_item_kit_product]
             ) 
-          insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments?
+          insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments? && !child_item['record_serial']
+          if child_item['record_serial'] && serial_added && GeneralSetting.last.multi_box_shipments?
+            insert_in_box(order_item, order_item_kit_product.id)
+          end
         end
         break
       end
@@ -95,7 +98,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
   def insert_in_box(item, kit_id)
     if @box_id.blank?
-      box = Box.create(name: "Box 1", order_id: item.order.id)
+      box = Box.create(name: "Box 1", order_id: item.order.id)  
       OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id)
     else
       order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first

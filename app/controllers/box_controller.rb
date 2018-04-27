@@ -46,16 +46,19 @@ class BoxController < ApplicationController
 
   def reset_single_order_item order_item
     order_item_box = OrderItemBox.where(order_item_id: order_item.id, box_id: params[:box_id]).first
-    order_item.scanned_qty = order_item.scanned_qty - order_item_box.item_qty
+    order_item_box.item_qty = order_item_box.item_qty - 1
+    order_item_box.save
+    order_item.scanned_qty = order_item.scanned_qty - 1
+    
     if order_item.scanned_qty == 0
       order_item.reset_scanned
     else
       order_item.scanned_status = "partially_scanned"
-      order_item.clicked_qty = order_item.clicked_qty - order_item_box.item_qty
+      order_item.clicked_qty = order_item.clicked_qty - 1
     end
     if order_item.save
       addactivity(order_item, order_item_box.box)
-      order_item_box.destroy
+      order_item_box.destroy if order_item_box.item_qty == 0 
     end
   end
 
@@ -63,11 +66,13 @@ class BoxController < ApplicationController
     kit = OrderItemKitProduct.find_by_id(params[:kit_product_id])
     if kit
       order_item_box = OrderItemBox.where(order_item_id: order_item.id, box_id: params[:box_id], kit_id: kit.id).first
+      order_item_box.item_qty = order_item_box.item_qty - 1
+      order_item_box.save
       reset_kit(kit, order_item_box)
 
       if order_item.scanned_qty != 0
-        order_item.scanned_qty = order_item.scanned_qty - order_item_box.item_qty
-        order_item.clicked_qty = order_item.clicked_qty - order_item_box.item_qty
+        order_item.scanned_qty = order_item.scanned_qty - 1
+        order_item.clicked_qty = order_item.clicked_qty - 1
         order_item.scanned_status = 'partially_scanned'
       end
 
@@ -78,17 +83,17 @@ class BoxController < ApplicationController
         order_item.save
       end
 
-      order_item_box.destroy
+      order_item_box.destroy if order_item_box.item_qty == 0
     end
   end
 
   def reset_kit kit, order_item_box 
-    kit.scanned_qty = kit.scanned_qty - order_item_box.item_qty
+    kit.scanned_qty = kit.scanned_qty - 1
     if kit.scanned_qty == 0
       kit.clicked_qty = 0
       kit.scanned_status = "notscanned"
     else
-      kit.clicked_qty = kit.clicked_qty - order_item_box.item_qty
+      kit.clicked_qty = kit.clicked_qty - 1
       kit.scanned_status = "partially_scanned"
     end
 
