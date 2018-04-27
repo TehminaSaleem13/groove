@@ -308,7 +308,7 @@ class ProductsController < ApplicationController
         render :pdf => "file_name",
                :template => "products/bulk_barcode_generation.html.erb",
                :orientation => 'Portrait',
-               :page_height => '1.15in',
+               :page_height => '1.12in',
                :page_width => '3in',
                :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
       }
