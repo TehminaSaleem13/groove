@@ -109,7 +109,7 @@ module Groovepacker
         def get_orders_by_tag(tagId)
           response = { 'orders' => [] }
           unless tagId == -1
-            %w(awaiting_shipment shipped).each do |status|
+            %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
               res = find_orders_by_tag_and_status(tagId, status)
               response['orders'] = response['orders'] + res unless res.nil?
             end
