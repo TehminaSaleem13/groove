@@ -8,6 +8,7 @@ module Groovepacker
         @api_key = shipping_easy_credential.api_key
         @api_secret = shipping_easy_credential.api_secret
         @last_imported_at = @credential.last_imported_at
+        @store_api_key = shipping_easy_credential.store_api_key
       end
 
       def orders(statuses, importing_time, import_item)
@@ -35,6 +36,12 @@ module Groovepacker
         combined_response["orders"] = remove_cleared_and_drop_shipped(combined_response["orders"])
         combined_response["error"] = response["error"]
         combined_response
+      end
+
+      def get_single_order(order)
+        filters = {includes: "products", id: order, store_api_key: @store_api_key} rescue nil
+        filters = filters.merge(api_key_and_secret)
+        response = ::ShippingEasy::Resources::Order.find(filters) rescue nil
       end
 
       def api_key_and_secret

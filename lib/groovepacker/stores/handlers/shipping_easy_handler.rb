@@ -17,6 +17,11 @@ module Groovepacker
             self.build_handle).import
         end
 
+        def import_single_order_from(order_no)
+          Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
+            self.build_handle).ondemand_import_single_order(order_no)
+        end
+
       end
     end
   end

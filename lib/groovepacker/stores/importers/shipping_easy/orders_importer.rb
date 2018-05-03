@@ -33,6 +33,12 @@ module Groovepacker
             @result
           end
 
+          def ondemand_import_single_order(order)
+            init_common_objects
+            response = @client.get_single_order(order)
+            import_single_order(response["order"]) rescue nil
+          end
+
           private
             def import_single_order(order)
               update_current_import_item(order)

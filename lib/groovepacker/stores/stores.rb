@@ -148,7 +148,7 @@ module Groovepacker
 				params = @params
 		    @shippingeasy = @store.shipping_easy_credential || @store.create_shipping_easy_credential
 		    new_record = true unless @shippingeasy.persisted?
-		    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship] }
+		    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship] }
 		    @shippingeasy.save
 		    begin
 		      @store.save!

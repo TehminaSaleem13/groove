@@ -16,8 +16,9 @@ module Groovepacker
           stores = Store.where("status=? and store_type NOT IN (?)", true, ['CSV', 'system'])
           s_stores = stores.where("store_type='Shipstation API 2'")
           o_stores = stores.where("store_type='BigCommerce'")
+          se_stores = stores.where("store_type='ShippingEasy'")
           #o_stores = stores.where("store_type!='Shipstation API 2'")
-          [s_stores, o_stores].each { |st| run_for_each_store(st, order_no) }
+          [s_stores, o_stores, se_stores].each { |st| run_for_each_store(st, order_no) }
           #run_for_each_store(s_stores, order_no)
         end
 
