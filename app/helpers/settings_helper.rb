@@ -99,7 +99,8 @@ module SettingsHelper
         :tracking_error_info_not_found, :custom_field_one,
         :custom_field_two, :export_csv_email, :html_print,
         :show_primary_bin_loc_in_barcodeslip, :time_to_send_email, :schedule_import_mode, :master_switch,
-        :idle_timeout, :hex_barcode, :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips
+        :idle_timeout, :hex_barcode, :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
+        :custom_user_field_one, :custom_user_field_two
       ]
     )
   end

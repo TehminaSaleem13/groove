@@ -50,12 +50,15 @@ class UsersController < ApplicationController
         else
           @user.name = params[:name]
         end
+        @user.last_name = params[:last_name]
         username_change = @user.username_change
         unless params[:view_dashboard].nil?
           @user.view_dashboard = params[:view_dashboard]
         end
 
         @user.confirmation_code = params[:confirmation_code]
+        @user.custom_field_one = params[:custom_field_one]
+        @user.custom_field_two = params[:custom_field_two]
 
         if params[:role].nil? || params[:role]['id'].nil?
           user_role = Role.find_by_name("role_#{@user.id}")
@@ -107,8 +110,9 @@ class UsersController < ApplicationController
             # send_user_info_obj.build_send_users_stream(tenant_name)
             send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
           else
+            set_custom_fields
             HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
-                  query: { username: @user.username, packing_user_id: @user.id, active: @user.active },
+                  query: { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one: @custom_field_one, custom_field_two: @custom_field_two},
                   headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
           end
 
@@ -474,5 +478,11 @@ class UsersController < ApplicationController
   def get_super_admin_email
     email = Role.find_by_name("Super Admin").users.map(&:email).compact[0] rescue nil
     render json: {email: email}
+  end
+
+  def set_custom_fields
+    general_setting = GeneralSetting.first
+    @custom_field_one = general_setting.custom_user_field_one.blank? ? nil : { general_setting.custom_user_field_one.parameterize.underscore => @user.custom_field_one}
+    @custom_field_two = general_setting.custom_user_field_two.blank? ? nil : { general_setting.custom_user_field_two.parameterize.underscore => @user.custom_field_two}
   end
 end
