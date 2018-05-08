@@ -102,9 +102,7 @@ class SettingsController < ApplicationController
       @result['data']['settings']['packing_type'] = $redis.get("#{Apartment::Tenant.current}_packing_type")
     else
       @result['status'] &= false
-      @result['error_messages'] = [
-        'No general settings available for the system. Contact administrator.'
-      ]
+      @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
     @result["email_address_for_billing_notification"] = general_setting.email_address_for_billing_notification
     render json: @result
@@ -137,27 +135,7 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
     customer = find_stripe_customer
-
-    if customer.try(:stripe_customer_id).present?
-      stripe_customer = Stripe::Customer.retrieve(customer.stripe_customer_id)
-      stripe_customer.email = params["email_address_for_billing_notification"] 
-      if (params["email_address_for_billing_notification"].include?("@") rescue false)
-        begin
-          stripe_customer.save
-          general_setting.email_address_for_billing_notification = stripe_customer.email
-          general_setting.save
-        rescue
-          @result['status'] &= false
-          @result['error_messages'] = ['No customer found']
-        end
-      else
-        @result['status'] &= false
-        @result['error_messages'] = ['Please update correct email address']
-      end
-    else
-      @result['status'] &= false
-      @result['error_messages'] = ['Not having valid stripe customer id']
-    end
+    update_with_stripe_customer(customer)
     render json: @result
   end
 

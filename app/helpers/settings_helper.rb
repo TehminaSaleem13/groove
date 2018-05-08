@@ -132,4 +132,28 @@ module SettingsHelper
   def bin_location(product)
     product.product_inventory_warehousess.first.location_primary rescue nil
   end
+
+  def update_with_stripe_customer customer
+    if customer.try(:stripe_customer_id).present?
+      stripe_customer = Stripe::Customer.retrieve(customer.stripe_customer_id)
+      stripe_customer.email = params["email_address_for_billing_notification"] 
+      if (params["email_address_for_billing_notification"].include?("@") rescue false)
+        begin
+          stripe_customer.save
+          general_setting.email_address_for_billing_notification = stripe_customer.email
+          general_setting.save
+        rescue
+          @result['status'] &= false
+          @result['error_messages'] = ['No customer found']
+        end
+      else
+        @result['status'] &= false
+        @result['error_messages'] = ['Please update correct email address']
+      end
+    else
+      @result['status'] &= false
+      @result['error_messages'] = ['Not having valid stripe customer id']
+    end
+    @result
+  end
 end

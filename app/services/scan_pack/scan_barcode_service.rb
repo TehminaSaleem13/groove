@@ -59,39 +59,9 @@ module ScanPack
       barcode = ProductBarcode.find_by_barcode(@params[:input])
       packing_count = barcode.packing_count rescue 1
       if packing_count.present? && packing_count.to_i > 1
-        if rem_qty.present? && rem_qty >= packing_count.to_i
-
-          product_scan_object = ScanPack::ProductScanService.new(
-            [
-              @current_user, @session,
-              @params[:input], @params[:state], @params[:id], @params[:box_id], barcode.packing_count.to_i || 1
-            ]
-          )
-          @result = product_scan_object.run(false, false, true)
-        else
-          @result['error_messages'].push("The pack barcode scanned exceeds the number of units of SKU #{@params[:input]} in this order")
-        end
+        do_if_packing_count_present(rem_qty, barcode, packing_count)
       else
-        @matcher[@params[:state]].each do |state_func|
-          if state_func == "product_scan"
-            output = send(
-              state_func, @params[:input], @params[:state], @params[:id], @params[:box_id],
-              {
-                current_user: @current_user, session: @session
-              }
-            )
-          else
-            output = send(
-              state_func, @params[:input], @params[:state], @params[:id],
-              {
-                current_user: @current_user, session: @session
-              }
-            )
-          end
-          do_set_result(output)
-          update_activity(output)
-          break if output["matched"]
-        end
+        do_if_packing_count_not_present
       end
     end
 
@@ -141,6 +111,43 @@ module ScanPack
       result = order.get_boxes_data
       @result["data"]["order"]["box"] = result[:box]
       @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
+    end
+
+    def do_if_packing_count_present
+      if rem_qty.present? && rem_qty >= packing_count.to_i
+        product_scan_object = ScanPack::ProductScanService.new(
+          [
+            @current_user, @session,
+            @params[:input], @params[:state], @params[:id], @params[:box_id], barcode.packing_count.to_i || 1
+          ]
+        )
+        @result = product_scan_object.run(false, false, true)
+      else
+        @result['error_messages'].push("The pack barcode scanned exceeds the number of units of SKU #{@params[:input]} in this order")
+      end
+    end
+
+    def do_if_packing_count_not_present
+      @matcher[@params[:state]].each do |state_func|
+        if state_func == "product_scan"
+          output = send(
+            state_func, @params[:input], @params[:state], @params[:id], @params[:box_id],
+            {
+              current_user: @current_user, session: @session
+            }
+          )
+        else
+          output = send(
+            state_func, @params[:input], @params[:state], @params[:id],
+            {
+              current_user: @current_user, session: @session
+            }
+          )
+        end
+        do_set_result(output)
+        update_activity(output)
+        break if output["matched"]
+      end
     end
   end
 end
