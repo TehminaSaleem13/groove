@@ -1,5 +1,6 @@
 class DashboardController < ApplicationController
   before_filter :groovepacker_authorize!
+  include ActionView::Helpers::NumberHelper
   # perform authorization too
 
   def exceptions
@@ -45,7 +46,7 @@ class DashboardController < ApplicationController
   end
 
   def daily_packed_percentage
-    orders = Order.select("created_at, scanned_on").where("created_at > ?", Time.now() - 30.days).group_by{ |o| o.created_at.to_date }    
+    orders = Order.select("created_at, scanned_on").where("created_at > ?", Time.now() - 30.days).order('created_at desc').group_by{ |o| o.created_at.to_date }    
     results = []
     orders.values.each_with_index do |order, index|
       imported = order.count
@@ -54,9 +55,10 @@ class DashboardController < ApplicationController
       order.each do |ord|
         ord.scanned_on.blank? ? unscanned = unscanned + 1 : scanned = scanned + 1  
       end
+      scanned = number_with_precision((scanned*100)/imported.to_f, precision: 2)
       day = orders.keys[index].strftime("%A")
       date = orders.keys[index].strftime("%m/%d/%Y")
-      results << { day: day, date: date, scanned: (scanned*100)/imported, imported: imported, unscanned: unscanned }
+      results << { day: day, date: date, scanned: scanned, imported: imported, unscanned: unscanned }
     end
     render json: results
   end
