@@ -44,4 +44,20 @@ class DashboardController < ApplicationController
     render json: results
   end
 
+  def daily_packed_percentage
+    orders = Order.select("created_at, scanned_on").where("created_at > ?", Time.now() - 30.days).group_by{ |o| o.created_at.to_date }    
+    results = []
+    orders.values.each_with_index do |order, index|
+      imported = order.count
+      scanned = 0
+      unscanned = 0
+      order.each do |ord|
+        ord.scanned_on.blank? ? unscanned = unscanned + 1 : scanned = scanned + 1  
+      end
+      day = orders.keys[index].strftime("%A")
+      date = orders.keys[index].strftime("%m/%d/%Y")
+      results << { day: day, date: date, scanned: (scanned*100)/imported, imported: imported, unscanned: unscanned }
+    end
+    render json: results
+  end
 end
