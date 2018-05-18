@@ -2,7 +2,7 @@ namespace :ftp_csv_file_import do
   desc "import file from server"
   task :ftp_import => :environment do
     current_time = Time.now.in_time_zone('Eastern Time (US & Canada)').strftime("%I:%M")
-    # umi_ftp_logger = Logger.new("#{Rails.root}/log/umi_ftp.log")
+    umi_ftp_logger = Logger.new("#{Rails.root}/log/umi_ftp.log")
     other_tenants_logger = Logger.new("#{Rails.root}/log/ftp_tenant.log")
     ftp_error_logger = Logger.new("#{Rails.root}/log/ftp_error.log")
     Tenant.all.each do |tenant|
