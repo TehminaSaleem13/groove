@@ -39,7 +39,7 @@ module Groovepacker
       end
 
       def get_single_order(order)
-        filters = {includes: "products", order_number: order, page: 1, per_page: 1, last_updated_at: "1900-04-27T16:42:43Z", status: ["shipped", "ready_for_shipment", "pending", "cleared"]} rescue nil
+        filters = {includes: "products", order_number: order, page: 1, per_page: 1, last_updated_at: "1900-04-27T16:42:43Z", status: ["shipped", "ready_for_shipment", "pending", "cleared", "pending_shipment"]} rescue nil
         filters = filters.merge(api_key_and_secret)
         response = ::ShippingEasy::Resources::Order.find_all(filters) rescue nil
       end
