@@ -29,6 +29,7 @@ class CreateTenant
                                       subscription.password)
     setting = GeneralSetting.all.first
     setting.email_address_for_packer_notes = subscription.email
+    setting.email_address_for_billing_notification = subscription.email
     setting.save
   end
 
