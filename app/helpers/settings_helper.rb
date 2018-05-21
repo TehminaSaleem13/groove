@@ -140,6 +140,7 @@ module SettingsHelper
       if (params["email_address_for_billing_notification"].include?("@") rescue false)
         begin
           stripe_customer.save
+          general_setting = GeneralSetting.all.first
           general_setting.email_address_for_billing_notification = stripe_customer.email
           general_setting.save
         rescue
