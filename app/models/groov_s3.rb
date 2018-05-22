@@ -84,9 +84,10 @@ class GroovS3
     end
 
     def create_order_xml(tenant, name, data, privacy = :private)
-      object = self.create(tenant, "orders/#{name}", 'text/xml', privacy)
+      date = Time.now.strftime("%Y-%m-%d")
+      object = self.create(tenant, "orders/#{date}-#{name}", 'text/xml', privacy)
       if self.save(object, data)
-        "orders/#{name}"
+        "orders/#{date}-#{name}"
       else
         nil
       end
