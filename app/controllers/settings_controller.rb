@@ -284,6 +284,16 @@ class SettingsController < ApplicationController
     render json: {}
   end
 
+  def auto_complete
+    data = []
+    Tenant.all.each do |tenant|
+      Apartment::Tenant.switch(tenant.name)
+      data << GeneralSetting.where('custom_user_field_one LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_one)
+      data << GeneralSetting.where('custom_user_field_two LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_two)
+    end
+    render json: data.flatten.uniq
+  end
+
   # def execute_in_bulk_action(activity)
   #   result = {}
   #   result['status'] = true

@@ -161,6 +161,7 @@ Groovepacks::Application.routes.draw do
       get 'order_exceptions'
       get 'order_serials'
       get 'export_csv'
+      get 'auto_complete'
       post 'restore'
       post 'save_columns_state'
       post 'cancel_bulk_action'
