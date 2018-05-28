@@ -87,8 +87,10 @@ class SettingsController < ApplicationController
 
   def get_settings
     @result = {'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'data'=> {}}
-    @result['scheduled_import_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).scheduled_import_toggle rescue false
-    @result['inventory_report_toggle'] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue false
+    current_tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    @result['scheduled_import_toggle'] = current_tenant.scheduled_import_toggle rescue false
+    @result['inventory_report_toggle'] = current_tenant.inventory_report_toggle rescue false
+    @result['is_multi_box'] = current_tenant.is_multi_box rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_settings = GeneralSetting.all.first

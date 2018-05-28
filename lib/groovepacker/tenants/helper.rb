@@ -238,6 +238,11 @@ module Groovepacker
         begin
           Apartment::Tenant.switch(tenant.name)
           @access_restriction = AccessRestriction.all.last
+          unless params["basicinfo"]["is_multi_box"]
+            setting = GeneralSetting.all.first
+            setting.update_attribute(:multi_box_shipments, false)
+          end
+
           return result unless @access_restriction
           access_restrictions_info = params["access_restrictions_info"]
           retrieve_and_save_restrictions(@access_restriction, access_restrictions_info)
