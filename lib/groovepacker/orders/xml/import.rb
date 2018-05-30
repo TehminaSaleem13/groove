@@ -27,34 +27,40 @@ module Groovepacker
           end
           # update all order related info
           order_persisted = order.persisted? ? true : false
-          if order.save
-            order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
-            # @order[:order_items] = @order.order_items
-            order_item_result = process_order_items(order, @order)
-            if order_item_result[:status]
-              order.reload
-              # update order status
-              order.update_order_status
+          begin
+            if order.save!
+              order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
+              # @order[:order_items] = @order.order_items
+              order_item_result = process_order_items(order, @order)
+              if order_item_result[:status]
+                order.reload
+                # update order status
+                order.update_order_status
+              else
+                # order.destroy
+              end
+              result[:status] = order_item_result[:status]
+              result[:errors] = order_item_result[:errors]
             else
-              # order.destroy
+              result[:status] = false
+              result[:errors] = order.errors.full_messages
+              result[:order] = nil
             end
-            result[:status] = order_item_result[:status]
-            result[:errors] = order_item_result[:errors]
-          else
-            result[:status] = false
-            result[:errors] = order.errors.full_messages
-            result[:order] = nil
-          end
-          if result[:status]
-            upload_res = @order.save
-            if upload_res.nil?
-              result[:status] = false 
-              result[:errors] = ["Error uploading to S3."]
-            else
-              order.import_s3_key = upload_res
-              order.save
+            if result[:status]
+              upload_res = @order.save
+              if upload_res.nil?
+                result[:status] = false 
+                result[:errors] = ["Error uploading to S3."]
+              else
+                order.import_s3_key = upload_res
+                order.save!
+              end
             end
+          rescue Exception => e
+            logger = Logger.new("#{Rails.root}/log/error_log_order_save_on_csv_import_#{Apartment::Tenant.current}.log")
+            logger.info("Order save Error ============#{e}")
           end
+
           setting = ScanPackSetting.all.first
           order.order_items.map(&:product).each do |product|  
             #product.set_product_status
@@ -91,19 +97,31 @@ module Groovepacker
                   end
                   # if all are finished then mark as completed
                   if import_item.previous_imported + import_item.success_imported == @order.total_count
-                    import_item.status = "completed"
-                    if @ftp_flag == "true"
-                      groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
-                      response = groove_ftp.update(@file_name)
-                      ftp_csv_import = Groovepacker::Orders::Import.new
-                      ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
+                    if check_count_is_equle?
+                      import_item.status = "completed"
+                      if @ftp_flag == "true"
+                        groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
+                        response = groove_ftp.update(@file_name)
+                        ftp_csv_import = Groovepacker::Orders::Import.new
+                        ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
+                      end
+                    else
+                      import_item.status = "cancelled"
+                      ImportMailer.order_skipped(@file_name, @skipped_count, @order.store_id, @skipped_ids).deliver
+                      if @ftp_flag == "true"
+                        ftp_csv_import = Groovepacker::Orders::Import.new
+                        ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
+                      end
                     end
                   end
                   import_item.save
                 end
               end
-            rescue Exception => ex
-              
+            rescue Exception => e
+              logger = Logger.new("#{Rails.root}/log/error_log_csv_import_#{Apartment::Tenant.current}.log")
+              logger.info("=========================================")
+              logger.info(e)
+              logger.info(e.backtrace.join(",")) rescue logger.info(e)
             end
           end
 
@@ -111,6 +129,18 @@ module Groovepacker
         end
 
         private
+        def check_count_is_equle?
+          logger = Logger.new("#{Rails.root}/log/check_count_#{Apartment::Tenant.current}.log")
+          orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
+          logger.info("orders array from redis ============================== #{orders}")
+          $redis.expire("#{Apartment::Tenant.current}_csv_file_increment_id_index", 1)
+          db_orders = Order.where(increment_id: orders).map(&:increment_id)
+          return true if db_orders.count == @order.total_count && orders.count == @order.total_count
+          @skipped_count = @order.total_count - db_orders.count
+          @skipped_ids = orders - db_orders
+          false
+        end
+
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
           if order.order_items.empty?

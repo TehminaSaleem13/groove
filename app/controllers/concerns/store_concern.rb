@@ -203,6 +203,9 @@ module StoreConcern
       map_data.name = params[:name]
       map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence], :map => params[:map] }
       map_data.save!
+      map_data.map[:map].values.each_with_index do |data, index|
+        $redis.set("#{Apartment::Tenant.current}_csv_file_increment_id_index", index)  if data[:value] == "increment_id"
+      end
       csv_map.save!
     rescue ActiveRecord::RecordInvalid
       @result['status'] = false

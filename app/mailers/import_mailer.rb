@@ -49,4 +49,14 @@ class ImportMailer < ActionMailer::Base
     subject = "[#{@current_tenant}] [#{Rails.env}] products import for Store: #{@credential.store.name} is complete"
     mail to: "#{system_notifications_email}", bcc: ENV["PRODUCTS_IMPORT_COMPLETE_EMAILS"], subject: subject
   end
+
+  def order_skipped file_name, skip_count, store_id, skip_ids
+    @file_name = file_name
+    @skip_count = skip_count
+    @skip_ids = skip_ids
+    @store = Store.find_by_id(store_id)
+    @current_tenant = Apartment::Tenant.current
+    subject = "Import order skipped"
+    mail to: ENV["SKIPPED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
+  end
 end

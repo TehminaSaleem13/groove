@@ -20,7 +20,6 @@ class ImportCsv
         replace: '', # Use a blank for those replacements
         universal_newline: true # Always break lines with \n
       }
-
       if params[:flag] == 'ftp_download'
         groove_ftp = FTP::FtpConnectionManager.get_instance(store)
         response = groove_ftp.download(tenant)
@@ -50,6 +49,7 @@ class ImportCsv
                    end if !(store.csv_beta && params[:type] == "order") 
         set_file_path(params, file_path)
       end
+      set_data_for_csv_import_count(params[:file_path]) if params[:file_path]
       $redis.set("#{Apartment::Tenant.current}_csv_filename", params[:file_name])
       $redis.expire("#{Apartment::Tenant.current}_csv_filename", 18000)
       if csv_file.nil? && !store.csv_beta || file_path.blank? 
@@ -179,5 +179,31 @@ class ImportCsv
     system 'mkdir', '-p', "csv_files/#{tenant}"
     file_path = nil
     file_path = "#{Rails.root}/csv_files/#{tenant}/#{params[:file_name]}"
+  end
+
+  def set_data_for_csv_import_count file_path
+    begin
+      require 'csv'
+      $redis.expire("#{Apartment::Tenant.current}_csv_array", 0)
+      logger = Logger.new("#{Rails.root}/log/set_data_for_csv_import_count_#{Apartment::Tenant.current}.log")
+      logger.info("file Path =============== #{file_path}")
+      csv_text_data = File.read(file_path)
+      logger.info("csv text =============== #{csv_text_data}")
+
+      csv = CSV.parse(csv_text_data, :headers => true)
+      column_number = $redis.get("#{Apartment::Tenant.current}_csv_file_increment_id_index").to_i
+      logger.info("column index =============== #{column_number}")
+
+      order_numbers = []
+      csv.each do |row|
+        column_name = row.as_json[column_number][0]
+        order_numbers << row[column_name] unless row[column_name].blank? 
+      end
+      $redis.sadd("#{Apartment::Tenant.current}_csv_array", order_numbers.uniq)
+      logger.info("set redis array =============== #{order_numbers.uniq}")
+    rescue Exception => e
+      logger = Logger.new("#{Rails.root}/log/set_data_for_csv_import_count_error_#{Apartment::Tenant.current}.log")
+      logger.info("Error ================= #{e}")
+    end
   end
 end

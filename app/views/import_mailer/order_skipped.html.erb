@@ -1,0 +1,14 @@
+<h3> <%= @skip_count %> order has skipped:</h3>
+<p><strong>Tenant Name: </strong><%= @current_tenant %></p>
+<strong>Store id: </strong><%= @store.try(:id) %>
+<p>
+  <strong>Store type: </strong><%= @store.try(:store_type) %>
+</p>
+<p><strong>Import Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
+<p><strong>File Name: </strong><%= @file_name %></p>
+<p><strong>Skipped Order number: 
+<ul>
+<% @skip_ids.each do |id| %>
+  <li><%= id %></li>
+<% end %>
+</ul>
