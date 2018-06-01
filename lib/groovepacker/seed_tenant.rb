@@ -55,7 +55,7 @@ module Groovepacker
       end
 
       if ScanPackSetting.all.length == 0
-        ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number => false)
+        ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number => false, :intangible_setting_enabled => true, :intangible_setting_gen_barcode_from_sku => true, :intangible_string => "Coupon:")
       end
 
       [
