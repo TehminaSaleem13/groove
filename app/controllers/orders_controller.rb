@@ -203,7 +203,11 @@ class OrdersController < ApplicationController
   end
 
   def generate_all_packing_slip
-    @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
+    if params[:ids].blank?
+      @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
+    else
+      @orders = Order.where(id: params[:ids].split(",")) 
+    end
   end
 
   def cancel_packing_slip
