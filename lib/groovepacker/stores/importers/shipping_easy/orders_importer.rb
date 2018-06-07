@@ -17,8 +17,21 @@ module Groovepacker
             @result[:total_imported] = response["orders"].uniq.length
             update_import_item_obj_values
             uniq_response = response["orders"].uniq rescue []
-            uniq_response.each do |order|
-              order_copy = order["order"]
+            uniq_response = uniq_response.group_by { |d| d["external_order_identifier"]}
+            uniq_response.each do |key, orders|
+              if orders.count > 1
+                orders.each_with_index do |odr, index|
+                  unless index == 0
+                    if orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
+                      orders.first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
+                      orders.first["recipients"].first["line_items"].flatten!
+                      orders.first["shipments"] << odr["shipments"]
+                      orders.first["shipments"].flatten!
+                    end
+                  end
+                end
+              end
+              order_copy = orders.first
               order = order_copy unless order_copy.blank? 
               @order_to_update = false 
               import_item_fix
