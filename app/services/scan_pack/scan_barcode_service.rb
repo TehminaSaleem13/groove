@@ -113,7 +113,7 @@ module ScanPack
       @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
     end
 
-    def do_if_packing_count_present
+    def do_if_packing_count_present(rem_qty, barcode, packing_count)
       if rem_qty.present? && rem_qty >= packing_count.to_i
         product_scan_object = ScanPack::ProductScanService.new(
           [
