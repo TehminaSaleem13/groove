@@ -19,13 +19,8 @@ class UsersController < ApplicationController
     if current_user.can? 'add_edit_users'
       new_user = false
       if params[:id].nil?
-        if User.can_create_new?
-          @user = User.new
-          new_user = true
-        else
-          result['status'] = false
-          result['messages'].push('You have reached the maximum limit of number of users for your subscription.')
-        end
+        @user = User.new
+        new_user = true
       else
         @user = User.find(params[:id])
       end
@@ -98,11 +93,14 @@ class UsersController < ApplicationController
           role.save
         end
 
-
         if @user.save
           result['user'] = @user.attributes
           result['user']['role'] = @user.role.attributes
           result['user']['current_user'] = current_user
+
+          # update the plan amount with adding 50$/user
+          update_plan_amount("add") if new_user
+
           # send user data to groovelytics server if the user is newly created.
           if new_user && !Rails.env.test?
             tenant_name = Apartment::Tenant.current
@@ -338,18 +336,27 @@ class UsersController < ApplicationController
     result['status'] = true
     result['messages'] = []
     if current_user.can? 'add_edit_users'
+      users = []
+      user_count = User.where(active: true, is_deleted: false).count
       params['_json'].each do |user|
         unless user['id'] == current_user.id
-          @user = User.find(user['id'])
-          @user.username += '-' + Random.rand(10000000..99999999).to_s
-          @user.is_deleted = true
-          @user.active = false
-          @user.save
-          HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
-                  query: { username: @user.username, packing_user_id: @user.id },
-                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
+          if user_count - users.count > 3
+            # @user = User.find(user['id'])
+            # @user.username += '-' + Random.rand(10000000..99999999).to_s
+            # @user.is_deleted = true
+            # @user.active = false
+            # @user.save
+            # HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
+            #         query: { username: @user.username, packing_user_id: @user.id },
+            #         headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
+            users << @user
+          else
+            result['status'] = false
+            result['messages'].push("You need at least two user")
+          end
         end
       end
+      StripeInvoiceEmail.user_delete_request_email(users).deliver if users.any?
     else
       result['status'] = false
       result['messages'].push("Current user doesn't have permission to delete users")

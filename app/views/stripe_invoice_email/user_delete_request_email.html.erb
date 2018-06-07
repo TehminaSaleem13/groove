@@ -1,0 +1,10 @@
+<div>
+  <h2>User Delete Request</h2>
+  <strong>Tenant Name : <%= @tenant %></strong> 
+  
+  <% @users.each do |user| %>
+    <div>
+      <strong>Username : <%= user.username %></strong><br> 
+    </div>
+  <% end %>
+</div>
