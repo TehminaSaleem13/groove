@@ -25,8 +25,8 @@ module Groovepacker
                     if orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
                       orders.first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
                       orders.first["recipients"].first["line_items"].flatten!
-                      orders.first["shipments"] << odr["shipments"]
-                      orders.first["shipments"].flatten!
+                      # orders.first["shipments"] << odr["shipments"]
+                      # orders.first["shipments"].flatten!
                     end
                   end
                 end

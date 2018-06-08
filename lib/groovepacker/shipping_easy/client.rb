@@ -48,8 +48,8 @@ module Groovepacker
               if response["orders"].first["external_order_identifier"] == odr["external_order_identifier"] && response["orders"].first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
                 response["orders"].first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
                 response["orders"].first["recipients"].first["line_items"].flatten!
-                response["orders"].first["shipments"] << odr["shipments"]
-                response["orders"].first["shipments"].flatten!
+                # response["orders"].first["shipments"] << odr["shipments"]
+                # response["orders"].first["shipments"].flatten!
               end
             end
           end
