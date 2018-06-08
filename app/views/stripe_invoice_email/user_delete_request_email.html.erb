@@ -4,7 +4,11 @@
   
   <% @users.each do |user| %>
     <div>
-      <strong>Username : <%= user.username %></strong><br> 
+      <% @user_names.each do |user_names| %>
+        <strong>Username : <%= user_names["username"] if user_names["id"] == user.id %></strong><br>
+      <% end %>
+      <strong>Created at : <%= user.created_at %></strong><br>
+      <strong>Deleted at : <%= user.updated_at %></strong><br><br> 
     </div>
   <% end %>
 </div>

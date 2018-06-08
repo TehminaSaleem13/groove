@@ -53,8 +53,9 @@ class StripeInvoiceEmail < ActionMailer::Base
     end
   end
 
-  def user_delete_request_email users
+  def user_delete_request_email users, user_names
     @users = users
+    @user_names = user_names
     @tenant = Apartment::Tenant.current
     mail to: ['groovepacker@gmail.com', 'groovepackerservice@gmail.com'],
          subject: "GroovePacker user delete request"

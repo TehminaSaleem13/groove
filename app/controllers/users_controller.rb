@@ -337,18 +337,20 @@ class UsersController < ApplicationController
     result['messages'] = []
     if current_user.can? 'add_edit_users'
       users = []
+      user_names = []
       user_count = User.where(active: true, is_deleted: false).count
       params['_json'].each do |user|
         unless user['id'] == current_user.id
           if user_count - users.count > 3
-            # @user = User.find(user['id'])
-            # @user.username += '-' + Random.rand(10000000..99999999).to_s
-            # @user.is_deleted = true
-            # @user.active = false
-            # @user.save
-            # HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
-            #         query: { username: @user.username, packing_user_id: @user.id },
-            #         headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
+            @user = User.find(user['id'])
+            user_names << { "id" => @user.id, "username" => @user.username }
+            @user.username += '-' + Random.rand(10000000..99999999).to_s
+            @user.is_deleted = true
+            @user.active = false
+            @user.save
+            HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
+                    query: { username: @user.username, packing_user_id: @user.id },
+                    headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
             users << @user
           else
             result['status'] = false
@@ -356,7 +358,7 @@ class UsersController < ApplicationController
           end
         end
       end
-      StripeInvoiceEmail.user_delete_request_email(users).deliver if users.any?
+      StripeInvoiceEmail.user_delete_request_email(users, user_names).deliver if users.any?
     else
       result['status'] = false
       result['messages'].push("Current user doesn't have permission to delete users")
