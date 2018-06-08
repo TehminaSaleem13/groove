@@ -114,15 +114,7 @@ module Groovepacker
                       end
                     end
                   end
-                  if import_item.save
-                    logger = Logger.new("#{Rails.root}/log/csv_import_save#{Apartment::Tenant.current}.log")
-                    logger.info("============= Import save ==============")
-                  else
-                    logger = Logger.new("#{Rails.root}/log/csv_import_save_faild#{Apartment::Tenant.current}.log")
-                    logger.info("============= Import save faild ==============")
-                  end
-                    logger.info("import item id: #{import_item.id}")
-                    logger.info("order id: #{order.id}, order increment_id #{order.increment_id}")
+                  import_item.save
                 end
               end
             rescue Exception => e
