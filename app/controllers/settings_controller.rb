@@ -288,8 +288,13 @@ class SettingsController < ApplicationController
     data = []
     Tenant.all.each do |tenant|
       Apartment::Tenant.switch(tenant.name)
-      data << GeneralSetting.where('custom_user_field_one LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_one)
-      data << GeneralSetting.where('custom_user_field_two LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_two)
+      if params[:type] == 'general_settings'
+        data << GeneralSetting.where('custom_user_field_one LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_one)
+        data << GeneralSetting.where('custom_user_field_two LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_two)
+      else
+        data << User.where('custom_field_one LIKE ?', "%#{params[:value]}%").map(&:custom_field_one)
+        data << User.where('custom_field_two LIKE ?', "%#{params[:value]}%").map(&:custom_field_two)
+      end
     end
     render json: data.flatten.uniq
   end
