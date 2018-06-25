@@ -104,7 +104,6 @@ Groovepacks::Application.routes.draw do
       post 'get_id'
       post 'import_xml'
       post 'bulk_import_xml'
-      get 'next_split_order'
     end
     member do
       post 'add_item_to_order'
