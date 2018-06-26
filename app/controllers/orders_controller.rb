@@ -322,6 +322,24 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def next_split_order
+    key_array = params[:id].split("-")
+    if key_array.count == 1
+      key = key_array.first
+    else
+      last_value = Integer(key_array.last) rescue nil
+      if last_value.blank?
+        key = key_array.join("-")
+      elsif last_value.between?(1, 50)
+        key = key_array.pop.join('-') rescue key_array.first
+      else
+        key = key_array.join('-')
+      end
+    end
+    order = Order.where("increment_id LIKE ? AND increment_id != ? AND status != ?", "#{key}%", params[:id], "scanned").order("created_at asc").first
+    render json: order
+  end
+
   # def match
   #   @matching_orders = Order.where('postcode LIKE ?', "#{params['confirm']['postcode']}%")
   #   unless @matching_orders.nil?

@@ -17,9 +17,12 @@ module Groovepacker
             @result[:total_imported] = response["orders"].uniq.length
             update_import_item_obj_values
             uniq_response = response["orders"].uniq rescue []
-            uniq_response = uniq_response.group_by { |d| d["external_order_identifier"]}
-            uniq_response.each do |key, orders|
-              if orders.count > 1
+            verify_separately = @import_item.store.is_verify_separately
+            @group_orders = uniq_response.group_by { |d| d["external_order_identifier"]}
+            uniq_response = @group_orders unless verify_separately
+            uniq_response = uniq_response.values unless verify_separately
+            uniq_response.each do |orders|
+              if !verify_separately && orders.count > 1
                 orders.each_with_index do |odr, index|
                   unless index == 0
                     if orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
@@ -31,9 +34,9 @@ module Groovepacker
                   end
                 end
               end
-              order_copy = orders.first
-              order = order_copy unless order_copy.blank? 
-              @order_to_update = false 
+              order_copy = verify_separately ? orders : orders.first
+              order = order_copy unless order_copy.blank?
+              @order_to_update = false
               import_item_fix
               break if @import_item.status == 'cancelled'
               import_single_order(order)
@@ -52,13 +55,35 @@ module Groovepacker
             import_single_order(response["orders"][0]) rescue nil
           end
 
-          private
+          private 
             def import_single_order(order)
               update_current_import_item(order)
-              
-              shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
-              shiping_easy_order = Order.new if shiping_easy_order.blank?
-              return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
+              if order["shipments"].any?
+                shiping_easy_order = Order.find_by_shipment_id(order["shipments"][0]["id"]) rescue nil
+              else
+                shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
+                if shiping_easy_order && @group_orders && @import_item.store.is_verify_separately
+                  g_orders = Marshal.load(Marshal.dump(@group_orders[order["external_order_identifier"]]))
+                  g_orders.each_with_index do |odr, index|
+                    unless index == 0
+                      if g_orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
+                        g_orders.first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
+                        g_orders.first["recipients"].first["line_items"].flatten!
+                      end
+                    end
+                  end
+                  order = g_orders.first
+                end
+              end
+              if shiping_easy_order.blank?
+                shiping_easy_order = Order.where("increment_id LIKE ?","#{order['external_order_identifier']}%")
+                order['external_order_identifier'] = "#{order['external_order_identifier']}-#{shiping_easy_order.count}" if shiping_easy_order.count > 0   
+                shiping_easy_order = Order.new
+              else
+                return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
+                order['external_order_identifier'] = shiping_easy_order.increment_id
+              end
+              # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned"
               @order_to_update = true if shiping_easy_order.persisted?
               shiping_easy_order.order_items.destroy_all
               shiping_easy_order.store_id = @credential.store_id
