@@ -49,6 +49,7 @@ class SubscriptionsController < ApplicationController
         render json: create_store_and_credential
       end
     else
+      @subscription.destroy
       render json: {
         valid: false,
         progress: @subscription.progress,
@@ -57,7 +58,7 @@ class SubscriptionsController < ApplicationController
     end
   end
 
-  def valid_tenant_name
+  def valid_tenant_name    
     result = {}
     result['valid'] = true
     result['message'] = ''
