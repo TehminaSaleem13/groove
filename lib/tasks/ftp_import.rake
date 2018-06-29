@@ -8,7 +8,7 @@ namespace :ftp_csv_file_import do
     Tenant.all.each do |tenant|
       begin
         Apartment::Tenant.switch "#{tenant.name}"
-        import_no_inprogress = OrderImportSummary.where(status: ['in_progress', "not_started"]).blank?
+        import_no_inprogress = OrderImportSummary.where("status LIKE ? and updated_at >= ?", ['in_progress', "not_started"], DateTime.now - 1.hour).blank?
         item = !ImportItem.includes(:store).where(:stores => {:store_type => "CSV"}).map(&:status).include?("in_progress")
         # cred = !Store.where("csv_beta = ? and status = ?", true, true).map(&:ftp_credential).map(&:use_ftp_import).include?(true) rescue true
         # general_setting = GeneralSetting.last 
