@@ -16,6 +16,7 @@ namespace :ftp_csv_file_import do
         # current_time = (Time.now.utc + general_setting.time_zone.to_i).strftime("%H:%M")
         # from_import = general_setting.from_import.strftime("%H:%M")
         # to_import = general_setting.to_import.strftime("%H:%M")
+        other_tenants_logger.info("#{tenant.name} -  Current Time #{current_time} : UTC Time #{Time.now.utc} : ImportItem #{item.try(:status)} : OrderImportSummary #{import_no_inprogress.try(:status)}")
         if import_no_inprogress && item 
           puts "starting the rake task"
           ftp_csv_import = Groovepacker::Orders::Import.new
