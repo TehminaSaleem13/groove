@@ -13,9 +13,9 @@ class ProductKitSkus < ActiveRecord::Base
   def add_product_in_order_items
     tenant = Apartment::Tenant.current
     @order_items = OrderItem.where(:product_id => self.product_id)
-    if @order_items.count > 50
+    if @order_items.count > 50 
       kit_sku = Groovepacker::Products::BulkActions.new
-      kit_sku.delay.update_ordere_item_kit_product(tenant, self.product_id, self.id)
+      kit_sku.delay(:run_at => 2.seconds.from_now).update_ordere_item_kit_product(tenant, self.product_id, self.id)
     else
       @order_items.each do |order_item| 
         if !OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(self.id)
