@@ -17,8 +17,12 @@ module Groovepacker
             @result[:total_imported] = response["orders"].uniq.length
             update_import_item_obj_values
             uniq_response = response["orders"].uniq rescue []
-            verify_separately = @import_item.store.is_verify_separately
-            @split_order = @import_item.store.split_order
+            verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
+            if @import_item.store.split_order != "disabled" || @import_item.store.split_order != "0" 
+              @split_order = true
+            else
+              @split_order = false
+            end
             if @split_order
               @group_orders = uniq_response.group_by { |d| d["external_order_identifier"]}
               uniq_response = @group_orders unless verify_separately
@@ -70,7 +74,7 @@ module Groovepacker
                   shiping_easy_order = Order.find_by_shipment_id(order["shipments"][0]["id"]) rescue nil
                 else
                   shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
-                  if shiping_easy_order && @group_orders && @import_item.store.is_verify_separately
+                  if shiping_easy_order && @group_orders && @import_item.store.split_order == "verify_separately"
                     g_orders = Marshal.load(Marshal.dump(@group_orders[order["external_order_identifier"]]))
                     g_orders.each_with_index do |odr, index|
                       unless index == 0

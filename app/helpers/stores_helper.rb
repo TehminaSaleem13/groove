@@ -43,7 +43,6 @@ module StoresHelper
     @store.auto_update_products = params[:auto_update_products]
     @store.on_demand_import = params[:on_demand_import]
     @store.update_inv = params[:update_inv]
-    @store.is_verify_separately = params[:is_verify_separately]
     @store.split_order = params[:split_order]
     @store.save
   end
