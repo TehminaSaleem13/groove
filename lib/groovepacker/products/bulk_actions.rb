@@ -10,14 +10,15 @@ module Groovepacker
         on_demand_logger = Logger.new("#{Rails.root}/log/check_order_item_kit_products.log")
         order_items.each do |order_item|
           order_item_kit_product = OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id)
-          if !order_item_kit_product.include?(product_kit_sku_id.to_i)
+          is_kit_sku_notexist = order_item_kit_product.include?(product_kit_sku_id.to_i)
+          unless is_kit_sku_notexist
           # if !OrderItemKitProduct.where("order_item_id  = ? and product_kit_skus_id = ?", order_item.id, product_kit_skus_id)
             on_demand_logger.info("=========================================")
-            on_demand_logger.info("#{tenant} -- OrderItemId: #{order_item.id} -- ProductKitSkusId: #{product_kit_sku_id} -- kit_product_exist: #{order_item_kit_product}")
+            on_demand_logger.info("#{tenant} -- OrderItemId: #{order_item.id} -- ProductKitSkusId: #{product_kit_sku_id} -- kit_product_exist: #{order_item_kit_product} -- is_kit: #{is_kit_sku_notexist}")
             order_item_kit_product = OrderItemKitProduct.new
             order_item_kit_product.product_kit_skus = ProductKitSkus.find(product_kit_sku_id)
             order_item_kit_product.order_item = order_item
-            order_item_kit_product.save
+            order_item_kit_product.save unless OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(product_kit_sku_id.to_i)
           end
         end
       end
