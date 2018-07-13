@@ -109,6 +109,7 @@ module Groovepacker
             subscription = tenant.subscription if tenant.subscription
             CreateTenant.new.apply_restrictions_and_seed(subscription)
           end
+          result 
         rescue Exception => e
           result['status'] = false
           result['error_messages'].push(e.message);
@@ -152,7 +153,6 @@ module Groovepacker
         groove_bulk_actions.identifier = 'product'
         groove_bulk_actions.activity = 'delete'
         groove_bulk_actions.save
-
         bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
       end
 
@@ -601,7 +601,6 @@ module Groovepacker
         end
 
         return unless query.present?
-
         @latest_scanned_orders_per_tenant.merge!(
           Order.find_by_sql(query).group_by { |order| order.tenant_name })
       end
