@@ -135,15 +135,18 @@ module Groovepacker
             products_kit_skus
               .select{ |pkss| pkss.option_product_id == product.id }
               .each do |product_kit_sku|
-                product_kit_sku.product.status = 'new'
-                product_kit_sku.product.save
-                product_kit_sku.product.product_kit_activities.create(
-                  activity_message: "An item with Name #{product.name} and " +
-                    "SKU #{product.primary_sku} has been deleted",
-                  username: username,
-                  activity_type: 'deleted_item'
-                )
-                product_kit_sku.destroy
+                begin  
+                  product_kit_sku.product.status = 'new'
+                  product_kit_sku.product.save
+                  product_kit_sku.product.product_kit_activities.create(
+                    activity_message: "An item with Name #{product.name} and " +
+                      "SKU #{product.primary_sku} has been deleted",
+                    username: username,
+                    activity_type: 'deleted_item'
+                  )
+                  product_kit_sku.destroy
+                rescue 
+                end  
               end
 
             if product.destroy
