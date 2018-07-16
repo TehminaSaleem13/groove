@@ -328,6 +328,7 @@ class OrdersController < ApplicationController
       key = key_array.first
     else
       last_value = Integer(key_array.last) rescue nil
+      last_value = nil if key_array.last[0] == "0"
       if last_value.blank?
         key = key_array.join("-")
       elsif last_value.between?(1, 50)
