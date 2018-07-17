@@ -13,11 +13,10 @@ class ProductKitSkus < ActiveRecord::Base
   def add_product_in_order_items
     tenant = Apartment::Tenant.current
     @order_items = OrderItem.where(:product_id => self.product_id)
-    # if @order_items.count > 50 
-    #   kit_sku = Groovepacker::Products::BulkActions.new
-    #   sleep 0.025
-    #   kit_sku.delay(:run_at => 3.seconds.from_now).update_ordere_item_kit_product(tenant, self.product_id, self.id)
-    # else
+    if @order_items.count > 50 
+      kit_sku = Groovepacker::Products::BulkActions.new
+      kit_sku.delay(:run_at => 3.seconds.from_now, :queue => "order_item_kit_product").update_ordere_item_kit_product(tenant, self.product_id, self.id)
+    else
       @order_items.each do |order_item| 
         unless OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(self.id)
           order_item_kit_product = OrderItemKitProduct.new
@@ -26,7 +25,7 @@ class ProductKitSkus < ActiveRecord::Base
           order_item_kit_product.save
         end
       end
-    #end
+    end
     true
   end
 
