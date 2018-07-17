@@ -332,7 +332,8 @@ class OrdersController < ApplicationController
       if last_value.blank?
         key = key_array.join("-")
       elsif last_value.between?(1, 50)
-        key = key_array.pop.join('-') rescue key_array.first
+        key_array.pop
+        key = key_array.join('-') rescue key_array.first
       else
         key = key_array.join('-')
       end
