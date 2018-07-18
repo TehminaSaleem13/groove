@@ -119,8 +119,8 @@ module Groovepacker
 		    else
 		      @shipstation = @shipstation.first
 		    end
-		    @shipstation.api_key = params[:api_key]
-		    @shipstation.api_secret = params[:api_secret]
+		    @shipstation.api_key = params[:api_key] || "API KEY"
+		    @shipstation.api_secret = params[:api_secret] || "API SECRET"
 		    @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
 		    @shipstation.shall_import_shipped = params[:shall_import_shipped]
 		    @shipstation.shall_import_pending_fulfillment = params[:shall_import_pending_fulfillment]
