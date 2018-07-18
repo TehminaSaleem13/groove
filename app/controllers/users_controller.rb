@@ -339,10 +339,13 @@ class UsersController < ApplicationController
       users = []
       user_names = []
       user_count = User.where(active: true, is_deleted: false).count
+      super_admin_user = Role.find_by_name("Super Admin").users.where(active: true, is_deleted: false)
+      super_admin_user_count= super_admin_user.count
       params['_json'].each do |user|
         unless user['id'] == current_user.id
-          if user_count - users.count > 3
-            @user = User.find(user['id'])
+          @user = User.find(user['id'])
+          if (user_count > 1 && @user.role.name != "Super Admin" ) ||  (super_admin_user[0].role.name ==  @user.role.name && super_admin_user_count >= 2   )
+            super_admin_user_count = super_admin_user_count - 1 if ( super_admin_user.any? && super_admin_user[0].role.name ==  @user.role.name)
             user_names << { "id" => @user.id, "username" => @user.username }
             @user.username += '-' + Random.rand(10000000..99999999).to_s
             @user.is_deleted = true
@@ -354,7 +357,7 @@ class UsersController < ApplicationController
             users << @user
           else
             result['status'] = false
-            result['messages'].push("You need at least two user")
+            result['messages'].push("You have need at least one user")
           end
         end
       end
