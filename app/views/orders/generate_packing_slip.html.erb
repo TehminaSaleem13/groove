@@ -6311,8 +6311,15 @@
       <% order_count = 0 %>
       <% order_items.each do |order_item| %>
         <% unless order_item.product.is_intangible %>
-          <% order_count = order_count + order_item.qty %>
+          <% order_item_qty = order_item.order_item_kit_products.any? ? 0 : order_item.qty %>
+          <% order_count = order_count + order_item_qty %>
         <% end %>
+        <%if order_item.order_item_kit_products.any? %>
+          <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
+            <% product_kit_sku = order_item_kit_product.product_kit_skus%>
+            <% order_count = order_count + order_item.qty * product_kit_sku.qty  %>
+          <%end%>
+        <%end%>
       <% end %>
 
       <div class="row">
@@ -6392,8 +6399,27 @@
                 </td>
                 <td>
                   <center><%= order_item.qty %></center>
-                </td>
-              </tr>
+                </td> 
+              </tr> 
+               <%if  order_item.order_item_kit_products.any? %>
+                  <tr>
+                    <td  colspan="4" style="background: #000; color: #fff;"><b>Kit-parts</b></td>
+                  </tr>
+                  <%  order_item.order_item_kit_products.each do |order_item_kit_product| %>
+                    <% product_kit_sku = order_item_kit_product.product_kit_skus%>
+                    <tr style="position: relative;border: solid #333;border-width: 4px;">
+                      <% product= Product.find(product_kit_sku.option_product_id)%>
+                      <td><%=product.primary_sku%></td>
+                      <td><%=product.name%></td>
+                      <td>
+                        <% product.product_inventory_warehousess.each do |warehouse| %>
+                          <%= warehouse.location_primary %>
+                        <% end %>
+                      </td>
+                      <td><%=order_item.qty * product_kit_sku.qty %></td>
+                    </tr>
+                  <%end%>    
+               <%end%>
             <% end %>
           <% end %>
         </table>
@@ -6433,8 +6459,15 @@
         <% order_count = 0 %>
         <% order_items.each do |order_item| %>
           <% unless order_item.product.is_intangible %>
-            <% order_count = order_count + order_item.qty %>
+            <% order_item_qty = order_item.order_item_kit_products.any? ? 0 : order_item.qty %>
+            <% order_count = order_count + order_item_qty %>
           <% end %>
+          <%if order_item.order_item_kit_products.any? %>
+            <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
+              <% product_kit_sku = order_item_kit_product.product_kit_skus%>
+              <% order_count = order_count + order_item.qty * product_kit_sku.qty  %>
+            <%end%>
+        <%end%>
         <% end %>
 
         <div class="row">
@@ -6519,9 +6552,28 @@
                     <% else %>
                       <center><%= order_item_scanned_qty(order_item, box) %></center>
                     <% end %>
-                  </td>
+                  </td>  
                 </tr>
               <% end %>
+               <%if  order_item.order_item_kit_products.any? %>
+                  <tr>
+                    <td  colspan="4" style="background: #000; color: #fff;"><b>Kit-parts</b></td>
+                  </tr>
+                  <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
+                    <% product_kit_sku = order_item_kit_product.product_kit_skus%>
+                    <tr style="position: relative;border: solid #333;border-width: 4px;">
+                      <% product= Product.find(product_kit_sku.option_product_id)%>
+                      <td><%=product.primary_sku%></td>
+                      <td><%=product.name%></td>
+                      <td>
+                        <% product.product_inventory_warehousess.each do |warehouse| %>
+                          <%= warehouse.location_primary %>
+                        <% end %>
+                      </td>
+                      <td><%=order_item.qty * product_kit_sku.qty %></td>
+                    </tr>
+                  <%end%>    
+               <%end%>
             <% end %>
           </table>
         </div>
