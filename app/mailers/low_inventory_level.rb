@@ -36,7 +36,7 @@ class LowInventoryLevel < ActionMailer::Base
     # end
     # products = Product.find_all_by_id(product_ids)
     products =
-      Product
+      Product.where('status != ?', "inactive")
       .joins(:product_inventory_warehousess)
       .includes(
         :product_skus,
