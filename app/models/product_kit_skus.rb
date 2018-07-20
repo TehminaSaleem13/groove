@@ -15,7 +15,9 @@ class ProductKitSkus < ActiveRecord::Base
     @order_items = OrderItem.where(:product_id => self.product_id)
     if @order_items.count > 50 
       kit_sku = Groovepacker::Products::BulkActions.new
-      kit_sku.delay(:run_at => 3.seconds.from_now, :queue => "order_item_kit_product").update_ordere_item_kit_product(tenant, self.product_id, self.id)
+      latest_job = Delayed::Job.where(queue: "order_item_kit_product").last
+      run_at = latest_job ? latest_job.run_at + 1.seconds : 1.seconds.from_now
+      kit_sku.delay(:run_at => run_at, :queue => "order_item_kit_product").update_ordere_item_kit_product(tenant, self.product_id, self.id)
     else
       @order_items.each do |order_item| 
         unless OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id).include?(self.id)
