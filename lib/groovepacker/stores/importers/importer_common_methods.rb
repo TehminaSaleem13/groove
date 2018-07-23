@@ -47,8 +47,7 @@ module Groovepacker
           #create and import product
           product = Product.create(name: item["name"], store: @credential.store, store_product_id: 0)
           product.product_skus.create(sku: sku)
-
-          if item["upc"].present?
+          if @credential.gen_barcode_from_sku &&  @credential.import_upc && item["upc"].present?
             product.product_barcodes.create(barcode: item["upc"])
           elsif @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
             product.product_barcodes.create(barcode: sku)

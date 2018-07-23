@@ -1,5 +1,5 @@
 class ShippingEasyCredential < ActiveRecord::Base
-  attr_accessible :api_key, :api_secret, :gen_barcode_from_sku, :import_ready_for_shipment, :import_shipped, :last_imported_at, :ready_to_ship, :store_api_key
+  attr_accessible :api_key, :api_secret, :gen_barcode_from_sku, :import_ready_for_shipment, :import_shipped, :last_imported_at, :ready_to_ship, :store_api_key, :import_upc
   before_save :check_if_null_or_undefined
 
   belongs_to :store

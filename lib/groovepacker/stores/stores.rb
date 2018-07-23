@@ -130,6 +130,7 @@ module Groovepacker
 		    @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
 		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku]
 		    @shipstation.return_to_order = params[:return_to_order]
+		    @shipstation.import_upc = params[:import_upc]
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
 		      @store.save!
@@ -148,7 +149,7 @@ module Groovepacker
 				params = @params
 		    @shippingeasy = @store.shipping_easy_credential || @store.create_shipping_easy_credential
 		    new_record = true unless @shippingeasy.persisted?
-		    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship] }
+		    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship], import_upc: params[:import_upc]  }
 		    @shippingeasy.save
 		    begin
 		      @store.save!
