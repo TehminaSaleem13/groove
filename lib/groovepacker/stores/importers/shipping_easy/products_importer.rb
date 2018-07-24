@@ -42,8 +42,8 @@ module Groovepacker
                                      weight: product_weight)
             
             product.product_skus.create(sku: sku)
-            if @credential.gen_barcode_from_sku && @credential.import_upc && item["product"]["upc"].present?
-              product.product_barcodes.create(barcode: item["product"]["upc"])
+            if @credential.gen_barcode_from_sku && @credential.import_upc && item["upc"].present?
+              product.product_barcodes.create(barcode: item["upc"])
             elsif @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
               product.product_barcodes.create(barcode: sku)
             end
