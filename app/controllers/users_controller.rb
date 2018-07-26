@@ -108,6 +108,7 @@ class UsersController < ApplicationController
             # send_user_info_obj.build_send_users_stream(tenant_name)
             send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
           else
+
             set_custom_fields
             HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
                   query: { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one: @custom_field_one, custom_field_two: @custom_field_two},
@@ -344,7 +345,7 @@ class UsersController < ApplicationController
       params['_json'].each do |user|
         unless user['id'] == current_user.id
           @user = User.find(user['id'])
-          if (user_count > 1 && @user.role.name != "Super Admin" ) ||  (super_admin_user[0].role.name ==  @user.role.name && super_admin_user_count >= 2   )
+          if (user_count > 1 && @user.role.name != "Super Admin" ) ||  (super_admin_user[0].try(:role).try(:name) ==  @user.role.name && super_admin_user_count >= 2   )
             super_admin_user_count = super_admin_user_count - 1 if ( super_admin_user.any? && super_admin_user[0].role.name ==  @user.role.name)
             user_names << { "id" => @user.id, "username" => @user.username }
             @user.username += '-' + Random.rand(10000000..99999999).to_s
