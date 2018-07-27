@@ -6304,6 +6304,7 @@
 </style>
 
 <body>
+<% get_display_kit_parts = GeneralSetting.all.first.display_kit_parts %>
 <% if @boxes.blank? %>
   <div class="container" style="margin-left: 60px; margin-top: 20px; margin-bottom: 0px; margin-right: 50px;">
     <% if !@order.nil? %>
@@ -6311,10 +6312,10 @@
       <% order_count = 0 %>
       <% order_items.each do |order_item| %>
         <% unless order_item.product.is_intangible %>
-          <% order_item_qty = order_item.order_item_kit_products.any? ? 0 : order_item.qty %>
+          <% order_item_qty = order_item.order_item_kit_products.any? && get_display_kit_parts ? 0 : order_item.qty %>
           <% order_count = order_count + order_item_qty %>
         <% end %>
-        <%if order_item.order_item_kit_products.any? %>
+        <%if order_item.order_item_kit_products.any? && get_display_kit_parts %>
           <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
             <% product_kit_sku = order_item_kit_product.product_kit_skus%>
             <% order_count = order_count + order_item.qty * product_kit_sku.qty  %>
@@ -6401,7 +6402,7 @@
                   <center><%= order_item.qty %></center>
                 </td> 
               </tr> 
-               <%if  order_item.order_item_kit_products.any? %>
+               <%if  order_item.order_item_kit_products.any? && get_display_kit_parts %>
                   <tr>
                     <td  colspan="4" style="background: #000; color: #fff;"><b>Kit-parts</b></td>
                   </tr>
@@ -6459,10 +6460,10 @@
         <% order_count = 0 %>
         <% order_items.each do |order_item| %>
           <% unless order_item.product.is_intangible %>
-            <% order_item_qty = order_item.order_item_kit_products.any? ? 0 : order_item.qty %>
+            <% order_item_qty = order_item.order_item_kit_products.any? && get_display_kit_parts ? 0 : order_item.qty %>
             <% order_count = order_count + order_item_qty %>
           <% end %>
-          <%if order_item.order_item_kit_products.any? %>
+          <%if order_item.order_item_kit_products.any? && get_display_kit_parts %>
             <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
               <% product_kit_sku = order_item_kit_product.product_kit_skus%>
               <% order_count = order_count + order_item.qty * product_kit_sku.qty  %>
@@ -6555,7 +6556,7 @@
                   </td>  
                 </tr>
               <% end %>
-               <%if  order_item.order_item_kit_products.any? %>
+               <%if  order_item.order_item_kit_products.any? && get_display_kit_parts %>
                   <tr>
                     <td  colspan="4" style="background: #000; color: #fff;"><b>Kit-parts</b></td>
                   </tr>
