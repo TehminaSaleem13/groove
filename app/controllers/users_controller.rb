@@ -73,7 +73,7 @@ class UsersController < ApplicationController
         else
           # Make sure we have at least one super admin
           if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
-            User.includes(:role).where('roles.make_super_admin = 1').length <= 2 && !@user.role.nil? && @user.role.make_super_admin
+            User.where( is_deleted: false).includes(:role).where('roles.make_super_admin = 1').length <= 2 && !@user.role.nil? && @user.role.make_super_admin 
             result['status'] = false
             result['messages'].push('The app needs at least one super admin at all times')
           elsif !current_user.can?('make_super_admin') &&
