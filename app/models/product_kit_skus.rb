@@ -16,7 +16,7 @@ class ProductKitSkus < ActiveRecord::Base
     if @order_items.count > 50 
       kit_sku = Groovepacker::Products::BulkActions.new
       latest_job = Delayed::Job.where(queue: "order_item_kit_product").last
-      run_at = latest_job ? latest_job.run_at + 1.seconds : 1.seconds.from_now
+      run_at = latest_job ? latest_job.run_at + 3.seconds : 1.seconds.from_now
       kit_sku.delay(:run_at => run_at, :queue => "order_item_kit_product").update_ordere_item_kit_product(tenant, self.product_id, self.id)
     else
       @order_items.each do |order_item| 
