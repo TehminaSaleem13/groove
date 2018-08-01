@@ -6378,9 +6378,9 @@
       <br>
 
       <div class="span12">
-        <table>
+        <table width="100">
           <thead>
-          <td> Item</td>
+          <td colspan="2"> Item</td>
           <td> Description</td>
           <td style="white-space: nowrap;"> Pr Loc.</td>
           <td>
@@ -6391,7 +6391,7 @@
           <% order_items.each do |order_item| %>
             <% unless order_item.product.is_intangible %>
               <tr>
-                <td><%= order_item.product.primary_sku %></td>
+                <td colspan="2"><%= order_item.product.primary_sku %></td>
                 <td><%= order_item.product.name %></td>
                 <td>
                   <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
@@ -6402,9 +6402,13 @@
                   <center><%= order_item.qty %></center>
                 </td> 
               </tr> 
+          
+
                <%if  order_item.order_item_kit_products.any? && get_display_kit_parts %>
+                  <% n = order_item.order_item_kit_products.count %>
                   <tr>
-                    <td  colspan="4" style="background: #000; color: #fff;"><b>Kit-parts</b></td>
+                    <td rowspan="<%=n+1%>" style="background: #000; color: #fff; width:5px"></td>
+                    <td  colspan="4" style="background: #000; color: #fff; align="middle"><b>Kit-parts</b></td>
                   </tr>
                   <%  order_item.order_item_kit_products.each do |order_item_kit_product| %>
                     <% product_kit_sku = order_item_kit_product.product_kit_skus%>
@@ -6419,8 +6423,8 @@
                       </td>
                       <td><%=order_item.qty * product_kit_sku.qty %></td>
                     </tr>
-                  <%end%>    
-               <%end%>
+                  <%end%>   
+                <%end%>
             <% end %>
           <% end %>
         </table>
@@ -6527,9 +6531,9 @@
         <br>
 
         <div class="span12">
-          <table>
+          <table width="100">
             <thead>
-            <td> Item</td>
+            <td colspan="2"> Item</td>
             <td> Description</td>
             <td style="white-space: nowrap;"> Pr Loc.</td>
             <td>
@@ -6540,7 +6544,7 @@
             <% order_items.each do |order_item| %>
               <% unless order_item.product.is_intangible %>
                 <tr>
-                  <td><%= order_item.product.primary_sku %></td>
+                  <td colspan="2"><%= order_item.product.primary_sku %></td>
                   <td><%= order_item.product.name %></td>
                   <td>
                     <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
@@ -6557,8 +6561,10 @@
                 </tr>
               <% end %>
                <%if  order_item.order_item_kit_products.any? && get_display_kit_parts %>
+                  <% n = order_item.order_item_kit_products.count %>
                   <tr>
-                    <td  colspan="4" style="background: #000; color: #fff;"><b>Kit-parts</b></td>
+                    <td rowspan="<%=n+1%>" style="background: #000; color: #fff; width:5px"></td>
+                    <td  colspan="4" style="background: #000; color: #fff; align="middle"><b>Kit-parts</b></td>
                   </tr>
                   <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
                     <% product_kit_sku = order_item_kit_product.product_kit_skus%>
@@ -6611,3 +6617,4 @@
 
 </body>
 </html>
+
