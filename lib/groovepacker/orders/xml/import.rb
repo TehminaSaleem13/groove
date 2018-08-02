@@ -100,11 +100,16 @@ module Groovepacker
                     if check_count_is_equle?
                       import_item.status = "completed"
                       if @ftp_flag == "true"
+                        orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
+                        order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
+                        item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
+                        ImportMailer.order_information(@file_name,item_hash).deliver #if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                         response = groove_ftp.update(@file_name)
                         ftp_csv_import = Groovepacker::Orders::Import.new
                         ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
                       end
+                      $redis.expire("#{Apartment::Tenant.current}_csv_file_increment_id_index", 1)
                     else
                       import_item.status = "cancelled"
                       ImportMailer.order_skipped(@file_name, @skipped_count, @order.store_id, @skipped_ids).deliver
@@ -133,7 +138,6 @@ module Groovepacker
           logger = Logger.new("#{Rails.root}/log/check_count_#{Apartment::Tenant.current}.log")
           orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
           logger.info("orders array from redis ============================== #{orders}")
-          $redis.expire("#{Apartment::Tenant.current}_csv_file_increment_id_index", 1)
           db_orders = Order.where(increment_id: orders).map(&:increment_id)
           return true if db_orders.count == @order.total_count && orders.count == @order.total_count
           @skipped_count = @order.total_count - db_orders.count

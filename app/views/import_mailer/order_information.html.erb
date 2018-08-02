@@ -1,0 +1,6 @@
+<p><strong>File Name: </strong><%= @file_name %></p>
+<ul>
+<% @item_hash.each do |key, value| %>
+  <li>Duplicate count <b><%= value.to_s%></b> <%="Order ID #{key[0].to_s}" %></li>
+<% end %>
+</ul>

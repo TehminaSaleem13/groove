@@ -59,4 +59,11 @@ class ImportMailer < ActionMailer::Base
     subject = "Import order skipped"
     mail to: ENV["SKIPPED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
+
+  def order_information(file_name,item_hash)
+    @file_name = file_name
+    @item_hash = item_hash
+    subject = "Order Information"
+    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
+  end
 end
