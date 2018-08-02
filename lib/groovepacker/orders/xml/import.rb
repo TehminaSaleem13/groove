@@ -103,7 +103,7 @@ module Groovepacker
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
-                        ImportMailer.order_information(@file_name,item_hash).deliver #if item_hash.present?
+                        ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                         response = groove_ftp.update(@file_name)
                         ftp_csv_import = Groovepacker::Orders::Import.new
