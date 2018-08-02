@@ -29,6 +29,14 @@ module Groovepacker
           order_persisted = order.persisted? ? true : false
           begin
             if order.save!
+              item_hash = order.order_items.group([:order_id, :product_id]).having("count(*) > 1").count
+              if item_hash.any?
+                on_demand_logger = logger = Logger.new("#{Rails.root}/log/duplicate_order_item_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("=========================================")
+                log = { tenant: Apartment::Tenant.current, order_items_hash: item_hash , order: @order.order_items}  
+                on_demand_logger.info(log)
+                on_demand_logger.info("=========================================")
+              end
               order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
               # @order[:order_items] = @order.order_items
               order_item_result = process_order_items(order, @order)
