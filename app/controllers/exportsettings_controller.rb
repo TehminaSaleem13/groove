@@ -53,7 +53,8 @@ class ExportsettingsController < ApplicationController
           auto_stat_email_export: params[:auto_stat_email_export],
           time_to_send_stat_export_email: params[:time_to_send_stat_export_email],
           stat_export_type: params[:stat_export_type],
-          stat_export_email: params[:stat_export_email]
+          stat_export_email: params[:stat_export_email],
+          processing_time: params[:processing_time]
           )
         @result['success_messages'].push('Export settings updated successfully.')
         # else

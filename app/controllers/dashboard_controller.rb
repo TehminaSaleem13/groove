@@ -48,6 +48,7 @@ class DashboardController < ApplicationController
   def daily_packed_percentage
     orders = Order.select("order_placed_time, scanned_on").where("order_placed_time > ?", Time.now() - 30.days).order('order_placed_time desc').group_by{ |o| o.order_placed_time.to_date }    
     results = []
+    processing = ExportSetting.first.processing_time
     orders.values.each_with_index do |order, index|
       imported = order.count
       scanned = 0
@@ -56,10 +57,37 @@ class DashboardController < ApplicationController
         ord.scanned_on.blank? ? unscanned = unscanned + 1 : scanned = scanned + 1  
       end
       scanned = number_with_precision((scanned*100)/imported.to_f, precision: 2)
-      day = orders.keys[index].strftime("%A")
-      date = orders.keys[index].strftime("%m/%d/%Y")
+      day = (orders.keys[index] + processing).strftime("%A")
+      date = (orders.keys[index] + processing).strftime("%m/%d/%Y")
       results << { day: day, date: date, scanned: scanned, imported: imported, unscanned: unscanned }
     end
     render json: results
+  end
+
+
+  def download_daily_packed_csv
+    require 'csv'
+    tenant = Apartment::Tenant.current
+    processing = ExportSetting.first.processing_time
+    headers = ["OrderNumber", "ShipDate", "WeekDay","Status", " Tracking Number" ]
+    all_dates = params[:dashboard][:_json]
+    data = CSV.generate do |csv|
+      csv << headers if csv.count.eql? 0
+      all_dates.each do |date|
+        new_date =  DateTime.parse(date)
+        new_date =  new_date - processing if  processing != 0
+        orders = Order.where('order_placed_time >= ? AND order_placed_time <= ? AND status != ?', new_date.beginning_of_day, new_date.end_of_day, "scanned")
+        orders.each do |order|
+          if order.status == "onhold"
+            csv << ["#{order.increment_id}","#{order.order_placed_time}","#{order.order_placed_time.strftime("%A")}","Action Required","#{order.tracking_num}"]
+          else
+            csv << ["#{order.increment_id}","#{order.order_placed_time}","#{order.order_placed_time.strftime("%A")}","#{order.status}","#{order.tracking_num}"]
+          end 
+        end
+      end
+    end
+    url = GroovS3.create_public_csv(tenant, 'order',Time.now.to_i, data).url
+    CsvExportMailer.send_daily_packed(url).deliver
+    render json: {}
   end
 end

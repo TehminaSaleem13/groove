@@ -8,7 +8,7 @@ class ExportSetting < ActiveRecord::Base
                   :start_time, :end_time, :manual_export, :auto_stat_email_export, :time_to_send_stat_export_email,
                   :send_stat_export_email_on_mon, :send_stat_export_email_on_tue, :send_stat_export_email_on_wed,
                   :send_stat_export_email_on_thu, :send_stat_export_email_on_fri, :send_stat_export_email_on_sat,
-                  :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email
+                  :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email, :processing_time
 
   after_save :scheduled_export
 

@@ -357,6 +357,7 @@ Groovepacks::Application.routes.draw do
       get 'exceptions'
       get 'get_stat_stream_manually'
       get 'daily_packed_percentage'
+      post 'download_daily_packed_csv'
     end
     post 'generate_stats'
   end
