@@ -29,6 +29,14 @@ module Groovepacker
           order_persisted = order.persisted? ? true : false
           begin
             if order.save!
+              item_hash = order.order_items.group([:order_id, :product_id]).having("count(*) > 1").count
+              if item_hash.any?
+                on_demand_logger = logger = Logger.new("#{Rails.root}/log/duplicate_order_item_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("=========================================")
+                log = { tenant: Apartment::Tenant.current, order_items_hash: item_hash , order: @order.order_items}  
+                on_demand_logger.info(log)
+                on_demand_logger.info("=========================================")
+              end
               order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
               # @order[:order_items] = @order.order_items
               order_item_result = process_order_items(order, @order)
@@ -103,7 +111,7 @@ module Groovepacker
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
-                        ImportMailer.order_information(@file_name,item_hash).deliver #if item_hash.present?
+                        ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                         response = groove_ftp.update(@file_name)
                         ftp_csv_import = Groovepacker::Orders::Import.new
