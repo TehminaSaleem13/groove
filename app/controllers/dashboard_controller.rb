@@ -78,10 +78,12 @@ class DashboardController < ApplicationController
         new_date =  new_date - processing if  processing != 0
         orders = Order.where('order_placed_time >= ? AND order_placed_time <= ? AND status != ?', new_date.beginning_of_day, new_date.end_of_day, "scanned")
         orders.each do |order|
+          order_date = order.order_placed_time + processing.day
+          order_day = order_date.strftime("%A")
           if order.status == "onhold"
-            csv << ["#{order.increment_id}","#{order.order_placed_time}","#{order.order_placed_time.strftime("%A")}","Action Required","#{order.tracking_num}"]
+            csv << ["#{order.increment_id}","#{order_date}","#{order_day}","Action Required","#{order.tracking_num}"]
           else
-            csv << ["#{order.increment_id}","#{order.order_placed_time}","#{order.order_placed_time.strftime("%A")}","#{order.status}","#{order.tracking_num}"]
+            csv << ["#{order.increment_id}","#{order_date}","#{order_day}","#{order.status}","#{order.tracking_num}"]
           end 
         end
       end

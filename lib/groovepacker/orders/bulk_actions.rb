@@ -63,6 +63,7 @@ module Groovepacker
         return if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
         return if order_has_inactive_or_new_products(order, params)
         order.status = params[:status]
+        order.scanned_on = nil if params[:status] != 'scanned'
         order.reallocate_inventory = params[:reallocate_inventory]
         order.scanned_by_status_change = false
         update_status_and_add_activity(order, username) if params[:status] == 'scanned'

@@ -7,9 +7,9 @@ module Groovepacker
           set_status_and_message(false, 'Unknown field', ['&', 'error_msg'])
           return @result
         end
-
         if @params[:var] == 'status'
           order.status = @params[:value]
+          add_activity(order, @current_user.name) if @params[:value] == 'scanned'
         elsif @params[:var] == 'ordernum'
           order.increment_id = @params[:value]
         elsif @params[:var] == 'notes' && @current_user.can?('create_edit_notes')
@@ -23,6 +23,11 @@ module Groovepacker
           set_status_and_message(false, 'Could not save order info', ['&', 'error_msg'])
         end
         return @result
+      end
+
+      def add_activity(order, username)
+        order.scanned_on = Time.now
+        order.addactivity('Order Manually Moved To Scanned Status', username)
       end
 
       def generate_pick_list(orders)
