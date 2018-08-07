@@ -18,7 +18,7 @@ module Groovepacker
             update_import_item_obj_values
             uniq_response = response["orders"].uniq rescue []
             verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
-            if @import_item.store.split_order != "disabled" || @import_item.store.split_order != "0" 
+            if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together" 
               @split_order = true
             else
               @split_order = false
