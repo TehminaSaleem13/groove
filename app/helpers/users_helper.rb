@@ -61,18 +61,18 @@ module UsersHelper
     return user_role
   end
 
-  def update_plan_amount type
-    tenant = Tenant.find_by_name(Apartment::Tenant.current)
-    @subscription = tenant.subscription
-    amount = @subscription.amount.to_f/100
-    role_id = Role.find_by_name("Super Super Admin").try(:id)
-    users_count = User.where("active = ? and is_deleted = ? and role_id != ?", true, false, role_id).count
-    if users_count > AccessRestriction.last.num_users && type == 'add'
-      amount = amount + 50
-      set_subscription_info(amount)
-      create_stripe_plan(tenant)
-    end
-  end
+  # def update_plan_amount type
+  #   tenant = Tenant.find_by_name(Apartment::Tenant.current)
+  #   @subscription = tenant.subscription
+  #   amount = @subscription.amount.to_f/100
+  #   role_id = Role.find_by_name("Super Super Admin").try(:id)
+  #   users_count = User.where("active = ? and is_deleted = ? and role_id != ?", true, false, role_id).count
+  #   if users_count > AccessRestriction.last.num_users && type == 'add'
+  #     amount = amount + 50
+  #     set_subscription_info(amount)
+  #     create_stripe_plan(tenant)
+  #   end
+  # end
 
   def set_subscription_info amount
     @subscription_info = { }

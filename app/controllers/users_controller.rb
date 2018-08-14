@@ -11,6 +11,27 @@ class UsersController < ApplicationController
     end
   end
 
+  def get_subscription_info
+    result = {}
+    result['status'] = true
+    result['no_of_users'] =  AccessRestriction.last.num_users
+    tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    subscription = tenant.subscription
+    result['amount'] = (subscription.amount.to_f / 100)
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
+  def modify_plan
+    tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    @subscription = tenant.subscription
+    AccessRestriction.last.update_attributes(num_users: params[:users])
+    set_subscription_info(params[:amount])
+    create_stripe_plan(tenant)
+    render json: {status: true}
+  end
+
 
   def createUpdateUser
     result = {}
@@ -99,7 +120,7 @@ class UsersController < ApplicationController
           result['user']['current_user'] = current_user
 
           # update the plan amount with adding 50$/user
-          update_plan_amount("add") if new_user
+          #update_plan_amount("add") if new_user
 
           # send user data to groovelytics server if the user is newly created.
           if new_user && !Rails.env.test?
