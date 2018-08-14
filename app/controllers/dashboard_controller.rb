@@ -81,9 +81,9 @@ class DashboardController < ApplicationController
           order_date = order.order_placed_time + processing.day
           order_day = order_date.strftime("%A")
           if order.status == "onhold"
-            csv << ["#{order.increment_id}","#{order_date}","#{order_day}","Action Required","#{order.tracking_num}"]
+            csv << ["#{order.increment_id}","#{order_date}","#{order_day}","Action Required","#{order.tracking_num}\f"]
           else
-            csv << ["#{order.increment_id}","#{order_date}","#{order_day}","#{order.status}","#{order.tracking_num}"]
+            csv << ["#{order.increment_id}","#{order_date}","#{order_day}","#{order.status}","#{order.tracking_num}\f"]
           end 
         end
       end
