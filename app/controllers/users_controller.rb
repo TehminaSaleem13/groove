@@ -111,7 +111,7 @@ class UsersController < ApplicationController
 
             set_custom_fields
             HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
-                  query: { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one: @custom_field_one, custom_field_two: @custom_field_two},
+                  query: { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one_key: @custom_field_one_key, custom_field_one_value: @custom_field_one_value, custom_field_two_key: @custom_field_two_key, custom_field_two_value: @custom_field_two_value},
                   headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
           end
 
@@ -495,7 +495,10 @@ class UsersController < ApplicationController
 
   def set_custom_fields
     general_setting = GeneralSetting.first
-    @custom_field_one = general_setting.custom_user_field_one.blank? ? nil : { general_setting.custom_user_field_one.parameterize.underscore => @user.custom_field_one}
-    @custom_field_two = general_setting.custom_user_field_two.blank? ? nil : { general_setting.custom_user_field_two.parameterize.underscore => @user.custom_field_two}
+    @custom_field_one_key = general_setting.custom_user_field_one
+    @custom_field_one_value = @user.custom_field_one
+    
+    @custom_field_two_key = general_setting.custom_user_field_two
+    @custom_field_two_value = @user.custom_field_two
   end
 end
