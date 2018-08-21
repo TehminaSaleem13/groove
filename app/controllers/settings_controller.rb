@@ -137,7 +137,7 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
     customer = find_stripe_customer
-    update_with_stripe_customer(customer)
+    update_with_stripe_customer(customer) if general_setting.email_address_for_billing_notification != params[:email_address_for_billing_notification] && !general_setting.email_address_for_billing_notification.nil?
     render json: @result
   end
 
