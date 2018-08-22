@@ -21,6 +21,7 @@ namespace :ftp_csv_file_import do
         #     ftp_csv_import.ftp_order_import("unitedmedco")
         #   elsif current_time >= "08:00" && current_time <= "12:00"
           if current_time >= from_import && current_time <= to_import
+            OrderImportSummary.destroy_all if tenant.name == "unitedmedco"
             # ftp_csv_import.delay(attempts: 4).import_ftp_order(tenant.name)
             puts "Current Time: #{current_time} / From Import: #{from_import} / To Import: #{to_import}"
             ftp_csv_import.ftp_order_import(tenant.name)
