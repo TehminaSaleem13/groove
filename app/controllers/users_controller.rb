@@ -26,7 +26,12 @@ class UsersController < ApplicationController
   def modify_plan
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
     @subscription = tenant.subscription
-    AccessRestriction.last.update_attributes(num_users: params[:users])
+    access_restriction = AccessRestriction.last
+    if params[:users].to_i < access_restriction.num_users
+      users = access_restriction.num_users -  params[:users].to_i
+      StripeInvoiceEmail.remove_user_request_email(tenant, users).deliver
+    end  
+    access_restriction.update_attributes(num_users: params[:users])
     set_subscription_info(params[:amount])
     create_stripe_plan(tenant)
     render json: {status: true}
