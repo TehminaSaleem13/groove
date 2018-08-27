@@ -12,6 +12,7 @@ namespace :check do
             summary = csv_import.order_import_summary
             summary.status = "completed"
             summary.save
+            OrderImportSummary.destroy_all
             ImportMailer.import_hung(tenant, csv_import).deliver
           end
         end
