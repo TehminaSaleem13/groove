@@ -108,7 +108,7 @@ class GeneralSetting < ActiveRecord::Base
       end
     else
       tenant = Apartment::Tenant.current
-      Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
+      #Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
     end
     true
   end
@@ -212,7 +212,7 @@ class GeneralSetting < ActiveRecord::Base
       elsif job_type == 'import_orders'
         if self.should_import_orders(date)
           Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
-          self.delay(:run_at => time_diff.seconds.from_now, :queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
+          self.delay(:run_at => time, :queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
           job_scheduled = true
         end
       elsif job_type == 'export_order'
