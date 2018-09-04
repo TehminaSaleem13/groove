@@ -360,6 +360,7 @@ Groovepacks::Application.routes.draw do
       get 'get_stat_stream_manually'
       get 'daily_packed_percentage'
       post 'download_daily_packed_csv'
+      get 'process_missing_data'
     end
     post 'generate_stats'
   end
