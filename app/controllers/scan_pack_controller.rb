@@ -75,6 +75,16 @@ class ScanPackController < ApplicationController
     # render json: @result
   end
 
+  def send_request_to_api 
+    if params[:scan_pack][:_json].present?
+      current_tenant = Apartment::Tenant.current
+      params[:tenant] =  current_tenant
+      scan_pack_object = ScanPack::Base.new
+      scan_pack_object.delay(:run_at => 1.seconds.from_now).request_api(params)
+    end
+    render json: {}
+  end
+
   def click_scan
     render json: product_scan(
         params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id],

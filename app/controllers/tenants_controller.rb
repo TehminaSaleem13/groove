@@ -94,6 +94,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_api_call
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.api_call = !tenant.api_call
+    tenant.save
+    render json: {}
+  end
+
   def create_duplicate
     result = create_single_duplicate
 

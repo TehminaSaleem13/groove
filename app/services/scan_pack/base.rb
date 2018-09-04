@@ -17,6 +17,25 @@ module ScanPack
       @result['error_messages'].push(error_message)
     end
 
+    def request_api(params)
+      Apartment::Tenant.switch params[:tenant]
+      order = Order.find(params[:scan_pack][:_json])
+      store  = order.store 
+      magento_credential =  MagentoCredentials.where(:store_id => store.id).first unless MagentoCredentials.where(:store_id => store.id).empty?
+      client = nil
+      session = nil
+      if !magento_credential.nil?
+        if magento_credential.updated_patch
+          client = Savon.client( wsdl: magento_credential.host+"/api/soap/?wsdl")
+        end
+        response = client.call(:login, message: {apiUser: magento_credential.username, apikey: magento_credential.api_key}) rescue nil
+        session = response.body[:login_response][:login_return]
+        tracking_num = order.tracking_num.nil? ? '' : order.tracking_num
+        request= "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><soap:Body><call xmlns=\"urn:Magento\"><sessionId xmlns=\"\">#{session}</sessionId><resourcePath xmlns=\"\">groovepacker_api.updateshipment</resourcePath><args SOAP-ENC:arrayType=\"xsd:string[2]\" xsi:type=\"SOAP-ENC:Array\"><item xsi:type=\"xsd:string\">#{order.increment_id}</item><item xsi:type=\"xsd:string\">#{tracking_num}</item></args></call></soap:Body></soap:Envelope>"
+        response = client.call(:call,xml: request) rescue nil
+      end  
+    end
+
     def can_order_be_scanned
       #result = false
       #max_shipments = AccessRestriction.order("created_at").last.num_shipments

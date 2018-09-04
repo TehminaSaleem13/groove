@@ -61,6 +61,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/delete_summary' => 'tenants#delete_summary' 
   get '/tenants/update_import_mode' => 'tenants#update_import_mode'
   get '/tenants/update_fba' => 'tenants#update_fba'
+  get '/tenants/update_api_call' => 'tenants#update_api_call'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
@@ -246,6 +247,7 @@ Groovepacks::Application.routes.draw do
       post 'reset_order_scan'
       post 'get_shipment'
       post 'update_scanned'
+      post 'send_request_to_api'
     end
     member do
     end

@@ -91,6 +91,7 @@ class SettingsController < ApplicationController
     @result['scheduled_import_toggle'] = current_tenant.scheduled_import_toggle rescue false
     @result['inventory_report_toggle'] = current_tenant.inventory_report_toggle rescue false
     @result['is_multi_box'] = current_tenant.is_multi_box rescue false
+    @result['api_call'] = current_tenant.api_call rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_settings = GeneralSetting.all.first
