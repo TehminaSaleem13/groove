@@ -269,7 +269,23 @@ module ScanPack
           @single_order_result.merge!('product_edit_matched' => true,
                                       'inactive_or_new_products' => @single_order.get_inactive_or_new_products,
                                       'next_state' => 'scanpack.rfp.product_edit')
+
+          if GeneralSetting.last.remove_order_items 
+            data =    []
+            @single_order.order_items.find do |order_item|
+              data << order_item if order_item.qty.eql?(0)
+            end
+            if data.any?
+              data.each do |item|
+                product = item.product
+                sku = product.product_skus.first.sku rescue nil
+                item.order.addactivity("Item with sku having 0 qty " + sku.to_s + " removed", @current_user.name)
+                item.delete
+              end  
+            end
+          end 
           message = check_for_zero_qty_item
+
         else
           @session.merge!(product_edit_matched_for_current_user: false,
                           order_edit_matched_for_current_user: false,
