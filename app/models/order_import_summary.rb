@@ -17,7 +17,10 @@ class OrderImportSummary < ActiveRecord::Base
   def emit_data_to_user(send_data=false)
     return true unless (self.changes["status"].present? || send_data)
     result = Hash.new
-    result['import_info'] = self.reload
+    import_summary = self.reload
+    time_zone = GeneralSetting.last.time_zone.to_i
+    import_summary.updated_at += time_zone
+    result['import_info'] = import_summary
     result['import_items'] = []
     # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
     import_items = ImportItem.all
@@ -25,6 +28,7 @@ class OrderImportSummary < ActiveRecord::Base
       if import_item.store.nil?
         import_item.destroy
       else
+        import_item.updated_at += time_zone
         result['import_items'].push({store_info: import_item.store, import_info: import_item,
                                      show_update: show_update(import_item.store)})
       end
