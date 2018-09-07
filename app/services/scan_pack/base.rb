@@ -33,6 +33,13 @@ module ScanPack
         tracking_num = order.tracking_num.nil? ? '' : order.tracking_num
         request= "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><soap:Body><call xmlns=\"urn:Magento\"><sessionId xmlns=\"\">#{session}</sessionId><resourcePath xmlns=\"\">groovepacker_api.updateshipment</resourcePath><args SOAP-ENC:arrayType=\"xsd:string[2]\" xsi:type=\"SOAP-ENC:Array\"><item xsi:type=\"xsd:string\">#{order.increment_id}</item><item xsi:type=\"xsd:string\">#{tracking_num}</item></args></call></soap:Body></soap:Envelope>"
         response = client.call(:call,xml: request) rescue nil
+        log_response = response.body[:call_response][:call_return]  if !response.nil? 
+        on_demand_logger = Logger.new("#{Rails.root}/log/shopakira_request_call.log")
+        if !response.nil? 
+          on_demand_logger.info("=========================================")
+          log = { tenant: Apartment::Tenant.current, order: order.increment_id , tracking_num: order.tracking_num , response: log_response }
+          on_demand_logger.info(log)
+        end  
       end  
     end
 
