@@ -111,23 +111,25 @@ module Groovepacker
                   if import_item.previous_imported + import_item.success_imported == @order.total_count
                     if check_count_is_equle?
                       import_item.status = "completed"
+                      orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
+                      logger = Logger.new("#{Rails.root}/log/import_order_information.log")
+                      logger.info("=========================================")
+                      logger.info("Tenant : #{Apartment::Tenant.current}")
+                      logger.info("Name of imported file: #{@file_name}")
+                      logger.info("Orders in file: #{orders.count}")
+                      logger.info("New orders imported:#{$redis.get("new_order_#{tenant}").to_i}")
+                      logger.info("Existing orders updated:#{$redis.get("update_order_#{tenant}").to_i} ")
+                      logger.info("Existing orders skipped:#{$redis.get("skip_order_#{tenant}").to_i} ")
+                      logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
+                      @after_import_count = Order.all.count
+                      logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
+
                       if @ftp_flag == "true"
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
-                        logger = Logger.new("#{Rails.root}/log/import_order_information.log")
-                        logger.info("=========================================")
-                        logger.info("Tenant : #{Apartment::Tenant.current}")
-                        logger.info("Name of imported file: #{@file_name}")
-                        logger.info("Orders in file: #{orders.count}")
-                        logger.info("New orders imported:#{$redis.get("new_order_#{tenant}").to_i}")
-                        logger.info("Existing orders updated:#{$redis.get("update_order_#{tenant}").to_i} ")
-                        logger.info("Existing orders skipped:#{$redis.get("skip_order_#{tenant}").to_i} ")
-                        logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
-                        @after_import_count = Order.all.count
-                        logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
                         if @after_import_count - $redis.get("new_order_#{tenant}").to_i ==  $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
                           response = groove_ftp.update(@file_name)
                         else
