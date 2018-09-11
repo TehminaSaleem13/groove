@@ -66,4 +66,17 @@ class ImportMailer < ActionMailer::Base
     subject = "Order Information"
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
+
+  def not_imported(file_name,order_in_file, new_order, update_order, skip_order, total_order, after_import )
+    @file_name = file_name
+    @order_in_file = order_in_file
+    @new_order = new_order
+    @update_order = update_order
+    @skip_order = skip_order
+    @total_order = total_order
+    @after_import = after_import
+    @current_tenant =Apartment::Tenant.current
+    subject = "Order not Imported Properly "
+    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
+  end
 end
