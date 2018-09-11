@@ -117,8 +117,9 @@ module Groovepacker
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
-                        logger = Logger.new("#{Rails.root}/log/Import_Order_Inforation_#{Apartment::Tenant.current}.log")
+                        logger = Logger.new("#{Rails.root}/log/import_order_information.log")
                         logger.info("=========================================")
+                        logger.info("Tenant : #{Apartment::Tenant.current}")
                         logger.info("Name of imported file: #{@file_name}")
                         logger.info("Orders in file: #{orders.count}")
                         logger.info("New orders imported:#{$redis.get("new_order_#{tenant}").to_i}")

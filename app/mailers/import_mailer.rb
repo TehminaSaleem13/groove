@@ -77,6 +77,6 @@ class ImportMailer < ActionMailer::Base
     @after_import = after_import
     @current_tenant =Apartment::Tenant.current
     subject = "Order not Imported Properly "
-    mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
+    mail to: "kcpatel006@gmail.com", subject: subject
   end
 end
