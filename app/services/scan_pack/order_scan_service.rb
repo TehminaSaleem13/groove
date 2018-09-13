@@ -272,19 +272,23 @@ module ScanPack
 
           if GeneralSetting.last.remove_order_items 
             data =    []
-            @single_order.order_items.find do |order_item|
+            @single_order.reload.order_items.each do |order_item|
               data << order_item if order_item.qty.eql?(0)
             end
             if data.any?
               data.each do |item|
                 product = item.product
                 sku = product.product_skus.first.sku rescue nil
-                item.order.addactivity("Item with sku having 0 qty " + sku.to_s + " removed", @current_user.name)
+                item.order.addactivity("Item with sku " + sku.to_s + " having 0 qty removed", "GroovePacker Automaticaly")
                 item.delete
-              end  
+              end 
+              message = "An item with quantity of 0 has been removed from this order"
             end
-          end 
-          message = check_for_zero_qty_item
+          end
+
+          if @single_order.reload.order_items.map(&:qty).include?(0)  
+            message = check_for_zero_qty_item
+          end
 
         else
           @session.merge!(product_edit_matched_for_current_user: false,

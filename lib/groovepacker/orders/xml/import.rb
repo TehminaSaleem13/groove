@@ -248,7 +248,7 @@ module Groovepacker
                   n = $redis.get("update_order").to_i + 1
                   $redis.set("update_order", n)
                 end
-                order.addactivity("Item with SKU: #{product.primary_sku} Added", 
+                order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
                   "#{order.store.name} Import")
               else
                 order_item = order.order_items.where(product_id: product.id)
