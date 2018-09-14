@@ -9,7 +9,7 @@ module Groovepacker
         end
         if @params[:var] == 'status'
           check = order.order_items.map(&:qty).include? (0)
-          if check 
+          if check || @params[:value] != "scanned"
            set_status_and_message(false, 'Only orders containing Active items can be Awaiting', ['&', 'error_msg'])  
           else
             order.status = @params[:value]
