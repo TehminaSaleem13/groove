@@ -22,6 +22,8 @@ class OrderImportSummary < ActiveRecord::Base
     import_summary.updated_at += time_zone
     result['import_info'] = import_summary
     result['import_items'] = []
+    lines = File.open("#{Rails.root}/log/import_order_information.log").to_a 
+    result['summary'] = lines.last(8).join(", ")
     # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
     import_items = ImportItem.all
     import_items.each do |import_item|
