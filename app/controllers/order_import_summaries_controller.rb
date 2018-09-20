@@ -19,9 +19,11 @@ class OrderImportSummariesController < ApplicationController
 
   def download_summary_details
     require 'wicked_pdf' 
+    require 'open-uri'
     @tenant_name = Apartment::Tenant.current
-    lines = File.open("#{Rails.root}/log/import_order_information.log").to_a
-    @result = lines.last(64)
+    url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+'import_order_information.log'
+    lines = open(url).read
+    @result = lines.split("=========================================\n").last(64)
     action_view = do_get_action_view_object_for_html_rendering
     pdf_html = action_view.render :template => "order_import_summaries/download_summary_details.html.erb", :layout => nil, :locals => {:@result => @result}
     pdf_path = Rails.root.join('public', 'pdfs', "imported_order_information.pdf")

@@ -123,7 +123,12 @@ module Groovepacker
                       logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
                       @after_import_count = Order.all.count
                       logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
-
+                      pdf_path = Rails.root.join( 'log', "import_order_information.log")
+                      reader_file_path = Rails.root.join('log', "import_order_information.log")
+                      base_file_name = File.basename(pdf_path)
+                      pdf_file = File.open(reader_file_path)
+                      GroovS3.create_log(Apartment::Tenant.current, base_file_name, pdf_path.read)
+        
                       if @ftp_flag == "true"
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)

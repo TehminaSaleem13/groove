@@ -125,6 +125,11 @@ class GroovS3
       self.save(object, data)
     end
 
+    def create_log(tenant, file_name, data)
+      object = self.create(tenant, "log/#{file_name}", 'text',:public_read)
+      self.save(object, data)
+    end
+
     def create_receiving_label_pdf(tenant, file_name, data)
       object = self.create(tenant, "pdf/#{file_name}", 'application/pdf', :public_read)
       self.save(object, data)
