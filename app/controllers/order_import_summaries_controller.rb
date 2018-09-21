@@ -20,35 +20,40 @@ class OrderImportSummariesController < ApplicationController
   def download_summary_details
     require 'wicked_pdf' 
     require 'open-uri'
-    @tenant_name = Apartment::Tenant.current
-    url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+'import_order_information.log'
-    lines = open(url).read
-    @result = lines.split("=========================================\n").last(64)
-    action_view = do_get_action_view_object_for_html_rendering
-    pdf_html = action_view.render :template => "order_import_summaries/download_summary_details.html.erb", :layout => nil, :locals => {:@result => @result}
-    pdf_path = Rails.root.join('public', 'pdfs', "imported_order_information.pdf")
-    doc_pdf = WickedPdf.new.pdf_from_string(
-       pdf_html,
-      :inline => true,
-      :save_only => false,
-      :orientation => 'Portrait',
-      :page_height => '6in',
-      :page_width => '4in',
-      :margin => {:top => '1',
-                  :bottom => '0',
-                  :left => '2',
-                  :right => '2'}
-    )
-    reader_file_path = Rails.root.join('public', 'pdfs', "imported_order_summary.pdf")
-    File.open(reader_file_path, 'wb') do |file|
-      file << doc_pdf
+    begin
+      @tenant_name = Apartment::Tenant.current
+      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+'import_order_information.log'
+      lines = open(url).read
+      @result = lines.split("=========================================\n").last(64).reverse
+      action_view = do_get_action_view_object_for_html_rendering
+      pdf_html = action_view.render :template => "order_import_summaries/download_summary_details.html.erb", :layout => nil, :locals => {:@result => @result}
+      pdf_path = Rails.root.join('public', 'pdfs', "imported_order_information.pdf")
+      doc_pdf = WickedPdf.new.pdf_from_string(
+         pdf_html,
+        :inline => true,
+        :save_only => false,
+        :orientation => 'Portrait',
+        :page_height => '6in',
+        :page_width => '4in',
+        :margin => {:top => '1',
+                    :bottom => '0',
+                    :left => '2',
+                    :right => '2'}
+      )
+      reader_file_path = Rails.root.join('public', 'pdfs', "imported_order_summary.pdf")
+      File.open(reader_file_path, 'wb') do |file|
+        file << doc_pdf
+      end
+      base_file_name = File.basename(pdf_path)
+      pdf_file = File.open(reader_file_path)
+      GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+      pdf_file.close
+      generate_url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+      render json: {url: generate_url}
+    rescue Exception => e
+      logger = Logger.new("#{Rails.root}/log/download_summary_details_#{Apartment::Tenant.current}.log")
+      logger.info(e)
     end
-    base_file_name = File.basename(pdf_path)
-    pdf_file = File.open(reader_file_path)
-    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
-    pdf_file.close
-    generate_url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
-    render json: {url: generate_url}
   end
 
   def do_get_action_view_object_for_html_rendering
