@@ -135,11 +135,16 @@ module Groovepacker
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
-                        if @after_import_count - $redis.get("new_order_#{tenant}").to_i ==  $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
-                          response = groove_ftp.update(@file_name)
-                        else
-                          ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count ).deliver
-                        end  
+                        begin
+                          if @after_import_count - $redis.get("new_order_#{tenant}").to_i ==  $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
+                            response = groove_ftp.update(@file_name)
+                          else
+                            ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count ).deliver
+                          end
+                        rescue Exception => e
+                          logger = Logger.new("#{Rails.root}/log/after_import.log")
+                          logger.info(e)
+                        end
                         ftp_csv_import = Groovepacker::Orders::Import.new
                         ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
                       end
