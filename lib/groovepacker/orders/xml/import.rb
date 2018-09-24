@@ -112,23 +112,29 @@ module Groovepacker
                     if check_count_is_equle?
                       import_item.status = "completed"
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
-                      logger = Logger.new("#{Rails.root}/log/import_order_information.log")
-                      logger.info("=========================================")
-                      logger.info("Tenant : #{Apartment::Tenant.current}")
-                      logger.info("Name of imported file: #{@file_name}")
-                      logger.info("Orders in file: #{orders.count}")
-                      logger.info("New orders imported:#{$redis.get("new_order_#{tenant}").to_i}")
-                      logger.info("Existing orders updated:#{$redis.get("update_order_#{tenant}").to_i} ")
-                      logger.info("Existing orders skipped:#{$redis.get("skip_order_#{tenant}").to_i} ")
-                      logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
-                      @after_import_count = Order.all.count
-                      logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
-                      pdf_path = Rails.root.join( 'log', "import_order_information.log")
-                      reader_file_path = Rails.root.join('log', "import_order_information.log")
-                      base_file_name = File.basename(pdf_path)
-                      pdf_file = File.open(reader_file_path)
-                      GroovS3.create_log(Apartment::Tenant.current, base_file_name, pdf_path.read)
-        
+                      begin
+                        logger = Logger.new("#{Rails.root}/log/import_order_information.log")
+                        logger.info("=========================================")
+                        logger.info("Tenant : #{Apartment::Tenant.current}")
+                        logger.info("Name of imported file: #{@file_name}")
+                        logger.info("Orders in file: #{orders.count}")
+                        logger.info("New orders imported:#{$redis.get("new_order_#{tenant}").to_i}")
+                        logger.info("Existing orders updated:#{$redis.get("update_order_#{tenant}").to_i} ")
+                        logger.info("Existing orders skipped:#{$redis.get("skip_order_#{tenant}").to_i} ")
+                        logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
+                        n = Order.where('updated_at > ?',$redis.get("last_order_#{tenant}")).count
+                        @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
+                        logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
+                        pdf_path = Rails.root.join( 'log', "import_order_information.log")
+                        reader_file_path = Rails.root.join('log', "import_order_information.log")
+                        base_file_name = File.basename(pdf_path)
+                        pdf_file = File.open(reader_file_path)
+                        GroovS3.create_log(Apartment::Tenant.current, base_file_name, pdf_path.read)
+                      rescue Exception => e
+                        logger = Logger.new("#{Rails.root}/log/check_for_hung_#{Apartment::Tenant.current}.log")
+                        logger.info(e)
+                      end
+                    
                       if @ftp_flag == "true"
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
