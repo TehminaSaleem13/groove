@@ -16,7 +16,7 @@ module ElixirApi
           $redis.set("new_order_#{tenant}",  0 )
           $redis.set("update_order_#{tenant}", 0)
           $redis.set("skip_order_#{tenant}", 0)
-          $redis.set("last_order_#{tenant}",Order.last.updated_at)
+          $redis.set("last_order_#{tenant}",Order.last.created_at)
         end
 
         def self.cancel_import(tenant)
