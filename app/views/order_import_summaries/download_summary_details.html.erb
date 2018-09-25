@@ -1,5 +1,9 @@
 <ul>
   <% @result.each do |key| %>
-    <li > <%="#{key.to_s}" %></li>
+    <%value = key.split("\n")%>
+    <%value.each do | key|%>
+      <li > <%="#{key.to_s}" %></li>
+    <%end%>
+    <br> 
   <% end %>
 </ul>
