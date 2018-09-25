@@ -192,6 +192,7 @@ module Groovepacker
 
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
+          @skip_count = 0
           if order.order_items.empty?
             # create order items
             orderXML.order_items.each do |order_item_XML|
@@ -205,6 +206,14 @@ module Groovepacker
             orderXML.order_items.each do |order_item_XML|
               create_update_order_item(order, order_item_XML)
             end
+          end
+
+          if @skip_count == order.order_items.count
+            n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
+            $redis.set("skip_order_#{Apartment::Tenant.current}", n)
+          else
+            n = $redis.get("update_order").to_i + 1
+            $redis.set("update_order", n)
           end
           result
         end
@@ -256,12 +265,8 @@ module Groovepacker
                   order_item = order_item.first
                   order_item.sku = first_sku
                   if order_item_XML[:qty] == order_item.qty || order_item.price ==  order_item_XML[:price] 
-                    n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
-                    $redis.set("skip_order_#{Apartment::Tenant.current}", n)
-                  else
-                    n = $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
-                    $redis.set("update_order_#{Apartment::Tenant.current}", n)
-                  end  
+                    @skip_count = @skip_count + 1 
+                  end 
                   order_item.qty = order_item_XML[:qty] || 0
                   order_item.price = order_item_XML[:price]
                   order_item.save
