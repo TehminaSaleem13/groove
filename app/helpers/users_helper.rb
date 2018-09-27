@@ -90,4 +90,28 @@ module UsersHelper
     helper = Groovepacker::Tenants::Helper.new
     helper.update_subscription_plan(tenant, @subscription_info)
   end
+
+  def check_for_removal params, access_restriction,tenant
+    if params[:users].to_i < access_restriction.num_users && params[:is_annual] == "false"
+      users = access_restriction.num_users -  params[:users].to_i
+      if access_restriction.added_through_ui == 0 
+        StripeInvoiceEmail.remove_user_request_email(tenant, users).deliver
+        return true
+      else
+        if access_restriction.added_through_ui < users
+          rm_user = users - access_restriction.added_through_ui
+          params[:users] = params[:users].to_i + rm_user
+          params[:amount] = params[:users].to_i * 50  
+          StripeInvoiceEmail.remove_user_request_email(tenant, rm_user).deliver
+          access_restriction.update_attributes(added_through_ui: 0)
+        end
+        ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
+        access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
+        access_restriction.update_attributes(num_users: params[:users])
+        set_subscription_info(params[:amount])
+        create_stripe_plan(tenant)
+        return false
+      end
+    end
+  end
 end

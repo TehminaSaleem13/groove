@@ -31,24 +31,21 @@ class UsersController < ApplicationController
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
     @subscription = tenant.subscription
     access_restriction = AccessRestriction.last
-    if params[:users].to_i < access_restriction.num_users
-      users = access_restriction.num_users -  params[:users].to_i
-      access_restriction.update_attributes(added_through_ui: users)
-      StripeInvoiceEmail.remove_user_request_email(tenant, users).deliver
-      result['request_send'] = true
-    end
-    if params[:users].to_i > access_restriction.num_users 
+    data = {}
+    data = {users: params[:users], amount: params[:amount],  is_annual: params[:is_annual] }
+    result['request_send'] = check_for_removal(data,access_restriction,tenant)
+
+    if params[:is_annual] == "false" && params[:users].to_i > access_restriction.num_users
       ui_user = params[:users].to_i - access_restriction.num_users  
-      access_restriction.update_attributes(added_through_ui: ui_user)
-    end  
-    if params[:is_annual] == "false"  && params[:users].to_i >= access_restriction.num_users 
+      access_restriction.update_attributes(added_through_ui: ui_user) 
       access_restriction.update_attributes(num_users: params[:users])
       set_subscription_info(params[:amount])
       create_stripe_plan(tenant)
-    else
+    elsif params[:is_annual] == "true"  
       StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount] ).deliver
       result['request_send'] = true
-    end  
+    end
+    
     respond_to do |format|
       format.json { render json: result }
     end
