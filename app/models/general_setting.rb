@@ -234,7 +234,17 @@ class GeneralSetting < ActiveRecord::Base
           stat_stream_obj.delay(:run_at => time, :queue => "generate_stat_export_#{tenant}").generate_export(tenant, params)
           job_scheduled = true
         end
+      elsif job_type == 'daily_packed'
+        export_setting = ExportSetting.all.first
+        if export_setting.should_daily_export_orders(time)
+          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_daily_packed_export_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
+          ExportSetting.update_all(manual_export: false)
+          daily_pack  = DailyPacked.new()
+          daily_pack.delay(:run_at => time, :queue => "generate_daily_packed_export_#{tenant}").send_daily_pack_csv(tenant)
+          job_scheduled = true
+        end
       end
+
     end
     job_scheduled
   end
