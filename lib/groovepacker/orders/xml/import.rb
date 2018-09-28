@@ -122,7 +122,7 @@ module Groovepacker
                         logger.info("Existing orders updated:#{$redis.get("update_order_#{tenant}").to_i} ")
                         logger.info("Existing orders skipped:#{$redis.get("skip_order_#{tenant}").to_i} ")
                         logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
-                        n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count
+                        n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
                         @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
                         logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
                         pdf_path = Rails.root.join( 'log', "import_order_information_#{Apartment::Tenant.current}.log")
