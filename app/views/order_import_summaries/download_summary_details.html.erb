@@ -1,9 +1,11 @@
 <ul>
   <% @result.each do |key| %>
     <%value = key.split("\n")%>
-    <%value.each do | key|%>
-      <li > <%="#{key.to_s}" %></li>
-    <%end%>
-    <br> 
-  <% end %>
+    <%if value.first.include?(current_tenant)%>
+      <%value.each do | key|%>
+        <li > <%="#{key.to_s}" %></li>
+      <%end%>
+      <br> 
+      <% end %>
+    <%end%>  
 </ul>
