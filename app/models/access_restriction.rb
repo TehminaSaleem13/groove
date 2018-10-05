@@ -1,5 +1,5 @@
 class AccessRestriction < ActiveRecord::Base
-  attr_accessible :tenant_id, :num_users, :num_shipments, :num_import_sources, :total_scanned_shipments
+  attr_accessible :tenant_id, :num_users, :num_shipments, :num_import_sources, :total_scanned_shipments, :added_through_ui
   has_one :tenant
 
   after_save :remove_from_new_customers_if_scanned_30

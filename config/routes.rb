@@ -40,6 +40,7 @@ Groovepacks::Application.routes.draw do
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
   get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
+  get 'order_import_summary/download_summary_details' => 'OrderImportSummaries#download_summary_details'
   get '/order_import_summary/fix_imported_at' => 'OrderImportSummaries#fix_imported_at'
   get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
@@ -218,6 +219,8 @@ Groovepacks::Application.routes.draw do
       post 'update_login_date'
       get 'get_email'
       get 'get_super_admin_email'
+      get 'modify_plan'
+      get 'get_subscription_info'
     end
     member do
       put 'create_role'

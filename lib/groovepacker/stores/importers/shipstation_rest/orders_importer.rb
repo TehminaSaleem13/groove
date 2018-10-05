@@ -299,7 +299,7 @@ module Groovepacker
                 shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{@credential.store.name} Import")
                 item.destroy
               elsif item.product.try(:primary_sku).present?
-                shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} Added", "#{@credential.store.name} Import")
+                shipstation_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@credential.store.name} Import")
               end
             end
 

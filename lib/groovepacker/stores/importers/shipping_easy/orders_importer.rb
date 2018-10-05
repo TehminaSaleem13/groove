@@ -216,6 +216,7 @@ module Groovepacker
             end
 
             def import_single_order_product(order_item, item)
+
               #find_or_create_order_item_product is defined in products importer module
               order_item_product = find_or_create_order_item_product(item, @credential.store)
               order_item.product = order_item_product
@@ -300,7 +301,7 @@ module Groovepacker
               shiping_easy_order.order_items.each do |item|
                 primary_sku = item.product.try(:primary_sku)
                 next if primary_sku.nil?
-                shiping_easy_order.addactivity("Item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
+                shiping_easy_order.addactivity("QTY #{item.qty} of item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
               end
             end
 

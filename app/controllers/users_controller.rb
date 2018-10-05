@@ -11,6 +11,46 @@ class UsersController < ApplicationController
     end
   end
 
+  def get_subscription_info
+    result = {}
+    result['status'] = true
+    result['no_of_users'] =  AccessRestriction.last.num_users
+    result['added_through_ui'] = AccessRestriction.last.added_through_ui
+    result ['total_users'] = User.where(is_deleted: false).count
+    tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    subscription = tenant.subscription
+    result['amount'] = (subscription.amount.to_f / 100)
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
+  def modify_plan
+    result = {}
+    result['status'] = true
+    tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    @subscription = tenant.subscription
+    access_restriction = AccessRestriction.last
+    data = {}
+    data = {users: params[:users], amount: params[:amount],  is_annual: params[:is_annual] }
+    result['request_send'] = check_for_removal(data,access_restriction,tenant)
+
+    if params[:is_annual] == "false" && params[:users].to_i > access_restriction.num_users
+      ui_user = params[:users].to_i - access_restriction.num_users  
+      access_restriction.update_attributes(added_through_ui: ui_user) 
+      access_restriction.update_attributes(num_users: params[:users])
+      set_subscription_info(params[:amount])
+      create_stripe_plan(tenant)
+    elsif params[:is_annual] == "true"  
+      StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount] ).deliver
+      result['request_send'] = true
+    end
+    
+    respond_to do |format|
+      format.json { render json: result }
+    end
+  end
+
 
   def createUpdateUser
     result = {}
@@ -99,7 +139,7 @@ class UsersController < ApplicationController
           result['user']['current_user'] = current_user
 
           # update the plan amount with adding 50$/user
-          update_plan_amount("add") if new_user
+          #update_plan_amount("add") if new_user
 
           # send user data to groovelytics server if the user is newly created.
           if new_user && !Rails.env.test?

@@ -15,6 +15,7 @@ class OrderImportSummary < ActiveRecord::Base
   end
 
   def emit_data_to_user(send_data=false)
+    require 'open-uri'
     return true unless (self.changes["status"].present? || send_data)
     result = Hash.new
     import_summary = self.reload
@@ -22,6 +23,13 @@ class OrderImportSummary < ActiveRecord::Base
     import_summary.updated_at += time_zone
     result['import_info'] = import_summary
     result['import_items'] = []
+    begin
+      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+'import_order_information.log'
+      lines = open(url).read
+      result['summary'] = lines.split("=========================================\n").last.gsub(/[\n]/,"<br/>")
+    rescue
+      result['summary'] = "nil"
+    end  
     # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
     import_items = ImportItem.all
     import_items.each do |import_item|

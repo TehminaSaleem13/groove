@@ -8,7 +8,12 @@ module Groovepacker
           return @result
         end
         if @params[:var] == 'status'
-          order.status = @params[:value]
+          check = order.order_items.map(&:qty).include? (0)
+          if check || @params[:value] != "scanned"
+           set_status_and_message(false, 'Only orders containing Active items can be Awaiting', ['&', 'error_msg'])  
+          else
+            order.status = @params[:value]
+          end
           add_activity(order, @current_user.name) if @params[:value] == 'scanned'
         elsif @params[:var] == 'ordernum'
           order.increment_id = @params[:value]

@@ -224,6 +224,7 @@ module ScanPack
         @result['success_messages'].push('This order marked as scanned')
         @single_order_result['next_state'] = 'scanpack.rfp.default'
       else
+        check_removal_zero_qty_item
         do_if_single_order_status_on_hold(has_inactive_or_new_products) if single_order_status.eql?('onhold')
         # process orders that have status of Service Issue
         do_if_single_order_status_serviceissue if single_order_status.eql?('serviceissue')
@@ -257,6 +258,27 @@ module ScanPack
       @result['notice_messages'].push('This order has already been scanned')
     end
 
+    def check_removal_zero_qty_item
+      if GeneralSetting.last.remove_order_items 
+        data =    []
+        @single_order.reload.order_items.each do |order_item|
+          data << order_item if order_item.qty.eql?(0)
+        end
+        if data.any?
+          data.each do |item|
+            product = item.product
+            sku = product.product_skus.first.sku rescue nil
+            item.order.addactivity("Item with sku " + sku.to_s + " having 0 qty removed", "GroovePacker Automaticaly")
+            item.delete
+          end 
+          @single_order.reload.order_items
+          @single_order.update_order_status
+          message = "An item with quantity of 0 has been removed from this order"
+          @result['notice_messages'].push(message)
+        end
+      end
+    end
+
     def do_if_single_order_status_on_hold(has_inactive_or_new_products)
       if has_inactive_or_new_products
         # get list of inactive_or_new_products
@@ -269,7 +291,9 @@ module ScanPack
           @single_order_result.merge!('product_edit_matched' => true,
                                       'inactive_or_new_products' => @single_order.get_inactive_or_new_products,
                                       'next_state' => 'scanpack.rfp.product_edit')
-          message = check_for_zero_qty_item
+  
+            message = check_for_zero_qty_item
+
         else
           @session.merge!(product_edit_matched_for_current_user: false,
                           order_edit_matched_for_current_user: false,

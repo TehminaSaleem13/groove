@@ -60,4 +60,18 @@ class StripeInvoiceEmail < ActionMailer::Base
     mail to: ['groovepacker@gmail.com', 'groovepackerservice@gmail.com'],
          subject: "GroovePacker user delete request"
   end
+
+  def remove_user_request_email tenant, users
+    @users = users
+    @tenant = tenant
+    mail to: ['support@groovepacker.com'],subject: "#{ENV["RAILS_ENV"]} #{@users} User Removal Request for #{@tenant.name}"
+  end
+
+  def annual_plan tenant, users, amount
+    @users = users
+    @tenant = tenant.name
+    @amount = amount
+    mail to: ['support@groovepacker.com'],subject: "Request for annual plan"
+    
+  end
 end

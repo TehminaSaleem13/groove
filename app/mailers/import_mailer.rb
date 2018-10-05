@@ -61,9 +61,10 @@ class ImportMailer < ActionMailer::Base
   end
 
   def order_information(file_name,item_hash)
+    tenant = Apartment::Tenant.current
     @file_name = file_name
     @item_hash = item_hash
-    subject = "Order Information"
+    subject = "#{tenant}  Order CSV Import Summary Report"
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
 

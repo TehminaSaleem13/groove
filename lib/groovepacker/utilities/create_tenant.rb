@@ -13,9 +13,20 @@ class CreateTenant
 
     subscription.update_progress('tenant_created')
     self.send_transaction_emails(subscription)
+    create_csv_store
     # TransactionEmail.delay(run_at: 2.hours.from_now).send_email(subscription)
     # TransactionEmail.welcome_email(subscription).deliver
     # subscription.update_progress("email_sent")
+  end
+
+  def create_csv_store
+    store = Store.new
+    store.name = "CSV"
+    store.store_type = "CSV"
+    store.csv_beta = true
+    store.status = true 
+    store.inventory_warehouse_id = InventoryWarehouse.first.id
+    store.save!
   end
 
   def apply_restrictions_and_seed(subscription)
