@@ -113,7 +113,7 @@ module Groovepacker
                       import_item.status = "completed"
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                       begin
-                        logger = Logger.new("#{Rails.root}/log/import_order_information.log")
+                        logger = Logger.new("#{Rails.root}/log/import_order_information_#{Apartment::Tenant.current}.log")
                         logger.info("=========================================")
                         logger.info("Tenant : #{Apartment::Tenant.current}")
                         logger.info("Name of imported file: #{@file_name}")
@@ -125,8 +125,8 @@ module Groovepacker
                         n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count
                         @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
                         logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
-                        pdf_path = Rails.root.join( 'log', "import_order_information.log")
-                        reader_file_path = Rails.root.join('log', "import_order_information.log")
+                        pdf_path = Rails.root.join( 'log', "import_order_information_#{Apartment::Tenant.current}.log")
+                        reader_file_path = Rails.root.join('log', "import_order_information_#{Apartment::Tenant.current}.log")
                         base_file_name = File.basename(pdf_path)
                         pdf_file = File.open(reader_file_path)
                         GroovS3.create_log(Apartment::Tenant.current, base_file_name, pdf_path.read)

@@ -22,9 +22,9 @@ class OrderImportSummariesController < ApplicationController
     require 'open-uri'
     begin
       @tenant_name = Apartment::Tenant.current
-      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+'import_order_information.log'
+      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_information_#{Apartment::Tenant.current}.log"
       lines = open(url).read
-      @result = lines.split("=========================================\n").last(64).reverse
+      @result = lines.split("=========================================\n").last(80).reverse
       action_view = do_get_action_view_object_for_html_rendering
       pdf_html = action_view.render :template => "order_import_summaries/download_summary_details.html.erb", :layout => nil, :locals => {:@result => @result}
       pdf_path = Rails.root.join('public', 'pdfs', "imported_order_information.pdf")

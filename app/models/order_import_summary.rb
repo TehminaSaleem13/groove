@@ -24,7 +24,7 @@ class OrderImportSummary < ActiveRecord::Base
     result['import_info'] = import_summary
     result['import_items'] = []
     begin
-      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+'import_order_information.log'
+      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_information_#{Apartment::Tenant.current}.log"
       lines = open(url).read
       result['summary'] = lines.split("=========================================\n").last.gsub(/[\n]/,"<br/>")
     rescue
