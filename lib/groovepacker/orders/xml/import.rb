@@ -211,7 +211,7 @@ module Groovepacker
           if @skip_count == order.order_items.count
             n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
             $redis.set("skip_order_#{Apartment::Tenant.current}", n)
-          else
+          elsif !@check_new_order
             n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
             $redis.set("update_order_#{Apartment::Tenant.current}", n)
           end
