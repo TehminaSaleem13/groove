@@ -91,6 +91,10 @@ class UsersController < ApplicationController
           @user.view_dashboard = params[:view_dashboard]
         end
 
+        unless params[:dashboard_switch].nil?
+          @user.dashboard_switch = params[:dashboard_switch]
+        end
+
         @user.confirmation_code = params[:confirmation_code]
         @user.custom_field_one = params[:custom_field_one]
         @user.custom_field_two = params[:custom_field_two]
