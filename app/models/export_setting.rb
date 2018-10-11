@@ -26,10 +26,14 @@ class ExportSetting < ActiveRecord::Base
     else
       destroy_order_export_email_scheduled
     end
+    daily_packed_check
+  end
+
+  def daily_packed_check
     if auto_email_daily_export_with_changed_hash
       schedule_job("daily_packed", time_to_send_daily_packed_export_email)
     else
-       destroy_daily_packed_email_scheduled
+      destroy_daily_packed_email_scheduled
     end
   end
 
