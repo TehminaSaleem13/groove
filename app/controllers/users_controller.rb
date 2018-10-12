@@ -184,27 +184,37 @@ class UsersController < ApplicationController
   end
 
   def print_confirmation_code
+    require 'wicked_pdf'
     user = User.find(params[:id])
     @action_code = user.confirmation_code
-
-    respond_to do |format|
-      format.html
-      format.pdf {
-        render :pdf => 'confirmation_code_'+user.username.to_s,
-               :template => 'settings/action_barcodes.html.erb',
-               :orientation => 'Portrait',
-               :page_height => '1in',
-               :page_width => '3in',
-               :margin => {
-                 :top => '0',
-                 :bottom => '0',
-                 :left => '0',
-                 :right => '0'
-               }
-      }
+    tenant_name = Apartment::Tenant.current
+    file_name ='confirmation_code_'+user.username.to_s
+    packing_slip_obj = Groovepacker::PackingSlip::PdfMerger.new
+    action_view = packing_slip_obj.do_get_action_view_object_for_html_rendering
+    pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+    pdf_html = action_view.render :template => "settings/action_barcodes.html.erb", :layout => nil, :locals => {:@action_code => @action_code}
+    doc_pdf = WickedPdf.new.pdf_from_string(
+       pdf_html,
+      :inline => true,
+      :save_only => false,
+      :orientation => 'Portrait',
+      :page_height => '1in',
+      :page_width => '3in',
+      :margin => {:top => '0', :bottom => '0',:left => '0',:right => '0'}
+    )
+    reader_file_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+    File.open(reader_file_path, 'wb') do |file|
+      file << doc_pdf
     end
+    base_file_name = File.basename(pdf_path)
+    pdf_file = File.open(reader_file_path)
+    GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
+    pdf_file.close
+    generate_barcode = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
+    render json: {url: generate_barcode}
   end
 
+  
   def create_role
     result = {}
     result['status'] = true

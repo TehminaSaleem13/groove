@@ -64,7 +64,7 @@ class ImportMailer < ActionMailer::Base
     tenant = Apartment::Tenant.current
     @file_name = file_name
     @item_hash = item_hash
-    subject = "#{tenant}  Order CSV Import Summary Report"
+    subject = "[#{tenant}] Order CSV Failure Report "
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
 
@@ -76,8 +76,8 @@ class ImportMailer < ActionMailer::Base
     @skip_order = skip_order
     @total_order = total_order
     @after_import = after_import
-    @current_tenant =Apartment::Tenant.current
-    subject = "Order not Imported Properly "
+    @current_tenant = Apartment::Tenant.current
+    subject = "[#{@current_tenant}] Order CSV Import Summary Report "
     mail to: "kcpatel006@gmail.com", subject: subject
   end
 end

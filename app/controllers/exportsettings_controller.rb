@@ -54,7 +54,18 @@ class ExportsettingsController < ApplicationController
           time_to_send_stat_export_email: params[:time_to_send_stat_export_email],
           stat_export_type: params[:stat_export_type],
           stat_export_email: params[:stat_export_email],
-          processing_time: params[:processing_time]
+          processing_time: params[:processing_time],
+          daily_packed_email_export: params[:daily_packed_email_export],
+          time_to_send_daily_packed_export_email: params[:time_to_send_daily_packed_export_email],
+          daily_packed_email_on_mon: params[:daily_packed_email_on_mon],
+          daily_packed_email_on_tue: params[:daily_packed_email_on_tue],
+          daily_packed_email_on_wed: params[:daily_packed_email_on_wed],
+          daily_packed_email_on_thu: params[:daily_packed_email_on_thu],
+          daily_packed_email_on_fri: params[:daily_packed_email_on_fri],
+          daily_packed_email_on_sat: params[:daily_packed_email_on_sat],
+          daily_packed_email_on_sun: params[:daily_packed_email_on_sun],
+          daily_packed_email: params[:daily_packed_email],
+          daily_packed_export_type: params[:daily_packed_export_type]
           )
         @result['success_messages'].push('Export settings updated successfully.')
         # else
@@ -108,6 +119,12 @@ class ExportsettingsController < ApplicationController
     export_setting = ExportSetting.first
     params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
     stat_stream_obj.delay(:queue => "generate_stat_export_#{Apartment::Tenant.current}").generate_export(Apartment::Tenant.current, params)
+    render json: {}
+  end
+
+  def daily_packed
+    daily_pack  = DailyPacked.new()
+    daily_pack.delay(:queue => "generate_daily_packed_export_#{Apartment::Tenant.current}").send_daily_pack_csv(Apartment::Tenant.current)
     render json: {}
   end
 

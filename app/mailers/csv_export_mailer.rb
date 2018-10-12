@@ -15,11 +15,15 @@ class CsvExportMailer < ActionMailer::Base
     mail to: recipients, subject: subject if recipients.compact.present?
   end
 
-  def send_daily_packed(object_url)
+  def send_daily_packed(object_url,tenant)
+    Apartment::Tenant.switch(tenant)
     @object_url = object_url
-    general_setting = GeneralSetting.all.first
-    recipients = [general_setting.email_address_for_packer_notes]
-    subject = "daily packed % Report"
+    #general_setting = GeneralSetting.all.first
+    #recipients = [general_setting.email_address_for_packer_notes]
+    recipients = [ ExportSetting.first.daily_packed_email]
+    subject = "Daily Packed % Report for #{tenant}"
+    file_name = "#{tenant}_#{Time.now.to_i}.csv"
+    attachments[file_name] = Net::HTTP.get(URI.parse(object_url)) rescue nil
     mail to: recipients , subject: subject 
   end
 

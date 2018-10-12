@@ -234,6 +234,7 @@ Groovepacks::Application.routes.draw do
       put 'update_export_settings'
       get 'order_exports'
       get 'email_stats'
+      get 'daily_packed'
     end
   end
 

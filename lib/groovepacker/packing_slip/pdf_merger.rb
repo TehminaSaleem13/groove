@@ -23,6 +23,18 @@ module Groovepacker
         #delete the perviously generated merged pdf
         File.delete(input)
       end
+
+      def do_get_action_view_object_for_html_rendering
+        ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
+        action_view = ActionView::Base.new()
+        action_view.view_paths = ActionController::Base.view_paths
+        action_view.class_eval do
+          include Rails.application.routes.url_helpers
+          include ApplicationHelper
+          include ProductsHelper
+        end
+        action_view
+      end
     end
   end
 end

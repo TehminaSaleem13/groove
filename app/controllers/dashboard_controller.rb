@@ -97,7 +97,7 @@ class DashboardController < ApplicationController
       end
     end
     url = GroovS3.create_public_csv(tenant, 'order',Time.now.to_i, data).url
-    CsvExportMailer.send_daily_packed(url).deliver
+    CsvExportMailer.send_daily_packed(url,tenant).deliver
     render json: {}
   end
 end

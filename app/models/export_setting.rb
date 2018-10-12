@@ -8,7 +8,10 @@ class ExportSetting < ActiveRecord::Base
                   :start_time, :end_time, :manual_export, :auto_stat_email_export, :time_to_send_stat_export_email,
                   :send_stat_export_email_on_mon, :send_stat_export_email_on_tue, :send_stat_export_email_on_wed,
                   :send_stat_export_email_on_thu, :send_stat_export_email_on_fri, :send_stat_export_email_on_sat,
-                  :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email, :processing_time
+                  :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email, :processing_time,
+                  :daily_packed_email_export, :time_to_send_daily_packed_export_email, :daily_packed_email_on_mon,
+                  :daily_packed_email_on_tue, :daily_packed_email_on_wed, :daily_packed_email_on_thu, :daily_packed_email_on_fri,
+                  :daily_packed_email_on_sat, :daily_packed_email_on_sun, :daily_packed_email ,:daily_packed_export_type
 
   after_save :scheduled_export
 
@@ -22,6 +25,15 @@ class ExportSetting < ActiveRecord::Base
       schedule_job("export_order", time_to_send_export_email)
     else
       destroy_order_export_email_scheduled
+    end
+    daily_packed_check
+  end
+
+  def daily_packed_check
+    if auto_email_daily_export_with_changed_hash
+      schedule_job("daily_packed", time_to_send_daily_packed_export_email)
+    else
+      destroy_daily_packed_email_scheduled
     end
   end
 
@@ -41,6 +53,11 @@ class ExportSetting < ActiveRecord::Base
     day = date.strftime('%a')
     # Returns True/False
     send("send_stat_export_email_on_#{day.downcase}")
+  end
+
+  def should_daily_export_orders(date)
+    day = date.strftime('%a')
+    send("daily_packed_email_on_#{day.downcase}")
   end
 
   def calculate_row_data(single_row, order_item)
@@ -82,6 +99,10 @@ class ExportSetting < ActiveRecord::Base
     auto_stat_email_export && changes[:time_to_send_stat_export_email].present? && stat_export_email.present?
   end
 
+  def auto_email_daily_export_with_changed_hash
+    daily_packed_email_export && changes[:time_to_send_daily_packed_export_email].present? && daily_packed_email.present?
+  end
+
   def schedule_job(type, time)
     job_scheduled = false
     date = DateTime.now
@@ -101,6 +122,11 @@ class ExportSetting < ActiveRecord::Base
     # Delayed::Job.where(
     #   queue: "order_export_email_scheduled_#{tenant}"
     # ).destroy_all
+  end
+
+  def destroy_daily_packed_email_scheduled
+    tenant = Apartment::Tenant.current
+    Delayed::Job.where("queue =? && run_at < ?", "generate_daily_packed_export_#{tenant}", Time.now()).destroy_all
   end
 
   def destroy_stat_export_email_scheduled
