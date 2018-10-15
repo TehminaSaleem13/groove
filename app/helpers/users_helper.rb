@@ -114,4 +114,16 @@ module UsersHelper
       end
     end
   end
+
+  def remove_user params, access_restriction,tenant
+    if params[:users].to_i < access_restriction.num_users && params[:is_annual] == "false"
+      users = access_restriction.num_users -  params[:users].to_i
+      ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
+      access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
+      access_restriction.update_attributes(num_users: params[:users])
+      set_subscription_info(params[:amount])
+      create_stripe_plan(tenant)
+      return false
+    end  
+  end
 end
