@@ -193,6 +193,7 @@ module Groovepacker
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
           @skip_count = 0
+          @update_count = 0 
           if order.order_items.empty?
             # create order items
             orderXML.order_items.each do |order_item_XML|
@@ -211,7 +212,7 @@ module Groovepacker
           if @skip_count == order.order_items.count && !@check_new_order
             n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
             $redis.set("skip_order_#{Apartment::Tenant.current}", n)
-          elsif !@check_new_order
+          elsif !@check_new_order && @update_count == 0
             n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
             $redis.set("update_order_#{Apartment::Tenant.current}", n)
           end
@@ -256,6 +257,7 @@ module Groovepacker
                 if !@check_new_order
                   n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
                   $redis.set("update_order_#{Apartment::Tenant.current}", n)
+                  @update_count = @update_count + 1
                 end
                 order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
                   "#{order.store.name} Import")
