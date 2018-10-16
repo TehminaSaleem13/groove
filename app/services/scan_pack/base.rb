@@ -18,26 +18,19 @@ module ScanPack
     end
 
     def request_api(params)
+      require "net/http"
       Apartment::Tenant.switch params[:tenant]
       order = Order.find(params[:scan_pack][:_json])
       store  = order.store 
       magento_credential =  MagentoCredentials.where(:store_id => store.id).first unless MagentoCredentials.where(:store_id => store.id).empty?
-      client = nil
-      session = nil
       if !magento_credential.nil?
-        if magento_credential.updated_patch
-          client = Savon.client( wsdl: magento_credential.host+"/api/soap/?wsdl")
-        end
-        response = client.call(:login, message: {apiUser: magento_credential.username, apikey: magento_credential.api_key}) rescue nil
-        session = response.body[:login_response][:login_return]
-        tracking_num = order.tracking_num.nil? ? '' : order.tracking_num
-        request= "<soap:Envelope xmlns:soap=\"http://schemas.xmlsoap.org/soap/envelope/\" xmlns:xsi=\"http://www.w3.org/2001/XMLSchema-instance\" xmlns:xsd=\"http://www.w3.org/2001/XMLSchema\"><soap:Body><call xmlns=\"urn:Magento\"><sessionId xmlns=\"\">#{session}</sessionId><resourcePath xmlns=\"\">groovepacker_api.updateshipment</resourcePath><args SOAP-ENC:arrayType=\"xsd:string[2]\" xsi:type=\"SOAP-ENC:Array\"><item xsi:type=\"xsd:string\">#{order.increment_id}</item><item xsi:type=\"xsd:string\">#{tracking_num}</item></args></call></soap:Body></soap:Envelope>"
         on_demand_logger = Logger.new("#{Rails.root}/log/shopakira_request_call.log")
         begin
-          response = client.call(:call,xml: request) 
-          log_response = response.body[:call_response][:call_return]
+          data = {'key' => 'Gr00_$p4ck3RPJ2004k1R4', 'order_id' => order.increment_id, 'tracking_id' => order.tracking_num}
+          x = Net::HTTP.post_form(URI.parse('https://www.shopakira.com/groovepacker'), data)
+          response = x.body
           on_demand_logger.info("=========================================")
-          log = { tenant: Apartment::Tenant.current, order: order.increment_id , tracking_num: order.tracking_num , response: log_response }
+          log = { tenant: Apartment::Tenant.current, order: order.increment_id , tracking_num: order.tracking_num , response: response }
           on_demand_logger.info(log)
         rescue Exception => e
           on_demand_logger.info("=========================================")
