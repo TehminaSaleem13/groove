@@ -33,8 +33,11 @@ class UsersController < ApplicationController
     access_restriction = AccessRestriction.last
     data = {}
     data = {users: params[:users], amount: params[:amount],  is_annual: params[:is_annual] }
-    result['request_send'] = check_for_removal(data,access_restriction,tenant)
-
+    if tenant.created_at > "2016-09-23 00:00:00"
+      result['request_send'] = remove_user(data,access_restriction,tenant)
+    else
+      result['request_send'] = check_for_removal(data,access_restriction,tenant)
+    end
     if params[:is_annual] == "false" && params[:users].to_i > access_restriction.num_users
       ui_user = params[:users].to_i - access_restriction.num_users  
       access_restriction.update_attributes(added_through_ui: ui_user) 

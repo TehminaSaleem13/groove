@@ -144,6 +144,15 @@ module Groovepacker
           if Order::SOLD_STATUSES.include? @orderitem.order.status
             set_status_and_message(false, "Scanned Orders item quantities can't be changed", ['&', 'push'])
           else
+            if @orderitem.scanned_status == "scanned" &&  @params[:qty] > @orderitem.qty 
+              @orderitem.scanned_status = 'partially_scanned'
+              if @orderitem.order_item_kit_products.count > 0
+                @orderitem.order_item_kit_products.each do |o|
+                  o.scanned_status = 'partially_scanned'
+                  o.save
+                end
+              end   
+            end
             @orderitem.qty = @params[:qty]
           end
           return if @orderitem.save
