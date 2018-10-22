@@ -22,6 +22,11 @@ module OrderConcern
     result_rows = result_rows.blank? ? [] : result_rows
     ids = result_rows.map { |p| p['id'] }
     orders = Order.where('id IN (?)', ids)
+    if params[:sort] == "custom_field_one" || params[:sort] == "custom_field_two"
+      orders = orders.order("#{params[:sort]} #{params[:order]}")
+    else
+      orders
+    end  
   end
 
   def get_orders_list_for_selected(sort_by_order_number = false)
