@@ -277,4 +277,16 @@ module OrdersHelper
     end
     (tscan_time == 0 || tscan_count == 0) ? nil : tscan_time/tscan_count
   end
+
+  def sort_order params, orders
+    if params[:sort] == "order_date"
+      params[:sort] = "order_placed_time"
+    end
+    begin
+      orders = orders.order("#{params[:sort]} #{params[:order]}")
+    rescue 
+      orders
+    end  
+    return orders
+  end
 end
