@@ -144,6 +144,16 @@ module Groovepacker
           if Order::SOLD_STATUSES.include? @orderitem.order.status
             set_status_and_message(false, "Scanned Orders item quantities can't be changed", ['&', 'push'])
           else
+            product = @orderitem.product
+            sku = product.product_skus.first.sku rescue nil
+            if @params[:qty] > @orderitem.qty
+              value = @params[:qty] -  @orderitem.qty
+              @orderitem.order.addactivity("Item with sku " + sku.to_s + " QTY increased by #{value}", @current_user.name)
+            else
+              value = @orderitem.qty - @params[:qty]
+              @orderitem.order.addactivity("Item with sku " + sku.to_s + " QTY decreased by #{value} ", @current_user.name)
+            end 
+
             if @orderitem.scanned_status == "scanned" &&  @params[:qty] > @orderitem.qty 
               @orderitem.scanned_status = 'partially_scanned'
               if @orderitem.order_item_kit_products.count > 0
@@ -153,7 +163,9 @@ module Groovepacker
                 end
               end   
             end
+
             @orderitem.qty = @params[:qty]
+
           end
           return if @orderitem.save
 
