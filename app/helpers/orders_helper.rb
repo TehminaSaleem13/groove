@@ -279,9 +279,6 @@ module OrdersHelper
   end
 
   def sort_order params, orders
-    if params[:sort] == "order_date"
-      params[:sort] = "order_placed_time"
-    end
     begin
       orders = orders.order("#{params[:sort]} #{params[:order]}")
     rescue 
