@@ -22,7 +22,7 @@ module OrderConcern
     result_rows = result_rows.blank? ? [] : result_rows
     ids = result_rows.map { |p| p['id'] }
     orders = Order.where('id IN (?)', ids)
-    orders = sort_order(params, orders)
+    #orders = sort_order(params, orders)
   end
 
   def get_orders_list_for_selected(sort_by_order_number = false)
