@@ -205,8 +205,10 @@ class OrdersController < ApplicationController
   def generate_all_packing_slip
     if params[:ids].blank?
       @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
+      @orders = params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" ? sort_order(params, @orders)  : @orders
     else
       @orders = Order.where(id: params[:ids].split(",")) 
+      @orders = params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" ? sort_order(params, @orders) : @orders
     end
   end
 
