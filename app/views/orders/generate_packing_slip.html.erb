@@ -6568,7 +6568,10 @@
                   </tr>
                   <% order_item.order_item_kit_products.each do |order_item_kit_product| %>
                     <% product_kit_sku = order_item_kit_product.product_kit_skus%>
-                    <tr style="position: relative;border: solid #333;border-width: 4px;">
+                    <%if GeneralSetting.first.multi_box_shipments %>
+                      <%t = OrderItemBox.where(box_id: box.id, order_item_id: order_item.id, kit_id: order_item_kit_product.id).first%>
+                      <%if t.present? %>
+                        <tr style="position: relative;border: solid #333;border-width: 4px;">
                       <% product= Product.find(product_kit_sku.option_product_id)%>
                       <td><%=product.primary_sku%></td>
                       <td><%=product.name%></td>
@@ -6577,8 +6580,22 @@
                           <%= warehouse.location_primary %>
                         <% end %>
                       </td>
-                      <td><%=order_item.qty * product_kit_sku.qty %></td>
-                    </tr>
+                      <td><%= t.item_qty %></td>
+                        </tr>
+                      <%end%>  
+                    <%else%>
+                      <tr style="position: relative;border: solid #333;border-width: 4px;">
+                        <% product= Product.find(product_kit_sku.option_product_id)%>
+                        <td><%=product.primary_sku%></td>
+                        <td><%=product.name%></td>
+                        <td>
+                          <% product.product_inventory_warehousess.each do |warehouse| %>
+                            <%= warehouse.location_primary %>
+                          <% end %>
+                        </td>
+                        <td><%=order_item.qty * product_kit_sku.qty %></td>
+                      </tr>
+                    <%end%>  
                   <%end%>    
                <%end%>
             <% end %>

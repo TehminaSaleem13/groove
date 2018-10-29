@@ -192,6 +192,8 @@ module OrderConcern
     box_data = @order.get_boxes_data
     @result['order']['boxes'] = box_data[:box]
     @result['order']['order_item_boxes'] = box_data[:order_item_boxes]
+    @result['order']['order_item_in_boxes'] = box_data[:order_item_in_boxes]
+    @result['order']['list'] = box_data[:list]
   end
 
   def retrieve_order_item(orderitem)
