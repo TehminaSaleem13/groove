@@ -104,11 +104,39 @@ module ScanPack
         'order_num' => @single_order.increment_id
       })
       if @single_order.has_unscanned_items
-        do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
+        if ScanPackSetting.last.scanning_sequence == "any_sequence" || ScanPackSetting.last.scanning_sequence == "kits_sequence"
+          do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
+        end
+
+        if ScanPackSetting.last.scanning_sequence == "items_sequence"
+          unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
+          value = check_scanning_item(unscanned_items,clean_input)
+          if value
+            do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
+          else
+            @result['status'] &= false
+            @result['error_messages'].push("Please scan items in the suggested order")
+          end
+        end
       else
         @result['status'] &= false
         @result['error_messages'].push("There are no unscanned items in this order")
       end
+    end
+
+
+    def check_scanning_item(unscanned_items, clean_input)
+      list = [] 
+      list << unscanned_items.first["barcodes"].map(&:barcode)
+      if unscanned_items.first["child_items"].any?
+        data = []
+        unscanned_items.first["child_items"].each do |child_item|
+          data << child_item["barcodes"].map(&:barcode)
+        end 
+        list << data
+      end 
+      value = list.flatten.include?("#{clean_input}")
+      return value
     end
 
     def do_if_service_issue_code_is_enabled_and_and_eql_to_input
@@ -182,15 +210,33 @@ module ScanPack
 
     def do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
       barcode_found = false
+      value = true
       unscanned_items.each do |item|
         if item['product_type'] == 'individual'
-          barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
+          if ScanPackSetting.last.scanning_sequence == "kits_sequence" && item['child_items'].any?
+            value = check_scanning_kit(item['child_items'],clean_input) 
+            if value
+               barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
+            else
+              @result['status'] &= false
+              @result['error_messages'].push("Please scan items in the suggested order")
+            end
+          else
+            barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
+          end
         elsif item['product_type'] == 'single'
           barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found])
         end
         break if barcode_found
       end
       barcode_found
+    end
+
+    def check_scanning_kit(child_items, clean_input)
+      list = [] 
+      list << child_items.first["barcodes"].map(&:barcode)
+      value = list.flatten.include?("#{clean_input}")
+      return value
     end
 
     def do_set_result_for_boxes order
