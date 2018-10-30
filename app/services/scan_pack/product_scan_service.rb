@@ -143,7 +143,7 @@ module ScanPack
     def check_scanning_item(unscanned_items, clean_input)
       list = [] 
       list << unscanned_items.first["barcodes"].map(&:barcode)
-      if unscanned_items.first["child_items"].any?
+      if !unscanned_items.first["child_items"].nil?
         data = []
         unscanned_items.first["child_items"].each do |child_item|
           data << child_item["barcodes"].map(&:barcode)
