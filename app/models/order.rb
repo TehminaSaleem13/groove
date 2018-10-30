@@ -1040,11 +1040,13 @@ class Order < ActiveRecord::Base
     list =  []
     order_item_boxes.flatten.each do |o|
       data1 = {}
-      order_item_kit_product = OrderItemKitProduct.find(o.kit_id)
-      product_kit_sku = order_item_kit_product.product_kit_skus
-      product = Product.find(product_kit_sku.option_product_id)
-      data1 = { product_name: product.name ,qty:  o.item_qty, box: o.box.id  }
-      list << data1
+      if !o.kit_id.nil?
+        order_item_kit_product = OrderItemKitProduct.find(o.kit_id)
+        product_kit_sku = order_item_kit_product.product_kit_skus
+        product = Product.find(product_kit_sku.option_product_id)
+        data1 = { product_name: product.name ,qty:  o.item_qty, box: o.box.id  }
+        list << data1
+      end  
     end  
     list = list.group_by { |d| d[:box] }
     result = { box: boxes.as_json(only: [:id, :name]), order_item_boxes: order_item_boxes.flatten, list: list   }
