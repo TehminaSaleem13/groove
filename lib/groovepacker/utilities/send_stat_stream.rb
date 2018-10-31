@@ -40,6 +40,12 @@ class SendStatStream
     send_stream(tenant, stat_stream, order_id, path)
   end
 
+  def update_missing_data(tenant)
+    path = "/dashboard/process_missing_data"
+    HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}#{path}",
+          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant }) 
+  end
+
   def update_stats(tenant)
     path = "/dashboard/run_stat_stream"
     HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",

@@ -27,6 +27,14 @@ class DashboardController < ApplicationController
     render json: results
   end
 
+  def process_missing_data
+    results = {"status"=> true, "message" => "Your request has been queued."}
+    tenant = Apartment::Tenant.current
+    stat_stream_obj = SendStatStream.new()
+    stat_stream_obj.update_missing_data(tenant)
+    render json: results
+  end
+
   def generate_stats
     results = {"status"=> true}
     tenant = Apartment::Tenant.current

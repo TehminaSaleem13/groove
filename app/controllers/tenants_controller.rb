@@ -101,6 +101,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_allow_rts
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.allow_rts = !tenant.allow_rts
+    tenant.save
+    render json: {}
+  end
+
   def create_duplicate
     result = create_single_duplicate
 

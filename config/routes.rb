@@ -63,6 +63,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_import_mode' => 'tenants#update_import_mode'
   get '/tenants/update_fba' => 'tenants#update_fba'
   get '/tenants/update_api_call' => 'tenants#update_api_call'
+  get '/tenants/update_allow_rts' => 'tenants#update_allow_rts'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action
@@ -364,6 +365,7 @@ Groovepacks::Application.routes.draw do
       get 'get_stat_stream_manually'
       get 'daily_packed_percentage'
       post 'download_daily_packed_csv'
+      get 'process_missing_data'
     end
     post 'generate_stats'
   end
