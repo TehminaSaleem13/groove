@@ -103,6 +103,7 @@ module ScanPack
         },
         'order_num' => @single_order.increment_id
       })
+      
       if @single_order.has_unscanned_items
         if ScanPackSetting.last.scanning_sequence == "any_sequence" || ScanPackSetting.last.scanning_sequence == "kits_sequence"
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
@@ -114,6 +115,7 @@ module ScanPack
           if value
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
+            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
             @result['status'] &= false
             @result['error_messages'].push("Please scan items in the suggested order")
           end
@@ -218,8 +220,10 @@ module ScanPack
             if value
                barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
             else
+              @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{item['child_items'].first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
               @result['status'] &= false
               @result['error_messages'].push("Please scan items in the suggested order")
+              break
             end
           else
             barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
