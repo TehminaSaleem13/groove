@@ -200,6 +200,7 @@ module OrdersHelper
     outputter.margin = 0
     outputter.xdim = 2
     blob = outputter.to_png #Raw PNG data
+    increment_id = increment_id.gsub(/[\#\s+]/, '')
     File.open("#{Rails.root}/public/images/#{increment_id}.png",
               'w') do |f|
       f.write blob
