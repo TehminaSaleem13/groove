@@ -1,8 +1,14 @@
 class ShipstationRestCredential < ActiveRecord::Base
   attr_accessible :api_key, :api_secret, :store_id, :shall_import_, :regular_import_range, :gen_barcode_from_sku, :import_upc
-  validates_presence_of :api_key, :api_secret, :regular_import_range
-
+  validates_presence_of :regular_import_range
+  before_save :check_if_null_or_undefined
   belongs_to :store
+
+  
+  def check_if_null_or_undefined
+    self.api_key = nil if self.api_key=="null" or self.api_key=="undefined"
+    self.api_secret = nil if self.api_secret=="null" or self.api_secret=="undefined"
+  end
 
   def verify_tags
     context = Groovepacker::Stores::Context.new(

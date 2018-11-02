@@ -25,6 +25,13 @@ module Groovepacker
         end
         if Store.where("status = '1' AND store_type != 'system'").length > 0
           add_import_to_delayed_job(order_summary)
+          st = Store.where(store_type: "Shipstation API 2",status: true)
+          data = []
+          st.each do |s|
+            if s.shipstation_rest_credential.api_key.nil? || s.shipstation_rest_credential.api_secret.nil?
+              set_status_and_message(false, 'Please click here to open your ShipStation connection settings and add your API details.', ['push', 'error_messages'])
+            end
+          end  
           @result['success_messages'].push('Scouring the interwebs for new orders...')
         else
           set_status_and_message(false, 'You currently have no Active Stores in your Store List', ['push', 'error_messages'])
