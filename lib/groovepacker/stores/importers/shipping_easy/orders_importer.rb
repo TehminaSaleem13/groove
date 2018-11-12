@@ -176,6 +176,9 @@ module Groovepacker
 
             def import_order(shiping_easy_order, order)
               total_weight = order["recipients"][0]["original_order"]["total_weight_in_ounces"] rescue 0
+              custom_1 = order["recipients"][0]["original_order"]["custom_1"] rescue nil
+              custom_2 = order["recipients"][0]["original_order"]["custom_2"] rescue nil
+
               shiping_easy_order.assign_attributes( increment_id: order["external_order_identifier"],
                                                     store_order_id: order["id"],
                                                     order_placed_time: order["ordered_at"].to_datetime,
@@ -183,7 +186,9 @@ module Groovepacker
                                                     shipping_amount: order["base_shipping_cost"],
                                                     order_total: order["total_excluding_tax"],
                                                     notes_internal: order["internal_notes"],
-                                                    weight_oz: total_weight
+                                                    weight_oz: total_weight,
+                                                    custom_field_one: custom_1,
+                                                    custom_field_two: custom_2
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end
