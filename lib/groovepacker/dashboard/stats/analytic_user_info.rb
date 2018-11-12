@@ -8,6 +8,7 @@ module Groovepacker
             Apartment::Tenant.switch(tenant)
             @users = User.all
             unless @users.empty?
+              general_setting = GeneralSetting.first
               @users.each do |user|
                 result = build_result
                 user_id = user.id
@@ -15,6 +16,12 @@ module Groovepacker
                 result[:user_name] = user.username
                 result[:active] = user.active
                 result[:is_deleted] = user.is_deleted
+                result[:first_name] = user.name rescue nil 
+                result[:last_name] = user.last_name rescue nil 
+                result[:custom_field_one_key] = general_setting.custom_user_field_one
+                result[:custom_field_two_key] = general_setting.custom_user_field_two
+                result[:custom_field_one_value]  = user.custom_field_one
+                result[:custom_field_two_value]  = user.custom_field_two
                 if user_change_hash
                   result[:previous_user_name] = user_change_hash[user_id]
                 end
