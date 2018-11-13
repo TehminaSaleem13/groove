@@ -15,7 +15,7 @@ class ScanPackSetting < ActiveRecord::Base
                   :intangible_string, :intangible_setting_gen_barcode_from_sku,
                   :post_scan_pause_enabled, :post_scan_pause_time, :display_location,
                   :string_removal_enabled, :string_removal, :first_escape_string_enabled, 
-                  :second_escape_string_enabled, :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders
+                  :second_escape_string_enabled, :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders, :scanning_sequence, :click_scan
 
   def self.is_action_code(code)
     setting = all.first
