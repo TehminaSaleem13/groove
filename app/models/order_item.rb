@@ -108,6 +108,10 @@ class OrderItem < ActiveRecord::Base
     result['type_scan_enabled'] = item.type_scan_enabled
     result['order_item_id'] = self.id
     result['box_id'] = self.box_id
+     result['partially_scanned'] = false
+    if self.scanned_status == 'partially_scanned' && self.cached_order_item_kit_products.any?
+      result['partially_scanned'] = true
+    end
 
     result
   end
@@ -141,7 +145,6 @@ class OrderItem < ActiveRecord::Base
       child_item['qty_remaining'] = self.qty * kit_product.cached_product_kit_skus.qty -
         kit_product.scanned_qty
     end
-
     child_item['kit_packing_placement'] = kit_product.cached_product_kit_skus.packing_order
     child_item['kit_product_id'] = kit_product.id
     child_item
