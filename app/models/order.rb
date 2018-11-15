@@ -583,7 +583,9 @@ class Order < ActiveRecord::Base
     end
     if ScanPackSetting.last.scanning_sequence == "kits_sequence"
       unscanned_list.sort_by { |row| (row["partially_scanned"] ? 0 : 1) }
-    end
+    else
+      unscanned_list
+    end  
   end
 
   def find_unscanned_order_item_with_barcode(barcode)
