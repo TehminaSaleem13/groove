@@ -503,7 +503,6 @@ class Order < ActiveRecord::Base
     if most_recent_scanned_product
       chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
     end
-    
     limited_order_items.each do |order_item|
       if order_item.cached_product.try(:is_kit) == 1
         option_products = order_item.cached_option_products
@@ -568,7 +567,6 @@ class Order < ActiveRecord::Base
         end
       end
     end
-
     unscanned_list.sort do |a, b|
       o = (a['packing_placement'] <=> b['packing_placement']);
       o == 0 ? (a['name'] <=> b['name']) : o
@@ -582,6 +580,9 @@ class Order < ActiveRecord::Base
       unscanned_list = list
     rescue
       unscanned_list 
+    end
+    if ScanPackSetting.last.scanning_sequence == "kits_sequence"
+      unscanned_list.sort_by { |row| (row["partially_scanned"] ? 0 : 1) }
     end
   end
 
