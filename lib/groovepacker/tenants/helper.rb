@@ -511,6 +511,13 @@ module Groovepacker
           tenant_hash['last_activity']['most_recent_login'] = most_recent_login(tenant_name)
           tenant_hash['last_activity']['most_recent_scan'] = most_recent_scan(tenant_name)
           tenant_hash['most_recent_activity'] = most_recent_login(tenant_name)['date_time']
+          last_login = tenant_hash['last_activity']['most_recent_login']
+          last_scan =  tenant_hash['last_activity']['most_recent_scan']
+          if last_login["date_time"] < last_scan["date_time"]
+            tenant_hash['last_activity']['most_recent_login'] = most_recent_scan(tenant_name)
+            tenant_hash['last_activity']['most_recent_login']['user'] = tenant_hash['last_activity']['most_recent_login']['user'].username 
+            tenant_hash['most_recent_activity'] = most_recent_scan(tenant_name)
+          end
           check_split_or_production
         rescue => e
           tenant_hash['most_recent_activity'] = nil
@@ -573,7 +580,7 @@ module Groovepacker
         end
 
         return unless query.present?
-
+        
         @recent_login_per_tenant.merge!(
           User.find_by_sql(query).group_by { |order| order.tenant_name })
       end
