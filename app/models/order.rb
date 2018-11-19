@@ -682,6 +682,7 @@ class Order < ActiveRecord::Base
     #transform scanned_list to move all child items into displaying as individual items
     scanned_list.each do |scanned_item|
       if scanned_item['product_type'] == 'individual'
+        scanned_item['child_items'].reverse!
         scanned_item['child_items'].each do |child_item|
           if child_item['scanned_qty'] > 0
             found_single_item = false
@@ -702,14 +703,14 @@ class Order < ActiveRecord::Base
                                          child_item['qty_remaining'],
                                          child_item['scanned_qty'], child_item['packing_placement'], child_item['barcodes'],
                                          child_item['product_id'], scanned_item['order_item_id'], nil, child_item['instruction'], child_item['confirmation'], child_item['skippable'], child_item['record_serial'],
-                                         child_item['box_id'], child_item['kit_product_id'])
+                                         child_item['box_id'], child_item['kit_product_id'], child_item ['updated_at'])
               scanned_list.push(new_item)
             end
           end
         end
       end
     end
-    scanned_list
+   scanned_list.sort! { |a,b| b["updated_at"] <=> a["updated_at"] }
   end
 
   def reset_scanned_status(current_user)

@@ -112,7 +112,7 @@ class OrderItem < ActiveRecord::Base
     if self.scanned_status == 'partially_scanned' && self.cached_order_item_kit_products.any?
       result['partially_scanned'] = true
     end
-
+    result['updated_at'] = self.updated_at
     result
   end
 
@@ -147,6 +147,7 @@ class OrderItem < ActiveRecord::Base
     end
     child_item['kit_packing_placement'] = kit_product.cached_product_kit_skus.packing_order
     child_item['kit_product_id'] = kit_product.id
+    child_item['updated_at'] = self.updated_at
     child_item
   end
 

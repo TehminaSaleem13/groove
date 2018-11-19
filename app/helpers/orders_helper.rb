@@ -94,7 +94,7 @@ module OrdersHelper
   def build_pack_item(name, product_type, images, sku, qty_remaining,
                       scanned_qty, packing_placement,
                       barcodes, product_id, order_item_id, child_items, instruction, confirmation, skippable, record_serial,
-                      box_id, kit_product_id)
+                      box_id, kit_product_id , updated_at)
 
     unscanned_item = Hash.new
     unscanned_item["name"] = name
@@ -113,6 +113,7 @@ module OrdersHelper
     unscanned_item["scanned_qty"] = scanned_qty
     unscanned_item["box_id"] = box_id
     unscanned_item["kit_product_id"] = kit_product_id
+    unscanned_item['updated_at'] = updated_at
 
     if !child_items.nil?
       unscanned_item['child_items'] = child_items
