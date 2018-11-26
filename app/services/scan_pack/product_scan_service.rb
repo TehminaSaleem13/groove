@@ -165,8 +165,10 @@ module ScanPack
         end
       end
       if data.any?
-        data.first["child_items"].each do |i|
-          list << i["barcodes"].map(&:barcode)
+        if data.first["child_items"].present?
+          data.first["child_items"].each do |i|
+            list << i["barcodes"].map(&:barcode)
+          end
         end
       end  
       return list.flatten
