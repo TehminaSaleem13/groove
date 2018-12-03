@@ -19,10 +19,10 @@ module SettingsService
         associated_user: '', total_packed_items: '',
         total_clicked_items: ''
       }
- 
-      params[:start] = params[:start].gsub(/GMT/,'')
-      params[:end] = params[:end].gsub(/GMT/,'')
-      @exceptions = OrderException.where(updated_at: Time.parse(params[:start]).getutc..Time.parse(params[:end]).getutc)
+
+      start_time = params[:start].gsub(/GMT/,'+00:00')
+      end_time = params[:end].gsub(/GMT/,'+00:00')
+      @exceptions = OrderException.where(updated_at: Time.parse(start_time).getutc..Time.parse(end_time).getutc)
     end
 
     def call
