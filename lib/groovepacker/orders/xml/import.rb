@@ -142,6 +142,10 @@ module Groovepacker
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                         begin
+                          if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
+                            $redis.set("new_order_#{tenant}" , orders.count)
+                          end
+
                           if @after_import_count - $redis.get("new_order_#{tenant}").to_i ==  $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
                             response = groove_ftp.update(@file_name)
                           else
