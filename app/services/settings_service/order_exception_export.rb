@@ -23,6 +23,7 @@ module SettingsService
       start_time = params[:start].gsub(/GMT/,'+00:00')
       end_time = params[:end].gsub(/GMT/,'+00:00')
       @exceptions = OrderException.where(updated_at: Time.parse(start_time).getutc..Time.parse(end_time).getutc)
+      
     end
 
     def call
@@ -50,7 +51,8 @@ module SettingsService
       #     csv << single_row.values
       #   end
       # end
-      CSV.open(Rails.root.join('public', 'csv', @result['filename']), 'wb') do |csv|
+
+      data = CSV.generate do |csv|
         csv << row_map.keys
         exceptions.each do |exception|
           single_row = row_map.dup
@@ -58,7 +60,8 @@ module SettingsService
           csv << single_row.values
         end
       end
-      public_url = GroovS3.get_csv_export_exception(@result['filename'])
+
+      public_url =  GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-exceptions","#{Time.now}", data).url
       @result['filename'] = {'url' => public_url, 'filename' => @result['filename']}
     end
 
