@@ -113,6 +113,17 @@ module Groovepacker
                       import_item.status = "completed"
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                       begin
+                        
+                        if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
+                          $redis.set("new_order_#{tenant}" , orders.count)
+                        end
+
+                        n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
+                        @final_count = $redis.get("total_orders_#{tenant}").to_i + n
+                        unless $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
+                          ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @final_count ).deliver
+                        end
+
                         logger = Logger.new("#{Rails.root}/log/import_order_information_#{Apartment::Tenant.current}.log")
                         logger.info("=========================================")
                         logger.info("Tenant : #{Apartment::Tenant.current}")
@@ -142,9 +153,6 @@ module Groovepacker
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
                         begin
-                          if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
-                            $redis.set("new_order_#{tenant}" , orders.count)
-                          end
 
                           if @after_import_count - $redis.get("new_order_#{tenant}").to_i ==  $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
                             response = groove_ftp.update(@file_name)
@@ -211,14 +219,15 @@ module Groovepacker
             orderXML.order_items.each do |order_item_XML|
               create_update_order_item(order, order_item_XML)
             end
-          end
 
-          if @skip_count == order.order_items.count && !@check_new_order
-            n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
-            $redis.set("skip_order_#{Apartment::Tenant.current}", n)
-          elsif !@check_new_order && @update_count == 0
-            n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
-            $redis.set("update_order_#{Apartment::Tenant.current}", n)
+            if !@check_new_order && @update_count >= 1
+              n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
+              $redis.set("update_order_#{Apartment::Tenant.current}", n)
+            elsif !@check_new_order
+              n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
+              $redis.set("skip_order_#{Apartment::Tenant.current}", n)
+            end
+
           end
           result
         end
@@ -259,8 +268,6 @@ module Groovepacker
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
                 if !@check_new_order
-                  n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
-                  $redis.set("update_order_#{Apartment::Tenant.current}", n)
                   @update_count = @update_count + 1
                 end
                 order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
@@ -272,6 +279,8 @@ module Groovepacker
                   order_item.sku = first_sku
                   if order_item_XML[:qty] == order_item.qty || order_item.price ==  order_item_XML[:price] 
                     @skip_count = @skip_count + 1 
+                  else
+                    @update_count = @update_count + 1
                   end 
                   order_item.qty = order_item_XML[:qty] || 0
                   order_item.price = order_item_XML[:price]
