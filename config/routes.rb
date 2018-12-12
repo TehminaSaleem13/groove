@@ -42,6 +42,7 @@ Groovepacks::Application.routes.draw do
   get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
   get 'order_import_summary/download_summary_details' => 'OrderImportSummaries#download_summary_details'
   get '/order_import_summary/fix_imported_at' => 'OrderImportSummaries#fix_imported_at'
+  get '/order_import_summary/delete_import_summary' => 'OrderImportSummaries#delete_import_summary'
   get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
   put '/shipstation_rest_credentials/:store_id/update_product_image' => 'shipstation_rest_credentials#update_product_image'

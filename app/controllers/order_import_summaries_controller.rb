@@ -97,5 +97,15 @@ class OrderImportSummariesController < ApplicationController
     render json: {status: true}
   end
 
+  def delete_import_summary
+    store = Store.find_by_id(params["store_id"])
+    i = ImportItem.where(store_id: store.id).last
+    if !i.order_import_summary.nil?
+      i.order_import_summary.destroy
+    end
+    
+    render json: {status: true}
+  end
+
 end
 
