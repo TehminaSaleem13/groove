@@ -114,12 +114,13 @@ module Groovepacker
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                       begin
                         
-                        if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
-                          $redis.set("new_order_#{tenant}" , orders.count)
-                        end
-
                         n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
                         @final_count = $redis.get("total_orders_#{tenant}").to_i + n
+
+                        if orders.count == @final_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
+                          $redis.set("new_order_#{tenant}" , orders.count)
+                        end
+                        
                         unless $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
                           ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @final_count ).deliver
                         end
