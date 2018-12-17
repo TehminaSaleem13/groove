@@ -278,7 +278,7 @@ module Groovepacker
                 unless order_item.empty?
                   order_item = order_item.first
                   order_item.sku = first_sku
-                  if order_item_XML[:qty] == order_item.qty || order_item.price ==  order_item_XML[:price] 
+                  if order_item_XML[:qty] == order_item.qty && order_item.price ==  order_item_XML[:price] 
                     @skip_count = @skip_count + 1 
                   else
                     @update_count = @update_count + 1
