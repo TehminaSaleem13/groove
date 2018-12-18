@@ -34,8 +34,10 @@ class StoresController < ApplicationController
   def create_update_ftp_credentials
     result = {"status"=>true, "messages"=>[], "has_credentials"=>false}
     store = Store.find_by_id(params[:id])
-    store.csv_beta = params["use_csv_beta"]
-    store.save
+    if store.present?
+      store.csv_beta = params["use_csv_beta"]
+      store.save
+    end
     # unless store.nil?
     result = ftp_update(store, result) if store.present? && store.store_type == 'CSV'
     # end

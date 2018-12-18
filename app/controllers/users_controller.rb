@@ -19,7 +19,7 @@ class UsersController < ApplicationController
     result ['total_users'] = User.where(is_deleted: false).count
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
     subscription = tenant.subscription
-    result['amount'] = (subscription.amount.to_f / 100)
+    result['amount'] = (subscription.amount.to_f / 100) rescue 0
     respond_to do |format|
       format.json { render json: result }
     end
