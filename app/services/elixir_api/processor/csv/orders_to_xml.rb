@@ -18,6 +18,7 @@ module ElixirApi
           $redis.set("skip_order_#{tenant}", 0)
           last_order = Order.last.created_at rescue nil
           $redis.set("last_order_#{tenant}",last_order)
+          $redis.set("import_action_#{tenant}", order_params["params"][:import_action])
         end
 
         def self.cancel_import(tenant)

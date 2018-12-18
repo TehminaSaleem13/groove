@@ -274,14 +274,22 @@ module Groovepacker
                 unless order_item.empty?
                   order_item = order_item.first
                   order_item.sku = first_sku
-                  if order_item_XML[:qty] == order_item.qty && order_item.price ==  order_item_XML[:price] 
-                    @skip_count = @skip_count + 1 
+                  tenant = Apartment::Tenant.current
+                  if order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price] 
+                    if $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "skip_order"
+                      @skip_count = @skip_count + 1 
+                    end
                   else
-                    @update_count = @update_count + 1
+                    if $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "update_order"
+                      @update_count = @update_count + 1
+                    end
                   end 
-                  order_item.qty = order_item_XML[:qty] || 0
-                  order_item.price = order_item_XML[:price]
-                  order_item.save
+
+                  if $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "update_order"
+                    order_item.qty = order_item_XML[:qty] || 0
+                    order_item.price = order_item_XML[:price]
+                    order_item.save
+                  end
                 end
               end
             end
