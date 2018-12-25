@@ -41,11 +41,12 @@ class StripeInvoiceEmail < ActionMailer::Base
     unless subscription.stripe_customer_id.nil?
       begin
         customer = Stripe::Customer.retrieve(subscription.stripe_customer_id)
-        if subscription.tenant_name == "tessemaes"
-          email = ["ap@tessemaes.com"]
-        else
+        # remove email for tessemaes
+        # if subscription.tenant_name == "tessemaes"
+        #   email = ["ap@tessemaes.com"]
+        # else
           email = customer.email
-        end
+        # end
         return email
       rescue Stripe::InvalidRequestError => er
         return nil
