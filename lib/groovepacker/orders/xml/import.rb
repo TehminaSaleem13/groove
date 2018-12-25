@@ -23,11 +23,13 @@ module Groovepacker
             n = $redis.get("new_order_#{tenant}").to_i + 1
             $redis.set("new_order_#{tenant}" , n)
           end
-          ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
+          if check_for_update
+            ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
               "custom_field_one", "custom_field_two", "method", "order_total",
               "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
               order[attr] = @order.send(attr)
+            end
           end
           # update all order related info
           order_persisted = order.persisted? ? true : false
@@ -201,7 +203,6 @@ module Groovepacker
 
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
-          @skip_count = 0
           @update_count = 0 
           if order.order_items.empty?
             # create order items
@@ -264,7 +265,7 @@ module Groovepacker
               if order.order_items.where(product_id: product.id).empty?
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
-                if !@check_new_order
+                if !@check_new_order && check_for_update
                   @update_count = @update_count + 1
                 end
                 order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
@@ -275,17 +276,13 @@ module Groovepacker
                   order_item = order_item.first
                   order_item.sku = first_sku
                   tenant = Apartment::Tenant.current
-                  if order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price] 
-                    if $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "skip_order"
-                      @skip_count = @skip_count + 1 
-                    end
-                  else
-                    if $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "update_order"
+                  if !(order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price]) 
+                    if check_for_update
                       @update_count = @update_count + 1
                     end
                   end 
 
-                  if $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "update_order"
+                  if check_for_update
                     order_item.qty = order_item_XML[:qty] || 0
                     order_item.price = order_item_XML[:price]
                     order_item.save
@@ -294,6 +291,11 @@ module Groovepacker
               end
             end
           end
+        end
+
+        def check_for_update
+          tenant = Apartment::Tenant.current
+          $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "update_order"
         end
 
         def create_update_product(product, product_xml)
