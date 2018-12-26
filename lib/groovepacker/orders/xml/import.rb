@@ -300,7 +300,7 @@ module Groovepacker
 
         def check_for_update
           tenant = Apartment::Tenant.current
-          $redis.get("import_action_#{tenant}").nil? || $redis.get("import_action_#{tenant}") == "update_order"
+          $redis.get("import_action_#{tenant}") == "" || $redis.get("import_action_#{tenant}") == "update_order"
         end
 
         def create_update_product(product, product_xml)
