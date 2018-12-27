@@ -26,14 +26,17 @@ module Groovepacker
             $redis.set("new_order_#{tenant}" , n)
           end
 
-          if check_for_update
-            ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
+
+          unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned"))
+            if check_for_update 
+              ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
               "custom_field_one", "custom_field_two", "method", "order_total",
               "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
               order[attr] = @order.send(attr)
+                end
             end
-          end
+          end  
 
           if @old_order.try(:attributes) != order.attributes
             @update_count = @update_count + 1 
@@ -102,6 +105,9 @@ module Groovepacker
             begin
               order_import_summary = OrderImportSummary.find(@order.import_summary_id)
               import_item = order_import_summary.import_items.where(store_id: order.store_id)
+              if import_item.empty?
+                import_item = order_import_summary.import_items
+              end
               import_item = import_item.first
               @time_of_import = import_item.created_at 
               if import_item
@@ -210,29 +216,33 @@ module Groovepacker
 
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
-          if order.order_items.empty?
-            # create order items
-            orderXML.order_items.each do |order_item_XML|
-              create_update_order_item(order, order_item_XML)
-            end
-          else
-            # if order item exists in the current order but does not exist in XML order
-            # then delete the order item
-            delete_existing_order_items(order, orderXML)
-
-            orderXML.order_items.each do |order_item_XML|
-              create_update_order_item(order, order_item_XML)
-            end
-
-
-            if !@check_new_order 
-              if @update_count >= 1
-                n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
-                $redis.set("update_order_#{Apartment::Tenant.current}", n)
-              else
-                n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
-                $redis.set("skip_order_#{Apartment::Tenant.current}", n)
+          
+          unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned"))
+            if order.order_items.empty?
+              # create order items
+              orderXML.order_items.each do |order_item_XML|
+                create_update_order_item(order, order_item_XML)
               end
+            else
+              # if order item exists in the current order but does not exist in XML order
+              # then delete the order item
+              if check_for_update
+                delete_existing_order_items(order, orderXML)
+
+                orderXML.order_items.each do |order_item_XML|
+                  create_update_order_item(order, order_item_XML)
+                end
+              end  
+            end
+          end
+
+          if !@check_new_order 
+            if @update_count >= 1
+              n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
+              $redis.set("update_order_#{Apartment::Tenant.current}", n)
+            else
+              n = $redis.get("skip_order_#{Apartment::Tenant.current}").to_i + 1
+              $redis.set("skip_order_#{Apartment::Tenant.current}", n)
             end
           end
           result
