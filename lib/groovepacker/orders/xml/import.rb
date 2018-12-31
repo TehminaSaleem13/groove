@@ -94,6 +94,7 @@ module Groovepacker
               order_import_summary = OrderImportSummary.find(@order.import_summary_id)
               import_item = order_import_summary.import_items.where(store_id: order.store_id)
               import_item = import_item.first
+              @time_of_import = import_item.created_at 
               if import_item
                 import_item.with_lock do
                   import_item.to_import = @order.total_count
@@ -115,30 +116,25 @@ module Groovepacker
                       begin
                         
                         n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
-                        @final_count = $redis.get("total_orders_#{tenant}").to_i + n
+                        @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
 
-                        if orders.count == @final_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
+                        if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
                           $redis.set("new_order_#{tenant}" , orders.count)
                         end
                         
                         unless $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
-                          ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @final_count ).deliver
+                          ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count ).deliver
                         end
 
-                        logger = Logger.new("#{Rails.root}/log/import_order_information_#{Apartment::Tenant.current}.log")
-                        logger.info("=========================================")
-                        logger.info("Tenant : #{Apartment::Tenant.current}")
-                        logger.info("Name of imported file: #{@file_name}")
-                        logger.info("Orders in file: #{orders.count}")
-                        logger.info("New orders imported:#{$redis.get("new_order_#{tenant}").to_i}")
-                        logger.info("Existing orders updated:#{$redis.get("update_order_#{tenant}").to_i} ")
-                        logger.info("Existing orders skipped:#{$redis.get("skip_order_#{tenant}").to_i} ")
-                        logger.info("Orders in GroovePacker before import: #{$redis.get("total_orders_#{tenant}").to_i}")
-                        n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
-                        @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
-                        logger.info("Orders in GroovePacker after import:#{@after_import_count} ")
-                        pdf_path = Rails.root.join( 'log', "import_order_information_#{Apartment::Tenant.current}.log")
-                        reader_file_path = Rails.root.join('log', "import_order_information_#{Apartment::Tenant.current}.log")
+                        time_zone = GeneralSetting.last.time_zone.to_i
+                        time_of_import_tz =  @time_of_import + time_zone
+                        
+                        on_demand_logger = Logger.new("#{Rails.root}/log/import_order_info_#{Apartment::Tenant.current}.log")
+                        log = {"Time_Stamp_Tenant_TZ" => "#{time_of_import_tz}","Time_Stamp_UTC" => "#{@time_of_import}" , "Tenant" => "#{Apartment::Tenant.current}","Name_of_imported_file" => "#{@file_name}","Orders_in_file" => "#{orders.count}".to_i, "New_orders_imported" => "#{$redis.get("new_order_#{tenant}")}".to_i, "Existing_orders_updated" =>"#{$redis.get("update_order_#{tenant}")}".to_i , "Existing_orders_skipped" => "#{$redis.get("skip_order_#{tenant}")}".to_i, "Orders_in_GroovePacker_before_import" => "#{$redis.get("total_orders_#{tenant}")}".to_i, "Orders_in_GroovePacker_after_import" =>"#{@after_import_count}".to_i }
+                        on_demand_logger.info(log)
+                        
+                        pdf_path = Rails.root.join( 'log', "import_order_info_#{Apartment::Tenant.current}.log")
+                        reader_file_path = Rails.root.join('log', "import_order_info_#{Apartment::Tenant.current}.log")
                         base_file_name = File.basename(pdf_path)
                         pdf_file = File.open(reader_file_path)
                         GroovS3.create_log(Apartment::Tenant.current, base_file_name, pdf_path.read)
