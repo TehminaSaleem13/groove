@@ -27,7 +27,7 @@ module Groovepacker
           end
 
 
-          unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned"))
+          unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") ||  order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if check_for_update 
               ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
@@ -217,7 +217,7 @@ module Groovepacker
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
           
-          unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned"))
+          unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") || order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if order.order_items.empty?
               # create order items
               orderXML.order_items.each do |order_item_XML|
