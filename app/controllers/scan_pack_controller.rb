@@ -85,6 +85,28 @@ class ScanPackController < ApplicationController
     render json: {}
   end
 
+  def order_change_into_scanned
+    @result = Hash.new
+    order = Order.find(params[:id])
+    if !order.nil?
+      order.order_items.update_all(scanned_status: "scanned")
+      current_user_name = current_user.try(:username)
+      order.addactivity("Order is scanned through SCANNED barcode",current_user_name)
+      order.set_order_to_scanned_state(current_user_name)
+      @result['status'] = true
+      @result['error_messages'] = []
+      @result['success_messages'] = []
+      @result['notice_messages'] = []
+      @result['data'] = Hash.new
+      @result['data']['order_complete'] = true
+      @result['data']['next_state'] = 'scanpack.rfo'
+    else
+      @result['status'] = false
+    end 
+
+    render json: @result 
+  end
+
   def click_scan
     render json: product_scan(
         params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id],

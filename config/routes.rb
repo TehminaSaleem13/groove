@@ -254,6 +254,7 @@ Groovepacks::Application.routes.draw do
       post 'get_shipment'
       post 'update_scanned'
       post 'send_request_to_api'
+      post 'order_change_into_scanned'
     end
     member do
     end
