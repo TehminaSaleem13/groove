@@ -40,7 +40,9 @@ class UsersController < ApplicationController
     end
     if params[:is_annual] == "false" && params[:users].to_i > access_restriction.num_users
       ui_user = params[:users].to_i - access_restriction.num_users  
-      access_restriction.update_attributes(added_through_ui: ui_user) 
+      access_restriction.update_attributes(added_through_ui: ui_user)
+      tenant.addon_notes = "#{tenant.addon_notes}" + "User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} on #{Time.now.strftime("%Y-%m-%d  %H:%M")}\n"
+      tenant.save!
       access_restriction.update_attributes(num_users: params[:users])
       set_subscription_info(params[:amount])
       create_stripe_plan(tenant)
@@ -147,7 +149,11 @@ class UsersController < ApplicationController
 
           # update the plan amount with adding 50$/user
           #update_plan_amount("add") if new_user
-
+          if new_user && !Rails.env.test?
+            on_demand_logger = Logger.new("#{Rails.root}/log/user_create_and_delete_info_#{Apartment::Tenant.current}.log")
+            log = { tenant: Apartment::Tenant.current, action: "user created", user_count: User.where(is_deleted: false).count, Time: Time.now.strftime("%Y-%m-%d  %H:%M")}
+            on_demand_logger.info(log) 
+          end
           # send user data to groovelytics server if the user is newly created.
           if new_user && !Rails.env.test?
             tenant_name = Apartment::Tenant.current
@@ -409,6 +415,9 @@ class UsersController < ApplicationController
             @user.is_deleted = true
             @user.active = false
             @user.save
+            on_demand_logger = Logger.new("#{Rails.root}/log/user_create_and_delete_info_#{Apartment::Tenant.current}.log")
+            log = { tenant: Apartment::Tenant.current, action: "user removed", user_count:  User.where(is_deleted: false).count, Time: Time.now.strftime("%Y-%m-%d  %H:%M") }
+            on_demand_logger.info(log) 
             HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
                     query: { username: @user.username, packing_user_id: @user.id },
                     headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?

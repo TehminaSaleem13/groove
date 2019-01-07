@@ -107,6 +107,8 @@ module UsersHelper
         end
         ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
         access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
+        tenant.addon_notes = "#{tenant.addon_notes}" + "User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} on #{Time.now.strftime("%Y-%m-%d  %H:%M")}\n"
+        tenant.save!
         access_restriction.update_attributes(num_users: params[:users])
         set_subscription_info(params[:amount])
         create_stripe_plan(tenant)
@@ -120,6 +122,8 @@ module UsersHelper
       users = access_restriction.num_users -  params[:users].to_i
       ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
       access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
+      tenant.addon_notes = "#tenant.addon_notes}" + "User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} on #{Time.now.strftime("%Y-%m-%d  %H:%M")} \n"
+      tenant.save!
       access_restriction.update_attributes(num_users: params[:users])
       set_subscription_info(params[:amount])
       create_stripe_plan(tenant)
