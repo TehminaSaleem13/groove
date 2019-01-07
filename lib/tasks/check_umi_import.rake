@@ -8,6 +8,9 @@ namespace :check do
       begin
         import_item.each do |csv_import|
           if (Time.now.to_i - csv_import.updated_at.to_i) > 300
+            time_of_import = csv_import.created_at
+            log = AddLogCsv.new
+            log.add_log_csv(Apartment::Tenant.current,time_of_import)
             csv_import.update_attribute(:status, "cancelled")
             summary = csv_import.order_import_summary
             summary.status = "completed"
