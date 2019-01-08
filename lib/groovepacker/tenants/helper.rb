@@ -27,7 +27,6 @@ module Groovepacker
         @tenant_names = tenants.map(&:name)
 
         ActiveRecord::Associations::Preloader.new(tenants, :subscription).run
-
         latest_scanned_order_for_all_tenants
         latest_scanned_order_packing_user_for_all_tenants
         get_access_restrictions_for_all_tenants
@@ -271,6 +270,7 @@ module Groovepacker
           basic_tenant_info = params[:basicinfo]
           tenant.note = basic_tenant_info[:note] if basic_tenant_info[:note]
           tenant.addon_notes = basic_tenant_info[:addon_notes] if basic_tenant_info[:addon_notes]
+          tenant.activity_log = basic_tenant_info[:activity_log] if basic_tenant_info[:activity_log]
           tenant.save
         rescue => e
           update_fail_status(result, e.message)

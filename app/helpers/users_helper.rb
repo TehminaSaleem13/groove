@@ -96,18 +96,22 @@ module UsersHelper
       users = access_restriction.num_users -  params[:users].to_i
       if access_restriction.added_through_ui == 0 
         StripeInvoiceEmail.remove_user_request_email(tenant, users).deliver
+        tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} Request for User Remove: #{users} user wants to remove from plan. \n" + "#{tenant.activity_log}" 
+        tenant.save!
         return true
       else
         if access_restriction.added_through_ui < users
           rm_user = users - access_restriction.added_through_ui
           params[:users] = params[:users].to_i + rm_user
           params[:amount] = params[:users].to_i * 50  
+          tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} Request for User Remove: #{rm_user} user wants to remove from plan. \n" + "#{tenant.activity_log}" 
+          tenant.save!
           StripeInvoiceEmail.remove_user_request_email(tenant, rm_user).deliver
           access_restriction.update_attributes(added_through_ui: 0)
         end
         ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
         access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
-        tenant.addon_notes = "#{tenant.addon_notes}" + "User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} on #{Time.now.strftime("%Y-%m-%d  %H:%M")}\n"
+        tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + "#{tenant.activity_log}" 
         tenant.save!
         access_restriction.update_attributes(num_users: params[:users])
         set_subscription_info(params[:amount])
@@ -122,7 +126,7 @@ module UsersHelper
       users = access_restriction.num_users -  params[:users].to_i
       ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
       access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
-      tenant.addon_notes = "#tenant.addon_notes}" + "User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} on #{Time.now.strftime("%Y-%m-%d  %H:%M")} \n"
+      tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + "#{tenant.activity_log}"  
       tenant.save!
       access_restriction.update_attributes(num_users: params[:users])
       set_subscription_info(params[:amount])
