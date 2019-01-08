@@ -28,7 +28,7 @@ module Groovepacker
 
 
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") ||  order.try(:order_items).map(&:scanned_status).include?("scanned"))
-            if check_for_update 
+            if check_for_update || @check_new_order
               ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
               "custom_field_one", "custom_field_two", "method", "order_total",
