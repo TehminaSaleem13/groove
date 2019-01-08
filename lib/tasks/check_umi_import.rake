@@ -9,8 +9,9 @@ namespace :check do
         import_item.each do |csv_import|
           if (Time.now.to_i - csv_import.updated_at.to_i) > 300
             time_of_import = csv_import.created_at
+            file_name = $redis.get("file_name_#{tenant}")
             log = AddLogCsv.new
-            log.add_log_csv(Apartment::Tenant.current,time_of_import)
+            log.add_log_csv(Apartment::Tenant.current,time_of_import,file_name)
             csv_import.update_attribute(:status, "cancelled")
             summary = csv_import.order_import_summary
             summary.status = "completed"

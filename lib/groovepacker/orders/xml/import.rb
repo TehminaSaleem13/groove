@@ -142,7 +142,8 @@ module Groovepacker
                         end
 
                         log = AddLogCsv.new
-                        log.add_log_csv(Apartment::Tenant.current,@time_of_import)
+
+                        log.add_log_csv(Apartment::Tenant.current,@time_of_import,@file_name)
 
                       rescue Exception => e
                         logger = Logger.new("#{Rails.root}/log/check_for_hung_#{Apartment::Tenant.current}.log")

@@ -19,6 +19,7 @@ module ElixirApi
           last_order = Order.last.created_at rescue nil
           $redis.set("last_order_#{tenant}",last_order)
           $redis.set("import_action_#{tenant}", order_params["params"][:import_action])
+          $redis.set("file_name_#{tenant}",order_params["params"][:file_name])
         end
 
         def self.cancel_import(tenant)

@@ -1,7 +1,8 @@
 class AddLogCsv
-  def add_log_csv(tenant,time_of_import)
+  def add_log_csv(tenant,time_of_import,file_name)
     Apartment::Tenant.switch(tenant)
     @time_of_import = time_of_import
+    @file_name = file_name
     n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
     @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
 
