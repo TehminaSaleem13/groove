@@ -58,6 +58,7 @@ module Groovepacker
             result[:exception_description] = @exception.description
             result[:exception_reason] = @exception.reason
             result[:exception_recorded_date] = @exception.created_at
+            result[:exception_assoicated_user] = @exception.user_id
           end
         end
 
@@ -83,7 +84,8 @@ module Groovepacker
             packing_time: 0,
             scanned_item_count: 0,
             exception_description: nil,
-            exception_reason: nil
+            exception_reason: nil,
+            exception_assoicated_user: 0
           }
         end
       end
