@@ -25,7 +25,7 @@ class OrderImportSummariesController < ApplicationController
       @tenant_name = Apartment::Tenant.current
       url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
       lines = open(url).read
-      headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check C=D+E+F", "Check H=D+G"]
+      headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check E=F+G+H", "Check J=F+I"]
       data = CSV.generate do |csv|
         csv << headers if csv.count.eql? 0
         lines.split("\n").drop(1).each do |r| 

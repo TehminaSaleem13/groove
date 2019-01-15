@@ -203,7 +203,7 @@ module Groovepacker
           return true if db_orders.count == @order.total_count && orders.count == @order.total_count
           @skipped_count = @order.total_count - db_orders.count
           @skipped_ids = orders - db_orders
-          false
+          true
         end
 
         def process_order_items(order, orderXML)
