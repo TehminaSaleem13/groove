@@ -170,7 +170,7 @@ module Groovepacker
                         ftp_csv_import = Groovepacker::Orders::Import.new
                         ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
                       end
-                      $redis.expire("#{Apartment::Tenant.current}_csv_file_increment_id_index", 1)
+                      #$redis.expire("#{Apartment::Tenant.current}_csv_file_increment_id_index", 1)
                     else
                       import_item.status = "cancelled"
                       ImportMailer.order_skipped(@file_name, @skipped_count, @order.store_id, @skipped_ids).deliver
