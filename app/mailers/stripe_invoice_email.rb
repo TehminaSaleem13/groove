@@ -75,4 +75,11 @@ class StripeInvoiceEmail < ActionMailer::Base
     mail to: ['support@groovepacker.com'],subject: "Request for annual plan"
     
   end
+
+  def remainder_for_access_restriction tenant
+    @tenant = tenant.name
+    mail to: ['kcpatel006@gmail.com','support@groovepacker.com'],
+         subject: "Access Restriction is not created for #{@tenant} in this month"
+  end
+
 end
