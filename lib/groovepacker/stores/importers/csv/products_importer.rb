@@ -101,7 +101,8 @@ module Groovepacker
               inventory: [],
               product_type: '',
               spl_instructions_4_packer: '',
-              is_intangible: false
+              is_intangible: false,
+              click_scan_enabled: "on"
             }
           end
 
@@ -192,7 +193,19 @@ module Groovepacker
               usable_record[:name] = single_row[self.mapping['sku'][:position]].strip
             end
             usable_record[:is_intangible] = apply_intangible(usable_record)
-            
+
+            if !self.mapping['is_intangible'].nil? && self.mapping['is_intangible'][:position] >= 0 && !single_row[self.mapping['is_intangible'][:position]].blank?
+              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['is_intangible'][:position]])
+                usable_record[:is_intangible] = true
+              end
+            end
+
+            if !self.mapping['click_scan_enabled'].nil? && self.mapping['click_scan_enabled'][:position] >= 0 && !single_row[self.mapping['click_scan_enabled'][:position]].blank?
+              if ["OFF","off","FALSE",false,"NO","no","0" ].include?(single_row[self.mapping['click_scan_enabled'][:position]])
+                usable_record[:click_scan_enabled] = "off"
+              end
+            end
+
             if !self.mapping['product_instructions'].nil? && self.mapping['product_instructions'][:position] >= 0 && !single_row[self.mapping['product_instructions'][:position]].blank?
               usable_record[:spl_instructions_4_packer] = single_row[self.mapping['product_instructions'][:position]]
             end
@@ -342,7 +355,8 @@ module Groovepacker
             record[:name] = 'Product from CSV Import' if record[:name].blank?
             record[:product_record_serial] = record[:product_record_serial] == "1" ? true : false
             record[:product_second_record_serial] = record[:product_second_record_serial] == "1" ? true : false
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial])
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled])
+
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
             if record[:skus].length > 0 && record[:barcodes].length > 0
@@ -393,6 +407,10 @@ module Groovepacker
             end
             if !self.mapping['receiving_instructions'].nil? && record[:product_receiving_instructions] != "[DELETE]" #&& self.mapping['receiving_instructions'][:action] == 'overwrite'
               duplicate_product.product_receiving_instructions = record[:product_receiving_instructions]
+            end
+
+            if !self.mapping['click_scan_enabled'].nil? && record[:click_scan_enabled] != "[DELETE]"
+              duplicate_product.click_scan_enabled = record[:click_scan_enabled]
             end
 
             @products_for_status_update << duplicate_product

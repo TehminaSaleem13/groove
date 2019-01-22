@@ -21,7 +21,8 @@ class Product < ActiveRecord::Base
                   :base_sku,
                   :product_receiving_instructions,
                   :second_record_serial,
-                  :record_serial
+                  :record_serial,
+                  :click_scan_enabled
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy
