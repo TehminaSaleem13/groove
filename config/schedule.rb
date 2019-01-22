@@ -97,7 +97,9 @@ every '0 1 1 * *' do
 end
 
 every 1.day, :at => '03:00 am' do
-  rake "doo:schedule_check_for_access_restriction"
+  if environment=='production'
+    rake "doo:schedule_check_for_access_restriction"
+  end
 end
 
 # every 1.day, :at => '03:00 am' do
