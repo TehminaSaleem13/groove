@@ -20,28 +20,34 @@ class OrderImportSummariesController < ApplicationController
   end
 
   def download_summary_details
-    require 'open-uri'
+    #require 'open-uri'
     begin
       @tenant_name = Apartment::Tenant.current
-      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
-      lines = open(url).read
-      headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check E=F+G+H", "Check J=F+I"]
+      #url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
+      #lines = open(url).read
+      summary = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days)
+      lines = summary.map(&:log_record)
+      
+      headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check C=D+E+F", "Check H=D+G"]
       data = CSV.generate do |csv|
         csv << headers if csv.count.eql? 0
-        lines.split("\n").drop(1).each do |r| 
-          y = eval r.gsub(/[\"]/, "'")
-          if y['Orders_in_file'] ==  y['New_orders_imported'] + y['Existing_orders_updated'] + y['Existing_orders_skipped']
-            check_1 = 'YES'
-          else
-            check_1 ='NO'
-          end  
-          
-          if y['Orders_in_GroovePacker_after_import'] == y['New_orders_imported'] + y['Orders_in_GroovePacker_before_import']
-            check_2 = 'YES'
-          else
-            check_2 = 'No'
+        lines.each do |r| 
+          #y = eval r.gsub(/[\"]/, "'")
+          y = JSON.parse r
+          if y["Tenant"] == @tenant_name
+            if y['Orders_in_file'] ==  y['New_orders_imported'] + y['Existing_orders_updated'] + y['Existing_orders_skipped']
+              check_1 = 'YES'
+            else
+              check_1 ='NO'
+            end  
+            
+            if y['Orders_in_GroovePacker_after_import'] == y['New_orders_imported'] + y['Orders_in_GroovePacker_before_import']
+              check_2 = 'YES'
+            else
+              check_2 = 'No'
+            end
+            csv << [y["Time_Stamp_Tenant_TZ"], y["Time_Stamp_UTC"] ,y["Name_of_imported_file"], y["Tenant"], y["Orders_in_file"], y["New_orders_imported",], y["Existing_orders_updated"], y["Existing_orders_skipped",], y["Orders_in_GroovePacker_before_import",], y["Orders_in_GroovePacker_after_import"], "#{check_1}", "#{check_2}"]
           end
-          csv << [y["Time_Stamp_Tenant_TZ"], y["Time_Stamp_UTC"] ,y["Name_of_imported_file"], y["Tenant"], y["Orders_in_file"], y["New_orders_imported",], y["Existing_orders_updated"], y["Existing_orders_skipped",], y["Orders_in_GroovePacker_before_import",], y["Orders_in_GroovePacker_after_import"], "#{check_1}", "#{check_2}"]
         end
       end
       url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url

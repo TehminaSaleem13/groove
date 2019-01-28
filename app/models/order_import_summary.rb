@@ -24,10 +24,11 @@ class OrderImportSummary < ActiveRecord::Base
     result['import_info'] = import_summary
     result['import_items'] = []
     begin
-      url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
-      lines = open(url).read
-      summary = lines.split("\n").last
-      result['summary'] = summary.gsub(/[,]/,"<br/>").gsub(/[{,}]/,"")
+      #url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
+      #lines = open(url).read
+      #summary = lines.split("\n").last
+      lines = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days).last
+      result['summary'] = lines.log_record.gsub(/[,]/,"<br/>").gsub(/[{,}]/,"").gsub(/[:]/, "=>")
     rescue
       result['summary'] = "nil"
     end  
