@@ -79,6 +79,7 @@ class TenantsController < ApplicationController
     setting = GeneralSetting.last
     tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
     tenant.inventory_report_toggle = params["inventory_report_toggle"]
+    tenant.test_tenant_toggle = params["test_tenant_toggle"]
     tenant.save
     if tenant.scheduled_import_toggle == false
       setting.schedule_import_mode = "Daily"
