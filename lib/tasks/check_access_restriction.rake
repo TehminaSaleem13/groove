@@ -8,8 +8,10 @@ namespace :doo do
         begin
           Apartment::Tenant.switch tenant.name
           access_restriction = AccessRestriction.order("created_at").last
-          if (Date.today - Date.parse(access_restriction.created_at.strftime("%F"))).to_i > 31 && tenant.test_tenant_toggle
-            StripeInvoiceEmail.remainder_for_access_restriction(tenant).deliver
+          if (Date.today - Date.parse(access_restriction.created_at.strftime("%F"))).to_i > 31
+            unless tenant.test_tenant_toggle
+              StripeInvoiceEmail.remainder_for_access_restriction(tenant).deliver
+            end
           end
         rescue Exception => e
           puts e.message
