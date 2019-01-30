@@ -141,6 +141,11 @@ module Groovepacker
                           ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count ).deliver
                         end
 
+
+                        if @ftp_flag == "false"
+                          @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name") 
+                          $redis.del("#{Apartment::Tenant.current}/original_file_name") 
+                        end
                         log = AddLogCsv.new
 
                         log.add_log_csv(Apartment::Tenant.current,@time_of_import,@file_name)

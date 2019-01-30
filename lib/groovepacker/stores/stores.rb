@@ -85,6 +85,7 @@ module Groovepacker
 			      	end
 			      rescue
 			      end
+			      $redis.set("#{current_tenant}/original_file_name", params["orderfile"].original_filename)
 		        File.open(path, "wb") { |f| f.write(order_file_data) }
 		        $redis.set("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv", order_file_data.split("\n").first(200).join("\n"))
 		        GroovS3.create_public_csv(current_tenant, 'order', @store.id, order_file_data)
