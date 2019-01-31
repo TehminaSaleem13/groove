@@ -25,6 +25,8 @@ class ImportCsv
         response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
+          new_file_data = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+          File.write(file_path,new_file_data)
           csv_file = begin
                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
