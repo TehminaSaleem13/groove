@@ -93,6 +93,7 @@ class SettingsController < ApplicationController
     @result['is_multi_box'] = current_tenant.is_multi_box rescue false
     @result['api_call'] = current_tenant.api_call rescue false
     @result['allow_rts'] = current_tenant.allow_rts rescue false
+    @result['is_active'] = current_user.active
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_settings = GeneralSetting.all.first
