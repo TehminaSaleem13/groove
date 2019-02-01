@@ -25,7 +25,7 @@ class OrderImportSummariesController < ApplicationController
       @tenant_name = Apartment::Tenant.current
       #url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
       #lines = open(url).read
-      summary = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days)
+      summary = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days).reverse!
       lines = summary.map(&:log_record).uniq
       
       headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check C=D+E+F", "Check H=D+G"]
