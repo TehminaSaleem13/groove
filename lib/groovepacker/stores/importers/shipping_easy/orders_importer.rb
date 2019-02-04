@@ -73,7 +73,7 @@ module Groovepacker
                 if order["shipments"].any?
                   shiping_easy_order = Order.find_by_shipment_id(order["shipments"][0]["id"]) rescue nil
                 else
-                  shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
+                  shiping_easy_order = find_shipping_easy_order(order)
                   if shiping_easy_order && @group_orders && @import_item.store.split_order == "verify_separately"
                     g_orders = Marshal.load(Marshal.dump(@group_orders[order["external_order_identifier"]]))
                     g_orders.each_with_index do |odr, index|
@@ -98,7 +98,7 @@ module Groovepacker
                   order['external_order_identifier'] = shiping_easy_order.increment_id
                 end
               else
-                shiping_easy_order = Order.find_by_increment_id(order["external_order_identifier"])
+                shiping_easy_order = find_shipping_easy_order(order)
                 shiping_easy_order = Order.new if shiping_easy_order.blank?
                 return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
                   shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned"))
@@ -111,6 +111,15 @@ module Groovepacker
               shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
               import_order_items_and_create_products(shiping_easy_order, order)
               update_success_import_count
+            end
+
+            def find_shipping_easy_order(order)
+              if !@credential.allow_duplicate_id
+                shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
+              else
+                shiping_easy_order = Order.find_by_increment_id_and_store_order_id(order['external_order_identifier'], order['id'])
+              end
+              shiping_easy_order
             end
 
             def create_alias_and_product(order_item, item)
@@ -210,8 +219,13 @@ module Groovepacker
                   import_item_count
                 end
               end
+              if !@credential.allow_duplicate_id
+                shiping_easy_order.save
+              else
+                shiping_easy_order.save
+              end
               return unless shiping_easy_order.save
-              shiping_easy_order = Order.find_by_increment_id(shiping_easy_order.increment_id)
+              shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
               add_order_activity(shiping_easy_order)
               shiping_easy_order.set_order_status
             end
