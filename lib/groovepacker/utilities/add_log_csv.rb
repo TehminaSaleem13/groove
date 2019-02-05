@@ -24,4 +24,29 @@ class AddLogCsv
     #pdf_file = File.open(reader_file_path)
     #GroovS3.create_log(Apartment::Tenant.current, base_file_name, pdf_path.read)
   end
+
+  def send_activity_log
+    store_id = "complete"
+    current_tenant = Apartment::Tenant.current
+    header = "Tenant,Event,Time(EST),Store Type,User Name\n"
+    file_data = header
+    
+    Tenant.find_each do |tenant|
+    Apartment::Tenant.switch(tenant.name)
+    file_data +=
+      Ahoy::Event
+      .where('time > ?', Time.now.ago(7.days))
+      .reduce('') do |data, record|
+        properties = record.properties
+        data += "#{properties['tenant']},#{properties['title']},"
+        data += "#{record.time.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p')},"
+        data += "#{Store.where(id: properties['store_id']).first.try(:store_type)},"
+        data += "#{User.where(id: properties['user_id']).first.try(:name)}\n"
+      end
+    end
+
+    GroovS3.create_csv(current_tenant, 'activity_log', store_id, file_data, :public_read)
+    url = GroovS3.find_csv(current_tenant, 'activity_log', store_id).url
+    CsvExportMailer.send_csv(url).deliver
+  end
 end

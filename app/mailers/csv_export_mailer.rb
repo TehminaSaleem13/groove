@@ -71,4 +71,9 @@ class CsvExportMailer < ActionMailer::Base
     @url = url
     mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "Export log with fetching time" 
   end
+
+  def send_csv(url)
+    @url = url
+    mail to: ['groovepacker@gmail.com', 'groovepackerservice@gmail.com','kcpatel006@gmail.com'], subject: "[#{ENV["RAILS_ENV"]}] Activity Log"
+  end
 end
