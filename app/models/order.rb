@@ -24,8 +24,8 @@ class Order < ActiveRecord::Base
   # before_save :unique_order_items
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
-  after_save :delete_if_order_exist
-  validates_uniqueness_of :increment_id
+  after_save :delete_if_order_exist, :if => :check_for_duplicate?
+  validates_uniqueness_of :increment_id, :if => :check_for_duplicate?
 
   include ProductsHelper
   include OrdersHelper
@@ -34,6 +34,18 @@ class Order < ActiveRecord::Base
   ALLOCATE_STATUSES = ['awaiting', 'onhold', 'serviceissue']
   UNALLOCATE_STATUSES = ['cancelled']
   SOLD_STATUSES = ['scanned']
+
+  def check_for_duplicate?
+    if self.store.store_type == "ShippingEasy" 
+      unless self.store.shipping_easy_credential.allow_duplicate_id
+        true
+      else
+        false
+      end  
+    else
+      true
+    end  
+  end
 
   def customer_name
     [firstname, lastname].join(' ')
