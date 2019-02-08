@@ -319,6 +319,7 @@ class OrderItem < ActiveRecord::Base
     self.kit_split_qty = 0
     self.kit_split_scanned_qty = 0
     self.single_scanned_qty = 0
+    self.clicked_qty = 0
     self.save
   end
 

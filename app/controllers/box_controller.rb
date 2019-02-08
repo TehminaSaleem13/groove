@@ -54,7 +54,9 @@ class BoxController < ApplicationController
       order_item.reset_scanned
     else
       order_item.scanned_status = "partially_scanned"
-      order_item.clicked_qty = order_item.clicked_qty - 1
+      if order_item.clicked_qty > 0
+        order_item.clicked_qty = order_item.clicked_qty - 1 
+      end
     end
     if order_item.save
       addactivity(order_item, order_item_box.box)
