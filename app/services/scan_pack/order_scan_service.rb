@@ -1,10 +1,11 @@
 module ScanPack
   class OrderScanService < ScanPack::Base
-    def initialize(current_user, session, input, state, id)
+    def initialize(current_user, session, input, state, id, store_order_id)
       @current_user = current_user
       @input = input
       @state = state
       @id = id
+      @store_order_id = store_order_id
       @result = {
         'status' => true,
         'matched' => true,
@@ -41,6 +42,10 @@ module ScanPack
     def order_scan
       collect_orders
       @single_order, @single_order_result = get_single_order_with_result
+
+      if @single_order_result["matched_orders"].count > 0 && @store_order_id.to_i != 0
+        @single_order = @orders.where(store_order_id: @store_order_id).first
+      end
       do_if_single_order_not_present && return unless @single_order
       do_if_single_order_present
     end
@@ -89,7 +94,6 @@ module ScanPack
         matched_single_status, matched_single_order_placed_time,
         single_order_status, single_order_order_placed_time,
         order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
-
         do_check_order_status_for_single_and_matched(
           matched_single, single_order_status, matched_single_status,
           order_placed_for_single_before_than_matched_single
@@ -154,6 +158,7 @@ module ScanPack
     def do_if_single_order_present
       @single_order_result['status'] = @single_order.status
       @single_order_result['order_num'] = @single_order.increment_id
+      @single_order_result['store_order_id'] = @single_order.store_order_id
 
       # Check if order has inactive/new/0qty items but still in awaiting
       check_if_order_update_needed_and_clear_cache

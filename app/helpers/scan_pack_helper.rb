@@ -3,9 +3,9 @@ module ScanPackHelper
   include OrdersHelper
   include ScanPack
   
-  def order_scan(input, state, id, options={})
+  def order_scan(input, state, id,store_order_id,options={})
     order_scan_object = ScanPack::OrderScanService.new(
-      options[:current_user], options[:session], input, state, id
+      options[:current_user], options[:session], input, state, id, store_order_id
     )
     order_scan_object.run
   end
