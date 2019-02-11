@@ -45,6 +45,7 @@ module ScanPack
 
       if @single_order_result["matched_orders"].count > 0 && @store_order_id.to_i != 0
         @single_order = @orders.where(store_order_id: @store_order_id).first
+        @single_order_result["matched_orders"] = []
       end
       do_if_single_order_not_present && return unless @single_order
       do_if_single_order_present

@@ -263,7 +263,8 @@ module OrdersHelper
                           'country' => order.country,
                           'tags' => order.order_tags,
                           'custom_field_one' => order.custom_field_one,
-                          'custom_field_two' => order.custom_field_two
+                          'custom_field_two' => order.custom_field_two,
+                          'store_order_id' => order.store_order_id
                         })
   end
 
