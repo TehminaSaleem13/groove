@@ -210,7 +210,7 @@ module OrdersHelper
   end
 
   def init_product_attrs(product, available_inv)
-    location_primary = product.primary_warehouse.location_primary rescue ""
+    location_primary = product.try(:primary_warehouse).location_primary rescue ""
     order_item = {'productinfo' => product,
                   'available_inv' => order_item_available_inv(product),
                   'sku' => product.primary_sku,
@@ -218,14 +218,8 @@ module OrdersHelper
                   'category' => product.primary_category,
                   'image' => product.base_product.primary_image,
                   'spl_instructions_4_packer' => product.spl_instructions_4_packer,
-                  'qty_on_hand' => product.primary_warehouse.quantity_on_hand,
-                  'location_primary' => location_primary,
-                  'sku' => product.primary_sku,
-                  'barcode' => product.primary_barcode,
-                  'category' => product.primary_category,
-                  'image' => product.base_product.primary_image,
-                  'spl_instructions_4_packer' => product.spl_instructions_4_packer,
-                  'qty_on_hand' => product.primary_warehouse.quantity_on_hand
+                  'qty_on_hand' => product.try(:primary_warehouse).try(:quantity_on_hand) ,
+                  'location_primary' => location_primary
                  }
   end
 
