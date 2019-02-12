@@ -43,7 +43,12 @@ module Groovepacker
 
         def bind_order_data(order, result)
           result[:packing_user_id] = order.packing_user_id ||= 420
-          result[:order_increment_id] = order.increment_id
+          if Order.where(increment_id: order.increment_id).count >= 2
+            increment_id = "#{order.increment_id}-#{order.store_order_id}"
+            result[:order_increment_id] = increment_id
+          else
+            result[:order_increment_id] = order.increment_id
+          end
           result[:item_count] = order.order_items.count
           # use updated_at value if scanned_on is nil
           result[:scanned_on] = order.scanned_on ||= order.updated_at
