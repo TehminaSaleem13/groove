@@ -136,9 +136,16 @@ module ScanPack
               current_user: @current_user, session: @session
             }
           )
-        else
+        elsif state_func == "order_scan"
           output = send(
             state_func, @params[:input], @params[:state], @params[:id], @params[:store_order_id],
+            {
+              current_user: @current_user, session: @session
+            }
+          )
+        else
+          output = send(
+            state_func, @params[:input], @params[:state], @params[:id],
             {
               current_user: @current_user, session: @session
             }
