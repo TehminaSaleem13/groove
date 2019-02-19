@@ -264,8 +264,8 @@ module Groovepacker
             found_obj = false
             found_obj = true if ids.include?(object.id)
             if found_obj == false && type == "sku"
-              object.product.add_product_activity("The #{type}  #{object.sku} was deleted to this item", @current_user.name)
-            elsif type == "barcode"
+              object.product.add_product_activity("The #{type} #{object.sku} was deleted to this item", @current_user.name)
+            elsif found_obj == false && type == "barcode"
               object.product.add_product_activity("The #{type} #{object.barcode}  was deleted to this item", @current_user.name)
             end   
 
