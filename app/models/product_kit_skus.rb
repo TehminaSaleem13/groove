@@ -55,7 +55,7 @@ class ProductKitSkus < ActiveRecord::Base
     Product.find(self.option_product_id)
   end
 
-  def self.remove_products_from_kit(kit, params, result)
+  def self.remove_products_from_kit(kit, params, result, current_user)
     if params[:kit_products].nil?
       result['messages'].push("No sku sent in the request")
       result['status'] &= false
@@ -66,9 +66,9 @@ class ProductKitSkus < ActiveRecord::Base
         count = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id).order_item_kit_products.count rescue 0
         if count > 200
           result["success_messages"] = "Your request for 'remove item' has been queued"
-          result["job"] = self.delay.remove_single_kit_product(kit, kit_product, params, result, tenant) 
+          result["job"] = self.delay.remove_single_kit_product(kit, kit_product, params, result, tenant, current_user) 
         else
-          result =self.remove_single_kit_product(kit, kit_product, params, result, tenant) 
+          result =self.remove_single_kit_product(kit, kit_product, params, result, tenant, current_user) 
         end
       end
     end
@@ -76,7 +76,7 @@ class ProductKitSkus < ActiveRecord::Base
     return result
   end
 
-  def self.remove_single_kit_product(kit, kit_product, params, result, tenant)
+  def self.remove_single_kit_product(kit, kit_product, params, result, tenant, current_user)
     Apartment::Tenant.switch tenant
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id)
     if product_kit_sku.nil?
@@ -86,24 +86,26 @@ class ProductKitSkus < ActiveRecord::Base
     end
     product_kit_sku.qty = 0
     product_kit_sku.save
+    new_sku = Product.find(product_kit_sku.option_product_id)
+    kit.add_product_activity("The product with SKU #{new_sku.product_skus.first.sku} was removed as an item to this kit", current_user.name)
     return result if product_kit_sku.destroy
     result['messages'].push("Product #{kit_product} could not be removed fronm kit")
     result['status'] &= false
     result
   end
 
-  def self.app_product_to_kit(kit, params, result)
+  def self.app_product_to_kit(kit, params, result, current_user)
     if params[:product_ids].nil?
       result['messages'].push("No item sent in the request")
       result['status'] &= false
     else
       items = Product.find(params[:product_ids])
-      items.each { |item| result = self.add_single_product_to_kit(kit, item, params, result) }
+      items.each { |item| result = self.add_single_product_to_kit(kit, item, params, result, current_user) }
     end
     return result
   end
 
-  def self.add_single_product_to_kit(kit, item, params, result)
+  def self.add_single_product_to_kit(kit, item, params, result, current_user)
     if item.nil?
       result['messages'].push("Item does not exist")
       result['status'] &= false
@@ -114,6 +116,11 @@ class ProductKitSkus < ActiveRecord::Base
       @productkitsku = ProductKitSkus.new
       @productkitsku.option_product_id = item.id
       @productkitsku.qty = 1
+      unless kit.product_kit_skuss.map(&:option_product_id).include?(@productkitsku.option_product_id)
+        new_sku = Product.find(@productkitsku.option_product_id)
+        kit.add_product_activity("The product with SKU #{new_sku.product_skus.first.sku} was added as an item to this kit", current_user.name)
+      end
+
       kit.product_kit_skuss << @productkitsku unless kit.product_kit_skuss.map(&:option_product_id).include?(@productkitsku.option_product_id)
       if kit.save
         kit.update_product_status

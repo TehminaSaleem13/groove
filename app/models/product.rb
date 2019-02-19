@@ -35,6 +35,7 @@ class Product < ActiveRecord::Base
   has_many :product_lots
   has_and_belongs_to_many :product_inventory_reports, join_table: :products_product_inventory_reports
   has_one :sync_option
+  has_many :product_activities, :dependent => :destroy
 
   after_save :check_inventory_warehouses
   after_save :gen_barcode_from_sku_if_intangible
@@ -586,23 +587,25 @@ class Product < ActiveRecord::Base
     actual_product.save
   end
 
-  def create_or_update_productsku(sku, order, status = nil, db_sku=nil)
+  def create_or_update_productsku(sku, order, status = nil, db_sku=nil,current_user)
     product_sku = status == 'new' ? ProductSku.new : db_sku
-
+    product_sku.product.add_product_activity( "The SKU of this item was changed from #{product_sku.sku} to #{sku['sku']} ",current_user.username) if (status != 'new' && sku['sku'] != product_sku.sku)
     product_sku.sku = sku['sku']
     product_sku.purpose = sku['purpose']
     product_sku.product_id = id unless product_sku.persisted?
     product_sku.order = order
+    product_sku.product.add_product_activity( "The SKU #{product_sku.sku} was added to this item",current_user.username) if status == 'new'
     response = product_sku.save ? true : false
     response
   end
 
-  def create_or_update_productbarcode(barcode, order, status = nil, db_barcode=nil)
+  def create_or_update_productbarcode(barcode, order, status = nil, db_barcode=nil, current_user)
     product_barcode = status == 'new' ? ProductBarcode.new : db_barcode
-
+    product_barcode.product.add_product_activity( "The barcode of this item was changed from #{product_barcode.barcode} to #{barcode['barcode']} ",current_user.username) if (status != 'new' && barcode['barcode'] != product_barcode.barcode)
     product_barcode.barcode = barcode['barcode']
     product_barcode.product_id = id unless product_barcode.persisted?
     product_barcode.order = order
+    product_barcode.product.add_product_activity( "The barcode #{product_barcode.barcode} was added to this item",current_user.username) if status == 'new'
     response = product_barcode.save ? true : false
     response
   end
@@ -714,5 +717,19 @@ class Product < ActiveRecord::Base
     sku_for_barcode = product_skus.first unless sku_for_barcode
     # method will not generate barcode if already exists
     sku_for_barcode.gen_barcode_from_sku_if_intangible_product if sku_for_barcode.present?
+  end
+
+  def add_product_activity(product_activity_message, username='', activity_type ='regular')
+    @activity = ProductActivity.new
+    @activity.product_id = self.id
+    @activity.action = product_activity_message
+    @activity.username = username
+    @activity.activitytime = current_time_from_proper_timezone
+    @activity.activity_type = activity_type
+    if @activity.save
+      true
+    else
+      false
+    end
   end
 end

@@ -134,6 +134,7 @@ module ProductService
         @result['product']['productkitskus'] = @result['product']['productkitskus'].sort_by { |hsh| hsh['packing_order'] }
         @result['product']['product_kit_activities'] = @product.product_kit_activities
         @result['product']['unacknowledged_kit_activities'] = @product.unacknowledged_kit_activities
+        @result['product']['activities'] = @product.product_activities
       end
 
       def get_single_productkitsku_attrs(kit)

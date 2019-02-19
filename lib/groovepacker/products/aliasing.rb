@@ -56,16 +56,20 @@ module Groovepacker
 
         def copy_skus_of_alias(product_alias, skus_len)
           @product_skus = ProductSku.where(:product_id => product_alias.id)
-          copy_sku_or_barocdes_of_aliased_product(@product_skus, skus_len)
+          copy_sku_or_barocdes_of_aliased_product(@product_skus, skus_len, "sku")
         end
 
         def copy_barcodes_of_alias(product_alias, barcodes_len)
           @product_barcodes = ProductBarcode.where(:product_id => product_alias.id)
-          copy_sku_or_barocdes_of_aliased_product(@product_barcodes, barcodes_len)
+          copy_sku_or_barocdes_of_aliased_product(@product_barcodes, barcodes_len, "barcode")
         end
 
-        def copy_sku_or_barocdes_of_aliased_product(objects, objects_len)
+        def copy_sku_or_barocdes_of_aliased_product(objects, objects_len, type)
           objects.each do |object|
+            if type == "sku"
+              p = Product.find(object.product_id)
+              @product_orig.add_product_activity("The Product with SKU #{p.product_skus.first.sku} was added as an alias to this product", @current_user.name)
+            end
             object.product_id = @product_orig.id
             object.order = objects_len
             objects_len+=1

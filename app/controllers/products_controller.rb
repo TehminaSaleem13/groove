@@ -255,14 +255,14 @@ class ProductsController < ApplicationController
 
   def add_product_to_kit
     #@kit is coming from find_kit_product method of products concern
-    @result = ProductKitSkus.app_product_to_kit(@kit, params, @result) if check_if_not_a_kit
+    @result = ProductKitSkus.app_product_to_kit(@kit, params, @result, current_user) if check_if_not_a_kit
 
     render json: @result
   end
 
   def remove_products_from_kit
     #@kit is coming from find_kit_product method of products concern
-    @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result) if check_if_not_a_kit
+    @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result, current_user) if check_if_not_a_kit
 
     render json: @result
   end

@@ -150,7 +150,7 @@ module Groovepacker
           #Update product categories
           #check if a product category is defined.
           product_cats = ProductCat.where(:product_id => @product.id)
-          @result = destroy_object_if_not_defined(product_cats, @params[:cats])
+          @result = destroy_object_if_not_defined(product_cats, @params[:cats], 'category')
           (@params[:cats]||[]).each do |category|
             status = @product.create_or_update_productcat(category, product_cats)
             @result['status'] &= status
@@ -161,7 +161,7 @@ module Groovepacker
           #Update product skus
           #check if a product sku is defined.
           product_skus = ProductSku.where(:product_id => @product.id)
-          @result = destroy_object_if_not_defined(product_skus, @params[:skus])
+          @result = destroy_object_if_not_defined(product_skus, @params[:skus], 'sku')
           (@params[:skus]||[]).each_with_index do |sku, index|
             status = create_or_update_single_sku(sku, index, true, product_skus)
             @result['status'] &= status
@@ -175,9 +175,9 @@ module Groovepacker
           
           if sku["id"].present?
             db_sku = product_skus.find{|_sku| _sku.id == sku["id"]}
-            status = @product.create_or_update_productsku(sku, index, nil, db_sku)
+            status = @product.create_or_update_productsku(sku, index, nil, db_sku, @current_user)
           elsif sku["sku"].present? && db_sku.blank?
-            status = @product.create_or_update_productsku(sku, index, 'new')
+            status = @product.create_or_update_productsku(sku, index, 'new', @current_user)
           elsif sku["sku"].present? && db_sku.present?
             @result['status'] = false
             @result['message'] = "Sku "+sku["sku"]+" already exists"
@@ -189,7 +189,7 @@ module Groovepacker
           #Update product barcodes
           #check if a product barcode is defined.
           product_barcodes = ProductBarcode.where(:product_id => @product.id)
-          @result = destroy_object_if_not_defined(product_barcodes, @params[:barcodes])
+          @result = destroy_object_if_not_defined(product_barcodes, @params[:barcodes], 'barcode')
           return if @params[:barcodes].blank?
           @params[:barcodes].each_with_index do |barcode, index|
             @result['status'] &= create_or_update_single_barcode(barcode, index, true, product_barcodes)
@@ -204,9 +204,9 @@ module Groovepacker
           case true
           when barcode["id"].present?
             db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"]}
-            status = @product.create_or_update_productbarcode(barcode, index, nil, db_barcode)
+            status = @product.create_or_update_productbarcode(barcode, index, nil, db_barcode, @current_user)
           when barcode["barcode"].present? && db_barcode.blank?
-            status = @product.create_or_update_productbarcode(barcode, index, 'new')
+            status = @product.create_or_update_productbarcode(barcode, index, 'new', @current_user)
           when barcode["barcode"].present? && db_barcode.present?
             @result['status'] = false
             @result['message'] = "Barcode #{barcode['barcode']} already exists"
@@ -217,7 +217,7 @@ module Groovepacker
 
         def create_or_update_product_images
           product_images = ProductImage.where(:product_id => @product.id)
-          @result = destroy_object_if_not_defined(product_images, @params[:images])
+          @result = destroy_object_if_not_defined(product_images, @params[:images], 'image')
           (@params[:images]||[]).each_with_index do |image, index|
             unless @product.create_or_update_productimage(image, index, product_images)
               @result['status'] &= false
@@ -257,13 +257,18 @@ module Groovepacker
           attr_array
         end
 
-        def destroy_object_if_not_defined(objects_array, obj_params)
+        def destroy_object_if_not_defined(objects_array, obj_params, type)
           return @result if objects_array.blank?
-
           ids = obj_params.map {|obj| obj["id"]}.compact rescue []
           objects_array.each do |object|
             found_obj = false
             found_obj = true if ids.include?(object.id)
+            if found_obj == false && type == "sku"
+              object.product.add_product_activity("The #{type}  #{object.sku} was deleted to this item", @current_user.name)
+            elsif type == "barcode"
+              object.product.add_product_activity("The #{type} #{object.barcode}  was deleted to this item", @current_user.name)
+            end   
+
             if found_obj == false && !object.destroy
               @result['status'] &= false
             end
@@ -273,6 +278,11 @@ module Groovepacker
 
         def update_product_basic_info
           basic_info = @params[:basicinfo]
+          @product.add_product_activity("The Product Name of this item was changed from #{@product.name} to #{basic_info["name"]} ",@current_user.username)  if @product.name != basic_info["name"]
+          unless @product.is_kit == basic_info["is_kit"]
+            type = basic_info["is_kit"] == 0 ? "product" : "kit"
+            @product.add_product_activity("This item was changed to a #{type}", @current_user.name)  
+          end
           attrs_to_update.each {|attr| @product[attr] = basic_info[attr] }
           @product.packing_placement = basic_info[:packing_placement] if basic_info[:packing_placement].is_a?(Integer)
           @product.weight = @product.get_product_weight(@params[:weight])
@@ -297,7 +307,11 @@ module Groovepacker
             product_location.inventory_warehouse_id = @current_user.inventory_warehouse_id
           end
 
-          product_location.quantity_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand] unless @params[:inventory_warehouses].blank?
+          unless @params[:inventory_warehouses].blank?
+            qua_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand]
+            @product.add_product_activity("The QOH of this item was changed from #{product_location.quantity_on_hand} to #{qua_on_hand} ", @current_user.name)  if product_location.quantity_on_hand != qua_on_hand
+            product_location.quantity_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand]
+          end
           product_location.save
         end
 
