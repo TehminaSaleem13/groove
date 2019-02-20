@@ -316,6 +316,7 @@ class ProductsController < ApplicationController
   end
 
   def update_product_list
+    params["current_user"] = current_user.name
     @result = Product.update_product_list(params, @result)
     render json: @result
   end
@@ -348,6 +349,7 @@ class ProductsController < ApplicationController
   #sets the value.
   def adjust_available_inventory
     unless params[:id].nil? || params[:inv_wh_id].nil? || params[:method].nil?
+      params["current_user"] = current_user.name
       result = ProductInventoryWarehouses.adjust_available_inventory(params, result)
     else
       @result['status'] &= false

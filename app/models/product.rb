@@ -700,7 +700,7 @@ class Product < ActiveRecord::Base
     if product.nil?
       result = result.merge('status' => false, 'error_msg' => 'Cannot find Product')
     else
-      response = product.updatelist(product, params[:var], params[:value])
+      response = product.updatelist(product, params[:var], params[:value], params[:current_user])
       errors = begin
                  response.errors.full_messages
                rescue

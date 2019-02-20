@@ -1,7 +1,7 @@
 module ProductsService
   class UpdateList < ProductsService::Base
     def initialize(*args)
-      @product, @var, @value = args
+      @product, @var, @value, @current_user = args
     end
 
     def call
@@ -71,6 +71,7 @@ module ProductsService
       elsif @var == 'location_name'
         product_location.name = @value
       elsif @var == 'qty_on_hand'
+        @product.add_product_activity("The QOH of this item was changed from #{product_location.quantity_on_hand} to #{@value} ", @current_user)
         product_location.quantity_on_hand = @value
       end
       product_location.save

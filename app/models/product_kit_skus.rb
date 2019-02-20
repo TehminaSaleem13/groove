@@ -87,7 +87,7 @@ class ProductKitSkus < ActiveRecord::Base
     product_kit_sku.qty = 0
     product_kit_sku.save
     new_sku = Product.find(product_kit_sku.option_product_id)
-    kit.add_product_activity("The product with SKU #{new_sku.product_skus.first.sku} was removed as an item to this kit", current_user.name)
+    kit.add_product_activity("The product with SKU #{new_sku.product_skus.first.sku} was removed as an item from this kit", current_user.name)
     return result if product_kit_sku.destroy
     result['messages'].push("Product #{kit_product} could not be removed fronm kit")
     result['status'] &= false

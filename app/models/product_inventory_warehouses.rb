@@ -97,8 +97,10 @@ class ProductInventoryWarehouses < ActiveRecord::Base
 
   def self.update_inventory_count(product_inv_whs, params, result)
     if params[:method] == 'recount'
+      product_inv_whs.product.add_product_activity("The QOH of this item was changed from #{product_inv_whs.quantity_on_hand} to #{params[:inventory_count].to_i} ", params[:current_user]) if product_inv_whs.quantity_on_hand != params[:inventory_count].to_i
       product_inv_whs.quantity_on_hand = params[:inventory_count]
     elsif params[:method] == 'receive'
+      product_inv_whs.product.add_product_activity("The QOH of this item was changed from #{product_inv_whs.quantity_on_hand} to #{product_inv_whs.quantity_on_hand + params[:inventory_count].to_i} ", params[:current_user])
       product_inv_whs.available_inv =
         product_inv_whs.available_inv + (params[:inventory_count].to_i)
     else
