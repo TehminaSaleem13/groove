@@ -14,7 +14,13 @@ module Groovepacker
           else
             order.status = @params[:value]
           end
-          add_activity(order, @current_user.name) if @params[:value] == 'scanned'
+          if @params[:value] == 'scanned'
+            order.order_items.each do |order_item|
+              order_item.scanned_status = "scanned"
+              order_item.save
+            end
+            add_activity(order, @current_user.name) 
+          end
         elsif @params[:var] == 'ordernum'
           order.increment_id = @params[:value]
         elsif @params[:var] == 'notes' && @current_user.can?('create_edit_notes')
