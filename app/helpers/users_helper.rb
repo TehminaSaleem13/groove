@@ -81,8 +81,7 @@ module UsersHelper
       plan_id: @subscription.subscription_plan_id,
       interval: @subscription.interval,
       customer_subscription_id: @subscription.customer_subscription_id,
-      stripe_customer_id: @subscription.stripe_customer_id,
-      stripe_customer_id: @subscription.stripe_customer_id
+      customer_id: @subscription.stripe_customer_id
     }
   end
 
