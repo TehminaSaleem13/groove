@@ -31,6 +31,7 @@ module Groovepacker
             return false
           end
           result = true
+          order.order_items.reload
           order.order_items.each do |order_item|
             result &= allocate_item(order_item, status_match)
           end
@@ -42,6 +43,7 @@ module Groovepacker
             return false
           end
           result = true
+          order.order_items.reload
           order.order_items.each do |order_item|
             result &= deallocate_item(order_item, status_match)
           end
