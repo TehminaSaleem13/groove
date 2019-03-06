@@ -221,11 +221,7 @@ module Groovepacker
                   import_item_count
                 end
               end
-              if !@credential.allow_duplicate_id
-                shiping_easy_order.save
-              else
-                shiping_easy_order.save
-              end
+             
               return unless shiping_easy_order.save
               shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
               add_order_activity(shiping_easy_order)
