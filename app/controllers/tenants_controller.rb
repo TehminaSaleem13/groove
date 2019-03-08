@@ -76,15 +76,15 @@ class TenantsController < ApplicationController
   def update_import_mode
     tenant = Tenant.find(params["tenant"])
     Apartment::Tenant.switch tenant.name
-    setting = GeneralSetting.last
-    tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
-    tenant.inventory_report_toggle = params["inventory_report_toggle"]
+    # setting = GeneralSetting.last
+    #tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
+    #tenant.inventory_report_toggle = params["inventory_report_toggle"]
     tenant.test_tenant_toggle = params["test_tenant_toggle"]
     tenant.save
-    if tenant.scheduled_import_toggle == false
-      setting.schedule_import_mode = "Daily"
-      setting.save
-    end
+    # if tenant.scheduled_import_toggle == false
+    #   setting.schedule_import_mode = "Daily"
+    #   setting.save
+    # end
     render json: {}
   end
 
@@ -112,6 +112,26 @@ class TenantsController < ApplicationController
   def update_product_activity_switch
     tenant = Tenant.find(params["tenant_id"])
     tenant.product_activity_switch = !tenant.product_activity_switch
+    tenant.save
+    render json: {}
+  end
+
+  def update_scheduled_import_toggle
+    setting = GeneralSetting.last
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.scheduled_import_toggle = !tenant.scheduled_import_toggle
+    tenant.save
+    if tenant.scheduled_import_toggle == false
+      setting.schedule_import_mode = "Daily"
+      setting.save
+    end
+    render json: {}
+  end
+
+
+  def update_inventory_report_toggle
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.inventory_report_toggle = !tenant.inventory_report_toggle
     tenant.save
     render json: {}
   end
