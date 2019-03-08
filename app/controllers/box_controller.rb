@@ -34,9 +34,28 @@ class BoxController < ApplicationController
   def remove_empty
     boxes = Box.where(id: params[:ids])
     if boxes.destroy_all
+      arrange_box(params[:order_id])
       return render json:  { status: true }
     end
     render json:  { status: false }
+  end
+
+  def delete_box
+    box = Box.find_by_id(params[:id])
+    if box.present?
+      change_box_name =  check_sequence(box)
+      if box.order_items.empty? && box.order_item_boxes.empty? 
+        box.destroy
+      else
+        box.order_item_boxes.each do |order_item_box|
+          order_item = OrderItem.find_by_id(order_item_box.order_item_id)
+          order_item.reset_scanned
+        end  
+        box.destroy
+      end
+      change_sequence(change_box_name)
+    end  
+    render json:  { }
   end
 
   private
@@ -105,5 +124,43 @@ class BoxController < ApplicationController
         current_user.username
       )
     end
+  end
+
+  def check_sequence(box)
+    order_id = box.order_id
+    change_box_name = []
+    all_boxes = Box.where(order_id: order_id ).map(&:name)
+    all_boxes.each do |all_box|
+      if all_box > box.name
+        change_box_name  << Box.where(order_id: order_id, name: all_box ).last.id
+      end
+    end 
+    return  change_box_name 
+  end
+
+  def change_sequence(change_box_name)
+    change_box_name.each do |id|
+      box = Box.find_by_id(id)
+      box_name = box.name   
+      new_name = box_name.gsub(box_name[4] ,(box_name[4].to_i - 1).to_s) 
+      save_new_name(new_name, box)
+    end   
+  end
+
+
+  def arrange_box(order_id)
+    boxes = Box.where(order_id: order_id)
+    boxes_name = boxes.map(&:name)
+    boxes.each do |box|
+      box_name = box.name 
+      i = boxes_name.index(box_name) + 1
+      new_name = box_name.gsub(box_name[4] ,i.to_s) 
+      save_new_name(new_name, box)
+    end
+  end
+
+  def save_new_name(new_name, box)
+    box.name = new_name
+    box.save
   end
 end

@@ -380,6 +380,7 @@ Groovepacks::Application.routes.draw do
     collection do
       put 'remove_from_box'
       put 'remove_empty'
+      put 'delete_box'
     end
   end
 
