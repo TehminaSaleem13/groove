@@ -43,18 +43,29 @@ class BoxController < ApplicationController
   def delete_box
     box = Box.find_by_id(params[:id])
     if box.present?
+      order_id = box.order_id
+      order = Order.find_by_id(order_id)
       change_box_name =  check_sequence(box)
+      
       if box.order_items.empty? && box.order_item_boxes.empty? 
+        add_activity_for_delete(order,box)
         box.destroy
       else
         box.order_item_boxes.each do |order_item_box|
           order_item = OrderItem.find_by_id(order_item_box.order_item_id)
+          order.addactivity("order item having sku #{order_item.product.primary_sku} with qty #{order_item_box.item_qty} is removed from #{box.try(:name)} due to box delete", current_user.username )
           order_item.reset_scanned
         end  
+        add_activity_for_delete(order,box) 
         box.destroy
       end
       change_sequence(change_box_name)
     end  
+
+    
+    if order.status == "scanned" && (order.order_items.map(&:scanned_status).include?("scanned") ||  order.order_items.map(&:scanned_status).include?("partially_scanned"))
+      order.update_attributes(status: "awaiting") 
+    end 
     render json:  { }
   end
 
@@ -162,5 +173,9 @@ class BoxController < ApplicationController
   def save_new_name(new_name, box)
     box.name = new_name
     box.save
+  end
+
+  def add_activity_for_delete(order, box)
+    order.addactivity("#{box.try(:name)} with #{box.order_item_boxes.count} order items is deleted.", current_user.username)
   end
 end

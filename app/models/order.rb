@@ -504,7 +504,7 @@ class Order < ActiveRecord::Base
     unscanned_list = []
 
     limited_order_items = order_items_with_eger_load_and_cache(order_item_status, limit, offset)
-
+    
     if barcode
       barcode_in_order_item = find_unscanned_order_item_with_barcode(barcode)
       order_item_id = barcode_in_order_item.try(:id)
@@ -579,7 +579,7 @@ class Order < ActiveRecord::Base
         end
       end
     end
-    
+
     unscanned_list = unscanned_list.sort do |a, b|
       o = (a['packing_placement'] <=> b['packing_placement']);
       o == 0 ? (a['name'] <=> b['name']) : o
@@ -844,8 +844,10 @@ class Order < ActiveRecord::Base
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         Groovepacker::Inventory::Orders.unsell(self)
-        user = User.find_by_id(GroovRealtime.current_user_id)
-        self.reset_scanned_status(user)
+        if self.order_items.count ==  self.order_items.where(scanned_status: "scanned").count
+          user = User.find_by_id(GroovRealtime.current_user_id)
+          self.reset_scanned_status(user)
+        end  
       end
     end
     self.update_column(:reallocate_inventory, false)

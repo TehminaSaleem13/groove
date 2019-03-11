@@ -80,7 +80,16 @@ module ScanPack
       if @params[:state] == "scanpack.rfp.default" && @result['status'] == true
         current_product_id = ProductBarcode.where(barcode: @params["input"])[0].try(:product_id)
         item_sku = ProductSku.where(product_id: current_product_id)[0].try(:sku)
-        @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
+        if @params[:box_id].nil?
+          if GeneralSetting.last.multi_box_shipments?
+            @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.name)
+          else
+            @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
+          end  
+        else
+          box = Box.find_by_id(@params[:box_id])
+          @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.name)
+        end  
       end
     end
 
