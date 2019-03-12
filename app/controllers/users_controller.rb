@@ -43,6 +43,7 @@ class UsersController < ApplicationController
       access_restriction.update_attributes(added_through_ui: ui_user)
       tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + "#{tenant.activity_log}"
       tenant.save!
+      StripeInvoiceEmail.add_user_notification(tenant, params[:users].to_i, access_restriction ).deliver
       access_restriction.update_attributes(num_users: params[:users])
       set_subscription_info(params[:amount])
       create_stripe_plan(tenant)
