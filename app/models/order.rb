@@ -142,12 +142,12 @@ class Order < ActiveRecord::Base
     self.addactivity('Order Scanning Complete', username) if !ScanPackSetting.last.order_verification
     self.packing_score = self.compute_packing_score
     self.save
-    restriction = AccessRestriction.order("created_at").last
-    unless restriction.nil?
-      restriction.total_scanned_shipments += 1
-      restriction.save
-    end
-
+    # restriction = AccessRestriction.order("created_at").last
+    # unless restriction.nil?
+    #   restriction.total_scanned_shipments += 1
+    #   restriction.save
+    # end
+    update_access_restriction
     unless Rails.env.test?
       tenant = Apartment::Tenant.current
       # if tenant == 'wagaboutit' || !Rails.env.production?
@@ -156,6 +156,12 @@ class Order < ActiveRecord::Base
         stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled').build_send_stream(tenant, self.id)
       # end
     end
+  end
+
+  def update_access_restriction
+    tenant = Apartment::Tenant.current
+    stat_stream_obj = SendStatStream.new()
+    stat_stream_obj.delay.update_restriction(tenant)
   end
 
   def has_inactive_or_new_products

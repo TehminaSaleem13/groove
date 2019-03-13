@@ -67,4 +67,13 @@ class SendStatStream
           query: {tenant_name: tenant, days: days, email: email},
           headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
   end
+
+  def update_restriction(tenant)
+    Apartment::Tenant.switch(tenant)
+    restriction = AccessRestriction.order("created_at").last
+    unless restriction.nil?
+      restriction.total_scanned_shipments += 1
+      restriction.save
+    end
+  end
 end
