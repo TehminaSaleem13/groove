@@ -10,7 +10,7 @@ class BoxController < ApplicationController
   end
 
   def remove_from_box
-    order_item = OrderItem.find_by_id(params["order_item_id"])
+    order_item = OrderItem.where(id: params["order_item_id"]).last
     if order_item
       @order = order_item.order
       unless params[:kit_product_id].blank?
@@ -94,7 +94,7 @@ class BoxController < ApplicationController
   end
 
   def reset_individual_order_item order_item
-    kit = OrderItemKitProduct.find_by_id(params[:kit_product_id])
+    kit = OrderItemKitProduct.where(id: params[:kit_product_id]).last
     if kit
       order_item_box = OrderItemBox.where(order_item_id: order_item.id, box_id: params[:box_id], kit_id: kit.id).first
       order_item_box.item_qty = order_item_box.item_qty - 1
@@ -107,7 +107,7 @@ class BoxController < ApplicationController
         order_item.scanned_status = 'partially_scanned'
       end
 
-      if order_item.order_item_kit_products.map(&:scanned_qty).sum == 0
+      if order_item.order_item_kit_products.pluck(:scanned_qty).sum == 0
         order_item.reset_scanned
         addactivity(order_item, order_item_box.box) if order_item.save
       else
@@ -160,7 +160,7 @@ class BoxController < ApplicationController
 
   def arrange_box(order_id)
     boxes = Box.where(order_id: order_id)
-    boxes_name = boxes.map(&:name)
+    boxes_name = boxes.pluck(:name)
     boxes.each do |box|
       box_name = box.name 
       i = boxes_name.index(box_name) + 1

@@ -77,11 +77,12 @@ module ScanPack
         second_escape_string = @scanpack_settings.second_escape_string
         first_escape = @scanpack_settings.first_escape_string_enabled && first_escape_string.present? && !@input.index(first_escape_string || "").nil?
         second_escape = @scanpack_settings.second_escape_string_enabled && second_escape_string.present? && !@input.index(second_escape_string || "").nil?
-        if first_escape && second_escape
+        case 
+        when first_escape && second_escape
           clean_input = @input.split(first_escape_string)[0].split(second_escape_string)[0]
-        elsif first_escape
+        when first_escape
           clean_input = @input.slice(0..(@input.index(first_escape_string || "")-1))
-        elsif second_escape
+        when second_escape
           clean_input = @input.slice(0..(@input.index(second_escape_string || "")-1)) 
         else
           clean_input = @input   
@@ -105,11 +106,11 @@ module ScanPack
       })
       
       if @single_order.has_unscanned_items
-        if ScanPackSetting.last.scanning_sequence == "any_sequence"
+        if @scanpack_settings.scanning_sequence == "any_sequence"
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
         end
 
-        if ScanPackSetting.last.scanning_sequence == "items_sequence"
+        if @scanpack_settings.scanning_sequence == "items_sequence"
           unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
           value = check_scanning_item(unscanned_items,clean_input)
           if value
@@ -121,7 +122,7 @@ module ScanPack
           end
         end
 
-        if ScanPackSetting.last.scanning_sequence == "kits_sequence"
+        if @scanpack_settings.scanning_sequence == "kits_sequence"
           list = check_scanning_kit(clean_input)
           if list.empty?
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
@@ -160,9 +161,7 @@ module ScanPack
       data = []
       list = []
       unscanned_items.each do |item|
-        if item["partially_scanned"] == true 
-          data << item
-        end
+        data << item if item["partially_scanned"] == true 
       end
       if data.any?
         if data.first["child_items"].present?
@@ -230,29 +229,7 @@ module ScanPack
             type_in_count = @typein_count.to_i + 1
           end
         end
-        if @multibarcode
-          if @box_id.nil?
-            if GeneralSetting.last.multi_box_shipments?
-              @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in Box 1", @current_user.username)
-            else
-              @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity}", @current_user.username)
-            end
-          else
-            box = Box.find_by_id(@box_id)
-            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username)
-          end  
-        else
-          if @box_id.nil?
-            if GeneralSetting.last.multi_box_shipments?
-              @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
-            else
-              @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
-            end  
-          else
-            box = Box.find_by_id(@box_id)
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
-          end  
-        end
+        add_log(sku_for_activity)
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
@@ -278,6 +255,33 @@ module ScanPack
       result = order.get_boxes_data
       @result["data"]["order"]["box"] = result[:box]
       @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
+    end
+
+    def add_log(sku_for_activity)
+      general_setting = GeneralSetting.last
+      if @multibarcode
+        if @box_id.nil?
+          if general_setting.multi_box_shipments?
+            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in Box 1", @current_user.username)
+          else
+            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity}", @current_user.username)
+          end
+        else
+          box = Box.find_by_id(@box_id)
+          @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username)
+        end  
+      else
+        if @box_id.nil?
+          if general_setting.multi_box_shipments?
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{@sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+          else
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{@sku_for_activity}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+          end  
+        else
+          box = Box.find_by_id(@box_id)
+          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{@sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+        end  
+      end
     end
 
   end # class end

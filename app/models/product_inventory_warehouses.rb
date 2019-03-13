@@ -72,7 +72,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
       return result
     end
 
-    product_inv_whs = ProductInventoryWarehouses.find_by_product_id_and_inventory_warehouse_id(product.id, params[:inv_wh_id])
+    product_inv_whs = ProductInventoryWarehouses.where(product_id: product.id , inventory_warehouse_id: params[:inv_wh_id]).last
     unless product_inv_whs
       product_inv_whs = product.product_inventory_warehousess.build(:inventory_warehouse_id => params[:inv_wh_id])
     end

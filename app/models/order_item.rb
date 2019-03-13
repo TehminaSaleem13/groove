@@ -393,7 +393,7 @@ class OrderItem < ActiveRecord::Base
           self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
         end     
       else
-        box = Box.find_by_id(box_id)
+        box = Box.where(id: box_id).last
         self.order.addactivity("Item with SKU: " + sku + " has been click scanned in #{box.try(:name)}", username) if !ScanPackSetting.last.order_verification
       end
     end

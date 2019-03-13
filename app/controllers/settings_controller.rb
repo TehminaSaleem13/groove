@@ -290,16 +290,18 @@ class SettingsController < ApplicationController
 
   def auto_complete
     data = []
-    Tenant.all.each do |tenant|
+    Tenant.select(:name).each do |tenant|
       Apartment::Tenant.switch(tenant.name)
       if params[:type] == 'general_settings'
-        data << GeneralSetting.where('custom_user_field_one LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_one)
-        data << GeneralSetting.where('custom_user_field_two LIKE ?', "%#{params[:value]}%").map(&:custom_user_field_two)
+
+        data << GeneralSetting.select(:custom_user_field_one).where('custom_user_field_one LIKE ?', "%#{params[:value]}%").pluck(:custom_user_field_one)
+        data << GeneralSetting.select(:custom_user_field_two).where('custom_user_field_two LIKE ?', "%#{params[:value]}%").pluck(:custom_user_field_two)
       else
-        data << User.where('custom_field_one LIKE ?', "%#{params[:value]}%").map(&:custom_field_one)
-        data << User.where('custom_field_two LIKE ?', "%#{params[:value]}%").map(&:custom_field_two)
+        data << User.select(:custom_field_one).where('custom_field_one LIKE ?', "%#{params[:value]}%").pluck(:custom_field_one)
+        data << User.select(:custom_field_two).where('custom_field_two LIKE ?', "%#{params[:value]}%").pluck(:custom_field_two)
       end
     end
+
     render json: data.flatten.uniq
   end
 
