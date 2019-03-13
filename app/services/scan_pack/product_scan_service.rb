@@ -229,7 +229,7 @@ module ScanPack
             type_in_count = @typein_count.to_i + 1
           end
         end
-        add_log(sku_for_activity)
+        add_log(sku_for_activity,type_in_count)
         do_if_barcode_found
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
@@ -257,7 +257,7 @@ module ScanPack
       @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
     end
 
-    def add_log(sku_for_activity)
+    def add_log(sku_for_activity,type_in_count)
       general_setting = GeneralSetting.last
       if @multibarcode
         if @box_id.nil?
@@ -273,13 +273,13 @@ module ScanPack
       else
         if @box_id.nil?
           if general_setting.multi_box_shipments?
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{@sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
           else
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{@sku_for_activity}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
           end  
         else
           box = Box.find_by_id(@box_id)
-          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{@sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
         end  
       end
     end
