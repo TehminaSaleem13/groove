@@ -62,8 +62,7 @@ class BoxController < ApplicationController
       change_sequence(change_box_name)
     end  
 
-    
-    if order.status == "scanned" && (order.order_items.pluck(:scanned_status).include?("scanned") ||  order.order_items.pluck(:scanned_status).include?("partially_scanned"))
+    if order.present? && order.status == "scanned" 
       order.update_attributes(status: "awaiting") 
     end 
     render json:  { }
