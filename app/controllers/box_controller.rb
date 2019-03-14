@@ -41,10 +41,10 @@ class BoxController < ApplicationController
   end
 
   def delete_box
-    box = Box.find_by_id(params[:id])
+    box = Box.where(id: params[:id]).last
     if box.present?
       order_id = box.order_id
-      order = Order.find_by_id(order_id)
+      order = Order.where(id: order_id).last
       change_box_name =  check_sequence(box)
       
       if box.order_items.empty? && box.order_item_boxes.empty? 
@@ -52,7 +52,7 @@ class BoxController < ApplicationController
         box.destroy
       else
         box.order_item_boxes.each do |order_item_box|
-          order_item = OrderItem.find_by_id(order_item_box.order_item_id)
+          order_item = OrderItem.where(id: order_item_box.order_item_id).last
           order.addactivity("order item having sku #{order_item.product.primary_sku} with qty #{order_item_box.item_qty} is removed from #{box.try(:name)} due to box delete", current_user.username )
           order_item.reset_scanned
         end  
@@ -63,7 +63,7 @@ class BoxController < ApplicationController
     end  
 
     
-    if order.status == "scanned" && (order.order_items.map(&:scanned_status).include?("scanned") ||  order.order_items.map(&:scanned_status).include?("partially_scanned"))
+    if order.status == "scanned" && (order.order_items.pluck(:scanned_status).include?("scanned") ||  order.order_items.pluck(:scanned_status).include?("partially_scanned"))
       order.update_attributes(status: "awaiting") 
     end 
     render json:  { }
@@ -140,7 +140,7 @@ class BoxController < ApplicationController
   def check_sequence(box)
     order_id = box.order_id
     change_box_name = []
-    all_boxes = Box.where(order_id: order_id ).map(&:name)
+    all_boxes = Box.where(order_id: order_id ).pluck(:name)
     all_boxes.each do |all_box|
       if all_box > box.name
         change_box_name  << Box.where(order_id: order_id, name: all_box ).last.id
@@ -151,7 +151,7 @@ class BoxController < ApplicationController
 
   def change_sequence(change_box_name)
     change_box_name.each do |id|
-      box = Box.find_by_id(id)
+      box = Box.where(id: id).last
       box_name = box.name   
       new_name = box_name.gsub(box_name[4] ,(box_name[4].to_i - 1).to_s) 
       save_new_name(new_name, box)
