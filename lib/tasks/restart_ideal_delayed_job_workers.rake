@@ -24,7 +24,7 @@ namespace :delayed_job do
 
     rescue StandardError => e
       puts e.message
-      break
+      exit
     end
   end
 end
