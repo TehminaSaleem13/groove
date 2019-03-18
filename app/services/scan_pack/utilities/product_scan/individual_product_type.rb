@@ -98,15 +98,24 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
   def insert_in_box(item, kit_id)
     if @box_id.blank?
-      box = Box.create(name: "Box 1", order_id: item.order.id)  
-      OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id)
-    else
+      box = Box.find_or_create_by_name_and_order_id(:name => "Box 1", :order_id => item.order.id)  
       order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
-      if order_item_box
-        order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+      if order_item_box.nil?
+        OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id)
       else
-        OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id)
-      end
+        if_order_item_present(item, kit_id)
+      end  
+    else
+      if_order_item_present(item, kit_id)
+    end
+  end
+
+  def if_order_item_present(item, kit_id)
+    order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
+    if order_item_box
+      order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+    else
+      OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id)
     end
   end
 

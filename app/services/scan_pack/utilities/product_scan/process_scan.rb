@@ -34,16 +34,25 @@ module ScanPack::Utilities::ProductScan::ProcessScan
 
   def insert_order_item_in_box
     if @box_id.blank?
-      box = Box.create(name: "Box 1", order_id: @order_item.order.id)
+      box = Box.find_or_create_by_name_and_order_id(:name => "Box 1", :order_id => @order_item.order.id)
       @box_id = box.id
-      OrderItemBox.create(order_item_id: @order_item.id, box_id: box.id, item_qty: @typein_count)
-    else
       order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
-      if order_item_box
-        order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+      if order_item_box.nil?
+        OrderItemBox.create(order_item_id: @order_item.id, box_id: box.id, item_qty: @typein_count)
       else
-        OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
-      end
+        if_order_item
+      end  
+    else
+     if_order_item
+    end
+  end
+
+  def if_order_item
+    order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
+    if order_item_box
+      order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+    else
+      OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
     end
   end
 end # module end

@@ -2,7 +2,7 @@ class BoxController < ApplicationController
   before_filter :groovepacker_authorize!
 
   def create
-    box = Box.new(name: params[:name], order_id: params[:order_id])
+    box = Box.find_or_create_by_name_and_order_id(:name => params[:name], :order_id => params[:order_id])  
     if box.save
       return render json: box.as_json(only: [:id, :name])
     end
