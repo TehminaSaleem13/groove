@@ -129,7 +129,20 @@ class UsersController < ApplicationController
             if user_role.custom && !user_role.display
               user_role = update_role(user_role, params[:role])
             end
-
+            if user_role.name != @user.role.try(:name)
+              case user_role.name
+              when "Scan & Pack User"
+                @user.view_dashboard = "packer_dashboard"
+              when "Manager"
+                @user.view_dashboard = "packer_dashboard"
+              when "Admin"
+                @user.view_dashboard = "admin_dashboard"
+              when "Super Admin"
+                @user.view_dashboard = "admin_dashboard_with_packer_stats"
+              else
+                @user.view_dashboard = user_role.users.last.try(:view_dashboard) rescue "packer_dashboard"
+              end
+            end
             @user.role = user_role
           end
           role = @user.role
