@@ -102,6 +102,10 @@ every 1.day, :at => '03:00 am' do
   end
 end
 
+every 1.day, :at => '04:00 am' do
+  rake "doo:check_nginx_process"
+end
+
 # every 1.day, :at => '03:00 am' do
 #   runner "backup perform --trigger db_backup"
 # end
