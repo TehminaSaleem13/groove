@@ -106,11 +106,10 @@ module ScanPack
       })
       
       if @single_order.has_unscanned_items
-        if @scanpack_settings.scanning_sequence == "any_sequence"
+        case @scanpack_settings.scanning_sequence
+        when "any_sequence"
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
-        end
-
-        if @scanpack_settings.scanning_sequence == "items_sequence"
+        when "items_sequence"
           unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
           value = check_scanning_item(unscanned_items,clean_input)
           if value
@@ -120,9 +119,7 @@ module ScanPack
             @result['status'] &= false
             @result['error_messages'].push("Please scan items in the suggested order")
           end
-        end
-
-        if @scanpack_settings.scanning_sequence == "kits_sequence"
+        when "kits_sequence"
           list = check_scanning_kit(clean_input)
           if list.empty?
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
