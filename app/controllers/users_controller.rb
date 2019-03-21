@@ -80,16 +80,11 @@ class UsersController < ApplicationController
         @user.email = params[:email]
         @user.other = params[:other] if !params[:other].nil?
         @user.password_confirmation = params[:conf_password] if !params[:conf_password].nil? && params[:conf_password] != ''
-        if params[:active].blank?
-          params[:active] = false
-        end
+        params[:active] = false if params[:active].blank?
         
         @user.active = params[:active]
-        if params[:name].blank?
-          @user.name = params[:username]
-        else
-          @user.name = params[:name]
-        end
+
+        @user.name = params[:name].blank? ? params[:username] :  params[:name] 
         @user.last_name = params[:last_name]
         username_change = @user.username_change
         unless params[:view_dashboard].nil?
@@ -113,7 +108,7 @@ class UsersController < ApplicationController
             user_role.name = "role_#{@user.id}"
           end
         else
-          user_role = Role.find_by_id(params[:role]['id'])
+          user_role = Role.where(id: params[:role]['id']).last
         end
 
         if user_role.nil?
@@ -147,25 +142,17 @@ class UsersController < ApplicationController
           result['user']['role'] = @user.role.attributes
           result['user']['current_user'] = current_user
 
-          # update the plan amount with adding 50$/user
-          #update_plan_amount("add") if new_user
-          if new_user && !Rails.env.test?
-            on_demand_logger = Logger.new("#{Rails.root}/log/user_create_and_delete_info_#{Apartment::Tenant.current}.log")
-            log = { tenant: Apartment::Tenant.current, action: "user created", user_count: User.where(is_deleted: false).count, Time: Time.now.strftime("%Y-%m-%d  %H:%M")}
-            on_demand_logger.info(log) 
-          end
-          # send user data to groovelytics server if the user is newly created.
           if new_user && !Rails.env.test?
             tenant_name = Apartment::Tenant.current
             send_user_info_obj = SendUsersInfo.new()
             # send_user_info_obj.build_send_users_stream(tenant_name)
             send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
           else
-
             set_custom_fields
-            HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
-                  query: { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one_key: @custom_field_one_key, custom_field_one_value: @custom_field_one_value, custom_field_two_key: @custom_field_two_key, custom_field_two_value: @custom_field_two_value},
-                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
+            send_user_info_data = SendUsersInfo.new()
+            tenant_name = Apartment::Tenant.current
+            user_data = { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one_key: @custom_field_one_key, custom_field_one_value: @custom_field_one_value, custom_field_two_key: @custom_field_two_key, custom_field_two_value: @custom_field_two_value}
+            send_user_info_data.delay(:run_at => 1.seconds.from_now).update_gl_user(user_data, tenant_name) if user_data[:packing_user_id].present?
           end
 
         else

@@ -20,4 +20,11 @@ class SendUsersInfo
     end
     HTTParty::Basement.default_options.update(verify: true)
   end
+
+  def update_gl_user(user_data, tenant_name)
+    Apartment::Tenant.switch(tenant_name)
+    HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
+        query: { username: user_data[:username], packing_user_id: user_data[:packing_user_id] , active: user_data[:active], first_name: user_data[:first_name] , last_name: user_data[:last_name] , custom_field_one_key: user_data[:custom_field_one_key] , custom_field_one_value: user_data[:custom_field_one_value], custom_field_two_key: user_data[:custom_field_two_key], custom_field_two_value: user_data[:custom_field_two_value]},
+        headers: { 'Content-Type' => 'application/json', 'tenant' => tenant_name }) rescue nil 
+  end
 end
