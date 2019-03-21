@@ -48,11 +48,14 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   end
 
   def if_order_item
-    order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
-    if order_item_box
-      order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
-    else
-      OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
-    end
+    box = Box.find_by_id(@box_id)
+    if @single_order.id == box.order_id
+      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
+      if order_item_box
+        order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+      else
+        OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
+      end
+    end  
   end
 end # module end
