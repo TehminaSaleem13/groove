@@ -317,7 +317,6 @@ GEM
     net-ssh-gateway (1.2.0)
       net-ssh (>= 2.6.5)
     netrc (0.7.7)
-    newrelic_rpm (3.7.2.195)
     ng-rails-csrf (0.1.0)
     nokogiri (1.6.3.1)
       mini_portile (= 0.6.0)
@@ -638,7 +637,6 @@ DEPENDENCIES
   multi_xml
   mws-connect (~> 0.0.7)!
   mysql2 (>= 0.3.19)
-  newrelic_rpm
   ng-rails-csrf
   oauth
   open4
