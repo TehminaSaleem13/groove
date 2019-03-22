@@ -129,7 +129,7 @@ class UsersController < ApplicationController
             if user_role.custom && !user_role.display
               user_role = update_role(user_role, params[:role])
             end
-            if user_role.name != @user.role.try(:name)
+            if user_role.name != @user.role.try(:name) && new_user != true
               case user_role.name
               when "Scan & Pack User"
                 @user.view_dashboard = "packer_dashboard"
