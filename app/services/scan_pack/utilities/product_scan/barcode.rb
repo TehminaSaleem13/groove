@@ -57,16 +57,17 @@ module ScanPack::Utilities::ProductScan::Barcode
 
   def do_if_post_scanning_option_is_not_none
     scanpack_settings_post_scanning_option = @scanpack_settings.post_scanning_option
-    if scanpack_settings_post_scanning_option == "Verify"
+    case scanpack_settings_post_scanning_option
+    when "Verify"
       unless @single_order.tracking_num.present?
         @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
         @single_order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", @current_user.username)
       else
         @result['data']['next_state'] = 'scanpack.rfp.verifying'
       end
-    elsif scanpack_settings_post_scanning_option == "Record"
+    when "Record"
       @result['data']['next_state'] = 'scanpack.rfp.recording'
-    elsif scanpack_settings_post_scanning_option == "PackingSlip"
+    when "PackingSlip"
       do_set_order_scanned_state_and_result_data
       generate_packing_slip(@single_order)
     else

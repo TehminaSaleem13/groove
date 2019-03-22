@@ -22,6 +22,7 @@ class OrderItem < ActiveRecord::Base
   # validates_uniqueness_of :sku, scope: :order_id
   cached_methods :product, :order_item_kit_products, :option_products
   after_save :delete_cache_for_associated_obj
+  validates :order_id, uniqueness: { scope: :product_id }
 
   include OrdersHelper
 

@@ -524,13 +524,14 @@ class Order < ActiveRecord::Base
     limited_order_items.each do |order_item|
       if order_item.cached_product.try(:is_kit) == 1
         option_products = order_item.cached_option_products
-        if order_item.cached_product.kit_parsing == 'single'
+        case order_item.cached_product.kit_parsing
+        when 'single'
           #if single, then add order item to unscanned list
           unscanned_list.push(order_item.build_unscanned_single_item)
-        elsif order_item.cached_product.kit_parsing == 'individual'
+        when 'individual'
           #else if individual then add all order items as children to unscanned list
           unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
-        elsif order_item.cached_product.kit_parsing == 'depends'
+        when 'depends'
           if order_item.kit_split
             if order_item.kit_split_qty > order_item.kit_split_scanned_qty
               unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
@@ -673,13 +674,14 @@ class Order < ActiveRecord::Base
     self.order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
       if order_item.cached_product.is_kit == 1
         option_products = order_item.cached_option_products
-        if order_item.cached_product.kit_parsing == 'single'
+        case order_item.cached_product.kit_parsing
+        when 'single'
           #if single, then add order item to unscanned list
           scanned_list.push(order_item.build_scanned_single_item)
-        elsif order_item.cached_product.kit_parsing == 'individual'
+        when 'individual'
           #else if individual then add all order items as children to unscanned list
           scanned_list.push(order_item.build_scanned_individual_kit(option_products))
-        elsif order_item.cached_product.kit_parsing == 'depends'
+        when 'depends'
           if order_item.kit_split
             if order_item.kit_split_qty > 0
               scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
