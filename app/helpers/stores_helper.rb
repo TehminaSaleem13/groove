@@ -35,16 +35,18 @@ module StoresHelper
 
   def init_store_data
     params[:name]=nil if params[:name]=='undefined'
-    @store.name = params[:name] || get_default_warehouse_name
-    @store.store_type = params[:store_type]
-    @store.status = params[:status]
-    @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
-    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-    @store.auto_update_products = params[:auto_update_products]
-    @store.on_demand_import = params[:on_demand_import]
-    @store.update_inv = params[:update_inv]
-    @store.split_order = params[:split_order]
-    @store.save
+    if params[:status].present?
+      @store.name = params[:name] || get_default_warehouse_name
+      @store.store_type = params[:store_type]
+      @store.status = params[:status]
+      @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
+      @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
+      @store.auto_update_products = params[:auto_update_products]
+      @store.on_demand_import = params[:on_demand_import]
+      @store.update_inv = params[:update_inv]
+      @store.split_order = params[:split_order]
+      @store.save
+    end
   end
 
   def store_duplicate
