@@ -482,6 +482,7 @@ module Groovepacker
                     plan_id)
         update_stripe_subscription(plan_id) rescue nil
         update_subscription_item(plan_id, existing_plan) rescue nil
+        update_annual_subscription(plan_id) rescue nil
         update_app_subscription(plan_id, amount, @subscription_info[:interval])
         (existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]]) rescue nil
       end
@@ -515,6 +516,19 @@ module Groovepacker
         end  
       end
 
+      def update_annual_subscription(plan_id)
+        if @customer
+          subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
+          if @customer.subscriptions.count >= 2 && subscription.plan.interval == "year"
+            if @trial_end_time && (@trial_end_time > Time.now.to_i)
+              Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
+            else
+              Stripe::Subscription.update(subscription.id, plan: plan_id, prorate: true)
+            end  
+          end
+        end  
+      end
+      
       def update_app_subscription(plan_id, amount, interval)
         @subscription.subscription_plan_id = plan_id
         @subscription.amount = amount
