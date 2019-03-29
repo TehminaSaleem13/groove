@@ -64,16 +64,15 @@ class StripeInvoiceEmail < ActionMailer::Base
 
   def remove_user_request_email tenant, users
     @users = users
-    @tenant = tenant
-    mail to: ['support@groovepacker.com'],subject: "#{ENV["RAILS_ENV"]} #{@users} User Removal Request for #{@tenant.name}"
+    @tenant = tenant.name
+    mail to: ['support@groovepacker.com'],subject: I18n.t('user_remove_sub', env: ENV["RAILS_ENV"] , tenant: @tenant, quantity: @users)
   end
 
   def annual_plan tenant, users, amount
     @users = users
     @tenant = tenant.name
     @amount = amount
-    mail to: ['support@groovepacker.com'],subject: "Request for annual plan"
-    
+    mail to: ['support@groovepacker.com'],subject: I18n.t('annual_sub', env: ENV["RAILS_ENV"] , tenant: @tenant)
   end
 
   def remainder_for_access_restriction tenant
@@ -82,4 +81,17 @@ class StripeInvoiceEmail < ActionMailer::Base
          subject: "Access Restriction is not created for #{@tenant} in this month"
   end
 
+  def add_user_notification tenant, users, access_restriction
+     @users = users
+     @tenant = tenant.name
+     @previous_users = access_restriction.num_users
+     mail to: ['support@groovepacker.com'],subject: I18n.t('add_user_sub', env: ENV["RAILS_ENV"] , tenant: @tenant, quantity: ( @users - @previous_users))
+  end
+
+  def user_remove_notification tenant, access_restriction, users
+    @tenant = tenant.name
+    @previous_users = access_restriction.num_users
+    @users = users.to_i
+    mail to: ['support@groovepacker.com'],subject: I18n.t('remove_notify_sub', env: ENV["RAILS_ENV"] , tenant: @tenant, quantity: ( @previous_users - @users))
+  end
 end

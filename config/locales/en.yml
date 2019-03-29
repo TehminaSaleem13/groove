@@ -3,3 +3,11 @@
 
 en:
   hello: "Hello world"
+  annual: ! '%{tenant} has recently requested an annual plan. The request was submitted at %{time}. Please make the necessary changes to their account in Stipe manually.Details are as follows:'
+  annual_sub: ! '[%{env}] Annual Plan request for [%{tenant}]'
+  add_user_sub: ! '[%{env}] User Successfully added for [%{tenant}] Qty [%{quantity}]'
+  add_user: ! '%{tenant} has recently added %{qty} user to their plan. The change occurred at %{time}. Please verify the plan in stripe reflects this change.'
+  user_remove_sub: ! '[%{env}] User Removal Request for [%{tenant}] Qty [%{quantity}]'
+  user_remove: ! 'On %{time} %{tenant} requested removal of %{qty} user from their plan. Please make this change manually.'
+  remove_notify_sub: ! '[%{env}] User Successfully removed for [%{tenant}] Qty [%{quantity}]'
+  remove_notify: ! '%{tenant} has recently removed %{qty} user from their plan. The change occurred at %{time}. Please verify the plan in stripe reflects this change.'

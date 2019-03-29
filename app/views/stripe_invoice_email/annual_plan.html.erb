@@ -1,4 +1,4 @@
-<p>Tenant <%= @tenant%> Request for Annual subscription details are as follows:</p>
+<%= I18n.t('annual', tenant: @tenant, time: Time.now.utc) %>
 <ul>
   <li>User:<%= @users%></li>
   <li>Amount: <%= @amount%></li>
