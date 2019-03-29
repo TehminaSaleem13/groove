@@ -80,4 +80,12 @@ class ImportMailer < ActionMailer::Base
     subject = "[#{@current_tenant}] Order CSV Import Summary Report "
     mail to: "kcpatel006@gmail.com", subject: subject
   end
+
+  def duplicate_order_info(tenant, value, data)
+    @tenant = tenant
+    @value = value
+    @data = data
+    subject = "[#{@tenant}] #{@value} are duplicate "
+    mail to: "kcpatel006@gmail.com", subject: subject
+  end
 end
