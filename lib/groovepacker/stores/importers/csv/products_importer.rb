@@ -102,7 +102,10 @@ module Groovepacker
               product_type: '',
               spl_instructions_4_packer: '',
               is_intangible: false,
-              click_scan_enabled: "on"
+              click_scan_enabled: "on",
+              is_skippable: false,
+              add_to_any_order: false,
+              type_scan_enabled: "on"
             }
           end
 
@@ -203,6 +206,24 @@ module Groovepacker
             if !self.mapping['click_scan_enabled'].nil? && self.mapping['click_scan_enabled'][:position] >= 0 && !single_row[self.mapping['click_scan_enabled'][:position]].blank?
               if ["OFF","off","FALSE",false,"NO","no","0" ].include?(single_row[self.mapping['click_scan_enabled'][:position]])
                 usable_record[:click_scan_enabled] = "off"
+              end
+            end
+
+            if !self.mapping['is_skippable'].nil? && self.mapping['is_skippable'][:position] >= 0 && !single_row[self.mapping['is_skippable'][:position]].blank?
+              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['is_skippable'][:position]])
+                usable_record[:is_skippable] = true
+              end
+            end
+
+            if !self.mapping['add_to_any_order'].nil? && self.mapping['add_to_any_order'][:position] >= 0 && !single_row[self.mapping['add_to_any_order'][:position]].blank?
+              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['add_to_any_order'][:position]])
+                usable_record[:add_to_any_order] = true
+              end
+            end
+
+            if !self.mapping['type_scan_enabled'].nil? && self.mapping['type_scan_enabled'][:position] >= 0 && !single_row[self.mapping['type_scan_enabled'][:position]].blank?
+              if ["OFF","off","FALSE",false,"NO","no","0" ].include?(single_row[self.mapping['type_scan_enabled'][:position]])
+                usable_record[:type_scan_enabled] = "off"
               end
             end
 
@@ -355,7 +376,7 @@ module Groovepacker
             record[:name] = 'Product from CSV Import' if record[:name].blank?
             record[:product_record_serial] = record[:product_record_serial] == "1" ? true : false
             record[:product_second_record_serial] = record[:product_second_record_serial] == "1" ? true : false
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled])
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled])
 
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
@@ -411,6 +432,18 @@ module Groovepacker
 
             if !self.mapping['click_scan_enabled'].nil? && record[:click_scan_enabled] != "[DELETE]"
               duplicate_product.click_scan_enabled = record[:click_scan_enabled]
+            end
+
+            if !self.mapping['type_scan_enabled'].nil? && record[:type_scan_enabled] != "[DELETE]"
+              duplicate_product.type_scan_enabled = record[:type_scan_enabled]
+            end
+
+            if !self.mapping['is_skippable'].nil? && record[:is_skippable] != "[DELETE]"
+              duplicate_product.is_skippable = record[:is_skippable]
+            end
+
+            if !self.mapping['add_to_any_order'].nil? && record[:add_to_any_order] != "[DELETE]"
+              duplicate_product.add_to_any_order = record[:add_to_any_order]
             end
 
             @products_for_status_update << duplicate_product

@@ -22,7 +22,10 @@ class Product < ActiveRecord::Base
                   :product_receiving_instructions,
                   :second_record_serial,
                   :record_serial,
-                  :click_scan_enabled
+                  :click_scan_enabled,
+                  :is_skippable,
+                  :add_to_any_order,
+                  :type_scan_enabled
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy
