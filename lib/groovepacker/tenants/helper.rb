@@ -471,6 +471,7 @@ module Groovepacker
       end
 
       def create_new_plan_and_assign(tenant)
+        @updated_in_stripe = true
         plan_info = new_plan_info(tenant)
         plan_id = plan_info['plan_id']
         existing_plan = get_plan_info(@subscription_info[:plan_id])['plan_info']
@@ -483,7 +484,7 @@ module Groovepacker
         update_stripe_subscription(plan_id) rescue nil
         update_subscription_item(plan_id, existing_plan) rescue nil
         update_annual_subscription(plan_id) rescue nil
-        update_app_subscription(plan_id, amount, @subscription_info[:interval])
+        update_app_subscription(plan_id, amount, @subscription_info[:interval]) if @updated_in_stripe == true
         (existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]]) rescue nil
       end
 
@@ -493,9 +494,21 @@ module Groovepacker
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
           @trial_end_time = subscription.trial_end
           if @trial_end_time && (@trial_end_time > Time.now.to_i)
-            @customer.update_subscription(plan: plan_id, trial_end: @trial_end_time, prorate: false)
+            begin
+              @customer.update_subscription(plan: plan_id, trial_end: @trial_end_time, prorate: false)
+              @updated_in_stripe = true
+            rescue Exception => e
+              Rollbar.error(e, e.message)
+              @updated_in_stripe = false
+            end  
           else
-            @customer.update_subscription(plan: plan_id, prorate: true)
+            begin
+              @customer.update_subscription(plan: plan_id, prorate: true)
+              @updated_in_stripe = true
+            rescue Exception => e
+               Rollbar.error(e, e.message)
+              @updated_in_stripe = false
+            end 
           end
         end
       end
@@ -509,7 +522,13 @@ module Groovepacker
             subscription.items.data.each do |item|
               if item.plan["id"] ==  existing_plan.id
                 prorate =  (@trial_end_time && (@trial_end_time > Time.now.to_i)) ? false : true
-                Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
+                begin
+                  Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
+                  @updated_in_stripe = true
+                rescue Exception => e
+                  Rollbar.error(e, e.message)
+                  @updated_in_stripe = false
+                end
               end
             end  
           end
@@ -521,9 +540,21 @@ module Groovepacker
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
           if @customer.subscriptions.count >= 2 && subscription.plan.interval == "year"
             if @trial_end_time && (@trial_end_time > Time.now.to_i)
-              Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
+              begin
+                Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
+                @updated_in_stripe = true
+              rescue Exception => e
+                Rollbar.error(e, e.message)
+                @updated_in_stripe = false
+              end
             else
-              Stripe::Subscription.update(subscription.id, plan: plan_id, prorate: true)
+              begin
+                Stripe::Subscription.update(subscription.id, plan: plan_id, prorate: true)
+                @updated_in_stripe = true
+              rescue Exception => e
+                Rollbar.error(e, e.message)
+                @updated_in_stripe = false
+              end
             end  
           end
         end  
