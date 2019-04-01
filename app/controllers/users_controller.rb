@@ -48,7 +48,7 @@ class UsersController < ApplicationController
       create_stripe_plan(tenant)
     elsif params[:is_annual] == "true"  
       StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount] ).deliver
-      result['request_send'] = true
+      result['annual_request'] = true
     end
     
     respond_to do |format|
