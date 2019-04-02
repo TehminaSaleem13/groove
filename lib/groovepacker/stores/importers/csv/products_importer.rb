@@ -374,8 +374,16 @@ module Groovepacker
 
           def create_single_import(record)
             record[:name] = 'Product from CSV Import' if record[:name].blank?
-            record[:product_record_serial] = record[:product_record_serial] == "1" ? true : false
-            record[:product_second_record_serial] = record[:product_second_record_serial] == "1" ? true : false
+            if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial])
+              record[:product_second_record_serial] = true
+            else
+              record[:product_second_record_serial] = false
+            end    
+            if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial])
+              record[:product_record_serial] = true
+            else
+              record[:product_record_serial] = false
+            end  
             single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled])
 
             single_import.store_id = self.params[:store_id]
@@ -414,8 +422,25 @@ module Groovepacker
             if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
               duplicate_product.name = record[:name]
             end
-            duplicate_product.second_record_serial = record[:product_second_record_serial].to_i if record[:product_second_record_serial] != nil
-            duplicate_product.record_serial = record[:product_record_serial].to_i if record[:product_record_serial] != nil
+            if record[:product_second_record_serial] != nil
+              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial])
+                duplicate_product.second_record_serial = 1
+              else
+                duplicate_product.second_record_serial = record[:product_second_record_serial].to_i 
+              end
+            else
+              duplicate_product.second_record_serial = 0
+            end
+
+            if record[:product_record_serial] != nil
+              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial])
+                duplicate_product.record_serial = 1
+              else
+                duplicate_product.record_serial = record[:product_record_serial].to_i 
+              end  
+            else
+              duplicate_product.record_serial = 0
+            end  
             if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
               duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
             end
