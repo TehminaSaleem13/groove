@@ -852,7 +852,7 @@ class Order < ActiveRecord::Base
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         Groovepacker::Inventory::Orders.unsell(self)
-        if self.order_items.count ==  self.order_items.where(scanned_status: "scanned").count
+        if self.order_items.select { |o| o.product.is_intangible == false }.count ==  self.order_items.where(scanned_status: "scanned").select { |o| o.product.is_intangible == false }.count
           user = User.find_by_id(GroovRealtime.current_user_id)
           self.reset_scanned_status(user)
         end  
