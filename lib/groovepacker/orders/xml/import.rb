@@ -137,10 +137,6 @@ module Groovepacker
                           $redis.set("new_order_#{tenant}" , orders.count)
                         end
                         
-                        unless $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
-                          ImportMailer.not_imported(@file_name, orders.count,$redis.get("new_order_#{tenant}").to_i ,$redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count ).deliver
-                        end
-
 
                         if @ftp_flag == "false"
                           @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name") 
