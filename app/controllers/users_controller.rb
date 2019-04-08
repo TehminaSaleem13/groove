@@ -552,6 +552,11 @@ class UsersController < ApplicationController
       user.last_sign_in_at = DateTime.now
       user.save 
     end
+    if user.nil? && Apartment::Tenant.current == "shopflauntboutique"
+      on_demand_logger = Logger.new("#{Rails.root}/log/check_last_login.log")
+      log = { tenant: Apartment::Tenant.current, params_username: params[:username], time: Time.now.utc}
+      on_demand_logger.info(log)     
+    end
     render json: {}
   end
 
