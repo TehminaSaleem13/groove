@@ -20,7 +20,9 @@ module Groovepacker
               order_item.save
             end
             add_activity(order, @current_user.name) 
-          end
+          else
+            order.scanned_by_status_change = false
+          end  
         elsif @params[:var] == 'ordernum'
           order.increment_id = @params[:value]
         elsif @params[:var] == 'notes' && @current_user.can?('create_edit_notes')
@@ -38,6 +40,8 @@ module Groovepacker
 
       def add_activity(order, username)
         order.scanned_on = Time.now
+        order.scanned_by_status_change = true
+        order.packing_user_id = User.find_by_username(username).try(:id)
         order.addactivity('Order Manually Moved To Scanned Status', username)
       end
 
