@@ -29,6 +29,6 @@ class TransactionEmail < ActionMailer::Base
     else
       subject = "[#{subscription.tenant_name}] [#{Rails.env}] Subscription failed"
     end
-    mail to: "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com ", subject: subject
+    mail to: "svisamsetty@navaratan.com, groovepacker+importfail@gmail.com, support@groovepacker.com, kcpatel006@gmail.com ", subject: subject
   end
 end

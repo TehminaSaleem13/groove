@@ -12,7 +12,7 @@ class CreateTenant
     create_default_csv_map
 
     subscription.update_progress('tenant_created')
-    self.send_transaction_emails(subscription)
+    self.delay(run_at: 2.hours.from_now).send_transaction_emails(subscription)
     create_csv_store
     # TransactionEmail.delay(run_at: 2.hours.from_now).send_email(subscription)
     # TransactionEmail.welcome_email(subscription).deliver
@@ -45,7 +45,11 @@ class CreateTenant
   end
 
   def send_transaction_emails(subscription)
-    TransactionEmail.delay(run_at: 2.hours.from_now).send_email(subscription)
+    if subscription.reload.status == "completed"
+      TransactionEmail.send_email(subscription).deliver
+    else
+      TransactionEmail.failed_subscription(subscription, nil).deliver
+    end
     # TransactionEmail.welcome_email(subscription).deliver
   end
 
