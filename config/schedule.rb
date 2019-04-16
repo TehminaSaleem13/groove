@@ -77,7 +77,9 @@ every 1.day, :at => '04:00 am' do
 end
 
 every 1.day, :at => '01:00 am' do
-  rake "doo:scheduled_stat_export_umi"
+  if environment=='production'
+    rake "doo:scheduled_stat_export_umi"
+  end
 end
 
 every 1.day, :at => '02:00 am' do
