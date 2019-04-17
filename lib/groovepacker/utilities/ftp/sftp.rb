@@ -72,6 +72,36 @@ module FTP
       result
     end
 
+    def check_imported
+      result = self.build_result
+      begin
+        response = connect
+        if response[:error_messages].empty? && response[:status] == true
+          connection_obj = response[:connection_obj]
+          folder = find_folder(connection_obj)
+          if folder == true
+            result[:status] = false
+            result[:error_messages].push("Impoted folder Found")
+          else
+            result[:success_messages].push("Does not have permission to create folder")
+          end
+        else
+          result[:status] = false
+          response[:error_messages].each do |message|
+            result[:error_messages].push(message)
+          end
+          return result
+        end
+      rescue Net::SFTP::StatusException
+        result[:status] = false
+        result[:error_messages].push("Please specify the correct derectory path.")
+      rescue Exception => e
+        result[:status] = false
+        result[:error_messages].push(e.message)
+      end
+      result
+    end
+
     def download(current_tenant)
       result = self.build_result
       result[:file_info] = {}
@@ -126,7 +156,11 @@ module FTP
           connection_obj = response[:connection_obj]
           new_file = rename_file(ftp_file_name)
           handle = connection_obj.open!("#{self.directory}/#{ftp_file_name}")
-          connection_obj.rename!("#{self.directory}/#{ftp_file_name}", "#{self.directory}/#{new_file}")
+          begin
+            connection_obj.rename!("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
+          rescue Exception => e
+            connection_obj.rename!("#{self.directory}/#{ftp_file_name}", "#{self.directory}/#{new_file}")
+          end
           connection_obj.close!(handle)
         else
           result[:status] = false
@@ -154,6 +188,31 @@ module FTP
         end
       end
       return file
+    end
+
+    
+    def find_folder(connection_obj)
+      folder_found = true   
+      begin
+        found = connection_obj.dir.glob(self.directory, "imported")
+        if found.any?
+          folder_found = true
+        else
+          folder_found = false
+        end  
+      rescue Exception => e
+        folder_found = false
+      end
+      if folder_found == true
+        return true
+      else
+        begin
+          connection_obj.mkdir("#{self.directory}/imported", :permissions => 0755).wait
+          return true
+        rescue Exception => e
+          return false
+        end
+      end
     end
   end
 end

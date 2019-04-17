@@ -78,6 +78,40 @@ module FTP
       result
     end
 
+    def check_imported
+      result = self.build_result
+      begin
+        response = connect
+        if response[:error_messages].empty? && response[:status] == true
+          connection_obj = response[:connection_obj]
+          folder = find_folder(connection_obj)
+          connection_obj.close()
+          if folder == true
+            result[:status] = false
+            result[:error_messages].push("Impoted folder Found")
+          else
+            result[:success_messages].push("Does not have permission to create folder")
+          end
+        else
+          result[:status] = false
+          response[:error_messages].each do |message|
+            result[:error_messages].push(message)
+          end
+          return result
+        end
+      rescue Net::FTPPermError => e
+        message = e.message
+        split_message = message.split(" ")
+        split_message.shift
+        result[:status] = false
+        result[:error_messages].push(split_message.join(" "))
+      rescue Exception => e
+        result[:status] = false
+        result[:error_messages].push(e.message)
+      end
+      result
+    end
+
     def download(current_tenant)
       result = self.build_result
       result[:file_info] = {}
@@ -133,8 +167,12 @@ module FTP
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           new_file = rename_file(ftp_file_name)
+          begin
+            connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
+          rescue Exception => e
+            connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/#{new_file}")
+          end
           
-          connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/#{new_file}")
           connection_obj.close()
         else
           result[:status] = false
@@ -175,6 +213,27 @@ module FTP
       unless fmtimes.index(fmtimes.max).nil? || ('-imported'.in? files[fmtimes.index(fmtimes.max)])
         index = fmtimes.index(fmtimes.max)
         files[index]
+      end
+    end
+
+    def find_folder(connection_obj)
+      folder_found = true
+      begin
+        connection_obj.chdir("#{self.directory}/imported")
+        folder_found = true
+      rescue Exception => e
+        folder_found = false
+      end
+      if folder_found == true
+        return true
+      else
+        begin
+          connection_obj.chdir(self.directory)
+          connection_obj.mkdir("imported")
+          return true
+        rescue Exception => e
+          return false
+        end
       end
     end
   end

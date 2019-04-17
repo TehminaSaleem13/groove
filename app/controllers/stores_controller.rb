@@ -82,6 +82,15 @@ class StoresController < ApplicationController
   #   init_store_data
   # end
 
+  def check_imported_folder
+    result = {}
+    store = Store.find(params[:id])
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    result[:connection] = groove_ftp.check_imported()
+    store.ftp_credential.update_attribute(:connection_established, true) if result[:connection][:status]
+    render json: result
+  end
+
   def create_update_store
     @result = {"status"=>true, "store_id"=>0, "csv_import"=>false, "messages"=>[]}
     create_store if current_user.can? 'add_edit_stores'

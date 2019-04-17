@@ -205,6 +205,7 @@ Groovepacks::Application.routes.draw do
       post 'delete_map'
       get 'pull_store_inventory'
       get 'push_store_inventory'
+      get 'check_imported_folder'
     end
   end
 
