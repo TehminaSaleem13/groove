@@ -196,24 +196,20 @@ module FTP
     private
 
     def find_file(connection_obj)
+      file = nil
     	connection_obj.chdir(self.directory)
       begin
         files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
       rescue
         files = connection_obj.nlst('*.csv') rescue connection_obj.nlst('*.CSV')
       end
-      fmtimes = []
       files.each do |individual_file|
-        if '-imported'.in? individual_file
-          fmtimes << Time.now.utc-1.year
-        else
-          fmtimes << connection_obj.mtime(individual_file)
+        unless '-imported'.in? individual_file
+          file = individual_file
+          break
         end
       end
-      unless fmtimes.index(fmtimes.max).nil? || ('-imported'.in? files[fmtimes.index(fmtimes.max)])
-        index = fmtimes.index(fmtimes.max)
-        files[index]
-      end
+      return file
     end
 
     def find_folder(connection_obj)
