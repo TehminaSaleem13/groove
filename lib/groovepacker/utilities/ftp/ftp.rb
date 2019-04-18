@@ -87,10 +87,10 @@ module FTP
           folder = find_folder(connection_obj)
           connection_obj.close()
           if folder == true
-            result[:status] = false
-            result[:error_messages].push("Impoted folder Found")
+            result[:success_messages].push("Imported Folder Ready")
           else
-            result[:success_messages].push("Does not have permission to create folder")
+            result[:status] = false
+            result[:error_messages].push("Unable to create the imported folder in the current directory. Please create it manually.")
           end
         else
           result[:status] = false
