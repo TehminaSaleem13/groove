@@ -67,6 +67,39 @@ class StoresController < ApplicationController
     result
   end
 
+
+  def get_order_details
+    result = {}
+    store = Store.find(params[:store_id])
+    if store.present?
+      credential  = store.shipstation_rest_credential
+      client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
+      response = client.get_order_value(params[:order_no])
+      if response.nil?
+        result[:status] = false
+      else 
+        result[:status] = true
+        time_zone = GeneralSetting.last.time_zone.to_i
+        result[:createDate] = response.last["createDate"].to_time + time_zone
+        result[:modifyDate] = response.last["modifyDate"].to_time + time_zone
+        if response.last["orderStatus"] == 'awaiting_shipment'
+          result[:orderStatus] = 'Awaiting Shipment'
+        elsif response.last["orderStatus"] == 'shipped'
+          result[:orderStatus] = 'Shipped'  
+        elsif response.last["orderStatus"] == 'pending_fulfillment'
+           result[:orderStatus] = 'Pending Fulfillment'  
+        end 
+        if response.last["tagIds"].nil?
+          result[:gp_ready_status] = 'No'
+        else
+           result[:gp_ready_status] = response.last["tagIds"].include?(48826) ?  'Yes' : 'No'
+        end
+       
+      end
+    end
+    render json: result
+  end
+
   def connect_and_retrieve
     result = {}
     store = Store.find(params[:id])

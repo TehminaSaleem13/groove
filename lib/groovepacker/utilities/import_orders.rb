@@ -188,7 +188,15 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_item = ImportItem.find(import_item.id) rescue new_import_item
       import_item.previous_imported = result[:previous_imported]
       import_item.success_imported = result[:success_imported]
-      update_status(import_item, result)
+      if store.regular_import_v2 == true 
+        if result[:no_order] == true
+          update_status(import_item, result)
+        else
+          import_item.save
+        end
+      else
+        update_status(import_item, result)
+      end
     rescue
     end
   end

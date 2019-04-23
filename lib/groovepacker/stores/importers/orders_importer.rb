@@ -27,7 +27,7 @@ module Groovepacker
             order_no = URI.encode(order_no)
             stores.each do |store|
               break if check_order_exists(order_no)
-              next unless store.on_demand_import
+              next unless (store.on_demand_import || store.on_demand_import_v2)
               import_item = ImportItem.create(store_id: store.id)
               handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
               context = Groovepacker::Stores::Context.new(handler)

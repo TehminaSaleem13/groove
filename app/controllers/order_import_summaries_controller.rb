@@ -20,36 +20,46 @@ class OrderImportSummariesController < ApplicationController
   end
 
   def download_summary_details
-    #require 'open-uri'
+    store = Store.find_by_id(params["store_id"])
     begin
+      store = Store.find_by_id(params["store_id"])
       @tenant_name = Apartment::Tenant.current
-      #url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
-      #lines = open(url).read
       summary = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days).reverse!
       lines = summary.map(&:log_record).uniq
-      
-      headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check C=D+E+F", "Check H=D+G"]
-      data = CSV.generate do |csv|
-        csv << headers if csv.count.eql? 0
-        lines.each do |r| 
-          #y = eval r.gsub(/[\"]/, "'")
-          y = JSON.parse r
-          if y["Tenant"] == @tenant_name
-            if y['Orders_in_file'] ==  y['New_orders_imported'] + y['Existing_orders_updated'] + y['Existing_orders_skipped']
-              check_1 = 'YES'
-            else
-              check_1 ='NO'
-            end  
+      if store.store_type == "CSV"
+        headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Filename","Tenant", " Orders in file " , "New_orders_imported", "Existing orders updated", "Existing orders skipped", "Orders before import", "Orders after import", "Check C=D+E+F", "Check H=D+G"]
+        data = CSV.generate do |csv|
+          csv << headers if csv.count.eql? 0
+          lines.each do |r| 
+            y = JSON.parse r
+            if y["Tenant"] == @tenant_name && y["Type"].nil?
+              if y['Orders_in_file'] ==  y['New_orders_imported'] + y['Existing_orders_updated'] + y['Existing_orders_skipped']
+                check_1 = 'YES'
+              else
+                check_1 ='NO'
+              end  
             
-            if y['Orders_in_GroovePacker_after_import'] == y['New_orders_imported'] + y['Orders_in_GroovePacker_before_import']
-              check_2 = 'YES'
-            else
-              check_2 = 'No'
+              if y['Orders_in_GroovePacker_after_import'] == y['New_orders_imported'] + y['Orders_in_GroovePacker_before_import']
+                check_2 = 'YES'
+              else
+                check_2 = 'No'
+              end
+              csv << [y["Time_Stamp_Tenant_TZ"], y["Time_Stamp_UTC"] ,y["Name_of_imported_file"], y["Tenant"], y["Orders_in_file"], y["New_orders_imported",], y["Existing_orders_updated"], y["Existing_orders_skipped",], y["Orders_in_GroovePacker_before_import",], y["Orders_in_GroovePacker_after_import"], "#{check_1}", "#{check_2}"]
             end
-            csv << [y["Time_Stamp_Tenant_TZ"], y["Time_Stamp_UTC"] ,y["Name_of_imported_file"], y["Tenant"], y["Orders_in_file"], y["New_orders_imported",], y["Existing_orders_updated"], y["Existing_orders_skipped",], y["Orders_in_GroovePacker_before_import",], y["Orders_in_GroovePacker_after_import"], "#{check_1}", "#{check_2}"]
           end
         end
-      end
+      else
+        headers = ["Time Stamp Tenant TZ", "Time Stamp UTC", "Type", "Order Create Date", "Order Modified Date","Order Status (the status in the OrderManager)", "Order Status Settings in GP" , "Order Date Settings in GP"]
+        data = CSV.generate do |csv|
+          csv << headers if csv.count.eql? 0
+          lines.each do |r| 
+            y = JSON.parse r
+            if y["Tenant"] == @tenant_name && y["Type"] != nil
+              csv << [y["Timestamp of the OD import (in tenants TZ)"], y["Timestamp of the OD import (UTC)"] ,y["Type"],y["Order Create Date"], y["Order Modified Date"], y["Order Status (the status in the OrderManager)"], y["Order Status Settings"], y["Order Date Settings"]]
+            end
+          end
+        end
+      end  
       url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url
       render json: {url: url}
     rescue Exception => e
@@ -79,7 +89,14 @@ class OrderImportSummariesController < ApplicationController
     end
     if cred   
       cred.last_imported_at = nil
-      cred.quick_import_last_modified = nil if store.store_type == "Shipstation API 2"
+      if store.store_type == "Shipstation API 2"
+        if store.regular_import_v2 == true
+          date = DateTime.parse(params[:date]).utc
+          cred.quick_import_last_modified = date.beginning_of_day
+        else
+          cred.quick_import_last_modified = nil 
+        end
+      end
       cred.save
     end
     render json: {status: true}
@@ -95,5 +112,20 @@ class OrderImportSummariesController < ApplicationController
     render json: {status: true}
   end
 
+  def get_last_modified
+    result = {}
+    cred = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    time_zone = GeneralSetting.last.time_zone.to_i
+    if cred.present?
+      if cred.quick_import_last_modified.nil?
+        result[:last_imported_at] =  (Time.now.utc - 5.day)  + time_zone 
+      else
+        result[:last_imported_at] =  cred.quick_import_last_modified.to_time + time_zone 
+      end
+    
+      result[:current_time] = Time.now.utc + time_zone
+    end
+    render json: result
+  end
 end
 

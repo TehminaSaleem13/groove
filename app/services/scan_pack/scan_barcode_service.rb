@@ -34,7 +34,8 @@ module ScanPack
       end
       if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
        stores = Store.where("status=? and on_demand_import=?", true, true)
-       run_import_for_not_found_order if stores.present?
+       check_stores = Store.where("status=? and on_demand_import_v2=?", true, true)
+       run_import_for_not_found_order if (stores.present? || check_stores.present?)
       end
     end
 
@@ -109,7 +110,12 @@ module ScanPack
         if job.blank? || job.failed_at.present?
           order_importer.delay(:run_at => 1.seconds.from_now, :queue => order_no_input).search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
           #order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
-          @result["notice_messages"]="It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."
+          st = stores.where(store_type: "Shipstation API 2").last
+          if st.on_demand_import == true
+            @result["notice_messages"]="It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."
+          elsif st.on_demand_import_v2 == true
+            @result["on_demand"] = true
+          end
         else
           @result["notice_messages"]="Still checking on this order."
         end

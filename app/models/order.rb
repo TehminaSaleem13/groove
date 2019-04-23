@@ -77,6 +77,16 @@ class Order < ActiveRecord::Base
 
   end
 
+  def self.emit_data_for_on_demand_import_v2(hash, order_no)
+    if hash["orders"].blank?
+      result = {"status" => false, "message" => "Please verify that order #{order_no} is available in your order manager. They were not able to provide it on our request"}
+      GroovRealtime::emit('popup_display_for_on_demand_import_v2', result, :tenant)
+    else
+      result = {"status" => true , "message" => "Order #{order_no} is Ready and will open in:", "id" => "#{order_no}"}
+      GroovRealtime::emit('popup_display_for_on_demand_import_v2', result, :tenant)
+    end  
+  end
+
   def self.csv_already_imported_warning
     result = {"status" => false, "message" => "Looks like the CSV file with this name has already been imported before.<br/> If you would like to re-import this file please"  }
     GroovRealtime::emit('csv_already_imported_warning', result, :tenant)

@@ -45,6 +45,8 @@ module StoresHelper
       @store.on_demand_import = params[:on_demand_import]
       @store.update_inv = params[:update_inv]
       @store.split_order = params[:split_order]
+      @store.on_demand_import_v2 = params[:on_demand_import_v2]
+      @store.regular_import_v2 = params[:regular_import_v2]
       @store.save
     end
   end

@@ -16,6 +16,20 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
+        def get_orders_v2(status, ord_placed_after, date_type = 'created_at', page_index)
+          Rails.logger.info 'Getting orders with status: ' + status
+          start_date = order_date_start(
+            date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
+          fetch_orders_v2(status, start_date, page_index)
+        end
+
+         def get_orders_count_ss(status, ord_placed_after, date_type = 'created_at')
+          start_date = order_date_start(
+            date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
+          fetch_orders_count(status, start_date)
+        end
+
+
         def get_shipments(import_from, date_type = 'created_at')
           shipments_after_last_import = []
           start_date = shipment_date_start(date_type, ss_format(import_from))
@@ -39,6 +53,19 @@ module Groovepacker
             tracking_number = handle_shipment_response(response, orderId)
           end
           tracking_number
+        end
+
+        def get_order_value(orderno)
+          response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
+          response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno } 
+          if response["orders"].present?
+            return response["orders"]
+          else
+            response = @service.query("/shipments?trackingNumber=#{orderno}", nil, "get")
+            return nil if response["shipments"].blank? 
+            shipment = response["shipments"].first
+            get_order_value(shipment["orderNumber"])
+          end
         end
 
         def get_order(orderId)
@@ -118,6 +145,29 @@ module Groovepacker
           response
         end
 
+
+        def get_orders_by_tag_v2(tagId, page_index)
+          response = { 'orders' => [] }
+          unless tagId == -1
+            %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
+              res = find_orders_by_tag_and_status_v2(tagId, status, page_index)
+              response['orders'] = response['orders'] + res["orders"] unless res["orders"].nil?  rescue nil
+            end
+          end
+          response
+        end
+
+        def get_orders_count_by_tag_v2(tagId, page_index)
+          total_response_count = 0
+          unless tagId == -1
+            %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
+              res = find_orders_by_tag_and_status_v2_count(tagId, status, page_index)
+              total_response_count = total_response_count + res["total"].to_i  rescue 0
+            end
+          end
+          total_response_count
+        end
+
         def find_orders_by_tag_and_status(tag_id, status)
           page_index = 1
           orders = []
@@ -129,6 +179,14 @@ module Groovepacker
             return orders if page_index > total_pages.to_i
           end
         end
+
+        def find_orders_by_tag_and_status_v2(tag_id, status, page_index)
+          response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
+        end
+
+      def find_orders_by_tag_and_status_v2_count(tag_id, status, page_index)
+          response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=1", nil, "get")
+      end
 
         def check_gpready_awating_order(tag_id)
           response = @service.query("/orders/listbytag?orderStatus=awaiting_payment&tagId=#{tag_id}&page=1&pageSize=1", nil, "get")
@@ -158,6 +216,18 @@ module Groovepacker
             page_index += 1
             return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150
           end
+        end
+
+        def fetch_orders_v2(status, start_date, page_index)
+          res = @service.query("/Orders?orderStatus=" \
+              "#{status}&page=#{page_index}&pageSize=100#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, "get")
+        end
+
+        def fetch_orders_count(status, start_date)
+          page_index = 1
+          res = @service.query("/Orders?orderStatus=" \
+              "#{status}&page=#{page_index}&pageSize=1#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, "get")
+          return (res["total"].to_i rescue 0)
         end
 
         def handle_shipment_response(response, orderId)

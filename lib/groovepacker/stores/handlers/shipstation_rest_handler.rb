@@ -19,8 +19,13 @@ module Groovepacker
         end
 
         def import_orders
-          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
-            self.build_handle).import
+          if @store.regular_import_v2 == true
+            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+              self.build_handle).import
+          else  
+            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
+              self.build_handle).import
+          end  
         end
 
         def import_images
@@ -49,8 +54,13 @@ module Groovepacker
         end
 
         def import_single_order_from(order_no)
-          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
-            self.build_handle).import_single_order(order_no)
+          if @store.on_demand_import_v2 == true
+            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+              self.build_handle).import_single_order(order_no)
+          else
+            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
+              self.build_handle).import_single_order(order_no)
+          end
         end
 
         def find_or_create_product(item)
