@@ -191,8 +191,12 @@ class ImportCsv
       logger.info("file Path =============== #{file_path}")
       csv_text_data = File.read(file_path)
       logger.info("csv text =============== #{csv_text_data}")
-
-      csv = CSV.parse(csv_text_data, :headers => true)
+      begin
+        csv = CSV.parse(csv_text_data, :headers => true)
+      rescue Exception => e
+        csv_text_data = csv_text_data.gsub( /["\"]/, '')
+        csv = CSV.parse(csv_text_data, :headers => true)
+      end
       column_number = $redis.get("#{Apartment::Tenant.current}_csv_file_increment_id_index").to_i
       logger.info("column index =============== #{column_number}")
 
