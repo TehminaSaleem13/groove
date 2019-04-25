@@ -276,6 +276,8 @@ module OrdersHelper
   end
 
   def sort_order params, orders
+    params["sort"] = "increment_id" if params["sort"] == "ordernum"
+    params["sort"] = "order_placed_time" if params["sort"] == "order_date"
     begin
       orders = orders.order("#{params[:sort]} #{params[:order]}")
     rescue 
