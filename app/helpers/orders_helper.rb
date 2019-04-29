@@ -195,7 +195,7 @@ module OrdersHelper
     order
   end
 
-  def generate_order_barcode(increment_id)
+  def generate_order_barcode_for_html(increment_id)
     order_barcode = Barby::Code128B.new(increment_id)
     outputter = Barby::PngOutputter.new(order_barcode)
     outputter.margin = 0
@@ -206,7 +206,7 @@ module OrdersHelper
               'w') do |f|
       f.write blob
     end
-    increment_id
+    #increment_id
   end
 
   def init_product_attrs(product, available_inv)

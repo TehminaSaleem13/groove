@@ -212,6 +212,7 @@ class OrdersController < ApplicationController
       value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
       @orders = value ? sort_order(params, @orders) : @orders
     end
+    @orders.map(&:increment_id).each do |increment_id| generate_order_barcode_for_html(increment_id) end 
   end
 
   def cancel_packing_slip
