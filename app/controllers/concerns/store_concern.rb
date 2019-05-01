@@ -113,7 +113,7 @@ module StoreConcern
       params[:type] = 'both' if params[:type].nil? || !['both', 'order', 'product', 'kit'].include?(params[:type])
       if check_csv_condition
         @result['store_id'] = @store.id
-        default_csv_map = { 'name' => '', 'map' => {'rows' => 2,'sep' => ',','other_sep' => 0,'delimiter' => '"','fix_width' => 0,'fixed_width' => 4, 'contains_unique_order_items' => false,'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil,'order_date_time_format' => 'Default','day_month_sequence' => 'MM/DD','map' => {}}}
+        default_csv_map = { 'name' => '', 'map' => {'rows' => 2,'sep' => ',','other_sep' => 0,'delimiter' => '"','fix_width' => 0,'fixed_width' => 4, 'contains_unique_order_items' => false,'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil,'order_date_time_format' => 'Default','day_month_sequence' => 'MM/DD','map' => {}, 'encoding_format' => 'ASCII + UTF-8'}}
         csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
         csv_directory = 'uploads/csv'
         current_tenant = Apartment::Tenant.current
@@ -201,7 +201,7 @@ module StoreConcern
     end  
     begin
       map_data.name = params[:name]
-      map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence], :map => params[:map] }
+      map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence],:encoding_format => params[:encoding_format],:map => params[:map] }
       map_data.save!
       map_data.map[:map].values.each_with_index do |data, index|
         $redis.set("#{Apartment::Tenant.current}_csv_file_increment_id_index", index)  if data[:value] == "increment_id"

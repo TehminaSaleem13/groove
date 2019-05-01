@@ -195,7 +195,8 @@ module StoresHelper
       order_placed_at: params[:order_placed_at],
       order_date_time_format: params[:order_date_time_format],
       day_month_sequence: params[:day_month_sequence],
-      reimport_from_scratch: params[:reimport_from_scratch]
+      reimport_from_scratch: params[:reimport_from_scratch],
+      encoding_format: params[:encoding_format]
     }    
     # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
     if params[:type] == 'order'

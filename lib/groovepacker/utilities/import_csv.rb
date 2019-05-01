@@ -25,7 +25,22 @@ class ImportCsv
         response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
-          new_file_data = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+          if params[:encoding_format].present?
+            begin
+              if params[:encoding_format] == "ASCII + UTF-8"
+                new_file_data = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+              elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
+                new_file_data = File.read(file_path).force_encoding("ISO-8859-1").encode("UTF-8")
+              elsif params[:encoding_format] == "UTF-8"
+                new_file_data = File.read(file_path).force_encoding("UTF-8")
+              end
+            rescue Exception => e
+              new_file_data = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+            end
+          else
+            new_file_data =  File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+          end  
+
           File.write(file_path,new_file_data)
           csv_file = begin
                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
@@ -43,7 +58,21 @@ class ImportCsv
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
         set_file_name(params,file.url)
         file_path = download_csv(file,tenant, params)
-        File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))             
+        if params[:encoding_format].present?
+          begin
+            if params[:encoding_format] == "ASCII + UTF-8"
+              File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+            elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
+              
+            elsif params[:encoding_format] == "UTF-8"
+              File.write(file_path, file.content.force_encoding("UTF-8"))
+            end
+          rescue Exception => e
+            File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+          end
+        else
+          File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+        end       
         csv_file = begin
                     file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
