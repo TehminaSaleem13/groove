@@ -113,7 +113,9 @@ every 1.day, :at => '04:00 am' do
 end
 
 every 1.month do
-  rake "doo:scheduled_tenant_details"
+  if environment=='production'
+    rake "doo:scheduled_tenant_details"
+  end  
 end
 # every 1.day, :at => '03:00 am' do
 #   runner "backup perform --trigger db_backup"
