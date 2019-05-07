@@ -94,4 +94,9 @@ class StripeInvoiceEmail < ActionMailer::Base
     @users = users.to_i
     mail to: ['support@groovepacker.com'],subject: I18n.t('remove_notify_sub', env: ENV["RAILS_ENV"] , tenant: @tenant, quantity: ( @previous_users - @users))
   end
+
+  def send_tenant_details url
+    @url = url 
+    mail to: ['support@groovepacker.com', 'groovepacker@gmail.com', 'kcpatel006@gmail.com' ],subject: "[#{ENV["RAILS_ENV"]}] GroovePacker Tenants details"
+  end
 end

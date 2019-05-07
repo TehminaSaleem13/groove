@@ -111,6 +111,10 @@ end
 every 1.day, :at => '04:00 am' do
   rake "doo:check_duplicate_order"
 end
+
+every 1.month do
+  rake "doo:scheduled_tenant_details"
+end
 # every 1.day, :at => '03:00 am' do
 #   runner "backup perform --trigger db_backup"
 # end
