@@ -255,7 +255,7 @@ module StoresHelper
     req.add_field("X-EBAY-API-CERT-NAME", ENV['EBAY_CERT_ID'])
     req.add_field("X-EBAY-API-SITEID", 0)
     req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
-    req.body ='<?xml version="1.0" encoding="utf-8"?>'+ '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+ '<SessionID>'+session[:ebay_session_id]+'</SessionID>' + '</FetchTokenRequest>'
+    req.body ='<?xml version="1.0" encoding="utf-8"?>'+ '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+ "<SessionID>#{$redis.get('ebay_session_id')}</SessionID>" + '</FetchTokenRequest>'
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
     res = http.start do |http_runner|
