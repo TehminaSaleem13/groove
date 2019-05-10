@@ -194,17 +194,11 @@ class ProductsController < ApplicationController
   end
 
   def generate_barcode
-    @products =
-      list_selected_products(params)
-      .includes(
-        :product_kit_skuss, :product_barcodes, :product_skus,
-        :product_kit_activities, :product_inventory_warehousess
-      )
-
-    eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
-
-    @products.each { |product| @result = product.generate_barcode(@result, eager_loaded_obj) }
-
+    export_product = ExportSsProductsCsv.new
+    data = {}
+    data[:result] = @result
+    tenant_name = Apartment::Tenant.current
+    export_product.delay.generate_barcode_with_delay(params, data, tenant_name)
     render json: @result
   end
 

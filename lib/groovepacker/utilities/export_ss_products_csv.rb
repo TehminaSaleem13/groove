@@ -1,5 +1,5 @@
 class ExportSsProductsCsv
-  
+   include ProductsHelper
   def export_active_products(tenant_name)
   	Apartment::Tenant.switch(tenant_name)
     require 'csv'
@@ -93,5 +93,15 @@ class ExportSsProductsCsv
     single_row[:Category] = product.primary_category
     single_row = single_row.merge({:Tag1 => '', :Tag2 => '', :Tag3 => '', :Tag4 => '', :Tag5 => '', :CustomsDescription => '', :CustomsValue => '', :CustomsTariffNo => '', :ThumbnailUrl => '', :FillSKU => '', :Length => '', :Width => '', :Height => '', :UseProductName => ''})
     single_row
+  end
+
+  def generate_barcode_with_delay(params, data, tenant_name)
+    Apartment::Tenant.switch(tenant_name)
+    @result = data[:result]
+    @products = list_selected_products(params).includes(:product_kit_skuss, :product_barcodes, :product_skus,:product_kit_activities, :product_inventory_warehousess)
+
+    eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
+
+    @products.each { |product| @result = product.generate_barcode(@result, eager_loaded_obj) }
   end
 end
