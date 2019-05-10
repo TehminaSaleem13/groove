@@ -34,7 +34,7 @@ namespace :doo do
       end 
 
       url = GroovS3.create_public_csv("admintools", 'subscription',Time.now.to_i, data).url
-      StripeInvoiceEmail.send_tenant_details(url).deliver_now
+      StripeInvoiceEmail.send_tenant_details(url).deliver
     end
     exit(1)
   end
