@@ -270,13 +270,13 @@ module ScanPack
       else
         if @box_id.nil?
           if general_setting.multi_box_shipments?
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
           else
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
           end  
         else
           box = Box.find_by_id(@box_id)
-          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !ScanPackSetting.last.order_verification
+          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
         end  
       end
     end
