@@ -160,6 +160,20 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def tenant_log
+    AddLogCsv.new.delay(:run_at => 1.seconds.from_now).send_tenant_log
+    render json: {}
+  end
+
+  def clear_redis_method
+    result = {}
+    require 'rake'
+    Groovepacks::Application.load_tasks
+    Rake::Task['doo:clear_redis'].execute
+    result[:status] =  true
+    render json: result
+  end
+
   def clear_all_imports
     Tenant.find_each do |tenant|
       Apartment::Tenant.switch(tenant.name)
