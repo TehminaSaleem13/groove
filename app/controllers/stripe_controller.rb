@@ -13,6 +13,12 @@ class StripeController < ApplicationController
       @invoice = get_invoice(event)
       case type
       when 'invoice.payment_succeeded'
+        subs = Subscription.where(customer_subscription_id: @invoice.subscription_id).last
+        if subs.present?
+          tenant = subs.tenant
+          tenant.last_charge_in_stripe = @invoice.date 
+          tenant.save
+        end
         StripeInvoiceEmail.send_success_invoice(@invoice).deliver
       when 'invoice.payment_failed'
         StripeInvoiceEmail.send_failure_invoice(@invoice).deliver
