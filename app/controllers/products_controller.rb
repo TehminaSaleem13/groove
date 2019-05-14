@@ -293,20 +293,14 @@ class ProductsController < ApplicationController
   end
 
   def bulk_barcode_generation
-    require 'wicked_pdf'
-    order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
-    @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
-    respond_to do |format|
-      format.html
-      format.pdf { 
-        render :pdf => "file_name",
-               :template => "products/bulk_barcode_generation.html.erb",
-               :orientation => 'Portrait',
-               :page_height => '1.12in',
-               :page_width => '3in',
-               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
-      }
-    end
+    result = {}
+    result['status'] = true
+    result['messages'] = "Product bracode lable will open shortly"
+    scan_pack_object = ScanPack::Base.new
+    params[:current_user_id] = current_user.id
+    params[:tenant] =  Apartment::Tenant.current
+    scan_pack_object.delay.bulk_barcode_with_delay(params)
+    render json: result
   end
 
   def update_product_list
