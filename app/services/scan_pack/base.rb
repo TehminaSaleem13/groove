@@ -1,7 +1,7 @@
 module ScanPack
   class Base
     include ScanPack::Utilities::OrderDetailsAndNextItem
-
+    include ProductsHelper
     def set_scan_pack_action_instances(current_user, session, params)
       @current_user = current_user
       @params = params
@@ -197,38 +197,65 @@ module ScanPack
     #----------- BARCODE SLIP ENDS --------------
     
     def bulk_barcode_with_delay(params)
-    require 'wicked_pdf' 
-    Apartment::Tenant.switch params[:tenant]
-    order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
-    @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
-    @tenant_name = Apartment::Tenant.current
-    action_view = do_get_action_view_object_for_html_rendering
-    pdf_html = action_view.render :template => "products/bulk_barcode_generation.html.erb", :layout => nil, :locals => {:@order_items => @order_items}
-    pdf_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
-    doc_pdf = WickedPdf.new.pdf_from_string(
-      pdf_html,
-      :inline => true,
-      :save_only => false,
-      :orientation => 'Portrait',
-          :page_height => '1.12in',
-          :page_width => '3in',
-          :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
-    )
-    reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
-    File.open(reader_file_path, 'wb') do |file|
-      file << doc_pdf
+      require 'wicked_pdf' 
+      Apartment::Tenant.switch params[:tenant]
+      order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
+      @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
+      @tenant_name = Apartment::Tenant.current
+      action_view = do_get_action_view_object_for_html_rendering
+      pdf_html = action_view.render :template => "products/bulk_barcode_generation.html.erb", :layout => nil, :locals => {:@order_items => @order_items}
+      pdf_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
+      reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
+      common(pdf_html,reader_file_path, '1.12in', '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'} )
+      base_file_name = File.basename(pdf_path)
+      pdf_file = File.open(reader_file_path)
+      GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+      pdf_file.close
+      generate_url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+      g = GenerateBarcode.new
+      g.url = generate_url
+      g.status = 'completed'
+      g.current_increment_id = 'bulk_barcode'
+      g.user_id = params[:current_user_id]
+      g.save
     end
-    base_file_name = File.basename(pdf_path)
-    pdf_file = File.open(reader_file_path)
-    GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
-    pdf_file.close
-    generate_url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
-    g = GenerateBarcode.new
-    g.url = generate_url
-    g.status = 'completed'
-    g.current_increment_id = 'bulk_barcode'
-    g.user_id = params[:current_user_id]
-    g.save
- end
+
+    def print_label_with_delay(params)
+      require 'wicked_pdf'
+      Apartment::Tenant.switch params[:tenant]
+      @products = list_selected_products(params)
+      action_view = do_get_action_view_object_for_html_rendering
+      reader_file_path = do_get_pdf_file_path(@products.count.to_s)
+      @tenant_name = Apartment::Tenant.current
+      file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+      pdf_html = action_view.render :template => "products/print_receiving_label.html.erb", :layout => nil, :locals => {:@products => @products}
+      common(pdf_html,reader_file_path, '6in' , '4in', {:top => '1', :bottom => '0', :left => '2', :right => '2'} )
+      base_file_name = File.basename(pdf_path)
+      pdf_file = File.open(reader_file_path)
+      GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+      pdf_file.close
+      url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+      if params["productArray"].count > 20
+        GroovRealtime::emit('print_lable', url, :tenant) 
+      end  
+      url
+    end
+
+
+    def common(pdf_html, reader_file_path, h, w, val )
+      doc_pdf = WickedPdf.new.pdf_from_string(
+         pdf_html,
+        :inline => true,
+        :save_only => false,
+        :orientation => 'Portrait',
+        :page_height => h,
+        :page_width => w,
+        :margin => val
+      )
+      File.open(reader_file_path, 'wb') do |file|
+        file << doc_pdf
+      end
+    end
   end
 end

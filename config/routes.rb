@@ -148,6 +148,7 @@ Groovepacks::Application.routes.draw do
       post 'generate_product_inventory_report'
       post 'update_generic'
       post 'bulk_barcode_generation'
+      get  'bulk_barcode_pdf'
     end
     member do
       get 'generate_barcode_slip'

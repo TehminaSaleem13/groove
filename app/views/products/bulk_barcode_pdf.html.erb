@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<% @order_items.each do |item| %>
+  <% item.qty.times do %>
+    <body style="line-height: 90%; margin-left: 3px; margin-top: 3px; margin-right: 2px; margin-bottom: 1px">
+    <% if !item.product.nil? && !item.product.product_barcodes.first.nil? && !item.product.product_barcodes.first.barcode.nil? %>
+      <% unless item.product.primary_sku.nil? %>
+        <div style="line-height: 70%; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: -5px;"><%= item.product.primary_sku %></div>
+        <br/>
+      <% end %>
+      <div style="font-size: 12px; margin-left: 10px; margin-top:-5px; margin-bottom: 3px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= item.product.name %></div>
+      <% barcode_string = generate_barcode(item.product.primary_barcode) %>
+      <div style="margin-top:3px;">
+        <center><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 48}) %></center>
+      </div>
+      <div style="line-height: 8px; font-size:8px; margin-bottom: 5px;">
+        <%= item.order.increment_id rescue nil%><center>*<%=  item.product.primary_barcode %>*</center>
+      </div>
+    <% else %>
+      <br/>
+
+      <div style="font-size: 20px; margin-bottom: 10px; margin-left: 45px;">Barcode not available</div>
+    <% end %>
+    </body>
+  <%end%>
+<%end%>
+</html>
