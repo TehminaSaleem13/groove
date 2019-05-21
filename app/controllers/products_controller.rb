@@ -163,14 +163,14 @@ class ProductsController < ApplicationController
   def print_receiving_label
     params[:tenant] =  Apartment::Tenant.current
     scan_pack_object = ScanPack::Base.new
-    if params["productArray"].count > 20
+    if (params["productArray"].count > 20 || params["select_all"] == true)
       val = scan_pack_object.delay.print_label_with_delay(params)
       render json: {}
     else
       url = scan_pack_object.print_label_with_delay(params)
       render json: {url: url}
     end  
-    
+
   end
 
   def generate_barcode
@@ -178,7 +178,7 @@ class ProductsController < ApplicationController
     data = {}
     data[:result] = @result
     tenant_name = Apartment::Tenant.current
-    if params[:productArray].count > 20
+    if (params["productArray"].count > 20 || params["select_all"] == true)
       export_product.delay.generate_barcode_with_delay(params, data, tenant_name)
     else
       export_product.generate_barcode_with_delay(params, data, tenant_name)
