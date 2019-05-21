@@ -103,6 +103,6 @@ class ExportSsProductsCsv
     eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
 
     @products.each { |product| @result = product.generate_barcode(@result, eager_loaded_obj) }
-    GroovRealtime::emit('gen_barcode_with_delay',{}, :tenant) if params[:productArray].count > 20
+    GroovRealtime::emit('gen_barcode_with_delay',{}, :tenant) if (params["productArray"].count > 20 || params["select_all"] == true)
   end
 end
