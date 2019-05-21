@@ -29,6 +29,7 @@ module Groovepacker
 					index_2 = csv[0].split("\t").index("ASIN")
 					index_3 = csv[0].split("\t").index("FNSKU")
 					index_4 = csv[0].split("\t").index("Shipped")
+          index_4 = csv[0].split("\t").index("Shipped\r") if index_4.nil?
 					index_arr1 = (0..csv[0].split("\t").count-1).to_a
 					index_arr = [index_0, index_1, index_2, index_3, index_4 ]
 					index_arr1 = index_arr1 - index_arr
@@ -41,7 +42,8 @@ module Groovepacker
 						if index == 0
 							csv[index] = "Shipment ID\t"+row.join("\t")
 						else	
-							csv[index] = "#{order_file_data.split("\r\n")[0].split("\t")[1]}\t"+row.join("\t")
+              val = "#{order_file_data.split("\r\n")[0].split("\t")[1]}"
+							csv[index] = "#{val.split("\r")[0]}\t"+row.join("\t")
 							csv[index] = csv[index].gsub(",", " ")
 						end		
 					end
