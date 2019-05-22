@@ -163,7 +163,7 @@ class ProductsController < ApplicationController
   def print_receiving_label
     params[:tenant] =  Apartment::Tenant.current
     scan_pack_object = ScanPack::Base.new
-    if (params["productArray"].count > 20 || params["select_all"] == true)
+    if  false #(params["productArray"].count > 20 || params["select_all"] == true)
       val = scan_pack_object.delay.print_label_with_delay(params)
       render json: {}
     else
