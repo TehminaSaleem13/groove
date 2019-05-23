@@ -204,6 +204,10 @@ module Groovepacker
           return true if db_orders.count == @order.total_count && orders.count == @order.total_count
           @skipped_count = @order.total_count - db_orders.count
           @skipped_ids = orders - db_orders
+          if @order.total_count == 1
+            store = Store.find_by_id(@order.store_id)
+            return true if store.fba_import == true
+          end
           false
         end
 
