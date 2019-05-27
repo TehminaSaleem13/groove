@@ -387,7 +387,7 @@ Groovepacks::Application.routes.draw do
       put 'delete_box'
     end
   end
-  #match "*path" => redirect("/")
+  get "*path" => redirect("/")
   # Sample resource route with options:
   #   resources :products do
   #     member do
