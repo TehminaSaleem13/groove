@@ -236,7 +236,7 @@ module ScanPack
       GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
       pdf_file.close
       url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
-      if false #(params["productArray"].count > 20 || params["select_all"] == true)
+      if (params["productArray"].count > 20 || params["select_all"] == true)
         GroovRealtime::emit('print_lable', url, :tenant) 
       end  
       url
