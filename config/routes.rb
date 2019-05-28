@@ -388,6 +388,7 @@ Groovepacks::Application.routes.draw do
     end
   end
   get "*path" => redirect("/")
+  post "*path" => redirect("/")
   # Sample resource route with options:
   #   resources :products do
   #     member do
