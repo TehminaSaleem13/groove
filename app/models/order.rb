@@ -35,13 +35,10 @@ class Order < ActiveRecord::Base
   UNALLOCATE_STATUSES = ['cancelled']
   SOLD_STATUSES = ['scanned']
 
-  def check_for_duplicate?
-    if self.store.store_type == "ShippingEasy" 
-      unless self.store.shipping_easy_credential.allow_duplicate_id
-        true
-      else
-        false
-      end  
+  def check_for_duplicate
+    duplicate_condition  = (self.store.store_type == "ShippingEasy" && self.store.shipping_easy_credential.allow_duplicate_id) || (self.store.store_type == "Shipstation API 2" && self.store.shipstation_rest_credential.allow_duplicate_order)
+    if duplicate_condition
+      false
     else
       true
     end  

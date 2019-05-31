@@ -420,7 +420,11 @@ module Groovepacker
             end
 
             def find_or_init_new_order(order)
-              shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
+              if @credential.allow_duplicate_order == true
+                shipstation_order = Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
+              else
+                shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
+              end
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy

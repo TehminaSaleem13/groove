@@ -132,6 +132,7 @@ module Groovepacker
 		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku]
 		    @shipstation.return_to_order = params[:return_to_order]
 		    @shipstation.import_upc = params[:import_upc]
+		    @shipstation.allow_duplicate_order = params[:allow_duplicate_order]
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
 		      @store.save!
