@@ -80,8 +80,8 @@ class StoresController < ApplicationController
       else 
         result[:status] = true
         time_zone = GeneralSetting.last.time_zone.to_i
-        result[:createDate] = response.last["orderDate"].to_time + time_zone
-        result[:modifyDate] = response.last["modifyDate"].to_time + time_zone
+        result[:createDate] = response.last["orderDate"].to_time
+        result[:modifyDate] = response.last["modifyDate"].to_time
         if response.last["orderStatus"] == 'awaiting_shipment'
           result[:orderStatus] = 'Awaiting Shipment'
         elsif response.last["orderStatus"] == 'shipped'

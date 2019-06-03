@@ -33,46 +33,23 @@ module Groovepacker
             shipments_response = @client.get_shipments(import_from-1.days)
             $redis.set("#{Apartment::Tenant.current}_shipment_response",shipments_response)
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker_one(data, 1, Apartment::Tenant.current)
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_2").start_worker_two(data, 2, Apartment::Tenant.current)
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_3").start_worker_three(data, 3, Apartment::Tenant.current)
+            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
+            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_2").start_worker(data, 2, Apartment::Tenant.current)
+            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_3").start_worker(data, 3, Apartment::Tenant.current)
           end
 
 
-        def start_worker_one(data, page_index,name)
-          Apartment::Tenant.switch name
-          @store = Store.find(data[:store])
-          @credential = ShipstationRestCredential.find(data[:credential])
-          @result = data[:result]
-          @import_item = ImportItem.find(data[:import_item])
-          @client = data[:client]
-          @total_pages = data[:total_pages]
-
-          start_import_order(data, page_index, Apartment::Tenant.current)
+        def start_worker(data, page_index,name)
+          get_start(data, page_index, name)
           if page_index <= data[:total_pages]
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 3}").start_worker_one(data, page_index + 3, Apartment::Tenant.current)
+            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 3}").start_worker(data, page_index + 3, Apartment::Tenant.current)
           else
-            all_delayed = Delayed::Job.where("queue LIKE ?","%#{Apartment::Tenant.current}_importing_page%" ).where(failed_at: nil).count
-            if all_delayed <= 1
-              importing_time = data[:importing_time]
-              quick_importing_time = data[:quick_importing_time]
-              if @result[:status] && @import_item != 'tagged'
-                @credential.last_imported_at = importing_time || @credential.last_imported_at
-                @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
-                @credential.save
-              end          
-              update_orders_status
-              destroy_nil_import_items
-              ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
-              OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all
-              @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled' 
-            end
-          end  
-                  
+            after_import(data)
+          end       
         end
 
-        def start_worker_two(data, page_index, name)
+        def get_start(data, page_index,name)
           Apartment::Tenant.switch name
           @store = Store.find(data[:store])
           @credential = ShipstationRestCredential.find(data[:credential])
@@ -80,60 +57,25 @@ module Groovepacker
           @import_item = ImportItem.find(data[:import_item])
           @client = data[:client]
           @total_pages = data[:total_pages]
-
           start_import_order(data, page_index, Apartment::Tenant.current)
-          if page_index <= data[:total_pages]
-            t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 3}").start_worker_two(data, page_index + 3, Apartment::Tenant.current)
-          elsif data[:total_pages].even?
-            all_delayed = Delayed::Job.where("queue LIKE ?","%#{Apartment::Tenant.current}_importing_page%" ).where(failed_at: nil).count
-            if all_delayed <= 1
-              importing_time = data[:importing_time]
-              quick_importing_time = data[:quick_importing_time]
-              if @result[:status] && @import_item != 'tagged'
-                @credential.last_imported_at = importing_time || @credential.last_imported_at
-                @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
-                @credential.save
-              end          
-              update_orders_status 
-              destroy_nil_import_items
-              ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
-              OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all 
-              @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled'
-            end
-          end         
         end
 
-        def start_worker_three(data, page_index, name)
-          Apartment::Tenant.switch name
-          @store = Store.find(data[:store])
-          @credential = ShipstationRestCredential.find(data[:credential])
-          @result = data[:result]
-          @import_item = ImportItem.find(data[:import_item])
-          @client = data[:client]
-          @total_pages = data[:total_pages]
-
-          start_import_order(data, page_index, Apartment::Tenant.current)
-          if page_index <= data[:total_pages]
-            t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 3}").start_worker_three(data, page_index + 3, Apartment::Tenant.current)
-          elsif data[:total_pages].even?
-            all_delayed = Delayed::Job.where("queue LIKE ?","%#{Apartment::Tenant.current}_importing_page%" ).where(failed_at: nil).count
-            if all_delayed <= 1
-              importing_time = data[:importing_time]
-              quick_importing_time = data[:quick_importing_time]
-              if @result[:status] && @import_item != 'tagged'
-                @credential.last_imported_at = importing_time || @credential.last_imported_at
-                @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
-                @credential.save
-              end          
-              update_orders_status 
-              destroy_nil_import_items
-              ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
-              OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all 
-              @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled'
-            end
-          end         
+        def after_import(data)
+          all_delayed = Delayed::Job.where("queue LIKE ?","%#{Apartment::Tenant.current}_importing_page%" ).where(failed_at: nil).count
+          if all_delayed <= 1
+            importing_time = data[:importing_time]
+            quick_importing_time = data[:quick_importing_time]
+            if @result[:status] && @import_item != 'tagged'
+              @credential.last_imported_at = importing_time || @credential.last_imported_at
+              @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
+              @credential.save
+            end          
+            update_orders_status
+            destroy_nil_import_items
+            ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
+            OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all
+            @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled' 
+          end
         end
 
           def start_import_order(data, page_index, name)
