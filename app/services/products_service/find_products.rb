@@ -75,6 +75,7 @@ module ProductsService
     end
 
     def set_sort_key
+      params[:sort] = "store_type" if params[:sort] == "store_name"
       p_sort = params[:sort]
       @sort_key = supported_sort_keys_contains(p_sort) ? p_sort : 'updated_at'
     end
