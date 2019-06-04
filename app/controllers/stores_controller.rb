@@ -81,7 +81,7 @@ class StoresController < ApplicationController
         result[:status] = true
         time_zone = GeneralSetting.last.time_zone.to_i
         result[:createDate] = response.last["orderDate"].to_time
-        result[:modifyDate] = response.last["modifyDate"].to_time
+        result[:modifyDate] = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["modifyDate"]).to_time + time_zone
         if response.last["orderStatus"] == 'awaiting_shipment'
           result[:orderStatus] = 'Awaiting Shipment'
         elsif response.last["orderStatus"] == 'shipped'
