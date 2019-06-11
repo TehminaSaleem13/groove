@@ -1,5 +1,5 @@
 <html>
-<link href='http://fonts.googleapis.com/css?family=Montserrat+Alternates:700' rel='stylesheet' type='text/css'>
+<link href='https://fonts.googleapis.com/css?family=Montserrat+Alternates:700' rel='stylesheet' type='text/css'>
 <style type="text/css">
   /*!
  * Bootstrap v2.3.2
@@ -6332,9 +6332,10 @@
         </div>
         <div class="span8" style="margin-top: -60px;">
           <% barcode_string = order.increment_id.gsub(/[\#\s+]/, '') %>
+          <% image_name = Digest::MD5.hexdigest(barcode_string) %>
           <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
             <div style="position:absolute; top:0; left:0;">
-              <%= image_tag("/images/#{barcode_string}.png") %>
+              <%= image_tag("/images/#{image_name}.png") %>
               <%#= pdf_image_tag(barcode_string+".png", {:width => 100}) %></div>
           </div>
           <br>
