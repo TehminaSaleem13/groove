@@ -202,7 +202,8 @@ module Groovepacker
                                                     notes_internal: order["internal_notes"],
                                                     weight_oz: total_weight,
                                                     custom_field_one: custom_1,
-                                                    custom_field_two: custom_2
+                                                    custom_field_two: custom_2,
+                                                    customer_comments: order["notes"]
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end
