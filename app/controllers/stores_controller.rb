@@ -97,6 +97,11 @@ class StoresController < ApplicationController
        
       end
     end
+    order_found = Order.where(increment_id: "#{params[:order_no]}").last
+      if order_found.present?
+        result[:gp_order_found] = order_found.status
+        result[:id] = order_found.id
+      end
     render json: result
   end
 
