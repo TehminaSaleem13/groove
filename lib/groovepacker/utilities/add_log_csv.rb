@@ -51,12 +51,12 @@ class AddLogCsv
   end
 
   def send_tenant_log
-    headers = [ "Tenant Name", "Number of Users", "Number of Products", " GP Plan Price","Stripe Plan Price", "Last Stripe Charge", "Admintools URL", "Stripe URL", "Start Date", "Billing date" ]
+    headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Products", " GP Plan Price","Stripe Plan Price", "Last Stripe Charge", "Admintools URL", "Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|
       csv << headers if csv.count.eql? 0
       Subscription.all.each do |sub|
           begin
-            t = Tenant.where(name: "#{sub.tenant_name}")
+            t = Tenant.where(name: "#{sub.tenant_name}").last
             if t.present?
               Apartment::Tenant.switch "#{sub.tenant_name}"
               tenant_id = Tenant.find_by_name("#{sub.tenant_name}").id
@@ -76,7 +76,7 @@ class AddLogCsv
               end  
               stripe_amount = (stripe_amount.to_f / 100) rescue 0  
               val1 = '**'  if sub_amount != stripe_amount
-              csv << ["#{sub.tenant_name}","#{access_restriction.try(:num_users)}","#{ total_product }", "#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "https://admintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
+              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{ total_product }", "#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "https://admintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
             end
           rescue Exception => e
             Rollbar.error(e, e.message)
