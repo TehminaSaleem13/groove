@@ -120,6 +120,7 @@ module ScanPack
             @result['error_messages'].push("Please scan items in the suggested order")
           end
         when "kits_sequence"
+          do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           # list = check_scanning_kit(clean_input)
           # if list.empty?
           #   do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
