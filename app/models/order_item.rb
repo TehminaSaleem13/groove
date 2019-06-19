@@ -148,6 +148,7 @@ class OrderItem < ActiveRecord::Base
     child_item['kit_packing_placement'] = kit_product.cached_product_kit_skus.packing_order
     child_item['kit_product_id'] = kit_product.id
     child_item['updated_at'] = self.updated_at
+    child_item["product_qty_in_kit"] = kit_product.cached_product_kit_skus.qty
     child_item
   end
 

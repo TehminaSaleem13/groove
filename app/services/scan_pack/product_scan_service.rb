@@ -120,7 +120,18 @@ module ScanPack
             @result['error_messages'].push("Please scan items in the suggested order")
           end
         when "kits_sequence"
-          list = check_scanning_kit(clean_input)
+          # list = check_scanning_kit(clean_input)
+          # if list.empty?
+          #   do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
+          # elsif list.include?(clean_input) 
+          #   do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
+          # else
+          #   @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
+          #   @result['status'] &= false
+          #   @result['error_messages'].push("Please scan items in the suggested order")
+          # end  
+        when "kit_packing_mode"
+          list = check_kit_mode(clean_input)
           if list.empty?
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           elsif list.include?(clean_input) 
@@ -142,31 +153,45 @@ module ScanPack
       list = [] 
       list << unscanned_items.first["barcodes"].map(&:barcode)
       if !unscanned_items.first["child_items"].nil?
-        data = []
-        unscanned_items.first["child_items"].each do |child_item|
-          data << child_item["barcodes"].map(&:barcode)
-        end 
-        list << data
+        # data = []
+        # unscanned_items.first["child_items"].each do |child_item|
+        #   data << child_item["barcodes"].map(&:barcode)
+        # end 
+        # list << data
+        list << unscanned_items.first["child_items"].first["barcodes"].map(&:barcode)
       end 
       value = list.flatten.include?("#{clean_input}")
       return value
     end
 
 
-    def check_scanning_kit(clean_input)
-      unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
-      data = []
+    # def check_scanning_kit(clean_input)
+    #   unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
+    #   data = []
+    #   list = []
+    #   unscanned_items.each do |item|
+    #     data << item if item["partially_scanned"] == true 
+    #   end
+    #   if data.any?
+    #     if data.first["child_items"].present?
+    #       data.first["child_items"].each do |i|
+    #         list << i["barcodes"].map(&:barcode)
+    #       end
+    #     end
+    #   end  
+    #   return list.flatten
+    # end
+
+    def check_kit_mode(clean_input)
+      total_items = @single_order.get_unscanned_items(barcode: clean_input)
       list = []
-      unscanned_items.each do |item|
-        data << item if item["partially_scanned"] == true 
-      end
-      if data.any?
-        if data.first["child_items"].present?
-          data.first["child_items"].each do |i|
-            list << i["barcodes"].map(&:barcode)
+      total_items.each do |item|
+        if item["partially_scanned"] == true && item["child_items"].present?
+          item["child_items"].each do |i|
+            list << i["barcodes"].map(&:barcode) if ((item["qty_remaining"] * i["product_qty_in_kit"] - i["product_qty_in_kit"]) < i["qty_remaining"] )
           end
-        end
-      end  
+        end  
+      end
       return list.flatten
     end
 
