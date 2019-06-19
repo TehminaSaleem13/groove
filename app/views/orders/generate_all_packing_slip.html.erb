@@ -6311,7 +6311,7 @@
 </style>
 
 <body>
-<% @orders.includes(:order_items).each do |order|%>  
+<% @orders.each do |order|%>  
   <div class="container page-break" style="margin: 20px 0;">
     <% if !order.nil? %>
       <% order_items = order.order_items %>

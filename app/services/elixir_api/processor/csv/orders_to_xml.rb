@@ -20,6 +20,7 @@ module ElixirApi
           $redis.set("last_order_#{tenant}",last_order)
           $redis.set("import_action_#{tenant}", order_params["params"][:import_action])
           $redis.set("file_name_#{tenant}",order_params["params"][:file_name])
+          $redis.set("is_create_barcode_#{tenant}",GeneralSetting.last.create_barcode_at_import)
         end
 
         def self.cancel_import(tenant)

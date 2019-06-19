@@ -80,6 +80,9 @@ module Groovepacker
                 order.save!
               end
             end
+            if $redis.get("is_create_barcode_#{tenant}") == "true"
+              order.generate_order_barcode_for_html(order.increment_id)
+            end
           rescue Exception => e
             logger = Logger.new("#{Rails.root}/log/error_log_order_save_on_csv_import_#{Apartment::Tenant.current}.log")
             logger.info("Order save Error ============#{e}")
