@@ -42,6 +42,7 @@ class ImportCsv
           end  
 
           File.write(file_path,new_file_data)
+          File.write(file_path,new_file_data.gsub(/\"\"/,"\""))
           csv_file = begin
                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
@@ -73,6 +74,7 @@ class ImportCsv
         else
           File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
         end       
+        File.write(file_path,file.content.gsub(/\"\"/,"\""))
         csv_file = begin
                     file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
