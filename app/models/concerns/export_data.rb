@@ -185,7 +185,7 @@ module ExportData
   def fetch_orders_hash_array(orders, row_map, order_hash_array)
     orders.each do |order|
       order_items = order.order_items
-      next if order_items.empty?
+      next if order_items.reload.empty?
       order_hash_item_array = []
       order_items.each do |order_item|
         if order_export_type == 'order_with_serial_lot'

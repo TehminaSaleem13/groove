@@ -19,6 +19,7 @@ class ExportOrder < ActionMailer::Base
       file_data = Net::HTTP.get(URI.parse(url)) rescue []
       file_data = file_data.split("\n")
       file_data.each do |row| 
+        row = row.gsub("\"",'') 
         @csv_data << CSV.parse_line(row)
       end
       # @csv_data = Net::HTTP.get(URI.parse(url)) rescue []
