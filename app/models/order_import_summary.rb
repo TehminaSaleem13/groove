@@ -20,6 +20,7 @@ class OrderImportSummary < ActiveRecord::Base
     result = Hash.new
     import_summary = self.reload
     time_zone = GeneralSetting.last.time_zone.to_i
+    time_zone = GeneralSetting.last.dst ? time_zone : time_zone+3600
     import_summary.updated_at += time_zone
     result['import_info'] = import_summary
     result['import_items'] = []

@@ -294,7 +294,7 @@ module Groovepacker
             def get_orders_response_v2(page_index, statuses, import_from, import_date_type)
               response = {"orders" => nil}
               response = fetch_orders_if_import_type_is_not_tagged_v2(response, page_index, statuses, import_from, import_date_type)
-              response = fetch_tagged_orders(response,page_index) if  @import_item.import_type == 'tagged'
+              response = fetch_tagged_orders(response,page_index)
               if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
                 on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_tag_order_import_#{Apartment::Tenant.current}.log")
                 on_demand_logger.info("=========================================")
@@ -306,9 +306,8 @@ module Groovepacker
             def get_orders_response_count
               total_response_count  = 0
               total_response_count = fetch_orders_count_if_import_type_is_not_tagged(total_response_count)
-              if (statuses.empty? || @import_item.import_type == 'tagged')
-                total_response_count = fetch_tagged_orders_count(total_response_count)
-              end
+              total_tagged_order_count = fetch_tagged_orders_count(total_response_count, @import_item.import_type, statuses)
+              total_response_count = total_response_count + total_tagged_order_count
               return total_response_count
             end
 
@@ -341,10 +340,10 @@ module Groovepacker
               return response
             end
 
-            def fetch_tagged_orders_count(total_response_count)
+            def fetch_tagged_orders_count(total_response_count, import_type, statuses)
               return total_response_count unless gp_ready_tag_id != -1
               page_index = 1
-              total_response_count = @client.get_orders_count_by_tag_v2(gp_ready_tag_id, page_index)
+              total_response_count = @client.get_orders_count_by_tag_v2(gp_ready_tag_id, page_index, import_type, statuses)
               return total_response_count
             end  
 

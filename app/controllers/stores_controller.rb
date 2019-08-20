@@ -72,6 +72,8 @@ class StoresController < ApplicationController
     result = {}
     store = Store.find(params[:store_id])
     if store.present?
+      result[:store_id] = store.id
+      result[:order_no] = params[:order_no]
       credential  = store.shipstation_rest_credential
       client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
       response = client.get_order_value(params[:order_no])
