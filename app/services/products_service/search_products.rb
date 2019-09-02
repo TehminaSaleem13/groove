@@ -103,7 +103,7 @@ module ProductsService
                 products.type_scan_enabled as type_scan_enabled, \
                 products.base_sku as base_sku, \
                 products.click_scan_enabled as click_scan_enabled, \
-                products.status as status, products.updated_at as updated_at, \
+                products.status as status, products.custom_product_1 as custom_product_1, products.custom_product_2 as custom_product_2, products.custom_product_3 as custom_product_3, products.updated_at as updated_at, \
                 product_skus.sku as sku, product_barcodes.barcode as barcode, \
                 product_cats.category as cat, \
                 product_inventory_warehouses.location_primary, \
@@ -135,6 +135,9 @@ module ProductsService
           \(\
               products.name \
                 like #{@search} OR product_barcodes.barcode \
+                like #{@search} OR products.custom_product_1 \
+                like #{@search} OR products.custom_product_2 \
+                like #{@search} OR products.custom_product_3 \
                 like #{@search} OR product_skus.sku \
                 like #{@search} OR product_cats.category \
                 like #{@search} OR \

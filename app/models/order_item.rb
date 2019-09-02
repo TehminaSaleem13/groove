@@ -108,6 +108,12 @@ class OrderItem < ActiveRecord::Base
     result['type_scan_enabled'] = item.type_scan_enabled
     result['order_item_id'] = self.id
     result['box_id'] = self.box_id
+    result['custom_product_1'] = item.custom_product_1
+    result['custom_product_2'] = item.custom_product_2
+    result['custom_product_3'] = item.custom_product_3
+    result['custom_product_display_1'] = item.custom_product_display_1
+    result['custom_product_display_2'] = item.custom_product_display_2
+    result['custom_product_display_3'] = item.custom_product_display_3
      result['partially_scanned'] = false
     if self.scanned_status == 'partially_scanned' && self.cached_order_item_kit_products.any?
       result['partially_scanned'] = true

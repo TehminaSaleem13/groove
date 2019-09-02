@@ -71,6 +71,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_product_activity_switch' => 'tenants#update_product_activity_switch'
   get '/tenants/update_scheduled_import_toggle' => 'tenants#update_scheduled_import_toggle'
   get '/tenants/update_inventory_report_toggle' => 'tenants#update_inventory_report_toggle'
+  get '/tenants/update_custom_fields' => 'tenants#update_custom_fields'
   # Sample of regular route:
   #   match 'products/:id' => 'catalog#view'
   # Keep in mind you can assign values other than :controller and :action

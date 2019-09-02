@@ -97,7 +97,10 @@ module ProductConcern
               'image' => '',
               'barcode' => product.primary_barcode,
               'sku' => product.primary_sku,
-              'cat' => product.primary_category
+              'cat' => product.primary_category,
+              'custom_product_1' => product.custom_product_1,
+              'custom_product_2' => product.custom_product_2,
+              'custom_product_3' => product.custom_product_3
             }
     end
 

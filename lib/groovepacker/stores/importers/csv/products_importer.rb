@@ -105,7 +105,10 @@ module Groovepacker
               click_scan_enabled: "on",
               is_skippable: false,
               add_to_any_order: false,
-              type_scan_enabled: "on"
+              type_scan_enabled: "on",
+              custom_product_1: "",
+              custom_product_2: "",
+              custom_product_3: ""
             }
           end
 
@@ -226,6 +229,19 @@ module Groovepacker
                 usable_record[:type_scan_enabled] = "off"
               end
             end
+
+            if !self.mapping['custom_product_1'].nil? && self.mapping['custom_product_1'][:position] >= 0 && !single_row[self.mapping['custom_product_1'][:position]].blank?
+              usable_record[:custom_product_1] = single_row[self.mapping['custom_product_1'][:position]]
+            end
+
+            if !self.mapping['custom_product_2'].nil? && self.mapping['custom_product_2'][:position] >= 0 && !single_row[self.mapping['custom_product_2'][:position]].blank?
+              usable_record[:custom_product_2] = single_row[self.mapping['custom_product_2'][:position]]
+            end
+
+            if !self.mapping['custom_product_3'].nil? && self.mapping['custom_product_3'][:position] >= 0 && !single_row[self.mapping['custom_product_3'][:position]].blank?
+              usable_record[:custom_product_3] = single_row[self.mapping['custom_product_3'][:position]]
+            end
+
 
             if !self.mapping['product_instructions'].nil? && self.mapping['product_instructions'][:position] >= 0 && !single_row[self.mapping['product_instructions'][:position]].blank?
               usable_record[:spl_instructions_4_packer] = single_row[self.mapping['product_instructions'][:position]]
@@ -384,7 +400,7 @@ module Groovepacker
             else
               record[:product_record_serial] = false
             end  
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled])
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3])
 
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
@@ -469,6 +485,18 @@ module Groovepacker
 
             if !self.mapping['add_to_any_order'].nil? && record[:add_to_any_order] != "[DELETE]"
               duplicate_product.add_to_any_order = record[:add_to_any_order]
+            end
+
+            if !self.mapping['custom_product_1'].nil? && record[:custom_product_1]!='' && record[:custom_product_1]!= "[DELETE]"
+              duplicate_product.custom_product_1 = record[:custom_product_1]
+            end
+
+            if !self.mapping['custom_product_2'].nil? && record[:custom_product_2]!='' && record[:custom_product_2]!= "[DELETE]"
+              duplicate_product.custom_product_2 = record[:custom_product_2]
+            end
+
+            if !self.mapping['custom_product_3'].nil? && record[:custom_product_3]!='' && record[:custom_product_3]!= "[DELETE]"
+              duplicate_product.custom_product_3 = record[:custom_product_3]
             end
 
             @products_for_status_update << duplicate_product

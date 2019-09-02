@@ -136,6 +136,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_custom_fields
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.custom_product_fields = !tenant.custom_product_fields
+    tenant.save
+    render json: {}
+  end
+  
   def create_duplicate
     result = create_single_duplicate
 
