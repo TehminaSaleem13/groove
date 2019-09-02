@@ -7,6 +7,24 @@ module Groovepacker
         @result['params'] = @params
         @result["exist_barcode"] = false
         multi_barcode = @params[:basicinfo][:multibarcode] rescue []
+        apply_loop(multi_barcode)
+
+        if @product.blank?
+          @result.merge({'status' => false, 'message' => 'Cannot find product information.'})
+          return @result
+        end
+
+        unless @current_user.can?('add_edit_products') || (@session[:product_edit_matched_for_current_user] && @session[:product_edit_matched_for_products].include?(@product.id))
+          @result.merge({ 'status' => false, 'message' => 'You do not have enough permissions to update a product' })
+          return @result
+        end
+        @product.reload
+        @product = update_product_and_associated_info
+        @product.update_product_status
+        return @result
+      end
+
+      def apply_loop(multi_barcode)
         (multi_barcode.try(:values) || []).each do |barcode|
           multi = barcode
           barcode = ProductBarcode.find_by_id(multi[:id]) rescue nil
@@ -24,20 +42,6 @@ module Groovepacker
             end
           end
         end
-
-        if @product.blank?
-          @result.merge({'status' => false, 'message' => 'Cannot find product information.'})
-          return @result
-        end
-
-        unless @current_user.can?('add_edit_products') || (@session[:product_edit_matched_for_current_user] && @session[:product_edit_matched_for_products].include?(@product.id))
-          @result.merge({ 'status' => false, 'message' => 'You do not have enough permissions to update a product' })
-          return @result
-        end
-        @product.reload
-        @product = update_product_and_associated_info
-        @product.update_product_status
-        return @result
       end
 
       def create_product_export(params, result, tenant)
@@ -269,9 +273,7 @@ module Groovepacker
               object.product.add_product_activity("The #{type} #{object.barcode}  was deleted from this item", @current_user.name)
             end   
 
-            if found_obj == false && !object.destroy
-              @result['status'] &= false
-            end
+            @result['status'] &= false if found_obj == false && !object.destroy
           end
           return @result
         end
