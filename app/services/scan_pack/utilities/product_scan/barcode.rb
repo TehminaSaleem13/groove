@@ -57,6 +57,7 @@ module ScanPack::Utilities::ProductScan::Barcode
 
   def do_if_post_scanning_option_is_not_none
     scanpack_settings_post_scanning_option = @scanpack_settings.post_scanning_option
+    @scanpack_settings_post_scanning_option_second = @scanpack_settings.post_scanning_option_second
     case scanpack_settings_post_scanning_option
     when "Verify"
       unless @single_order.tracking_num.present?
@@ -68,11 +69,21 @@ module ScanPack::Utilities::ProductScan::Barcode
     when "Record"
       @result['data']['next_state'] = 'scanpack.rfp.recording'
     when "PackingSlip"
-      do_set_order_scanned_state_and_result_data
-      generate_packing_slip(@single_order)
+      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "PackingSlip" 
+        do_set_order_scanned_state_and_result_data
+        generate_packing_slip(@single_order)
+      else
+        generate_packing_slip(@single_order)
+        apply_second_action
+      end  
     else
-      do_set_order_scanned_state_and_result_data
-      generate_order_barcode_slip(@single_order)
+      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Barcode" 
+        do_set_order_scanned_state_and_result_data
+        generate_order_barcode_slip(@single_order)
+      else
+        generate_order_barcode_slip(@single_order)
+        apply_second_action
+      end  
     end
   end
 
@@ -82,4 +93,25 @@ module ScanPack::Utilities::ProductScan::Barcode
     @result['data']['next_state'] = 'scanpack.rfo'
   end
 
+  def apply_second_action
+    case @scanpack_settings_post_scanning_option_second
+      when "Verify"
+        unless @single_order.tracking_num.present?
+          @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
+          @single_order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", @current_user.username)
+        else
+          @result['data']['next_state'] = 'scanpack.rfp.verifying'
+        end
+      when "Record"
+        @result['data']['next_state'] = 'scanpack.rfp.recording'
+      when "PackingSlip"
+        do_set_order_scanned_state_and_result_data
+        generate_packing_slip(@single_order)
+      when "Barcode"
+        do_set_order_scanned_state_and_result_data
+        generate_order_barcode_slip(@single_order)
+      else
+        do_set_order_scanned_state_and_result_data
+      end
+  end
 end#module

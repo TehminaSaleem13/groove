@@ -12,6 +12,7 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
       }
     }
     @order = Order.where(id: @id).last
+    @scanpack_settings_post_scanning_option_second = ScanPackSetting.last.post_scanning_option_second
   end
   
   def run
@@ -40,23 +41,50 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   end
 
   def do_if_tracking_number_eql_input
-    @order.set_order_to_scanned_state(@current_user.username)
-    @result['data'].merge!({
+    @order.addactivity("Shipping Label Verified: #{@order.tracking_num}", @current_user.username)
+    @order.save
+    if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Verify" 
+      @order.set_order_to_scanned_state(@current_user.username)
+      @result['data'].merge!({
       'order_complete'=> true,
       'next_state'=> 'scanpack.rfo'
       })
-    @order.addactivity("Shipping Label Verified: #{@order.tracking_num}", @current_user.username)
-    @order.save
+    else
+      apply_second_action
+    end
   end
 
   def do_if_input_eql_confirmation_code
-    @result['matched'] = false
-    @order.set_order_to_scanned_state(@current_user.username)
-    @result['data'].merge!({
-      'order_complete'=> true,
-      'next_state'=> 'scanpack.rfo'
-      })
-    @order.save
+    if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Verify" 
+      @result['matched'] = false
+      @order.set_order_to_scanned_state(@current_user.username)
+      @result['data'].merge!({
+        'order_complete'=> true,
+        'next_state'=> 'scanpack.rfo'
+        })
+      @order.save
+    else
+      apply_second_action
+    end  
   end
 
+  def apply_second_action
+    case @scanpack_settings_post_scanning_option_second
+      when "Record"
+        @result['data']['next_state'] = 'scanpack.rfp.recording'
+      when "PackingSlip"
+        do_set_order_scanned_state_and_result_data
+        generate_packing_slip(@order)
+      when "Barcode"
+        do_set_order_scanned_state_and_result_data
+        generate_order_barcode_slip(@order)
+      else
+        do_set_order_scanned_state_and_result_data
+      end
+  end
+  def do_set_order_scanned_state_and_result_data
+    @order.set_order_to_scanned_state(@current_user.username)
+    @result['data']['order_complete'] = true
+    @result['data']['next_state'] = 'scanpack.rfo'
+  end
 end
