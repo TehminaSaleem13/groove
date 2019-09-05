@@ -45,6 +45,15 @@ module Groovepacker
           order_persisted = order.persisted? ? true : false
           begin
             if order.save!
+              if Apartment::Tenant.current == "living" 
+                order_item_dup = OrderItem.where("created_at >= ?", Time.now.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
+                unless order_item_dup.empty?
+                  order_item_dup.each do |i|
+                    item = OrderItem.where(order_id: i[0][0], product_id: i[0][1])
+                    item.last.destroy if item.count > 1
+                  end
+                end
+              end
               item_hash = order.order_items.group([:order_id, :product_id]).having("count(*) > 1").count
               if item_hash.any?
                 on_demand_logger = logger = Logger.new("#{Rails.root}/log/duplicate_order_item_#{Apartment::Tenant.current}.log")
@@ -283,6 +292,10 @@ module Groovepacker
               if order.order_items.where(product_id: product.id).empty?
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
+                on_demand_logger = Logger.new("#{Rails.root}/log/check_for_duplicate_order_item_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("=========================================")
+                log = { order_increment_id: order.increment_id, product_id: product.id, created_at: order.created_at}  
+                on_demand_logger.info(log)
                 order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
                   "#{order.store.name} Import")
               else
