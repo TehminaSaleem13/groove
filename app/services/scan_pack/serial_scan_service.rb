@@ -32,6 +32,11 @@ module ScanPack
         )
       end
 
+      check_prefix(serial)
+      @result['status']
+    end
+
+    def check_prefix(serial)
       scan_pack_settings  = ScanPackSetting.last
       if scan_pack_settings.require_serial_lot
         unless scan_pack_settings.valid_prefixes.nil? || (scan_pack_settings.valid_prefixes.strip.equal? "")
@@ -50,7 +55,6 @@ module ScanPack
           end  
         end
       end 
-      @result['status']
     end
 
     def serial_scan
