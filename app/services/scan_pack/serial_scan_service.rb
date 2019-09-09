@@ -32,6 +32,24 @@ module ScanPack
         )
       end
 
+      scan_pack_settings  = ScanPackSetting.last
+      if scan_pack_settings.require_serial_lot
+        unless scan_pack_settings.valid_prefixes.nil? || (scan_pack_settings.valid_prefixes.strip.equal? "")
+          all_valid_prefixes = scan_pack_settings.valid_prefixes
+          all_valid_prefixes = all_valid_prefixes.split(',')
+          value = false
+          all_valid_prefixes.each do |string|
+            if (serial.downcase.start_with?(string.downcase))
+              value = true
+              @params[:serial] = @params[:serial].downcase.sub(string.downcase, '')
+              break  
+            end  
+          end
+          if value == false 
+            set_error_messages("The value scanned does not appear to be a valid serial or lot number. Please check the \'Require Serial/Lot Prefix\' setting in your scan and pack options.")
+          end  
+        end
+      end 
       @result['status']
     end
 

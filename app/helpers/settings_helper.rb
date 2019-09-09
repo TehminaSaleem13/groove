@@ -71,7 +71,7 @@ module SettingsHelper
         :post_scan_pause_enabled, :post_scan_pause_time,
         :display_location, :string_removal_enabled, :string_removal,
         :first_escape_string_enabled, :second_escape_string_enabled,
-        :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode , :post_scanning_option_second
+        :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode , :post_scanning_option_second, :require_serial_lot, :valid_prefixes
       ]
     )
   end
