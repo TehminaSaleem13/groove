@@ -51,16 +51,24 @@ class AddLogCsv
   end
 
   def send_tenant_log
-    headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Products", " GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "Admintools URL", "Stripe URL", "Start Date", "Billing date" ]
+    headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Products", "Stipe Products" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "Admintools URL", "Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|
       csv << headers if csv.count.eql? 0
-      Subscription.order(:tenant_id).each do |sub|
+      Subscription.order(:tenant_id).where(status: "completed").each do |sub|
           begin
             t = Tenant.where(name: "#{sub.tenant_name}").last
             if t.present?
               Apartment::Tenant.switch "#{sub.tenant_name}"
               tenant_id = Tenant.find_by_name("#{sub.tenant_name}").id
               access_restriction = AccessRestriction.order("created_at").last
+              product_sku_count = ProductSku.all.count
+              if product_sku_count < 10000
+                product_count = 0 
+              elsif (product_sku_count > 10000 || product_sku_count < 100000)
+                product_count = 1
+              elsif product_sku_count > 100000
+                product_count = 2
+              end
               customer = Stripe::Customer.retrieve("#{sub.stripe_customer_id}") rescue nil
               subscription = customer.subscriptions.retrieve("#{sub.customer_subscription_id}")  rescue nil
               total_product =  Stripe::SubscriptionItem.list(subscription: "#{sub.customer_subscription_id}").count rescue nil
@@ -79,7 +87,7 @@ class AddLogCsv
               end  
               stripe_amount = (stripe_amount.to_f / 100) rescue 0  
               val1 = '**'  if sub_amount != stripe_amount
-              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{total_product}", "#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","https://admintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
+              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{total_product}","#{product_count}" , "#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","https://admintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
             end
           rescue Exception => e
             Rollbar.error(e, e.message)
