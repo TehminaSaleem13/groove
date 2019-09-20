@@ -87,7 +87,7 @@ class AddLogCsv
               end  
               stripe_amount = (stripe_amount.to_f / 100) rescue 0  
               val1 = '**'  if sub_amount != stripe_amount
-              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{total_product}","#{product_count}" , "#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","https://admintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
+              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{total_product}","#{product_count}" , "#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","https://scadmintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
             end
           rescue Exception => e
             Rollbar.error(e, e.message)
