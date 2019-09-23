@@ -64,6 +64,21 @@ class TenantsController < ApplicationController
     end
   end
 
+  def update_price_field
+    tenant = Tenant.find(params["id"])
+    feature = params["feature"]
+    toggle =  params["value"]["toggle"]
+    amount =  params["value"]["amount"]
+    db_price =  tenant.price
+    db_price[feature]["toggle"] = toggle
+    db_price[feature]["amount"] = amount
+    tenant.price = db_price
+    tenant.save
+    add_plan_to_subscription(amount, tenant, feature) if toggle == true
+    remove_plan_to_subscription(tenant, feature)  if  toggle == false
+    render json: {}
+  end
+
   def delete_tenant
     result = delete_tenants
 

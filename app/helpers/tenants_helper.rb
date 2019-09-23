@@ -84,6 +84,8 @@ module TenantsHelper
           subsc.subscription_plan_id = new_plan
           subsc.amount = 0
           subsc.save
+          @tenant.price = {"bigCommerce_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}}
+          @tenant.save!
         end
       end
     else
@@ -156,6 +158,7 @@ module TenantsHelper
   def build_tenant_hash(result, tenant)
     result['tenant'] = {}
     result['tenant']['basicinfo'] = tenant.attributes
+    result['tenant']['basicinfo']['price'] =  tenant.price
     helper = Groovepacker::Tenants::Helper.new
     result['tenant']['subscription_info'] = helper.get_subscription_data(tenant.name, "show")
     access_info = Groovepacker::Dashboard::Stats::ShipmentStats.new
@@ -182,5 +185,67 @@ module TenantsHelper
       return true
     end
     return false
+  end
+
+  def add_plan_to_subscription(amount, tenant, feature)
+    begin
+      plan_info = new_plan_info_for_feature(tenant, feature)
+      plan_id = plan_info['plan_id']
+      amount = amount.to_i * 100
+      subscription = tenant.subscription
+      create_plan_for_feature(amount, subscription.interval, plan_info['plan_name'],"usd", plan_id)
+      response = Stripe::SubscriptionItem.create({
+        subscription: subscription.customer_subscription_id,
+        plan: plan_id,
+        quantity: 1,
+      })
+      sleep 3
+      tenant_price =  tenant.price
+      tenant_price[feature]["stripe_id"] = response.id
+      tenant.price = tenant_price.to_s
+      tenant.save 
+    rescue Exception => e
+       Rollbar.error(e, e.message)
+    end  
+  end
+
+  def new_plan_info_for_feature(tenant, feature)
+    time_now = Time.now.strftime('%y-%m-%d-%H-%M')
+    feature = feature.gsub("_", "-")
+    return {
+      'plan_id' => time_now + '-' + tenant.name + '-' + feature,
+      'plan_name' => time_now + ' ' + tenant.name + ' ' + feature
+    }
+  end
+
+
+def create_plan_for_feature(amount, interval, name, currency, id, trial_period_days=nil)
+    Stripe::Plan.create(
+      amount: amount,
+      interval: interval,
+      name: name,
+      currency: currency,
+      id: id,
+      trial_period_days: trial_period_days
+    )
+  end
+
+  def remove_plan_to_subscription(tenant, feature)
+    begin
+      db_price = tenant.price
+      stripe_value  = db_price[feature]['stripe_id']
+      feature = feature.gsub("_", "-")
+      if stripe_value.present?
+        sub_item = Stripe::SubscriptionItem.retrieve(stripe_value)
+        sub_plan = Stripe::Plan.retrieve(sub_item.plan.id)
+        sleep 3
+        if sub_item.present? && sub_item.plan.id.include?(feature)
+          sub_item.delete()
+          sub_plan.delete()
+        end
+      end    
+    rescue Exception => e
+       Rollbar.error(e, e.message)
+    end  
   end
 end

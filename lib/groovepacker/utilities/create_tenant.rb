@@ -5,6 +5,8 @@ class CreateTenant
     tenant = Tenant.create(name: tenant_name, initial_plan_id: subscription.subscription_plan_id)
     subscription.tenant = tenant
     subscription.save
+    tenant.price = {"bigCommerce_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}}
+    tenant.save
     Apartment::Tenant.switch(tenant_name)
     self.apply_restrictions_and_seed(subscription)
     self.delay(run_at: 1.seconds.from_now).create_groovelytics_tenant(tenant_name)

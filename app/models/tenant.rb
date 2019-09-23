@@ -3,7 +3,7 @@ class Tenant < ActiveRecord::Base
   validates :name, uniqueness: true
   has_one :subscription
   has_one :access_restriction
-
+  serialize :price
   before_destroy :remove_subscriber_from_campaignmonitor
 
   def remove_subscriber_from_campaignmonitor
