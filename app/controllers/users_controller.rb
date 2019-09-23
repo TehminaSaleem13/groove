@@ -409,23 +409,28 @@ class UsersController < ApplicationController
       params['_json'].each do |user|
         unless user['id'] == current_user.id
           @user = User.find(user['id'])
-          if (user_count > 1 && @user.role.name != "Super Admin" ) ||  (super_admin_user[0].try(:role).try(:name) ==  @user.role.name && super_admin_user_count >= 2   )
-            super_admin_user_count = super_admin_user_count - 1 if ( super_admin_user.any? && super_admin_user[0].role.name ==  @user.role.name)
-            user_names << { "id" => @user.id, "username" => @user.username }
-            @user.username += '-' + Random.rand(10000000..99999999).to_s
-            @user.is_deleted = true
-            @user.active = false
-            @user.save
-            on_demand_logger = Logger.new("#{Rails.root}/log/user_create_and_delete_info_#{Apartment::Tenant.current}.log")
-            log = { tenant: Apartment::Tenant.current, action: "user removed", user_count:  User.where(is_deleted: false).count, Time: Time.now.strftime("%Y-%m-%d  %H:%M") }
-            on_demand_logger.info(log) 
-            HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
-                    query: { username: @user.username, packing_user_id: @user.id },
-                    headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
-            users << @user
+          if (user_count > 1 && @user.role.name != "Super Admin" ) ||  (super_admin_user[0].try(:role).try(:name) ==  @user.role.name && super_admin_user_count >= 1 )
+            unless  (super_admin_user_count == 1 && super_admin_user.map(&:id).include?(@user.id) )
+              super_admin_user_count = super_admin_user_count - 1 if ( super_admin_user.any? && super_admin_user[0].role.name ==  @user.role.name)
+              user_names << { "id" => @user.id, "username" => @user.username }
+              @user.username += '-' + Random.rand(10000000..99999999).to_s
+              @user.is_deleted = true
+              @user.active = false
+              @user.save
+              on_demand_logger = Logger.new("#{Rails.root}/log/user_create_and_delete_info_#{Apartment::Tenant.current}.log")
+              log = { tenant: Apartment::Tenant.current, action: "user removed", user_count:  User.where(is_deleted: false).count, Time: Time.now.strftime("%Y-%m-%d  %H:%M") }
+              on_demand_logger.info(log) 
+              HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
+                      query: { username: @user.username, packing_user_id: @user.id },
+                      headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
+              users << @user
+            else
+              result['status'] = false
+              result['messages'].push("You must have at least one SuperAdmin user on the account.")
+            end  
           else
             result['status'] = false
-            result['messages'].push("You have need at least one user")
+            result['messages'].push("You must have at least one SuperAdmin user on the account.")
           end
         end
       end
