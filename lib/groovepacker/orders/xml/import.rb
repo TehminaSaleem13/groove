@@ -45,7 +45,7 @@ module Groovepacker
           order_persisted = order.persisted? ? true : false
           begin
             if order.save!
-              if Apartment::Tenant.current == "living" 
+              if (Apartment::Tenant.current == "living" || Apartment::Tenant.current == "unitedmedco" || Apartment::Tenant.current == "toririchard")
                 order_item_dup = OrderItem.where("created_at >= ?", Time.now.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
                 unless order_item_dup.empty?
                   order_item_dup.each do |i|
