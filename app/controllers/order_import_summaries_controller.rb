@@ -90,12 +90,7 @@ class OrderImportSummariesController < ApplicationController
     if cred   
       cred.last_imported_at = nil
       if store.store_type == "Shipstation API 2"
-        if store.regular_import_v2 == true
-          date = DateTime.parse(params[:date]).utc
-          cred.quick_import_last_modified = date.beginning_of_day
-        else
-          cred.quick_import_last_modified = nil 
-        end
+        cred.quick_import_last_modified = nil 
       end
       cred.save
     end

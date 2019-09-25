@@ -35,7 +35,6 @@ module Groovepacker
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
             t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
             t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_2").start_worker(data, 2, Apartment::Tenant.current)
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_3").start_worker(data, 3, Apartment::Tenant.current)
           end
 
 
@@ -43,7 +42,7 @@ module Groovepacker
           get_start(data, page_index, name)
           if page_index <= data[:total_pages]
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 3}").start_worker(data, page_index + 3, Apartment::Tenant.current)
+            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 2}").start_worker(data, page_index + 2, Apartment::Tenant.current)
           else
             after_import(data)
           end       
@@ -240,14 +239,14 @@ module Groovepacker
               when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : (quick_import_date - 1.hour)
+                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
                 self.import_from = DateTime.now-1.weeks
               when 'from_create_date'
                 @import_item.update_attribute(:import_type, "regular")
                 quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : (quick_import_date - 1.hour)
+                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date 
               else
                 @import_item.update_attribute(:import_type, "regular")
                 last_imported_at = @credential.last_imported_at
