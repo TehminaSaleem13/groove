@@ -141,6 +141,13 @@ module Groovepacker
               response['orders'] = response['orders'] + res unless res.nil?
             end
           end
+          if Apartment::Tenant.current == "rabbitair" && response['orders'].present?
+            value_1 = []
+            response['orders'].each do |order|
+              value_1 << order["orderNumber"]
+            end  
+            ImportMailer.check_old_orders(Apartment::Tenant.current, value_1)
+          end  
           # response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') }.reverse rescue response['orders']
           response
         end

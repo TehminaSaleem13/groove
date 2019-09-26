@@ -88,4 +88,11 @@ class ImportMailer < ActionMailer::Base
     subject = "[#{@tenant}] #{@value} are duplicate "
     mail to: "kcpatel006@gmail.com", subject: subject
   end
+
+  def check_old_orders(tenant, data)
+    @tenant = tenant
+    @data = data
+    subject = "[#{@tenant}] check for old orders "
+    mail to: "kcpatel006@gmail.com", subject: subject
+  end
 end
