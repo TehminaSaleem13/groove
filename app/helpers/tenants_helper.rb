@@ -84,7 +84,7 @@ module TenantsHelper
           subsc.subscription_plan_id = new_plan
           subsc.amount = 0
           subsc.save
-          @tenant.price = {"bigCommerce_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}}
+          @tenant.price = {"bigCommerce_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "high_sku_feature"=>{"toggle"=>false, "amount"=>50, "stripe_id"=>""}, "double_high_sku"=>{"toggle"=>false, "amount"=>100, "stripe_id"=>""}, "cust_maintenance_1"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "cust_maintenance_2"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}}
           @tenant.save!
         end
       end
@@ -193,7 +193,7 @@ module TenantsHelper
       plan_id = plan_info['plan_id']
       amount = amount.to_i * 100
       subscription = tenant.subscription
-      create_plan_for_feature(amount, subscription.interval, plan_info['plan_name'],"usd", plan_id)
+      create_plan_for_feature(amount, subscription.interval, plan_info['plan_name'], plan_id)
       response = Stripe::SubscriptionItem.create({
         subscription: subscription.customer_subscription_id,
         plan: plan_id,
@@ -219,14 +219,14 @@ module TenantsHelper
   end
 
 
-def create_plan_for_feature(amount, interval, name, currency, id, trial_period_days=nil)
+def create_plan_for_feature(amount, interval, name, id)
     Stripe::Plan.create(
       amount: amount,
       interval: interval,
       name: name,
-      currency: currency,
+      currency: "usd",
       id: id,
-      trial_period_days: trial_period_days
+      trial_period_days: nil
     )
   end
 

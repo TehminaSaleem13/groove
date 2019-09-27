@@ -60,16 +60,7 @@ class AddLogCsv
             if t.present? && t.test_tenant_toggle == false
               Apartment::Tenant.switch "#{sub.tenant_name}"
               tenant_id = Tenant.find_by_name("#{sub.tenant_name}").id
-              access_restriction = AccessRestriction.order("created_at").last
-              tenant_user = (User.where(is_deleted: false, active: true).count - 1 )
-              product_sku_count = Product.all.count
-              if product_sku_count < 10000
-                product_count = product_sku_count 
-              elsif (product_sku_count > 10000 || product_sku_count < 100000)
-                product_count =   "High SKU"
-              elsif product_sku_count > 100000
-                product_count = "Double High SKU"
-              end
+              access_restriction, tenant_user, product_count = get_tenant_details("#{sub.tenant_name}") 
               customer = Stripe::Customer.retrieve("#{sub.stripe_customer_id}") rescue nil
               subscription = customer.subscriptions.retrieve("#{sub.customer_subscription_id}")  rescue nil
               total_product =  Stripe::SubscriptionItem.list(subscription: "#{sub.customer_subscription_id}").count rescue nil
@@ -99,5 +90,20 @@ class AddLogCsv
     end 
     url = GroovS3.create_public_csv("admintools", 'subscription',Time.now.to_i, data).url
     StripeInvoiceEmail.send_tenant_details(url).deliver
+  end
+
+  def get_tenant_details(tenant)
+    Apartment::Tenant.switch tenant
+    access_restriction = AccessRestriction.order("created_at").last
+    tenant_user = (User.where(is_deleted: false, active: true).count - 1 )
+    product_sku_count = Product.all.count
+    if product_sku_count < 10000
+      product_count = product_sku_count 
+    elsif (product_sku_count > 10000 || product_sku_count < 100000)
+      product_count =   "High SKU"
+    elsif product_sku_count > 100000
+      product_count = "Double High SKU"
+    end
+    return access_restriction, tenant_user, product_count
   end
 end
