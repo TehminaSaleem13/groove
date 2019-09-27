@@ -10,4 +10,16 @@ namespace :doo do
       end
     end
   end
+
+  task :update_price_value_to_tenant => :environment do
+    tenants = Tenant.order(:name) rescue Tenant.all
+    tenants.each do |tenant|
+      begin
+        new_price = tenant.price.merge({"high_sku_feature"=>{"toggle"=>false, "amount"=>50, "stripe_id"=>""}, "double_high_sku"=>{"toggle"=>false, "amount"=>100, "stripe_id"=>""}, "cust_maintenance_1"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "cust_maintenance_2"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}})
+        tenant.price = new_price
+        tenant.save
+      rescue
+      end
+    end
+  end
 end
