@@ -106,6 +106,10 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def create
+    @result = Order.create_new_order(@result, current_user)
+    render json: @result
+  end
 
   def record_exception
     unless params[:reason].blank?

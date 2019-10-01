@@ -26,7 +26,6 @@ module Groovepacker
             $redis.set("new_order_#{tenant}" , n)
           end
 
-
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") ||  order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if check_for_update || @check_new_order
               ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
@@ -142,18 +141,13 @@ module Groovepacker
                           $redis.set("new_order_#{tenant}" , orders.count)
                         end
                         
-
                         if @ftp_flag == "false"
                           @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name") 
                           $redis.del("#{Apartment::Tenant.current}/original_file_name") 
                         end
                         log = AddLogCsv.new
-
                         log.add_log_csv(Apartment::Tenant.current,@time_of_import,@file_name)
-
-                      rescue Exception => e
-                        logger = Logger.new("#{Rails.root}/log/check_for_hung_#{Apartment::Tenant.current}.log")
-                        logger.info(e)
+                      rescue
                       end
                     
                       if @ftp_flag == "true"
@@ -179,7 +173,7 @@ module Groovepacker
                       #$redis.expire("#{Apartment::Tenant.current}_csv_file_increment_id_index", 1)
                     else
                       import_item.status = "cancelled"
-                      ImportMailer.order_skipped(@file_name, @skipped_count, @order.store_id, @skipped_ids).deliver
+                      #ImportMailer.order_skipped(@file_name, @skipped_count, @order.store_id, @skipped_ids).deliver
                       if @ftp_flag == "true"
                         ftp_csv_import = Groovepacker::Orders::Import.new
                         ftp_csv_import.ftp_order_import(Apartment::Tenant.current)

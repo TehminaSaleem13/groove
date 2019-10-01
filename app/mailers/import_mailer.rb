@@ -68,19 +68,6 @@ class ImportMailer < ActionMailer::Base
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"], subject: subject
   end
 
-  def not_imported(file_name,order_in_file, new_order, update_order, skip_order, total_order, after_import )
-    @file_name = file_name
-    @order_in_file = order_in_file
-    @new_order = new_order
-    @update_order = update_order
-    @skip_order = skip_order
-    @total_order = total_order
-    @after_import = after_import
-    @current_tenant = Apartment::Tenant.current
-    subject = "[#{@current_tenant}] Order CSV Import Summary Report "
-    mail to: "kcpatel006@gmail.com", subject: subject
-  end
-
   def duplicate_order_info(tenant, value, data)
     @tenant = tenant
     @value = value
