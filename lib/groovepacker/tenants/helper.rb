@@ -45,6 +45,8 @@ module Groovepacker
         @sort = sort_param(params)
         if @sort && @sort != ''
           tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].to_s.downcase }
+          tenants_result = tenants_result.sort_by { |v|  v["latest_activity"].to_i } if @sort == "most_recent_activity"
+          tenants_result = tenants_result.sort_by { |v|  v["last_charge_in_stripe"].to_i } if @sort == "last_charge_in_stripe"
           tenants_result.reverse! if params[:order] == 'DESC'
         end
         params["pages_sort"] == "true" ? tenants_result[offset, limit] : tenants_result
@@ -582,9 +584,15 @@ module Groovepacker
             tenant_hash['last_activity']['most_recent_login']['user'] = tenant_hash['last_activity']['most_recent_login']['user'].username 
             tenant_hash['most_recent_activity'] = most_recent_scan(tenant_name)
           end
+          if last_login["date_time"].to_i < last_scan["date_time"].to_i
+            tenant_hash["latest_activity"] = last_scan["date_time"]
+          else
+            tenant_hash["latest_activity"] = last_login["date_time"]
+          end  
           check_split_or_production
         rescue => e
           tenant_hash['most_recent_activity'] = nil
+          tenant_hash["last_activity"] = nil
           check_split_or_production          
         end
         Apartment::Tenant.switch(current_tenant)
