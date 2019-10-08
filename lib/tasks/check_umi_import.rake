@@ -7,7 +7,7 @@ namespace :check do
       import_item = ImportItem.includes(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started')")
       begin
         import_item.each do |csv_import|
-          if (Time.now.to_i - csv_import.updated_at.to_i) > 300
+          if (Time.now.to_i - csv_import.updated_at.to_i) > 600
             time_of_import = csv_import.created_at
             file_name = $redis.get("file_name_#{tenant}")
             log = AddLogCsv.new

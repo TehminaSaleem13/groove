@@ -141,6 +141,8 @@ module Groovepacker
                           $redis.set("new_order_#{tenant}" , orders.count)
                         end
                         
+                        $redis.set("skip_order_#{Apartment::Tenant.current}", import_item.previous_imported) if import_item.previous_imported != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
+
                         if @ftp_flag == "false"
                           @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name") 
                           $redis.del("#{Apartment::Tenant.current}/original_file_name") 

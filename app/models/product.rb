@@ -730,6 +730,7 @@ class Product < ActiveRecord::Base
     @activity.username = username
     @activity.activitytime = current_time_from_proper_timezone
     @activity.activity_type = activity_type
+    @activity.user_id = User.find_by(username: username).try(:id)
     if @activity.save
       true
     else
