@@ -4,10 +4,10 @@ class UsersController < ApplicationController
 
   def index
     @users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
+    user_info = get_user_details(@users)
 
     respond_to do |format|
-      format.html # show.html.erb
-      format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role }
+     format.json { render json: user_info }
     end
   end
 

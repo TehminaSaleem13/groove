@@ -135,4 +135,17 @@ module UsersHelper
       return false
     end  
   end
+
+  def get_user_details(users)
+    user_info = []
+    users.each do |user|
+      order_change_time = OrderActivity.where(username: user.username).last.try(:updated_at)
+      product_change_time = ProductActivity.where(username: user.username).last.try(:updated_at)
+      scan_time = order_change_time.to_i >  product_change_time.to_i ? order_change_time : product_change_time
+      login_time = user.last_sign_in_at
+      recent_activity = scan_time.to_i >  login_time.to_i ? scan_time : login_time
+      user_info << { id: user.id, username: user.username, last_sign_in_at: recent_activity, active: user.active, role: user.role }
+    end
+    return user_info
+  end
 end
