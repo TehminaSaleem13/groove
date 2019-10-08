@@ -22,7 +22,7 @@ module Groovepacker
                     tracking_num = order["Shipment"]["TrackingNumber"]  if order["Shipment"].class.to_s.include?("Hash")
                     notes_internal = get_internal_notes(order) unless order["Note"].nil?
 
-                    order_m = Order.create(
+                    order_m = Order.create!(
                       increment_id: order_number,
                       order_placed_time: order["Date"],
                       store: store,
@@ -146,7 +146,7 @@ module Groovepacker
               product = import_product(item, store) rescue nil
             end
             if item.present?
-	            order.order_items.create(
+	            order.order_items.create!(
 	              product: product,
 	              price: item["UnitPrice"].to_f,
 	              qty: item["Quantity"],
