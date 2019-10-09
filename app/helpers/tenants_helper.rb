@@ -202,7 +202,7 @@ module TenantsHelper
       sleep 3
       tenant_price =  tenant.price
       tenant_price[feature]["stripe_id"] = response.id
-      tenant.price = tenant_price.to_s
+      tenant.price = tenant_price
       tenant.save 
     rescue Exception => e
        Rollbar.error(e, e.message)
