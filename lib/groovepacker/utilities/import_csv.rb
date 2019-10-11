@@ -42,7 +42,11 @@ class ImportCsv
           end  
 
           File.write(file_path,new_file_data)
-          File.write(file_path,new_file_data.gsub(/\"\"/,"\"")) if Apartment::Tenant.current == "unitedmedco"
+          if Apartment::Tenant.current == "unitedmedco"
+            first_remove = file.content.gsub(/\"\"/,"\"")
+            second_remove = first_remove.gsub(/\"\"/,"\"")
+            File.write(file_path, second_remove) 
+          end 
           csv_file = begin
                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
@@ -74,7 +78,12 @@ class ImportCsv
         else
           File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
         end       
-        File.write(file_path,file.content.gsub(/\"\"/,"\"")) if Apartment::Tenant.current == "unitedmedco"
+        if Apartment::Tenant.current == "unitedmedco"
+          first_remove = file.content.gsub(/\"\"/,"\"")
+          second_remove = first_remove.gsub(/\"\"/,"\"")
+          File.write(file_path, second_remove) 
+        end 
+
         csv_file = begin
                     file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
