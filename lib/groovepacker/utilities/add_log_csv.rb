@@ -42,16 +42,16 @@ class AddLogCsv
   end
 
   def send_tenant_log
-    headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Active Users(in tenant)" , "Number of Products", "Stipe Products Count" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "Admintools URL", "Stripe URL", "Start Date", "Billing date", "Is Delinquent" ]
+    headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Active Users(in tenant)" , "Number of Products", "Stipe Products Count" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "QTY Scanned in last 30", "Is Delinquent", "Admintools URL","Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|
       csv << headers if csv.count.eql? 0
-      Subscription.order(:tenant_id).where(status: "completed").each do |sub|
+      Subscription.order(:tenant_id).where("status = ? AND tenant_name NOT LIKE ? ", "completed", "%deleted%").each do |sub|
           begin
             t = Tenant.where(name: "#{sub.tenant_name}").last
             if t.present? && t.test_tenant_toggle == false
               Apartment::Tenant.switch "#{sub.tenant_name}"
               tenant_id = Tenant.find_by_name("#{sub.tenant_name}").id
-              access_restriction, tenant_user, product_count = get_tenant_details("#{sub.tenant_name}") 
+              access_restriction, tenant_user, product_count, scanned_orders = get_tenant_details("#{sub.tenant_name}") 
               customer = Stripe::Customer.retrieve("#{sub.stripe_customer_id}") rescue nil
               subscription = customer.subscriptions.retrieve("#{sub.customer_subscription_id}")  rescue nil
               total_product =  Stripe::SubscriptionItem.list(subscription: "#{sub.customer_subscription_id}").count rescue nil
@@ -72,7 +72,7 @@ class AddLogCsv
               end  
               stripe_amount = (stripe_amount.to_f / 100) rescue 0  
               val1 = '**'  if sub_amount != stripe_amount
-              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{tenant_user}", "#{product_count}" ,"#{total_product}","#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","https://scadmintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}", "#{is_delinquent}"]
+              csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{tenant_user}", "#{product_count}" ,"#{total_product}","#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","#{scanned_orders}","#{is_delinquent}",  "https://scadmintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
             end
           rescue Exception => e
             Rollbar.error(e, e.message)
@@ -95,6 +95,7 @@ class AddLogCsv
     elsif product_sku_count > 100000
       product_count = "Double High SKU"
     end
-    return access_restriction, tenant_user, product_count
+    scanned_orders = Order.where("status = ?  AND scanned_on > ?", "scanned", Time.now() - 30.days ).count
+    return access_restriction, tenant_user, product_count, scanned_orders 
   end
 end
