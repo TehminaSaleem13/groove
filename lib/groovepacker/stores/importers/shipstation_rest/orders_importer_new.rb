@@ -148,11 +148,6 @@ module Groovepacker
                 shipstation_order = find_or_init_new_order(order)
                 import_order_form_response(shipstation_order, order, shipments_response) 
               rescue Exception => e
-                if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
-                  on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_order_import_#{Apartment::Tenant.current}.log")
-                  on_demand_logger.info("=========================================")
-                  on_demand_logger.info(e.backtrace.first(10).join(","))
-                end
               end
               break if Rails.env == "test"
               sleep 0.3
@@ -206,10 +201,6 @@ module Groovepacker
               end
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
-              on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_order_item_quantity.log")
-              on_demand_logger.info("=========================================")
-              log = { tenant: Apartment::Tenant.current, order: order["orderNumber"] ,order_item_sku: item["sku"], quantity: item["quantity"] }
-              on_demand_logger.info(log) 
             end
             shipstation_order.save
             @import_item.save
@@ -294,11 +285,6 @@ module Groovepacker
               response = {"orders" => nil}
               response = fetch_orders_if_import_type_is_not_tagged_v2(response, page_index, statuses, import_from, import_date_type)
               response = fetch_tagged_orders(response,page_index)
-              if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
-                on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_tag_order_import_#{Apartment::Tenant.current}.log")
-                on_demand_logger.info("=========================================")
-                on_demand_logger.info(response["orders"].map {|a| a["orderId"]}.join(", ")) rescue on_demand_logger.info("")
-              end
               return response
             end
 

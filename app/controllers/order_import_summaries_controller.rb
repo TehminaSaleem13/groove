@@ -63,8 +63,7 @@ class OrderImportSummariesController < ApplicationController
       url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url
       render json: {url: url}
     rescue Exception => e
-      logger = Logger.new("#{Rails.root}/log/download_summary_details_#{Apartment::Tenant.current}.log")
-      logger.info(e)
+      Rollbar.error(e, e.message)
     end
   end
 

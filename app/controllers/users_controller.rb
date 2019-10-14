@@ -419,9 +419,6 @@ class UsersController < ApplicationController
               @user.is_deleted = true
               @user.active = false
               @user.save
-              on_demand_logger = Logger.new("#{Rails.root}/log/user_create_and_delete_info_#{Apartment::Tenant.current}.log")
-              log = { tenant: Apartment::Tenant.current, action: "user removed", user_count:  User.where(is_deleted: false).count, Time: Time.now.strftime("%Y-%m-%d  %H:%M") }
-              on_demand_logger.info(log) 
               HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
                       query: { username: @user.username, packing_user_id: @user.id },
                       headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
@@ -558,11 +555,6 @@ class UsersController < ApplicationController
       user.current_sign_in_at = DateTime.now
       user.last_sign_in_at = DateTime.now
       user.save 
-    end
-    if Apartment::Tenant.current == "shopflauntboutique" || Apartment::Tenant.current == "unjury"
-      on_demand_logger = Logger.new("#{Rails.root}/log/check_last_login.log")
-      log = { tenant: Apartment::Tenant.current, params_username: params["username"], time: Time.now.utc, user: user}
-      on_demand_logger.info(log)     
     end
     render json: {}
   end
