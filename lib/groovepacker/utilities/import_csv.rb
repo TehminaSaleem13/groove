@@ -43,7 +43,7 @@ class ImportCsv
 
           File.write(file_path,new_file_data)
           if Apartment::Tenant.current == "unitedmedco"
-            first_remove = file.content.gsub(/\"\"/,"\"")
+            first_remove = new_file_data.gsub(/\"\"/,"\"")
             second_remove = first_remove.gsub(/\"\"/,"\"")
             File.write(file_path, second_remove) 
           end 
