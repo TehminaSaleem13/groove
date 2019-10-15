@@ -44,9 +44,6 @@ module Groovepacker
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
-            on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{Apartment::Tenant.current}.log")
-            on_demand_logger.info("=========================================")
-            on_demand_logger.info("StoreId: #{@credential.store.id}")
             response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
@@ -137,10 +134,6 @@ module Groovepacker
               end
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
-              on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_order_item_quantity.log")
-              on_demand_logger.info("=========================================")
-              log = { tenant: Apartment::Tenant.current, order: order["orderNumber"] ,order_item_sku: item["sku"], quantity: item["quantity"] }
-              on_demand_logger.info(log) 
             end
             shipstation_order.save
             @import_item.save

@@ -27,10 +27,6 @@ module ScanPack
         begin
           data = {'key' => 'Gr00_$p4ck3RPJ2004k1R4', 'order_id' => order.increment_id, 'tracking_id' => order.tracking_num}
           x = Net::HTTP.post_form(URI.parse('https://www.shopakira.com/groovepacker'), data)
-          response = x.body
-          on_demand_logger.info("=========================================")
-          log = { tenant: Apartment::Tenant.current, order: order.increment_id , tracking_num: order.tracking_num , response: response }
-          on_demand_logger.info(log)
         rescue Exception => e
           Rollbar.error(e, e.message)
         end       

@@ -108,9 +108,6 @@ module Groovepacker
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
-            on_demand_logger = Logger.new("#{Rails.root}/log/on_demand_import_#{Apartment::Tenant.current}.log")
-            on_demand_logger.info("=========================================")
-            on_demand_logger.info("StoreId: #{@credential.store.id}")
             response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
@@ -127,7 +124,7 @@ module Groovepacker
             else
               order_in_gp = Order.find_by_increment_id(order_no)
               order_in_gp = Order.find_by_tracking_num(order_no)  if order_in_gp.nil?
-              log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Create Date" => "#{order_in_gp.created_at}", "Order Modified Date" => "#{order_in_gp.updated_at}", "Order Status (the status in the OrderManager)" =>"#{(response["orders"].first["orderStatus"] rescue nil)}","Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}", "Type" => "import success" } 
+              log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Create Date" => "#{order_in_gp.try(:created_at)}", "Order Modified Date" => "#{order_in_gp.try(:updated_at)}", "Order Status (the status in the OrderManager)" =>"#{(response["orders"].first["orderStatus"] rescue nil)}","Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}", "Type" => "import success" } 
             end
             summary = CsvImportSummary.find_or_create_by_log_record(log.to_json)
             summary.file_name =  ""
