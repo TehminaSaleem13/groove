@@ -8,7 +8,6 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            #this method is initializing following objects: @credential, @client, @import_item, @result
             init_common_objects
             set_import_date_and_type
             unless statuses.empty? && gp_ready_tag_id == -1
@@ -29,7 +28,6 @@ module Groovepacker
             total_order = response.to_i
             @total_pages = (total_order / 100.to_f).ceil
             data = { client: @client, credential: @credential.id, result: @result, store: @store.id, import_item: @import_item.id,  import_from: self.import_from , total_pages: @total_pages, importing_time: self.importing_time, quick_importing_time: self.quick_importing_time }
-            $redis.set("#{Apartment::Tenant.current}_success_import", 0)
             shipments_response = @client.get_shipments(import_from-1.days)
             $redis.set("#{Apartment::Tenant.current}_shipment_response",shipments_response)
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
@@ -56,7 +54,17 @@ module Groovepacker
           @import_item = ImportItem.find(data[:import_item])
           @client = data[:client]
           @total_pages = data[:total_pages]
-          start_import_order(data, page_index, Apartment::Tenant.current)
+          import_from = data[:import_from]
+          import_date_type = data[:import_date_type]
+          @statuses ||= @credential.get_active_statuses
+          response = get_orders_response_v2(page_index, @statuses, import_from, set_import_date_type) 
+          if !response["orders"].blank?
+            initialize_orders_import(response) 
+            if @total_pages == page_index
+              @credential.download_ss_image = false
+              @credential.save
+            end  
+          end
         end
 
         def after_import(data)
@@ -76,21 +84,6 @@ module Groovepacker
             @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled' 
           end
         end
-
-          def start_import_order(data, page_index, name)
-            import_from = data[:import_from]
-            import_date_type = data[:import_date_type]
-            statuses ||= @credential.get_active_statuses
-            response = get_orders_response_v2(page_index, statuses, import_from, set_import_date_type) 
-            if !response["orders"].blank?
-              initialize_orders_import(response) 
-              if @total_pages == page_index
-                cred = @store.shipstation_rest_credential
-                cred.download_ss_image = false
-                cred.save
-              end  
-            end  
-          end
 
           def initialize_orders_import(response)
             response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') } rescue response['orders']
@@ -210,11 +203,6 @@ module Groovepacker
             order_item.row_total = item["unitPrice"].to_f * item["quantity"].to_f
           end
 
-          def verify_awaiting_tags
-            init_common_objects
-            @client.check_gpready_awating_order(gp_ready_tag_id)
-          end
-
           private
             def statuses
               @statuses ||= @credential.get_active_statuses
@@ -222,8 +210,6 @@ module Groovepacker
 
             def set_import_date_and_type
               case @import_item.import_type
-              when 'deep'
-                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
@@ -295,7 +281,6 @@ module Groovepacker
 
             def fetch_orders_count_if_import_type_is_not_tagged(total_response_count)
               return total_response_count unless @import_item.import_type != 'tagged'
-              statuses.push('awaiting_payment')
               statuses.each do |status|
                 status_response = @client.get_orders_count_ss(status, import_from, import_date_type)
                 total_response_count = total_response_count + status_response
@@ -317,7 +302,6 @@ module Groovepacker
             def fetch_tagged_orders(response, page_index)
               return response unless gp_ready_tag_id != -1
               tagged_response = @client.get_orders_by_tag_v2(gp_ready_tag_id, page_index)
-              #perform union of orders
               response = get_orders_from_union(response, tagged_response)
               return response
             end
@@ -360,7 +344,6 @@ module Groovepacker
               if shipstation_order.blank?
                 shipstation_order = Order.new(store_id: @store.id)
               elsif (order["tagIds"]||[]).include?(gp_ready_tag_id)
-                # in order to adjust inventory on deletion of order assign order status as 'cancelled'
                 shipstation_order.status = 'cancelled'
                 shipstation_order.save
                 shipstation_order.destroy
@@ -375,9 +358,7 @@ module Groovepacker
                 update_activity_for_single_item(shipstation_order, item)
               end
               shipstation_order.set_order_status
-              v = $redis.get("#{Apartment::Tenant.current}_success_import").to_i  + 1
-              $redis.set("#{Apartment::Tenant.current}_success_import", v)
-              @result[:success_imported] =  $redis.get("#{Apartment::Tenant.current}_success_import").to_i 
+              @result[:success_imported] =  @result[:success_imported] + 1
               @import_item.update_attributes(success_imported: @result[:success_imported]) 
             end
 
