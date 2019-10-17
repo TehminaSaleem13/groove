@@ -14,7 +14,6 @@ module Groovepacker
             @success_imported = @products_to_import.length
             @usable_records.clear
             @found_skus = nil
-            
             Product.import @products_to_import
             found_products_raw = []
             @all_unique_ids.each_slice(20000) do |ids|
@@ -559,12 +558,17 @@ module Groovepacker
               end
               record[:barcodes].each_with_index do |single_to_add_barcode, index|
                 if !to_not_add_barcodes.include?(single_to_add_barcode) && single_to_add_barcode != "[DELETE]"
-                  to_add_barcode = ProductBarcode.new
-                  to_add_barcode.barcode = single_to_add_barcode
-                  to_add_barcode.packing_count = record[:all_barcodes_qty][single_to_add_barcode][0].to_i rescue 1
-                  to_add_barcode.order = index
-                  to_add_barcode.product_id = duplicate_product.id
-                  @import_product_barcodes << to_add_barcode
+                  begin
+                    to_add_barcode = ProductBarcode.new
+                    to_add_barcode.barcode = single_to_add_barcode
+                    to_add_barcode.packing_count = record[:all_barcodes_qty][single_to_add_barcode][0].to_i rescue 1
+                    to_add_barcode.order = index
+                    to_add_barcode.product_id = duplicate_product.id
+                    to_add_barcode.save!
+                    #@import_product_barcodes << to_add_barcode
+                  rescue Exception => e
+                    Rollbar.error(e, e.message) 
+                  end
                 end
               end
               #end
@@ -584,11 +588,16 @@ module Groovepacker
               end
               record[:skus].each_with_index do |single_to_add_sku, index|
                 if !to_not_add_skus.include?(single_to_add_sku) && single_to_add_sku != "[DELETE]" 
-                  to_add_sku = ProductSku.new
-                  to_add_sku.sku = single_to_add_sku
-                  to_add_sku.order = index
-                  to_add_sku.product_id = duplicate_product.id
-                  @import_product_skus << to_add_sku
+                  begin
+                    to_add_sku = ProductSku.new
+                    to_add_sku.sku = single_to_add_sku
+                    to_add_sku.order = index
+                    to_add_sku.product_id = duplicate_product.id
+                    to_add_sku.save!
+                    #@import_product_skus << to_add_sku
+                  rescue Exception => e
+                    Rollbar.error(e, e.message) 
+                  end
                 end
               end
               #end
@@ -854,12 +863,17 @@ module Groovepacker
                   new_order = 0
                   record[:skus].each do |sku|
                     if sku != "[DELETE]"
-                      product_sku = ProductSku.new
-                      product_sku.sku = sku
-                      product_sku.order = new_order
-                      product_sku.product_id = product_id
-                      @import_product_skus << product_sku  
-                      new_order = new_order + 1      
+                      begin
+                        product_sku = ProductSku.new
+                        product_sku.sku = sku
+                        product_sku.order = new_order
+                        product_sku.product_id = product_id
+                        product_sku.save!
+                        #@import_product_skus << product_sku  
+                        new_order = new_order + 1
+                      rescue Exception => e
+                        Rollbar.error(e, e.message)
+                      end        
                     end
                   end
                 end
@@ -869,14 +883,19 @@ module Groovepacker
                   record[:barcodes].each do |barcode|
                     if barcode != "[DELETE]"
                       unless @found_barcodes.include? barcode
-                        product_barcode = ProductBarcode.new
-                        product_barcode.barcode = barcode
-                        product_barcode.packing_count = record[:all_barcodes_qty][barcode][0] rescue 1
-                        product_barcode.is_multipack_barcode = true
-                        product_barcode.order = new_order
-                        product_barcode.product_id = product_id
-                        @import_product_barcodes << product_barcode
-                        new_order = new_order + 1
+                        begin
+                          product_barcode = ProductBarcode.new
+                          product_barcode.barcode = barcode
+                          product_barcode.packing_count = record[:all_barcodes_qty][barcode][0] rescue 1
+                          product_barcode.is_multipack_barcode = true
+                          product_barcode.order = new_order
+                          product_barcode.product_id = product_id
+                          product_barcode.save
+                          #@import_product_barcodes << product_barcode
+                          new_order = new_order + 1
+                        rescue Exception => e
+                          Rollbar.error(e, e.message)
+                        end
                       end
                     end
                   end
@@ -935,13 +954,13 @@ module Groovepacker
           end
 
           def import_product_related_data
-            ProductSku.import @import_product_skus
+            #ProductSku.import @import_product_skus
 
             @import_product_skus.clear
             @product_import.status = 'importing_barcodes'
             @product_import.save
             
-            ProductBarcode.import @import_product_barcodes
+            #ProductBarcode.import @import_product_barcodes
 
             @import_product_barcodes.clear
             @product_import.status = 'importing_cats'
