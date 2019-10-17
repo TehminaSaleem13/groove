@@ -10,14 +10,12 @@ module Groovepacker
         end
 
         def get_orders(status, ord_placed_after, date_type = 'created_at')
-          Rails.logger.info 'Getting orders with status: ' + status
           start_date = order_date_start(
             date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
           fetch_orders(status, start_date)
         end
 
         def get_orders_v2(status, ord_placed_after, date_type = 'created_at', page_index)
-          Rails.logger.info 'Getting orders with status: ' + status
           start_date = order_date_start(
             date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
           fetch_orders_v2(status, start_date, page_index)
@@ -74,7 +72,6 @@ module Groovepacker
         end
 
         def get_order_on_demand(orderno, import_item, using_tracking_number=false)
-          Rails.logger.info 'Getting orders with order No: ' + orderno
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
           response = (response.class == String ? {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1} : response)
           begin
@@ -141,13 +138,6 @@ module Groovepacker
               response['orders'] = response['orders'] + res unless res.nil?
             end
           end
-          if Apartment::Tenant.current == "rabbitair" && response['orders'].present?
-            value_1 = []
-            response['orders'].each do |order|
-              value_1 << order["orderNumber"]
-            end  
-            ImportMailer.check_old_orders(Apartment::Tenant.current, value_1)
-          end  
           # response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') }.reverse rescue response['orders']
           response
         end
