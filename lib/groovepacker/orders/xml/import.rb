@@ -53,7 +53,6 @@ module Groovepacker
                   end
                 end
               end
-              item_hash = order.order_items.group([:order_id, :product_id]).having("count(*) > 1").count
               order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
               # @order[:order_items] = @order.order_items
               order_item_result = process_order_items(order, @order)
@@ -141,6 +140,9 @@ module Groovepacker
                           $redis.set("new_order_#{tenant}" , orders.count)
                         end
                         
+                        new_orders_count = @after_import_count -  $redis.get("total_orders_#{tenant}").to_i
+                        $redis.set("new_order_#{tenant}", new_orders_count)
+
                         $redis.set("skip_order_#{Apartment::Tenant.current}", import_item.previous_imported) if import_item.previous_imported != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
 
                         if @ftp_flag == "false"
