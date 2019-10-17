@@ -17,6 +17,8 @@ class User < ActiveRecord::Base
   belongs_to :inventory_warehouse
   belongs_to :role
   has_many :user_inventory_permissions, :dependent => :destroy
+  has_many :order_activities
+  has_many :product_activities
 
   before_save :check_inventory_presence
   after_save :check_fix_permissions
@@ -78,4 +80,14 @@ class User < ActiveRecord::Base
       end
     end
   end
+
+  def last_activity
+    order_change_time = self.order_activities.last.try(:updated_at)
+    product_change_time = self.order_activities.last.try(:updated_at)
+    scan_time = order_change_time.to_i >  product_change_time.to_i ? order_change_time : product_change_time
+    login_time = self.last_sign_in_at
+    recent_activity = scan_time.to_i >  login_time.to_i ? scan_time : login_time
+    recent_activity
+  end
+
 end

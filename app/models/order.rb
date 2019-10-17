@@ -60,6 +60,7 @@ class Order < ActiveRecord::Base
     @activity.activitytime = current_time_from_proper_timezone
     @activity.activity_type = activity_type
     @activity.user_id = User.find_by_username(username).try(:id)
+    @activity.user_id = User.find_by_name(username).try(:id) if @activity.user_id.nil?
     if @activity.save
       true
     else
