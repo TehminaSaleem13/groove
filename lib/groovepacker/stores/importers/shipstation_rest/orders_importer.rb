@@ -237,7 +237,7 @@ module Groovepacker
               return response unless gp_ready_tag_id != -1
               tagged_response = @client.get_orders_by_tag(gp_ready_tag_id)
               #perform union of orders
-              if Apatment::Tenant.current == "rabbitair" && tagged_response['orders'].present?
+              if Apartment::Tenant.current == "rabbitair" && tagged_response['orders'].present?
                 value_1 = []
                 tagged_response['orders'].each do |order|
                   value_1 << order["orderNumber"]
