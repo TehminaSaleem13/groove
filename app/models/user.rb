@@ -83,7 +83,7 @@ class User < ActiveRecord::Base
 
   def last_activity
     order_change_time = self.order_activities.last.try(:updated_at)
-    product_change_time = self.order_activities.last.try(:updated_at)
+    product_change_time = self.product_activities.last.try(:updated_at)
     scan_time = order_change_time.to_i >  product_change_time.to_i ? order_change_time : product_change_time
     login_time = self.last_sign_in_at
     recent_activity = scan_time.to_i >  login_time.to_i ? scan_time : login_time
