@@ -86,6 +86,15 @@ module Groovepacker
           rescue Exception => e
             logger = Logger.new("#{Rails.root}/log/error_log_order_save_on_csv_import_#{Apartment::Tenant.current}.log")
             logger.info("Order save Error ============#{e}")
+            if (Apartment::Tenant.current == "living" || Apartment::Tenant.current == "unitedmedco" || Apartment::Tenant.current == "toririchard")
+              a = Order.group(:increment_id).having("count(*) >1").count.keys
+              unless a.empty?
+                Order.where("increment_id in (?)", a).each do |o|
+                  orders = Order.where(increment_id: o.increment_id)
+                  orders.last.destroy if orders.count > 1
+                end
+              end  
+            end  
           end
 
           setting = ScanPackSetting.all.first
