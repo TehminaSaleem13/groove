@@ -28,17 +28,24 @@ module Groovepacker
             total_order = response.to_i
             @total_pages = (total_order / 100.to_f).ceil
             data = { client: @client, credential: @credential.id, result: @result, store: @store.id, import_item: @import_item.id,  import_from: self.import_from , total_pages: @total_pages, importing_time: self.importing_time, quick_importing_time: self.quick_importing_time }
+            $redis.set("#{Apartment::Tenant.current}_success_import", 0)
             shipments_response = @client.get_shipments(import_from-1.days)
             $redis.set("#{Apartment::Tenant.current}_shipment_response",shipments_response)
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_2").start_worker(data, 2, Apartment::Tenant.current)
+            if total_order <= 100
+              t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
+            else
+              t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
+              t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_2").start_worker(data, 2, Apartment::Tenant.current)
+            end  
           end
 
 
         def start_worker(data, page_index,name)
           get_start(data, page_index, name)
-          if page_index <= data[:total_pages]
+          if data[:total_pages] == 1
+            after_import(data)
+          elsif page_index <= data[:total_pages]
             t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
             t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 2}").start_worker(data, page_index + 2, Apartment::Tenant.current)
           else
@@ -358,7 +365,9 @@ module Groovepacker
                 update_activity_for_single_item(shipstation_order, item)
               end
               shipstation_order.set_order_status
-              @result[:success_imported] =  @result[:success_imported] + 1
+              v = $redis.get("#{Apartment::Tenant.current}_success_import").to_i  + 1
+              $redis.set("#{Apartment::Tenant.current}_success_import", v)
+              @result[:success_imported] =  $redis.get("#{Apartment::Tenant.current}_success_import").to_i 
               @import_item.update_attributes(success_imported: @result[:success_imported]) 
             end
 
