@@ -195,10 +195,7 @@ module Groovepacker
                   @emit_value  = (import_item.changes["status"].to_a & ["not_started", "completed"]).any?
                   import_item.save
                   if @emit_value
-                    import_summary = OrderImportSummary.top_summary
-                    unless import_summary.nil?
-                      import_summary.emit_data_to_user(true)
-                    end
+                    emit_record
                   end  
                 end
               end

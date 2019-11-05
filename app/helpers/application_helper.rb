@@ -129,4 +129,11 @@ module ApplicationHelper
   def order_item_scanned_qty order_item, box
     order_item.order_item_boxes.find_by_box_id(box.id).item_qty
   end
+
+  def emit_record
+    import_summary = OrderImportSummary.top_summary
+    unless import_summary.nil?
+      import_summary.emit_data_to_user(true)
+    end
+  end
 end
