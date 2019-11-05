@@ -121,5 +121,15 @@ class OrderImportSummariesController < ApplicationController
     end
     render json: result
   end
+
+  def get_import_details
+    import_item = ImportItem.where(store_id: params["store_id"]).last
+    unless import_item.nil?
+      result = import_item.get_import_item_info(params["store_id"])
+    else
+      result = { status: false }
+    end  
+    render json: result
+  end
 end
 

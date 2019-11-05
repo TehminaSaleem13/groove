@@ -307,6 +307,11 @@ module OrderConcern
       begin 
         import_item.status = 'cancelled'
         import_item.save
+        total_summary = OrderImportSummary.all
+        total_summary.each do |import_summary|
+          import_summary.status = 'cancelled'
+          import_summary.save
+        end
       rescue
         nil
       end
