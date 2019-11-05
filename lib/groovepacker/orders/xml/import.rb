@@ -16,6 +16,7 @@ module Groovepacker
           order = Order.find_by_increment_id(@order.increment_id)
           @old_order = Order.find_by_increment_id(@order.increment_id)
           @update_count = 0
+          @emit_value = false
           # if order exists, update the order and order items
           # order does not exist create order
           if order.nil?
@@ -191,7 +192,14 @@ module Groovepacker
                       end
                     end
                   end
+                  @emit_value  = (import_item.changes["status"].to_a & ["not_started", "completed"]).any?
                   import_item.save
+                  if @emit_value
+                    import_summary = OrderImportSummary.top_summary
+                    unless import_summary.nil?
+                      import_summary.emit_data_to_user(true)
+                    end
+                  end  
                 end
               end
             rescue Exception => e
