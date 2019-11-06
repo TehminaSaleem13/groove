@@ -131,6 +131,18 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_groovelytic_stat
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.groovelytic_stat = !tenant.groovelytic_stat
+    tenant.save
+    unless tenant.groovelytic_stat
+      Apartment::Tenant.switch! tenant.name
+      users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
+      users.update_all(view_dashboard: "none")
+    end
+    render json: {}
+  end
+
   def update_scheduled_import_toggle
     setting = GeneralSetting.last
     tenant = Tenant.find(params["tenant_id"])

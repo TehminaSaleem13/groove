@@ -22,4 +22,16 @@ namespace :doo do
       end
     end
   end
+
+  task :update_price_value => :environment do
+    tenants = Tenant.order(:name) rescue Tenant.all
+    tenants.each do |tenant|
+      begin
+        new_price = tenant.price.merge({"groovelytic_stat_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}})
+        tenant.price = new_price
+        tenant.save
+      rescue
+      end
+    end
+  end
 end

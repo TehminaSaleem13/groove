@@ -169,11 +169,10 @@ class Order < ActiveRecord::Base
     update_access_restriction
     unless Rails.env.test?
       tenant = Apartment::Tenant.current
-      # if tenant == 'wagaboutit' || !Rails.env.production?
+      if Tenant.where(name: tenant).last.groovelytic_stat
         stat_stream_obj = SendStatStream.new()
-        # stat_stream_obj.build_send_stream(tenant, self.id)
         stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled').build_send_stream(tenant, self.id)
-      # end
+      end
     end
   end
 

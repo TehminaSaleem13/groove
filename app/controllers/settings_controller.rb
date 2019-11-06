@@ -93,6 +93,7 @@ class SettingsController < ApplicationController
     @result['is_multi_box'] = current_tenant.is_multi_box rescue false
     @result['api_call'] = current_tenant.api_call rescue false
     @result['allow_rts'] = current_tenant.allow_rts rescue false
+    @result['groovelytic_stat'] = current_tenant.groovelytic_stat rescue true
     @result['is_active'] = current_user.active
     @result['custom_product_fields'] = current_tenant.custom_product_fields rescue false
     @result['product_activity'] = current_tenant.product_activity_switch rescue false
