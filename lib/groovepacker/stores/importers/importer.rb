@@ -63,7 +63,10 @@ module Groovepacker
                                             :to_import => total_imported)
           sleep 0.5
           import_item_fix
-          emit_record
+          import_summary = OrderImportSummary.top_summary
+          unless import_summary.nil?
+            import_summary.emit_data_to_user(true)
+          end
         end
 
         def import_item_fix

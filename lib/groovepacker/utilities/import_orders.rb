@@ -205,7 +205,10 @@ class ImportOrders < Groovepacker::Utilities::Base
     return if import_item.status == 'cancelled'
     status = result[:status] ? 'completed' : 'failed'
     import_item.update_attributes(status: status)
-    emit_record
+    import_summary = OrderImportSummary.top_summary
+    unless import_summary.nil?
+      import_summary.emit_data_to_user(true)
+    end
   end
 
   def update_import_item_and_send_mail(e, import_item, tenant)

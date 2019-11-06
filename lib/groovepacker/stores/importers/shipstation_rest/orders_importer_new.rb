@@ -89,7 +89,10 @@ module Groovepacker
             ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
             OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all
             @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled' 
-            emit_record
+            import_summary = OrderImportSummary.top_summary
+            unless import_summary.nil?
+              import_summary.emit_data_to_user(true)
+            end
           end
         end
 
