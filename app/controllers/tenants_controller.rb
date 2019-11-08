@@ -136,7 +136,7 @@ class TenantsController < ApplicationController
     tenant.groovelytic_stat = !tenant.groovelytic_stat
     tenant.save
     unless tenant.groovelytic_stat
-      Apartment::Tenant.switch! tenant.name
+      Apartment::Tenant.switch tenant.name
       users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
       users.update_all(view_dashboard: "none")
     end
