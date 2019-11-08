@@ -123,11 +123,11 @@ class OrderImportSummariesController < ApplicationController
   end
 
   def get_import_details
-    import_item = ImportItem.where(store_id: params["store_id"]).last
+    import_item = ImportItem.where(store_id: params["store_id"], status: "in_progress").last
     unless import_item.nil?
       result = import_item.get_import_item_info(params["store_id"])
     else
-      result = { status: false }
+      result = { status: false, store_id:  params["store_id"] }
     end  
     render json: result
   end
