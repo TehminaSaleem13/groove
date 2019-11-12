@@ -98,6 +98,9 @@ module Groovepacker
           elsif params[:action_type] == 'both'
             delete_orders(result)
             delete_products(current_user)
+          elsif params[:action_type] == 'inventory'
+            helper = Groovepacker::Tenants::Helper.new
+            helper.delay.reset_inventory(result, Apartment::Tenant.current)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations'
@@ -155,6 +158,13 @@ module Groovepacker
         groove_bulk_actions.activity = 'delete'
         groove_bulk_actions.save
         bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
+      end
+
+      def reset_inventory(result, tenant)
+        Apartment::Tenant.switch tenant
+        ProductInventoryWarehouses.where("allocated_inv != 0").each do |inventory|
+          inventory.update_allocated_inv
+        end
       end
 
       def delete_all(tenant_name)
