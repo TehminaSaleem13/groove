@@ -181,6 +181,8 @@ module TenantsHelper
       return current_user.can?('delete_products')
     elsif action_type == 'both'
       return current_user.can?('delete_products') && current_user.can?('delete_orders')
+    elsif action_type == "inventory"
+      return current_user.can?('reset_inventory')
     elsif action_type == 'all'
       return true
     end

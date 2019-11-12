@@ -110,4 +110,9 @@ class ProductInventoryWarehouses < ActiveRecord::Base
     return product_inv_whs, result
   end
 
+  def update_allocated_inv
+    self.available_inv = self.available_inv + self.allocated_inv
+    self.allocated_inv = 0
+    self.save!
+  end
 end
