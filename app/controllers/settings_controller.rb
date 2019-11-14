@@ -124,24 +124,7 @@ class SettingsController < ApplicationController
   def update_settings 
     @result = {'status' => true, 'error_messages' =>[], 'success_messages'=> [], 'notice_messages' => []}
     general_setting = GeneralSetting.all.first
-
-    if general_setting.present?
-      if current_user.can? 'edit_general_prefs'
-        general_setting.attributes = permit_general_setting_params
-        if general_setting.save
-          @result['success_messages'] = ['Settings updated successfully.']
-        else
-          @result['status'] &= false
-          @result['error_messages'] = ['Error saving general settings.']
-        end
-      else
-        @result['status'] &= false
-        @result['error_messages'] = ['You are not authorized to update general preferences.']
-      end
-    else
-      @result['status'] &= false
-      @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
-    end
+    @result = upadate_setting_attributes(general_setting, current_user)
     customer = find_stripe_customer
     update_with_stripe_customer(customer) if general_setting.email_address_for_billing_notification != params[:email_address_for_billing_notification] && !general_setting.email_address_for_billing_notification.nil?
     render json: @result

@@ -54,8 +54,6 @@ Groovepacks::Application.routes.draw do
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
   post '/amazons/products_import' => 'amazons#products_import'
-  # The priority is based upon order of creation:
-  # first created -> highest priority.
   get '/delayed_jobs' => 'delayed_jobs#index'
   post '/delayed_jobs_delete' => 'delayed_jobs#destroy' 
   post '/delayed_job_reset' => 'delayed_jobs#reset'

@@ -157,4 +157,25 @@ module SettingsHelper
     end
     @result
   end
+
+  def upadate_setting_attributes(general_setting,current_user)
+    if general_setting.present?
+      if current_user.can? 'edit_general_prefs'
+        general_setting.attributes = permit_general_setting_params
+        if general_setting.save
+          @result['success_messages'] = ['Settings updated successfully.']
+        else
+          @result['status'] &= false
+          @result['error_messages'] = ['Error saving general settings.']
+        end
+      else
+        @result['status'] &= false
+        @result['error_messages'] = ['You are not authorized to update general preferences.']
+      end
+    else
+      @result['status'] &= false
+      @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
+    end
+   @result 
+  end
 end
