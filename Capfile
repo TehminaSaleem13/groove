@@ -17,3 +17,5 @@ require 'rubber/capistrano'
 
 Dir['vendor/plugins/*/recipes/*.rb'].each { |plugin| load(plugin) }
 load 'config/deploy'
+
+require 'appsignal/capistrano'
