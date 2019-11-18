@@ -335,6 +335,7 @@ module Groovepacker
                 'All import statuses disabled and no GP Ready tags found. Import skipped.')
               @import_item.message = 'All import statuses disabled and no GP Ready tags found. Import skipped.'
               @import_item.save
+              @result[:no_order] = true
             end
 
             def find_or_init_new_order(order)
