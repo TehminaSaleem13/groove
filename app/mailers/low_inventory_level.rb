@@ -6,13 +6,22 @@ class LowInventoryLevel < ActionMailer::Base
       Apartment::Tenant.switch(tenant)
       general_setting = GeneralSetting.all.first
       @products_list = get_entire_list(tenant)
-      mail to: general_setting.low_inventory_email_address,
-           subject: "GroovePacker #{tenant} Low Inventory Alert"
+      @products_list.each_slice(4000).with_index  do |products_list, page_no|
+        LowInventoryLevel.send_mail(products_list, page_no, tenant, general_setting).deliver
+      end 
       #import_orders_obj = ImportOrders.new
       #import_orders_obj.reschedule_job('low_inventory_email', tenant)
     rescue Exception => ex
       LowInventoryLevel.error_on_low_inv_email(ex, tenant).deliver
     end
+  end
+
+  def send_mail(products_list, page_no, tenant, general_setting)
+    page_info = "Page #{page_no + 1}" unless  page_no == 0 && products_list.count < 4000 
+    @products_list = products_list
+    @general_setting = general_setting
+    mail to: general_setting.low_inventory_email_address,
+           subject: "GroovePacker #{tenant} Low Inventory Alert #{page_info}"
   end
 
   def error_on_low_inv_email(ex, tenant)
