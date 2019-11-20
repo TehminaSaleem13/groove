@@ -1,7 +1,7 @@
 default: &defaults
   # Your push api key, it is possible to set this dynamically using ERB:
   # push_api_key: "<%= ENV['APPSIGNAL_PUSH_API_KEY'] %>"
-  push_api_key: "5018311a-130b-4e98-8f42-e76886bd4e40"
+  push_api_key: "bc77adda-204d-41d9-90f7-c3ef65c905d0"
 
   # Your app's name
   name: "Groovepacker"
