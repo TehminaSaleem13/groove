@@ -58,10 +58,6 @@ class ExportOrder < ActionMailer::Base
   def get_order_counts(export_settings)
     result = {}
     day_begin, end_time = export_settings.send(:set_start_and_end_time)
-    on_demand_logger = Logger.new("#{Rails.root}/log/export_report_scanned_on_time.log")
-    on_demand_logger.info("=========================================")
-    log = { tenant: Apartment::Tenant.current, manual_export: export_settings.manual_export, start_time: day_begin, end_time: end_time }
-    on_demand_logger.info(log) 
     ExportSetting.update_all(manual_export: false)
     scanned_orders = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time)
     result['imported'] = Order.where("created_at >= ? and created_at <= ?", day_begin, end_time).size
