@@ -224,6 +224,11 @@ module Groovepacker
               end
              
               return unless shiping_easy_order.save
+              if Apartment::Tenant.current == "verdantkitchen"             
+                on_demand_logger = Logger.new("#{Rails.root}/log/order_dupliacte _#{Apartment::Tenant.current}.log")
+                log = {order_id: shiping_easy_order.increment_id, Time: Time.now}
+                on_demand_logger.info(log) 
+              end  
               shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
               add_order_activity(shiping_easy_order)
               shiping_easy_order.set_order_status

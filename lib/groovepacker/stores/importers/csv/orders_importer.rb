@@ -69,9 +69,7 @@ module Groovepacker
                 begin
                   check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
                 rescue Exception => e
-                  on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-                  on_demand_logger.info("3 =========================================")
-                  on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
+                  Rollbar.error(e, e.message)
                 end
                 order_items_ar = []
               end
@@ -87,9 +85,7 @@ module Groovepacker
                 begin
                   check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result) 
                 rescue Exception => e
-                  on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-                  on_demand_logger.info("4 =========================================")
-                  on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)                  
+                  Rollbar.error(e, e.message)
                 end 
                 order_items_ar = []
               end
@@ -109,9 +105,7 @@ module Groovepacker
             begin
               result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) if order.present?
             rescue Exception => e
-              on_demand_logger = Logger.new("#{Rails.root}/log/csv_import_#{Apartment::Tenant.current}.log")
-              on_demand_logger.info("5 =========================================")
-              on_demand_logger.info(e.backtrace.first(10).join(",")) rescue on_demand_logger.info(e)
+              Rollbar.error(e, e.message)
               result = nil
             end
               #break if result[:order_reimported] == true

@@ -215,9 +215,7 @@ module Groovepacker
 
         private
         def check_count_is_equle?
-          #logger = Logger.new("#{Rails.root}/log/check_count_#{Apartment::Tenant.current}.log")
           orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
-          #logger.info("orders array from redis ============================== #{orders}")
           db_orders = Order.where(increment_id: orders).map(&:increment_id)
           return true if db_orders.count == @order.total_count && orders.count == @order.total_count
           @skipped_count = @order.total_count - db_orders.count
