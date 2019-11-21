@@ -13,6 +13,7 @@ module Groovepacker
               create_single_product(product)
             end
             update_orders_status
+            send_products_import_complete_email(response["products"].count)
           end
 
           def import_single_product(item)
@@ -155,6 +156,10 @@ module Groovepacker
               inv_wh.save
             end
 
+            def send_products_import_complete_email(products_count)
+              result = { status: true, success_imported: products_count }
+              ImportMailer.send_products_import_complete_email(products_count, result, @credential).deliver rescue nil
+            end
         end
       end
     end
