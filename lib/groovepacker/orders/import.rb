@@ -100,7 +100,18 @@ module Groovepacker
         begin
           #find store/credential by using the auth_token
           credential = ShipworksCredential.find_by_auth_token(auth_token)
-          status = create_or_update_item(credential, status)
+          tenant = Apartment::Tenant.current
+          if Tenant.where(name: tenant).last.is_delay == false 
+            status = create_or_update_item(credential, status)
+          else
+            return 401 unless !(credential.nil? || !credential.store.status)
+            cred = {}
+            cred[:id] = credential.id
+            import_item = ImportItem.find_by_store_id(credential.store.id)
+            import_item = ImportItem.create_or_update(import_item, credential)
+            import_orders_obj = ImportOrders.new(@params)
+            import_orders_obj.delay(:queue => "shipworks_importing_orders_#{tenant}").start_shipwork_import(cred, status, @params, tenant)
+          end
         rescue Exception => e
           tenant = Apartment::Tenant.current
           ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver rescue nil

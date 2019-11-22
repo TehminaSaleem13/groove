@@ -143,6 +143,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_is_delay
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.is_delay = !tenant.is_delay
+    tenant.save
+    render json: {}
+  end
+
   def update_scheduled_import_toggle
     setting = GeneralSetting.last
     tenant = Tenant.find(params["tenant_id"])
