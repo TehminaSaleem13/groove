@@ -224,4 +224,13 @@ class ImportOrders < Groovepacker::Utilities::Base
     end
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
   end
+
+  def start_shipwork_import(cred, status, value, tenant)
+    Apartment::Tenant.switch tenant
+    credential = ShipworksCredential.find(cred[:id])
+    import_item = ImportItem.find_by_store_id(credential.store.id)
+    shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)
+    context = Groovepacker::Stores::Context.new(shipwork_handler)
+    context.import_order(value["ShipWorks"]["Customer"]["Order"])
+  end
 end

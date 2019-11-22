@@ -61,6 +61,8 @@ module Groovepacker
                         order_m.addactivity("Item with SKU: "+item.product.primary_sku+" Added", store.name+" Import")
                       end
                     end
+                    import_item.status = 'completed'
+                    import_item.save
                   else
                     import_item.status = 'failed'
                     import_item.message = 'No new orders with the currently enabled statuses.'
