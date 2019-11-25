@@ -233,4 +233,37 @@ class ImportOrders < Groovepacker::Utilities::Base
     context = Groovepacker::Stores::Context.new(shipwork_handler)
     context.import_order(value["ShipWorks"]["Customer"]["Order"])
   end
+
+  def import_product_from_store(tenant, store_id)
+    Apartment::Tenant.switch tenant
+    store = Store.find store_id
+    handler = get_handler_for_products(store)
+    context = Groovepacker::Stores::Context.new(handler)
+    context.import_products
+  end
+
+  def get_handler_for_products(store)
+    handler = nil
+    case store.store_type
+    when 'Ebay'
+      handler = Groovepacker::Stores::Handlers::EbayHandler.new(store)
+    when 'Magento'
+      handler = Groovepacker::Stores::Handlers::MagentoHandler.new(store)
+    when 'Magento API 2'
+      handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(store)
+    when 'Shipstation'
+      handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(store)
+    when 'Shipstation API 2'
+      handler = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store)
+    when 'BigCommerce'
+      handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store)
+    when 'Shopify'
+      handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(store)
+    when 'Teapplix'
+      handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(store)
+    when 'Amazon'
+      handler = Groovepacker::Stores::Handlers::AmazonHandler.new(store)
+    end
+    return handler
+  end
 end
