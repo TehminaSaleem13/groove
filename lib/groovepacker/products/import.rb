@@ -33,37 +33,36 @@ module Groovepacker
         end
 
         def run_import_for_stores(current_tenant)
-          context = Groovepacker::Stores::Context.new(get_handler)
+          #context = Groovepacker::Stores::Context.new(get_handler)
           import_orders_obj = ImportOrders.new
-          import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
-          context.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_products
+          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_product_from_store(current_tenant, @store.id)
           # context.import_products
         end
 
-        def get_handler
-          handler = nil
-          case @store.store_type
-          when 'Ebay'
-            handler = Groovepacker::Stores::Handlers::EbayHandler.new(@store)
-          when 'Magento'
-            handler = Groovepacker::Stores::Handlers::MagentoHandler.new(@store)
-          when 'Magento API 2'
-            handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
-          when 'Shipstation'
-            handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(@store)
-          when 'Shipstation API 2'
-            handler = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store)
-          when 'BigCommerce'
-            handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
-          when 'Shopify'
-            handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
-          when 'Teapplix'
-            handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
-          when 'Amazon'
-            handler = Groovepacker::Stores::Handlers::AmazonHandler.new(@store)
-          end
-          return handler
-        end
+        # def get_handler
+        #   handler = nil
+        #   case @store.store_type
+        #   when 'Ebay'
+        #     handler = Groovepacker::Stores::Handlers::EbayHandler.new(@store)
+        #   when 'Magento'
+        #     handler = Groovepacker::Stores::Handlers::MagentoHandler.new(@store)
+        #   when 'Magento API 2'
+        #     handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
+        #   when 'Shipstation'
+        #     handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(@store)
+        #   when 'Shipstation API 2'
+        #     handler = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store)
+        #   when 'BigCommerce'
+        #     handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(@store)
+        #   when 'Shopify'
+        #     handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+        #   when 'Teapplix'
+        #     handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
+        #   when 'Amazon'
+        #     handler = Groovepacker::Stores::Handlers::AmazonHandler.new(@store)
+        #   end
+        #   return handler
+        # end
 
         def run_import_for_amazon
           # @credential = AmazonCredentials.find_by_store_id(@store.id)
