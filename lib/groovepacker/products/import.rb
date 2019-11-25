@@ -35,7 +35,7 @@ module Groovepacker
         def run_import_for_stores(current_tenant)
           context = Groovepacker::Stores::Context.new(get_handler)
           import_orders_obj = ImportOrders.new
-          import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(current_tenant)
+          import_orders_obj.init_import(current_tenant)
           context.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_products
           # context.import_products
         end
