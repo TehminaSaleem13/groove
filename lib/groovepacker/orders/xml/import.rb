@@ -203,10 +203,7 @@ module Groovepacker
                 end
               end
             rescue Exception => e
-              logger = Logger.new("#{Rails.root}/log/error_log_csv_import_#{Apartment::Tenant.current}.log")
-              logger.info("=========================================")
-              logger.info(e)
-              logger.info(e.backtrace.join(",")) rescue logger.info(e)
+              Rollbar.error(e, e.message)
             end
           end
 
