@@ -178,14 +178,7 @@ class ImportCsv
         end
       end
     rescue Exception => e
-      on_demand_logger = Logger.new("#{Rails.root}/log/import_log_for_#{Apartment::Tenant.current}.log")
-      on_demand_logger.info('1 =========================================')
-      begin
-        on_demand_logger.info(e.backtrace.first(10).join(','))
-      rescue
-        on_demand_logger.info(e)
-      end
-      raise e
+      Rollbar.error(e, e.message)
     end
     track_user(tenant, params, 'Import Finished', "#{params[:type].capitalize} Import Finished")
     result
@@ -227,10 +220,7 @@ class ImportCsv
     begin
       require 'csv'
       $redis.expire("#{Apartment::Tenant.current}_csv_array", 0)
-      logger = Logger.new("#{Rails.root}/log/set_data_for_csv_import_count_#{Apartment::Tenant.current}.log")
-      logger.info("file Path =============== #{file_path}")
       csv_text_data = File.read(file_path)
-      logger.info("csv text =============== #{csv_text_data}")
       begin
         csv = CSV.parse(csv_text_data, :headers => true)
       rescue Exception => e
@@ -238,7 +228,6 @@ class ImportCsv
         csv = CSV.parse(csv_text_data, :headers => true)
       end
       column_number = $redis.get("#{Apartment::Tenant.current}_csv_file_increment_id_index").to_i
-      logger.info("column index =============== #{column_number}")
 
       order_numbers = []
       csv.each do |row|
@@ -246,10 +235,8 @@ class ImportCsv
         order_numbers << row[column_name].strip unless row[column_name].blank? 
       end
       $redis.sadd("#{Apartment::Tenant.current}_csv_array", order_numbers.uniq)
-      logger.info("set redis array =============== #{order_numbers.uniq}")
     rescue Exception => e
-      logger = Logger.new("#{Rails.root}/log/set_data_for_csv_import_count_error_#{Apartment::Tenant.current}.log")
-      logger.info("Error ================= #{e}")
+      Rollbar.error(e, e.message)
     end
   end
 end
