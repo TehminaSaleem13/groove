@@ -71,7 +71,11 @@ module Groovepacker
               update_current_import_item(order)
               if @split_order
                 if order["shipments"].any?
-                  shiping_easy_order = Order.find_by_shipment_id(order["shipments"][0]["id"]) rescue nil
+                   if order["shipments"].count == 1
+                      shiping_easy_order = find_shipping_easy_order(order)  
+                   elsif order["shipments"].count >= 2
+                      shiping_easy_order = Order.find_by_shipment_id(order["shipments"][1]["id"]) rescue nil
+                   end        
                 else
                   shiping_easy_order = find_shipping_easy_order(order)
                   if shiping_easy_order && @group_orders && @import_item.store.split_order == "verify_separately"
