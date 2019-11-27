@@ -250,5 +250,35 @@ module ScanPack
         file << doc_pdf
       end
     end
+
+    def finding_products(tenant)
+      Apartment::Tenant.switch tenant
+      products = Product.where("updated_at < ? ", Time.now - 90.days ).pluck(:id)
+
+      products = Product.includes(:order_items).where(id: products , order_items: {product_id: nil}).map(&:id)
+
+      kit_product = ProductKitSkus.all.map(&:option_product_id).uniq
+      
+      products = products - kit_product
+
+      # products = Product.includes(:order_items).where(id: products , order_items: {product_id: nil}).where(product_kit_skus: {product_id: nil}).pluck(:id)
+  
+      products = find_products(products, :product_skus)
+      products = find_products(products, :product_barcodes)
+      products = find_products(products, :product_cats)
+      products = find_products(products, :product_images)
+      products = find_products(products, :product_inventory_warehousess)
+      Product.where(id: products).update_all(status: "inactive")
+    end
+    
+    def find_products(products, val)
+      if val == :product_inventory_warehousess
+         new_products =  Product.where(id: products).joins(val).where("product_inventory_warehouses.updated_at > ?", Time.now - 90.days).pluck(:id)
+      else  
+        new_products =  Product.where(id: products).joins(val).where("#{val}.updated_at > ?", Time.now - 90.days).pluck(:id)
+      end  
+      products = products - new_products
+      products
+    end
   end
 end

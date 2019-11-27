@@ -474,6 +474,12 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  def find_inactive_product
+    scan_pack_object = ScanPack::Base.new
+    scan_pack_object.delay.finding_products(Apartment::Tenant.current)
+    render json: @result
+  end
+
   private
   def execute_groove_bulk_action(activity)
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
