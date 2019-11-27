@@ -25,7 +25,13 @@ class Product < ActiveRecord::Base
                   :click_scan_enabled,
                   :is_skippable,
                   :add_to_any_order,
-                  :type_scan_enabled
+                  :type_scan_enabled,
+                  :custom_product_1,
+                  :custom_product_2,
+                  :custom_product_3,
+                  :custom_product_display_1,
+                  :custom_product_display_2,
+                  :custom_product_display_3
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy
