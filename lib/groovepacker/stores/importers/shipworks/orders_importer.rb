@@ -79,7 +79,14 @@ module Groovepacker
                 import_item.save
               end
             end
-            update_orders_status
+            updated_products = Product.where(status_updated: true)
+            if updated_products.any?
+              orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+              (orders||[]).find_each(:batch_size => 100) do |order|
+                order.update_order_status
+              end
+            end
+            #update_orders_status
           end
 
           private
