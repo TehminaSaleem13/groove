@@ -98,10 +98,6 @@ module Groovepacker
 
         def log_on_demand_order_import(orderno, response, using_tracking_number)
           import_time = Time.now
-          on_demand_logger.info("OrderNumber: #{orderno}")
-          on_demand_logger.info("ImportTime: #{import_time}")
-          on_demand_logger.info("Using Tracking Number: #{using_tracking_number}")
-          on_demand_logger.info("Response: #{response}")
         end
 
         def get_shipments_by_orderno(orderno)
