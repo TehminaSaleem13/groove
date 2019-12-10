@@ -5,4 +5,11 @@ class ShopifyCredential < ActiveRecord::Base
 
   belongs_to :store
 
+  def get_status
+  	val = ""
+    val = "shipped%2C" if self.shipped_status?
+    val = val +"unshipped%2C" if self.unshipped_status?
+    val = val + "partial%2C" if self.partial_status?
+    val
+  end
 end
