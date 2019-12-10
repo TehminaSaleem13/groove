@@ -150,17 +150,11 @@ module Groovepacker
           response
         end
 
-        def get_orders_count_by_tag_v2(tagId, page_index, import_type, statuses)
+        def get_orders_count_by_tag_v2(tagId)
           total_response_count = 0
           unless tagId == -1
-            if import_type == 'tagged'
-              status_array = %w(awaiting_shipment shipped pending_fulfillment awaiting_payment)
-            elsif (import_type =='regular' ||  import_type ==  'quick')
-              all_status = %w(awaiting_shipment shipped pending_fulfillment awaiting_payment)
-              status_array = all_status - statuses
-            end
-            status_array.each do |status|
-              res = find_orders_by_tag_and_status_v2_count(tagId, status, page_index)
+            %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
+              res = find_orders_by_tag_and_status_v2_count(tagId, status, 1)
               total_response_count = total_response_count + res["total"].to_i  rescue 0
             end
           end

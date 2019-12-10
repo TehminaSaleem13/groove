@@ -285,7 +285,7 @@ module Groovepacker
             def get_orders_response_count
               total_response_count  = 0
               total_response_count = fetch_orders_count_if_import_type_is_not_tagged(total_response_count)
-              total_tagged_order_count = fetch_tagged_orders_count(total_response_count, @import_item.import_type, statuses)
+              total_tagged_order_count = fetch_tagged_orders_count(total_response_count)
               total_response_count = total_response_count + total_tagged_order_count
               return total_response_count
             end
@@ -317,10 +317,9 @@ module Groovepacker
               return response
             end
 
-            def fetch_tagged_orders_count(total_response_count, import_type, statuses)
+            def fetch_tagged_orders_count(total_response_count)
               return total_response_count unless gp_ready_tag_id != -1
-              page_index = 1
-              total_response_count = @client.get_orders_count_by_tag_v2(gp_ready_tag_id, page_index, import_type, statuses)
+              total_response_count = @client.get_orders_count_by_tag_v2(gp_ready_tag_id)
               return total_response_count
             end  
 
