@@ -9,7 +9,7 @@ module Groovepacker
         fulfillment_status = shopify_credential.get_status
         while page_index
           query = {"page" => page_index, "updated_at_min" => last_import, "limit" => 250}.as_json
-          response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders?status=#{shopify_credential.status}&fulfillment_status=#{fulfillment_status}",query: query,headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
+          response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}",query: query,headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
           page_index = page_index + 1
           combined_response["orders"] << response["orders"]
           break if (response["orders"].blank? || response["orders"].count < 250)
