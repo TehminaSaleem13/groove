@@ -53,10 +53,10 @@ module Groovepacker
             self.build_handle).verify_awaiting_tags
         end
 
-        def import_single_order_from(order_no)
+        def import_single_order_from(order_no, user_id)
           if @store.on_demand_import_v2 == true
             Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).import_single_order(order_no)
+              self.build_handle).import_single_order(order_no, user_id)
           else
             Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
               self.build_handle).import_single_order(order_no)

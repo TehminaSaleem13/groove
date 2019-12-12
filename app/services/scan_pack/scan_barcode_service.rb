@@ -108,7 +108,7 @@ module ScanPack
         order_importer = Groovepacker::Stores::Importers::OrdersImporter.new(nil)
         job = Delayed::Job.find_by_queue(order_no_input)
         if job.blank? || job.failed_at.present?
-          order_importer.delay(:run_at => 1.seconds.from_now, :queue => order_no_input).search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
+          order_importer.delay(:run_at => 1.seconds.from_now, :queue => order_no_input).search_and_import_single_order(tenant: current_tenant, order_no: order_no_input, user_id: @current_user.id)
           #order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
           st = stores.where(store_type: "Shipstation API 2").last
           if st.present? && st.on_demand_import == true

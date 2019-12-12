@@ -65,6 +65,10 @@ module Groovepacker
         self.handler.import_single_order_from(order_no)
       end
 
+      def import_single_order_from_ss_rest(order_no, user_id)
+        self.handler.import_single_order_from(order_no, user_id )
+      end
+
       def find_or_create_product(item)
         self.handler.find_or_create_product(item)
       end

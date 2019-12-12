@@ -80,12 +80,12 @@ class Order < ActiveRecord::Base
 
   end
 
-  def self.emit_data_for_on_demand_import_v2(hash, order_no)
+  def self.emit_data_for_on_demand_import_v2(hash, order_no, user_id)
     if hash["orders"].blank?
-      result = {"status" => false, "message" => "Please verify that order #{order_no} is available in your order manager. They were not able to provide it on our request"}
+      result = {"status" => false,  "user_id" => "#{user_id}", "message" => "Please verify that order #{order_no} is available in your order manager. They were not able to provide it on our request"}
       GroovRealtime::emit('popup_display_for_on_demand_import_v2', result, :tenant)
     else
-      result = {"status" => true , "message" => "Order #{order_no} is Ready and will open in:", "id" => "#{order_no}"}
+      result = {"status" => true , "message" => "Order #{order_no} is Ready and will open in:", "id" => "#{order_no}", "user_id" => "#{user_id}" }
       GroovRealtime::emit('popup_display_for_on_demand_import_v2', result, :tenant)
     end  
   end

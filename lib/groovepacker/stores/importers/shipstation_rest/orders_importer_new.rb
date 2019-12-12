@@ -108,14 +108,14 @@ module Groovepacker
             import_orders_from_response(response, shipments_response)
           end
 
-          def import_single_order(order_no)
+          def import_single_order(order_no, user_id)
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
             response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
-            Order.emit_data_for_on_demand_import_v2(response, order_no)
+            Order.emit_data_for_on_demand_import_v2(response, order_no, user_id)
             time_zone = GeneralSetting.last.time_zone.to_i
             od_tz = @import_item.created_at + time_zone
             od_utc = @import_item.created_at
