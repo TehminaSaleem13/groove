@@ -207,14 +207,14 @@ class OrdersController < ApplicationController
   end
 
   def generate_all_packing_slip
-    if params[:ids].blank?
+    if params[:select_all].blank?
       @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
       value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
       @orders = value ? sort_order(params, @orders)  : @orders
     else
-      @orders = Order.where(id: params[:ids].split(",")) 
+      @orders = gp_orders_search.do_search(false)
       value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
-      @orders = value ? sort_order(params, @orders) : @orders
+      @orders = value ? sort_order(params, @orders["orders"]) : @orders["orders"]
     end
     @orders.map(&:increment_id).each do |increment_id| generate_order_barcode_for_html(increment_id) end 
   end
