@@ -1,13 +1,7 @@
 class Order < ActiveRecord::Base
   belongs_to :store
   attr_accessible :customercomments, :status, :storename, :store_order_id, :store, :order_total
-  attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname,
-                  :increment_id, :lastname,
-                  :method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal,
-                  :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company,
-                  :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz,
-                  :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change,
-                  :status, :scan_start_time
+  attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname, :increment_id, :lastname,:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal, :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company, :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz, :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change, :status, :scan_start_time
 
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
@@ -120,8 +114,7 @@ class Order < ActiveRecord::Base
 
     @order_items.each do |item|
       #add new product if item is not added.
-      if ProductSku.where(:sku => item.sku).length == 0 &&
-        !item.name.nil? && item.name != '' && !item.sku.nil?
+      if ProductSku.where(:sku => item.sku).length == 0 && !item.name.nil? && item.name != '' && !item.sku.nil?
         product = Product.new
         product.name = item.name
         product.status = 'new'
@@ -161,11 +154,6 @@ class Order < ActiveRecord::Base
     self.addactivity('Order Scanning Complete', username) if !ScanPackSetting.last.order_verification
     self.packing_score = self.compute_packing_score
     self.save
-    # restriction = AccessRestriction.order("created_at").last
-    # unless restriction.nil?
-    #   restriction.total_scanned_shipments += 1
-    #   restriction.save
-    # end
     update_access_restriction
     unless Rails.env.test?
       tenant = Apartment::Tenant.current
@@ -196,7 +184,6 @@ class Order < ActiveRecord::Base
         break
       end
     end
-
     result
   end
 
@@ -241,7 +228,6 @@ class Order < ActiveRecord::Base
     # Implement hold orders from Groovepacker::Inventory
     result = !has_inactive_or_new_products
 
-
     result &= false if unacknowledged_activities.length > 0
 
     if result
@@ -255,7 +241,6 @@ class Order < ActiveRecord::Base
         save
       end
     end
-
     # isn't being used, shouldn't get called
     # self.apply_and_update_predefined_tags
   end
@@ -935,9 +920,7 @@ class Order < ActiveRecord::Base
   end
 
   def unacknowledged_activities
-    order_activities.
-      where('activity_type in (:types)', types: 'deleted_item').
-      where(acknowledged: false)
+    order_activities.where('activity_type in (:types)', types: 'deleted_item').where(acknowledged: false)
   end
 
   def add_item_to_order(product)
@@ -958,7 +941,6 @@ class Order < ActiveRecord::Base
       addactivity("Order Exception Cleared", current_user.name)
       stat_stream_obj = SendStatStream.new()
       stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'clear_order_exception_#{self.id}').send_order_exception(self.id, tenant)
-      #stat_stream_obj.send_order_exception(self.id, tenant)
     else
       result['status'] &= false
       result['messages'].push('Error clearing exceptions')
@@ -1030,11 +1012,7 @@ class Order < ActiveRecord::Base
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
     # key = "order_items_#{id}_was_egar_loaded"
     limited_order_items = partially_load_order_item(order_item_status, limit, offset)
-    if !(
-      %w(lairdsuperfood).include?(Apartment::Tenant.current)
-    ) && (
-      limited_order_items.map(&:keys?).include? true
-    )
+    if !( %w(lairdsuperfood).include?(Apartment::Tenant.current)) && (limited_order_items.map(&:keys?).include? true)
       limited_order_items
     else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
