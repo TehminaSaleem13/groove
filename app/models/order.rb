@@ -774,50 +774,50 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def apply_and_update_predefined_tags
+  # def apply_and_update_predefined_tags
 
-    #apply contains new tag, if any of the order items contain new products
-    contains_new_tag = OrderTag.where(:name => 'Contains New')
-    contains_new_tag = contains_new_tag.first if contains_new_tag.length > 0
-    if !contains_new_tag.nil?
-      contains_new = false
+  #   #apply contains new tag, if any of the order items contain new products
+  #   contains_new_tag = OrderTag.where(:name => 'Contains New')
+  #   contains_new_tag = contains_new_tag.first if contains_new_tag.length > 0
+  #   if !contains_new_tag.nil?
+  #     contains_new = false
 
-      self.order_items.each do |order_item|
-        if !order_item.product.nil? && order_item.product.status == 'new'
-          contains_new = true
-        end
-      end
+  #     self.order_items.each do |order_item|
+  #       if !order_item.product.nil? && order_item.product.status == 'new'
+  #         contains_new = true
+  #       end
+  #     end
 
-      # if contains_new
-      #   self.addtag(contains_new_tag.id)
-      # else
-      #   self.removetag(contains_new_tag.id)
-      # end
-    end
+  #     # if contains_new
+  #     #   self.addtag(contains_new_tag.id)
+  #     # else
+  #     #   self.removetag(contains_new_tag.id)
+  #     # end
+  #   end
 
-    #apply contains inactive tag, if any of the order items contain inactive products
-    contains_inactive_tag = OrderTag.where(:name => 'Contains Inactive')
-    contains_inactive_tag = contains_inactive_tag.first if contains_inactive_tag.length > 0
-    if !contains_inactive_tag.nil?
-      contains_inactive = false
+  #   #apply contains inactive tag, if any of the order items contain inactive products
+  #   contains_inactive_tag = OrderTag.where(:name => 'Contains Inactive')
+  #   contains_inactive_tag = contains_inactive_tag.first if contains_inactive_tag.length > 0
+  #   if !contains_inactive_tag.nil?
+  #     contains_inactive = false
 
-      self.order_items.each do |order_item|
-        if !order_item.product.nil? && order_item.product.status == 'inactive'
-          contains_inactive = true
-          break
-        end
-      end
+  #     self.order_items.each do |order_item|
+  #       if !order_item.product.nil? && order_item.product.status == 'inactive'
+  #         contains_inactive = true
+  #         break
+  #       end
+  #     end
 
-      # if contains_inactive
-      #   self.addtag(contains_inactive_tag.id)
-      # else
-      #   self.removetag(contains_inactive_tag.id)
-      # end
-    end
+  #     # if contains_inactive
+  #     #   self.addtag(contains_inactive_tag.id)
+  #     # else
+  #     #   self.removetag(contains_inactive_tag.id)
+  #     # end
+  #   end
 
-    self.save
+  #   self.save
 
-  end
+  # end
 
   def get_items_count
     count = 0
@@ -834,9 +834,9 @@ class Order < ActiveRecord::Base
     #TODO: remove this from here as soon as possible.
     # Very slow way to ensure inventory always gets allocated
     Groovepacker::Inventory::Orders.allocate(self)
-    if changed_hash['status'].nil?
-      return true
-    end
+   
+      return true if changed_hash['status'].nil?
+
     initial_status = changed_hash['status'][0]
     final_status = changed_hash['status'][1]
     if ALLOCATE_STATUSES.include?(initial_status)
