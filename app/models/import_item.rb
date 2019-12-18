@@ -68,6 +68,11 @@ class ImportItem < ActiveRecord::Base
       result[:elapsed_time] = Time.at(time_for_order_imported).utc.strftime("%H:%M:%S")
       result[:elapsed_time_remaining] = Time.at(time_zone_for_remaining_order).utc.strftime("%H:%M:%S")
     end
+    time_zone = GeneralSetting.last.time_zone.to_i
+    time_zone = GeneralSetting.last.dst ? time_zone : time_zone+3600
+    last_update = $redis.get("#{Apartment::Tenant.current}_#{store_id}").to_time
+    last_update = last_update.nil?  ? nil :  last_update 
+    result[:last_imported_data] = last_update
     result[:store_id] = store_id
     result[:status] = true
     return result

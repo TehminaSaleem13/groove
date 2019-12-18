@@ -20,6 +20,8 @@ class ImportOrders < Groovepacker::Utilities::Base
   def add_import_item_for_active_stores(store)
     imp_items = ImportItem.where('store_id = ? AND order_import_summary_id IS NOT NULL', store.id)
     unless store.store_type == 'CSV' && store.ftp_credential && store.ftp_credential.use_ftp_import == false
+      last_completed = imp_items.last.try(:updated_at)
+      $redis.set("#{Apartment::Tenant.current}_#{store.id}",last_completed)
       imp_items.delete_all
       new_import_item(store.id, nil, 'not_started')
       return
