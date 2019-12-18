@@ -330,9 +330,7 @@ class Order < ActiveRecord::Base
     end
 
     if barcode_found
-      if Product.find(matched_product_id).kit_parsing == 'individual'
-        result = true
-      end
+      result = true if Product.find(matched_product_id).kit_parsing == 'individual'
     end
     result
   end
@@ -774,51 +772,6 @@ class Order < ActiveRecord::Base
     result
   end
 
-  # def apply_and_update_predefined_tags
-
-  #   #apply contains new tag, if any of the order items contain new products
-  #   contains_new_tag = OrderTag.where(:name => 'Contains New')
-  #   contains_new_tag = contains_new_tag.first if contains_new_tag.length > 0
-  #   if !contains_new_tag.nil?
-  #     contains_new = false
-
-  #     self.order_items.each do |order_item|
-  #       if !order_item.product.nil? && order_item.product.status == 'new'
-  #         contains_new = true
-  #       end
-  #     end
-
-  #     # if contains_new
-  #     #   self.addtag(contains_new_tag.id)
-  #     # else
-  #     #   self.removetag(contains_new_tag.id)
-  #     # end
-  #   end
-
-  #   #apply contains inactive tag, if any of the order items contain inactive products
-  #   contains_inactive_tag = OrderTag.where(:name => 'Contains Inactive')
-  #   contains_inactive_tag = contains_inactive_tag.first if contains_inactive_tag.length > 0
-  #   if !contains_inactive_tag.nil?
-  #     contains_inactive = false
-
-  #     self.order_items.each do |order_item|
-  #       if !order_item.product.nil? && order_item.product.status == 'inactive'
-  #         contains_inactive = true
-  #         break
-  #       end
-  #     end
-
-  #     # if contains_inactive
-  #     #   self.addtag(contains_inactive_tag.id)
-  #     # else
-  #     #   self.removetag(contains_inactive_tag.id)
-  #     # end
-  #   end
-
-  #   self.save
-
-  # end
-
   def get_items_count
     count = 0
     unless self.order_items.empty?
@@ -948,21 +901,6 @@ class Order < ActiveRecord::Base
     return result
   end
 
-  # def self.duplicate_selected_orders(orders, current_user, result)
-  #   orders.each do |order|
-  #     neworder = order.duplicate_single_order(current_user, result)
-
-  #     unless neworder.persisted?
-  #       result['status'] = false
-  #       result['error_messages'] = neworder.errors.full_messages
-  #     else
-  #       #add activity
-  #       Order.add_activity_to_new_order(neworder, order.order_items, current_user)
-  #     end
-  #   end
-  #   return result
-  # end
-
   def self.add_activity_to_new_order(neworder, order_items, username)
     order_items.each do |order_item|
       Order.create_new_order_item(neworder, order_item)
@@ -980,21 +918,6 @@ class Order < ActiveRecord::Base
     neworder_item.row_total = order_item.row_total
     neworder_item.save
   end
-
-  # def duplicate_single_order(current_user, result)
-  #   neworder = self.dup
-  #   index = 0
-  #   temp_increment_id = ''
-
-  #   begin
-  #     temp_increment_id = self.increment_id + "(duplicate"+index.to_s+ ")"
-  #     neworder.increment_id = temp_increment_id
-  #     orderslist = Order.where(:increment_id => temp_increment_id)
-  #     index = index + 1
-  #   end while orderslist.present?
-  #   neworder.save(:validate => false)
-  #   return neworder
-  # end
 
   def set_traced_in_dashboard
     self.traced_in_dashboard = true
