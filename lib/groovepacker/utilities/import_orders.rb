@@ -29,6 +29,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     if imp_items.empty?
       new_import_item(store.id, 'CSV Importers Ready. FTP Order Import Is Off')
     elsif imp_items.where("status = 'failed'").present?
+      last_completed = imp_items.last.try(:updated_at)
+      $redis.set("#{Apartment::Tenant.current}_#{store.id}",last_completed)
       imp_items.delete_all
       new_import_item(store.id, 'FTP Order Import Is Off')
     end

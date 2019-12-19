@@ -70,8 +70,8 @@ class ImportItem < ActiveRecord::Base
     end
     time_zone = GeneralSetting.last.time_zone.to_i
     time_zone = GeneralSetting.last.dst ? time_zone : time_zone+3600
-    last_update = $redis.get("#{Apartment::Tenant.current}_#{store_id}").to_time
-    last_update = last_update.nil?  ? nil :  last_update 
+    last_update = $redis.get("#{Apartment::Tenant.current}_#{store_id}").to_time.utc rescue nil
+    last_update = last_update.nil?  ? nil :  last_update  + time_zone
     result[:last_imported_data] = last_update
     result[:store_id] = store_id
     result[:status] = true
