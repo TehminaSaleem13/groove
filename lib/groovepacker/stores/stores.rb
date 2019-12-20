@@ -153,6 +153,8 @@ module Groovepacker
 			    new_record = true unless @shippingeasy.persisted?
 			    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship], import_upc: params[:import_upc], allow_duplicate_id: params[:allow_duplicate_id]}
 			    @shippingeasy.save
+			    @shippingeasy.import_ready_for_shipment = false  if @shippingeasy.ready_to_ship || @shippingeasy.import_shipped
+			    @shippingeasy.save
 			    begin
 			      @store.save!
 			    rescue ActiveRecord::RecordInvalid => e

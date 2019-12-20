@@ -71,11 +71,23 @@ module Groovepacker
               update_current_import_item(order)
               if @split_order
                 if order["shipments"].any?
-                   if order["shipments"].count == 1
-                      shiping_easy_order = find_shipping_easy_order(order)  
-                   elsif order["shipments"].count >= 2
-                      shiping_easy_order = Order.find_by_shipment_id(order["shipments"][1]["id"]) rescue nil
-                   end        
+                  if order["shipments"].count == 1
+                     shiping_easy_order = Order.find_by_store_order_id(order['id'])
+                     if shiping_easy_order.blank?
+                      shiping_easy_order =  Order.find_by_shipment_id(order["shipments"][0]["id"]) rescue nil
+                     else
+                      shiping_easy_order
+                     end 
+                  elsif order["shipments"].count >= 2
+                    order["shipments"].each do |shipment|
+                      shiping_easy_order = Order.find_by_shipment_id(shipment["id"]) rescue nil
+                      if shiping_easy_order.blank?
+                        @shipment_value = shipment["id"]
+                        @tracking_value = shipment["tracking_number"]
+                        break 
+                      end
+                    end
+                  end        
                 else
                   shiping_easy_order = find_shipping_easy_order(order)
                   if shiping_easy_order && @group_orders && @import_item.store.split_order == "verify_separately"
@@ -113,8 +125,13 @@ module Groovepacker
               shiping_easy_order.order_items.destroy_all
               shiping_easy_order.store_id = @credential.store_id
               import_order(shiping_easy_order, order)
-              shiping_easy_order.shipment_id = order["shipments"][0]["id"] rescue nil
-              shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
+              if order["shipments"].count == 1
+                shiping_easy_order.shipment_id = order["shipments"][0]["id"] rescue nil
+                shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
+              elsif order["shipments"].count >= 2
+                shiping_easy_order.shipment_id = @shipment_value rescue nil
+                shiping_easy_order.tracking_num = @tracking_value rescue nil
+              end  
               import_order_items_and_create_products(shiping_easy_order, order)
               update_success_import_count
             end
@@ -123,7 +140,7 @@ module Groovepacker
               if !@credential.allow_duplicate_id
                 shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
               else
-                shiping_easy_order = Order.find_by_increment_id_and_store_order_id(order['external_order_identifier'], order['id'])
+                shiping_easy_order = Order.find_by_store_order_id(order['id'])
               end
               shiping_easy_order
             end
