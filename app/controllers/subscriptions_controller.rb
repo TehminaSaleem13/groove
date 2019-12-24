@@ -23,6 +23,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def confirm_payment
+    params[:tenant_name] = params[:tenant_name].gsub(/[^0-9A-Za-z]/, '')
     @subscription = create_subscription(params)
     if @subscription
       one_time_payment = params[:shop_name].blank? ? ENV['ONE_TIME_PAYMENT'] : 0

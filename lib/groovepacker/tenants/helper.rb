@@ -337,11 +337,15 @@ module Groovepacker
             is_modified: @tenant.is_modified
           )
           created_tenant.update_attribute(:initial_plan_id, @tenant.initial_plan_id)
+          created_tenant.price = {"bigCommerce_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "high_sku_feature"=>{"toggle"=>false, "amount"=>50, "stripe_id"=>""}, "double_high_sku"=>{"toggle"=>false, "amount"=>100, "stripe_id"=>""}, "cust_maintenance_1"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "cust_maintenance_2"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "groovelytic_stat_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}}
+          created_tenant.save
+          Subscription.create!(tenant_name: created_tenant.name, tenant_id: created_tenant.id,progress: "transaction_complete" , interval: "month", status: "completed" , user_name: "test", password: "12345678", subscription_plan_id: created_tenant.initial_plan_id)
           @tenant.duplicate_tenant_id = created_tenant.id
           @tenant.save
           SendStatStream.new.delay.duplicate_groovlytic_tenant(current_tenant, duplicate_name)
         rescue => e
           update_fail_status(result, e.message)
+          Rollbar.error(e, e.message)
         end
         result
       end
