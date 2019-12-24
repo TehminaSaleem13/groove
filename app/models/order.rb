@@ -63,10 +63,7 @@ class Order < ActiveRecord::Base
   end
 
    def self.create_new_order(result, current_user)
-    order = Order.new
-    order.store_id = Store.where(store_type: 'system').first.id
-    order.status = "onhold"
-    order.order_placed_time = Time.now.utc
+    order = Order.new( store_id: Store.where(store_type: 'system').first.id, status: "onhold" , order_placed_time: Time.now.utc)
     order.save
     result['order'] = order
     result

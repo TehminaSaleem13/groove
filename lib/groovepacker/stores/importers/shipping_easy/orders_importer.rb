@@ -105,9 +105,9 @@ module Groovepacker
                 end
                 if shiping_easy_order.blank?
                   shiping_easy_order = Order.where("increment_id LIKE ?","#{order['external_order_identifier']}%")
-                  unless @credential.allow_duplicate_id
+                  #unless @credential.allow_duplicate_id
                     order['external_order_identifier'] = "#{order['external_order_identifier']}-#{shiping_easy_order.count}" if shiping_easy_order.count > 0   
-                  end
+                  #end
                   shiping_easy_order = Order.new
                 else
                   return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
