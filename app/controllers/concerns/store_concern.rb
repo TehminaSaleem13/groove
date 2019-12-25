@@ -314,13 +314,13 @@ module StoreConcern
     @result['status'] = true
     tenant = Apartment::Tenant.current
     import_orders_obj = ImportOrders.new
-    import_orders_obj.delay(:run_at => 1.seconds.from_now).init_import(tenant)
+    import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "start_import_#{Apartment::Tenant.current}").init_import(tenant)
     if @store && current_user.can?('update_inventories')
       context = create_handler
       if flag == "push"
-        context.delay(:run_at => 1.seconds.from_now).push_inventory
+        context.delay(:run_at => 1.seconds.from_now, :queue => "push_inventory").push_inventory
       elsif flag == "pull"
-        context.delay(:run_at => 1.seconds.from_now).pull_inventory
+        context.delay(:run_at => 1.seconds.from_now, :queue => "pull_inventory").pull_inventory
         @result['message'] = "Your request for innventory pull has beed queued"
       end
     else

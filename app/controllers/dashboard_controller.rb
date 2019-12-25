@@ -75,7 +75,7 @@ class DashboardController < ApplicationController
 
   def download_daily_packed_csv
     daily_pack = DailyPacked.new
-    daily_pack.delay(:run_at => 1.seconds.from_now).send_csv_daily_pack(params,Apartment::Tenant.current)
+    daily_pack.delay(:run_at => 1.seconds.from_now, :queue => "download_daily_packed_csv").send_csv_daily_pack(params,Apartment::Tenant.current)
     render json: {}
   end
 end

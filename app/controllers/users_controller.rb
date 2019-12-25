@@ -167,7 +167,7 @@ class UsersController < ApplicationController
             send_user_info_data = SendUsersInfo.new()
             tenant_name = Apartment::Tenant.current
             user_data = { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one_key: @custom_field_one_key, custom_field_one_value: @custom_field_one_value, custom_field_two_key: @custom_field_two_key, custom_field_two_value: @custom_field_two_value}
-            send_user_info_data.delay(:run_at => 1.seconds.from_now).update_gl_user(user_data, tenant_name) if user_data[:packing_user_id].present?
+            send_user_info_data.delay(:run_at => 1.seconds.from_now, :queue => 'update_users_info_#{tenant_name}').update_gl_user(user_data, tenant_name) if user_data[:packing_user_id].present?
           end
 
         else

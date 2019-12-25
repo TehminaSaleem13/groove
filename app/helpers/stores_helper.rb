@@ -218,7 +218,7 @@ module StoresHelper
       groove_bulk_actions.save
       data[:bulk_action_id] = groove_bulk_actions.id
       import_csv = ImportCsv.new
-      import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+      import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_kit_from_csv#{Apartment::Tenant.current}").import Apartment::Tenant.current, data.to_s
       # import_csv.import(Apartment::Tenant.current, data.to_s)
     elsif params[:type] == 'product'
       product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -229,7 +229,7 @@ module StoresHelper
       #   product_import.save
       # end
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
+      delayed_job = import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}").import Apartment::Tenant.current, data.to_s
       # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
       product_import.update_attributes(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
     end
