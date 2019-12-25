@@ -47,6 +47,8 @@ module StoresHelper
       @store.split_order = params[:split_order]
       @store.on_demand_import_v2 = params[:on_demand_import_v2]
       @store.regular_import_v2 = params[:regular_import_v2]
+      @store.quick_fix = params[:quick_fix]
+      @store.troubleshooter_option = params[:troubleshooter_option]
       @store.save
     end
   end
