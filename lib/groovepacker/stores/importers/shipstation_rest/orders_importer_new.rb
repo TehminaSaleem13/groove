@@ -172,7 +172,7 @@ module Groovepacker
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
-              if condition
+              if check_for_replace_product
                 update_order_activity_log_for_gp_coupon(shipstation_order, order)
               else
                 update_order_activity_log(shipstation_order)
