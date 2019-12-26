@@ -69,9 +69,13 @@ module ProductsHelper
     coupan_product = nil
     intangible_strings.each do |string|
       if product.downcase.include?(string) || sku.downcase.include?(string)
-        coupan_product = Product.joins(:product_skus).where("product_skus.sku =  ?", "GP Coupon").last
-        coupan_product = Product.find_or_create_by(name: "GP Coupon", store_id: 1) if coupan_product.nil?
-        coupan_product.is_intangible =  true, 
+        coupan_product = Product.joins(:product_skus).where("product_skus.sku =  ?", "GP Coupon").readonly(false).last
+        if coupan_product.nil?
+          coupan_product  =  Product.new
+          coupan_product.name = "GP Coupon"
+          coupan_product.store_id = 1
+        end   
+        coupan_product.is_intangible =  true
         coupan_product.status=  "active"
         coupan_product.save
         coupan_product.product_skus.create(sku: "GP Coupon") if coupan_product.present?
