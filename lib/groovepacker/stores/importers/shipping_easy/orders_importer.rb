@@ -194,6 +194,10 @@ module Groovepacker
               if product.blank?
                 product_weight = product_hash["weight_in_ounces"] || "0.0"
                 product_hash["description"] = "created by #{@credential.store.name}" if product_hash["description"].blank?
+                if check_for_replace_product
+                  coupon_product = replace_product(product_hash["description"], sku)
+                  return coupon_product unless coupon_product.nil? 
+                end 
                 product = Product.create(name: product_hash["description"], store: @credential.store ,store_product_id: store_product_id, weight: product_weight)
                 product.product_skus.create(sku: sku)
                 product.product_cats.create(category: product_hash["product_category_name"])
@@ -251,7 +255,11 @@ module Groovepacker
                 on_demand_logger.info(log) 
               end  
               shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
-              add_order_activity(shiping_easy_order)
+              if check_for_replace_product
+                add_order_activity_for_gp_coupon(shiping_easy_order, order["recipients"][0]["line_items"])
+              else
+                add_order_activity(shiping_easy_order)   
+              end
               shiping_easy_order.set_order_status
             end
 
@@ -349,6 +357,20 @@ module Groovepacker
                 primary_sku = item.product.try(:primary_sku)
                 next if primary_sku.nil?
                 shiping_easy_order.addactivity("QTY #{item.qty} of item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
+              end
+            end
+
+            def add_order_activity_for_gp_coupon(shiping_easy_order, params_item)
+              shiping_easy_order.addactivity("Order Import", "#{@credential.store.name} Import")
+              shiping_easy_order.order_items.each_with_index do |item, index|
+                product_name = params_item[index]["product"].nil? ? params_item[index]["item_name"] :  params_item[index]["product"]["description"]
+                if product_name == item.product.name && params_item[index]["sku"] == item.product.primary_sku
+                  primary_sku = item.product.try(:primary_sku)
+                  next if primary_sku.nil?
+                  shiping_easy_order.addactivity("QTY #{item.qty} of item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
+                else
+                  shiping_easy_order.addactivity("Intangible item with SKU #{params_item[index]["sku"]}  and Name #{product_name} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                end
               end
             end
 

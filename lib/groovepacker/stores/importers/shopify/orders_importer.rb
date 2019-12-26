@@ -46,7 +46,12 @@ module Groovepacker
               #update store
               shopify_order.set_order_status
               #add order activities
-              add_order_activities(shopify_order)
+              if check_for_replace_product
+                add_order_activities_for_gp_coupon(shopify_order, order)
+              else
+                add_order_activities(shopify_order)
+              end
+              
               #increase successful import with 1 and save
               update_import_count('success_imported')
             end
@@ -145,6 +150,17 @@ module Groovepacker
               end
             end
 
+            def add_order_activities_for_gp_coupon(shopify_order, order)
+              shopify_order.addactivity("Order Import", @store.name+" Import")
+              shopify_order.order_items.each_with_index do |item, index|
+                if order["line_items"][index]["name"] == item.product.name &&  order["line_items"][index]["sku"] == item.product.primary_sku
+                  next if item.product.nil? || item.product.primary_sku.nil?
+                  shopify_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", @store.name+" Import")
+                else
+                  shopify_order.addactivity("Intangible item with SKU #{order["line_items"][index]["sku"]}  and Name #{order["line_items"][index]["name"]} was replaced with GP Coupon.",@store.name+" Import")
+                end 
+              end  
+            end
         end
       end
     end

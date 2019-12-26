@@ -77,6 +77,13 @@ module Groovepacker
           private
 
           def create_new_product(item, sku, credential)
+            if check_for_replace_product
+              coupon_product = replace_product(item["name"], sku)
+              unless coupon_product.nil? 
+                result = true
+                return result
+              end   
+            end 
             product = Product.create(store: credential.store, store_product_id: 0,
                                      name: item["name"])
             product.product_skus.create(sku: sku)

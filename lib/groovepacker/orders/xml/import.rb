@@ -3,7 +3,7 @@ module Groovepacker
     module Xml
       class Import
         attr_accessor :order
-
+        include ProductsHelper
         def initialize(file_name, csv_name, flag)
           @order = Groovepacker::Orders::Xml::OrderXml.new(file_name)
           @file_name = csv_name
@@ -245,7 +245,6 @@ module Groovepacker
               end  
             end
           end
-
           if !@check_new_order 
             if @update_count >= 1
               n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
@@ -277,13 +276,25 @@ module Groovepacker
         end
 
         def create_update_order_item(order, order_item_XML)
+          @gp_coupon_found  = false
           first_sku = order_item_XML[:product][:skus].first
           unless first_sku.nil?
             product_sku = ProductSku.find_by_sku(first_sku)
             if product_sku.nil?
               # add product
-              product = Product.new
-              product.store = order.store
+              if check_for_replace_product
+                coupon_product = replace_product(order_item_XML[:product][:name], first_sku)
+                if coupon_product.nil?
+                  product = Product.new
+                  product.store = order.store
+                else
+                  product = coupon_product
+                  @gp_coupon_found  = true
+                end  
+              else 
+                product = Product.new
+                product.store = order.store
+              end  
             else
               product = product_sku.product
             end
@@ -293,8 +304,12 @@ module Groovepacker
               if order.order_items.where(product_id: product.id).empty?
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
-                order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
+                if check_for_replace_product && @gp_coupon_found == true 
+                  order.addactivity("Intangible item with SKU #{order_item_XML[:product][:skus].first}  and Name #{order_item_XML[:product][:name]} was replaced with GP Coupon.","#{order.store.name} Import")
+                else
+                  order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
                   "#{order.store.name} Import")
+                end  
               else
                 order_item = order.order_items.where(product_id: product.id)
                 unless order_item.empty?
@@ -326,12 +341,14 @@ module Groovepacker
         def create_update_product(product, product_xml)
           result = {  status: true, errors: [], product: nil }
           #product information
+          return result if @gp_coupon_found == true
           product.name = product_xml[:name] if product.name.blank?
           product.spl_instructions_4_packer = product_xml[:instructions] if product.spl_instructions_4_packer.blank?
           product.is_kit = product_xml[:is_kit] if product.is_kit == 0
           product.kit_parsing = product_xml[:kit_parsing] if product.kit_parsing.blank?
           product.weight = product_xml[:weight] if product.weight.blank?
           product.weight_format = product_xml[:weight_format] if product.weight_format.blank?
+    
           if product.save
             #images
             product_xml[:images].each do |product_image|

@@ -96,6 +96,10 @@ module Groovepacker
 
             def create_new_product_from_order(variant, sku, shopify_product)
               #create and import product
+              if check_for_replace_product
+                coupon_product = replace_product(variant["title"], sku)
+                return coupon_product unless coupon_product.nil? 
+              end 
               product = Product.create(name: variant["title"], store: @store,
                                        store_product_id: variant["product_id"])
               
@@ -158,6 +162,7 @@ module Groovepacker
 
             def send_products_import_complete_email(products_count)
               result = { status: true, success_imported: products_count }
+
               ImportMailer.send_products_import_complete_email(products_count, result, @credential).deliver rescue nil
             end
         end

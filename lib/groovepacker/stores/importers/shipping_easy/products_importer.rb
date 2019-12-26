@@ -37,6 +37,10 @@ module Groovepacker
 
           def create_new_product_from_order(item, store, sku)
             product_weight = item["weight_in_ounces"] || "0.0"
+            if check_for_replace_product
+              coupon_product = replace_product(item["item_name"], sku)
+              return coupon_product unless coupon_product.nil? 
+            end 
             product = Product.create(name: item["item_name"], store: store,
                                      store_product_id: item["ext_line_item_id"],
                                      weight: product_weight)

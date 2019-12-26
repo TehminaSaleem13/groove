@@ -172,7 +172,12 @@ module Groovepacker
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
-              update_order_activity_log(shipstation_order)
+              if condition
+                update_order_activity_log_for_gp_coupon(shipstation_order, order)
+              else
+                update_order_activity_log(shipstation_order)
+              end
+              
               remove_gp_tags_from_ss(order)
             else
               @import_item.update_attributes(previous_imported: @import_item.previous_imported+1)
@@ -367,6 +372,23 @@ module Groovepacker
               shipstation_order.addactivity("Order Import", @credential.store.name+" Import")
               shipstation_order.order_items.each do |item|
                 update_activity_for_single_item(shipstation_order, item)
+              end
+      
+              shipstation_order.set_order_status
+              v = $redis.get("#{Apartment::Tenant.current}_success_import").to_i  + 1
+              $redis.set("#{Apartment::Tenant.current}_success_import", v)
+              @result[:success_imported] =  $redis.get("#{Apartment::Tenant.current}_success_import").to_i 
+              @import_item.update_attributes(success_imported: @result[:success_imported]) 
+            end
+
+            def update_order_activity_log_for_gp_coupon(shipstation_order, order)
+              shipstation_order.addactivity("Order Import", @credential.store.name+" Import")
+              shipstation_order.order_items.each_with_index do |item, index|
+                if order["items"][index]["name"] == item.product.name && order["items"][index]["sku"] == item.product.primary_sku
+                  update_activity_for_single_item(shipstation_order, item)
+                elsif item.product.is_intangible == true
+                  shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                end
               end
               shipstation_order.set_order_status
               v = $redis.get("#{Apartment::Tenant.current}_success_import").to_i  + 1
