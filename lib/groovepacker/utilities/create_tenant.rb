@@ -9,12 +9,12 @@ class CreateTenant
     tenant.save
     Apartment::Tenant.switch(tenant_name)
     self.apply_restrictions_and_seed(subscription)
-    self.delay(run_at: 1.seconds.from_now).create_groovelytics_tenant(tenant_name)
+    self.delay(run_at: 1.seconds.from_now, queue: 'create_tenant_at_groovelytics' ).create_groovelytics_tenant(tenant_name)
     # self.create_groovelytics_tenant(tenant_name)
     create_default_csv_map
 
     subscription.update_progress('tenant_created')
-    self.delay(run_at: 20.minutes.from_now).send_transaction_emails(subscription)
+    self.delay(run_at: 20.minutes.from_now, queue: 'send_transaction_emails').send_transaction_emails(subscription)
     create_csv_store
     # TransactionEmail.delay(run_at: 2.hours.from_now).send_email(subscription)
     # TransactionEmail.welcome_email(subscription).deliver

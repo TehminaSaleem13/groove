@@ -102,7 +102,7 @@ module ScanPack
         status: 'scheduled'
         })
       @boxes ||= Box.where(order_id: orders.first[:id]).map(&:id)
-      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now).generate_packing_slip_pdf(orders, Apartment::Tenant.current, @slip_data_hash, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes)
+      delayed_job = GeneratePackingSlipPdf.delay(:run_at => 1.seconds.from_now, :queue => 'generate_packing_slip_pdf').generate_packing_slip_pdf(orders, Apartment::Tenant.current, @slip_data_hash, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes)
       generate_barcode.delayed_job_id = delayed_job.id
       generate_barcode.save
       @result['status'] = true
