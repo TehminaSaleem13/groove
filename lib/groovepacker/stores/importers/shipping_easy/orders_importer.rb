@@ -57,6 +57,15 @@ module Groovepacker
 
             @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
             update_orders_status
+            unless  @credential.allow_duplicate_id
+              a = Order.group(:increment_id).having("count(*) >1").count.keys
+              unless a.empty?
+                Order.where("increment_id in (?)", a).each do |o|
+                  orders = Order.where(increment_id: o.increment_id)
+                  orders.last.destroy if orders.count > 1
+                end
+              end 
+            end   
             @result
           end
 
