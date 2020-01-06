@@ -272,6 +272,8 @@ module Groovepacker
           fix_user_inventory_permissions(user, inv_wh)
         end
       end
+      ProductInventoryReport.create(name: "All_Products_Report", is_locked: true)
+      ProductInventoryReport.create(name: "Active_Products_Report", is_locked: true)
     end
   end
 end

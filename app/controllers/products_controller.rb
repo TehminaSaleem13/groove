@@ -425,17 +425,7 @@ class ProductsController < ApplicationController
 
   def update_inventory_record
     data = params["data"]
-    selected_ids = data["selected"] || data["selected_id"]
-    products = Product.where("id in (?)", selected_ids) 
-    id = data["report_id"] || params["data"]["id"]
-    report = id.present? ? ProductInventoryReport.find(id) : ProductInventoryReport.new
-    report_name = data["report_name"] || data["name"]
-    report.name = report_name.present? ? report_name : "Default Report"
-    report.scheduled = data["scheduled"] 
-    report.type = data["type"] 
-    report.products = products
-    report.save
-    @result["status"] = true
+    @result = update_inv_record(data, params)
     render json: @result
   end
 

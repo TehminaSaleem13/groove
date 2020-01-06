@@ -109,4 +109,20 @@ module ProductsHelper
     InventoryReportMailer.delay.manual_inventory_report(ids, tenant)
     # InventoryReportMailer.manual_inventory_report(ids).deliver
   end
+
+  def update_inv_record(data, params)
+    selected_ids = data["selected"] || data["selected_id"]
+    products = data["select_toggle"] ? Product.all : Product.where("id in (?)", selected_ids)
+    id = data["report_id"] || params["data"]["id"]
+    report = id.present? ? ProductInventoryReport.find(id) : ProductInventoryReport.new
+    report_name = data["report_name"] || data["name"]
+    report.name = report_name.present? ? report_name : "Default Report"
+    report.scheduled = data["scheduled"] 
+    report.type = data["type"] 
+    report.products = products
+    report.save
+    @result["status"] = true
+    @result
+  end
+
 end
