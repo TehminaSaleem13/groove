@@ -141,7 +141,7 @@ module Groovepacker
           @import_item = ImportItem.find_by_store_id(credential.store.id)
           @import_item = ImportItem.create_or_update(@import_item, credential)
           shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, @import_item)
-          Groovepacker::Stores::Context.new(shipwork_handler).import_order(@params["ShipWorks"]["Customer"]["Order"])
+          Groovepacker::Stores::Context.new(shipwork_handler).import_order(@params["ShipWorks"]["Customer"]["Order"]) if @params["ShipWorks"]["Customer"].present?
           change_status_if_not_failed
           return status
         end
