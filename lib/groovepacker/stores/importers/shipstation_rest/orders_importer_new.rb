@@ -85,6 +85,15 @@ module Groovepacker
               @credential.save
             end          
             update_orders_status
+            unless  @credential.allow_duplicate_id
+              a = Order.group(:increment_id).having("count(*) >1").count.keys
+              unless a.empty?
+                Order.where("increment_id in (?)", a).each do |o|
+                  orders = Order.where(increment_id: o.increment_id)
+                  orders.last.destroy if orders.count > 1
+                end
+              end 
+            end   
             destroy_nil_import_items
             ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
             OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all

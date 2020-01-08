@@ -37,6 +37,15 @@ module Groovepacker
               @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
               @credential.save
             end
+            unless  @credential.allow_duplicate_id
+              a = Order.group(:increment_id).having("count(*) >1").count.keys
+              unless a.empty?
+                Order.where("increment_id in (?)", a).each do |o|
+                  orders = Order.where(increment_id: o.increment_id)
+                  orders.last.destroy if orders.count > 1
+                end
+              end 
+            end   
             destroy_nil_import_items
           end
 
