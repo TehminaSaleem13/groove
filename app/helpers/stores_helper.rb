@@ -162,6 +162,13 @@ module StoresHelper
         @store = Store.find(store["id"])
         @store.status = store["status"]
         @result['status'] = false if !@store.save
+        if @store.status == false
+          OrderImportSummary.last.import_items.each do |import_item|
+            import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
+          end
+          import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
+          OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
+        end
       end
       OrderImportSummary.first.emit_data_to_user unless OrderImportSummary.first.nil?
     else
@@ -288,6 +295,13 @@ module StoresHelper
       if @result['status'] && !@store.save
         @result['status'] = false
         @result['message'] = "Could not save store info"
+      end
+      if @store.status == false
+        OrderImportSummary.last.import_items.each do |import_item|
+          import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
+        end
+        import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
+        OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
       end
     end
   end
