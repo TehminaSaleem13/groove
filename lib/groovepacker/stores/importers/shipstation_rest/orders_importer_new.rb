@@ -85,7 +85,7 @@ module Groovepacker
               @credential.save
             end          
             update_orders_status
-            unless  @credential.allow_duplicate_id
+            unless  @credential.allow_duplicate_order
               a = Order.group(:increment_id).having("count(*) >1").count.keys
               unless a.empty?
                 Order.where("increment_id in (?)", a).each do |o|
