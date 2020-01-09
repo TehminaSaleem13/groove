@@ -89,6 +89,12 @@ class ImportCsv
                    rescue
                      nil
                    end if !(store.csv_beta && params[:type] == "order") 
+        
+        if check_mapping_for_tracking_num(params)
+          csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) 
+          params.merge!(only_for_tracking_num: true)
+        end
+
         set_file_path(params, file_path)
       end
       set_data_for_csv_import_count(params[:file_path]) if params[:file_path]
@@ -98,7 +104,7 @@ class ImportCsv
         result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
-        if store.csv_beta && params[:type] == "order"
+        if store.csv_beta && params[:type] == "order" && !csv_file
           begin
             ElixirApi::Processor::CSV::OrdersToXML.call('tenant' => tenant,'params' => params)
           rescue Net::ReadTimeout
@@ -214,6 +220,16 @@ class ImportCsv
     system 'mkdir', '-p', "csv_files/#{tenant}"
     file_path = nil
     file_path = "#{Rails.root}/csv_files/#{tenant}/#{params[:file_name]}"
+  end
+
+  def check_mapping_for_tracking_num(params)
+    default_map = CsvMap.find_or_initialize_by(name: "Tracking Number Update")
+    default_map.update(kind: "order", name: "Tracking Number Update", custom: true, map: {:rows=>2, :sep=>",", :other_sep=>0, :delimiter=>"\"", :fix_width=>0, :fixed_width=>4, :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YYYY TIME", :day_month_sequence=>"MM/DD", :map=>{"0"=>{"name"=>"Order number", "value"=>"increment_id"}, "1"=>{"name"=>"Tracking Number", "value"=>"tracking_num"}}})
+    
+    mappings_for_tracking_num = ['increment_id', 'tracking_num']
+    mappings = []
+    params[:map].values.each { |mapping| mappings << mapping['value'] }
+    (mappings.sort == mappings_for_tracking_num.sort) ? true : false
   end
 
   def set_data_for_csv_import_count file_path

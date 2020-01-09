@@ -63,7 +63,7 @@ module Groovepacker
               next if @helper.blank_or_invalid(single_row)
               product_name = single_row[mapping['product_name'][:position]] rescue nil
               product_sku = single_row[mapping['sku'][:position]] rescue nil
-              next if product_sku.blank? && product_name.blank?
+              next unless product_sku.blank? && product_name.blank? && params[:only_for_tracking_num].present?
               inc_id = @helper.get_row_data(single_row, 'increment_id').strip
               if index!=0 and current_inc_id.present? and current_inc_id != inc_id
                 begin
@@ -163,18 +163,19 @@ module Groovepacker
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
-            if @helper.not_imported?(@imported_orders, inc_id)
-              @order = Order.find_or_initialize_by_increment_id("#{inc_id}-currupted")
+            if @helper.not_imported?(@imported_orders, inc_id) || params[:only_for_tracking_num]
+              @order = Order.find_or_initialize_by(increment_id: "#{inc_id}")
               order_persisted = @order.persisted? ? true : false
               @order.store_id = params[:store_id]
+              @order.tracking_num = single_row[mapping['tracking_num'][:position]]
               @order_required = %w(qty sku increment_id price)
               @order.save
               import_order_data(order_map, single_row, index)
               @order.addactivity("Order Import", "#{@order.store.name} Import") unless order_persisted
-              @order.update_attributes(increment_id: "#{inc_id}-currupted")
+              @order.update_attributes(increment_id: "#{inc_id}")
               @order.save
               @order = Order.find_by_increment_id(@order.increment_id)
-              update_result(result, single_row) if result[:order_reimported] == false
+              update_result(result, single_row) if result[:order_reimported] == false && !params[:only_for_tracking_num]
               import_item_failed_result(result, index) unless result[:status]
               @order.set_order_status rescue nil
             else
@@ -255,10 +256,12 @@ module Groovepacker
             if single_sku.blank?
               existing_product = Product.find_by_name(single_row[mapping['product_name'][:position]]) rescue nil
 
-              if existing_product.present?
-                single_row[mapping['sku'][:position]] = existing_product.primary_sku
-              else
-                single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku rescue nil
+              unless params[:only_for_tracking_num]
+                if existing_product.present?
+                  single_row[mapping['sku'][:position]] = existing_product.primary_sku 
+                else
+                  single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku rescue nil
+                end
               end
             end
             order_map.each do |single_map|
