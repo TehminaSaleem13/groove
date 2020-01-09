@@ -164,7 +164,7 @@ module Groovepacker
 
           def import_single_order(single_row, index, inc_id, order_map, result)
             if @helper.not_imported?(@imported_orders, inc_id) || params[:only_for_tracking_num]
-              @order = Order.find_or_initialize_by(increment_id: "#{inc_id}")
+              @order = Order.find_or_initialize_by_increment_id("#{inc_id}")
               order_persisted = @order.persisted? ? true : false
               @order.store_id = params[:store_id]
               @order.tracking_num = single_row[mapping['tracking_num'][:position]]
