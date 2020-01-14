@@ -8,6 +8,10 @@ module Groovepacker
           def import
             initialize_import_objects
             response = @client.products
+            if response["products"] == [nil]
+              Product.emit_message_for_access_token
+              return
+            end  
             return if response["products"].blank?
             response["products"].each do |product|
               create_single_product(product)

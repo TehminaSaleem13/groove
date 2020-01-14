@@ -332,6 +332,11 @@ class Product < ActiveRecord::Base
     save
   end
 
+  def self.emit_message_for_access_token
+    result = {"message" => "The Shopfiy token appears to be invalid. Please disconnect and re-authorize your Shopify store. If you see this issue occur regularly please contact GroovePacker support."}
+    GroovRealtime::emit('access_token_message', result, :tenant)
+  end
+
   def should_scan_as_single_product?
     !should_scan_as_individual_items?
   end

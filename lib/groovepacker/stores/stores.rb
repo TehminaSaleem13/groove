@@ -193,6 +193,7 @@ module Groovepacker
 		    @shopify = ShopifyCredential.find_by_store_id(@store.id)
 		    begin
 		      params[:shop_name] = nil if params[:shop_name] == 'null'
+		      params[:shop_name] = params[:shop_name].gsub(/[,()'".]+\z/,'') if params[:shop_name] != 'null'
 		      if @shopify.nil?
 		        @store.shopify_credential = ShopifyCredential.new(shop_name: params[:shop_name])
 		        new_record = true
