@@ -7,7 +7,11 @@ module Groovepacker
 
           def import
             initialize_import_objects
-            response = @client.products
+            begin
+              response = @client.products
+            rescue
+              Product.emit_message_for_access_token
+            end
             if response["products"] == [nil]
               Product.emit_message_for_access_token
               return
