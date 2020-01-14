@@ -162,13 +162,7 @@ module StoresHelper
         @store = Store.find(store["id"])
         @store.status = store["status"]
         @result['status'] = false if !@store.save
-        if @store.status == false
-          OrderImportSummary.last.import_items.each do |import_item|
-            import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
-          end
-          import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
-          OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
-        end
+        stop_running_import if @store.status == false
       end
       OrderImportSummary.first.emit_data_to_user unless OrderImportSummary.first.nil?
     else
@@ -296,13 +290,7 @@ module StoresHelper
         @result['status'] = false
         @result['message'] = "Could not save store info"
       end
-      if @store.status == false
-        OrderImportSummary.last.import_items.each do |import_item|
-          import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
-        end
-        import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
-        OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
-      end
+      stop_running_import if @store.status == false
     end
   end
 
@@ -336,6 +324,7 @@ module StoresHelper
       @result['messages'].push('Please select a store type to create a store')
     else
       init_store_data
+      stop_running_import if @store.status == false
       # init_update_store_data
     end
     if @result['status']
@@ -346,5 +335,13 @@ module StoresHelper
       @result['status'] = false
       @result['messages'].push("Current user does not have permission to create or edit a store")
     end
+  end
+
+  def stop_running_import
+    OrderImportSummary.last.import_items.each do |import_item|
+      import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
+    end
+    import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
+    OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
   end
 end
