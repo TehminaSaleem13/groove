@@ -138,6 +138,36 @@ module Groovepacker
                 end
               end
             end
+            if !self.mapping['quaternary_sku'].nil? && self.mapping['quaternary_sku'][:position] >= 0
+              unless single_row[self.mapping['quaternary_sku'][:position]].nil?
+                tert_skus = single_row[self.mapping['quaternary_sku'][:position]].split(',')
+                tert_skus.each do |tert_single_sku|
+                  unless single_row_skus.include? tert_single_sku.strip
+                    single_row_skus << tert_single_sku.strip
+                  end
+                end
+              end
+            end
+            if !self.mapping['quinary_sku'].nil? && self.mapping['quinary_sku'][:position] >= 0
+              unless single_row[self.mapping['quinary_sku'][:position]].nil?
+                tert_skus = single_row[self.mapping['quinary_sku'][:position]].split(',')
+                tert_skus.each do |tert_single_sku|
+                  unless single_row_skus.include? tert_single_sku.strip
+                    single_row_skus << tert_single_sku.strip
+                  end
+                end
+              end
+            end
+            if !self.mapping['senary_sku'].nil? && self.mapping['senary_sku'][:position] >= 0
+              unless single_row[self.mapping['senary_sku'][:position]].nil?
+                tert_skus = single_row[self.mapping['senary_sku'][:position]].split(',')
+                tert_skus.each do |tert_single_sku|
+                  unless single_row_skus.include? tert_single_sku.strip
+                    single_row_skus << tert_single_sku.strip
+                  end
+                end
+              end
+            end
             single_row_skus
           end
 
@@ -400,7 +430,7 @@ module Groovepacker
             else
               record[:product_record_serial] = false
             end  
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3])
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3], :custom_product_display_1 =>  record[:custom_product_display_1], :custom_product_display_2 => record[:custom_product_display_2], :custom_product_display_3 => record[:custom_product_display_3])
                         
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
@@ -477,6 +507,18 @@ module Groovepacker
 
             if !self.mapping['type_scan_enabled'].nil? && record[:type_scan_enabled] != "[DELETE]"
               duplicate_product.type_scan_enabled = record[:type_scan_enabled]
+            end
+             
+            if !self.mapping['custom_product_display_1'].nil? && record[:custom_product_display_1] != "[DELETE]"
+              duplicate_product.custom_product_display_1 = record[:custom_product_display_1]
+            end
+
+            if !self.mapping['custom_product_display_2'].nil? && record[:custom_product_display_2] != "[DELETE]"
+              duplicate_product.custom_product_display_2 = record[:custom_product_display_2]
+            end
+
+            if !self.mapping['custom_product_display_3'].nil? && record[:custom_product_display_3] != "[DELETE]"
+              duplicate_product.custom_product_display_3 = record[:custom_product_display_3]
             end
 
             if !self.mapping['is_skippable'].nil? && record[:is_skippable] != "[DELETE]"
@@ -698,6 +740,9 @@ module Groovepacker
                     usable_record[:new_sku] <<  single_row[self.mapping['sku'][:position]].split(',')[0]
                     usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0] rescue nil
                     usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0] rescue nil
+                    usable_record[:new_sku] <<  single_row[self.mapping['quaternary_sku'][:position]].split(',')[0] rescue nil
+                    usable_record[:new_sku] <<  single_row[self.mapping['quinary_sku'][:position]].split(',')[0] rescue nil
+                    usable_record[:new_sku] <<  single_row[self.mapping['senary_sku'][:position]].split(',')[0] rescue nil
                   rescue Exception => e
                     Rollbar.error(e, e.message)
                   end
