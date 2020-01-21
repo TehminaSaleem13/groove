@@ -175,7 +175,7 @@ module Groovepacker
               weight: item["Weight"],
               store_product_id: item["ID"]
             )
-
+            product.add_product_activity("Product Import","#{product.store.try(:name)}")
             found_sku = false
             #SKU
             unless item["SKU"].nil?

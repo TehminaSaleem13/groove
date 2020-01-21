@@ -15,6 +15,7 @@ module Groovepacker
             @usable_records.clear
             @found_skus = nil
             Product.import @products_to_import
+            Product.last(@products_to_import.length).each { |product| product.add_product_activity("Product Import","#{product.store.try(:name)}") }
             found_products_raw = []
             @all_unique_ids.each_slice(20000) do |ids|
               found_products_raw << Product.find_all_by_store_product_id(ids)  
@@ -400,7 +401,7 @@ module Groovepacker
               record[:product_record_serial] = false
             end  
             single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :spl_instructions_4_packer => record[:spl_instructions_4_packer], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3])
-
+                        
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
             if record[:skus].length > 0 && record[:barcodes].length > 0

@@ -86,6 +86,8 @@ module Groovepacker
             end 
             product = Product.create(store: credential.store, store_product_id: 0,
                                      name: item["name"])
+
+            product.add_product_activity("Product Import","#{product.store.try(:name)}")
             product.product_skus.create(sku: sku)
             set_product_fields(product, item, credential)
           end

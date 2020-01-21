@@ -351,6 +351,7 @@ module Groovepacker
     
           if product.save
             #images
+            product.add_product_activity("Product Import","#{product.store.try(:name)}")
             product_xml[:images].each do |product_image|
               if product.product_images.where(image: product_image).empty?
                 product.product_images.create(image: product_image)

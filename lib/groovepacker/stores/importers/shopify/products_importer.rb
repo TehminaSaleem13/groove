@@ -111,6 +111,7 @@ module Groovepacker
               product = Product.create(name: variant["title"], store: @store,
                                        store_product_id: variant["product_id"])
               
+              product.add_product_activity("Product Import","#{product.store.try(:name)}")
               product.product_skus.create(sku: sku)
               # get product categories
               add_tags(product, shopify_product)

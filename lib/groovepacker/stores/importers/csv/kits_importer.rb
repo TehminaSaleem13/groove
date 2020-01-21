@@ -103,6 +103,8 @@ module Groovepacker
             kit_product.name = import_name('kit_name', single_row, kit_product)
             kit_product.save
 
+            kit_product.add_product_activity("Product Import","#{kit_product.store.try(:name)}") if kit_product_sku
+
             #import product
             if not_blank?('part_sku', single_row)
               import_kit_products(single_row, kit_product)
