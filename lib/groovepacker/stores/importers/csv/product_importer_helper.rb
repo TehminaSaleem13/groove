@@ -33,27 +33,11 @@ module Groovepacker
 
           def init_usable_record(index)
             {
-              name: '',
-              weight: 0,
-              skus: [],
-              barcodes: [],
-              store_product_id: @store_product_id_base+index.to_s,
-              cats: [],
-              images: [],
-              inventory: [],
-              product_type: '',
-              spl_instructions_4_packer: '',
-              is_intangible: false,
-              click_scan_enabled: "on",
-              is_skippable: false,
-              add_to_any_order: false,
-              type_scan_enabled: "on",
-              custom_product_1: "",
-              custom_product_2: "",
-              custom_product_3: "",
-              custom_product_display_1: false,
-              custom_product_display_2: false, 
-              custom_product_display_3: false
+              name: '', weight: 0, skus: [], barcodes: [], store_product_id: @store_product_id_base + index.to_s,
+              cats: [], images: [], inventory: [], product_type: '', spl_instructions_4_packer: '',
+              is_intangible: false, click_scan_enabled: "on", is_skippable: false, add_to_any_order: false,
+              type_scan_enabled: "on", custom_product_1: "", custom_product_2: "", custom_product_3: "",
+              custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false
             }
           end
 
@@ -367,6 +351,43 @@ module Groovepacker
                   @product_import.status = 'importing_skus'
                 end
                 @product_import.save
+              end
+            end
+          end
+
+          def overwrite_existing_product(record)
+            product = find_product(record)
+            delete_product(record)
+            record[:images].each_with_index do |image, new_order|
+              product.product_images.find_by_order(new_order).destroy if image == "[DELETE]" rescue nil
+            end
+            (product.try(:product_images) || []).each do |image, index|
+              image.order = index
+              image.save
+            end
+            product.update_attribute(:name, "Product created from CSV import") if record[:name] == "[DELETE]"
+            pro_barcodes = product.try(:product_barcodes)
+            barcodes = record[:all_barcodes]
+            (pro_barcodes || []).each_with_index do |barcode, index|
+              pro_barcodes.where(:order => index)[0].destroy if barcodes["#{index}"][0] == "[DELETE]"  rescue nil
+            end
+            (product.try(:product_barcodes) || []).each_with_index do |barcode, index|
+              barcode.update_attribute(:order, index)
+            end
+            record[:cats].each_with_index do |cat, index|
+              product.product_cats[index].destroy if cat == "[DELETE]" rescue nil
+            end
+            product.update_attribute(:spl_instructions_4_packer, nil) if record[:spl_instructions_4_packer] == "[DELETE]"
+            product.update_attribute(:product_receiving_instructions, nil) if record[:product_receiving_instructions] == "[DELETE]"
+            product.update_attribute(:weight, nil) if record[:weight] == "[DELETE]"
+            record[:inventory].each_with_index do |inventory, index|
+              begin
+                product_inv = product.product_inventory_warehousess[index]
+                product_inv.update_attribute(:location_primary, nil) if inventory[:location_primary] == "[DELETE]"
+                product_inv.update_attribute(:location_secondary, nil) if inventory[:location_secondary] == "[DELETE]"
+                product_inv.update_attribute(:location_tertiary, nil) if inventory[:location_tertiary] == "[DELETE]"
+                product_inv.update_attribute(:quantity_on_hand, nil) if inventory[:quantity_on_hand] == "[DELETE]"
+              rescue
               end
             end
           end

@@ -288,4 +288,118 @@ module OrdersHelper
     end  
     return orders
   end
+
+  def update_access_restriction
+    tenant = Apartment::Tenant.current
+    stat_stream_obj = SendStatStream.new()
+    stat_stream_obj.delay.update_restriction(tenant)
+  end
+
+  def add_new_product_for_item(item, result)
+    product = Product.new
+    product.name = item.name
+    product.status = 'new'
+    product.store_id = self.store_id
+    product.store_product_id = 0
+
+    if product.save
+      product.set_product_status
+      #now add skus
+      @sku = ProductSku.new
+      @sku.sku = item.sku
+      @sku.purpose = 'primary'
+      @sku.product_id = product.id
+      result &= false if !@sku.save
+    end
+    item.product_id = product.id
+    item.save
+    import_amazon_product_details(self.store_id, item.sku, item.product_id)
+  end
+
+  def update_scanned_list(order_item, scanned_list)
+    if order_item.cached_product.is_kit == 1
+      option_products = order_item.cached_option_products
+      case order_item.cached_product.kit_parsing
+      when 'single'
+        #if single, then add order item to unscanned list
+        scanned_list.push(order_item.build_scanned_single_item)
+      when 'individual'
+        #else if individual then add all order items as children to unscanned list
+        scanned_list.push(order_item.build_scanned_individual_kit(option_products))
+      when 'depends'
+        if order_item.kit_split
+          scanned_list.push(order_item.build_scanned_individual_kit(option_products, true)) if order_item.kit_split_qty > 0
+          scanned_list.push(order_item.build_scanned_single_item(true)) if order_item.single_scanned_qty != 0
+        else
+          scanned_list.push(order_item.build_scanned_single_item)
+        end
+      end
+    else
+      # add order item to unscanned list
+      scanned_list.push(order_item.build_unscanned_single_item)
+    end
+  end
+
+  def update_unscanned_list(limited_order_items, unscanned_list)
+    limited_order_items.each do |order_item|
+      if order_item.cached_product.try(:is_kit) == 1
+        option_products = order_item.cached_option_products
+        case order_item.cached_product.kit_parsing
+        when 'single'
+          #if single, then add order item to unscanned list
+          unscanned_list.push(order_item.build_unscanned_single_item)
+        when 'individual'
+          #else if individual then add all order items as children to unscanned list
+          unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
+        when 'depends'
+          if order_item.kit_split
+            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true)) if (order_item.kit_split_qty > order_item.kit_split_scanned_qty)
+
+            if order_item.qty > order_item.kit_split_qty
+              unscanned_item = order_item.build_unscanned_single_item(true)
+              unscanned_list.push(unscanned_item) if unscanned_item['qty_remaining'] > 0
+            end
+            # unscanned_qty = order_item.qty - order_item.scanned_qty
+            # added_to_list_qty = true
+            # unscanned_qty.times do
+            #   if added_to_list_qty < unscanned_qty
+            #     individual_kit_count = 0
+
+            #     #determine no of split kits already in unscanned_list
+            #     unscanned_list.each do |unscanned_item|
+            #       if unscanned_item['product_id'] == order_item.product_id &&
+            #           unscanned_item['product_type'] == 'individual'
+            #           individual_kit_count = individual_kit_count + 1
+            #       end
+            #     end
+
+
+            #     #unscanned list building kits
+            #     if individual_kit_count < order_item.kit_split_qty
+            #       unscanned_list.push(order_item.build_unscanned_individual_kit, true)
+            #       added_to_list_qty = added_to_list_qty + order_item.kit_split_qty
+            #     else
+            #       unscanned_list.push(order_item.build_unscanned_single_item, true)
+            #     end
+            #   end
+            # end
+          else
+            unscanned_item = order_item.build_unscanned_single_item
+            unscanned_list.push(unscanned_item) if unscanned_item['qty_remaining'] > 0
+          end
+        end
+      else
+        unless order_item.cached_product.is_intangible
+          # add order item to unscanned list
+          unscanned_item = order_item.build_unscanned_single_item
+          if unscanned_item['qty_remaining'] > 0
+            loc = unscanned_item["location"].present? ? unscanned_item["location"] : " "
+            placement = "%.3i" %unscanned_item['packing_placement'] rescue unscanned_item['packing_placement']
+            unscanned_item["next_item"] = "#{placement}#{loc}#{unscanned_item['sku']}"
+            unscanned_list.push(unscanned_item)
+          end
+        end
+      end
+    end
+  end
 end

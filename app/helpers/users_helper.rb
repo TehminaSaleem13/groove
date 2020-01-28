@@ -135,4 +135,268 @@ module UsersHelper
       return false
     end  
   end
+
+  def assign_user_attributes(params)
+    @user.password = params[:password] if !params[:password].nil? && params[:password] != ''
+    @user.username = params[:username]
+    @user.email = params[:email]
+    @user.other = params[:other] if !params[:other].nil?
+    @user.password_confirmation = params[:conf_password] if !params[:conf_password].nil? && params[:conf_password] != ''
+    params[:active] = false if params[:active].blank?
+
+    @user.active = params[:active]
+
+    @user.name = params[:name].blank? ? params[:username] :  params[:name]
+    @user.last_name = params[:last_name]
+    username_change = @user.username_change
+
+    @user.view_dashboard = params[:view_dashboard] unless params[:view_dashboard].nil?
+
+    @user.dashboard_switch = params[:dashboard_switch] unless params[:dashboard_switch].nil?
+
+    @user.confirmation_code = params[:confirmation_code]
+    @user.custom_field_one = params[:custom_field_one]
+    @user.custom_field_two = params[:custom_field_two]
+  end
+
+  def assign_user_role(params)
+    if params[:role].nil? || params[:role]['id'].nil?
+      user_role = Role.find_by_name("role_#{@user.id}")
+      if user_role.nil?
+        user_role = Role.new
+        user_role.custom = true
+        user_role.display = false
+        user_role.name = "role_#{@user.id}"
+      end
+      user_role
+    else
+      user_role = Role.where(id: params[:role]['id']).last
+    end
+  end
+
+  def set_user_dashboard(params, result, user_role, new_user)
+    # Make sure we have at least one super admin
+    if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
+      User.where( is_deleted: false).eager_load(:role).where('roles.make_super_admin = 1').length <= 2 && !@user.role.nil? && @user.role.make_super_admin
+      result['status'] = false
+      result['messages'].push('The app needs at least one super admin at all times')
+    elsif !current_user.can?('make_super_admin') &&
+      ((params[:role]['make_super_admin'] && (@user.role.nil? || !@user.role.make_super_admin)) ||
+        (!params[:role]['make_super_admin'] && !@user.role.nil? && @user.role.make_super_admin))
+      result['status'] = false
+      result['messages'].push('You can not grant or revoke super admin privileges.')
+    else
+      user_role = update_role(user_role, params[:role]) if user_role.custom && !user_role.display
+      if user_role.name != @user.role.try(:name) && new_user != true
+        case user_role.name
+        when "Scan & Pack User"
+          @user.view_dashboard = "packer_dashboard"
+        when "Manager"
+          @user.view_dashboard = "packer_dashboard"
+        when "Admin"
+          @user.view_dashboard = "admin_dashboard"
+        when "Super Admin"
+          @user.view_dashboard = "admin_dashboard_with_packer_stats"
+        else
+          @user.view_dashboard = user_role.users.last.try(:view_dashboard) rescue "packer_dashboard"
+        end
+      end
+      @user.role = user_role
+    end
+  end
+
+  def set_and_return_user_info(result, new_user)
+    if @user.save
+      result['user'] = @user.attributes
+      result['user']['role'] = @user.role.attributes
+      result['user']['current_user'] = current_user
+
+      if new_user && !Rails.env.test?
+        tenant_name = Apartment::Tenant.current
+        send_user_info_obj = SendUsersInfo.new()
+        # send_user_info_obj.build_send_users_stream(tenant_name)
+        send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
+      else
+        set_custom_fields
+        send_user_info_data = SendUsersInfo.new()
+        tenant_name = Apartment::Tenant.current
+        user_data = { username: @user.username, packing_user_id: @user.id, active: @user.active, first_name: @user.name, last_name: @user.last_name, custom_field_one_key: @custom_field_one_key, custom_field_one_value: @custom_field_one_value, custom_field_two_key: @custom_field_two_key, custom_field_two_value: @custom_field_two_value}
+        send_user_info_data.delay(:run_at => 1.seconds.from_now, :queue => 'update_users_info_#{tenant_name}').update_gl_user(user_data, tenant_name) if user_data[:packing_user_id].present?
+      end
+    else
+      result['status'] = false
+      result['messages'] = @user.errors.full_messages
+    end
+  end
+
+  def retrieve_or_create_new_user(params, new_user)
+    if params[:id].nil?
+      @user = User.new
+      new_user = true
+    else
+      @user = User.find(params[:id])
+    end
+  end
+
+  def save_or_update_user(result, params, new_user)
+    if result['status']
+      assign_user_attributes(params)
+
+      user_role = assign_user_role(params)
+
+      if user_role.nil?
+        result.status = false
+        result['messages'].push('Invalid user Role')
+      else
+        set_user_dashboard(params, result, user_role, new_user)
+        role = @user.role
+        role.import_orders = params[:role][:import_orders]
+        role.save
+      end
+      set_and_return_user_info(result, new_user)
+    end
+  end
+
+  def create_existing_role(params, result)
+    if params[:role].nil?
+      result['status'] = false
+      result['messages'].push("No role data sent")
+    elsif params[:role]['new_name'].blank? || params[:role]['new_name'][0, 5] == "role_" || !Role.find_by_name(params[:role]['new_name']).nil?
+      result['status'] = false
+      result['messages'].push("Role name invalid. Please input a valid Role name")
+    else
+      if params[:role]['id'].nil?
+        user_role = Role.find_by_name("role_#{params[:id]}")
+        if user_role.nil?
+          user_role = Role.new
+        end
+      else
+        user_role = Role.find_by_id(params[:role]['id'])
+      end
+      user_role.custom = true
+      user_role.display = true
+      user_role.name = params[:role]['new_name']
+      user_role = update_role(user_role, params[:role])
+      result['role'] = user_role
+      user = User.find(params[:id])
+      if user.nil?
+        result['status'] = false
+        result['messages'].push("Role saved but could not apply to user. Please click save and close to apply manually")
+      else
+        user.role = user_role
+        user.save
+      end
+    end
+  end
+
+  def delete_existing_role(params, result)
+    if params[:role].nil? || params[:role]['id'].nil?
+      result['status'] = false
+      result['messages'].push("No role data sent")
+    else
+      if params[:role]['id'].nil?
+        user_role = Role.find_by_name("role_#{@user.id}")
+        if user_role.nil?
+          user_role = Role.new
+        end
+      else
+        user_role = Role.find_by_id(params[:role]['id'])
+      end
+
+      scan_pack_role = Role.find_by_name("Scan & Pack User")
+      User.where(:role_id => user_role.id).update_all(:role_id => scan_pack_role.id)
+      user_role.destroy
+
+      result['role'] = scan_pack_role
+    end
+  end
+
+  def create_duplicate_user(result, user)
+    @user = User.find(user["id"])
+    #@newuser = User.new
+    @newuser = @user.dup
+    index = 0
+    @newuser.username = @user.username+"(duplicate"+index.to_s+")"
+    @userslist = User.where(:username => @newuser.username)
+    begin
+      index = index + 1
+      @newuser.username = @user.username+"(duplicate"+index.to_s+")"
+      @userslist = User.where(:username => @newuser.username)
+    end while (!@userslist.nil? && @userslist.length > 0)
+
+    @newuser.password = @user.password
+    @newuser.password_confirmation = @user.password_confirmation
+    @newuser.confirmation_code = @user.confirmation_code+'1'
+    @newuser.last_sign_in_at = ''
+    if !@newuser.save(:validate => false)
+      result['status'] = false
+      result['messages'] = @newuser.errors.full_messages
+    end
+    tenant_name = Apartment::Tenant.current
+    send_user_info_obj = SendUsersInfo.new()
+    send_user_info_obj.delay(:run_at => 1.seconds.from_now, :queue => 'send_users_info_#{tenant_name}').build_send_users_stream(tenant_name)
+  end
+
+  def delete_existing_user(result, users, user_names)
+    user_count = User.where(active: true, is_deleted: false).count
+    super_admin_user = Role.find_by_name("Super Admin").users.where(active: true, is_deleted: false)
+    super_admin_user_count= super_admin_user.count
+    params['_json'].each do |user|
+      unless user['id'] == current_user.id
+        @user = User.find(user['id'])
+        if (user_count > 1 && @user.role.name != "Super Admin" ) ||  (super_admin_user[0].try(:role).try(:name) ==  @user.role.name && super_admin_user_count >= 1 )
+          unless  (super_admin_user_count == 1 && super_admin_user.map(&:id).include?(@user.id) )
+            super_admin_user_count = super_admin_user_count - 1 if ( super_admin_user.any? && super_admin_user[0].role.name ==  @user.role.name)
+            user_names << { "id" => @user.id, "username" => @user.username }
+            @user.username += '-' + Random.rand(10000000..99999999).to_s
+            @user.is_deleted = true
+            @user.active = false
+            @user.save
+            HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/delete_user",
+                    query: { username: @user.username, packing_user_id: @user.id },
+                    headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if @user.present?
+            users << @user
+          else
+            result['status'] = false
+            result['messages'].push("You must have at least one SuperAdmin user on the account.")
+          end
+        else
+          result['status'] = false
+          result['messages'].push("You must have at least one SuperAdmin user on the account.")
+        end
+      end
+    end
+  end
+
+  def send_email_reset_instruction(user, result, admin_email)
+    if user.email.blank?
+      admin_user = User.find_by_email(admin_email)
+      result[:msg] = "A password recovery link has been sent to #{admin_user.username} at #{admin_email}"
+      user.update_attribute(:email, admin_email)
+      email = user.send_reset_password_instructions
+      user.update_attribute(:email, "")
+    else
+      result[:msg] = "A password reset link has been emailed to the address associated with your user account: #{user.email}"
+      email = user.send_reset_password_instructions
+    end
+    user.reset_token = email
+    user.save!
+    result[:code] = 1
+  end
+
+  def check_and_create_duplicate_user(user, result)
+    if User.can_create_new?
+      create_duplicate_user(result, user)
+    else
+      result['status'] = false
+      result['messages'] = "You have reached the maximum limit of number of users for your subscription."
+    end
+  end
+
+  def check_for_invalid_password(params, result)
+    if !params[:password].nil? && params[:password] != '' && (params[:conf_password].blank? || params[:conf_password].length < 6)
+      result['status'] = false
+      result['messages'].push('Password and Confirm Password can not be less than 6 characters')
+    end
+  end
 end

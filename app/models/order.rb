@@ -112,26 +112,7 @@ class Order < ActiveRecord::Base
     @order_items.each do |item|
       #add new product if item is not added.
       if ProductSku.where(:sku => item.sku).length == 0 && !item.name.nil? && item.name != '' && !item.sku.nil?
-        product = Product.new
-        product.name = item.name
-        product.status = 'new'
-        product.store_id = self.store_id
-        product.store_product_id = 0
-
-        if product.save
-          product.set_product_status
-          #now add skus
-          @sku = ProductSku.new
-          @sku.sku = item.sku
-          @sku.purpose = 'primary'
-          @sku.product_id = product.id
-          if !@sku.save
-            result &= false
-          end
-        end
-        item.product_id = product.id
-        item.save
-        import_amazon_product_details(self.store_id, item.sku, item.product_id)
+        add_new_product_for_item(item, result)
       else
         item.product_id = ProductSku.where(:sku => item.sku).first.product_id
         item.save
@@ -298,40 +279,6 @@ class Order < ActiveRecord::Base
     result
   end
 
-  def does_barcode_belong_to_individual_kit(barcode)
-    result = false
-    barcode_found = false
-    product_inside_kit = false
-    matched_product_id = 0
-
-    product_barcode = ProductBarcode.where(:barcode => barcode)
-
-    if product_barcode.length > 0
-      product_barcode = product_barcode.first
-      self.order_items.each do |order_item|
-        if order_item.product_id == product_barcode.product.id
-          barcode_found = true
-          matched_product_id = order_item.product_id
-        end
-
-        if !barcode_found
-          order_item.order_item_kit_products.each do |kit|
-            if kit.product_kit_skus.product.id == product_barcode.product.id
-              barcode_found = true
-              matched_kit_id = product_kit_skus.product.id
-              matched_product_id = kit.id
-            end
-          end
-        end
-      end
-    end
-
-    if barcode_found
-      result = true if Product.find(matched_product_id).kit_parsing == 'individual'
-    end
-    result
-  end
-
   def should_the_kit_be_split(barcode)
     result = false
     product_inside_splittable_kit = false
@@ -340,11 +287,8 @@ class Order < ActiveRecord::Base
     matched_order_item_id = 0
     product_barcode = ProductBarcode.where(:barcode => barcode)
 
-    if product_barcode.length > 0
-      product_barcode = product_barcode.first
-    else
-      product_barcode = nil
-    end
+    product_barcode = product_barcode.length > 0 ? product_barcode.first : nil
+
     #check if barcode is present in a kit which has kitparsing of depends
     if !product_barcode.nil?
       self.order_items.includes(:product).each do |order_item|
@@ -446,53 +390,7 @@ class Order < ActiveRecord::Base
     grouped_data.each do |order_id, order_data|
       orders_scanning_count[order_id] =
         order_data.reduce({scanned: 0, unscanned: 0}) do |tmp_hash, data_hash|
-          if data_hash['is_kit'] == 1
-            case data_hash['kit_parsing']
-            when 'single'
-              tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
-              tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
-            when 'individual'
-              tmp_hash[:unscanned] += (
-                data_hash['order_item_qty'] * data_hash['product_kit_skus_qty']
-              ) - data_hash['kit_product_scanned_qty']
-              tmp_hash[:scanned] += data_hash['kit_product_scanned_qty']
-            when 'depends'
-              if data_hash['kit_split']
-
-                if data_hash['kit_split_qty'] > data_hash['kit_split_scanned_qty']
-                  tmp_hash[:unscanned] += (
-                    data_hash['kit_split_qty'] * data_hash['product_kit_skus_qty']
-                  ) - data_hash['kit_product_scanned_qty']
-                end
-
-                if data_hash['order_item_qty'] > data_hash['kit_split_qty']
-                  tmp_hash[:unscanned] += (
-                    data_hash['order_item_qty'] - data_hash['kit_split_qty']
-                  ) - (
-                    data_hash['order_item_scanned_qty'] - data_hash['kit_split_scanned_qty']
-                  )
-                end
-
-                if data_hash['kit_split_qty'] > 0
-                  tmp_hash[:scanned] += data_hash['kit_split_scanned_qty']
-                end
-
-                if data_hash['single_scanned_qty'] != 0
-                  tmp_hash[:scanned] += data_hash['single_scanned_qty']
-                end
-              else
-                tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
-                tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
-              end
-            end
-          else
-            # for individual items
-            unless data_hash['is_intangible'] == 1
-              tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'] rescue 0)
-            end
-
-            tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
-          end
+          update_grouped_order_date(tmp_hash, data_hash)
           tmp_hash
         end
     end
@@ -516,74 +414,8 @@ class Order < ActiveRecord::Base
         limited_order_items.unshift(barcode_in_order_item) if order_item_id
       end
     end
-    if most_recent_scanned_product
-      chek_for_recently_scanned(limited_order_items, most_recent_scanned_product)
-    end
-    limited_order_items.each do |order_item|
-      if order_item.cached_product.try(:is_kit) == 1
-        option_products = order_item.cached_option_products
-        case order_item.cached_product.kit_parsing
-        when 'single'
-          #if single, then add order item to unscanned list
-          unscanned_list.push(order_item.build_unscanned_single_item)
-        when 'individual'
-          #else if individual then add all order items as children to unscanned list
-          unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
-        when 'depends'
-          if order_item.kit_split
-            if order_item.kit_split_qty > order_item.kit_split_scanned_qty
-              unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true))
-            end
-            if order_item.qty > order_item.kit_split_qty
-              unscanned_item = order_item.build_unscanned_single_item(true)
-              if unscanned_item['qty_remaining'] > 0
-                unscanned_list.push(unscanned_item)
-              end
-            end
-            # unscanned_qty = order_item.qty - order_item.scanned_qty
-            # added_to_list_qty = true
-            # unscanned_qty.times do
-            #   if added_to_list_qty < unscanned_qty
-            #     individual_kit_count = 0
-
-            #     #determine no of split kits already in unscanned_list
-            #     unscanned_list.each do |unscanned_item|
-            #       if unscanned_item['product_id'] == order_item.product_id &&
-            #           unscanned_item['product_type'] == 'individual'
-            #           individual_kit_count = individual_kit_count + 1
-            #       end
-            #     end
-
-
-            #     #unscanned list building kits
-            #     if individual_kit_count < order_item.kit_split_qty
-            #       unscanned_list.push(order_item.build_unscanned_individual_kit, true)
-            #       added_to_list_qty = added_to_list_qty + order_item.kit_split_qty
-            #     else
-            #       unscanned_list.push(order_item.build_unscanned_single_item, true)
-            #     end
-            #   end
-            # end
-          else
-            unscanned_item = order_item.build_unscanned_single_item
-            if unscanned_item['qty_remaining'] > 0
-              unscanned_list.push(unscanned_item)
-            end
-          end
-        end
-      else
-        unless order_item.cached_product.is_intangible
-          # add order item to unscanned list
-          unscanned_item = order_item.build_unscanned_single_item
-          if unscanned_item['qty_remaining'] > 0
-            loc = unscanned_item["location"].present? ? unscanned_item["location"] : " " 
-            placement = "%.3i" %unscanned_item['packing_placement'] rescue unscanned_item['packing_placement']
-            unscanned_item["next_item"] = "#{placement}#{loc}#{unscanned_item['sku']}"
-            unscanned_list.push(unscanned_item)
-          end
-        end
-      end
-    end
+    chek_for_recently_scanned(limited_order_items, most_recent_scanned_product) if most_recent_scanned_product
+    update_unscanned_list(limited_order_items, unscanned_list)
 
     unscanned_list = unscanned_list.sort do |a, b|
       o = (a['packing_placement'] <=> b['packing_placement']);
@@ -599,11 +431,7 @@ class Order < ActiveRecord::Base
     rescue
       unscanned_list 
     end
-    if ScanPackSetting.last.scanning_sequence == "kits_sequence"
-      unscanned_list.sort_by { |row| (row["partially_scanned"] ? 0 : 1) }
-    else
-      unscanned_list
-    end  
+    ScanPackSetting.last.scanning_sequence == "kits_sequence" ? unscanned_list.sort_by { |row| (row["partially_scanned"] ? 0 : 1) } : unscanned_list
   end
 
   def find_unscanned_order_item_with_barcode(barcode)
@@ -670,33 +498,8 @@ class Order < ActiveRecord::Base
   def get_scanned_items(order_item_status: ['scanned', 'partially_scanned'], limit: 10, offset: 0)
     scanned_list = []
     self.order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
-      if order_item.cached_product.is_kit == 1
-        option_products = order_item.cached_option_products
-        case order_item.cached_product.kit_parsing
-        when 'single'
-          #if single, then add order item to unscanned list
-          scanned_list.push(order_item.build_scanned_single_item)
-        when 'individual'
-          #else if individual then add all order items as children to unscanned list
-          scanned_list.push(order_item.build_scanned_individual_kit(option_products))
-        when 'depends'
-          if order_item.kit_split
-            if order_item.kit_split_qty > 0
-              scanned_list.push(order_item.build_scanned_individual_kit(option_products, true))
-            end
-            if order_item.single_scanned_qty != 0
-              scanned_list.push(order_item.build_scanned_single_item(true))
-            end
-          else
-            scanned_list.push(order_item.build_scanned_single_item)
-          end
-        end
-      else
-        # add order item to unscanned list
-        scanned_list.push(order_item.build_unscanned_single_item)
-      end
+      update_scanned_list(order_item, scanned_list)
     end
-
 
     #transform scanned_list to move all child items into displaying as individual items
     scanned_list.each do |scanned_item|
@@ -798,10 +601,8 @@ class Order < ActiveRecord::Base
         Groovepacker::Inventory::Orders.sell(self)
       end
     elsif UNALLOCATE_STATUSES.include?(initial_status)
-      if ALLOCATE_STATUSES.include?(final_status)
-        # Unallocate -> allocate = Allocate inventory
-        Groovepacker::Inventory::Orders.allocate(self, true)
-      end
+      # Unallocate -> allocate = Allocate inventory
+      Groovepacker::Inventory::Orders.allocate(self, true) if ALLOCATE_STATUSES.include?(final_status)
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         Groovepacker::Inventory::Orders.unsell(self)
@@ -840,7 +641,7 @@ class Order < ActiveRecord::Base
           count = count + item.scanned_qty
         end
       else
-        count = count + item.scanned_qty
+        count += item.scanned_qty
       end
     end
     count
@@ -863,7 +664,7 @@ class Order < ActiveRecord::Base
           count = count + item.clicked_qty
         end
       else
-        count = count + item.clicked_qty
+        count += item.clicked_qty
       end
     end
     count
@@ -993,5 +794,49 @@ class Order < ActiveRecord::Base
     end  
     list = list.group_by { |d| d[:box] }
     result = { box: boxes.as_json(only: [:id, :name]), order_item_boxes: order_item_boxes.flatten, list: list   }
+  end
+
+  def self.update_grouped_order_date(tmp_hash, data_hash)
+    if data_hash['is_kit'] == 1
+      case data_hash['kit_parsing']
+      when 'single'
+        tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+        tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+      when 'individual'
+        tmp_hash[:unscanned] += (
+          data_hash['order_item_qty'] * data_hash['product_kit_skus_qty']
+        ) - data_hash['kit_product_scanned_qty']
+        tmp_hash[:scanned] += data_hash['kit_product_scanned_qty']
+      when 'depends'
+        if data_hash['kit_split']
+
+          if data_hash['kit_split_qty'] > data_hash['kit_split_scanned_qty']
+            tmp_hash[:unscanned] += (
+              data_hash['kit_split_qty'] * data_hash['product_kit_skus_qty']
+            ) - data_hash['kit_product_scanned_qty']
+          end
+
+          if data_hash['order_item_qty'] > data_hash['kit_split_qty']
+            tmp_hash[:unscanned] += (
+              data_hash['order_item_qty'] - data_hash['kit_split_qty']
+            ) - (
+              data_hash['order_item_scanned_qty'] - data_hash['kit_split_scanned_qty']
+            )
+          end
+
+          tmp_hash[:scanned] += data_hash['kit_split_scanned_qty'] if data_hash['kit_split_qty'] > 0
+
+          tmp_hash[:scanned] += data_hash['single_scanned_qty'] if data_hash['single_scanned_qty'] != 0
+        else
+          tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'])
+          tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+        end
+      end
+    else
+      # for individual items
+      tmp_hash[:unscanned] += (data_hash['order_item_qty'] - data_hash['order_item_scanned_qty'] rescue 0) unless data_hash['is_intangible'] == 1
+
+      tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
+    end
   end
 end
