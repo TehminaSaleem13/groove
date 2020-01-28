@@ -95,6 +95,7 @@ module Groovepacker
               @result[:previous_imported] = @result[:previous_imported] + 1
             else  
               @productdb.save
+              @productdb.add_product_activity("Product Import","#{@productdb.store.try(:name)}")
               import_amazon_product_details(@credential.store.id, @productdbsku.sku, @productdb.id)
               @result[:success_imported] = @result[:success_imported] + 1
             end

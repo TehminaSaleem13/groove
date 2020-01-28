@@ -129,6 +129,7 @@ module Groovepacker
               @productdb.product_inventory_warehousess << inv_wh
 
               @productdb.save
+              @productdb.add_product_activity("Product Import","#{@productdb.store.try(:name)}")
               make_product_intangible(@productdb)
               @productdb.set_product_status
               product_id = @productdb.id

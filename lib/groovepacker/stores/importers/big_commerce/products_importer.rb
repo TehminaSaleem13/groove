@@ -73,7 +73,7 @@ module Groovepacker
                                        store_product_id: bc_product["id"],
                                        weight: bc_product["weight"])
               product.product_skus.create(sku: sku)
-
+              product.add_product_activity("Product Import","#{product.store.try(:name)}")
               #get from products api
               #we are fetching product again here because the order_item may also
               #be passed as bc_product in this method.

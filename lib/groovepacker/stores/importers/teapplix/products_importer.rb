@@ -102,6 +102,7 @@ module Groovepacker
               
               if product.blank?
                 product = Product.create(name: teapplix_product["item_title"], store: @store)
+                product.add_product_activity("Product Import","#{product.store.try(:name)}")
               end
               return  product
             end
