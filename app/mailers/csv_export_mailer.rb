@@ -62,9 +62,15 @@ class CsvExportMailer < ActionMailer::Base
     mail to: recipients, subject: "[#{tenant}] Product Export CSV" if recipients.present? 
   end
 
-  def import_log(url, tenant, order) 
+  def send_product_barcode_label(url, tenant)
+    recipients = GeneralSetting.all.first.email_address_for_packer_notes.split(',') rescue []
     @url = url
-    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "[#{tenant}] #{order} CSV Log" 
+    mail to: recipients, subject: "[#{tenant}] Product Barcode Label" if recipients.present?
+  end
+
+  def import_log(url, tenant, order)
+    @url = url
+    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "[#{tenant}] #{order} CSV Log"
   end
 
   def export_scanned_time_log(url)

@@ -169,8 +169,19 @@ class ProductsController < ApplicationController
     else
       url = scan_pack_object.print_label_with_delay(params)
       render json: {url: url}
-    end  
+    end
+  end
 
+  def print_product_barcode_label
+    params[:tenant] =  Apartment::Tenant.current
+    scan_pack_object = ScanPack::Base.new
+    if (params["productArray"].count > 20 || params["select_all"] == true)
+      val = scan_pack_object.delay.print_product_barcode_label_with_delay(params)
+      render json: {}
+    else
+      url = scan_pack_object.print_product_barcode_label_with_delay(params)
+      render json: {}
+    end
   end
 
   def generate_barcode

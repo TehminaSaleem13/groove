@@ -235,6 +235,30 @@ module ScanPack
       url
     end
 
+    def print_product_barcode_label_with_delay(params)
+      require 'wicked_pdf'
+      Apartment::Tenant.switch params[:tenant]
+      @products = list_selected_products(params)
+      action_view = do_get_action_view_object_for_html_rendering
+      reader_file_path = do_get_pdf_file_path(@products.count.to_s)
+      @tenant_name = Apartment::Tenant.current
+      file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+      pdf_html = action_view.render :template => "products/print_barcode_label.html.erb", :layout => nil, :locals => {:@products => @products}
+      common(pdf_html, reader_file_path, '1.12in', '3in', {:top => '0.9', :bottom => '0', :left => '0', :right => '0'} )
+      base_file_name = File.basename(pdf_path)
+      pdf_file = File.open(reader_file_path)
+      GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
+      pdf_file.close
+      url = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+      if @products.count < 1000
+        GroovRealtime::emit('barcode_lable', url, :tenant)
+      else
+        GroovRealtime::emit('barcode_lable_email', url, :tenant)
+        CsvExportMailer.send_product_barcode_label(url, Apartment::Tenant.current).deliver
+      end
+      url
+    end
 
     def common(pdf_html, reader_file_path, h, w, val )
       doc_pdf = WickedPdf.new.pdf_from_string(

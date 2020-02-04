@@ -134,6 +134,7 @@ Groovepacks::Application.routes.draw do
       post 'update_image'
       post 'update_intangibleness'
       post 'print_receiving_label'
+      post 'print_product_barcode_label'
       put 'update_inventory_settings'
       put 'update_inventory_record'
       put 'remove_inventory_record'
