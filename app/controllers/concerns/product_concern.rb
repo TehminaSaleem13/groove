@@ -156,6 +156,19 @@ module ProductConcern
       count
     end
 
+    def get_report_products_count
+      count, all = {}, 0
+      product_report = ProductInventoryReport.where(id: params[:report_id]).first
+      products = product_report.products
+      if product_report
+        count['all'] = products.count
+        count.merge!(products.group(:status).count)
+      end
+      params[:limit] = Product.count
+      count['search'] = params[:search].present? ? do_get_report_products(params).count : 0
+      count
+    end
+
     def execute_scan_per_product
       if params[:setting].present? && ['type_scan_enabled', 'click_scan_enabled'].include?(params[:setting])
         products = list_selected_products(params)

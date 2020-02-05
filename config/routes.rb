@@ -144,6 +144,9 @@ Groovepacks::Application.routes.draw do
       post 'bulk_barcode_generation'
       get  'bulk_barcode_pdf'
       get  'find_inactive_product'
+      get 'get_report_products'
+      put 'update_inventory_report'
+      put 'remove_inventory_report_products'
     end
     member do
       get 'generate_barcode_slip'

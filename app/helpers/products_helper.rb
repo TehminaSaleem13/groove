@@ -40,12 +40,50 @@ module ProductsHelper
     ProductsService::FindProducts.call(params)
   end
 
+  def do_get_report_products(params)
+    ProductsService::FindProducts.new(params).get_report_products
+  end
+
   def do_search(params, results_only = true)
     ProductsService::SearchProducts.call(params, results_only)
   end
 
   def self.products_csv(products, csv, bulk_actions_id = nil, bulk_csv = nil)
     ProductsService::GenerateCSV.call(products, csv, bulk_actions_id, bulk_csv)
+  end
+
+  def add_inventory_report_products(params)
+    product_report = ProductInventoryReport.where(id: params[:data][:report_id]).first
+    if product_report
+      if params[:data][:select_toggle]
+        search_params = { search: params[:data][:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
+        product_ids = params[:data][:search].present? ? do_search(search_params).map(&:id) : Product.all.map(&:id)
+      else
+        product_ids = params[:data][:selected]
+      end
+      product_report.product_ids = (product_report.product_ids << product_ids).flatten.uniq
+    end
+    @result['status'] = true
+    return @result
+  end
+
+  def remove_report_products(params)
+    product_report = ProductInventoryReport.where(id: params[:data][:report_id]).first
+    if product_report
+      if params[:data][:select_toggle]
+        search_params = { search: params[:data][:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
+        if params[:data][:search].present?
+          product_ids = do_search(search_params).map(&:id)
+          product_report.product_ids = product_report.product_ids - product_ids
+        else
+          product_report.product_ids = []
+        end
+      else
+        product_report.product_ids = product_report.product_ids - params[:data][:selected]
+      end
+    end
+    @result['status'] = true
+    return @result
   end
 
   def make_product_intangible(product)
@@ -112,14 +150,23 @@ module ProductsHelper
 
   def update_inv_record(data, params)
     selected_ids = data["selected"] || data["selected_id"]
-    products = data["select_toggle"] ? Product.all : Product.where("id in (?)", selected_ids)
+
+    if data["select_toggle"]
+      search_params = { search: data[:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
+      product_ids = data[:search].present? ? do_search(search_params).map(&:id) : Product.all.map(&:id)
+    else
+      product_ids = data[:selected]
+    end
+
     id = data["report_id"] || params["data"]["id"]
     report = id.present? ? ProductInventoryReport.find(id) : ProductInventoryReport.new
+    unless report.persisted?
+      report.scheduled = data["scheduled"]
+      report.type = data["type"]
+      report.product_ids = product_ids
+    end
     report_name = data["report_name"] || data["name"]
     report.name = report_name.present? ? report_name : "Default Report"
-    report.scheduled = data["scheduled"] 
-    report.type = data["type"] 
-    report.products = products
     report.save
     @result["status"] = true
     @result

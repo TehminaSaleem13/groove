@@ -158,6 +158,24 @@ class ProductsController < ApplicationController
 
     render json: @result
   end
+  
+  def get_report_products
+    @products = do_get_report_products(params)
+    @result = @result.merge({ 'products' => make_products_list(@products),
+                              'products_count' => get_report_products_count()
+                            })
+    render json: @result
+  end
+
+  def update_inventory_report
+    @result = add_inventory_report_products(params)
+    render json: @result
+  end
+
+  def remove_inventory_report_products
+    @result = remove_report_products(params)
+    render json: @result
+  end
 
   #This method will generate pdf for receiving inventory label, upload to S3 and return result as url of uploaded file
   def print_receiving_label
