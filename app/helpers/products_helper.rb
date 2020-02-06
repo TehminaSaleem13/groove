@@ -155,16 +155,14 @@ module ProductsHelper
       search_params = { search: data[:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
       product_ids = data[:search].present? ? do_search(search_params).map(&:id) : Product.all.map(&:id)
     else
-      product_ids = data[:selected]
+      product_ids = selected_ids
     end
 
     id = data["report_id"] || params["data"]["id"]
     report = id.present? ? ProductInventoryReport.find(id) : ProductInventoryReport.new
-    unless report.persisted?
-      report.scheduled = data["scheduled"]
-      report.type = data["type"]
-      report.product_ids = product_ids
-    end
+    report.scheduled = data["scheduled"] if id.present?
+    report.type = data["type"] if id.present?
+    report.product_ids = product_ids unless report.persisted?
     report_name = data["report_name"] || data["name"]
     report.name = report_name.present? ? report_name : "Default Report"
     report.save
