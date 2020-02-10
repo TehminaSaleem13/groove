@@ -67,12 +67,14 @@ module Groovepacker
         order.reallocate_inventory = params[:reallocate_inventory]
         order.scanned_by_status_change = false
         if params[:status] == 'scanned'
-          update_status_and_add_activity(order, username) 
+          update_status_and_add_activity(order, username)
           order.order_items.each do |order_item|
-            order_item.scanned_status = "scanned"
+            order_item.scanned_status = 'scanned'
             order_item.save
           end
-        end  
+        else
+          order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
+        end
         order.packing_user_id = User.find_by_username(username).try(:id)
         return if order.save
         set_status_and_message(false, order.errors.full_messages)

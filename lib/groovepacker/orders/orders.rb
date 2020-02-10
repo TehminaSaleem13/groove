@@ -19,10 +19,11 @@ module Groovepacker
               order_item.scanned_status = "scanned"
               order_item.save
             end
-            add_activity(order, @current_user.name) 
+            add_activity(order, @current_user.name)
           else
             order.scanned_by_status_change = false
-          end  
+            order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", @current_user.name)
+          end
         elsif @params[:var] == 'ordernum'
           order.increment_id = @params[:value]
         elsif @params[:var] == 'notes' && @current_user.can?('create_edit_notes')
