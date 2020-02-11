@@ -174,7 +174,7 @@ module UsersHelper
     end
   end
 
-  def set_user_dashboard(params, result, user_role, new_user)
+  def set_user_dashboard(params, result, user_role)
     # Make sure we have at least one super admin
     if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
       User.where( is_deleted: false).eager_load(:role).where('roles.make_super_admin = 1').length <= 2 && !@user.role.nil? && @user.role.make_super_admin
@@ -187,7 +187,7 @@ module UsersHelper
       result['messages'].push('You can not grant or revoke super admin privileges.')
     else
       user_role = update_role(user_role, params[:role]) if user_role.custom && !user_role.display
-      if user_role.name != @user.role.try(:name) && new_user != true
+      if user_role.name != @user.role.try(:name) && @new_user != true
         case user_role.name
         when "Scan & Pack User"
           @user.view_dashboard = "packer_dashboard"
@@ -205,13 +205,12 @@ module UsersHelper
     end
   end
 
-  def set_and_return_user_info(result, new_user)
+  def set_and_return_user_info(result)
     if @user.save
       result['user'] = @user.attributes
       result['user']['role'] = @user.role.attributes
       result['user']['current_user'] = current_user
-
-      if new_user && !Rails.env.test?
+      if @new_user && !Rails.env.test?
         tenant_name = Apartment::Tenant.current
         send_user_info_obj = SendUsersInfo.new()
         # send_user_info_obj.build_send_users_stream(tenant_name)
@@ -229,16 +228,16 @@ module UsersHelper
     end
   end
 
-  def retrieve_or_create_new_user(params, new_user)
+  def retrieve_or_create_new_user(params)
     if params[:id].nil?
       @user = User.new
-      new_user = true
+      @new_user = true
     else
       @user = User.find(params[:id])
     end
   end
 
-  def save_or_update_user(result, params, new_user)
+  def save_or_update_user(result, params)
     if result['status']
       assign_user_attributes(params)
 
@@ -248,12 +247,12 @@ module UsersHelper
         result.status = false
         result['messages'].push('Invalid user Role')
       else
-        set_user_dashboard(params, result, user_role, new_user)
+        set_user_dashboard(params, result, user_role)
         role = @user.role
         role.import_orders = params[:role][:import_orders]
         role.save
       end
-      set_and_return_user_info(result, new_user)
+      set_and_return_user_info(result)
     end
   end
 

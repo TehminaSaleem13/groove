@@ -58,10 +58,10 @@ class UsersController < ApplicationController
     result['status'] = true
     result['messages'] = []
     if current_user.can? 'add_edit_users'
-      new_user = false
-      retrieve_or_create_new_user(params, new_user)
+      @new_user = false
+      retrieve_or_create_new_user(params)
       check_for_invalid_password(params, result)
-      save_or_update_user(result, params, new_user)
+      save_or_update_user(result, params)
     else
       result['status'] = false
       result['messages'].push("Current user doesn't have permission to Add or Edit users")
