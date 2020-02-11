@@ -88,7 +88,7 @@ module SettingsHelper
         :inventory_tracking, :low_inventory_alert_email,
         :low_inventory_email_address, :send_email_for_packer_notes,
         :default_low_inventory_alert_limit,
-        :default_low_inventory_alert_limit, :export_items,
+        :email_address_for_billing_notification, :export_items,
         :export_items, :max_time_per_item, :send_email_on_mon,
         :send_email_on_tue, :send_email_on_wed, :send_email_on_thurs,
         :send_email_on_fri, :send_email_on_sat, :send_email_on_sun,
