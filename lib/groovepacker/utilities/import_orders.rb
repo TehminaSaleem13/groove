@@ -11,10 +11,10 @@ class ImportOrders < Groovepacker::Utilities::Base
     # add import item for each store
     stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
     stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
-    order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all    
+    order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
     initiate_import(tenant)
     last_status = GrooveBulkActions.last.try(:status)
-    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending") 
+    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending")
   end
 
   def add_import_item_for_active_stores(store)
@@ -45,7 +45,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       next if import_item.status == "cancelled"
       import_orders_with_import_item(import_item, tenant)
     end
-    update_import_summary if OrderImportSummary.find_by_id(@order_import_summary.id).present? 
+    update_import_summary if OrderImportSummary.find_by_id(@order_import_summary.id).present?
   end
 
   def update_import_summary
@@ -64,6 +64,29 @@ class ImportOrders < Groovepacker::Utilities::Base
       result.merge({:status => false, :messages => "An import is already running."})
     end
     result
+  end
+
+  def import_range_import(params)
+    Apartment::Tenant.switch params[:tenant]
+    import_item = ImportItem.create(store_id: params[:store_id], import_type: params[:import_type])
+    store = Store.find(params[:store_id])
+    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+    context = Groovepacker::Stores::Context.new(handler)
+    if params[:import_type] == 'range_import'
+      context.range_import_for_ss(params[:start_date], params[:end_date], params[:order_date_type] )
+    else
+      fetched_order = Order.find_by_increment_id(params[:order_id])
+      context.quick_fix_import(params[:import_date], fetched_order.id)
+    end
+  end
+
+  def import_missing_order(params)
+    Apartment::Tenant.switch params[:tenant]
+    store = Store.find(params[:store_id])
+    import_item = ImportItem.create(store_id: store.id)
+    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+    context = Groovepacker::Stores::Context.new(handler)
+    context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
   end
 
   def run_import_for_single_store(params)
@@ -178,7 +201,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   def check_or_assign_import_item(import_item)
     return unless ImportItem.find_by_id(import_item.id).blank?
     import_item_id = import_item.id
-    import_item = import_item.dup  
+    import_item = import_item.dup
     import_item.id = import_item_id
     import_item.save
   end
@@ -192,15 +215,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_item = ImportItem.find(import_item.id) rescue new_import_item
       import_item.previous_imported = result[:previous_imported]
       import_item.success_imported = result[:success_imported]
-      if store.regular_import_v2 == true 
-        if result[:no_order] == true
-          update_status(import_item, result)
-        else
-          import_item.save
-        end
-      else
-        update_status(import_item, result)
-      end
+      update_status(import_item, result)
     rescue
     end
   end

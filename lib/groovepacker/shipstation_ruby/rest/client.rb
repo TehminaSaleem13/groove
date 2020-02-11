@@ -15,25 +15,17 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
-        def get_orders_v2(status, ord_placed_after, date_type = 'created_at', page_index)
-          start_date = order_date_start(
-            date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
-          fetch_orders_v2(status, start_date, page_index)
+        def get_orders_v2(status, ord_placed_after, date_type = 'created_at')
+          start_date = order_date_start(date_type, ord_placed_after.to_datetime.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')) unless ord_placed_after.nil?
+          fetch_orders(status, start_date)
         end
 
-         def get_orders_count_ss(status, ord_placed_after, date_type = 'created_at')
-          start_date = order_date_start(
-            date_type, ss_format(ord_placed_after)) unless ord_placed_after.nil?
-          fetch_orders_count(status, start_date)
-        end
-
-
-        def get_shipments(import_from, date_type = 'created_at')
+        def get_shipments(import_from, date_type = 'created_at', import_till = nil)
           shipments_after_last_import = []
-          start_date = shipment_date_start(date_type, ss_format(import_from))
+          shipments_date = import_till ? shipment_dates(date_type, ss_format(import_from), ss_format(import_till)) : shipment_dates(date_type, ss_format(import_from))
           page_index=1
           while page_index
-            response = @service.query("/shipments?page=#{page_index}&pageSize=200#{start_date}", nil, "get")
+            response = @service.query("/shipments?page=#{page_index}&pageSize=200#{shipments_date}", nil, "get")
             shipments_after_last_import = shipments_after_last_import.push(response["shipments"]).flatten
             break if (response["shipments"].count rescue 0)<200
             page_index +=1
@@ -53,14 +45,30 @@ module Groovepacker
           tracking_number
         end
 
+        def get_range_import_orders(start_date, end_date, type)
+          combined = { 'orders' => [] }
+          if type == "modified"
+            date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}"
+          else
+            date_val = "&orderDateStart=#{start_date}&orderDateEnd=#{end_date}"
+          end
+          page_index = 1
+          loop do
+            res = @service.query("/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC", nil, "get")
+            combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
+            page_index += 1
+            return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150
+          end
+        end
+
         def get_order_value(orderno)
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
-          response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno } 
+          response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
           if response["orders"].present?
             return response["orders"]
           else
             response = @service.query("/shipments?trackingNumber=#{orderno}", nil, "get")
-            return nil if response["shipments"].blank? 
+            return nil if response["shipments"].blank?
             shipment = response["shipments"].first
             get_order_value(shipment["orderNumber"])
           end
@@ -75,7 +83,7 @@ module Groovepacker
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
           response = (response.class == String ? {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1} : response)
           begin
-            response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno } 
+            response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
           rescue
             response = {"orders"=>[], "total"=>0, "page"=>1, "pages"=>1}
           end
@@ -139,27 +147,6 @@ module Groovepacker
         end
 
 
-        def get_orders_by_tag_v2(tagId, page_index)
-          response = { 'orders' => [] }
-          unless tagId == -1
-            %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
-              res = find_orders_by_tag_and_status_v2(tagId, status, page_index)
-              response['orders'] = response['orders'] + res["orders"] unless res["orders"].nil?  rescue nil
-            end
-          end
-          response
-        end
-
-        def get_orders_count_by_tag_v2(tagId)
-          total_response_count = 0
-          unless tagId == -1
-            %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
-              res = find_orders_by_tag_and_status_v2_count(tagId, status, 1)
-              total_response_count = total_response_count + res["total"].to_i  rescue 0
-            end
-          end
-          total_response_count
-        end
 
         def find_orders_by_tag_and_status(tag_id, status)
           page_index = 1
@@ -172,14 +159,6 @@ module Groovepacker
             return orders if page_index > total_pages.to_i
           end
         end
-
-        def find_orders_by_tag_and_status_v2(tag_id, status, page_index)
-          response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
-        end
-
-      def find_orders_by_tag_and_status_v2_count(tag_id, status, page_index)
-          response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=1", nil, "get")
-      end
 
         def check_gpready_awating_order(tag_id)
           response = @service.query("/orders/listbytag?orderStatus=awaiting_payment&tagId=#{tag_id}&page=1&pageSize=1", nil, "get")
@@ -211,11 +190,6 @@ module Groovepacker
           end
         end
 
-        def fetch_orders_v2(status, start_date, page_index)
-          res = @service.query("/Orders?orderStatus=" \
-              "#{status}&page=#{page_index}&pageSize=100#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, "get")
-        end
-
         def fetch_orders_count(status, start_date)
           page_index = 1
           res = @service.query("/Orders?orderStatus=" \
@@ -231,25 +205,25 @@ module Groovepacker
             tracking_number = s['trackingNumber']
             break
           end
-          
+
           tracking_number
         end
 
         def order_date_start(import_date_type, order_placed_after)
           if import_date_type == 'created_at'
             "&orderDateStart=#{order_placed_after}"
-          elsif %w(modified_at quick_created_at).include?(import_date_type)
-            if import_date_type == 'quick_created_at'
-              predicate = 'orderDateStart'
-            else
+          elsif %w(modified_at).include?(import_date_type)
               predicate = 'modifyDateStart'
-            end
             "&#{predicate}=#{order_placed_after}"
           end
         end
 
-        def shipment_date_start(import_date_type, shipment_after)
-          "&createDateStart=#{shipment_after}&createDateEnd=#{Date.today}"
+        def shipment_dates(import_date_type, shipment_after, shipment_till = nil)
+          if shipment_till
+            "&createDateStart=#{shipment_after}&createDateEnd=#{shipment_till}"
+          else
+            "&createDateStart=#{shipment_after}&createDateEnd=#{Date.today}"
+          end
         end
 
         def ss_format(start_date)

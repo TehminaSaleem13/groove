@@ -208,7 +208,7 @@ module OrdersHelper
                 'w') do |f|
         f.write blob
       end
-    end  
+    end
     #increment_id
   end
 
@@ -261,8 +261,8 @@ module OrdersHelper
                           'tags' => order.order_tags,
                           'custom_field_one' => order.custom_field_one,
                           'custom_field_two' => order.custom_field_two,
-                          'store_order_id' => order.store_order_id
-                        })
+                          'store_order_id' => order.store_order_id,
+                          'last_modified' => order.last_modified })
   end
 
   def avg_time_per_item(username)
@@ -283,9 +283,9 @@ module OrdersHelper
     params["sort"] = "order_placed_time" if params["sort"] == "order_date"
     begin
       orders = orders.order("#{params[:sort]} #{params[:order]}")
-    rescue 
+    rescue
       orders
-    end  
+    end
     return orders
   end
 

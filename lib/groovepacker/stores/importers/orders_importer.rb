@@ -33,7 +33,7 @@ module Groovepacker
               handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
               context = Groovepacker::Stores::Context.new(handler)
               if store.store_type == "Shipstation API 2"
-                context.import_single_order_from_ss_rest(order_no, user_id)
+                context.import_single_order_from_ss_rest(order_no, user_id, true)
               else
                 context.import_single_order_from(order_no)
               end

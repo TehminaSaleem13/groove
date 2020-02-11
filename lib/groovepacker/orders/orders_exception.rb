@@ -24,9 +24,9 @@ module Groovepacker
 
         #Items
         destroy_object_if_not_defined(order.order_items, @params[:single]['items'], 'items')
-        
+
         add_update_order_item(order)
-        
+
         #activity
         #As activities only get added, no updating or adding required
         activities = OrderActivity.where(:order_id => @params[:single]['basicinfo']['id'])
@@ -48,7 +48,7 @@ module Groovepacker
         def create_or_update_exception
           @exception = @order.order_exception
           @exception = assign_values_to_exception
-          
+
           if @exception.save
             username = @params[:assoc][:name] rescue ""
             @order.addactivity("Order Exception Associated with #{username} - Recorded", @current_user.name)
@@ -63,7 +63,7 @@ module Groovepacker
 
           @exception.reason = @params[:reason]
           @exception.description = @params[:description]
-          
+
           if !@params[:assoc].nil? && !@params[:assoc][:id] != 0
             @exception.user_id = @params[:assoc][:id]
           end
@@ -86,17 +86,17 @@ module Groovepacker
 
           attributes = ["id", "created_at", "updated_at", "order_id", "product_id"] << new_attr
           if current_ex_or_items_array.present?
-            current_ex_or_items_array.each do |value|
+            current_ex_or_items_array.to_unsafe_hash.each do |value|
               single_item_or_ex[value[0]] = value[1] unless attributes.include?(value[0])
             end
-          end  
+          end
           single_item_or_ex.save!
         end
 
         def destroy_object_if_not_defined(objects_array, obj_params, type)
           return if objects_array.blank?
           ids = get_ids_array_from_params(obj_params, type)
-          
+
           objects_array.each do |object|
             found_obj = false
             found_obj = true unless ids.include?(object.id)
@@ -115,7 +115,7 @@ module Groovepacker
 
         def add_update_order_item(order)
           return if @params[:single]['items'].blank?
-          
+
           @params[:single]['items'].each do |current_item|
             single_item = OrderItem.find_or_create_by_order_id_and_product_id(order.id, current_item['iteminfo']['product_id'])
             single_item = assign_values_to(single_item, current_item, 'item')

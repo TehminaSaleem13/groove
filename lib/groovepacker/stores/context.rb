@@ -65,12 +65,20 @@ module Groovepacker
         self.handler.import_single_order_from(order_no)
       end
 
-      def import_single_order_from_ss_rest(order_no, user_id)
-        self.handler.import_single_order_from(order_no, user_id )
+      def import_single_order_from_ss_rest(order_no, user_id, on_demand_quickfix = nil, controller = nil)
+        self.handler.import_single_order_from(order_no, user_id, on_demand_quickfix, controller)
       end
 
       def find_or_create_product(item)
         self.handler.find_or_create_product(item)
+      end
+
+      def range_import_for_ss(start_date, end_date, type)
+        self.handler.range_import_for_ss(start_date, end_date, type )
+      end
+
+      def quick_fix_import(import_date, order_id)
+        self.handler.quick_fix_import(import_date, order_id)
       end
 
       attr_accessor :handler

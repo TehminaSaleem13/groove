@@ -9,7 +9,7 @@ class SettingsController < ApplicationController
       current_user: current_user,
       params: params,
       tenant: Apartment::Tenant.current
-    )  
+    )
     @result = restore.delay.call
     respond_to do |format|
       format.json { render json: @result }
@@ -99,11 +99,11 @@ class SettingsController < ApplicationController
     @result['product_activity'] = current_tenant.product_activity_switch rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
-    general_settings = GeneralSetting.all.first
-    offset = general_settings.try(:time_zone).to_i
-    offset = general_settings.try(:dst) ? offset : offset+3600
-    @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
     general_setting = GeneralSetting.all.first
+    offset = general_setting.try(:time_zone).to_i
+    offset = general_setting.try(:dst) ? offset : offset + 3600
+    @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
+    @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
 
     if general_setting.present?
       @result['data']['settings'] = general_setting
@@ -121,7 +121,7 @@ class SettingsController < ApplicationController
     customer = Subscription.find_by_tenant_name(tenant) rescue nil
   end
 
-  def update_settings 
+  def update_settings
     @result = {'status' => true, 'error_messages' =>[], 'success_messages'=> [], 'notice_messages' => []}
     general_setting = GeneralSetting.all.first
     @result = upadate_setting_attributes(general_setting, current_user)
@@ -170,10 +170,10 @@ class SettingsController < ApplicationController
 
   #This method will generate barcode pdf and upload it in S3 and return url from S3
   def print_action_barcode
-    require 'wicked_pdf' 
+    require 'wicked_pdf'
     scan_pack_setting = ScanPackSetting.all.first
     @action_code = scan_pack_setting[params[:id]]
-   
+
     scan_pack_object = ScanPack::Base.new
     action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
     reader_file_path = scan_pack_object.do_get_pdf_file_path(@action_code)
@@ -246,12 +246,12 @@ class SettingsController < ApplicationController
       @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
       #@result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
     end
-    
+
     render json: @result
   end
 
   def convert_offset_in_second(offset)
-    minutes = offset.split("-")[1].present? ? -offset.split(":")[1].to_i*60 : offset.split(":")[1].to_i*60   
+    minutes = offset.split("-")[1].present? ? -offset.split(":")[1].to_i*60 : offset.split(":")[1].to_i*60
     minutes + offset.split(":")[0].to_i*3600
   end
 
@@ -262,7 +262,7 @@ class SettingsController < ApplicationController
     setting.update_attribute(:stat_status, nil) if params[:percentage].to_i.between?(1, 99)
     setting.update_attribute(:stat_status, "completed") if params[:percentage].to_i == 100
     result[:status] = "true"
-    result[:stat_status] = setting.stat_status 
+    result[:stat_status] = setting.stat_status
     render json: result
   end
 

@@ -216,7 +216,7 @@ class OrdersController < ApplicationController
       value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
       @orders = value ? sort_order(params, @orders["orders"]) : @orders["orders"]
     end
-    @orders.map(&:increment_id).each do |increment_id| generate_order_barcode_for_html(increment_id) end 
+    @orders.map(&:increment_id).each do |increment_id| generate_order_barcode_for_html(increment_id) end
   end
 
   def cancel_packing_slip
@@ -260,6 +260,12 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def import_for_ss
+    params[:tenant] = Apartment::Tenant.current
+    ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}").import_range_import(params)
+    render status: 200, nothing: true
+  end
+
   def import_xml
     begin
       order_import_summary = OrderImportSummary.find(params[:import_summary_id])
@@ -268,7 +274,7 @@ class OrdersController < ApplicationController
     rescue
       import_item = nil
     end
-    
+
     if $redis.get("#{Apartment::Tenant.current}-#{OrderImportSummary.first.try(:id)}") != 'cancelled'
       if import_item && !import_item.eql?('cancelled')
         if params[:order_xml].nil?
@@ -284,10 +290,10 @@ class OrdersController < ApplicationController
             file.write(order_xml.read)
           end
         end
-      
+
         order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params["file_name"], params["flag"])
         order_importer.process
-      
+
         if File.exists?(Rails.root.join('public', 'csv', file_name))
           File.delete(Rails.root.join('public', 'csv', file_name))
         end
@@ -365,7 +371,7 @@ class OrdersController < ApplicationController
     if current_user.can?('add_edit_order_items')
       GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user, list_selected_orders)
     else
-      set_status_and_message(false, "You do not have enough permissions to #{activity}", ['push', 'error_messages'])  
+      set_status_and_message(false, "You do not have enough permissions to #{activity}", ['push', 'error_messages'])
     end
   end
 end

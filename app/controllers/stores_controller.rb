@@ -13,12 +13,12 @@ class StoresController < ApplicationController
   end
 
   def update_include_product
-    result = check_include_pro_or_shipping_label("update_include_product")  
+    result = check_include_pro_or_shipping_label("update_include_product")
     render json: result
   end
 
   def popup_shipping_label
-    result = check_include_pro_or_shipping_label("popup_shipping_label")  
+    result = check_include_pro_or_shipping_label("popup_shipping_label")
     render json: result
   end
 
@@ -70,40 +70,7 @@ class StoresController < ApplicationController
 
   def get_order_details
     result = {}
-    store = Store.find(params[:store_id])
-    if store.present?
-      result[:store_id] = store.id
-      result[:order_no] = params[:order_no]
-      credential  = store.shipstation_rest_credential
-      client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
-      response = client.get_order_value(params[:order_no])
-      if response.nil?
-        result[:status] = false
-      else 
-        result[:status] = true
-        time_zone = GeneralSetting.last.time_zone.to_i
-        result[:createDate] = response.last["orderDate"].to_time
-        result[:modifyDate] = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["modifyDate"]).to_time + time_zone
-        if response.last["orderStatus"] == 'awaiting_shipment'
-          result[:orderStatus] = 'Awaiting Shipment'
-        elsif response.last["orderStatus"] == 'shipped'
-          result[:orderStatus] = 'Shipped'  
-        elsif response.last["orderStatus"] == 'pending_fulfillment'
-           result[:orderStatus] = 'Pending Fulfillment'  
-        end 
-        if response.last["tagIds"].nil?
-          result[:gp_ready_status] = 'No'
-        else
-           result[:gp_ready_status] = response.last["tagIds"].include?(48826) ?  'Yes' : 'No'
-        end
-       
-      end
-    end
-    order_found = Order.where(increment_id: "#{params[:order_no]}").last
-      if order_found.present?
-        result[:gp_order_found] = order_found.status
-        result[:id] = order_found.id
-      end
+    result = get_and_import_order(params, result, current_user)
     render json: result
   end
 
@@ -168,7 +135,7 @@ class StoresController < ApplicationController
   #   end
   #   if @result['status']
   #     params[:import_images] = false if params[:import_images].nil?
-  #     params[:import_products] = false if params[:import_products].nil? 
+  #     params[:import_products] = false if params[:import_products].nil?
   #     @result = check_store_type
   #   else
   #     @result['status'] = false
@@ -195,7 +162,7 @@ class StoresController < ApplicationController
         @result['messages'] = [store.errors.full_messages, store.shipstation_credential.errors.full_messages]
       elsif store_type_credientials == 'shipstation_rest_credential'
         @result['messages'] = [store.errors.full_messages, store.shipstation_rest_credential.errors.full_messages]
-      elsif store_type_credientials == 'teapplix_credential'        
+      elsif store_type_credientials == 'teapplix_credential'
         @result['messages'] = [store.errors.full_messages, store.teapplix_credential.errors.full_messages]
       end
     rescue ActiveRecord::StatementInvalid => e
@@ -277,10 +244,10 @@ class StoresController < ApplicationController
         @result['order']['data'] = file_data
       elsif type == 'product'
         @result['product']['data'] = file_data
-      end  
+      end
       File.delete(file_path)
     end
-  end 
+  end
 
   def csv_do_import
     @result = {"status"=>true, "last_row"=>0, "messages"=>[]}
@@ -405,7 +372,7 @@ class StoresController < ApplicationController
     # appName = ENV['EBAY_APP_ID']
     # certName = ENV['EBAY_CERT_ID']
     # @result['status'] = false
-    url = ENV['EBAY_SANDBOX_MODE'] == 'YES' ? "https://api.sandbox.ebay.com/ws/api.dll" : "https://api.ebay.com/ws/api.dll" 
+    url = ENV['EBAY_SANDBOX_MODE'] == 'YES' ? "https://api.sandbox.ebay.com/ws/api.dll" : "https://api.ebay.com/ws/api.dll"
     url = URI.parse(url)
     @store = EbayCredentials.where(:store_id => params[:id])
 
@@ -614,7 +581,7 @@ class StoresController < ApplicationController
     # tenant = Apartment::Tenant.current
     # export_product = ExportSsProductsCsv.new
     # export_product.delay.export_active_products(tenant)
-    # result["message"] = "Your export is being processed. It will be emailed to #{GeneralSetting.all.first.email_address_for_packer_notes} when it is ready." 
+    # result["message"] = "Your export is being processed. It will be emailed to #{GeneralSetting.all.first.email_address_for_packer_notes} when it is ready."
     # render json: result
   end
 

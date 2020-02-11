@@ -77,11 +77,11 @@ module Groovepacker
 		      current_tenant = Apartment::Tenant.current
 		      unless params[:orderfile].nil?
 		        path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
-		        order_file_data = params[:orderfile].read 
+		        order_file_data = params[:orderfile].read
 		        begin
 			      	if @store.fba_import
-			      		amazon_fba = Groovepacker::Stores::AmazonFbaStore.new(@store, params, @result) 
-			      		order_file_data = amazon_fba.fba_csv_data(order_file_data)  
+			      		amazon_fba = Groovepacker::Stores::AmazonFbaStore.new(@store, params, @result)
+			      		order_file_data = amazon_fba.fba_csv_data(order_file_data)
 			      	end
 			      rescue
 			      end
@@ -120,7 +120,7 @@ module Groovepacker
 		    else
 		      @shipstation = @shipstation.first
 		    end
-		    @shipstation.api_key = params[:api_key] 
+		    @shipstation.api_key = params[:api_key]
 		    @shipstation.api_secret = params[:api_secret]
 		    @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
 		    @shipstation.shall_import_shipped = params[:shall_import_shipped]
@@ -133,6 +133,7 @@ module Groovepacker
 		    @shipstation.return_to_order = params[:return_to_order]
 		    @shipstation.import_upc = params[:import_upc]
 		    @shipstation.allow_duplicate_order = params[:allow_duplicate_order]
+		    @shipstation.tag_import_option = params[:tag_import_option]
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
 		      @store.save!

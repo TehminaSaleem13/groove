@@ -11,133 +11,112 @@ module Groovepacker
             init_common_objects
             set_import_date_and_type
             unless statuses.empty? && gp_ready_tag_id == -1
-              get_order_and_apply_delay
+              initialize_orders_import
             else
               set_status_and_msg_for_skipping_import
             end
-            @result
-          end
-
-          def get_order_and_apply_delay
-            response = get_orders_response_count
-            if response == 0
-              @result[:no_order] = true 
-              return @result 
-            end
-            @result[:total_imported] = response.to_i
-            total_order = response.to_i
-            @total_pages = (total_order / 100.to_f).ceil
-            data = { client: @client, credential: @credential.id, result: @result, store: @store.id, import_item: @import_item.id,  import_from: self.import_from , total_pages: @total_pages, importing_time: self.importing_time, quick_importing_time: self.quick_importing_time }
-            $redis.set("#{Apartment::Tenant.current}_success_import", 0)
-            shipments_response = @client.get_shipments(import_from-1.days)
-            $redis.set("#{Apartment::Tenant.current}_shipment_response",shipments_response)
-            t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            if total_order <= 100
-              t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
-            else
-              t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_1").start_worker(data, 1, Apartment::Tenant.current)
-              t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_2").start_worker(data, 2, Apartment::Tenant.current)
-            end  
-          end
-
-
-        def start_worker(data, page_index,name)
-          get_start(data, page_index, name)
-          if data[:total_pages] == 1
-            after_import(data)
-          elsif page_index <= data[:total_pages]
-            t = Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new("a")
-            t.delay(:queue => "#{Apartment::Tenant.current}_importing_page_#{page_index + 2}").start_worker(data, page_index + 2, Apartment::Tenant.current)
-          else
-            after_import(data)
-          end       
-        end
-
-        def get_start(data, page_index,name)
-          Apartment::Tenant.switch name
-          @store = Store.find(data[:store])
-          @credential = ShipstationRestCredential.find(data[:credential])
-          @result = data[:result]
-          @import_item = ImportItem.find(data[:import_item])
-          @client = data[:client]
-          @total_pages = data[:total_pages]
-          import_from = data[:import_from]
-          import_date_type = data[:import_date_type]
-          @statuses ||= @credential.get_active_statuses
-          response = get_orders_response_v2(page_index, @statuses, import_from, set_import_date_type) 
-          if !response["orders"].blank?
-            initialize_orders_import(response) 
-            if @total_pages == page_index
-              @credential.download_ss_image = false
-              @credential.save
-            end  
-          end
-        end
-
-        def after_import(data)
-          all_delayed = Delayed::Job.where("queue LIKE ?","%#{Apartment::Tenant.current}_importing_page%" ).where(failed_at: nil).count
-          if all_delayed <= 1
-            importing_time = data[:importing_time]
-            quick_importing_time = data[:quick_importing_time]
-            if @result[:status] && @import_item != 'tagged'
-              @credential.last_imported_at = importing_time || @credential.last_imported_at
-              @credential.quick_import_last_modified = quick_importing_time || @credential.last_imported_at
-              @credential.save
-            end          
             update_orders_status
-            unless  @credential.allow_duplicate_order
-              a = Order.group(:increment_id).having("count(*) >1").count.keys
-              unless a.empty?
-                Order.where("increment_id in (?)", a).each do |o|
-                  orders = Order.where(increment_id: o.increment_id)
-                  orders.last.destroy if orders.count > 1
-                end
-              end 
-            end   
             destroy_nil_import_items
             ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
             OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all
-            @import_item.update_attributes(status: 'completed') if @import_item.status != 'cancelled' 
-            import_summary = OrderImportSummary.top_summary
-            unless import_summary.nil?
-              import_summary.emit_data_to_user(true)
-            end
+            @result
           end
-        end
 
-          def initialize_orders_import(response)
-            response['orders'] = response['orders'].sort_by { |h| h["orderDate"].split('-') } rescue response['orders']
+          def initialize_orders_import
+            response = get_orders_response
+            response['orders'] = response['orders'].sort_by { |h| h["modifyDate"].split('-') } rescue response['orders']
+            # response["orders"] = response["orders"].sort {|vn1, vn2| vn2["orderDate"] <=> vn1["orderDate"]} rescue response["orders"]
+            return @result if response["orders"].blank?
+            shipments_response = @client.get_shipments(import_from-1.days)
+            @result[:total_imported] = response["orders"].length
             initialize_import_item
-            begin
-              shipments_response =  eval $redis.get("#{Apartment::Tenant.current}_shipment_response")  rescue  []
-            rescue 
-              shipments_response = []
-            end
-           
+            @regular_import_triggered = true if @result[:status] && @import_item.import_type == 'quick'
             import_orders_from_response(response, shipments_response)
+            destroy_nil_import_items
           end
 
-          def import_single_order(order_no, user_id)
+          def range_import(start_date, end_date, type)
+            init_common_objects
+            initialize_import_item
+            start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
+            end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
+            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
+            shipments_response = @client.get_shipments(start_date, nil, end_date)
+            import_orders_from_response(response, shipments_response)
+            @import_item.destroy
+            destroy_nil_import_items
+          end
+
+          def quick_fix_import(import_date, order_id)
+            init_common_objects
+            initialize_import_item
+            import_date = Time.zone.parse(import_date) + Time.zone.utc_offset
+            last_imported_order = Order.find(order_id)
+            if Order.where('id != ?', order_id).count.zero? || Order.where('id != ?', order_id).where('last_modified > ?', last_imported_order.last_modified).blank?
+              @regular_import_triggered = true
+              start_date = !@credential.quick_import_last_modified.nil? ? @credential.quick_import_last_modified : convert_to_pst(1.day.ago)
+              end_date = convert_to_pst(Time.zone.now)
+            elsif Order.where('id != ?', order_id).where('last_modified < ?', last_imported_order.last_modified).blank?
+              start_date = last_imported_order.last_modified - 12.hours
+              end_date = convert_to_pst(Time.zone.now)
+            else
+              start_date = get_closest_date(order_id, import_date, '<')
+              end_date = get_closest_date(order_id, import_date, '>')
+            end
+            start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
+            end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
+            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
+            shipments_response = @client.get_shipments(start_date, nil, end_date)
+            import_orders_from_response(response, shipments_response)
+            @import_item.destroy
+            destroy_nil_import_items
+          end
+
+          def get_gp_time_in_pst(time)
+            gp_to_utc = convert_time_from_gp(Time.parse(time).utc)
+            convert_to_pst(gp_to_utc).strftime('%Y-%m-%d %H:%M:%S')
+          end
+
+          def convert_time_from_gp(time)
+            time_zone = GeneralSetting.last.time_zone.to_i
+            (time - time_zone).strftime('%Y-%m-%d %H:%M:%S')
+          end
+
+          def convert_to_pst(time)
+            zone = ActiveSupport::TimeZone.new('Pacific Time (US & Canada)')
+            time.to_datetime.in_time_zone(zone)
+          end
+
+          def get_closest_date(order_id, date, comparison_operator)
+            altered_date = comparison_operator == '<' ? date - 1.minute : date + 1.minute
+            sort_order = comparison_operator == '<' ? 'asc' : 'desc'
+
+            closest_date = Order.select('last_modified').where('id != ?', order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
+            return closest_date if closest_date.present?
+            date
+          end
+
+          def import_single_order(order_no, user_id, on_demand_quickfix, controller)
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
             response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
-            Order.emit_data_for_on_demand_import_v2(response, order_no, user_id)
+            Order.emit_data_for_on_demand_import_v2(response, order_no, user_id) if controller != 'stores'
             time_zone = GeneralSetting.last.time_zone.to_i
             od_tz = @import_item.created_at + time_zone
             od_utc = @import_item.created_at
-            status_set_in_gp = [] 
+            status_set_in_gp = []
             status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
             status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
             status_set_in_gp << "Shipped" if @credential.shall_import_shipped
             if response["orders"].blank?
-              log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}" , "Type" => "import failure" } 
+              log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}" , "Type" => "import failure" }
             else
               order_in_gp = Order.find_by_increment_id(order_no)
               order_in_gp = Order.find_by_tracking_num(order_no)  if order_in_gp.nil?
-              log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Create Date" => "#{order_in_gp.try(:created_at)}", "Order Modified Date" => "#{order_in_gp.try(:updated_at)}", "Order Status (the status in the OrderManager)" =>"#{(response["orders"].first["orderStatus"] rescue nil)}","Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}", "Type" => "import success" } 
+              log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Create Date" => "#{order_in_gp.try(:created_at)}", "Order Modified Date" => "#{order_in_gp.try(:updated_at)}", "Order Status (the status in the OrderManager)" =>"#{(response["orders"].first["orderStatus"] rescue nil)}","Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}", "Type" => "import success" }
             end
             summary = CsvImportSummary.find_or_create_by_log_record(log.to_json)
             summary.file_name =  ""
@@ -145,6 +124,7 @@ module Groovepacker
             summary.save
             @import_item.destroy
             destroy_nil_import_items
+            quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -156,12 +136,16 @@ module Groovepacker
               begin
                 @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
                 shipstation_order = find_or_init_new_order(order)
-                import_order_form_response(shipstation_order, order, shipments_response) 
+                import_order_form_response(shipstation_order, order, shipments_response)
+                @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
               rescue Exception => e
               end
               break if Rails.env == "test"
               sleep 0.3
             end
+            cred = @store.shipstation_rest_credential
+            cred.download_ss_image = false
+            cred.save
           end
 
           def import_order_form_response(shipstation_order, order, shipments_response)
@@ -186,7 +170,6 @@ module Groovepacker
               else
                 update_order_activity_log(shipstation_order)
               end
-              
               remove_gp_tags_from_ss(order)
             else
               @import_item.update_attributes(previous_imported: @import_item.previous_imported+1)
@@ -199,6 +182,7 @@ module Groovepacker
                                               order_placed_time: order["orderDate"], email: order["customerEmail"],
                                               shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
                                             }
+            shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
             shipstation_order = init_shipping_address(shipstation_order, order)
             shipstation_order = import_notes(shipstation_order, order)
             shipstation_order.weight_oz = order["weight"]["value"] rescue nil
@@ -228,6 +212,11 @@ module Groovepacker
             order_item.row_total = item["unitPrice"].to_f * item["quantity"].to_f
           end
 
+          def verify_awaiting_tags
+            init_common_objects
+            @client.check_gpready_awating_order(gp_ready_tag_id)
+          end
+
           private
             def statuses
               @statuses ||= @credential.get_active_statuses
@@ -235,17 +224,19 @@ module Groovepacker
 
             def set_import_date_and_type
               case @import_item.import_type
+              when 'deep'
+                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date
+                if quick_import_date.blank? || (quick_import_date <= DateTime.now - 15.days)
+                  self.import_from = DateTime.now-1.days
+                else
+                  self.import_from = quick_import_date
+                end
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
                 self.import_from = DateTime.now-1.weeks
-              when 'from_create_date'
-                @import_item.update_attribute(:import_type, "regular")
-                quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date 
               else
                 @import_item.update_attribute(:import_type, "regular")
                 last_imported_at = @credential.last_imported_at
@@ -289,53 +280,41 @@ module Groovepacker
               return shipstation_order
             end
 
-            def get_orders_response_v2(page_index, statuses, import_from, import_date_type)
+            def get_orders_response
               response = {"orders" => nil}
-              response = fetch_orders_if_import_type_is_not_tagged_v2(response, page_index, statuses, import_from, import_date_type)
-              response = fetch_tagged_orders(response,page_index)
+              response = fetch_orders_if_import_type_is_not_tagged(response)
+              response = fetch_tagged_orders(response) if @credential.tag_import_option || @import_item.import_type =="tagged"
+              if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
+                on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_tag_order_import_#{Apartment::Tenant.current}.log")
+                on_demand_logger.info("=========================================")
+                on_demand_logger.info(response["orders"].map {|a| a["orderId"]}.join(", ")) rescue on_demand_logger.info("")
+              end
               return response
             end
 
-            def get_orders_response_count
-              total_response_count  = 0
-              total_response_count = fetch_orders_count_if_import_type_is_not_tagged(total_response_count)
-              total_tagged_order_count = fetch_tagged_orders_count(total_response_count)
-              total_response_count = total_response_count + total_tagged_order_count
-              return total_response_count
-            end
-
-            def fetch_orders_count_if_import_type_is_not_tagged(total_response_count)
-              return total_response_count unless @import_item.import_type != 'tagged'
-              statuses.each do |status|
-                status_response = @client.get_orders_count_ss(status, import_from, import_date_type)
-                total_response_count = total_response_count + status_response
-              end
-              self.importing_time = DateTime.now
-              self.quick_importing_time = DateTime.now
-              return total_response_count
-            end
-
-            def fetch_orders_if_import_type_is_not_tagged_v2(response, page_index, statuses, import_from, import_date_type)
+            def fetch_orders_if_import_type_is_not_tagged(response)
               return response unless @import_item.import_type != 'tagged'
               statuses.each do |status|
-                status_response = @client.get_orders_v2(status, import_from, import_date_type, page_index)
+                status_response = @client.get_orders_v2(status, import_from, import_date_type)
                 response = get_orders_from_union(response, status_response)
               end
               return response
             end
 
-            def fetch_tagged_orders(response, page_index)
+            def fetch_tagged_orders(response)
               return response unless gp_ready_tag_id != -1
-              tagged_response = @client.get_orders_by_tag_v2(gp_ready_tag_id, page_index)
+              tagged_response = @client.get_orders_by_tag(gp_ready_tag_id)
+              #perform union of orders
+              if Apartment::Tenant.current == "rabbitair" && tagged_response['orders'].present?
+                value_1 = []
+                tagged_response['orders'].each do |order|
+                  value_1 << order["orderNumber"]
+                end
+                ImportMailer.check_old_orders(Apartment::Tenant.current, value_1)
+              end
               response = get_orders_from_union(response, tagged_response)
               return response
             end
-
-            def fetch_tagged_orders_count(total_response_count)
-              return total_response_count unless gp_ready_tag_id != -1
-              total_response_count = @client.get_orders_count_by_tag_v2(gp_ready_tag_id)
-              return total_response_count
-            end  
 
             def get_orders_from_union(response, tagged_or_status_response)
               response["orders"] = response["orders"].blank? ? tagged_or_status_response["orders"] : (response["orders"] | tagged_or_status_response["orders"])
@@ -348,7 +327,6 @@ module Groovepacker
                 'All import statuses disabled and no GP Ready tags found. Import skipped.')
               @import_item.message = 'All import statuses disabled and no GP Ready tags found. Import skipped.'
               @import_item.save
-              @result[:no_order] = true
             end
 
             def find_or_init_new_order(order)
@@ -357,6 +335,7 @@ module Groovepacker
               else
                 shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
               end
+
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy
@@ -369,6 +348,7 @@ module Groovepacker
               if shipstation_order.blank?
                 shipstation_order = Order.new(store_id: @store.id)
               elsif (order["tagIds"]||[]).include?(gp_ready_tag_id)
+                # in order to adjust inventory on deletion of order assign order status as 'cancelled'
                 shipstation_order.status = 'cancelled'
                 shipstation_order.save
                 shipstation_order.destroy
@@ -382,12 +362,9 @@ module Groovepacker
               shipstation_order.order_items.each do |item|
                 update_activity_for_single_item(shipstation_order, item)
               end
-      
               shipstation_order.set_order_status
-              v = $redis.get("#{Apartment::Tenant.current}_success_import").to_i  + 1
-              $redis.set("#{Apartment::Tenant.current}_success_import", v)
-              @result[:success_imported] =  $redis.get("#{Apartment::Tenant.current}_success_import").to_i 
-              @import_item.update_attributes(success_imported: @result[:success_imported]) 
+              @result[:success_imported] = @result[:success_imported] + 1
+              @import_item.update_attributes(success_imported: @result[:success_imported])
             end
 
             def update_order_activity_log_for_gp_coupon(shipstation_order, order)
@@ -395,15 +372,13 @@ module Groovepacker
               shipstation_order.order_items.each_with_index do |item, index|
                 if order["items"][index]["name"] == item.product.name && order["items"][index]["sku"] == item.product.primary_sku
                   update_activity_for_single_item(shipstation_order, item)
-                elsif item.product.is_intangible == true
+                else
                   shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
                 end
               end
               shipstation_order.set_order_status
-              v = $redis.get("#{Apartment::Tenant.current}_success_import").to_i  + 1
-              $redis.set("#{Apartment::Tenant.current}_success_import", v)
-              @result[:success_imported] =  $redis.get("#{Apartment::Tenant.current}_success_import").to_i 
-              @import_item.update_attributes(success_imported: @result[:success_imported]) 
+              @result[:success_imported] = @result[:success_imported] + 1
+              @import_item.update_attributes(success_imported: @result[:success_imported])
             end
 
             def update_activity_for_single_item(shipstation_order, item)

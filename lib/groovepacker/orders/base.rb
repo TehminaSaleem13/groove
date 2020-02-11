@@ -14,7 +14,7 @@ module Groovepacker
       	def supported_sort_keys
           [ 'updated_at', 'notes', 'ordernum', 'order_date', 'itemslength', 'recipient',
             'status', 'email', 'tracking_num', 'city', 'state', 'postcode', 'country',
-            'custom_field_one', 'custom_field_two', 'store_name']
+            'custom_field_one', 'custom_field_two', 'store_name', 'last_modified']
         end
 
         def supported_order_keys

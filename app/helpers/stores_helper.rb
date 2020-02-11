@@ -200,11 +200,11 @@ module StoresHelper
       day_month_sequence: params[:day_month_sequence],
       reimport_from_scratch: params[:reimport_from_scratch],
       encoding_format: params[:encoding_format]
-    }    
+    }
     # Comment everything after this line till next comment (i.e. the entire if block) when everything is moved to bulk actions
     if params[:type] == 'order'
       order_csv_import(data)
-      # if OrderImportSummary.where(status: 'in_progress').empty? 
+      # if OrderImportSummary.where(status: 'in_progress').empty?
       #   bulk_actions = Groovepacker::Orders::BulkActions.new
       #   bulk_actions.delay(:run_at => 1.seconds.from_now).import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
       #   # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
@@ -238,7 +238,7 @@ module StoresHelper
   end
 
   def order_csv_import(data)
-    if OrderImportSummary.where(status: 'in_progress').empty? 
+    if OrderImportSummary.where(status: 'in_progress').empty?
       bulk_actions = Groovepacker::Orders::BulkActions.new
       bulk_actions.delay(:run_at => 1.seconds.from_now, :queue => 'import_csv_orders').import_csv_orders(Apartment::Tenant.current, @store.id, data.to_s, current_user.id)
       # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
@@ -329,7 +329,7 @@ module StoresHelper
     end
     if @result['status']
       params[:import_images] = false if params[:import_images].nil?
-      params[:import_products] = false if params[:import_products].nil? 
+      params[:import_products] = false if params[:import_products].nil?
       @result = check_store_type
     else
       @result['status'] = false
@@ -343,5 +343,74 @@ module StoresHelper
     end
     import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
     OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
+  end
+
+  def get_and_import_order(params, result, current_user)
+    store = Store.find(params[:store_id])
+    if store.present?
+      result = { store_id: store.id, order_no: params[:order_no] }
+      credential = store.shipstation_rest_credential
+      client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
+      response = client.get_order_value(params[:order_no])
+      return result[:status] = false if response.nil?
+
+      result[:status] = true
+      result_modifyDate = Time.zone.parse(response.last["modifyDate"]) + Time.zone.utc_offset
+      result_createDate = Time.zone.parse(response.last["orderDate"]) + Time.zone.utc_offset
+
+      time_zone = GeneralSetting.last.time_zone.to_i
+      result_createDate_tz = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).utc + time_zone
+
+      result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
+        orderStatus: response.last["orderStatus"].titleize,
+        gp_ready_status: response.last["tagIds"].nil? ? 'No' : (response.last["tagIds"].include?(48826) ?  'Yes' : 'No'))
+
+      result.merge!(return_range_dates_hash(store, response.last["orderNumber"], result_modifyDate, result_createDate))
+
+      params[:current_user] = current_user.id
+      params[:tenant] = Apartment::Tenant.current
+      ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}").import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
+    end
+    order_found = Order.where(increment_id: "#{params[:order_no]}").last
+    result.merge!(gp_order_found: order_found.status, id: order_found.id) if order_found.present?
+    return result
+  end
+
+  def return_range_dates_hash(store, order_id, result_modifyDate, result_createDate)
+    dates = {}
+    credential = store.shipstation_rest_credential
+    if Order.where('increment_id != ?', order_id).count == 0 || Order.where('increment_id != ?', order_id).where('last_modified > ?', result_modifyDate).blank?
+      dates[:range_start_date] = !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified : get_time_in_pst(1.day.ago)
+      dates[:range_end_date] = get_time_in_pst(Time.zone.now)
+    elsif Order.where('increment_id != ?', order_id).where('last_modified < ? ', result_modifyDate).blank?
+      dates[:range_start_date] = result_modifyDate - 12.hours
+      dates[:range_end_date] = get_time_in_pst(Time.zone.now)
+    else
+      dates[:range_start_date] = get_closest_date(order_id, result_modifyDate, '<')
+      dates[:range_end_date] = get_closest_date(order_id, result_modifyDate, '>')
+    end
+    dates[:range_created_start_date] = get_time_in_gp(get_closest_date(order_id, result_createDate, '<'))
+    dates[:range_created_end_date] = get_time_in_gp(get_closest_date(order_id, result_createDate, '>'))
+    dates.each_pair { |key, value| dates[key] = value.strftime('%Y-%m-%d %H:%M:%S') }
+  end
+
+  def get_time_in_pst(time)
+    zone = "Pacific Time (US & Canada)"
+    pst_time = ActiveSupport::TimeZone[zone].parse(time.to_s)
+  end
+
+  def get_time_in_gp(time)
+    time = get_time_in_pst(time.strftime('%Y-%m-%d %H:%M:%S')).utc
+    time_zone = GeneralSetting.last.time_zone.to_i
+    gp_time = (time + time_zone)
+  end
+
+  def get_closest_date(order_id, date, comparison_operator)
+    altered_date = comparison_operator == '<' ? date - 1.minute : date + 1.minute
+    sort_order = comparison_operator == '<' ? 'asc' : 'desc'
+
+    closest_date = Order.select('last_modified').where('increment_id != ?', order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
+    return closest_date if closest_date.present?
+    date
   end
 end

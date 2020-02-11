@@ -44,8 +44,8 @@ module Groovepacker
                   orders = Order.where(increment_id: o.increment_id)
                   orders.last.destroy if orders.count > 1
                 end
-              end 
-            end   
+              end
+            end
             destroy_nil_import_items
           end
 
@@ -70,7 +70,7 @@ module Groovepacker
               begin
                 @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
                 shipstation_order = find_or_init_new_order(order)
-                import_order_form_response(shipstation_order, order, shipments_response) 
+                import_order_form_response(shipstation_order, order, shipments_response)
               rescue Exception => e
               end
               break if Rails.env == "test"
@@ -125,6 +125,7 @@ module Groovepacker
                                               order_placed_time: order["orderDate"], email: order["customerEmail"],
                                               shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
                                             }
+            shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
             shipstation_order = init_shipping_address(shipstation_order, order)
             shipstation_order = import_notes(shipstation_order, order)
             shipstation_order.weight_oz = order["weight"]["value"] rescue nil
@@ -244,7 +245,7 @@ module Groovepacker
                 value_1 = []
                 tagged_response['orders'].each do |order|
                   value_1 << order["orderNumber"]
-                end 
+                end
                 ImportMailer.check_old_orders(Apartment::Tenant.current, value_1)
               end
               response = get_orders_from_union(response, tagged_response)
@@ -270,7 +271,7 @@ module Groovepacker
               else
                 shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
               end
-             
+
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy

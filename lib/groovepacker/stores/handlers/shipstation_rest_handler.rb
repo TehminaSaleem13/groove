@@ -22,10 +22,10 @@ module Groovepacker
           if @store.regular_import_v2 == true
             Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
               self.build_handle).import
-          else  
+          else
             Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
               self.build_handle).import
-          end  
+          end
         end
 
         def import_images
@@ -53,10 +53,10 @@ module Groovepacker
             self.build_handle).verify_awaiting_tags
         end
 
-        def import_single_order_from(order_no, user_id)
+        def import_single_order_from(order_no, user_id, on_demand_quickfix, controller)
           if @store.on_demand_import_v2 == true
             Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).import_single_order(order_no, user_id)
+              self.build_handle).import_single_order(order_no, user_id, on_demand_quickfix, controller)
           else
             Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
               self.build_handle).import_single_order(order_no)
@@ -67,7 +67,16 @@ module Groovepacker
           Groovepacker::Stores::Importers::ShipstationRest::OrderProductImporter.new(
             self.build_handle).find_or_create_product(item)
         end
-        
+
+        def range_import_for_ss(start_date, end_date, type)
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+              self.build_handle).range_import(start_date, end_date, type)
+        end
+
+        def quick_fix_import(import_date, order_id)
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+              self.build_handle).quick_fix_import(import_date, order_id)
+        end
       end
     end
   end
