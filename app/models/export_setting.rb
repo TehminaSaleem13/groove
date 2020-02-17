@@ -136,6 +136,7 @@ class ExportSetting < ActiveRecord::Base
 
   def update_single_row(single_row, order)
     single_row[:order_number] = order.increment_id
+    single_row[:order_status] = order.status
     single_row[:order_date] = order.order_placed_time
     single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M %p")
     single_row[:address1] = order.address_1
@@ -239,6 +240,7 @@ class ExportSetting < ActiveRecord::Base
   def generate_row_mapping
     {
       order_date: '',
+      order_status: '',
       order_number: '',
       scanned_qty: '',
       packing_user: '',
@@ -251,6 +253,7 @@ class ExportSetting < ActiveRecord::Base
   def update_single_row_with_order_data(row_map, order)
     single_row = row_map.dup
     single_row[:order_number] = order.increment_id
+    single_row[:order_status] = order.status
     single_row[:scanned_qty] = order.scanned_items_count
     single_row[:order_date] = order.order_placed_time
     single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M %p")
