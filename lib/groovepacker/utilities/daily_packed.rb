@@ -10,7 +10,7 @@ class DailyPacked
     headers = ["OrderNumber", "ShipDate", "WeekDay","Status", " Tracking Number" ]
     data = CSV.generate do |csv|
       csv << headers if csv.count.eql? 0
-      orders = Order.where('order_placed_time > ? AND status != ?', Time.now() - duration.days, "scanned")
+      orders = Order.where('order_placed_time > ? AND status != ?', Time.now.beginning_of_day - duration.days, "scanned")
       begin
         get_data_into_csv(csv,orders,processing)
       rescue 
