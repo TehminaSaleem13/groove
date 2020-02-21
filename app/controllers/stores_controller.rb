@@ -74,6 +74,23 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def update_store_lro
+    result = { status: true }
+    begin
+      store = Store.find(params['store_id'])
+      cred = store.shipstation_rest_credential
+      if cred
+        new_lro = DateTime.parse(params['lro_date'])
+        new_lro = store.regular_import_v2 ? new_lro : new_lro + 8.hours
+        cred.update_attribute(:quick_import_last_modified, new_lro)
+      end
+    rescue => e
+      result[:error] = e
+      result[:status] = false
+    end
+    render json: result
+  end
+
   def connect_and_retrieve
     result = {}
     store = Store.find(params[:id])

@@ -191,6 +191,7 @@ Groovepacks::Application.routes.draw do
       post 'create_update_store'
       post 'update_store_list'
       get 'get_order_details'
+      get 'update_store_lro'
     end
     member do
       get 'verify_tags'
