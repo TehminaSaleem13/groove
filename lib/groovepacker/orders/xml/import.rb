@@ -122,7 +122,6 @@ module Groovepacker
                 import_item = order_import_summary.import_items
               end
               import_item = import_item.first
-              import_item.update_attributes(updated_orders_import: 0)
               @time_of_import = import_item.created_at 
               if import_item
                 import_item.with_lock do

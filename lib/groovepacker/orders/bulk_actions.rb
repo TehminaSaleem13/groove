@@ -197,6 +197,7 @@ module Groovepacker
                 ImportItem.where(store_id: store_id).delete_all
                 import_item = ImportItem.find_by_store_id(store_id)
                 import_item = ImportItem.new(store_id: store_id) if import_item.nil?
+                import_item.updated_orders_import = 0
                 import_item.order_import_summary_id = orderimport_summary.id
                 import_item.status = 'not_started'
                 import_item.save

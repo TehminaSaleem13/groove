@@ -59,7 +59,7 @@ class ImportItem < ActiveRecord::Base
     result[:remaining_items] = self.to_import - current_import
     result[:completed] =  Order.last(2).first.try(:increment_id)
     result[:in_progess] = self.current_increment_id
-    time = Order.last.try(:created_at) - self.created_at
+    time = Order.last.try(:updated_at) - self.created_at
     if result[:total_imported] != 0
       time_for_one_order = time / result[:total_imported].to_f
       time_for_total_order = time_for_one_order * self.to_import
