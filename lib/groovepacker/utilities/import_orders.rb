@@ -213,7 +213,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     new_import_item = import_item
     begin
       import_item = ImportItem.find(import_item.id) rescue new_import_item
-      import_item.previous_imported = result[:previous_imported]
+      import_item.updated_orders_import = result[:previous_imported]
       import_item.success_imported = result[:success_imported]
       update_status(import_item, result)
     rescue

@@ -32,11 +32,10 @@ module Groovepacker
             end
 
             def import_single_order(order)
-
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               if Order.find_by_increment_id(order["name"])
                 #mark previously imported
-                update_import_count() and return
+                update_import_count('success_updated') && return
               end
               #create order
               shopify_order = Order.new(store: @store)
@@ -133,12 +132,12 @@ module Groovepacker
             end
 
             def update_import_count(import_type = 'success_imported')
-              if import_type=='success_imported'
+              if import_type == 'success_imported'
                 @import_item.update_attributes(:success_imported => @import_item.success_imported+1)
                 @result[:success_imported] += 1
               else
-                @import_item.update_attributes(:previous_imported => @import_item.previous_imported+1)
                 @result[:previous_imported] += 1
+                @import_item.update_attributes(:updated_orders_import => @import_item.updated_orders_import+1)
               end
             end
 

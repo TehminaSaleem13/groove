@@ -49,7 +49,17 @@ module StoresHelper
       @store.regular_import_v2 = params[:regular_import_v2]
       @store.quick_fix = params[:quick_fix]
       @store.troubleshooter_option = params[:troubleshooter_option]
+      modify_store_lro if @store.regular_import_v2_changed? && @store.shipstation_rest_credential
       @store.save
+    end
+  end
+
+  def modify_store_lro
+    credential = @store.shipstation_rest_credential
+    if @store.regular_import_v2 && credential.quick_import_last_modified.present?
+      credential.update_attribute(:quick_import_last_modified, credential.quick_import_last_modified - 8.hours)
+    elsif credential.quick_import_last_modified.present?
+      credential.update_attribute(:quick_import_last_modified, credential.quick_import_last_modified + 8.hours)
     end
   end
 
@@ -381,12 +391,14 @@ module StoresHelper
   def return_range_dates_hash(store, order_id, result_modifyDate, result_createDate)
     dates = {}
     credential = store.shipstation_rest_credential
-    if Order.where('increment_id != ?', order_id).count == 0 || Order.where('increment_id != ?', order_id).where('last_modified > ?', result_modifyDate).blank?
-      dates[:range_start_date] = !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified : get_time_in_pst(1.day.ago)
+    result_modifyDate = DateTime.parse(result_modifyDate.to_s)
+    result_createDate = DateTime.parse(result_createDate.to_s)
+    if Order.where('increment_id != ?', order_id).count == 0 || Order.where('increment_id != ? AND last_modified > ?', order_id, result_modifyDate).blank?
+      dates[:range_start_date] = !credential.quick_import_last_modified.nil? ? get_store_lro(store, credential) : get_time_in_pst(1.day.ago)
       dates[:range_end_date] = get_time_in_pst(Time.zone.now)
-    elsif Order.where('increment_id != ?', order_id).where('last_modified < ? ', result_modifyDate).blank?
-      dates[:range_start_date] = result_modifyDate - 12.hours
-      dates[:range_end_date] = get_time_in_pst(Time.zone.now)
+    elsif Order.where('increment_id != ? AND last_modified < ?', order_id, result_modifyDate).blank?
+      dates[:range_start_date] = result_modifyDate - 6.hours
+      dates[:range_end_date] = result_modifyDate + 6.hours
     else
       dates[:range_start_date] = get_closest_date(order_id, result_modifyDate, '<')
       dates[:range_end_date] = get_closest_date(order_id, result_modifyDate, '>')
@@ -394,6 +406,10 @@ module StoresHelper
     dates[:range_created_start_date] = get_time_in_gp(get_closest_date(order_id, result_createDate, '<'))
     dates[:range_created_end_date] = get_time_in_gp(get_closest_date(order_id, result_createDate, '>'))
     dates.each_pair { |key, value| dates[key] = value.strftime('%Y-%m-%d %H:%M:%S') }
+  end
+
+  def get_store_lro(store, credential)
+    store.regular_import_v2 ? credential.quick_import_last_modified : credential.quick_import_last_modified - 8.hours 
   end
 
   def get_time_in_pst(time)

@@ -122,6 +122,7 @@ module Groovepacker
                 import_item = order_import_summary.import_items
               end
               import_item = import_item.first
+              import_item.update_attributes(updated_orders_import: 0)
               @time_of_import = import_item.created_at 
               if import_item
                 import_item.with_lock do
@@ -129,7 +130,7 @@ module Groovepacker
                   if result[:status]
                     import_item.status = "in_progress"
                     if order_persisted
-                      import_item.previous_imported += 1
+                      import_item.updated_orders_import += 1
                     else
                       import_item.success_imported += 1
                     end
@@ -137,7 +138,7 @@ module Groovepacker
                     #import_summary.failed_imported += 1
                   end
                   # if all are finished then mark as completed
-                  if import_item.previous_imported + import_item.success_imported == @order.total_count
+                  if import_item.updated_orders_import + import_item.success_imported == @order.total_count
                     if check_count_is_equle?
                       import_item.status = "completed"
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
@@ -153,7 +154,7 @@ module Groovepacker
                         new_orders_count = @after_import_count -  $redis.get("total_orders_#{tenant}").to_i
                         $redis.set("new_order_#{tenant}", new_orders_count)
 
-                        $redis.set("skip_order_#{Apartment::Tenant.current}", import_item.previous_imported) if import_item.previous_imported != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
+                        $redis.set("skip_order_#{Apartment::Tenant.current}", import_item.updated_orders_import) if import_item.updated_orders_import != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
 
                         if @ftp_flag == "false"
                           @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name") 

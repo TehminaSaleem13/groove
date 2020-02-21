@@ -84,6 +84,7 @@ module Groovepacker
           if @order_to_update
             @import_item.updated_orders_import += 1
             @import_item.save
+            @result[:previous_imported] += 1
           else
             @import_item.success_imported += 1
             @import_item.save

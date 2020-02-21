@@ -51,27 +51,27 @@ class ImportItem < ActiveRecord::Base
       GroovRealtime::emit('countdown_update', result, :tenant)
     end
   end
-  
+
   def get_import_item_info(store_id)
     result = {}
-    current_import =  self.success_imported + self.previous_imported
+    current_import = self.success_imported + self.updated_orders_import
     result[:total_imported] = current_import
     result[:remaining_items] = self.to_import - current_import
     result[:completed] =  Order.last(2).first.try(:increment_id)
     result[:in_progess] = self.current_increment_id
     time = Order.last.try(:created_at) - self.created_at
     if result[:total_imported] != 0
-      time_for_one_order = time / result[:total_imported].to_f 
+      time_for_one_order = time / result[:total_imported].to_f
       time_for_total_order = time_for_one_order * self.to_import
-      time_for_order_imported = time_for_one_order *  result[:total_imported]
-      time_zone_for_remaining_order =  time_for_total_order - time_for_order_imported
+      time_for_order_imported = time_for_one_order * result[:total_imported]
+      time_zone_for_remaining_order = time_for_total_order - time_for_order_imported
       result[:elapsed_time] = Time.at(time_for_order_imported).utc.strftime("%H:%M:%S")
       result[:elapsed_time_remaining] = Time.at(time_zone_for_remaining_order).utc.strftime("%H:%M:%S")
     end
     time_zone = GeneralSetting.last.time_zone.to_i
     time_zone = GeneralSetting.last.dst ? time_zone : time_zone+3600
     last_update = $redis.get("#{Apartment::Tenant.current}_#{store_id}").to_time.utc rescue nil
-    last_update = last_update.nil?  ? nil :  last_update  + time_zone
+    last_update = last_update.nil? ? nil : last_update + time_zone
     result[:last_imported_data] = last_update
     result[:store_id] = store_id
     result[:status] = true

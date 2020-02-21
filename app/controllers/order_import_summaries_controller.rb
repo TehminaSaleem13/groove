@@ -107,13 +107,14 @@ class OrderImportSummariesController < ApplicationController
 
   def get_last_modified
     result = {}
-    cred = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    store = Store.find(params["store_id"])
+    cred = store.shipstation_rest_credential
     time_zone = GeneralSetting.last.time_zone.to_i
     if cred.present?
       if cred.quick_import_last_modified.nil?
         result[:last_imported_at] = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S')
       else
-        result[:last_imported_at] = cred.quick_import_last_modified.strftime('%Y-%m-%d %H:%M:%S')
+        result[:last_imported_at] = (store.regular_import_v2 ? cred.quick_import_last_modified : cred.quick_import_last_modified - 8.hours).strftime('%Y-%m-%d %H:%M:%S')
       end
       result[:current_time] = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(Time.zone.now.to_s).strftime('%Y-%m-%d %H:%M:%S')
     end

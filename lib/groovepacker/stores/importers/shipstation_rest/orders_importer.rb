@@ -10,6 +10,7 @@ module Groovepacker
           def import
             #this method is initializing following objects: @credential, @client, @import_item, @result
             init_common_objects
+            @import_item.update_attributes(updated_orders_import: 0)
             set_import_date_and_type
             unless statuses.empty? && gp_ready_tag_id == -1
               initialize_orders_import
@@ -115,7 +116,7 @@ module Groovepacker
               end
               remove_gp_tags_from_ss(order)
             else
-              @import_item.update_attributes(previous_imported: @import_item.previous_imported+1)
+              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import+1)
               @result[:previous_imported] = @result[:previous_imported] + 1
             end
           end
@@ -271,7 +272,7 @@ module Groovepacker
               else
                 shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
               end
-
+              @order_to_update = shipstation_order.present?
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy
@@ -299,8 +300,7 @@ module Groovepacker
                 update_activity_for_single_item(shipstation_order, item)
               end
               shipstation_order.set_order_status
-              @result[:success_imported] = @result[:success_imported] + 1
-              @import_item.update_attributes(success_imported: @result[:success_imported])
+              update_import_result
             end
 
             def update_order_activity_log_for_gp_coupon(shipstation_order, order)
@@ -313,8 +313,17 @@ module Groovepacker
                 end
               end
               shipstation_order.set_order_status
-              @result[:success_imported] = @result[:success_imported] + 1
-              @import_item.update_attributes(success_imported: @result[:success_imported])
+              update_import_result
+            end
+
+            def update_import_result
+              if @order_to_update
+                @result[:previous_imported] = @result[:previous_imported] + 1
+                @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              else
+                @result[:success_imported] = @result[:success_imported] + 1
+                @import_item.update_attributes(success_imported: @result[:success_imported])
+              end
             end
 
             def update_activity_for_single_item(shipstation_order, item)

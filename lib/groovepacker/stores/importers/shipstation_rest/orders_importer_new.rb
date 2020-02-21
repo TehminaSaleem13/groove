@@ -9,6 +9,7 @@ module Groovepacker
 
           def import
             init_common_objects
+            @import_item.update_attributes(updated_orders_import: 0)
             set_import_date_and_type
             unless statuses.empty? && gp_ready_tag_id == -1
               initialize_orders_import
@@ -50,15 +51,17 @@ module Groovepacker
           def quick_fix_import(import_date, order_id)
             init_common_objects
             initialize_import_item
+            @import_item.update_attributes(:status => 'in_progress')
             import_date = Time.zone.parse(import_date) + Time.zone.utc_offset
+            import_date = DateTime.parse(import_date.to_s)
             last_imported_order = Order.find(order_id)
-            if Order.where('id != ?', order_id).count.zero? || Order.where('id != ?', order_id).where('last_modified > ?', last_imported_order.last_modified).blank?
+            if Order.where('id != ?', order_id).count.zero? || Order.where('id != ? AND last_modified > ?', order_id, last_imported_order.last_modified).blank?
               @regular_import_triggered = true
-              start_date = !@credential.quick_import_last_modified.nil? ? @credential.quick_import_last_modified : convert_to_pst(1.day.ago)
+              start_date = !@credential.quick_import_last_modified.nil? ? get_store_lro : convert_to_pst(1.day.ago)
               end_date = convert_to_pst(Time.zone.now)
-            elsif Order.where('id != ?', order_id).where('last_modified < ?', last_imported_order.last_modified).blank?
-              start_date = last_imported_order.last_modified - 12.hours
-              end_date = convert_to_pst(Time.zone.now)
+            elsif Order.where('id != ? AND last_modified < ?', order_id, last_imported_order.last_modified).blank?
+              start_date = last_imported_order.last_modified - 6.hours
+              end_date = last_imported_order.last_modified + 6.hours
             else
               start_date = get_closest_date(order_id, import_date, '<')
               end_date = get_closest_date(order_id, import_date, '>')
@@ -72,8 +75,12 @@ module Groovepacker
             destroy_nil_import_items
           end
 
+          def get_store_lro
+            @store.regular_import_v2 ? @credential.quick_import_last_modified : @credential.quick_import_last_modified - 8.hours 
+          end
+
           def get_gp_time_in_pst(time)
-            gp_to_utc = convert_time_from_gp(Time.parse(time).utc)
+            gp_to_utc = convert_time_from_gp(Time.zone.parse(time).utc)
             convert_to_pst(gp_to_utc).strftime('%Y-%m-%d %H:%M:%S')
           end
 
@@ -124,7 +131,8 @@ module Groovepacker
             summary.save
             @import_item.destroy
             destroy_nil_import_items
-            quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix
+            no_ongoing_imports = ImportItem.where("status = 'not_started' OR status = 'in_progress' AND store_id = #{@store.id}").blank?
+            quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -172,7 +180,7 @@ module Groovepacker
               end
               remove_gp_tags_from_ss(order)
             else
-              @import_item.update_attributes(previous_imported: @import_item.previous_imported+1)
+              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import+1)
               @result[:previous_imported] = @result[:previous_imported] + 1
             end
           end
@@ -335,7 +343,7 @@ module Groovepacker
               else
                 shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
               end
-
+              @order_to_update = shipstation_order.present?
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
                 shipstation_order.destroy
@@ -363,8 +371,7 @@ module Groovepacker
                 update_activity_for_single_item(shipstation_order, item)
               end
               shipstation_order.set_order_status
-              @result[:success_imported] = @result[:success_imported] + 1
-              @import_item.update_attributes(success_imported: @result[:success_imported])
+              update_import_result
             end
 
             def update_order_activity_log_for_gp_coupon(shipstation_order, order)
@@ -377,8 +384,17 @@ module Groovepacker
                 end
               end
               shipstation_order.set_order_status
-              @result[:success_imported] = @result[:success_imported] + 1
-              @import_item.update_attributes(success_imported: @result[:success_imported])
+              update_import_result
+            end
+
+            def update_import_result
+              if @order_to_update
+                @result[:previous_imported] = @result[:previous_imported] + 1
+                @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              else
+                @result[:success_imported] = @result[:success_imported] + 1
+                @import_item.update_attributes(success_imported: @result[:success_imported])
+              end
             end
 
             def update_activity_for_single_item(shipstation_order, item)

@@ -41,6 +41,7 @@ module Groovepacker
             @credential = handler[:credential]
             @client = handler[:store_handle]
             @import_item = handler[:import_item]
+            @import_item.update_attributes(updated_orders_import: 0)
             @result = self.build_result
           end
 
