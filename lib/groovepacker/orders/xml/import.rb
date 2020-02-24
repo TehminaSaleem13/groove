@@ -129,7 +129,7 @@ module Groovepacker
                   if result[:status]
                     import_item.status = "in_progress"
                     if order_persisted
-                      import_item.updated_orders_import += 1
+                      import_item.updated_orders_import += 1 rescue import_item.updated_orders_import = 1
                     else
                       import_item.success_imported += 1
                     end
@@ -137,6 +137,7 @@ module Groovepacker
                     #import_summary.failed_imported += 1
                   end
                   # if all are finished then mark as completed
+                  import_item.updated_orders_import = 0 unless import_item.updated_orders_import
                   if import_item.updated_orders_import + import_item.success_imported == @order.total_count
                     if check_count_is_equle?
                       import_item.status = "completed"
