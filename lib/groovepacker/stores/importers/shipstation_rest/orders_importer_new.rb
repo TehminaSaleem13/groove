@@ -138,12 +138,15 @@ module Groovepacker
 
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
+            @store.shipstation_rest_credential.update_attributes(bulk_import: false)
+            bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
               begin
                 @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
+                Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? bulk_ss_import += 1 : bulk_ss_import = 0
                 shipstation_order = find_or_init_new_order(order)
                 import_order_form_response(shipstation_order, order, shipments_response)
                 @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
@@ -153,6 +156,7 @@ module Groovepacker
               sleep 0.3
             end
             cred = @store.shipstation_rest_credential
+            cred.bulk_import = @import_item.status == 'in_progress' && bulk_ss_import >= 25 ? true : false
             cred.download_ss_image = false
             cred.save
           end
@@ -238,6 +242,7 @@ module Groovepacker
               when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
                 quick_import_date = @credential.quick_import_last_modified
+                quick_import_date += 1.second if @credential.bulk_import && quick_import_date
                 if quick_import_date.blank? || (quick_import_date <= DateTime.now - 15.days)
                   self.import_from = DateTime.now-1.days
                 else
