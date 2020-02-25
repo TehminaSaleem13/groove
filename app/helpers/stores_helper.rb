@@ -393,18 +393,19 @@ module StoresHelper
     credential = store.shipstation_rest_credential
     result_modifyDate = DateTime.parse(result_modifyDate.to_s)
     result_createDate = DateTime.parse(result_createDate.to_s)
-    if Order.where('increment_id != ?', order_id).count == 0 || Order.where('increment_id != ? AND last_modified > ?', order_id, result_modifyDate).blank?
+    store_orders = Order.where('store_id = ? AND increment_id != ?', store.id, order_id)
+    if store_orders.blank? || store_orders.where('last_modified > ?', result_modifyDate).blank?
       dates[:range_start_date] = !credential.quick_import_last_modified.nil? ? get_store_lro(store, credential) : get_time_in_pst(1.day.ago)
       dates[:range_end_date] = get_time_in_pst(Time.zone.now)
-    elsif Order.where('increment_id != ? AND last_modified < ?', order_id, result_modifyDate).blank?
+    elsif store_orders.where('last_modified < ?', result_modifyDate).blank?
       dates[:range_start_date] = result_modifyDate - 6.hours
       dates[:range_end_date] = result_modifyDate + 6.hours
     else
-      dates[:range_start_date] = get_closest_date(order_id, result_modifyDate, '<')
-      dates[:range_end_date] = get_closest_date(order_id, result_modifyDate, '>')
+      dates[:range_start_date] = get_closest_date(store.id, order_id, result_modifyDate, '<')
+      dates[:range_end_date] = get_closest_date(store.id, order_id, result_modifyDate, '>')
     end
-    dates[:range_created_start_date] = get_time_in_gp(get_closest_date(order_id, result_createDate, '<'))
-    dates[:range_created_end_date] = get_time_in_gp(get_closest_date(order_id, result_createDate, '>'))
+    dates[:range_created_start_date] = get_time_in_gp(get_closest_date(store.id, order_id, result_createDate, '<'))
+    dates[:range_created_end_date] = get_time_in_gp(get_closest_date(store.id, order_id, result_createDate, '>'))
     dates.each_pair { |key, value| dates[key] = value.strftime('%Y-%m-%d %H:%M:%S') }
   end
 
@@ -423,11 +424,11 @@ module StoresHelper
     gp_time = (time + time_zone)
   end
 
-  def get_closest_date(order_id, date, comparison_operator)
+  def get_closest_date(store_id, order_id, date, comparison_operator)
     altered_date = comparison_operator == '<' ? date - 1.minute : date + 1.minute
     sort_order = comparison_operator == '<' ? 'asc' : 'desc'
 
-    closest_date = Order.select('last_modified').where('increment_id != ?', order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
+    closest_date = Order.select('last_modified').where('store_id = ? AND increment_id != ?', store_id, order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
     return closest_date if closest_date.present?
     date
   end

@@ -237,7 +237,8 @@ module Groovepacker
                                                     weight_oz: total_weight,
                                                     custom_field_one: custom_1,
                                                     custom_field_two: custom_2,
-                                                    customer_comments: order["notes"]
+                                                    customer_comments: order["notes"],
+                                                    last_modified: order["updated_at"].to_datetime
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end

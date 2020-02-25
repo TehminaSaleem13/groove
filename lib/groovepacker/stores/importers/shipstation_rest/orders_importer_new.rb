@@ -55,11 +55,12 @@ module Groovepacker
             import_date = Time.zone.parse(import_date) + Time.zone.utc_offset
             import_date = DateTime.parse(import_date.to_s)
             last_imported_order = Order.find(order_id)
-            if Order.where('id != ?', order_id).count.zero? || Order.where('id != ? AND last_modified > ?', order_id, last_imported_order.last_modified).blank?
+            store_orders = Order.where('store_id = ? AND id != ?', @store.id, order_id)
+            if store_orders.blank? || store_orders.where('last_modified > ?', last_imported_order.last_modified).blank?
               @regular_import_triggered = true
               start_date = !@credential.quick_import_last_modified.nil? ? get_store_lro : convert_to_pst(1.day.ago)
               end_date = convert_to_pst(Time.zone.now)
-            elsif Order.where('id != ? AND last_modified < ?', order_id, last_imported_order.last_modified).blank?
+            elsif store_orders.where('last_modified < ?', last_imported_order.last_modified).blank?
               start_date = last_imported_order.last_modified - 6.hours
               end_date = last_imported_order.last_modified + 6.hours
             else
@@ -98,7 +99,7 @@ module Groovepacker
             altered_date = comparison_operator == '<' ? date - 1.minute : date + 1.minute
             sort_order = comparison_operator == '<' ? 'asc' : 'desc'
 
-            closest_date = Order.select('last_modified').where('id != ?', order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
+            closest_date = Order.select('last_modified').where('store_id = ? AND id != ?', @store.id, order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
             return closest_date if closest_date.present?
             date
           end
