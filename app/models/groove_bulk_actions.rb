@@ -45,6 +45,8 @@ class GrooveBulkActions < ActiveRecord::Base
       bulk_actions.duplicate(current_tenant, params, bulkaction_id)
     when activity=='export'
       bulk_actions.export(current_tenant, params, bulkaction_id, username)
+    when activity == 'product_barcode_label' || activity == 'order_product_barcode_label' && params['controller'] == 'products'
+      bulk_actions.barcode_labels_generate(current_tenant, params, bulkaction_id, username)
     end
   end
 

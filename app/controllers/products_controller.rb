@@ -191,15 +191,7 @@ class ProductsController < ApplicationController
   end
 
   def print_product_barcode_label
-    params[:tenant] =  Apartment::Tenant.current
-    scan_pack_object = ScanPack::Base.new
-    if (params["productArray"].count > 20 || params["select_all"] == true)
-      val = scan_pack_object.delay.print_product_barcode_label_with_delay(params)
-      render json: {}
-    else
-      url = scan_pack_object.print_product_barcode_label_with_delay(params)
-      render json: {}
-    end
+    execute_groove_bulk_action('product_barcode_label')
   end
 
   def generate_barcode
@@ -306,14 +298,7 @@ class ProductsController < ApplicationController
   end
 
   def bulk_barcode_generation
-    result = {}
-    result['status'] = true
-    result['messages'] = "Product bracode lable will open shortly"
-    scan_pack_object = ScanPack::Base.new
-    params[:current_user_id] = current_user.id
-    params[:tenant] =  Apartment::Tenant.current
-    scan_pack_object.delay.bulk_barcode_with_delay(params)
-    render json: result
+    execute_groove_bulk_action('order_product_barcode_label')
   end
 
   def bulk_barcode_pdf

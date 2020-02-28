@@ -178,4 +178,39 @@ module ProductsHelper
     end
     response
   end
+
+  def barcode_labels_generate(tenant, params, bulk_actions_id, username)
+    Apartment::Tenant.switch(tenant)
+    result = Hash.new
+    result['messages'] = []
+    result['status'] = true
+    bulk_action = GrooveBulkActions.find(bulk_actions_id)
+    bulk_action_type = bulk_action.activity == 'order_product_barcode_label' ? 'order_items' : 'products'
+    if bulk_action.activity == 'order_product_barcode_label'
+      order_ids = params['ids'].split(",").reject { |c| c.empty? } rescue nil
+      all_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
+    else
+      all_items = list_selected_products(params)
+    end
+    process_barcode_generation(bulk_action, all_items, username, bulk_action_type, result)
+  end
+
+  def process_barcode_generation(bulk_action, all_items, username, bulk_action_type, result)
+    begin
+      bulk_action.update_attributes(:status => 'in_progress', total: all_items.count)
+      (all_items||[]).in_groups_of(500, false) do |item_batch|
+        bulk_action.reload
+        if bulk_action.cancel?
+          bulk_action.update_attributes(:status => 'cancelled')
+          return true
+        end
+        last_batch = (all_items||[]).in_groups_of(500, false).last == item_batch
+        ScanPack::Base.new.bulk_barcodes_with_delay(item_batch, username, bulk_action_type, last_batch)
+        bulk_action.update_attributes(:completed => all_items.find_index(item_batch.last) + 1)
+      end
+      bulk_action.update_attributes(:status => result['status'] ? 'completed' : 'failed', :messages => result['messages'], :current => '') unless bulk_action.cancel?
+    rescue Exception => e
+      bulk_action.update_attributes(:status => 'failed', :messages => e, :current => '')
+    end
+  end
 end
