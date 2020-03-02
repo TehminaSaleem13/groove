@@ -133,7 +133,7 @@ module Groovepacker
             @import_item.destroy
             destroy_nil_import_items
             no_ongoing_imports = ImportItem.where("status = 'not_started' OR status = 'in_progress' AND store_id = #{@store.id}").blank?
-            quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports
+            quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports && (order_in_gp rescue nil)
           end
 
           def import_orders_from_response(response, shipments_response)
