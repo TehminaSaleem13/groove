@@ -49,17 +49,7 @@ module StoresHelper
       @store.regular_import_v2 = params[:regular_import_v2]
       @store.quick_fix = params[:quick_fix]
       @store.troubleshooter_option = params[:troubleshooter_option]
-      modify_store_lro if @store.regular_import_v2_changed? && @store.shipstation_rest_credential
       @store.save
-    end
-  end
-
-  def modify_store_lro
-    credential = @store.shipstation_rest_credential
-    if @store.regular_import_v2 && credential.quick_import_last_modified.present?
-      credential.update_attribute(:quick_import_last_modified, credential.quick_import_last_modified - 8.hours)
-    elsif credential.quick_import_last_modified.present?
-      credential.update_attribute(:quick_import_last_modified, credential.quick_import_last_modified + 8.hours)
     end
   end
 
@@ -395,7 +385,7 @@ module StoresHelper
     result_createDate = DateTime.parse(result_createDate.to_s)
     store_orders = Order.where('store_id = ? AND increment_id != ?', store.id, order_id)
     if store_orders.blank? || store_orders.where('last_modified > ?', result_modifyDate).blank?
-      dates[:range_start_date] = !credential.quick_import_last_modified.nil? ? get_store_lro(store, credential) : get_time_in_pst(1.day.ago)
+      dates[:range_start_date] = get_start_range_date(store_orders.blank?, store, credential)
       dates[:range_end_date] = get_time_in_pst(Time.zone.now)
     elsif store_orders.where('last_modified < ?', result_modifyDate).blank?
       dates[:range_start_date] = result_modifyDate - 6.hours
@@ -409,8 +399,16 @@ module StoresHelper
     dates.each_pair { |key, value| dates[key] = value.strftime('%Y-%m-%d %H:%M:%S') }
   end
 
-  def get_store_lro(store, credential)
-    store.regular_import_v2 ? credential.quick_import_last_modified : credential.quick_import_last_modified - 8.hours 
+  def get_start_range_date(store_orders_blank, store, credential)
+    if store_orders_blank
+      get_time_in_pst(1.day.ago)
+    else
+      if store.regular_import_v2
+        !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
+      else
+        !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified - 8.hours : get_time_in_pst(1.day.ago)
+      end
+    end
   end
 
   def get_time_in_pst(time)

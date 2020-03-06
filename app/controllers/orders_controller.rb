@@ -261,7 +261,7 @@ class OrdersController < ApplicationController
   end
 
   def import_for_ss
-    result = { error_messages: 'An Import is already running, please wait for it to complete!', status: false }
+    result = { error_messages: 'An Import is already in queue or running, please wait for it to complete!', status: false }
     params[:tenant] = Apartment::Tenant.current
     params[:current_user_id] = current_user.id
     if no_running_imports(params[:store_id])

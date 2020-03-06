@@ -41,9 +41,10 @@ module Groovepacker
             initialize_import_item
             start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
+            init_order_import_summary(user_id)
             response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
+            @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
-            init_order_import_summary(user_id, response['orders'].count)
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
           end
@@ -57,23 +58,26 @@ module Groovepacker
             quick_fix_range = get_quick_fix_range(import_date, order_id)
             start_date = quick_fix_range[:start_date].strftime('%Y-%m-%d %H:%M:%S')
             end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
+            init_order_import_summary(user_id)
             response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
+            @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
-            init_order_import_summary(user_id, response['orders'].count)
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
           end
 
-          def init_order_import_summary(user_id, order_count)
+          def init_order_import_summary(user_id)
             OrderImportSummary.where("status != 'in_progress' OR status = 'completed'").destroy_all
+            ImportItem.where(store_id: @store.id).where("status = 'cancelled' OR status = 'completed'").destroy_all
             @import_summary = OrderImportSummary.top_summary
             @import_summary = OrderImportSummary.create(user_id: user_id, status: 'in_progress', display_summary: true) unless @import_summary
-            @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'in_progress', to_import: order_count)
+            @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'not_started')
+            @range_or_quickfix_started = true
             @import_summary.emit_data_to_user(true)
           end
 
           def update_order_import_summary
-            @import_item.destroy
+            @import_item.update_attributes(status: 'completed') if @import_item.reload.status != 'cancelled'
             destroy_nil_import_items
             @import_summary.update_attributes(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
             @import_summary.emit_data_to_user(true)
@@ -94,7 +98,8 @@ module Groovepacker
             if store_orders.blank? || store_orders.where('last_modified > ?', last_imported_order.last_modified).blank?
               @regular_import_triggered = true
               Order.emit_notification_ondemand_quickfix(@notify_user_id) if @notify_regular_import
-              quick_fix_range[:start_date] = !@credential.quick_import_last_modified.nil? ? get_store_lro : convert_to_pst(1.day.ago)
+              @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
+              quick_fix_range[:start_date] = get_qf_range_start_date
               quick_fix_range[:end_date] = convert_to_pst(Time.zone.now)
             elsif store_orders.where('last_modified < ?', last_imported_order.last_modified).blank?
               quick_fix_range[:start_date] = last_imported_order.last_modified - 6.hours
@@ -106,8 +111,12 @@ module Groovepacker
             quick_fix_range
           end
 
-          def get_store_lro
-            @store.regular_import_v2 ? @credential.quick_import_last_modified : @credential.quick_import_last_modified - 8.hours 
+          def get_qf_range_start_date
+            if @store.regular_import_v2
+              !@credential.quick_import_last_modified_v2.nil? ? @credential.quick_import_last_modified_v2 : convert_to_pst(1.day.ago)
+            else
+              !@credential.quick_import_last_modified.nil? ? @credential.quick_import_last_modified - 8.hours : convert_to_pst(1.day.ago)
+            end
           end
 
           def get_gp_time_in_pst(time)
@@ -175,6 +184,10 @@ module Groovepacker
             @store.shipstation_rest_credential.update_attributes(bulk_import: false)
             bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
+            if @range_or_quickfix_started
+              @import_item.update_attributes(status: 'in_progress')
+              @import_summary.emit_data_to_user(true)
+            end
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
@@ -183,7 +196,7 @@ module Groovepacker
                 Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? bulk_ss_import += 1 : bulk_ss_import = 0
                 shipstation_order = find_or_init_new_order(order)
                 import_order_form_response(shipstation_order, order, shipments_response)
-                @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
+                @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
               rescue Exception => e
               end
               break if Rails.env == "test"
@@ -275,7 +288,7 @@ module Groovepacker
                 self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
                 @import_item.update_attribute(:import_type, "quick")
-                quick_import_date = @credential.quick_import_last_modified
+                quick_import_date = @credential.quick_import_last_modified_v2
                 quick_import_date += 1.second if @credential.bulk_import && quick_import_date
                 if quick_import_date.blank? || (quick_import_date <= DateTime.now - 15.days)
                   self.import_from = DateTime.now-1.days
