@@ -42,7 +42,7 @@ module Groovepacker
             start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
-            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
+            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type, @credential.order_import_range_days)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
             import_orders_from_response(response, shipments_response)
@@ -59,7 +59,7 @@ module Groovepacker
             start_date = quick_fix_range[:start_date].strftime('%Y-%m-%d %H:%M:%S')
             end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
             init_order_import_summary(user_id)
-            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
+            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified', @credential.order_import_range_days)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
             import_orders_from_response(response, shipments_response)
@@ -356,7 +356,7 @@ module Groovepacker
             def fetch_orders_if_import_type_is_not_tagged(response)
               return response unless @import_item.import_type != 'tagged'
               statuses.each do |status|
-                status_response = @client.get_orders_v2(status, import_from, import_date_type)
+                status_response = @client.get_orders_v2(status, import_from, import_date_type, @credential.order_import_range_days)
                 response = get_orders_from_union(response, status_response)
               end
               return response

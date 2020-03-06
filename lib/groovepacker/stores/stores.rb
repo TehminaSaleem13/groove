@@ -134,6 +134,7 @@ module Groovepacker
 		    @shipstation.import_upc = params[:import_upc]
 		    @shipstation.allow_duplicate_order = params[:allow_duplicate_order]
 		    @shipstation.tag_import_option = params[:tag_import_option]
+		    @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
 		      @store.save!

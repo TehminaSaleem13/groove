@@ -15,8 +15,8 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
-        def get_orders_v2(status, ord_placed_after, date_type = 'created_at')
-          start_date = order_date_start(date_type, ord_placed_after.to_datetime.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')) unless ord_placed_after.nil?
+        def get_orders_v2(status, ord_placed_after, date_type = 'created_at', order_import_range_days)
+          start_date = order_date_start(date_type, ord_placed_after.to_datetime.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20'), order_import_range_days) unless ord_placed_after.nil?
           fetch_orders(status, start_date)
         end
 
@@ -45,10 +45,11 @@ module Groovepacker
           tracking_number
         end
 
-        def get_range_import_orders(start_date, end_date, type)
+        def get_range_import_orders(start_date, end_date, type, order_import_range_days)
           combined = { 'orders' => [] }
           if type == "modified"
-            date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}"
+            created_date = (ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S')
+            date_val = order_import_range_days != 0 ? date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&createDateStart=#{created_date.gsub(' ', '%20')}" : "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}"
           else
             date_val = "&orderDateStart=#{start_date}&orderDateEnd=#{end_date}"
           end
@@ -209,12 +210,13 @@ module Groovepacker
           tracking_number
         end
 
-        def order_date_start(import_date_type, order_placed_after)
+        def order_date_start(import_date_type, order_placed_after, order_import_range_days = nil)
           if import_date_type == 'created_at'
             "&orderDateStart=#{order_placed_after}"
           elsif %w(modified_at).include?(import_date_type)
-              predicate = 'modifyDateStart'
-            "&#{predicate}=#{order_placed_after}"
+            predicate = 'modifyDateStart'
+            created_date = (ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S') if order_import_range_days.present?
+            order_import_range_days.present? && order_import_range_days != 0 ? "&#{predicate}=#{order_placed_after}&createDateStart=#{created_date.gsub(' ', '%20')}" : "&#{predicate}=#{order_placed_after}"
           end
         end
 
