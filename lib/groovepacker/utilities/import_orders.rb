@@ -73,10 +73,10 @@ class ImportOrders < Groovepacker::Utilities::Base
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
     context = Groovepacker::Stores::Context.new(handler)
     if params[:import_type] == 'range_import'
-      context.range_import_for_ss(params[:start_date], params[:end_date], params[:order_date_type] )
+      context.range_import_for_ss(params[:start_date], params[:end_date], params[:order_date_type], params[:current_user_id])
     else
       fetched_order = Order.find_by_increment_id(params[:order_id])
-      context.quick_fix_import(params[:import_date], fetched_order.id)
+      context.quick_fix_import(params[:import_date], fetched_order.id, params[:current_user_id])
     end
   end
 

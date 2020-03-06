@@ -261,9 +261,19 @@ class OrdersController < ApplicationController
   end
 
   def import_for_ss
+    result = { error_messages: 'An Import is already running, please wait for it to complete!', status: false }
     params[:tenant] = Apartment::Tenant.current
-    ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}").import_range_import(params)
-    render status: 200, nothing: true
+    params[:current_user_id] = current_user.id
+    if no_running_imports(params[:store_id])
+      ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}").import_range_import(params)
+      result[:success_messages] = params[:import_type] == 'range_import' ? 'Range Import will start!' : 'Quickfix Import will start!'
+      result[:status] = true
+    end
+    render json: result
+  end
+
+  def no_running_imports(store_id)
+    ImportItem.where("status = 'not_started' OR status = 'in_progress' AND store_id = #{store_id}").blank?
   end
 
   def import_xml

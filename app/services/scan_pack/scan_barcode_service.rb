@@ -103,19 +103,11 @@ module ScanPack
     def run_import_for_not_found_order
       stores = Store.where("status=? and store_type NOT IN (?)", true, ['CSV', 'system'])
       if stores.present?
-        current_tenant = Apartment::Tenant.current
         order_no_input = @params["input"]
-        order_importer = Groovepacker::Stores::Importers::OrdersImporter.new(nil)
-        job = Delayed::Job.find_by_queue(order_no_input)
+        job = Delayed::Job.find_by_queue("on_demand_scan_#{Apartment::Tenant.current}_#{order_no_input}")
         if job.blank? || job.failed_at.present?
-          order_importer.delay(:run_at => 1.seconds.from_now, :queue => order_no_input).search_and_import_single_order(tenant: current_tenant, order_no: order_no_input, user_id: @current_user.id)
-          #order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
-          st = stores.where(store_type: "Shipstation API 2").last
-          if st.present? && st.on_demand_import == true
-            @result["notice_messages"]="It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."
-          elsif st.present? && st.on_demand_import_v2 == true
-            @result["on_demand"] = true
-          end
+          store = stores.where(store_type: 'Shipstation API 2').last
+          add_on_demand_import_to_delay(order_no_input, job, store)
         else
           @result["notice_messages"]="Still checking on this order."
         end

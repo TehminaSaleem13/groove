@@ -68,14 +68,14 @@ module Groovepacker
             self.build_handle).find_or_create_product(item)
         end
 
-        def range_import_for_ss(start_date, end_date, type)
+        def range_import_for_ss(start_date, end_date, type, current_user_id)
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).range_import(start_date, end_date, type)
+              self.build_handle).range_import(start_date, end_date, type, current_user_id)
         end
-
-        def quick_fix_import(import_date, order_id)
+        
+        def quick_fix_import(import_date, order_id, current_user_id)
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).quick_fix_import(import_date, order_id)
+              self.build_handle).quick_fix_import(import_date, order_id, current_user_id)
         end
       end
     end

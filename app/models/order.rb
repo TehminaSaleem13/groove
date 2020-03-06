@@ -77,6 +77,11 @@ class Order < ActiveRecord::Base
 
   end
 
+  def self.emit_notification_ondemand_quickfix(user_id)
+    result = {"status" => true , "message" => 'It appears that the order scanned is more recent than any of the orders that have been imported. An import will be run to fetch all new orders. Please continue scanning once the import completes.', "user_id" => "#{user_id}" }
+    GroovRealtime::emit('notification_ondemand_quickfix', result, :tenant)
+  end
+
   def self.emit_data_for_on_demand_import_v2(hash, order_no, user_id)
     if hash["orders"].blank?
       result = {"status" => false,  "user_id" => "#{user_id}", "message" => "Please verify that order #{order_no} is available in your order manager. They were not able to provide it on our request"}

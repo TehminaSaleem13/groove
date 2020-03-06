@@ -36,44 +36,74 @@ module Groovepacker
             destroy_nil_import_items
           end
 
-          def range_import(start_date, end_date, type)
+          def range_import(start_date, end_date, type, user_id)
             init_common_objects
             initialize_import_item
             start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
+            init_order_import_summary(user_id, response['orders'].count)
             import_orders_from_response(response, shipments_response)
-            @import_item.destroy
-            destroy_nil_import_items
+            update_order_import_summary
           end
 
-          def quick_fix_import(import_date, order_id)
+          def quick_fix_import(import_date, order_id, user_id)
             init_common_objects
             initialize_import_item
-            @import_item.update_attributes(:status => 'in_progress')
+            check_import_item
             import_date = Time.zone.parse(import_date) + Time.zone.utc_offset
             import_date = DateTime.parse(import_date.to_s)
+            quick_fix_range = get_quick_fix_range(import_date, order_id)
+            start_date = quick_fix_range[:start_date].strftime('%Y-%m-%d %H:%M:%S')
+            end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
+            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
+            shipments_response = @client.get_shipments(start_date, nil, end_date)
+            init_order_import_summary(user_id, response['orders'].count)
+            import_orders_from_response(response, shipments_response)
+            update_order_import_summary
+          end
+
+          def init_order_import_summary(user_id, order_count)
+            OrderImportSummary.where("status != 'in_progress' OR status = 'completed'").destroy_all
+            @import_summary = OrderImportSummary.top_summary
+            @import_summary = OrderImportSummary.create(user_id: user_id, status: 'in_progress', display_summary: true) unless @import_summary
+            @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'in_progress', to_import: order_count)
+            @import_summary.emit_data_to_user(true)
+          end
+
+          def update_order_import_summary
+            @import_item.destroy
+            destroy_nil_import_items
+            @import_summary.update_attributes(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
+            @import_summary.emit_data_to_user(true)
+          end
+
+          def check_import_item
+            begin
+              @import_item.reload
+            rescue
+              @import_item = ImportItem.create(store_id: @import_item.store_id, status: 'not_started', updated_orders_import: 0)
+            end
+          end
+
+          def get_quick_fix_range(import_date, order_id)
+            quick_fix_range = {}
             last_imported_order = Order.find(order_id)
             store_orders = Order.where('store_id = ? AND id != ?', @store.id, order_id)
             if store_orders.blank? || store_orders.where('last_modified > ?', last_imported_order.last_modified).blank?
               @regular_import_triggered = true
-              start_date = !@credential.quick_import_last_modified.nil? ? get_store_lro : convert_to_pst(1.day.ago)
-              end_date = convert_to_pst(Time.zone.now)
+              Order.emit_notification_ondemand_quickfix(@notify_user_id) if @notify_regular_import
+              quick_fix_range[:start_date] = !@credential.quick_import_last_modified.nil? ? get_store_lro : convert_to_pst(1.day.ago)
+              quick_fix_range[:end_date] = convert_to_pst(Time.zone.now)
             elsif store_orders.where('last_modified < ?', last_imported_order.last_modified).blank?
-              start_date = last_imported_order.last_modified - 6.hours
-              end_date = last_imported_order.last_modified + 6.hours
+              quick_fix_range[:start_date] = last_imported_order.last_modified - 6.hours
+              quick_fix_range[:end_date] = last_imported_order.last_modified + 6.hours
             else
-              start_date = get_closest_date(order_id, import_date, '<')
-              end_date = get_closest_date(order_id, import_date, '>')
+              quick_fix_range[:start_date] = get_closest_date(order_id, import_date, '<')
+              quick_fix_range[:end_date] = get_closest_date(order_id, import_date, '>')
             end
-            start_date = start_date.strftime('%Y-%m-%d %H:%M:%S')
-            end_date = end_date.strftime('%Y-%m-%d %H:%M:%S')
-            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
-            shipments_response = @client.get_shipments(start_date, nil, end_date)
-            import_orders_from_response(response, shipments_response)
-            @import_item.destroy
-            destroy_nil_import_items
+            quick_fix_range
           end
 
           def get_store_lro
@@ -133,7 +163,11 @@ module Groovepacker
             @import_item.destroy
             destroy_nil_import_items
             no_ongoing_imports = ImportItem.where("status = 'not_started' OR status = 'in_progress' AND store_id = #{@store.id}").blank?
-            quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports && (order_in_gp rescue nil)
+            if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports && (order_in_gp rescue nil)
+              @notify_user_id = user_id
+              @notify_regular_import = true
+              quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id, user_id)
+            end
           end
 
           def import_orders_from_response(response, shipments_response)
