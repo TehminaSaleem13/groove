@@ -397,6 +397,16 @@ class ProductsController < ApplicationController
     render json: result
   end
 
+  def fix_shopify_broken_images
+    result = {};
+    tenant = Apartment::Tenant.current
+    export_product = ExportSsProductsCsv.new
+    export_product.delay.fix_shopify_product_images(tenant, params)
+    # export_product.fix_shopify_product_images(tenant, params)
+    result["status"] = true
+    render json: result
+  end
+
   def update_intangibleness
     Product.update_action_intangibleness(params)
 
