@@ -109,11 +109,7 @@ module Groovepacker
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
-              if check_for_replace_product
-                update_order_activity_log_for_gp_coupon(shipstation_order, order)
-              else
-                update_order_activity_log(shipstation_order)
-              end
+              check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)
               remove_gp_tags_from_ss(order)
             else
               @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import+1)
@@ -171,18 +167,26 @@ module Groovepacker
               when 'deep'
                 self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
-                @import_item.update_attribute(:import_type, "quick")
-                quick_import_date = @credential.quick_import_last_modified
-                self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date
+                set_regular_quick_import_date
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
                 self.import_from = DateTime.now-1.weeks
               else
-                @import_item.update_attribute(:import_type, "regular")
-                last_imported_at = @credential.last_imported_at
-                self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
+                set_import_date_from_store_cred
               end
               set_import_date_type
+            end
+
+            def set_regular_quick_import_date
+              @import_item.update_attribute(:import_type, "quick")
+              quick_import_date = @credential.quick_import_last_modified
+              self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date
+            end
+
+            def set_import_date_from_store_cred
+              @import_item.update_attribute(:import_type, "regular")
+              last_imported_at = @credential.last_imported_at
+              self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
             end
 
             def set_import_date_type

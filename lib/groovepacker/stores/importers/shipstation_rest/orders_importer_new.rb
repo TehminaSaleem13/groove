@@ -70,7 +70,7 @@ module Groovepacker
             OrderImportSummary.where("status != 'in_progress' OR status = 'completed'").destroy_all
             ImportItem.where(store_id: @store.id).where("status = 'cancelled' OR status = 'completed'").destroy_all
             @import_summary = OrderImportSummary.top_summary
-            @import_summary = OrderImportSummary.create(user_id: user_id, status: 'in_progress', display_summary: true) unless @import_summary
+            @import_summary = OrderImportSummary.create(user_id: user_id, status: 'not_started', display_summary: false) unless @import_summary
             @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'not_started')
             @range_or_quickfix_started = true
             @import_summary.emit_data_to_user(true)
@@ -96,9 +96,7 @@ module Groovepacker
             last_imported_order = Order.find(order_id)
             store_orders = Order.where('store_id = ? AND id != ?', @store.id, order_id)
             if store_orders.blank? || store_orders.where('last_modified > ?', last_imported_order.last_modified).blank?
-              @regular_import_triggered = true
-              Order.emit_notification_ondemand_quickfix(@notify_user_id) if @notify_regular_import
-              @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
+              notify_and_reset_lro(store_orders)
               quick_fix_range[:start_date] = get_qf_range_start_date
               quick_fix_range[:end_date] = convert_to_pst(Time.zone.now)
             elsif store_orders.where('last_modified < ?', last_imported_order.last_modified).blank?
@@ -111,11 +109,19 @@ module Groovepacker
             quick_fix_range
           end
 
+          def notify_and_reset_lro(store_orders)
+            @regular_import_triggered = true
+            Order.emit_notification_ondemand_quickfix(@notify_user_id) if @notify_regular_import
+            @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
+          end
+
           def get_qf_range_start_date
-            if @store.regular_import_v2
-              !@credential.quick_import_last_modified_v2.nil? ? @credential.quick_import_last_modified_v2 : convert_to_pst(1.day.ago)
+            if @store.regular_import_v2 && @credential.quick_import_last_modified_v2
+              @credential.quick_import_last_modified_v2
+            elsif @store.regular_import_v2 == false && @credential.quick_import_last_modified
+              @credential.quick_import_last_modified - 8.hours
             else
-              !@credential.quick_import_last_modified.nil? ? @credential.quick_import_last_modified - 8.hours : convert_to_pst(1.day.ago)
+              convert_to_pst(1.day.ago)
             end
           end
 
@@ -151,32 +157,20 @@ module Groovepacker
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and @scan_settings.scan_by_tracking_number
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import_v2(response, order_no, user_id) if controller != 'stores'
-            time_zone = GeneralSetting.last.time_zone.to_i
-            od_tz = @import_item.created_at + time_zone
+            od_tz = @import_item.created_at + GeneralSetting.last.time_zone.to_i
             od_utc = @import_item.created_at
-            status_set_in_gp = []
-            status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
-            status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
-            status_set_in_gp << "Shipped" if @credential.shall_import_shipped
+            status_set_in_gp = set_status_in_gp
             if response["orders"].blank?
               log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}" , "Type" => "import failure" }
             else
-              order_in_gp = Order.find_by_increment_id(order_no)
-              order_in_gp = Order.find_by_tracking_num(order_no)  if order_in_gp.nil?
+              order_in_gp = find_order_in_gp(order_no)
               log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Create Date" => "#{order_in_gp.try(:created_at)}", "Order Modified Date" => "#{order_in_gp.try(:updated_at)}", "Order Status (the status in the OrderManager)" =>"#{(response["orders"].first["orderStatus"] rescue nil)}","Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}", "Type" => "import success" }
             end
-            summary = CsvImportSummary.find_or_create_by_log_record(log.to_json)
-            summary.file_name =  ""
-            summary.import_type = "On demand import"
-            summary.save
+            create_import_summary(log)
             @import_item.destroy
             destroy_nil_import_items
             no_ongoing_imports = ImportItem.where("status = 'not_started' OR status = 'in_progress' AND store_id = #{@store.id}").blank?
-            if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports && (order_in_gp rescue nil)
-              @notify_user_id = user_id
-              @notify_regular_import = true
-              quick_fix_import(response['orders'][0]['modifyDate'], order_in_gp.id, user_id)
-            end
+            init_qf_after_on_demand(response['orders'][0]['modifyDate'], user_id, order_in_gp.id) if on_demand_quickfix && response["orders"].present? && @store.quick_fix && no_ongoing_imports && (order_in_gp rescue nil)
           end
 
           def import_orders_from_response(response, shipments_response)
@@ -225,11 +219,7 @@ module Groovepacker
               shipstation_order.tracking_num = tracking_info["trackingNumber"]
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
-              if check_for_replace_product
-                update_order_activity_log_for_gp_coupon(shipstation_order, order)
-              else
-                update_order_activity_log(shipstation_order)
-              end
+              check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)
               remove_gp_tags_from_ss(order)
             else
               @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import+1)
@@ -254,15 +244,19 @@ module Groovepacker
             @import_item.update_attributes(current_order_items: order["items"].length, current_order_imported_item: 0)
             order["items"].each do |item|
               product = product_importer_client.find_or_create_product(item)
-              if @is_download_image
-                images = product.product_images
-                product.product_images.create(image: item["imageUrl"]) if item["imageUrl"].present? && images.blank?
-              end
+              create_product_image
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
             shipstation_order.save
             @import_item.save
+          end
+
+          def create_product_image
+            if @is_download_image
+              images = product.product_images
+              product.product_images.create(image: item["imageUrl"]) if item["imageUrl"].present? && images.blank?
+            end
           end
 
           def import_order_item(item, shipstation_order, product)
@@ -287,23 +281,31 @@ module Groovepacker
               when 'deep'
                 self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
-                @import_item.update_attribute(:import_type, "quick")
-                quick_import_date = @credential.quick_import_last_modified_v2
-                quick_import_date += 1.second if @credential.bulk_import && quick_import_date
-                if quick_import_date.blank? || (quick_import_date <= DateTime.now - 15.days)
-                  self.import_from = DateTime.now-1.days
-                else
-                  self.import_from = quick_import_date
-                end
+                set_regular_quick_import_date
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
                 self.import_from = DateTime.now-1.weeks
               else
-                @import_item.update_attribute(:import_type, "regular")
-                last_imported_at = @credential.last_imported_at
-                self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
+                set_import_date_from_store_cred
               end
               set_import_date_type
+            end
+
+            def set_regular_quick_import_date
+              @import_item.update_attribute(:import_type, "quick")
+              quick_import_date = @credential.quick_import_last_modified_v2
+              quick_import_date += 1.second if @credential.bulk_import && quick_import_date
+              if quick_import_date.blank? || (quick_import_date <= DateTime.now - 15.days)
+                self.import_from = DateTime.now-1.days
+              else
+                self.import_from = quick_import_date
+              end
+            end
+
+            def set_import_date_from_store_cred
+              @import_item.update_attribute(:import_type, "regular")
+              last_imported_at = @credential.last_imported_at
+              self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
             end
 
             def set_import_date_type
@@ -391,11 +393,7 @@ module Groovepacker
             end
 
             def find_or_init_new_order(order)
-              if @credential.allow_duplicate_order == true
-                shipstation_order = Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
-              else
-                shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
-              end
+              shipstation_order = search_order_in_db(order)
               @order_to_update = shipstation_order.present?
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
@@ -403,6 +401,14 @@ module Groovepacker
                 shipstation_order = nil
               end
               init_new_order_if_required(shipstation_order, order)
+            end
+
+            def search_order_in_db(order)
+              if @credential.allow_duplicate_order == true
+                Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
+              else
+                Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
+              end
             end
 
             def init_new_order_if_required(shipstation_order, order)
@@ -473,6 +479,32 @@ module Groovepacker
             def destroy_nil_import_items
               ImportItem.where(:store_id => @store.id , :order_import_summary_id => nil).destroy_all rescue nil
               # ImportItem.where("status IS NULL").destroy_all
+            end
+
+            def set_status_in_gp
+              status_set_in_gp = []
+              status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
+              status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
+              status_set_in_gp << "Shipped" if @credential.shall_import_shipped
+            end
+
+            def create_import_summary(log)
+              summary = CsvImportSummary.find_or_create_by_log_record(log.to_json)
+              summary.file_name = ''
+              summary.import_type = 'On demand import'
+              summary.save
+            end
+
+            def find_order_in_gp(order_no)
+              order_in_gp = Order.find_by_increment_id(order_no)
+              order_in_gp = Order.find_by_tracking_num(order_no) if order_in_gp.nil?
+              order_in_gp
+            end
+
+            def init_qf_after_on_demand(from_import_date, user_id, order_in_gp_id)
+              @notify_user_id = user_id
+              @notify_regular_import = true
+              quick_fix_import(from_import_date, order_in_gp_id, user_id)
             end
 
         end
