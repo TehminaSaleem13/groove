@@ -18,14 +18,15 @@ module Groovepacker
         combined_response
       end
 
-      def products
+      def products(product_import_type)
         page_index = 1
         combined_response = {}
         combined_response["products"] = []
         while page_index
           puts "======================Fetching Page #{page_index}======================"
           query_opts = {"page" => page_index, "limit" => 100}.as_json
-          response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/products", 
+          add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? formatted_product_import_date(shopify_credential.product_last_import) : ''
+          response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/products#{add_url}", 
                                     query: query_opts, 
                                     headers: {
                                     "X-Shopify-Access-Token" => shopify_credential.access_token,
@@ -38,6 +39,10 @@ module Groovepacker
           break if (response["products"].blank? || response["products"].count < 100)
         end
         combined_response
+      end
+
+      def formatted_product_import_date(date)
+        "?updated_at_min=#{date.to_json.gsub("\"", '').gsub('Z', '-00:00')}"
       end
 
       def product(product_id)

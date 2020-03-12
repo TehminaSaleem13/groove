@@ -9,6 +9,10 @@ module Groovepacker
         self.handler.import_products
       end
 
+      def import_shopify_products(product_import_type)
+        self.handler.import_products(product_import_type)
+      end
+
       def import_order(order)
         self.handler.import_order(order)
       end

@@ -5,20 +5,22 @@ module Groovepacker
         class ProductsImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
 
-          def import
+          def import(product_import_type)
             initialize_import_objects
             begin
-              response = @client.products
+              response = @client.products(product_import_type)
             rescue
               Product.emit_message_for_access_token
             end
             if response["products"] == [nil]
               Product.emit_message_for_access_token
               return
-            end  
+            end
             return if response["products"].blank?
-            response["products"].each do |product|
+            products_response = response["products"].sort_by { |products| Time.zone.parse(products['updated_at']) }
+            products_response.each do |product|
               create_single_product(product)
+              @credential.update_attributes(product_last_import: Time.zone.parse(product['updated_at'])) if products_response.last == product
             end
             update_orders_status
             send_products_import_complete_email(response["products"].count)
@@ -80,9 +82,16 @@ module Groovepacker
                 product = create_new_product_from_order(variant, variant["sku"], shopify_product)
               else
                 product = ProductSku.where(sku: variant["sku"]).first.product
-                product.product_barcodes.create(barcode: variant["barcode"]) if product.product_barcodes.blank? && variant["barcode"].present?
+                product.update_attributes(name: variant['title'])
+                add_barcode_to_product(product, variant) if variant['barcode'].present? && product.product_barcodes.where(barcode: variant['barcode']).blank?
               end
               return product
+            end
+
+            def add_barcode_to_product(product, variant)
+              product.product_barcodes.destroy_all if @credential.modified_barcode_handling != 'add_to_existing'
+              product.product_barcodes.create(barcode: variant['barcode'])
+              product.touch
             end
 
             def create_product_with_temp_sku(variant, shopify_product)
@@ -116,7 +125,7 @@ module Groovepacker
               # get product categories
               add_tags(product, shopify_product)
               # create barcode
-              product.product_barcodes.create(barcode: variant["barcode"])
+              create_product_barcode(product, variant)
               # get image based on the variant id
               add_image(variant, product, shopify_product)
               #update inventory level
@@ -136,6 +145,18 @@ module Groovepacker
                 product.create_sync_option(:shopify_product_variant_id => variant["id"], :sync_with_shopify => true)
               else
                 product_sync_option.update_attributes(:shopify_product_variant_id => variant["id"], :sync_with_shopify => true)
+              end
+            end
+
+            def create_product_barcode(product, variant)
+              case @credential.generating_barcodes
+              when 'generate_from_sku'
+                product.product_barcodes.create(barcode: variant['sku']) if variant['sku'].present?
+              when 'import_from_shopify'
+                barcode = variant['barcode'].present? ? variant['barcode'] : variant['sku']
+                product.product_barcodes.create(barcode: barcode) if barcode.present?
+              when 'do_not_generate'
+                product.product_barcodes.create(barcode: variant['barcode']) if variant['barcode'].present?
               end
             end
 

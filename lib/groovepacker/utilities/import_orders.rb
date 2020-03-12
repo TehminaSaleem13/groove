@@ -253,12 +253,12 @@ class ImportOrders < Groovepacker::Utilities::Base
     context.import_order(value["ShipWorks"]["Customer"]["Order"])
   end
 
-  def import_product_from_store(tenant, store_id)
+  def import_product_from_store(tenant, store_id, product_import_type)
     Apartment::Tenant.switch tenant
     store = Store.find store_id
     handler = get_handler_for_products(store)
     context = Groovepacker::Stores::Context.new(handler)
-    context.import_products
+    store.store_type == 'Shopify' ? context.import_shopify_products(product_import_type) : context.import_products
   end
 
   def get_handler_for_products(store)
