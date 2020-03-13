@@ -28,7 +28,7 @@ module ScanPack
       @multibarcode = multibarcode
       case true
       when @id.blank? || @input.blank?
-        set_error_messages('Please specify barcode and order id to confirm purchase code')
+        set_error_messages('Please scan or enter a valid barcode')
       when @single_order.blank?
         set_error_messages("Could not find order with id:#{@id}")
       else
