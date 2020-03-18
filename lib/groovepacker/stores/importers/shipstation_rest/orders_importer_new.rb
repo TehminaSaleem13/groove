@@ -206,8 +206,8 @@ module Groovepacker
           def import_order_form_response(shipstation_order, order, shipments_response)
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
-              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {} rescue {}
-              if tracking_info.blank?
+              tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {} rescue {} if order['orderStatus'] == 'shipped'
+              if tracking_info.blank? && order['orderStatus'] == 'shipped'
                 response = @client.get_shipments_by_orderno(order["orderNumber"])
                 tracking_info = {}
                 if response.present?
@@ -217,7 +217,7 @@ module Groovepacker
                 end
               end
               shipstation_order = Order.find_by_id(shipstation_order.id) if shipstation_order.frozen?
-              shipstation_order.tracking_num = tracking_info["trackingNumber"]
+              shipstation_order.tracking_num = tracking_info["trackingNumber"] rescue nil
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
               check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)

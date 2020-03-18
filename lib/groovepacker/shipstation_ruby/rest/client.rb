@@ -111,7 +111,7 @@ module Groovepacker
 
         def get_shipments_by_orderno(orderno)
           response = @service.query("/shipments?orderNumber=#{URI.encode(orderno)}", nil, "get")
-          response["shipments"]
+          response["shipments"].select {|shipment| shipment["orderNumber"] == orderno}
         end
 
         def on_demand_logger
