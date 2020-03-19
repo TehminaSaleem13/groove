@@ -175,6 +175,7 @@ module Groovepacker
 
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
+            response["orders"] = response["orders"].sort_by { |order| Time.zone.parse(order['modifyDate']) } if response["orders"].present?
             @store.shipstation_rest_credential.update_attributes(bulk_import: false)
             bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
