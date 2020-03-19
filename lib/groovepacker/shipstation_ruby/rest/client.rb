@@ -45,17 +45,17 @@ module Groovepacker
           tracking_number
         end
 
-        def get_range_import_orders(start_date, end_date, type, order_import_range_days)
+        def get_range_import_orders(start_date, end_date, type, order_import_range_days, order_status)
           combined = { 'orders' => [] }
           if type == "modified"
             created_date = (ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S')
-            date_val = order_import_range_days != 0 ? date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&createDateStart=#{created_date.gsub(' ', '%20')}" : "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}"
+            date_val = order_import_range_days != 0 ? date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&createDateStart=#{created_date.gsub(' ', '%20')}" : "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&orderStatus=#{order_status}"
           else
             date_val = "&orderDateStart=#{start_date}&orderDateEnd=#{end_date}"
           end
           page_index = 1
           loop do
-            res = @service.query("/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC", nil, "get")
+            res = @service.query("/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC&orderStatus=#{order_status}", nil, "get")
             combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
             page_index += 1
             return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150

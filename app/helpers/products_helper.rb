@@ -170,4 +170,12 @@ module ProductsHelper
     @result
   end
 
+  def fetch_order_response_from_ss(start_date, end_date, type)
+    response = {"orders" => []}
+    statuses.each do |status|
+      status_response = @client.get_range_import_orders(start_date, end_date, type, @credential.order_import_range_days, status)
+      response = get_orders_from_union(response, status_response)
+    end
+    response
+  end
 end

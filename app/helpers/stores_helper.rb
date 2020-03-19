@@ -129,6 +129,7 @@ module StoresHelper
       @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       @result['mapping'] = CsvMapping.find_by_store_id(@store.id) if @store.store_type == 'CSV'
+      @result['enabled_status'] = @store.shipstation_rest_credential.get_active_statuses.any? if @store.shipstation_rest_credential.present?
     else
       @result['status'] = false
     end

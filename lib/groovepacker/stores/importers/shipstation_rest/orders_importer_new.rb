@@ -42,7 +42,7 @@ module Groovepacker
             start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
-            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type, @credential.order_import_range_days)
+            response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
             import_orders_from_response(response, shipments_response)
@@ -59,7 +59,7 @@ module Groovepacker
             start_date = quick_fix_range[:start_date].strftime('%Y-%m-%d %H:%M:%S')
             end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
             init_order_import_summary(user_id)
-            response = @client.get_range_import_orders(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified', @credential.order_import_range_days)
+            response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = @client.get_shipments(start_date, nil, end_date)
             import_orders_from_response(response, shipments_response)
@@ -346,6 +346,7 @@ module Groovepacker
 
             def get_orders_response
               response = {"orders" => nil}
+              Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank? && !@credential.tag_import_option && @import_item.import_type != 'tagged'
               response = fetch_orders_if_import_type_is_not_tagged(response)
               response = fetch_tagged_orders(response) if @credential.tag_import_option || @import_item.import_type =="tagged"
               if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)

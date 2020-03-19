@@ -227,6 +227,7 @@ module Groovepacker
 
             def get_orders_response
               response = {"orders" => nil}
+              Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank? && !@credential.tag_import_option && @import_item.import_type != 'tagged'
               response = fetch_orders_if_import_type_is_not_tagged(response)
               response = fetch_tagged_orders(response)
               return response

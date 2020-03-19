@@ -92,6 +92,11 @@ class Order < ActiveRecord::Base
     end  
   end
 
+  def self.emit_notification_all_status_disabled(user_id)
+    result = {"status" => true , "message" => "All import option switches are disabled. Please refer to <a target='_blank' href='https://groovepacker.freshdesk.com/en/support/solutions/articles/6000058013-shipstation-order-status-tag-import-options'><u style='color: antiquewhite;'>this article</u></a> for help.", "user_id" => "#{user_id}" }
+    GroovRealtime::emit('notification_all_status_disabled', result, :tenant)
+  end
+
   def self.csv_already_imported_warning
     result = {"status" => false, "message" => "Looks like the CSV file with this name has already been imported before.<br/> If you would like to re-import this file please"  }
     GroovRealtime::emit('csv_already_imported_warning', result, :tenant)
