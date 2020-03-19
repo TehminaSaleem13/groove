@@ -8,9 +8,8 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         item.save
       end
 
-      if child_item['barcodes'].present?
-        barcode_found = do_if_child_item_has_barcodes(params, child_item)
-      end 
+      barcode_found = do_if_child_item_has_barcodes(params, child_item) if child_item['barcodes'].present?
+
       break if barcode_found
     end
     barcode_found
@@ -36,11 +35,12 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         if order_item_kit_product.present?
           do_if_order_item_kit_product_present(
             [item, child_item, serial_added, clicked, order_item_kit_product]
-            ) 
-          insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments? && !child_item['record_serial']
+            )
+          insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments? && !child_item['record_serial'] && !should_remove_kit_item?(clean_input, child_item['skippable'])
           if child_item['record_serial'] && serial_added && GeneralSetting.last.multi_box_shipments?
-            insert_in_box(order_item, order_item_kit_product.id)
+            insert_in_box(order_item, order_item_kit_product.id) unless should_remove_kit_item?(clean_input, child_item['skippable'])
           end
+          remove_kit_item_from_order(child_item) if should_remove_kit_item?(clean_input, child_item['skippable'])
         end
         break
       end
@@ -121,6 +121,16 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
         OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id)
       end
     end 
+  end
+
+  def remove_kit_item_from_order(child_item)
+      order_item = OrderItem.where(id: child_item['order_item_id']).first
+      order_item_kit_product = order_item.order_item_kit_products.find(child_item['kit_product_id']) rescue nil if order_item
+      order_item_kit_product.destroy if order_item_kit_product
+  end
+
+  def should_remove_kit_item?(clean_input, child_item_skippable)
+    check_for_skip_settings(clean_input) && child_item_skippable
   end
 
 end #module

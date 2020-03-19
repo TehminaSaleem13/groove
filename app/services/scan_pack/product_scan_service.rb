@@ -36,12 +36,16 @@ module ScanPack
       end
       begin
         order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"]) 
-        @result["data"]["order"]["store_type"] = order.store.store_type 
+        @result["data"]["order"]["store_type"] = order.store.store_type
+
+        if @result["data"]["order"]["store_type"] == "Shipstation API 2"
+          @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention
+          @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button
+          @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label
+          @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order
+        end
         @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy"
-        @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2"
-        @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if @result["data"]["order"]["store_type"] == "Shipstation API 2"
-        @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2"
-        @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2"
+
         do_set_result_for_boxes(order)
       rescue
       end
@@ -111,13 +115,13 @@ module ScanPack
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
         when "items_sequence"
           unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
-          value = check_scanning_item(unscanned_items,clean_input)
-          if value
+          if check_scanning_item(unscanned_items,clean_input)
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
             @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
             @result['status'] &= false
-            @result['error_messages'].push("Please scan items in the suggested order")
+            message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : 'Please scan items in the suggested order'
+            @result['error_messages'].push(message)
           end
         when "kits_sequence"
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
@@ -133,9 +137,7 @@ module ScanPack
           # end  
         when "kit_packing_mode"
           list = check_kit_mode(clean_input)
-          if list.empty?
-            do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
-          elsif list.include?(clean_input) 
+          if list.empty? || list.include?(clean_input) || check_for_skip_settings(clean_input)
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
             @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
@@ -162,9 +164,19 @@ module ScanPack
         list << unscanned_items.first["child_items"].first["barcodes"].map(&:barcode)
       end 
       value = list.flatten.include?("#{clean_input}")
+      value = check_for_skippable_item(unscanned_items.first) if !value && check_for_skip_settings(clean_input)
       return value
     end
 
+    def check_for_skip_settings(clean_input)
+      @scanpack_settings.skip_code_enabled && @scanpack_settings.skip_code == clean_input
+    end
+
+    def check_for_skippable_item(item)
+      val = item['skippable']
+      val = item['child_items'].first['skippable'] if !val && item['child_items'].present?
+      val
+    end
 
     # def check_scanning_kit(clean_input)
     #   unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
@@ -233,9 +245,13 @@ module ScanPack
 
       unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
       #search if barcode exists
-      barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
-
-      barcode_found = do_if_barcode_not_found(clean_input, serial_added, clicked) unless barcode_found
+      if check_for_skip_settings(clean_input)
+        barcode_found = check_for_skippable_item(unscanned_items.first)
+        barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if barcode_found
+      else
+        barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
+        barcode_found = do_if_barcode_not_found(clean_input, serial_added, clicked) unless barcode_found
+      end
 
       if barcode_found
         last_activity = @single_order.order_activities.last
@@ -257,7 +273,11 @@ module ScanPack
       else
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
         @result['status'] &= false
-        @result['error_messages'].push("Barcode '"+clean_input+"' doesn't match any item remaining on this order")
+
+        msg = @scanpack_settings.scanning_sequence == "items_sequence" ? "Barcode '#{clean_input}'' does not match the currently suggested item" : "Barcode '"+clean_input+"' doesn't match any item remaining on this order"
+
+        message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : msg
+        @result['error_messages'].push(message)
       end
     end
 
