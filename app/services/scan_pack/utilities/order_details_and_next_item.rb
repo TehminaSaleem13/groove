@@ -61,11 +61,12 @@ module ScanPack
       end
 
       def do_find_next_item_in_child_items(unscanned_item_child_items, scanned_product_id)
-        unscanned_item_child_items.each do |child_item|
-          if child_item['product_id'] == scanned_product_id
-            return child_item.clone
-          end
-        end
+        return unscanned_item_child_items.first.clone if unscanned_item_child_items.present? && unscanned_item_child_items.first['product_id'] == scanned_product_id
+        # unscanned_item_child_items.each do |child_item|
+        #   if child_item['product_id'] == scanned_product_id
+        #     return child_item.clone
+        #   end
+        # end
         return nil # to avoid returning unscanned_item_child_items
       end
 
