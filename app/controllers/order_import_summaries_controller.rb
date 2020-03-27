@@ -101,7 +101,6 @@ class OrderImportSummariesController < ApplicationController
     if !i.order_import_summary.nil?
       i.order_import_summary.destroy
     end
-
     render json: {status: true}
   end
 
