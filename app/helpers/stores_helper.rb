@@ -386,9 +386,13 @@ module StoresHelper
     result_createDate = DateTime.parse(result_createDate.to_s)
     store_orders = Order.where('store_id = ? AND increment_id != ?', store.id, order_id)
     if store_orders.blank? || store_orders.where('last_modified > ?', result_modifyDate).blank?
+      # Rule #1 - If there are no orders in our DB (other than the order provided to the troubleshooter, ie. the QF Order which gets automatically imported) when the QF import is run, then delete the LRO timestamp and run a regular import. - A 24 hour import range will be run rather than the usual QF range.
+
+      # Rule #2- If the OSLMT of the QF order is newer/more recent than that of any OSLMT in DB, then run a regular import
       dates[:range_start_date] = get_start_range_date(store_orders.blank?, store, credential)
       dates[:range_end_date] = get_time_in_pst(Time.zone.now)
     elsif store_orders.where('last_modified < ?', result_modifyDate).blank?
+      # Rule #3- If the OSLMT of the QF order is Older than any OSLMT saved in our DB , and a more recent order does exist, then start the import range 6 hours before the OSLMT of the QF order and end the range 6 hours after the OSLMT of the QF order. (12 hours with the OSLMT in the middle)
       dates[:range_start_date] = result_modifyDate - 6.hours
       dates[:range_end_date] = result_modifyDate + 6.hours
     else

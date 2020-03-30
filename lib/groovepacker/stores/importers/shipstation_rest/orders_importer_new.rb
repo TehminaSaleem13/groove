@@ -97,9 +97,13 @@ module Groovepacker
             store_orders = Order.where('store_id = ? AND id != ?', @store.id, order_id)
             if store_orders.blank? || store_orders.where('last_modified > ?', last_imported_order.last_modified).blank?
               notify_and_reset_lro(store_orders)
+              # Rule #1 - If there are no orders in our DB (other than the order provided to the troubleshooter, ie. the QF Order which gets automatically imported) when the QF import is run, then delete the LRO timestamp and run a regular import. - A 24 hour import range will be run rather than the usual QF range.
+
+              # Rule #2- If the OSLMT of the QF order is newer/more recent than that of any OSLMT in DB, then run a regular import
               quick_fix_range[:start_date] = get_qf_range_start_date
               quick_fix_range[:end_date] = convert_to_pst(Time.zone.now)
             elsif store_orders.where('last_modified < ?', last_imported_order.last_modified).blank?
+              # Rule #3- If the OSLMT of the QF order is Older than any OSLMT saved in our DB , and a more recent order does exist, then start the import range 6 hours before the OSLMT of the QF order and end the range 6 hours after the OSLMT of the QF order. (12 hours with the OSLMT in the middle)
               quick_fix_range[:start_date] = last_imported_order.last_modified - 6.hours
               quick_fix_range[:end_date] = last_imported_order.last_modified + 6.hours
             else
@@ -159,7 +163,7 @@ module Groovepacker
             Order.emit_data_for_on_demand_import_v2(response, order_no, user_id) if controller != 'stores'
             od_tz = @import_item.created_at + GeneralSetting.last.time_zone.to_i
             od_utc = @import_item.created_at
-            status_set_in_gp = set_status_in_gp
+            status_set_in_gp = shipstation_order_import_status
             if response["orders"].blank?
               log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}" , "Type" => "import failure" }
             else
@@ -177,28 +181,21 @@ module Groovepacker
             # check_or_assign_import_item
             response["orders"] = response["orders"].sort_by { |order| Time.zone.parse(order['modifyDate']) } if response["orders"].present?
             @store.shipstation_rest_credential.update_attributes(bulk_import: false)
-            bulk_ss_import = 0
+            @bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
-            if @range_or_quickfix_started
-              @import_item.update_attributes(status: 'in_progress')
-              @import_summary.emit_data_to_user(true)
-            end
+            emit_data_for_range_or_quickfix
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
               begin
-                @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
-                Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? bulk_ss_import += 1 : bulk_ss_import = 0
-                shipstation_order = find_or_init_new_order(order)
-                import_order_form_response(shipstation_order, order, shipments_response)
-                @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
+                update_import_item_and_import_order(order, shipments_response)
               rescue Exception => e
               end
               break if Rails.env == "test"
               sleep 0.3
             end
             cred = @store.shipstation_rest_credential
-            cred.bulk_import = @import_item.status == 'in_progress' && bulk_ss_import >= 25 ? true : false
+            cred.bulk_import = @import_item.status == 'in_progress' && @bulk_ss_import >= 25 ? true : false
             cred.download_ss_image = false
             cred.save
           end
@@ -347,14 +344,43 @@ module Groovepacker
             def get_orders_response
               response = {"orders" => nil}
               Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank? && !@credential.tag_import_option && @import_item.import_type != 'tagged'
-              response = fetch_orders_if_import_type_is_not_tagged(response)
-              response = fetch_tagged_orders(response) if @credential.tag_import_option || @import_item.import_type =="tagged"
+              response = fetch_response_from_shipstation(response)
               if ["lairdsuperfood", "gunmagwarehouse"].include?(Apartment::Tenant.current)
                 on_demand_logger = Logger.new("#{Rails.root}/log/shipstation_tag_order_import_#{Apartment::Tenant.current}.log")
                 on_demand_logger.info("=========================================")
                 on_demand_logger.info(response["orders"].map {|a| a["orderId"]}.join(", ")) rescue on_demand_logger.info("")
               end
               return response
+            end
+
+            def fetch_response_from_shipstation(response)
+              response = fetch_orders_if_import_type_is_not_tagged(response)
+              response = fetch_tagged_orders(response) if @credential.tag_import_option || @import_item.import_type =="tagged"
+              response
+            end
+
+            def emit_data_for_range_or_quickfix
+              if @range_or_quickfix_started
+                @import_item.update_attributes(status: 'in_progress')
+                @import_summary.emit_data_to_user(true)
+              end
+            end
+
+            def shipstation_order_import_status
+              status_set_in_gp = [] 
+              status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
+              status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
+              status_set_in_gp << "Shipped" if @credential.shall_import_shipped
+              status_set_in_gp
+            end
+
+            def update_import_item_and_import_order(order, shipments_response)
+              @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
+              # If a large number of orders are imported into SS at the same time via CSV, their OSLMT will be the same. During each regular import, we count how many consecutive orders have had the same timestamp. While this count is => to 25 we will set a flag to 1 If a non-matching OSLMT is imported or if the import fails in any way, the flag is reset to 0. When each import is run we will check this flag. If it is set to 1 at the start of the import we will adjust our LRO timestamp forward by 1 second and set the flag back to 0 ##### @bulk_ss_import #####
+              Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
+              shipstation_order = find_or_init_new_order(order)
+              import_order_form_response(shipstation_order, order, shipments_response)
+              @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
             end
 
             def fetch_orders_if_import_type_is_not_tagged(response)
@@ -403,14 +429,6 @@ module Groovepacker
                 shipstation_order = nil
               end
               init_new_order_if_required(shipstation_order, order)
-            end
-
-            def search_order_in_db(order)
-              if @credential.allow_duplicate_order == true
-                Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
-              else
-                Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
-              end
             end
 
             def init_new_order_if_required(shipstation_order, order)
@@ -481,13 +499,6 @@ module Groovepacker
             def destroy_nil_import_items
               ImportItem.where(:store_id => @store.id , :order_import_summary_id => nil).destroy_all rescue nil
               # ImportItem.where("status IS NULL").destroy_all
-            end
-
-            def set_status_in_gp
-              status_set_in_gp = []
-              status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
-              status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
-              status_set_in_gp << "Shipped" if @credential.shall_import_shipped
             end
 
             def create_import_summary(log)

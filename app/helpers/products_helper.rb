@@ -181,9 +181,7 @@ module ProductsHelper
 
   def barcode_labels_generate(tenant, params, bulk_actions_id, username)
     Apartment::Tenant.switch(tenant)
-    result = Hash.new
-    result['messages'] = []
-    result['status'] = true
+    result = {"messages"=>[], "status"=>true}
     bulk_action = GrooveBulkActions.find(bulk_actions_id)
     bulk_action_type = bulk_action.activity == 'order_product_barcode_label' ? 'order_items' : 'products'
     if bulk_action.activity == 'order_product_barcode_label'
@@ -211,6 +209,14 @@ module ProductsHelper
       bulk_action.update_attributes(:status => result['status'] ? 'completed' : 'failed', :messages => result['messages'], :current => '') unless bulk_action.cancel?
     rescue Exception => e
       bulk_action.update_attributes(:status => 'failed', :messages => e, :current => '')
+    end
+  end
+
+  def search_order_in_db(order)
+    if @credential.allow_duplicate_order == true
+      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
+    else
+      Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
     end
   end
 end

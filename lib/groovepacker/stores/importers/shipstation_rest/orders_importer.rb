@@ -135,10 +135,7 @@ module Groovepacker
             @import_item.update_attributes(current_order_items: order["items"].length, current_order_imported_item: 0)
             order["items"].each do |item|
               product = product_importer_client.find_or_create_product(item)
-              if @is_download_image
-                images = product.product_images
-                product.product_images.create(image: item["imageUrl"]) if item["imageUrl"].present? && images.blank?
-              end
+              product.product_images.create(image: item["imageUrl"]) if @is_download_image && item["imageUrl"].present? && product.product_images.blank?
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
@@ -273,11 +270,7 @@ module Groovepacker
             end
 
             def find_or_init_new_order(order)
-              if @credential.allow_duplicate_order == true
-                shipstation_order = Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
-              else
-                shipstation_order = Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
-              end
+              shipstation_order = search_order_in_db(order)
               @order_to_update = shipstation_order.present?
               return if shipstation_order && (shipstation_order.status=="scanned" || shipstation_order.status=="cancelled" || shipstation_order.order_items.map(&:scanned_status).include?("partially_scanned") || shipstation_order.order_items.map(&:scanned_status).include?("scanned"))
               if @import_item.import_type == 'quick' && shipstation_order
