@@ -12,11 +12,6 @@ class StoresController < ApplicationController
     render json: @result
   end
 
-  def update_include_product
-    result = check_include_pro_or_shipping_label("update_include_product")
-    render json: result
-  end
-
   def popup_shipping_label
     result = check_include_pro_or_shipping_label("popup_shipping_label")
     render json: result

@@ -249,7 +249,7 @@ module Groovepacker
                 order["recipients"][0]["line_items"].each do |item|
                   order_item = shiping_easy_order.order_items.build
                   import_order_item(order_item, item)
-                  if @credential.includes_product && item["product"].present?
+                  if item["product"].present?
                     create_alias_and_product(order_item, item)
                   else
                     import_single_order_product(order_item, item)

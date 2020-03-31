@@ -31,7 +31,6 @@ Groovepacks::Application.routes.draw do
   post "magento_rest/callback" => "magento_rest#callback"
   get "magento_rest/redirect" => "magento_rest#redirect"
   get 'stores/export_active_products' => 'stores#export_active_products'
-  get 'stores/update_include_product' => 'stores#update_include_product'
   get 'stores/popup_shipping_label' => 'stores#popup_shipping_label'
   get 'stores/amazon_fba' => 'stores#amazon_fba'
   get 'shipstation_rest_credentials/use_chrome_extention' => 'shipstation_rest_credentials#use_chrome_extention'
