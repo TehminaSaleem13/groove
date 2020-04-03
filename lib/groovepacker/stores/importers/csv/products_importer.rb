@@ -89,7 +89,7 @@ module Groovepacker
                   usable_record[:barcodes] << single_barcode.strip
                 end
               end
-            end 
+            end
             usable_record[:barcodes]
           end
 
@@ -110,9 +110,7 @@ module Groovepacker
             @found_barcodes = []
             found_skus_raw.each do |found_sku|
               @found_skus[found_sku.sku] = found_sku
-              if @duplicate_action !='overwrite'
-                @duplicate_db += 1
-              end
+              @duplicate_db += 1 if @duplicate_action !='overwrite'
             end
             found_barcodes_raw.each do |found_barcode|
               @found_barcodes << found_barcode.barcode
@@ -153,31 +151,31 @@ module Groovepacker
 
           def update_existing_prod(duplicate_found, record, index)
             single_product_duplicate_sku = ProductSku.find_by_sku(duplicate_found)
-            duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id) 
+            duplicate_product = Product.find_by_id(single_product_duplicate_sku.product_id)
             if record[:name] == "`[DELETE]`"
               delete_existing_prod(duplicate_product)
               return true
             end
             duplicate_product.store_id = self.params[:store_id]
-            if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
-              duplicate_product.name = record[:name]
-            end
+            duplicate_product.name = record[:name] if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
             if record[:product_second_record_serial] != nil
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial])
-                duplicate_product.second_record_serial = 1
-              else
-                duplicate_product.second_record_serial = record[:product_second_record_serial].to_i 
-              end
+              duplicate_product.second_record_serial = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial]) ? 1 : record[:product_second_record_serial].to_i 
+              # if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial])
+              #   duplicate_product.second_record_serial = 1
+              # else
+              #   duplicate_product.second_record_serial = record[:product_second_record_serial].to_i
+              # end
             else
               duplicate_product.second_record_serial = 0
             end
 
             if record[:product_record_serial] != nil
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial])
-                duplicate_product.record_serial = 1
-              else
-                duplicate_product.record_serial = record[:product_record_serial].to_i 
-              end  
+              duplicate_product.record_serial = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial]) ? 1 : record[:product_record_serial].to_i
+              # if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial])
+              #   duplicate_product.record_serial = 1
+              # else
+              #   duplicate_product.record_serial = record[:product_record_serial].to_i
+              # end
             else
               duplicate_product.record_serial = 0
             end  
@@ -207,15 +205,21 @@ module Groovepacker
               if !self.mapping['inv_wh1'].nil? && updatable_record[:quantity_on_hand] != "[DELETE]" #&& self.mapping['inv_wh1'][:action] =='overwrite'
                 default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
               end
-              if !self.mapping['location_primary'].nil? && updatable_record[:location_primary] != "[DELETE]" #&& self.mapping['location_primary'][:action] =='overwrite'
-                default_inventory.location_primary = updatable_record[:location_primary]
+
+              attributes_location = %w(location_primary location_secondary location_tertiary)
+              attributes_location.each do |location|
+                default_inventory.send(location + '=', updatable_record[location.to_sym]) if !self.mapping[location].nil? && updatable_record[location.to_sym] != "[DELETE]"
               end
-              if !self.mapping['location_secondary'].nil? && updatable_record[:location_secondary] != "[DELETE]" #&& self.mapping['location_secondary'][:action] =='overwrite'
-                default_inventory.location_secondary = updatable_record[:location_secondary]
-              end
-              if !self.mapping['location_tertiary'].nil? && updatable_record[:location_tertiary] != "[DELETE]" #&& self.mapping['location_tertiary'][:action] =='overwrite'
-                default_inventory.location_tertiary = updatable_record[:location_tertiary]
-              end
+
+              # if !self.mapping['location_primary'].nil? && updatable_record[:location_primary] != "[DELETE]" #&& self.mapping['location_primary'][:action] =='overwrite'
+              #   default_inventory.location_primary = updatable_record[:location_primary]
+              # end
+              # if !self.mapping['location_secondary'].nil? && updatable_record[:location_secondary] != "[DELETE]" #&& self.mapping['location_secondary'][:action] =='overwrite'
+              #   default_inventory.location_secondary = updatable_record[:location_secondary]
+              # end
+              # if !self.mapping['location_tertiary'].nil? && updatable_record[:location_tertiary] != "[DELETE]" #&& self.mapping['location_tertiary'][:action] =='overwrite'
+              #   default_inventory.location_tertiary = updatable_record[:location_tertiary]
+              # end
               default_inventory.save
             end
 
@@ -229,9 +233,7 @@ module Groovepacker
               all_found_cats = ProductCat.where(product_id: duplicate_product.id)
               to_not_add_cats = []
               all_found_cats.each do |single_found_dup_cat|
-                if record[:cats].include? single_found_dup_cat.category
-                  to_not_add_cats << single_found_dup_cat.category
-                end
+                to_not_add_cats << single_found_dup_cat.category if record[:cats].include? single_found_dup_cat.category
               end
               record[:cats].each do |single_to_add_cat|
                 if !to_not_add_cats.include?(single_to_add_cat) && single_to_add_cat != "[DELETE]"
@@ -348,13 +350,13 @@ module Groovepacker
           def build_usable_records
             self.final_record.each_with_index do |single_row, index|
               do_skip = true
-              for i in 0..(single_row.length-1)
+              for i in 0..(single_row.length - 1)
                 do_skip = false unless single_row[i].blank?
-                break unless do_skip              
+                break unless do_skip
               end
               next if do_skip
               if !self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?
-                single_row_skus = build_single_row_skus(single_row)                
+                single_row_skus = build_single_row_skus(single_row)
                 (@all_skus & single_row_skus).length > 0 ? @duplicate_file += 1 : insert_usable_record_skus(index, single_row_skus, single_row)
               end
               update_new_product_attributes(index)
@@ -405,9 +407,7 @@ module Groovepacker
                   @product_import.save
                   return true
                 end
-                if index === (@usable_records.length - 1)
-                  @product_import.status = 'importing_products'
-                end
+                @product_import.status = 'importing_products' if index === (@usable_records.length - 1)
                 @product_import.save
               end
             end
@@ -440,9 +440,7 @@ module Groovepacker
 
             ProductInventoryWarehouses.import @import_product_inventory_warehouses
 
-
             @import_product_inventory_warehouses.clear
-
 
             @product_import.status = 'processing_status'
             @product_import.save
@@ -484,34 +482,30 @@ module Groovepacker
               unless single_row[self.mapping["#{sku_type}"][:position]].nil?
                 other_skus = single_row[self.mapping["#{sku_type}"][:position]].split(',')
                 other_skus.each do |other_single_sku|
-                  unless single_row_skus.include? other_single_sku.strip
-                    single_row_skus << other_single_sku.strip
-                  end
+                  single_row_skus << other_single_sku.strip unless single_row_skus.include? other_single_sku.strip
                 end
               end
             end
           end
 
           def update_new_product_attributes(index)
-            if (index + 1) % @check_length === 0 || index === (self.final_record.length - 1)
-              @product_import.reload
-              @product_import.success = @success
-              @product_import.current_sku = @all_skus.last
-              if @product_import.cancel
-                @product_import.status = 'cancelled'
-                @product_import.save
-                return true
-              end
-              if index === (self.final_record.length - 1)
-                @success = 0
-                @product_import.status = 'processing_products'
-                @product_import.success = @success
-                @product_import.current_sku = ''
-                @product_import.total = @usable_records.length
-              end
+            return @product_import.save unless (index + 1) % @check_length === 0 || index === (self.final_record.length - 1)
+            @product_import.reload
+            @product_import.success = @success
+            @product_import.current_sku = @all_skus.last
+            if @product_import.cancel
+              @product_import.status = 'cancelled'
               @product_import.save
-              # return true
+              return true
             end
+            if index === (self.final_record.length - 1)
+              @success = 0
+              @product_import.status = 'processing_products'
+              @product_import.success = @success
+              @product_import.current_sku = ''
+              @product_import.total = @usable_records.length
+            end
+            # return true
             @product_import.save
           end
 
@@ -521,59 +515,74 @@ module Groovepacker
             usable_record[:skus] = single_row_skus
             begin
               usable_record[:new_sku] = []
-              usable_record[:new_sku] <<  single_row[self.mapping['sku'][:position]].split(',')[0]
-              usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0] rescue nil
-              usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0] rescue nil
-              usable_record[:new_sku] <<  single_row[self.mapping['quaternary_sku'][:position]].split(',')[0] rescue nil
-              usable_record[:new_sku] <<  single_row[self.mapping['quinary_sku'][:position]].split(',')[0] rescue nil
-              usable_record[:new_sku] <<  single_row[self.mapping['senary_sku'][:position]].split(',')[0] rescue nil
+
+              sku_types = %w(sku secondary_sku tertiary_sku quaternary_sku quinary_sku senary_sku)
+              sku_types.each do |single_sku_type|
+                usable_record[:new_sku] << single_row[self.mapping[single_sku_type][:position]].split(',')[0] rescue nil
+              end
+              # usable_record[:new_sku] <<  single_row[self.mapping['sku'][:position]].split(',')[0]
+              # usable_record[:new_sku] <<  single_row[self.mapping['secondary_sku'][:position]].split(',')[0] rescue nil
+              # usable_record[:new_sku] <<  single_row[self.mapping['tertiary_sku'][:position]].split(',')[0] rescue nil
+              # usable_record[:new_sku] <<  single_row[self.mapping['quaternary_sku'][:position]].split(',')[0] rescue nil
+              # usable_record[:new_sku] <<  single_row[self.mapping['quinary_sku'][:position]].split(',')[0] rescue nil
+              # usable_record[:new_sku] <<  single_row[self.mapping['senary_sku'][:position]].split(',')[0] rescue nil
             rescue Exception => e
               Rollbar.error(e, e.message)
             end
-            @usable_records << build_usable_record(usable_record,single_row)
+            @usable_records << build_usable_record(usable_record, single_row)
             @success += 1
           end
 
           def assign_duplicate_product_attributes(record, duplicate_product)
-            if !self.mapping['click_scan_enabled'].nil? && record[:click_scan_enabled] != "[DELETE]"
-              duplicate_product.click_scan_enabled = record[:click_scan_enabled]
+            attributes1 = %W(click_scan_enabled type_scan_enabled custom_product_display_1 custom_product_display_2 custom_product_display_3 is_skippable add_to_any_order)
+            attributes1.each do |attribute_name|
+              duplicate_product.send(attribute_name + '=', record[attribute_name.to_sym]) if !self.mapping[attribute_name].nil? && record[attribute_name.to_sym] != "[DELETE]"
             end
 
-            if !self.mapping['type_scan_enabled'].nil? && record[:type_scan_enabled] != "[DELETE]"
-              duplicate_product.type_scan_enabled = record[:type_scan_enabled]
+            # if !self.mapping['click_scan_enabled'].nil? && record[:click_scan_enabled] != "[DELETE]"
+            #   duplicate_product.click_scan_enabled = record[:click_scan_enabled]
+            # end
+
+            # if !self.mapping['type_scan_enabled'].nil? && record[:type_scan_enabled] != "[DELETE]"
+            #   duplicate_product.type_scan_enabled = record[:type_scan_enabled]
+            # end
+
+            # if !self.mapping['custom_product_display_1'].nil? && record[:custom_product_display_1] != "[DELETE]"
+            #   duplicate_product.custom_product_display_1 = record[:custom_product_display_1]
+            # end
+
+            # if !self.mapping['custom_product_display_2'].nil? && record[:custom_product_display_2] != "[DELETE]"
+            #   duplicate_product.custom_product_display_2 = record[:custom_product_display_2]
+            # end
+
+            # if !self.mapping['custom_product_display_3'].nil? && record[:custom_product_display_3] != "[DELETE]"
+            #   duplicate_product.custom_product_display_3 = record[:custom_product_display_3]
+            # end
+
+            # if !self.mapping['is_skippable'].nil? && record[:is_skippable] != "[DELETE]"
+            #   duplicate_product.is_skippable = record[:is_skippable]
+            # end
+
+            # if !self.mapping['add_to_any_order'].nil? && record[:add_to_any_order] != "[DELETE]"
+            #   duplicate_product.add_to_any_order = record[:add_to_any_order]
+            # end
+
+            attributes2 = %W(custom_product_1 custom_product_2 custom_product_3)
+            attributes2.each do |attribute_name|
+              duplicate_product.send(attribute_name + '=', record[attribute_name.to_sym]) if !self.mapping[attribute_name].nil? && record[attribute_name.to_sym] != '' && record[attribute_name.to_sym] != "[DELETE]"
             end
 
-            if !self.mapping['custom_product_display_1'].nil? && record[:custom_product_display_1] != "[DELETE]"
-              duplicate_product.custom_product_display_1 = record[:custom_product_display_1]
-            end
+            # if !self.mapping['custom_product_1'].nil? && record[:custom_product_1]!='' && record[:custom_product_1]!= "[DELETE]"
+            #   duplicate_product.custom_product_1 = record[:custom_product_1]
+            # end
 
-            if !self.mapping['custom_product_display_2'].nil? && record[:custom_product_display_2] != "[DELETE]"
-              duplicate_product.custom_product_display_2 = record[:custom_product_display_2]
-            end
+            # if !self.mapping['custom_product_2'].nil? && record[:custom_product_2]!='' && record[:custom_product_2]!= "[DELETE]"
+            #   duplicate_product.custom_product_2 = record[:custom_product_2]
+            # end
 
-            if !self.mapping['custom_product_display_3'].nil? && record[:custom_product_display_3] != "[DELETE]"
-              duplicate_product.custom_product_display_3 = record[:custom_product_display_3]
-            end
-
-            if !self.mapping['is_skippable'].nil? && record[:is_skippable] != "[DELETE]"
-              duplicate_product.is_skippable = record[:is_skippable]
-            end
-
-            if !self.mapping['add_to_any_order'].nil? && record[:add_to_any_order] != "[DELETE]"
-              duplicate_product.add_to_any_order = record[:add_to_any_order]
-            end
-
-            if !self.mapping['custom_product_1'].nil? && record[:custom_product_1]!='' && record[:custom_product_1]!= "[DELETE]"
-              duplicate_product.custom_product_1 = record[:custom_product_1]
-            end
-
-            if !self.mapping['custom_product_2'].nil? && record[:custom_product_2]!='' && record[:custom_product_2]!= "[DELETE]"
-              duplicate_product.custom_product_2 = record[:custom_product_2]
-            end
-
-            if !self.mapping['custom_product_3'].nil? && record[:custom_product_3]!='' && record[:custom_product_3]!= "[DELETE]"
-              duplicate_product.custom_product_3 = record[:custom_product_3]
-            end
+            # if !self.mapping['custom_product_3'].nil? && record[:custom_product_3]!='' && record[:custom_product_3]!= "[DELETE]"
+            #   duplicate_product.custom_product_3 = record[:custom_product_3]
+            # end
           end
 
           def delete_product(record)

@@ -12,20 +12,6 @@ class UsersController < ApplicationController
     render json: @users.as_json(only: [:id, :username, :active], methods: [:last_activity], :include => :role) 
   end
 
-  def get_subscription_info
-    result = {}
-    result['status'] = true
-    result['no_of_users'] =  AccessRestriction.last.num_users
-    result['added_through_ui'] = AccessRestriction.last.added_through_ui
-    result ['total_users'] = User.where(is_deleted: false).count
-    tenant = Tenant.find_by_name(Apartment::Tenant.current)
-    subscription = tenant.subscription
-    result['amount'] = (subscription.amount.to_f / 100) rescue 0
-    respond_to do |format|
-      format.json { render json: result }
-    end
-  end
-
   def modify_plan
     result = {}
     result['status'] = true
@@ -132,11 +118,12 @@ class UsersController < ApplicationController
   def update_user_status
     if current_user.can? 'add_edit_users'
       user = User.find(params["id"])
-      params["active"] == "active" ? user.active = true : user.active = false
+      # params["active"] == "active" ? user.active = true : user.active = false
+      user.active = params['active'] == 'active'
       user.save
       HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/users/update_username",
                   query: { username: user.username, packing_user_id: user.id, active: user.active },
-                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil if user.present?
+                  headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current }) rescue nil
     end
     render json: {status: true}
   end

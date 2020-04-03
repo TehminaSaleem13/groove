@@ -179,9 +179,11 @@ module Groovepacker
           
           if sku["id"].present?
             db_sku = product_skus.find{|_sku| _sku.id == sku["id"]}
-            status = @product.create_or_update_productsku(sku, index, nil, db_sku, @current_user)
+            # status = @product.create_or_update_productsku(sku, index, nil, db_sku, @current_user)
+            status = @product.create_or_update_product_sku_or_barcode(sku, index, nil, db_sku, @current_user, 'SKU')
           elsif sku["sku"].present? && db_sku.blank?
-            status = @product.create_or_update_productsku(sku, index, 'new', @current_user)
+            # status = @product.create_or_update_productsku(sku, index, 'new', @current_user)
+            status = @product.create_or_update_product_sku_or_barcode(sku, index, 'new', @current_user, 'SKU')
           elsif sku["sku"].present? && db_sku.present?
             @result['status'] = false
             @result['message'] = "Sku "+sku["sku"]+" already exists"
@@ -208,9 +210,11 @@ module Groovepacker
           case true
           when barcode["id"].present?
             db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"]}
-            status = @product.create_or_update_productbarcode(barcode, index, nil, db_barcode, @current_user)
+            # status = @product.create_or_update_productbarcode(barcode, index, nil, db_barcode, @current_user)
+            status = @product.create_or_update_product_sku_or_barcode(barcode, index, nil, db_barcode, @current_user, 'barcode')
           when barcode["barcode"].present? && db_barcode.blank?
-            status = @product.create_or_update_productbarcode(barcode, index, 'new', @current_user)
+            # status = @product.create_or_update_productbarcode(barcode, index, 'new', @current_user)
+            status = @product.create_or_update_product_sku_or_barcode(barcode, index, 'new', @current_user, 'barcode')
           when barcode["barcode"].present? && db_barcode.present?
             @result['status'] = false
             @result['message'] = "Barcode #{barcode['barcode']} already exists"

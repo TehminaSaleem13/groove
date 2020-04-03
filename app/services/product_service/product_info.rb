@@ -47,7 +47,7 @@ module ProductService
                                                         'basicinfo' => @product.attributes,
                                                         'product_weight_format' => get_product_weight_format,
                                                         'weight' => @product.get_weight,
-                                                        'shipping_weight' => @product.get_shipping_weight,
+                                                        'shipping_weight' => @product.get_weight('shipping'),
                                                         'skus' => get_product_skus,
                                                         'cats' => @product.product_cats,
                                                         'spl_instructions_4_packer' => @product.spl_instructions_4_packer,
