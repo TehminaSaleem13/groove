@@ -97,7 +97,7 @@ module Groovepacker
             delete_products(current_user)
           elsif params[:action_type] == 'both'
             delete_orders(result)
-            delete_products(current_user)
+            delete_all_product_data
           elsif params[:action_type] == 'inventory'
             helper = Groovepacker::Tenants::Helper.new
             helper.delay.reset_inventory(result, Apartment::Tenant.current)
@@ -143,6 +143,12 @@ module Groovepacker
           else
             update_fail_status(result, order.errors.full_messages)
           end
+        end
+      end
+
+      def delete_all_product_data
+        %w(products product_activities product_cats product_images products_product_inventory_reports product_inventory_warehouses product_kit_activities product_kit_skus product_lots product_skus product_barcodes).each do |table|
+          ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
         end
       end
 
