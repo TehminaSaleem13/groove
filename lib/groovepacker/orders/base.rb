@@ -83,6 +83,28 @@ module Groovepacker
                 }
         end
 
+        def order_export_row_map
+          return {:order_number => '',
+                  :order_date_time => '',
+                  :sku => '',
+                  :product_name => '',
+                  :barcode => '',
+                  :qty => '',
+                  :first_name => '',
+                  :last_name => '',
+                  :email => '',
+                  :address_1 => '',
+                  :address_2 => '',
+                  :city => '',
+                  :state => '',
+                  :postal_code => '',
+                  :country => '',
+                  :customer_comments => '',
+                  :internal_notes => '',
+                  :tracking_num => '',
+                }
+        end
+
         def get_context(store)
           case store.store_type
           when 'Amazon'
