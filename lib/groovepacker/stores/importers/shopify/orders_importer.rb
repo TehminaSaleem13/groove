@@ -33,26 +33,32 @@ module Groovepacker
 
             def import_single_order(order)
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
-              if Order.find_by_increment_id(order["name"])
+              order_in_gp_present = false
+              order_in_gp = Order.find_by_increment_id(order["name"])
+              if order_in_gp
+                order_in_gp_present = true
+                is_scanned = order_in_gp && (order_in_gp.status=="scanned" || order_in_gp.status=="cancelled" || order_in_gp.order_items.map(&:scanned_status).include?("partially_scanned") || order_in_gp.order_items.map(&:scanned_status).include?("scanned"))
                 #mark previously imported
-                update_import_count('success_updated') && return
+                update_import_count('success_updated') && return if is_scanned
+                order_in_gp.destroy
               end
-              #create order
-              shopify_order = Order.new(store: @store)
-              shopify_order = import_order(shopify_order, order)
-              #import items in an order
-              shopify_order = import_order_items(shopify_order, order)
-              #update store
-              shopify_order.set_order_status
-              #add order activities
-              if check_for_replace_product
-                add_order_activities_for_gp_coupon(shopify_order, order)
-              else
-                add_order_activities(shopify_order)
-              end
+              import_order_and_items(order)
+              # #create order
+              # shopify_order = Order.new(store: @store)
+              # shopify_order = import_order(shopify_order, order)
+              # #import items in an order
+              # shopify_order = import_order_items(shopify_order, order)
+              # #update store
+              # shopify_order.set_order_status
+              # #add order activities
+              # if check_for_replace_product
+              #   add_order_activities_for_gp_coupon(shopify_order, order)
+              # else
+              #   add_order_activities(shopify_order)
+              # end
               
               #increase successful import with 1 and save
-              update_import_count('success_imported')
+              order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
             end
 
             def import_order(shopify_order, order)
@@ -74,7 +80,7 @@ module Groovepacker
               @import_item.current_order_items = order["line_items"].length
               @import_item.current_order_imported_item = 0
               @import_item.save
-
+              order["line_items"] = order["line_items"].reject {|h| h['fulfillment_status'] == nil && h['fulfillable_quantity'] == 0 }
               order["line_items"].each do |item|
                 order_item = import_order_item(order_item, item)
                 @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
@@ -159,6 +165,22 @@ module Groovepacker
                   shopify_order.addactivity("Intangible item with SKU #{order["line_items"][index]["sku"]}  and Name #{order["line_items"][index]["name"]} was replaced with GP Coupon.",@store.name+" Import")
                 end 
               end  
+            end
+
+            def import_order_and_items(order)
+              #create order
+              shopify_order = Order.new(store: @store)
+              shopify_order = import_order(shopify_order, order)
+              #import items in an order
+              shopify_order = import_order_items(shopify_order, order)
+              #update store
+              shopify_order.set_order_status
+              #add order activities
+              if check_for_replace_product
+                add_order_activities_for_gp_coupon(shopify_order, order)
+              else
+                add_order_activities(shopify_order)
+              end
             end
         end
       end
