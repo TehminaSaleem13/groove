@@ -23,6 +23,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       last_completed = imp_items.last.try(:updated_at)
       $redis.set("#{Apartment::Tenant.current}_#{store.id}",last_completed)
       imp_items.delete_all
+      ImportItem.where("store_id = ? AND status !='completed'", store.id).update_all(status: 'cancelled')
       new_import_item(store.id, nil, 'not_started')
       return
     end
@@ -100,6 +101,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     #add a new import summary
     import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
     #add import item for the store
+    ImportItem.where(store_id: params[:store].id).update_all(status: 'cancelled')
     ImportItem.where(store_id: params[:store].id).destroy_all
     import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
