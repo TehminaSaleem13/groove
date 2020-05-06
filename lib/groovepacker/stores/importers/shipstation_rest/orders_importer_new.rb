@@ -24,6 +24,7 @@ module Groovepacker
           end
 
           def initialize_orders_import
+            OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             response = get_orders_response
             response['orders'] = response['orders'].sort_by { |h| h["modifyDate"].split('-') } rescue response['orders']
             # response["orders"] = response["orders"].sort {|vn1, vn2| vn2["orderDate"] <=> vn1["orderDate"]} rescue response["orders"]

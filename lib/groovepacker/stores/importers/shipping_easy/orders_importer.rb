@@ -11,6 +11,7 @@ module Groovepacker
             init_common_objects
             return @result if import_statuses_are_empty
             importing_time = Time.now
+            OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             response = @client.orders(@statuses, importing_time, @import_item)
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)

@@ -7,6 +7,7 @@ module Groovepacker
 
           def import
             initialize_import_objects
+            OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
