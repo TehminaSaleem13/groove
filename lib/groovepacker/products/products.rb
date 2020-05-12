@@ -55,6 +55,41 @@ module Groovepacker
         CsvExportMailer.send_s3_export_product_url(result['filename'], Apartment::Tenant.current).deliver
       end
 
+      def ftp_product_import(tenant)
+        stores = Store.joins(:ftp_credential).where('product_ftp_host IS NOT NULL and product_ftp_username IS NOT NULL and product_ftp_password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_product_ftp_import = ?', 'CSV', true)
+        stores.each do |store|
+          params = {}
+          mapping = CsvMapping.find_by_store_id(store.id)
+          next unless check_connection_for_product_ftp_import(mapping, store)
+          map = mapping.product_csv_map
+          data = build_product_data(map,store)
+          data[:tenant] = tenant
+          data[:user_id] = User.find_by_name('gpadmin').try(:id)
+          ImportCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}").import Apartment::Tenant.current, data.to_s
+        end
+      end
+
+      def check_connection_for_product_ftp_import(mapping, store)
+        status = true
+        unless !mapping.nil? && !mapping.product_csv_map.nil? && store.ftp_credential.product_ftp_username && store.ftp_credential.product_ftp_password && store.ftp_credential.product_ftp_host
+          status = false
+        end
+        return status
+      end
+
+      def build_product_data(map,store)
+        data = {:flag => "ftp_download", :type => "product", :store_id => store.id}
+        common_product_ftp_data_attributes.each { |attr| data[attr.to_sym] = map[:map][attr.to_sym] }
+        return data
+      end
+
+      def common_product_ftp_data_attributes
+        return ["fix_width", "fixed_width", "sep", "delimiter", "rows", "map", "map", "import_action",
+                "contains_unique_order_items", "generate_barcode_from_sku", "use_sku_as_product_name",
+                "order_date_time_format", "day_month_sequence"
+              ]
+      end
+
       private
         def general_setting
           @general_settings ||= GeneralSetting.all.first
@@ -259,9 +294,7 @@ module Groovepacker
 
         def get_inv_update_attributes
           attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary']
-          if general_setting.low_inventory_alert_email
-            attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level']
-          end
+          attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level'] if general_setting.low_inventory_alert_email
           attr_array
         end
 

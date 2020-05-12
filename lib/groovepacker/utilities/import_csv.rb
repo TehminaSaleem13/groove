@@ -21,7 +21,8 @@ class ImportCsv
         universal_newline: true # Always break lines with \n
       }
       if params[:flag] == 'ftp_download'
-        groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+        ftp_type = params[:type] == 'product' ? 'product' : nil
+        groove_ftp = FTP::FtpConnectionManager.get_instance(store, ftp_type)
         response = groove_ftp.download(tenant)
         if response[:status]
           file_path = response[:file_info][:file_path]
@@ -51,8 +52,10 @@ class ImportCsv
                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
                        nil
-                     end if !store.csv_beta
-                     
+                     end if !store.csv_beta && params[:type] != "product"
+
+          csv_file = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options) rescue nil if params[:type] == "product"
+
           set_file_name(params, response[:file_info][:ftp_file_name])
           set_file_path(params, file_path)
         else
@@ -172,9 +175,9 @@ class ImportCsv
           end
           # File.delete(file_path)
           if params[:flag] == 'ftp_download' && result[:add_imported]
-            rename_ftp_file(store, result, response)
+            rename_ftp_file(store, result, response, params[:type])
             ftp_csv_import = Groovepacker::Orders::Import.new
-            ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
+            params[:type] == 'product' ? Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) : ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
             begin
               File.delete(file_path)
             rescue
@@ -186,14 +189,14 @@ class ImportCsv
     rescue Exception => e
       Rollbar.error(e, e.message)
     end
-    track_user(tenant, params, 'Import Finished', "#{params[:type].capitalize} Import Finished")
+        track_user(tenant, params, 'Import Finished', "#{params[:type].capitalize} Import Finished")
     result
   end
 
-  def rename_ftp_file(store, result, response)
+  def rename_ftp_file(store, result, response, type)
     import_item = ImportItem.where(store_id: store.id).last
-    return result if import_item.status == 'cancelled'
-    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    return result if import_item && import_item.status == 'cancelled' && type != 'product'
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store, type)
     response = groove_ftp.update(response[:file_info][:ftp_file_name])
     unless response[:status]
       result[:status] = false

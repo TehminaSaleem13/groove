@@ -261,7 +261,7 @@ module StoreConcern
       new_record = true
     end
     params[:host] = nil if params[:host] === 'null'
-    ftp.assign_attributes(host: params[:host], username: params[:username], password: params[:password], connection_method: params[:connection_method], connection_established: false, use_ftp_import: params[:use_ftp_import])
+    ftp.assign_attributes(host: params[:host], username: params[:username], password: params[:password], connection_method: params[:connection_method], connection_established: false, use_ftp_import: params[:use_ftp_import], product_ftp_host: params[:product_ftp_host], product_ftp_username: params[:product_ftp_username], product_ftp_password: params[:product_ftp_password], product_ftp_connection_method: params[:product_ftp_connection_method], product_ftp_connection_established: false, use_product_ftp_import: params[:use_product_ftp_import])
     store.ftp_credential = ftp
     begin
       store.save!

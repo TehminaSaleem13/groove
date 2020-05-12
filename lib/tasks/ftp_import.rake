@@ -27,7 +27,9 @@ namespace :ftp_csv_file_import do
             ftp_csv_import.ftp_order_import(tenant.name)
           end
         end
-        puts "====================FTP import end for #{tenant.name}======================"
+        puts "====================Product FTP import started for #{tenant.name}======================"
+        Groovepacker::Products::Products.new.ftp_product_import(tenant.name) if tenant.product_ftp_import
+        puts "====================Product FTP import end for #{tenant.name}======================"
       rescue Exception => e
         puts e.message
       end

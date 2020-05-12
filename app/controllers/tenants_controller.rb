@@ -124,6 +124,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_product_ftp_import
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.product_ftp_import = !tenant.product_ftp_import
+    tenant.save
+    render json: {}
+  end
+
   def update_product_activity_switch
     tenant = Tenant.find(params["tenant_id"])
     tenant.product_activity_switch = !tenant.product_activity_switch

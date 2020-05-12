@@ -73,10 +73,11 @@ class StoresController < ApplicationController
     result = { status: true }
     begin
       store = Store.find(params['store_id'])
-      cred = store.shipstation_rest_credential
+      cred = store.store_type == 'Shipstation API 2' ? store.shipstation_rest_credential : store.shipping_easy_credential
       if cred
         new_lro = Time.zone.parse(DateTime.parse(params['lro_date']).strftime('%Y-%m-%d %H:%M:%S'))
-        store.regular_import_v2 ? cred.update_attributes(quick_import_last_modified_v2: new_lro) : cred.update_attributes(quick_import_last_modified: new_lro + 8.hours)
+        store.regular_import_v2 ? cred.update_attributes(quick_import_last_modified_v2: new_lro) : cred.update_attributes(quick_import_last_modified: new_lro + 8.hours) if store.store_type == 'Shipstation API 2'
+        cred.update_attributes(last_imported_at: new_lro) if store.store_type == 'ShippingEasy'
       end
     rescue => e
       result[:error] = e
@@ -88,9 +89,10 @@ class StoresController < ApplicationController
   def connect_and_retrieve
     result = {}
     store = Store.find(params[:id])
-    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store, params[:type])
     result[:connection] = groove_ftp.retrieve()
-    store.ftp_credential.update_attribute(:connection_established, true) if result[:connection][:status]
+    store.ftp_credential.update_attribute(:connection_established, true) if result[:connection][:status] && params[:type].nil?
+    store.ftp_credential.update_attribute(:product_ftp_connection_established, true) if result[:connection][:status] && params[:type] == 'product'
     # store.ftp_credential.connection_established = true
     # store.ftp_credential.save!
     render json: result
@@ -103,7 +105,7 @@ class StoresController < ApplicationController
   def check_imported_folder
     result = {}
     store = Store.find(params[:id])
-    groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+    groove_ftp = FTP::FtpConnectionManager.get_instance(store, params[:type])
     result[:connection] = groove_ftp.check_imported()
     store.ftp_credential.update_attribute(:connection_established, true) if result[:connection][:status]
     render json: result
@@ -317,6 +319,7 @@ class StoresController < ApplicationController
   def show
     @store = Store.find_by_id(params[:id])
     @result = {"is_fba" => Tenant.find_by_name(Apartment::Tenant.current).try(:is_fba)}
+    @result = @result.merge!({"product_ftp_import" => Tenant.find_by_name(Apartment::Tenant.current).try(:product_ftp_import)})
     show_store
     render json: @result
   end
