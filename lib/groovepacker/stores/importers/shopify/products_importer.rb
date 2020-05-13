@@ -17,7 +17,7 @@ module Groovepacker
               return
             end
             return if response["products"].blank?
-            products_response = response["products"].sort_by { |products| Time.zone.parse(products['updated_at']) }
+            products_response = response["products"].compact.sort_by { |products| Time.zone.parse(products['updated_at']) }
             products_response.each do |product|
               create_single_product(product)
               @credential.update_attributes(product_last_import: Time.zone.parse(product['updated_at'])) if products_response.last == product

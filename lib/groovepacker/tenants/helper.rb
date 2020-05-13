@@ -479,7 +479,7 @@ module Groovepacker
 
       def retrieve_subscription_result(subscription_result, subscription)
         sub_plan_id = subscription.subscription_plan_id
-        subscription_result['plan'] = construct_plan_hash.key(sub_plan_id) || sub_plan_id.capitalize.gsub("-"," ") #get_plan_name(sub_plan_id)
+        subscription_result['plan'] = construct_plan_hash.key(sub_plan_id) || sub_plan_id.capitalize.gsub("-"," ") rescue nil #get_plan_name(sub_plan_id)
         subscription_result['plan_id'] = sub_plan_id
         subscription_result['amount'] = '%.2f' % [(subscription.amount * 100).round / 100.0 / 100.0] if subscription.amount
         subscription_result['start_day'] = subscription.created_at.strftime('%d %b')
