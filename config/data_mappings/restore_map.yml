@@ -11,8 +11,8 @@ products:
     updated_at: updated_at
     BinLocation 1: inv_wh1
     status: status
-    spl_instructions_4_packer: spl_instructions_4_packer
-    spl_instructions_4_confirmation: spl_instructions_4_confirmation
+    packing_instructions: packing_instructions
+    packing_instructions_conf: packing_instructions_conf
     Barcode 1: barcode
     is_skippable: is_skippable
     packing_placement: packing_placement

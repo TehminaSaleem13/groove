@@ -34,7 +34,7 @@ module Groovepacker
           def init_usable_record(index)
             {
               name: '', weight: 0, skus: [], barcodes: [], store_product_id: @store_product_id_base + index.to_s,
-              cats: [], images: [], inventory: [], product_type: '', spl_instructions_4_packer: '',
+              cats: [], images: [], inventory: [], product_type: '', packing_instructions: '',
               is_intangible: false, click_scan_enabled: "on", is_skippable: false, add_to_any_order: false,
               type_scan_enabled: "on", custom_product_1: "", custom_product_2: "", custom_product_3: "",
               custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false
@@ -70,6 +70,10 @@ module Groovepacker
               if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['is_skippable'][:position]])
                 usable_record[:is_skippable] = true
               end
+            end
+
+            if !self.mapping['packing_placement'].nil? && self.mapping['packing_placement'][:position] >= 0 && !single_row[self.mapping['packing_placement'][:position]].blank?
+                usable_record[:packing_placement] = single_row[self.mapping['packing_placement'][:position]].to_i if single_row[self.mapping['packing_placement'][:position]].to_i > 0
             end
 
             if !self.mapping['add_to_any_order'].nil? && self.mapping['add_to_any_order'][:position] >= 0 && !single_row[self.mapping['add_to_any_order'][:position]].blank?
@@ -114,9 +118,12 @@ module Groovepacker
               usable_record[:custom_product_3] = single_row[self.mapping['custom_product_3'][:position]]
             end
 
+            if !self.mapping['packing_instructions_conf'].nil? && self.mapping['packing_instructions_conf'][:position] >= 0 && !single_row[self.mapping['packing_instructions_conf'][:position]].blank?
+              usable_record[:packing_instructions_conf] = single_row[self.mapping['packing_instructions_conf'][:position]]
+            end
 
             if !self.mapping['product_instructions'].nil? && self.mapping['product_instructions'][:position] >= 0 && !single_row[self.mapping['product_instructions'][:position]].blank?
-              usable_record[:spl_instructions_4_packer] = single_row[self.mapping['product_instructions'][:position]]
+              usable_record[:packing_instructions] = single_row[self.mapping['product_instructions'][:position]]
             end
 
             if !self.mapping['receiving_instructions'].nil? && self.mapping['receiving_instructions'][:position] >= 0 && !single_row[self.mapping['receiving_instructions'][:position]].blank?
@@ -377,7 +384,7 @@ module Groovepacker
             record[:cats].each_with_index do |cat, index|
               product.product_cats[index].destroy if cat == "[DELETE]" rescue nil
             end
-            product.update_attribute(:spl_instructions_4_packer, nil) if record[:spl_instructions_4_packer] == "[DELETE]"
+            product.update_attribute(:packing_instructions, nil) if record[:packing_instructions] == "[DELETE]"
             product.update_attribute(:product_receiving_instructions, nil) if record[:product_receiving_instructions] == "[DELETE]"
             product.update_attribute(:weight, nil) if record[:weight] == "[DELETE]"
             record[:inventory].each_with_index do |inventory, index|

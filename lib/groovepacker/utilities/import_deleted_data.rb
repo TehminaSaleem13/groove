@@ -119,8 +119,8 @@ class ImportDeletedData
       product.created_at = item['created_at'].to_datetime
       product.updated_at = item['updated_at'].to_datetime
       product.status = item['status']
-      product.spl_instructions_4_packer = item['spl_instructions_4_packer']
-      product.spl_instructions_4_confirmation = item['spl_instructions_4_confirmation'].to_b
+      product.packing_instructions = item['packing_instructions']
+      product.packing_instructions_conf = item['packing_instructions_conf'].to_b
       product.is_skippable = item['is_skippable'].to_b
       product.packing_placement = item['packing_placement'].to_i
       product.pack_time_adj = item['pack_time_adj'].to_i

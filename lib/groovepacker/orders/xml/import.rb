@@ -344,7 +344,7 @@ module Groovepacker
           #product information
           return result if @gp_coupon_found == true
           product.name = product_xml[:name] if product.name.blank?
-          product.spl_instructions_4_packer = product_xml[:instructions] if product.spl_instructions_4_packer.blank?
+          product.packing_instructions = product_xml[:instructions] if product.packing_instructions.blank?
           product.is_kit = product_xml[:is_kit] if product.is_kit == 0
           product.kit_parsing = product_xml[:kit_parsing] if product.kit_parsing.blank?
           product.weight = product_xml[:weight] if product.weight.blank?

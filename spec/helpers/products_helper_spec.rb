@@ -74,7 +74,7 @@ RSpec.describe ProductsHelper, type: :helper do
       editables = {
         name: 'test', status: 'inactive', is_skippable: true,
         type_scan_enabled: '1', click_scan_enabled: '1',
-        spl_instructions_4_packer: 'Testing', sku: 'Test',
+        packing_instructions: 'Testing', sku: 'Test',
         category: '1', barcode: 'BAR'
       }
 

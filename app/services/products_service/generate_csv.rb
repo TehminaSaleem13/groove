@@ -63,10 +63,23 @@ module ProductsService
     end
 
     def check_headers_against_product_column
-      Product.column_names.each do |name|
+      all_fields = filter_and_arrange_fields(Product.column_names)
+      all_fields.each do |name|
         next if headers.any? { |s| s.casecmp(name) == 0 }
         headers.push(name)
       end
+    end
+
+    def filter_and_arrange_fields(all_product_fields)
+      delete_list = ['store_product_id', 'product_type', 'pack_time_adj', 'kit_parsing', 'is_kit', 'disable_conf_req', 'total_avail_ext', 'shipping_weight', 'status_updated', 'is_inventory_product']
+      delete_list.each do |del|
+        all_product_fields.delete_at(all_product_fields.index(del)) if all_product_fields.index(del)
+      end
+      insert_list = ['store_id', 'status', 'created_at', 'updated_at']
+      insert_list.each do |ins|
+        all_product_fields.insert(-1, all_product_fields.delete(ins))
+      end
+      all_product_fields
     end
 
     def process_data(item)

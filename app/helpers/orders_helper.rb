@@ -220,7 +220,7 @@ module OrdersHelper
                   'barcode' => product.primary_barcode,
                   'category' => product.primary_category,
                   'image' => product.base_product.primary_image,
-                  'spl_instructions_4_packer' => product.spl_instructions_4_packer,
+                  'packing_instructions' => product.packing_instructions,
                   'qty_on_hand' => product.try(:primary_warehouse).try(:quantity_on_hand) ,
                   'location_primary' => location_primary
                  }

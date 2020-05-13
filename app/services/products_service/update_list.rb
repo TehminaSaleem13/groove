@@ -21,7 +21,7 @@ module ProductsService
     def var_matches_attr_names?
       %w(
         name status is_skippable type_scan_enabled
-        click_scan_enabled spl_instructions_4_packer 
+        click_scan_enabled packing_instructions 
         custom_product_1 custom_product_2 custom_product_3
       ).include?(@var)
     end

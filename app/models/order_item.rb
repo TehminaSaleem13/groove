@@ -94,8 +94,8 @@ class OrderItem < ActiveRecord::Base
         collection
       end
     end
-    result['instruction'] = item.spl_instructions_4_packer
-    result['confirmation'] = item.spl_instructions_4_confirmation
+    result['instruction'] = item.packing_instructions
+    result['confirmation'] = item.packing_instructions_conf
     result['images'] = sort_by_order[item.cached_product_images]
     result['sku'] = sort_by_order[item.cached_product_skus].first.sku if item.cached_product_skus.length > 0
     result['packing_placement'] = item.packing_placement

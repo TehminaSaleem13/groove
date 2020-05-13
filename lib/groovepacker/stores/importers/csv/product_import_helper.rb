@@ -154,7 +154,7 @@ module Groovepacker
             import_product_barcode(product, single_row, order_increment_sku, unique_order_item)
             product.store_product_id = 0
             product.store_id = params[:store_id]
-            product.spl_instructions_4_packer =
+            product.packing_instructions =
               import_product_instructions(single_row)
             import_image(product, single_row)
             import_product_category(product, single_row)

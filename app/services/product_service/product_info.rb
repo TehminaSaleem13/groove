@@ -50,7 +50,7 @@ module ProductService
                                                         'shipping_weight' => @product.get_weight('shipping'),
                                                         'skus' => get_product_skus,
                                                         'cats' => @product.product_cats,
-                                                        'spl_instructions_4_packer' => @product.spl_instructions_4_packer,
+                                                        'packing_instructions' => @product.packing_instructions,
                                                         'images' => get_base_product_images,
                                                         'barcodes' => get_product_barcodes,
                                                         'sync_option' => sync_option_attrs,

@@ -68,7 +68,7 @@ describe('Products:',function() {
 
         describe('Special Instructions:',function() {
             var special_instructions = {};
-            special_instructions.textarea = element(by.model('products.single.basicinfo.spl_instructions_4_packer'));
+            special_instructions.textarea = element(by.model('products.single.basicinfo.packing_instructions'));
 
             // packing_placement is to blur out the special_instructions textarea field, so that the changes will be saved
             var packing_placement = {};
@@ -101,7 +101,7 @@ describe('Products:',function() {
 
             // special_instructions is to blur out the packing_placement input field, so that the changes will be saved
             var special_instructions = {};
-            special_instructions.textarea = element(by.model('products.single.basicinfo.spl_instructions_4_packer'));
+            special_instructions.textarea = element(by.model('products.single.basicinfo.packing_instructions'));
             
             packing_placement.default = '50';
             packing_placement.new = '55';
