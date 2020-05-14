@@ -149,13 +149,13 @@ module Groovepacker
         orders = $redis.get("bulk_action_duplicate_data_#{tenant}_#{bulk_actions_id}")
         orders = Marshal.load(orders)
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
-        index = 0
         temp_increment_id = ''
         orders.each do |order|
+          index = 1
           return if check_bulk_cancel(bulk_action)
           neworder = order.dup
           begin
-            temp_increment_id = order.increment_id + "(duplicate"+index.to_s+ ")"
+            temp_increment_id = order.increment_id.split(/[(]Duplicate|&|\+/).first + "(Duplicate-"+index.to_s+ ")"
             neworder.increment_id = temp_increment_id
             orderslist = Order.where(:increment_id => temp_increment_id)
             index = index + 1 
