@@ -16,11 +16,11 @@ class OrderItemKitProduct < ActiveRecord::Base
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
-  def process_item(clicked, username, typein_count=1)
+  def process_item(clicked, username, typein_count=1, is_skipped=nil)
     total_product_kit_skus = calculate_total_product_kit_skus
     return unless scanned_qty < total_product_kit_skus
 
-    self.scanned_qty += typein_count
+    self.scanned_qty += is_skipped ? total_product_kit_skus : typein_count
     set_clicked_qty(clicked, username, typein_count)
     set_scanned_status(total_product_kit_skus)
     self.save
