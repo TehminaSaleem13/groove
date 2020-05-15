@@ -129,6 +129,11 @@ module Groovepacker
             if !self.mapping['receiving_instructions'].nil? && self.mapping['receiving_instructions'][:position] >= 0 && !single_row[self.mapping['receiving_instructions'][:position]].blank?
               usable_record[:product_receiving_instructions] = single_row[self.mapping['receiving_instructions'][:position]]
             end
+
+            if !self.mapping['remove_sku'].nil? && self.mapping['remove_sku'][:position] >= 0 && !single_row[self.mapping['remove_sku'][:position]].blank?
+              usable_record[:remove_sku] = single_row[self.mapping['remove_sku'][:position]]
+            end
+
             usable_record[:all_barcodes] = {}
             usable_record[:all_barcodes_qty] ={}
             if !self.mapping['barcode'].nil? && self.mapping['barcode'][:position] >= 0
@@ -226,6 +231,12 @@ module Groovepacker
           end
 
           def find_product(record)
+            if record[:remove_sku].present?
+              sku = ProductSku.find_by_sku(record[:remove_sku])
+              @product = Product.find_by_id(sku.try(:product_id))
+              return @product if @product
+            end
+
             record[:skus].each do |sku|
               if sku != "[DELETE]"
                 sku = ProductSku.find_by_sku(sku)

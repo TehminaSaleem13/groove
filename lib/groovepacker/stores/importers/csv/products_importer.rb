@@ -66,7 +66,7 @@ module Groovepacker
 
           def build_single_row_skus(single_row)
             single_row_skus = []
-            prim_skus = single_row[self.mapping['sku'][:position]].split(',')
+            prim_skus = single_row[self.mapping['sku'][:position]].split(',') rescue []
             prim_skus.each do |prim_single_sku|
               single_row_skus << prim_single_sku.strip
             end
@@ -347,6 +347,8 @@ module Groovepacker
               end
               #end
             end
+            # Remove This SKU
+            duplicate_product.product_skus.where(sku: record[:remove_sku]).destroy_all if record[:remove_sku].present? && duplicate_product.product_skus.many?
           end
 
           def build_usable_records
@@ -357,7 +359,7 @@ module Groovepacker
                 break unless do_skip
               end
               next if do_skip
-              if !self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?
+              if (!self.mapping['sku'].nil? && self.mapping['sku'][:position] >= 0 && !single_row[self.mapping['sku'][:position]].blank?) || (!self.mapping['remove_sku'].nil? && self.mapping['remove_sku'][:position] >= 0 && !single_row[self.mapping['remove_sku'][:position]].blank?)
                 single_row_skus = build_single_row_skus(single_row)
                 (@all_skus & single_row_skus).length > 0 ? @duplicate_file += 1 : insert_usable_record_skus(index, single_row_skus, single_row)
               end
@@ -381,6 +383,9 @@ module Groovepacker
                   break
                 end
               end
+
+              duplicate_found = record[:remove_sku] if !duplicate_found && record[:remove_sku] && ProductSku.find_by_sku(record[:remove_sku]).try(:product).present?
+
               # product = Product.find_by_name(record[:name])
               if duplicate_found === false && @new_action == 'create'
                 product = find_product(record)
