@@ -28,7 +28,7 @@ module Groovepacker
             response['orders'] = response['orders'].sort_by { |h| h["modifyDate"].split('-') } rescue response['orders']
             # response["orders"] = response["orders"].sort {|vn1, vn2| vn2["orderDate"] <=> vn1["orderDate"]} rescue response["orders"]
             return @result if response["orders"].blank?
-            shipments_response = @client.get_shipments(import_from-1.days)
+            shipments_response = should_fetch_shipments? ? @client.get_shipments(import_from-1.days) : []
             @result[:total_imported] = response["orders"].length
             initialize_import_item
             @regular_import_triggered = true if @result[:status] && @import_item.import_type == 'quick'
@@ -44,7 +44,7 @@ module Groovepacker
             init_order_import_summary(user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
             @import_item.update_attributes(to_import: response['orders'].count)
-            shipments_response = @client.get_shipments(start_date, nil, end_date)
+            shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
           end
@@ -61,7 +61,7 @@ module Groovepacker
             init_order_import_summary(user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
             @import_item.update_attributes(to_import: response['orders'].count)
-            shipments_response = @client.get_shipments(start_date, nil, end_date)
+            shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
           end
@@ -204,7 +204,7 @@ module Groovepacker
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
               tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {} rescue {} if order['orderStatus'] == 'shipped'
-              if tracking_info.blank? && order['orderStatus'] == 'shipped'
+              if tracking_info.blank? && order['orderStatus'] == 'shipped' && should_fetch_shipments?
                 response = @client.get_shipments_by_orderno(order["orderNumber"])
                 tracking_info = {}
                 if response.present?
@@ -520,6 +520,9 @@ module Groovepacker
               quick_fix_import(from_import_date, order_in_gp_id, user_id)
             end
 
+            def should_fetch_shipments?
+              @credential.import_tracking_info && ((@credential.get_active_statuses.include? 'shipped') || @credential.tag_import_option || @import_item.import_type =="tagged")
+            end
         end
       end
     end
