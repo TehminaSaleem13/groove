@@ -337,6 +337,7 @@ module StoresHelper
   end
 
   def stop_running_import
+    return unless OrderImportSummary.last
     OrderImportSummary.last.import_items.each do |import_item|
       import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
     end
