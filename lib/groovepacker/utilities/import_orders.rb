@@ -247,15 +247,22 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_item.update_attributes(status: 'failed', message: import_item_message, import_error: error)
       Rollbar.error(e, e.message)
     end
-    re_import_orders(e, import_item.order_import_summary.user) rescue nil
-    ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
+    check_and_restart_import(e, import_item, tenant)
   end
 
-  def re_import_orders(exception, user)
-    return unless exception.message.include? 'Delayed::Worker.max_run_time'
-    OrderImportSummary.where(status: 'in_progress').destroy_all
-    ImportItem.where(status: %w(in_progress not_started)).update_all(status: 'cancelled')
-    Groovepacker::Orders::Import.new(params_attrs: @import_params.with_indifferent_access, current_user: user).start_import_for_all
+  def check_and_restart_import(e, import_item, tenant)
+    ImportItem.where(status: 'not_started').update_all(status: 'cancelled')
+    OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
+    import_start_count = $redis.get("import_restarted_#{tenant}").to_i || 0
+    if import_start_count < 3
+      $redis.set("import_restarted_#{tenant}", import_start_count.to_i + 1)
+      $redis.expire("import_restarted_#{tenant}", 30.minutes.to_i)
+      OrderImportSummary.create(user_id: nil, status: 'not_started')
+      Groovepacker::Orders::Import.new(params_attrs: @import_params.with_indifferent_access, current_user: import_item.order_import_summary.user).start_import_for_all rescue nil
+    else
+      $redis.del("import_restarted_#{tenant}")
+      ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
+    end
   end
 
   def start_shipwork_import(cred, status, value, tenant)

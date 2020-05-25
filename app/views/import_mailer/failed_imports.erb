@@ -1,0 +1,17 @@
+<h3>Import has failed:</h3>
+<p><strong>Tenant Name: </strong><%=@tenant%></p>
+
+<% @import_items.each do |import| %>
+  </br>
+  <div>
+    <p><strong>Import Item id: </strong><%=import.id %></p>
+    <p><strong>Store id: </strong><%=import.store_id %></p>
+    <p><strong>Store type: </strong><%=import.store.store_type %></p>
+    <p><strong>Import Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
+    <p><strong>Increment Id: </strong><%= import.current_increment_id%></p>
+    <p><strong>To Import: </strong><%= import.to_import%></p>
+    <p><strong>Updated Orders: </strong><%= import.updated_orders_import%></p>
+    <p><strong>Imported Orders: </strong><%= import.success_imported%></p>
+    <p><strong>Import Hung From: </strong><%=((Time.now.to_f - import.updated_at.to_f)/60.0).to_i%> Mins</p>
+  </div>
+<% end %>
