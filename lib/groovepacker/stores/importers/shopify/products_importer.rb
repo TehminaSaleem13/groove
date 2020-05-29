@@ -69,7 +69,8 @@ module Groovepacker
                 variant_title = variant["title"]=="Default Title" ? "" : " - #{variant["title"]}"
                 variant["title"] = shopify_product["title"] + variant_title
                 product = create_product_from_variant(variant, shopify_product)   
-                product = product.reload rescue product 
+                product = product.reload rescue product
+                product.product_inventory_warehousess.first.update_attributes(available_inv: variant['inventory_quantity']) if @credential.import_inventory_qoh
                 product.set_product_status 
               end
             end

@@ -202,7 +202,7 @@ module Groovepacker
 		        new_record = true
 		      else
 		        @shopify.update_attributes(shop_name: params[:shop_name])
-		        @shopify.update_attributes(shopify_status: params[:shopify_status], shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b, partial_status:  params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling], generating_barcodes: params[:generating_barcodes])
+		        @shopify.update_attributes(shopify_status: params[:shopify_status], shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b, partial_status:  params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling], generating_barcodes: params[:generating_barcodes], import_inventory_qoh: params[:import_inventory_qoh])
 		      end
 		      @store.save
 		    rescue ActiveRecord::RecordInvalid => e
