@@ -5,6 +5,7 @@ module Groovepacker
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
           include ProductsImporter
+          include ShippingEasyHelper
 
           def import
             init_common_objects
@@ -14,68 +15,166 @@ module Groovepacker
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)
             return @result if response["orders"].nil?
-            @result[:total_imported] = response["orders"].uniq.length
-            update_import_item_obj_values
-            uniq_response = response["orders"].uniq rescue []
-            verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
-            if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together" 
-              @split_order = true
-            else
-              @split_order = false
-            end
-            if @split_order
-              @group_orders = uniq_response.group_by { |d| d["external_order_identifier"]}
-              uniq_response = @group_orders unless verify_separately
-              uniq_response = uniq_response.values unless verify_separately
-            end
-            uniq_response.each do |orders|
-              if @split_order && !verify_separately && orders.count > 1
-                orders.each_with_index do |odr, index|
-                  unless index == 0
-                    if orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
-                      orders.first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
-                      orders.first["recipients"].first["line_items"].flatten!
-                      # orders.first["shipments"] << odr["shipments"]
-                      # orders.first["shipments"].flatten!
-                    end
-                  end
-                end
-              end
-              if @split_order
-                order_copy = verify_separately ? orders : orders.first
-              else
-                order_copy = orders
-              end             
-              order = order_copy unless order_copy.blank?
-              @order_to_update = false
-              import_item_fix
-              break if @import_item.status == 'cancelled'
-              import_single_order(order)
-              #increase_import_count
-              sleep 0.5
-            end
+            @regular_import = true
+            import_orders_from_response(response, importing_time)
+            # @result[:total_imported] = response["orders"].uniq.length
+            # update_import_item_obj_values
+            # uniq_response = response["orders"].uniq rescue []
+            # verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
+            # if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together" 
+            #   @split_order = true
+            # else
+            #   @split_order = false
+            # end
+            # if @split_order
+            #   @group_orders = uniq_response.group_by { |d| d["external_order_identifier"]}
+            #   uniq_response = @group_orders unless verify_separately
+            #   uniq_response = uniq_response.values unless verify_separately
+            # end
+            # uniq_response.each do |orders|
+            #   if @split_order && !verify_separately && orders.count > 1
+            #     orders.each_with_index do |odr, index|
+            #       unless index == 0
+            #         if orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
+            #           orders.first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
+            #           orders.first["recipients"].first["line_items"].flatten!
+            #           # orders.first["shipments"] << odr["shipments"]
+            #           # orders.first["shipments"].flatten!
+            #         end
+            #       end
+            #     end
+            #   end
+            #   if @split_order
+            #     order_copy = verify_separately ? orders : orders.first
+            #   else
+            #     order_copy = orders
+            #   end             
+            #   order = order_copy unless order_copy.blank?
+            #   @order_to_update = false
+            #   import_item_fix
+            #   break if @import_item.status == 'cancelled'
+            #   import_single_order(order)
+            #   #increase_import_count
+            #   sleep 0.5
+            # end
 
-            @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
-            update_orders_status
-            unless  @credential.allow_duplicate_id
-              a = Order.group(:increment_id).having("count(*) >1").count.keys
-              unless a.empty?
-                Order.where("increment_id in (?)", a).each do |o|
-                  orders = Order.where(increment_id: o.increment_id)
-                  orders.last.destroy if orders.count > 1
-                end
-              end 
-            end   
+            # @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
+            # update_orders_status
+            # unless  @credential.allow_duplicate_id
+            #   a = Order.group(:increment_id).having("count(*) >1").count.keys
+            #   unless a.empty?
+            #     Order.where("increment_id in (?)", a).each do |o|
+            #       orders = Order.where(increment_id: o.increment_id)
+            #       orders.last.destroy if orders.count > 1
+            #     end
+            #   end 
+            # end   
             @result
           end
 
-          def ondemand_import_single_order(order)
+          # def ondemand_import_single_order(order)
+          #   init_common_objects
+          #   response = @client.get_single_order(order)
+          #   import_single_order(response["orders"][0]) rescue nil
+          # end
+
+          def range_import(start_date, end_date, type, user_id)
             init_common_objects
-            response = @client.get_single_order(order)
-            import_single_order(response["orders"][0]) rescue nil
+            if type == 'created'
+              start_date = convert_time_from_gp(Time.zone.parse(start_date).utc)
+              end_date = convert_time_from_gp(Time.zone.parse(end_date).utc)
+              extract_field = 'ordered_at'
+            else
+              start_date = Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
+              end_date = Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
+              extract_field = 'updated_at'
+            end
+            init_order_import_summary(user_id)
+            importing_time = Time.zone.now
+            response = @client.orders(@statuses, importing_time, @import_item, Time.zone.parse(start_date))
+            response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
+            response['orders'] = response['orders'].select { |h| Time.zone.parse(h[extract_field]) <= Time.zone.parse(end_date) }
+            update_error_msg_if_any(response)
+            destroy_cleared_orders(response)
+            emit_data_for_range_or_quickfix(response['orders'].count)
+            import_orders_from_response(response, importing_time)
+            update_order_import_summary
           end
 
-          private 
+          def quick_fix_import(import_date, order_id, user_id)
+            init_common_objects
+            import_date = Time.zone.parse(import_date) + Time.zone.utc_offset
+            import_date = DateTime.parse(import_date.to_s)
+            quick_fix_range = get_quick_fix_range(import_date, order_id)
+            init_order_import_summary(user_id)
+            importing_time = Time.zone.now
+            response = @client.orders(@statuses, importing_time, @import_item, quick_fix_range[:start_date])
+            response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
+            response['orders'] = response['orders'].select { |h| Time.zone.parse(h['updated_at']) <= quick_fix_range[:end_date] }
+            update_error_msg_if_any(response)
+            destroy_cleared_orders(response)
+            emit_data_for_range_or_quickfix(response['orders'].count)
+            import_orders_from_response(response, importing_time)
+            update_order_import_summary
+          end
+
+          private
+
+            def import_orders_from_response(response, importing_time)
+              @result[:total_imported] = response["orders"].uniq.length
+              update_import_item_obj_values
+              uniq_response = response["orders"].uniq rescue []
+              verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
+              if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together" 
+                @split_order = true
+              else
+                @split_order = false
+              end
+              if @split_order
+                @group_orders = uniq_response.group_by { |d| d["external_order_identifier"]}
+                uniq_response = @group_orders unless verify_separately
+                uniq_response = uniq_response.values unless verify_separately
+              end
+              uniq_response.each do |orders|
+                if @split_order && !verify_separately && orders.count > 1
+                  orders.each_with_index do |odr, index|
+                    unless index == 0
+                      if orders.first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
+                        orders.first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
+                        orders.first["recipients"].first["line_items"].flatten!
+                        # orders.first["shipments"] << odr["shipments"]
+                        # orders.first["shipments"].flatten!
+                      end
+                    end
+                  end
+                end
+                if @split_order
+                  order_copy = verify_separately ? orders : orders.first
+                else
+                  order_copy = orders
+                end             
+                order = order_copy unless order_copy.blank?
+                @order_to_update = false
+                import_item_fix
+                break if @import_item.status == 'cancelled'
+                import_single_order(order)
+                #increase_import_count
+                sleep 0.5
+              end
+  
+              # @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
+              # update_orders_status
+              unless @credential.allow_duplicate_id
+                a = Order.group(:increment_id).having("count(*) >1").count.keys
+                unless a.empty?
+                  Order.where("increment_id in (?)", a).each do |o|
+                    orders = Order.where(increment_id: o.increment_id)
+                    orders.last.destroy if orders.count > 1
+                  end
+                end
+              end
+            end
+
             def import_single_order(order)
               update_current_import_item(order)
               if @split_order
@@ -143,6 +242,7 @@ module Groovepacker
               end  
               import_order_items_and_create_products(shiping_easy_order, order)
               update_success_import_count
+              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) if @import_item.status != 'cancelled' && @regular_import
             end
 
             def find_shipping_easy_order(order)
@@ -174,15 +274,15 @@ module Groovepacker
               product.set_product_status
             end
 
-            def create_s3_image(item)
-              image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
-              # image_data = IO.read(open(item["product"]["image"]["original"]))
-              file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}"
-              tenant = Apartment::Tenant.current
-              GroovS3.create_image(tenant, file_name, image_data, 'public_read')
-              s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
-              return s3_image_url
-            end
+            # def create_s3_image(item)
+            #   image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
+            #   # image_data = IO.read(open(item["product"]["image"]["original"]))
+            #   file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}"
+            #   tenant = Apartment::Tenant.current
+            #   GroovS3.create_image(tenant, file_name, image_data, 'public_read')
+            #   s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
+            #   return s3_image_url
+            # end
 
             def create_order_item(item, order_item)
               order_item_product = Product.joins(:product_skus).where("product_skus.sku = ?", item["sku"]).first rescue nil
@@ -295,33 +395,33 @@ module Groovepacker
               make_product_intangible(order_item.product)
             end
 
-            def import_item_count(order=nil)
-              unless order.blank?
-                @import_item.current_order_items = order["recipients"][0]["line_items"].length
-                @import_item.current_order_imported_item = 0
-              else
-                @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
-              end
-              @import_item.save
-            end
+            # def import_item_count(order=nil)
+            #   unless order.blank?
+            #     @import_item.current_order_items = order["recipients"][0]["line_items"].length
+            #     @import_item.current_order_imported_item = 0
+            #   else
+            #     @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
+            #   end
+            #   @import_item.save
+            # end
 
-            def init_common_objects
-              handler = self.get_handler
-              @credential = handler[:credential]
-              @client = handler[:store_handle]
-              @import_item = handler[:import_item]
-              @import_item.update_attributes(updated_orders_import: 0)
-              @result = self.build_result
-              @statuses = get_statuses
-            end
+            # def init_common_objects
+            #   handler = self.get_handler
+            #   @credential = handler[:credential]
+            #   @client = handler[:store_handle]
+            #   @import_item = handler[:import_item]
+            #   @import_item.update_attributes(updated_orders_import: 0)
+            #   @result = self.build_result
+            #   @statuses = get_statuses
+            # end
 
-            def get_statuses
-              status = ["cleared"]
-              status << "ready_for_shipment" if @credential.import_ready_for_shipment
-              status << "shipped" if @credential.import_shipped
-              status << "pending_shipment" if @credential.ready_to_ship
-              status
-            end
+            # def get_statuses
+            #   status = ["cleared"]
+            #   status << "ready_for_shipment" if @credential.import_ready_for_shipment
+            #   status << "shipped" if @credential.import_shipped
+            #   status << "pending_shipment" if @credential.ready_to_ship
+            #   status
+            # end
 
             def update_import_item_obj_values
               @import_item.update_attributes( current_increment_id: '', success_imported: 0, previous_imported: 0,
@@ -384,12 +484,12 @@ module Groovepacker
               end
             end
 
-            def destroy_cleared_orders(response)
-              skus = ProductKitSkus.where("option_product_id = product_id")
-              skus.destroy_all
-              orders_to_clear = Order.where("store_id=? and status!=? and increment_id in (?)", @credential.store_id, "scanned", response["cleared_orders_ids"])
-              orders_to_clear.destroy_all
-            end
+            # def destroy_cleared_orders(response)
+            #   skus = ProductKitSkus.where("option_product_id = product_id")
+            #   skus.destroy_all
+            #   orders_to_clear = Order.where("store_id=? and status!=? and increment_id in (?)", @credential.store_id, "scanned", response["cleared_orders_ids"])
+            #   orders_to_clear.destroy_all
+            # end
 
             def update_error_msg_if_any(response)
               return if response["error"].blank?

@@ -349,27 +349,48 @@ module StoresHelper
     store = Store.find(params[:store_id])
     if store.present?
       result = { store_id: store.id, order_no: params[:order_no] }
-      credential = store.shipstation_rest_credential
-      client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
-      response = client.get_order_value(params[:order_no])
-      return result[:status] = false if response.nil?
+      if store.store_type == 'ShippingEasy'
+        credential = store.shipping_easy_credential
+        client = Groovepacker::ShippingEasy::Client.new(credential)
+        response = client.get_single_order(params[:order_no])
+        return result[:status] = false if response['orders'].nil? || response['orders'].blank?
 
-      result[:status] = true
-      result_modifyDate = Time.zone.parse(response.last["modifyDate"]) + Time.zone.utc_offset
-      result_createDate = Time.zone.parse(response.last["orderDate"]) + Time.zone.utc_offset
+        result[:status] = true
+        result_modifyDate = Time.zone.parse(response['orders'].last["updated_at"]) + Time.zone.utc_offset
+        result_createDate = Time.zone.parse(response['orders'].last["ordered_at"]) + Time.zone.utc_offset
 
-      time_zone = GeneralSetting.last.time_zone.to_i
-      result_createDate_tz = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).utc + time_zone
+        time_zone = GeneralSetting.last.time_zone.to_i
+        result_createDate_tz = Time.zone.parse(response['orders'].last["ordered_at"]) + time_zone
 
-      result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
-        orderStatus: response.last["orderStatus"].titleize,
-        gp_ready_status: response.last["tagIds"].nil? ? 'No' : (response.last["tagIds"].include?(48826) ?  'Yes' : 'No'))
+        result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
+          orderStatus: response['orders'].last["order_status"].titleize)
 
-      result.merge!(return_range_dates_hash(store, response.last["orderNumber"], result_modifyDate, result_createDate))
+        result.merge!(return_range_dates_hash(store, response['orders'].last["external_order_identifier"], result_modifyDate, result_createDate))
+      end
 
+      if store.store_type == 'Shipstation API 2'
+        credential = store.shipstation_rest_credential
+        client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
+        response = client.get_order_value(params[:order_no])
+        return result[:status] = false if response.nil?
+
+        result[:status] = true
+        result_modifyDate = Time.zone.parse(response.last["modifyDate"]) + Time.zone.utc_offset
+        result_createDate = Time.zone.parse(response.last["orderDate"]) + Time.zone.utc_offset
+
+        time_zone = GeneralSetting.last.time_zone.to_i
+        result_createDate_tz = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).utc + time_zone
+
+        result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
+          orderStatus: response.last["orderStatus"].titleize,
+          gp_ready_status: response.last["tagIds"].nil? ? 'No' : (response.last["tagIds"].include?(48826) ?  'Yes' : 'No'))
+
+        result.merge!(return_range_dates_hash(store, response.last["orderNumber"], result_modifyDate, result_createDate))
+      end
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
       ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}").import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
+      result[:store_type] = store.store_type
     end
     order_found = Order.where(increment_id: "#{params[:order_no]}").last
     result.merge!(gp_order_found: order_found.status, id: order_found.id) if order_found.present?
@@ -378,7 +399,7 @@ module StoresHelper
 
   def return_range_dates_hash(store, order_id, result_modifyDate, result_createDate)
     dates = {}
-    credential = store.shipstation_rest_credential
+    credential = store.store_type == 'Shipstation API 2' ? store.shipstation_rest_credential : store.shipping_easy_credential
     result_modifyDate = DateTime.parse(result_modifyDate.to_s)
     result_createDate = DateTime.parse(result_createDate.to_s)
     store_orders = Order.where('store_id = ? AND increment_id != ?', store.id, order_id)
@@ -387,7 +408,7 @@ module StoresHelper
 
       # Rule #2- If the OSLMT of the QF order is newer/more recent than that of any OSLMT in DB, then run a regular import
       dates[:range_start_date] = get_start_range_date(store_orders.blank?, store, credential)
-      dates[:range_end_date] = get_time_in_pst(Time.zone.now)
+      dates[:range_end_date] = store.store_type == 'ShippingEasy' ? Time.current : get_time_in_pst(Time.zone.now)
     elsif store_orders.where('last_modified < ?', result_modifyDate).blank?
       # Rule #3- If the OSLMT of the QF order is Older than any OSLMT saved in our DB , and a more recent order does exist, then start the import range 6 hours before the OSLMT of the QF order and end the range 6 hours after the OSLMT of the QF order. (12 hours with the OSLMT in the middle)
       dates[:range_start_date] = result_modifyDate - 6.hours
@@ -402,14 +423,18 @@ module StoresHelper
   end
 
   def get_start_range_date(store_orders_blank, store, credential)
-    if store_orders_blank
-      get_time_in_pst(1.day.ago)
-    else
-      if store.regular_import_v2
-        !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
+    if store.store_type == 'Shipstation API 2'
+      if store_orders_blank
+        get_time_in_pst(1.day.ago)
       else
-        !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified - 8.hours : get_time_in_pst(1.day.ago)
+        if store.regular_import_v2
+          !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
+        else
+          !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified - 8.hours : get_time_in_pst(1.day.ago)
+        end
       end
+    elsif store.store_type == 'ShippingEasy'
+      store_orders_blank ? (credential.last_imported_at.nil? ? 1.day.ago : credential.last_imported_at) : 1.day.ago
     end
   end
 

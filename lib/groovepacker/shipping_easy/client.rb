@@ -11,12 +11,12 @@ module Groovepacker
         @store_api_key = shipping_easy_credential.store_api_key
       end
 
-      def orders(statuses, importing_time, import_item)
+      def orders(statuses, importing_time, import_item, start_time = nil)
         page_index = 1
         combined_response = {"orders" => []}
         filters = { page: page_index, per_page: 100, status: statuses, last_updated_at: @last_imported_at, includes: "products"}
         filters = filters.merge(api_key_and_secret)
-        last_import = @credential.last_imported_at rescue (DateTime.now - 4.days)
+        last_import = start_time.present? ? start_time : @credential.last_imported_at rescue (DateTime.now - 4.days)
 
         if import_item.import_type=='deep'
           days_back_to_import = import_item.days.to_i.days rescue 4.days

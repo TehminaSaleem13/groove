@@ -22,6 +22,15 @@ module Groovepacker
             self.build_handle).ondemand_import_single_order(order_no)
         end
 
+        def range_import(start_date, end_date, type, current_user_id)
+          Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
+              self.build_handle).range_import(start_date, end_date, type, current_user_id)
+        end
+        
+        def quick_fix_import(import_date, order_id, current_user_id)
+          Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
+              self.build_handle).quick_fix_import(import_date, order_id, current_user_id)
+        end
       end
     end
   end

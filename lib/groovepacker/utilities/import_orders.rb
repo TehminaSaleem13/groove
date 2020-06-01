@@ -73,7 +73,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
     context = Groovepacker::Stores::Context.new(handler)
     if params[:import_type] == 'range_import'
-      context.range_import_for_ss(params[:start_date], params[:end_date], params[:order_date_type], params[:current_user_id])
+      context.range_import(params[:start_date], params[:end_date], params[:order_date_type], params[:current_user_id])
     else
       fetched_order = Order.find_by_increment_id(params[:order_id])
       context.quick_fix_import(params[:import_date], fetched_order.id, params[:current_user_id]) if fetched_order.present?
@@ -86,7 +86,11 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_item = ImportItem.create(store_id: store.id)
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
     context = Groovepacker::Stores::Context.new(handler)
-    context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
+    if store.store_type == 'ShippingEasy'
+      context.import_single_order_from(params[:order_no])
+    else
+      context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
+    end
   end
 
   def run_import_for_single_store(params)
