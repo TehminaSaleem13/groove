@@ -16,6 +16,7 @@ class GrooveBulkActions < ActiveRecord::Base
     $redis.set("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] == "delete_orders"
     $redis.set("bulk_action_duplicate_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] == "duplicate_orders"
     $redis.set("bulk_action_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] ==  "change_orders_status"
+    $redis.set("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}",Marshal.dump(orders)) if params['action'] == "clear_assigned_tote"
     self.delay(run_at: 1.seconds.from_now, queue: "do_bulk_action").execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
     # self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
   end
@@ -47,6 +48,8 @@ class GrooveBulkActions < ActiveRecord::Base
       bulk_actions.export(current_tenant, params, bulkaction_id, username)
     when activity == 'product_barcode_label' || activity == 'order_product_barcode_label' && params['controller'] == 'products'
       bulk_actions.barcode_labels_generate(current_tenant, params, bulkaction_id, username)
+    when activity=='clear_assigned_tote' && params["controller"]=="orders"
+      bulk_actions.clear_assigned_tote(current_tenant, bulkaction_id , params[:user_id])
     end
   end
 

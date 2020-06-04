@@ -138,6 +138,16 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_scan_workflow
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.scan_pack_workflow = params['workflow'] if params['workflow'].in? %w(default product_first_scan_to_put_wall)
+    Apartment::Tenant.switch tenant.name
+    ToteSet.last || ToteSet.create(name: 'T')
+    Apartment::Tenant.switch
+    tenant.save
+    render json: {}
+  end
+
   def update_groovelytic_stat
     tenant = Tenant.find(params["tenant_id"])
     tenant.groovelytic_stat = !tenant.groovelytic_stat

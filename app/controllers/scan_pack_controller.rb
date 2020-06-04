@@ -116,6 +116,84 @@ class ScanPackController < ApplicationController
       ).merge('awaiting' => get_awaiting_orders_count)
   end
 
+  def product_first_scan
+    @result = product_first_scan_to_wall(params[:input])
+    render json: @result
+  end
+
+  def scan_to_tote
+    case params[:type]
+    when 'assigned_to_tote'
+      begin
+        tote = params[:tote][:id].present? ? Tote.find(params[:tote][:id]) : Tote.create(params[:tote].permit!)
+        if tote.name == params[:tote_barcode]
+          order_item = OrderItem.find(params[:order_item_id])
+          tote.order = order_item.order
+          if tote.save
+            order_item.order.update_attributes(last_suggested_at: DateTime.now)
+            order_item.process_item(nil, @current_user.username, 1, nil)
+            order_item.order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
+            @result[:success_messages] = "#{order_item.order.increment_id} is successfully assigned to #{ScanPackSetting.last.tote_identifier}: #{tote.name}"
+          end
+        else
+          @result[:status] = false
+          @result[:error_messages] = "Whoops! That’s the wrong #{ScanPackSetting.last.tote_identifier}. Please scan the correct #{ScanPackSetting.last.tote_identifier} and then add the item to it."
+        end
+      rescue => e
+        @result[:status] = false
+        @result[:error_messages] = e.to_s
+      end
+    when 'put_in_tote'
+      begin
+        tote = Tote.find(params[:tote][:id])
+        if params[:tote_barcode] == tote.name
+          order_item = OrderItem.find(params[:order_item_id])
+          order_item.order.update_attributes(last_suggested_at: DateTime.now)
+          order_item.process_item(nil, @current_user.username, 1, nil)
+          order_item.order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
+          @result[:success_messages] = "#{order_item.product.name} is successfully scanned to #{ScanPackSetting.last.tote_identifier}: #{tote.name}"
+        else
+          @result[:status] = false
+          @result[:error_messages] = "Whoops! That’s the wrong #{ScanPackSetting.last.tote_identifier}. Please scan the correct #{ScanPackSetting.last.tote_identifier} and then add the item to it."
+        end
+      rescue => e
+        @result[:status] = false
+        @result[:error_messages] = e.to_s
+      end
+    when 'scan_tote_to_complete'
+      begin
+        tote = Tote.find(params[:tote][:id])
+        if params[:tote_barcode] == tote.name
+          order_item = OrderItem.find(params[:order_item_id])
+          order = order_item.order
+          order_item.process_item(nil, @current_user.username, 1, nil)
+          order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
+          order.set_order_to_scanned_state(@current_user.username)
+          order.update_attributes(last_suggested_at: DateTime.now)
+          @result[:success_messages] = "#{order.increment_id} is successfully scanned"
+          @result[:scan_tote_to_completed] = true
+          @result[:multi_item_order_message] = ScanPackSetting.last.multi_item_order_complete_msg
+          @result[:multi_item_order_message_time] = ScanPackSetting.last.multi_item_order_complete_msg_time
+          @result[:store_type] = order.store.store_type
+          @result[:popup_shipping_label] = order.store.shipping_easy_credential.popup_shipping_label rescue nil
+          @result[:order_items_scanned] = order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
+          @result[:order_items_unscanned] = []
+          @result[:order_items_partial_scanned] = []
+          @result[:tote_name_identifier] = ScanPackSetting.last.tote_identifier + ' ' + tote.name
+          @result[:order] = order
+          tote.update_attributes(order_id: nil)
+        else
+          @result[:status] = false
+          @result[:error_messages] = "Whoops! That’s the wrong #{ScanPackSetting.last.tote_identifier}. Please scan the correct #{ScanPackSetting.last.tote_identifier} and then add the item to it."
+        end
+      rescue => e
+        @result[:status] = false
+        @result[:error_messages] = e.to_s
+      end
+    end
+    render json: @result
+  end
+
   def confirmation_code
     general_setting = GeneralSetting.first
     render json: {confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code])}

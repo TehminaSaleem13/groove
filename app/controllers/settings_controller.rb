@@ -105,6 +105,7 @@ class SettingsController < ApplicationController
     offset = general_setting.try(:dst) ? offset : offset + 3600
     @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
+    @result['scan_pack_workflow'] = Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow rescue 'default'
 
     if general_setting.present?
       @result['data']['settings'] = general_setting
@@ -160,13 +161,49 @@ class SettingsController < ApplicationController
     scan_pack_setting = ScanPackSetting.all.first
 
     if scan_pack_setting.present?
-      @result['settings'] = scan_pack_setting
+      @result['settings'] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select("id, name, max_totes"))
     else
       @result['status'] &= false
       @result['error_messages'] = ['No Scan Pack settings available for the system. Contact administrator.']
     end
 
     render json: @result
+  end
+
+  def print_tote_barcodes
+    require 'wicked_pdf'
+    result = {}
+    tote_set = ToteSet.find(params[:id])
+    if tote_set.totes.any?
+      action_view = ScanPack::Base.new.do_get_action_view_object_for_html_rendering
+      file_name = Apartment::Tenant.current + Time.now.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_tote_barcodes"
+      reader_file_path = Rails.root.join('public', 'pdfs', "tote_barcodes.pdf")
+      pdf_html = action_view.render :template => 'settings/tote_barcodes.html.erb', :layout => nil, :locals => {:@totes => tote_set.totes, :@tote_identifier => ScanPackSetting.last.tote_identifier.upcase}
+      doc_pdf = WickedPdf.new.pdf_from_string(
+        pdf_html,
+       :inline => true,
+       :save_only => false,
+       :orientation => 'Portrait',
+       :page_height => '4in',
+       :page_width => '6in',
+       :margin => {:top => '10', :bottom => '1', :left => '1', :right => '1'}
+     )
+     File.open(reader_file_path, 'wb') do |file|
+       file << doc_pdf
+     end
+      pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
+      base_file_name = File.basename(pdf_path)
+      pdf_file = File.open(reader_file_path)
+      GroovS3.create_pdf(Apartment::Tenant.current, base_file_name, pdf_file.read)
+      pdf_file.close
+      generate_url = ENV['S3_BASE_URL']+'/'+Apartment::Tenant.current+'/pdf/'+base_file_name
+      result[:status] = true
+      result[:url] = generate_url
+    else
+      result[:message] = 'No totes are present'
+      result[:status] = false
+    end
+    render json: result
   end
 
   #This method will generate barcode pdf and upload it in S3 and return url from S3

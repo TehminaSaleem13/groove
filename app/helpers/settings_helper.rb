@@ -71,7 +71,7 @@ module SettingsHelper
         :post_scan_pause_enabled, :post_scan_pause_time,
         :display_location, :string_removal_enabled, :string_removal,
         :first_escape_string_enabled, :second_escape_string_enabled,
-        :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode , :post_scanning_option_second, :require_serial_lot, :valid_prefixes, :replace_gp_code
+        :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode , :post_scanning_option_second, :require_serial_lot, :valid_prefixes, :replace_gp_code, :single_item_order_complete_msg, :single_item_order_complete_msg_time, :multi_item_order_complete_msg, :multi_item_order_complete_msg_time, :tote_identifier
       ]
     )
   end
@@ -117,7 +117,9 @@ module SettingsHelper
 
   def update_scan_pack_settings_attributes(scan_pack_setting)
     if current_user.can? 'edit_scanning_prefs'
+      params[:tote_identifier] = params[:tote_identifier].present? ? params[:tote_identifier] : 'Tote'
       if scan_pack_setting.update_attributes(permit_scan_pack_setting_params)
+        update_tote_sets if params[:tote_sets]
         @result['success_messages'] = ['Settings updated successfully.']
       else
         @result['status'] &= false
@@ -131,6 +133,21 @@ module SettingsHelper
 
   def bin_location(product)
     product.product_inventory_warehousess.first.location_primary rescue nil
+  end
+
+  def update_tote_sets
+    params[:tote_sets].each do |set|
+      tote_set = ToteSet.find_by_id(params[:id])
+      next unless tote_set.present?
+      tote_set.update_attributes(max_totes: set[:max_totes])
+      if tote_set.totes.count > tote_set.max_totes
+        (tote_set.totes.order('number ASC').all - tote_set.totes.order('number ASC').first(tote_set.max_totes)).each { |tote| tote.destroy }
+      elsif tote_set.totes.count < tote_set.max_totes
+        Range.new(1, (tote_set.max_totes - tote_set.totes.count)).to_a.each do
+          tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1)
+        end
+      end
+    end
   end
 
   def update_with_stripe_customer customer

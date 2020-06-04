@@ -96,6 +96,11 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def clear_assigned_tote
+    execute_groove_bulk_action("clear_assigned_tote")
+    render json: @result
+  end
+
   def show
     unless @order.nil?
       @result['order'] = {'basicinfo' => @order}

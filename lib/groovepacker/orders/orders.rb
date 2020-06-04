@@ -125,6 +125,9 @@ module Groovepacker
           elsif sort_key == 'itemslength'
             orders = Order.find_by_sql("SELECT orders.*, sum(order_items.qty) AS count FROM orders LEFT JOIN order_items ON (order_items.order_id = orders.id) #{status_filter_text} GROUP BY orders.id ORDER BY count #{sort_order} #{query_add}")
             preloader(orders)
+          elsif sort_key == 'tote'
+            orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN totes ON totes.order_id = orders.id #{status_filter_text} ORDER BY totes.name #{sort_order} #{query_add}")
+            preloader(orders)
           else
             orders = Order.includes(:order_items, :store, :order_tags).order("#{sort_key} #{sort_order}")
             orders = orders.where(:status => status_filter) unless status_filter == "all"

@@ -72,6 +72,7 @@ module Groovepacker
             order_item.scanned_status = 'scanned'
             order_item.save
           end
+          Tote.find_by(order_id: order.id).update(order_id: nil) if order.tote
         else
           order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
         end
@@ -115,6 +116,22 @@ module Groovepacker
       #   end
       #   orders
       # end
+
+      def clear_assigned_tote(current_tenant, bulkaction_id, user_id)
+        Apartment::Tenant.switch(current_tenant)
+        bulk_action = GrooveBulkActions.find(bulkaction_id)
+        orders = $redis.get("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}")
+        orders = Marshal.load(orders)
+        order_ids = orders.pluck(:id)
+        init_results
+        bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+        orders.each do |order|
+          order.tote.update(order: nil) if order.tote
+        end
+        bulk_action.update_attributes(completed: orders.count)
+        check_bulk_action_completed_or_not(bulk_action)
+        $redis.del("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}") 
+      end
 
       def delete(current_tenant, bulkaction_id)
         Apartment::Tenant.switch(current_tenant)
@@ -249,6 +266,7 @@ module Groovepacker
         OrderException.delete_all(['order_id IN (?)', order_ids])
         OrderSerial.delete_all(['order_id IN (?)', order_ids])
         OrderShipping.delete_all(['order_id IN (?)', order_ids])
+        Tote.where(order_id: order_ids).update_all(order_id: nil)
         destroy_order_items(order_ids)
       end
 

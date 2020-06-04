@@ -1,0 +1,17 @@
+<!DOCTYPE html>
+<html>
+<head>
+</head>
+<% @totes.each do |tote| %>
+  <body>
+    <div style="page-break-before: always;">
+      <div style="text-align: center; font-size: 32px; color: grey; font-family: 'Play', sans-serif; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= @tote_identifier %></div>
+      <div style="text-align: center; font-size: 150px; font-weight: bold; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= tote.name %></div>
+      <% barcode_string = generate_barcode(tote.name) %>
+      <div>
+        <center><%= pdf_image_tag(barcode_string+".png", {:width => 320, :height => 80}) %></center>
+      </div>
+    </div>
+  </body>
+<%end%>
+</html>

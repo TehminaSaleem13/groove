@@ -37,6 +37,7 @@ Groovepacks::Application.routes.draw do
   get 'shipstation_rest_credentials/switch_back_button' => 'shipstation_rest_credentials#switch_back_button'
   get 'shipstation_rest_credentials/auto_click_create_label' => 'shipstation_rest_credentials#auto_click_create_label'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
+  get '/settings/print_tote_barcodes' => 'settings#print_tote_barcodes'
   put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
   get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
   get 'order_import_summary/download_summary_details' => 'OrderImportSummaries#download_summary_details'
@@ -73,6 +74,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_custom_fields' => 'tenants#update_custom_fields'
   get '/tenants/update_groovelytic_stat'=> 'tenants#update_groovelytic_stat'
   get '/tenants/update_is_delay'=> 'tenants#update_is_delay'
+  get '/tenants/update_scan_workflow'=> 'tenants#update_scan_workflow'
   root :to => "home#index"
 
   resources :home do
@@ -96,6 +98,7 @@ Groovepacks::Application.routes.draw do
       post 'delete_orders'
       post 'duplicate_orders'
       post 'change_orders_status'
+      post 'clear_assigned_tote'
       post 'update_order_list'
       post 'rollback'
       post 'remove_item_from_order'
@@ -264,6 +267,8 @@ Groovepacks::Application.routes.draw do
       post 'update_scanned'
       post 'send_request_to_api'
       post 'order_change_into_scanned'
+      post 'product_first_scan'
+      post 'scan_to_tote'
     end
     member do
     end
