@@ -14,8 +14,10 @@
 # users commonly want.
 #
 
-require "codeclimate-test-reporter"
-CodeClimate::TestReporter.start
+# require "codeclimate-test-reporter"
+# CodeClimate::TestReporter.start
+
+require 'simplecov'
 
 SimpleCov.start 'rails' do
   add_filter '/spec/'
