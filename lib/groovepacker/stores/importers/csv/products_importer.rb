@@ -127,8 +127,8 @@ module Groovepacker
             record[:product_record_serial] = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial]) ? true : false
             record[:product_second_record_serial] = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial]) ? true : false
 
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :packing_instructions => record[:packing_instructions], :packing_instructions_conf => record[:packing_instructions_conf], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3], :custom_product_display_1 =>  record[:custom_product_display_1], :custom_product_display_2 => record[:custom_product_display_2], :custom_product_display_3 => record[:custom_product_display_3])
-                        
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :packing_instructions => record[:packing_instructions], :packing_instructions_conf => record[:packing_instructions_conf], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3], :custom_product_display_1 =>  record[:custom_product_display_1], :custom_product_display_2 => record[:custom_product_display_2], :custom_product_display_3 => record[:custom_product_display_3], :fnsku => record[:fnsku], :asin => record[:asin], :fba_upc => record[:fba_upc], :isbn => record[:isbn], :ean => record[:ean], :supplier_sku => record[:supplier_sku], :avg_cost => record[:avg_cost], :count_group => record[:count_group])
+
             single_import.packing_placement = record[:packing_placement] if record[:packing_placement].present? 
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
@@ -161,7 +161,7 @@ module Groovepacker
             duplicate_product.store_id = self.params[:store_id]
             duplicate_product.name = record[:name] if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
             if record[:product_second_record_serial] != nil
-              duplicate_product.second_record_serial = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial]) ? 1 : record[:product_second_record_serial].to_i 
+              duplicate_product.second_record_serial = ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(record[:product_second_record_serial]) ? 1 : record[:product_second_record_serial].to_s.to_i
               # if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial])
               #   duplicate_product.second_record_serial = 1
               # else
@@ -172,7 +172,7 @@ module Groovepacker
             end
 
             if record[:product_record_serial] != nil
-              duplicate_product.record_serial = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial]) ? 1 : record[:product_record_serial].to_i
+              duplicate_product.record_serial = ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(record[:product_record_serial]) ? 1 : record[:product_record_serial].to_s.to_i
               # if ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial])
               #   duplicate_product.record_serial = 1
               # else
@@ -181,9 +181,9 @@ module Groovepacker
             else
               duplicate_product.record_serial = 0
             end  
-            if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
-              duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
-            end
+            # if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
+            #   duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
+            # end
             duplicate_product.is_intangible = record[:is_intangible]
             if !self.mapping['product_type'].nil? #&& self.mapping['product_type'][:action] == 'overwrite'
               duplicate_product.product_type = record[:product_type]
@@ -208,9 +208,14 @@ module Groovepacker
                 default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
               end
 
-              attributes_location = %w(location_primary location_secondary location_tertiary)
+              attributes_location = %w(location_primary location_secondary location_tertiary location_quaternary)
               attributes_location.each do |location|
                 default_inventory.send(location + '=', updatable_record[location.to_sym]) if !self.mapping[location].nil? && updatable_record[location.to_sym] != "[DELETE]"
+              end
+
+              attributes_location_qty = %w(location_primary_qty location_secondary_qty location_tertiary_qty location_quaternary_qty)
+              attributes_location_qty.each do |location_qty|
+                default_inventory.send(location_qty + '=', updatable_record[location_qty.to_sym]) if !self.mapping[location_qty].nil? && updatable_record[location_qty.to_sym] != "[DELETE]"
               end
 
               # if !self.mapping['location_primary'].nil? && updatable_record[:location_primary] != "[DELETE]" #&& self.mapping['location_primary'][:action] =='overwrite'
@@ -577,6 +582,19 @@ module Groovepacker
             attributes2 = %W(custom_product_1 custom_product_2 custom_product_3)
             attributes2.each do |attribute_name|
               duplicate_product.send(attribute_name + '=', record[attribute_name.to_sym]) if !self.mapping[attribute_name].nil? && record[attribute_name.to_sym] != '' && record[attribute_name.to_sym] != "[DELETE]"
+            end
+
+            add_sku_attributes = %W(fnsku asin fba_upc isbn ean supplier_sku)
+            add_sku_attributes.each do |attribute_name|
+              duplicate_product.send(attribute_name + '=', record[attribute_name.to_sym]) if !self.mapping[attribute_name].nil? && record[attribute_name.to_sym] != '' && record[attribute_name.to_sym] != "[DELETE]"
+            end
+
+            if !self.mapping['count_group'].nil? && record[:count_group] != "[DELETE]" && record[:count_group].present?
+              duplicate_product.count_group = record[:count_group].chars.first
+            end
+
+            if !self.mapping['avg_cost'].nil? && record[:avg_cost] != "[DELETE]" && record[:avg_cost].present?
+              duplicate_product.avg_cost = record[:avg_cost].to_f
             end
 
             # if !self.mapping['custom_product_1'].nil? && record[:custom_product_1]!='' && record[:custom_product_1]!= "[DELETE]"

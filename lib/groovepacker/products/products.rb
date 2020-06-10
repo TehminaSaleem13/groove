@@ -293,7 +293,7 @@ module Groovepacker
         end
 
         def get_inv_update_attributes
-          attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary']
+          attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary', 'location_quaternary', 'location_primary_qty', 'location_secondary_qty', 'location_tertiary_qty', 'location_quaternary_qty']
           attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level'] if general_setting.low_inventory_alert_email
           attr_array
         end
@@ -328,6 +328,14 @@ module Groovepacker
           @product.shipping_weight = @product.get_product_weight(@params[:shipping_weight])
           @product.weight_format = get_weight_format(basic_info[:weight_format])
           @product.status = basic_info[:status] if basic_info[:status].present?
+          @product.fnsku = basic_info[:fnsku]
+          @product.asin = basic_info[:asin]
+          @product.fba_upc = basic_info[:fba_upc]
+          @product.isbn = basic_info[:isbn]
+          @product.ean = basic_info[:ean]
+          @product.supplier_sku = basic_info[:supplier_sku]
+          @product.avg_cost = basic_info[:avg_cost].to_f
+          @product.count_group = basic_info[:count_group].chars.first if basic_info[:count_group]
           @result['status'] &= false unless @product.save
         end
 

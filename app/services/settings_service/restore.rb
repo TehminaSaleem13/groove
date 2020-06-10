@@ -57,9 +57,15 @@ module SettingsService
 
     def load_mappings
       default_warehouse_map = {
-        'QOH' => 'available_inv',
-        'BinLocation 1' => 'location_primary',
-        'BinLocation 2' => 'location_secondary'
+        'Qty On Hand' => 'available_inv',
+        'Location 1' => 'location_primary',
+        'Location 2' => 'location_secondary',
+        'Location 3' => 'location_tertiary',
+        'Location 4' => 'location_quaternary',
+        'Location 1 Qty' => 'location_primary_qty',
+        'Location 2 Qty' => 'location_secondary_qty',
+        'Location 3 Qty' => 'location_tertiary_qty',
+        'Location 4 Qty' => 'location_quaternary_qty',
       }
       # end
       mapping = YAML.load_file('config/data_mappings/restore_map.yml')

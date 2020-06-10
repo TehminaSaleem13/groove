@@ -6,16 +6,15 @@ products:
     Name: name
     store_product_id: store_product_id
     product_type: product_type
-    store_id: store_id
-    created_at: created_at
-    updated_at: updated_at
+    Store ID: store_id
+    Created_at: created_at
+    Updated_at: updated_at
     BinLocation 1: inv_wh1
-    status: status
-    packing_instructions: packing_instructions
-    packing_instructions_conf: packing_instructions_conf
-    Barcode 1: barcode
-    is_skippable: is_skippable
-    packing_placement: packing_placement
+    Status: status
+    Packing Instructions: packing_instructions
+    Packing Instructions Conf: packing_instructions_conf
+    Opt. Skippable: is_skippable
+    Packing Placement: packing_placement
     pack_time_adj: pack_time_adj
     kit_parsing: kit_parsing
     is_kit: is_kit
@@ -23,6 +22,27 @@ products:
     total_avail_ext: total_avail_ext
     Weight: weight
     shipping_weight: shipping_weight
+    FNSKU: fnsku
+    ASIN: asin
+    FBA-UPC: fba_upc
+    ISBN: isbn
+    EAN: ean
+    Supplier SKU: supplier_sku
+    AVG Cost: avg_cost
+    Count Group: count_group
+    Opt. Click Scan: click_scan_enabled
+    Opt. Type-in Count: type_scan_enabled
+    Opt. Intangible: is_intangible
+    Opt. Add to Any Order: add_to_any_order
+    Opt. Record Serial 1: record_serial
+    Opt. Record Serial 2: second_record_serial
+    Product Receiving Instructions: product_receiving_instructions
+    Custom Product 1: custom_product_1
+    Custom Product Display 1: custom_product_display_1
+    Custom Product 2: custom_product_2
+    Custom Product Display 2: custom_product_display_2
+    Custom Product 3: custom_product_3
+    Custom Product Display 3: custom_product_display_3
 product_barcodes:
   :model: ProductBarcode
   :map:
@@ -82,6 +102,12 @@ product_inventory_warehouses:
     alert: alert
     location_primary: location_primary
     location_secondary: location_secondary
+    location_tertiary: location_tertiary
+    location_quaternary: location_quaternary
+    location_primary_qty: location_primary_qty
+    location_secondary_qty: location_secondary_qty
+    location_tertiary_qty: location_tertiary_qty
+    location_quaternary_qty: location_quaternary_qty
     name: name
     inventory_warehouse_id: inventory_warehouse_id
     available_inv: available_inv

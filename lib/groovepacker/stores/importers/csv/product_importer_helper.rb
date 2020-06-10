@@ -45,29 +45,30 @@ module Groovepacker
             if !self.mapping['product_name'].nil? && self.mapping['product_name'][:position] >= 0 && !single_row[self.mapping['product_name'][:position]].blank?
               usable_record[:name] = single_row[self.mapping['product_name'][:position]]
             end
-            
-            if !self.mapping['product_weight'].nil? && self.mapping['product_weight'][:position] >= 0 && !single_row[self.mapping['product_weight'][:position]].blank? && !single_row[self.mapping['product_weight'][:position]].nil?
-              usable_record[:weight] = single_row[self.mapping['product_weight'][:position]]
-            end
+
+            # if !self.mapping['product_weight'].nil? && self.mapping['product_weight'][:position] >= 0 && !single_row[self.mapping['product_weight'][:position]].blank? && !single_row[self.mapping['product_weight'][:position]].nil?
+            #   usable_record[:weight] = single_row[self.mapping['product_weight'][:position]]
+            # end
+
             if self.params[:use_sku_as_product_name]
               usable_record[:name] = single_row[self.mapping['sku'][:position]].strip
             end
             usable_record[:is_intangible] = apply_intangible(usable_record)
 
             if !self.mapping['is_intangible'].nil? && self.mapping['is_intangible'][:position] >= 0 && !single_row[self.mapping['is_intangible'][:position]].blank?
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['is_intangible'][:position]])
+              if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['is_intangible'][:position]])
                 usable_record[:is_intangible] = true
               end
             end
 
             if !self.mapping['click_scan_enabled'].nil? && self.mapping['click_scan_enabled'][:position] >= 0 && !single_row[self.mapping['click_scan_enabled'][:position]].blank?
-              if ["OFF","off","FALSE",false,"NO","no","0" ].include?(single_row[self.mapping['click_scan_enabled'][:position]])
+              if ["OFF","off","FALSE",false, 'false', "NO","no","0" ].include?(single_row[self.mapping['click_scan_enabled'][:position]])
                 usable_record[:click_scan_enabled] = "off"
               end
             end
 
             if !self.mapping['is_skippable'].nil? && self.mapping['is_skippable'][:position] >= 0 && !single_row[self.mapping['is_skippable'][:position]].blank?
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['is_skippable'][:position]])
+              if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['is_skippable'][:position]])
                 usable_record[:is_skippable] = true
               end
             end
@@ -77,31 +78,31 @@ module Groovepacker
             end
 
             if !self.mapping['add_to_any_order'].nil? && self.mapping['add_to_any_order'][:position] >= 0 && !single_row[self.mapping['add_to_any_order'][:position]].blank?
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['add_to_any_order'][:position]])
+              if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['add_to_any_order'][:position]])
                 usable_record[:add_to_any_order] = true
               end
             end
 
             if !self.mapping['type_scan_enabled'].nil? && self.mapping['type_scan_enabled'][:position] >= 0 && !single_row[self.mapping['type_scan_enabled'][:position]].blank?
-              if ["OFF","off","FALSE",false,"NO","no","0" ].include?(single_row[self.mapping['type_scan_enabled'][:position]])
+              if ["OFF","off","FALSE",false, 'false', "NO","no","0" ].include?(single_row[self.mapping['type_scan_enabled'][:position]])
                 usable_record[:type_scan_enabled] = "off"
               end
             end
 
             if !self.mapping['custom_product_display_1'].nil? && self.mapping['custom_product_display_1'][:position] >= 0 && !single_row[self.mapping['custom_product_display_1'][:position]].blank?
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['custom_product_display_1'][:position]])
+              if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['custom_product_display_1'][:position]])
                 usable_record[:custom_product_display_1] = true
               end
             end
 
             if !self.mapping['custom_product_display_2'].nil? && self.mapping['custom_product_display_2'][:position] >= 0 && !single_row[self.mapping['custom_product_display_2'][:position]].blank?
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['custom_product_display_2'][:position]])
+              if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['custom_product_display_2'][:position]])
                 usable_record[:custom_product_display_2] = true
               end
             end
 
             if !self.mapping['custom_product_display_3'].nil? && self.mapping['custom_product_display_3'][:position] >= 0 && !single_row[self.mapping['custom_product_display_3'][:position]].blank?
-              if ["ON","on","TRUE",true,"YES","yes","1" ].include?(single_row[self.mapping['custom_product_display_3'][:position]])
+              if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['custom_product_display_3'][:position]])
                 usable_record[:custom_product_display_3] = true
               end
             end
@@ -119,7 +120,7 @@ module Groovepacker
             end
 
             if !self.mapping['packing_instructions_conf'].nil? && self.mapping['packing_instructions_conf'][:position] >= 0 && !single_row[self.mapping['packing_instructions_conf'][:position]].blank?
-              usable_record[:packing_instructions_conf] = single_row[self.mapping['packing_instructions_conf'][:position]]
+              usable_record[:packing_instructions_conf] = true if ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['packing_instructions_conf'][:position]])
             end
 
             if !self.mapping['product_instructions'].nil? && self.mapping['product_instructions'][:position] >= 0 && !single_row[self.mapping['product_instructions'][:position]].blank?
@@ -132,6 +133,21 @@ module Groovepacker
 
             if !self.mapping['remove_sku'].nil? && self.mapping['remove_sku'][:position] >= 0 && !single_row[self.mapping['remove_sku'][:position]].blank?
               usable_record[:remove_sku] = single_row[self.mapping['remove_sku'][:position]]
+            end
+
+            if !self.mapping['avg_cost'].nil? && self.mapping['avg_cost'][:position] >= 0 && !single_row[self.mapping['avg_cost'][:position]].blank?
+              usable_record[:avg_cost] = single_row[self.mapping['avg_cost'][:position]].to_f
+            end
+
+            if !self.mapping['count_group'].nil? && self.mapping['count_group'][:position] >= 0 && !single_row[self.mapping['count_group'][:position]].blank?
+              usable_record[:count_group] = single_row[self.mapping['count_group'][:position]].chars.first
+            end
+
+            additional_skus = %i(fnsku asin fba_upc isbn ean supplier_sku)
+            additional_skus.each do |add_sku|
+              if !self.mapping[add_sku.to_s].nil? && self.mapping[add_sku.to_s][:position] >= 0 && !single_row[self.mapping[add_sku.to_s][:position]].blank?
+                usable_record[add_sku] = single_row[self.mapping[add_sku.to_s][:position]]
+              end
             end
 
             usable_record[:all_barcodes] = {}
@@ -185,8 +201,10 @@ module Groovepacker
                 end
               end
             end
-            usable_record[:product_second_record_serial] = single_row[self.mapping['product_second_record_serial'][:position]] if self.mapping['product_second_record_serial']
-            usable_record[:product_record_serial] = single_row[self.mapping['product_record_serial'][:position]] if self.mapping['product_record_serial']
+
+            usable_record[:product_record_serial] = true if self.mapping['product_record_serial'] && ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['product_record_serial'][:position]])
+            usable_record[:product_second_record_serial] = true if self.mapping['product_second_record_serial'] && ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(single_row[self.mapping['product_second_record_serial'][:position]])
+
             usable_record[:barcodes] = map_barcodes('quaternary_barcode', "4", single_row, usable_record)
             usable_record[:barcodes] = map_barcodes('quinary_barcode', "5", single_row, usable_record)
             usable_record[:barcodes] = map_barcodes('senary_barcode', "6", single_row, usable_record)
@@ -218,15 +236,29 @@ module Groovepacker
             if !self.mapping['inv_wh1'].nil? && self.mapping['inv_wh1'][:position] >= 0
               product_inventory[:quantity_on_hand] = single_row[self.mapping['inv_wh1'][:position]] || ''
             end
-            if !self.mapping['location_primary'].nil? && self.mapping['location_primary'][:position] >= 0
-              product_inventory[:location_primary] = single_row[self.mapping['location_primary'][:position]] || ''
+            # if !self.mapping['location_primary'].nil? && self.mapping['location_primary'][:position] >= 0
+            #   product_inventory[:location_primary] = single_row[self.mapping['location_primary'][:position]] || ''
+            # end
+            # if !self.mapping['location_secondary'].nil? && self.mapping['location_secondary'][:position] >= 0
+            #   product_inventory[:location_secondary] = single_row[self.mapping['location_secondary'][:position]] || ''
+            # end
+            # if !self.mapping['location_tertiary'].nil? && self.mapping['location_tertiary'][:position] >= 0
+            #   product_inventory[:location_tertiary] = single_row[self.mapping['location_tertiary'][:position]] || ''
+            # end
+            product_inv_locations = %i(location_primary location_secondary location_tertiary location_quaternary)
+            product_inv_locations.each do |location|
+              if !self.mapping[location.to_s].nil? && self.mapping[location.to_s][:position] >= 0
+                product_inventory[location] = single_row[self.mapping[location.to_s][:position]] || ''
+              end
             end
-            if !self.mapping['location_secondary'].nil? && self.mapping['location_secondary'][:position] >= 0
-              product_inventory[:location_secondary] = single_row[self.mapping['location_secondary'][:position]] || ''
+
+            product_inv_locations_qty = %i(location_primary_qty location_secondary_qty location_tertiary_qty location_quaternary_qty)
+            product_inv_locations_qty.each do |location_qty|
+              if !self.mapping[location_qty.to_s].nil? && self.mapping[location_qty.to_s][:position] >= 0
+                product_inventory[location_qty] = single_row[self.mapping[location_qty.to_s][:position]].to_i
+              end
             end
-            if !self.mapping['location_tertiary'].nil? && self.mapping['location_tertiary'][:position] >= 0
-              product_inventory[:location_tertiary] = single_row[self.mapping['location_tertiary'][:position]] || ''
-            end
+
             product_inventory
           end
 
@@ -354,6 +386,11 @@ module Groovepacker
                       product_inv_wh.location_primary = warehouse[:location_primary] if warehouse[:location_primary] != "[DELETE]"
                       product_inv_wh.location_secondary = warehouse[:location_secondary] if warehouse[:location_secondary] != "[DELETE]"
                       product_inv_wh.location_tertiary = warehouse[:location_tertiary] if warehouse[:location_tertiary] != "[DELETE]"
+                      product_inv_wh.location_quaternary = warehouse[:location_quaternary] if warehouse[:location_quaternary] != "[DELETE]"
+                      product_inv_wh.location_primary_qty = warehouse[:location_primary_qty] if warehouse[:location_primary_qty] != "[DELETE]"
+                      product_inv_wh.location_secondary_qty = warehouse[:location_secondary_qty] if warehouse[:location_secondary_qty] != "[DELETE]"
+                      product_inv_wh.location_tertiary_qty = warehouse[:location_tertiary_qty] if warehouse[:location_tertiary_qty] != "[DELETE]"
+                      product_inv_wh.location_quaternary_qty = warehouse[:location_quaternary_qty] if warehouse[:location_quaternary_qty] != "[DELETE]"
                       product_inv_wh.quantity_on_hand  = warehouse[:quantity_on_hand] if warehouse[:quantity_on_hand] != "[DELETE]"
                       product_inv_wh.product_id = product_id
                       @import_product_inventory_warehouses << product_inv_wh
@@ -404,6 +441,11 @@ module Groovepacker
                 product_inv.update_attribute(:location_primary, nil) if inventory[:location_primary] == "[DELETE]"
                 product_inv.update_attribute(:location_secondary, nil) if inventory[:location_secondary] == "[DELETE]"
                 product_inv.update_attribute(:location_tertiary, nil) if inventory[:location_tertiary] == "[DELETE]"
+                product_inv.update_attribute(:location_quaternary, nil) if inventory[:location_quaternary] == "[DELETE]"
+                product_inv.update_attribute(:location_primary_qty, nil) if inventory[:location_primary_qty] == "[DELETE]"
+                product_inv.update_attribute(:location_secondary_qty, nil) if inventory[:location_secondary_qty] == "[DELETE]"
+                product_inv.update_attribute(:location_tertiary_qty, nil) if inventory[:location_tertiary_qty] == "[DELETE]"
+                product_inv.update_attribute(:location_quaternary_qty, nil) if inventory[:location_quaternary_qty] == "[DELETE]"
                 product_inv.update_attribute(:quantity_on_hand, nil) if inventory[:quantity_on_hand] == "[DELETE]"
               rescue
               end

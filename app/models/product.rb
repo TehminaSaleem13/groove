@@ -33,7 +33,9 @@ class Product < ActiveRecord::Base
                   :custom_product_3,
                   :custom_product_display_1,
                   :custom_product_display_2,
-                  :custom_product_display_3
+                  :custom_product_display_3,
+                  :fnsku, :asin, :fba_upc, :isbn, :ean,
+                  :supplier_sku, :avg_cost, :count_group
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy

@@ -300,8 +300,8 @@ module Groovepacker
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         begin
-          dir = Dir.mktmpdir([user+'groov-export-', Time.now.to_s])
-          filename = 'groove-export-'+Time.now.to_s+'.zip'
+          dir = Dir.mktmpdir([user+'groov-export-', Time.current.to_s])
+          filename = 'groove-export-'+Time.current.to_s+'.zip'
           response = {}
           tables = {
             products: Product,

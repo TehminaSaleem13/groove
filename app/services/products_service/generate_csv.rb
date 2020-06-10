@@ -10,12 +10,11 @@ module ProductsService
       preload_associations(products)
     end
 
-    def call      
+    def call
       bulk_action?
       set_header
-      check_headers_against_product_column
       set_data_mapping
-      csv = ""
+
       if @bulk_csv
         @csv << headers
         products.each do |item|
@@ -27,23 +26,76 @@ module ProductsService
         end
         @csv
       else
-        csv << headers.join(",")
-        csv << "\n" 
-        products.each do |item|
-          if @bulk_action
-            @bulk_action.reload
-            return true if bulk_action_cancelled?
+        @csv = CSV.generate(headers: true) do |csv|
+          csv << headers.to_a
+          products.each do |item|
+            if @bulk_action
+              @bulk_action.reload
+              return true if bulk_action_cancelled?
+            end
+            csv << process_data(item)
           end
-          arr = process_data(item)
-          new_arr = []
-          arr.each do |val| 
-            new_arr << (val.class==String ? "\"#{val}\"" : val)
-          end
-          csv << new_arr.join(",")
-          csv << "\n"
         end
-        csv
+        @csv
       end
+
+      # if @bulk_csv
+      #   @csv << headers
+      #   products.each do |item|
+      #     if @bulk_action
+      #       @bulk_action.reload
+      #       return true if bulk_action_cancelled?
+      #     end
+      #     @csv << process_data(item)
+      #   end
+      #   @csv
+      # else
+      #   csv << headers.join(",")
+      #   csv << "\n" 
+      #   products.each do |item|
+      #     if @bulk_action
+      #       @bulk_action.reload
+      #       return true if bulk_action_cancelled?
+      #     end
+      #     arr = process_data(item)
+      #     new_arr = []
+      #     arr.each do |val| 
+      #       new_arr << (val.class==String ? "\"#{val}\"" : val)
+      #     end
+      #     csv << new_arr.join(",")
+      #     csv << "\n"
+      #   end
+      #   csv
+      # end
+
+      # if @bulk_csv
+      #   @csv << headers
+      #   products.each do |item|
+      #     if @bulk_action
+      #       @bulk_action.reload
+      #       return true if bulk_action_cancelled?
+      #     end
+      #     @csv << process_data(item)
+      #   end
+      #   @csv
+      # else
+      #   csv << headers.join(",")
+      #   csv << "\n" 
+      #   products.each do |item|
+      #     if @bulk_action
+      #       @bulk_action.reload
+      #       return true if bulk_action_cancelled?
+      #     end
+      #     arr = process_data(item)
+      #     new_arr = []
+      #     arr.each do |val| 
+      #       new_arr << (val.class==String ? "\"#{val}\"" : val)
+      #     end
+      #     csv << new_arr.join(",")
+      #     csv << "\n"
+      #   end
+      #   csv
+      # end
     end
 
     private
@@ -55,19 +107,8 @@ module ProductsService
 
     def set_header
       @headers = [
-        'ID', 'Name', 'SKU 1', 'Barcode 1','Barcode 1 qty', 'BinLocation 1', 'QOH',
-        'Primary Image', 'Weight', 'Primary Category',
-        'SKU 2', 'SKU 3', 'Barcode 2', 'Barcode 2 qty', 'Barcode 3', 'Barcode 3 qty', 'Barcode 4', 'Barcode 4 qty', 'Barcode 5', 'Barcode 5 qty', 'Barcode 6', 'Barcode 6 qty', 'BinLocation 2',
-        'BinLocation 3'
+        'ID', 'Product Name', 'SKU 1', 'SKU 2', 'SKU 3', 'SKU 4', 'SKU 5', 'SKU 6', 'Barcode 1','Barcode 1 Qty', 'Barcode 2', 'Barcode 2 Qty', 'Barcode 3', 'Barcode 3 Qty', 'Barcode 4', 'Barcode 4 Qty', 'Barcode 5', 'Barcode 5 Qty', 'Barcode 6', 'Barcode 6 Qty', 'Location 1', 'Location 1 Qty', 'Location 2', 'Location 2 Qty', 'Location 3', 'Location 3 Qty', 'Location 4', 'Location 4 Qty', 'Qty On Hand','Absolute Image URL', 'Packing Instructions', 'Packing Instructions Conf', 'Product Receiving Instructions', 'Categories', 'FNSKU', 'ASIN', 'FBA-UPC', 'ISBN', 'EAN', 'Supplier SKU', 'AVG Cost', 'Count Group', 'Packing Placement', 'Custom Product 1', 'Custom Product Display 1', 'Custom Product 2', 'Custom Product Display 2', 'Custom Product 3', 'Custom Product Display 3', 'Opt. Click Scan', 'Opt. Type-in Count', 'Opt. Intangible', 'Opt. Add to Any Order', 'Opt. Skippable', 'Opt. Record Serial 1', 'Opt. Record Serial 2', 'Store ID', 'Status', 'Created At', 'Updated At'
       ]
-    end
-
-    def check_headers_against_product_column
-      all_fields = filter_and_arrange_fields(Product.column_names)
-      all_fields.each do |name|
-        next if headers.any? { |s| s.casecmp(name) == 0 }
-        headers.push(name)
-      end
     end
 
     def filter_and_arrange_fields(all_product_fields)
@@ -88,11 +129,12 @@ module ProductsService
       item_mapping = @data_mapping['item']
       inventory_wh_mapping = @data_mapping['inventory_wh']
       item_other_skus_barcodes = @data_mapping['item_other_skus_barcodes']
+      item_categories = @data_mapping['item_categories']
       headers.each do |title|
         data.push(
           find_value([
                        item, inventory_wh, title, item_mapping, inventory_wh_mapping,
-                       item_other_skus_barcodes
+                       item_other_skus_barcodes, item_categories
                      ])
         )
       end
@@ -104,40 +146,78 @@ module ProductsService
       @data_mapping = {
         'item' => {
           'ID' => 'id',
-          'Name' => 'name',
+          'Product Name' => 'name',
           'SKU 1' => 'primary_sku',
           'Barcode 1' => 'primary_barcode',
-          'Barcode 1 qty' => 'primary_barcode_qty',
-          'Primary Image' => 'primary_image',
-          'Weight' => 'weight',
-          'Primary Category' => 'primary_category'
+          'Barcode 1 Qty' => 'primary_barcode_qty',
+          'Absolute Image URL' => 'primary_image',
+          'Packing Instructions' => 'packing_instructions',
+          'Packing Instructions Conf' => 'packing_instructions_conf',
+          'Product Receiving Instructions' => 'product_receiving_instructions',
+          'Packing Placement' => 'packing_placement',
+          'Custom Product 1' => 'custom_product_1',
+          'Custom Product Display 1' => 'custom_product_display_1',
+          'Custom Product 2' => 'custom_product_2',
+          'Custom Product Display 2' => 'custom_product_display_2',
+          'Custom Product 3' => 'custom_product_3',
+          'Custom Product Display 3' => 'custom_product_display_3',
+          'FNSKU' => 'fnsku',
+          'ASIN' => 'asin',
+          'FBA-UPC' => 'fba_upc',
+          'ISBN' => 'isbn',
+          'EAN' => 'ean',
+          'Supplier SKU' => 'supplier_sku',
+          'AVG Cost' => 'avg_cost',
+          'Count Group' => 'count_group',
+          'Opt. Click Scan' => 'click_scan_enabled',
+          'Opt. Type-in Count' => 'type_scan_enabled',
+          'Opt. Intangible' => 'is_intangible',
+          'Opt. Add to Any Order' => 'add_to_any_order',
+          'Opt. Skippable' => 'is_skippable',
+          'Opt. Record Serial 1' => 'record_serial',
+          'Opt. Record Serial 2' => 'second_record_serial',
+          'Store ID' => 'store_id',
+          'Status' => 'status',
+          'Created At' => 'created_at',
+          'Updated At' => 'updated_at'
         },
         'item_other_skus_barcodes' => {
           'SKU 2' => 'sku',
           'SKU 3' => 'sku',
+          'SKU 4' => 'sku',
+          'SKU 5' => 'sku',
+          'SKU 6' => 'sku',
           'Barcode 2' => 'barcode',
-          'Barcode 2 qty' => 'packing_count',
+          'Barcode 2 Qty' => 'packing_count',
           'Barcode 3' => 'barcode',
-          'Barcode 3 qty' => 'packing_count',
+          'Barcode 3 Qty' => 'packing_count',
           'Barcode 4' => 'barcode',
-          'Barcode 4 qty' => 'packing_count',
+          'Barcode 4 Qty' => 'packing_count',
           'Barcode 5' => 'barcode',
-          'Barcode 5 qty' => 'packing_count',
+          'Barcode 5 Qty' => 'packing_count',
           'Barcode 6' => 'barcode',
-          'Barcode 6 qty' => 'packing_count'
+          'Barcode 6 Qty' => 'packing_count'
+        },
+        'item_categories' => {
+          'Categories' => 'categories'
         },
         'inventory_wh' => {
-          'BinLocation 1' => 'location_primary',
-          'QOH' => 'quantity_on_hand',
-          'BinLocation 2' => 'location_secondary',
-          'BinLocation 3' => 'location_tertiary'
+          'Location 1' => 'location_primary',
+          'Qty On Hand' => 'quantity_on_hand',
+          'Location 2' => 'location_secondary',
+          'Location 3' => 'location_tertiary',
+          'Location 4' => 'location_quaternary',
+          'Location 1 Qty' => 'location_primary_qty',
+          'Location 2 Qty' => 'location_secondary_qty',
+          'Location 3 Qty' => 'location_tertiary_qty',
+          'Location 4 Qty' => 'location_quaternary_qty',
         }
       }
     end
 
     def find_value(parameters)
       item, inventory_wh, title, item_mapping, inventory_wh_mapping,
-      item_other_skus_barcodes = parameters
+      item_other_skus_barcodes, item_categories = parameters
 
       if this_in_that(title, item_mapping)
         value_for(item, item_mapping[title])
@@ -146,6 +226,8 @@ module ProductsService
       elsif this_in_that(title, item_other_skus_barcodes)
         attribute = item_other_skus_barcodes[title]
         find_other_skus_barcodes(item, title, attribute)
+      elsif this_in_that(title, item_categories)
+        item.product_cats.map(&:category).join(', ')
       else
         item.attributes.values_at(title).try(:first)
       end
