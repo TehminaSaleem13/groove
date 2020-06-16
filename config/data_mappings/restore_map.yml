@@ -14,7 +14,7 @@ products:
     Packing Instructions: packing_instructions
     Packing Instructions Conf: packing_instructions_conf
     Opt. Skippable: is_skippable
-    Packing Placement: packing_placement
+    Product Scanning Sequence: packing_placement
     pack_time_adj: pack_time_adj
     kit_parsing: kit_parsing
     is_kit: is_kit

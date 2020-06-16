@@ -40,9 +40,10 @@ module Groovepacker
                       @file_kit_skus << kit_sku
                     end
                   end
-                  if should_import
-                    import_kit(single_row, kit_sku)
-                  end
+                  # if should_import
+                  #   import_kit(single_row, kit_sku)
+                  # end
+                  import_kit(single_row, kit_sku)
                 end
               end
               @update_status_products.each do |product|
@@ -168,6 +169,7 @@ module Groovepacker
             if not_blank?('part_qty', single_row)
               product_kit_part_sku = ProductKitSkus.find_or_create_by_product_id_and_option_product_id(kit_product.id, single_import_product.id)
               product_kit_part_sku.qty = single_row[self.mapping['part_qty'][:position]]
+              product_kit_part_sku.packing_order = single_row[self.mapping['kit_part_scanning_sequence'][:position]].to_i if not_blank?('kit_part_scanning_sequence',single_row) && single_row[self.mapping['kit_part_scanning_sequence'][:position]].to_i != 0
               product_kit_part_sku.save
             end
           end
