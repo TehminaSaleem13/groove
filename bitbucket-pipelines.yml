@@ -1,0 +1,27 @@
+pipelines:
+  branches:
+    development:
+      - step:
+          image: ruby:2.1.6
+          caches:
+            - bundler
+          script:
+            - bundle install
+            - bundle exec rake db:create RAILS_ENV=test
+            - bundle exec rake db:migrate RAILS_ENV=test
+            - bundle exec rspec RAILS_ENV=test
+          services:
+            - db
+
+definitions:
+  caches:
+    bundler: ./vendor
+
+  services:
+    db:
+      image: mysql:5.7
+      environment:
+        MYSQL_DATABASE: pipelines
+        MYSQL_ROOT_PASSWORD: root_user_password
+        MYSQL_USER: test_user
+        MYSQL_PASSWORD: test_user_password
