@@ -10,6 +10,12 @@ module ShippingEasyHelper
     return s3_image_url
   end
 
+  def not_to_update(shiping_easy_order)
+    not_update = (shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned")))
+    @order_to_update = not_update
+    not_update
+  end
+
   def convert_time_from_gp(time)
     time_zone = GeneralSetting.last.time_zone.to_i
     (time - time_zone).strftime('%Y-%m-%d %H:%M:%S')
