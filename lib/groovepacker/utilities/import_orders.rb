@@ -247,7 +247,15 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_item.update_attributes(status: 'failed', message: import_item_message, import_error: error)
       Rollbar.error(e, e.message)
     end
+    re_import_orders(e, import_item.order_import_summary.user) rescue nil
     ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
+  end
+
+  def re_import_orders(exception, user)
+    return unless exception.message.include? 'Delayed::Worker.max_run_time'
+    OrderImportSummary.where(status: 'in_progress').destroy_all
+    ImportItem.where(status: %w(in_progress not_started)).update_all(status: 'cancelled')
+    Groovepacker::Orders::Import.new(params_attrs: @import_params.with_indifferent_access, current_user: user).start_import_for_all
   end
 
   def start_shipwork_import(cred, status, value, tenant)
