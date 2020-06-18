@@ -1,25 +1,26 @@
-pipelines:
-  branches:
-    development:
-      - step:
-          image: ruby:2.1.6
-          caches:
-            - bundler
-          script:
-            - bundle install
-            - bundle update fog
-            - bundle exec rake db:create RAILS_ENV=test
-            - bundle exec rake db:migrate RAILS_ENV=test
-            - RAILS_ENV=test bundle exec rspec spec/
-          services:
-            - db
+image: ruby:2.1.6
 
+pipelines:
+  default:
+    - step:
+        name: 'Master Rspec'
+        caches:
+          - bundler
+        services:
+          - mysql
+          - redis
+        script:
+          - bundle install
+          - bundle exec rake db:create RAILS_ENV=test
+          - bundle exec rake db:migrate RAILS_ENV=test
+          - RAILS_ENV=test rspec
 definitions:
   caches:
-    bundler: ./vendor
-
+    bundler: vendor/bundle
   services:
-    db:
+    redis:
+      image: redis:3.2
+    mysql:
       image: mysql:5.7
       environment:
         MYSQL_DATABASE: pipelines
