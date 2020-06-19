@@ -28,15 +28,22 @@ class ImportCsv
           file_path = response[:file_info][:file_path]
           if params[:encoding_format].present?
             begin
+              file_content = File.read(file_path)
+              regex = /(?<=\s)("[^"]+")(?=\s)/
+              begin
+                file_content[regex] = file_content[regex][1..-2]
+              rescue
+                nil
+              end
               if params[:encoding_format] == "ASCII + UTF-8"
-                new_file_data = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+                new_file_data = file_content.encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
               elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
-                new_file_data = File.read(file_path).force_encoding("ISO-8859-1").encode("UTF-8")
+                new_file_data = file_content.force_encoding("ISO-8859-1").encode("UTF-8")
               elsif params[:encoding_format] == "UTF-8"
-                new_file_data = File.read(file_path).force_encoding("UTF-8")
+                new_file_data = file_content.force_encoding("UTF-8")
               end
             rescue Exception => e
-              new_file_data = File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
+              new_file_data = file_content.encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
             end
           else
             new_file_data =  File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
@@ -68,12 +75,19 @@ class ImportCsv
         file_path = download_csv(file,tenant, params)
         if params[:encoding_format].present?
           begin
+            file_content = file.content
+            regex = /(?<=\s)("[^"]+")(?=\s)/
+            begin
+              file_content[regex] = file_content[regex][1..-2]
+            rescue
+              nil
+            end
             if params[:encoding_format] == "ASCII + UTF-8"
-              File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+              File.write(file_path, file_content.encode(Encoding.find('ASCII'), encoding_options))
             elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
-              
+              File.write(file_path, file_content.force_encoding("ISO-8859-1").encode("UTF-8"))
             elsif params[:encoding_format] == "UTF-8"
-              File.write(file_path, file.content.force_encoding("UTF-8"))
+              File.write(file_path, file_content.force_encoding("UTF-8"))
             end
           rescue Exception => e
             File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))

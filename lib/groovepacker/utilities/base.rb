@@ -41,7 +41,7 @@ module Groovepacker
       def common_data_attributes
         return ["fix_width", "fixed_width", "sep", "delimiter", "rows", "map", "map", "import_action",
                 "contains_unique_order_items", "generate_barcode_from_sku", "use_sku_as_product_name",
-                "order_placed_at", "order_date_time_format", "day_month_sequence"
+                "order_placed_at", "order_date_time_format", "day_month_sequence", "encoding_format"
               ]
       end
 
