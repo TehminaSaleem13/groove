@@ -156,7 +156,7 @@ module Groovepacker
               unless single_row[self.mapping['barcode'][:position]].nil?
                 barcodes = single_row[self.mapping['barcode'][:position]].split(',')
                 barcode_qty = single_row[self.mapping['barcode_qty'][:position]].split(',') rescue 1
-                usable_record[:all_barcodes]["0"] = barcodes  
+                usable_record[:all_barcodes]["0"] = barcodes
                 barcodes.each do |single_barcode|
                   usable_record[:all_barcodes_qty][single_barcode] = barcode_qty
                   break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!@all_barcodes.include? single_barcode.strip)
@@ -214,7 +214,7 @@ module Groovepacker
             end
             #add inventory warehouses
             product_inventory = init_prod_inv
-            
+
             usable_record[:inventory] << build_prod_inv(product_inventory,single_row)
 
             #add product categories
@@ -285,7 +285,7 @@ module Groovepacker
               location_primary: '',
               location_secondary: '',
               location_tertiary: ''
-            } 
+            }
           end
 
           def check_after_every(length)
@@ -321,11 +321,11 @@ module Groovepacker
                         product_sku.order = new_order
                         product_sku.product_id = product_id
                         product_sku.save!
-                        #@import_product_skus << product_sku  
+                        #@import_product_skus << product_sku
                         new_order = new_order + 1
                       rescue Exception => e
                         Rollbar.error(e, e.message)
-                      end        
+                      end
                     end
                   end
                 end
@@ -356,7 +356,7 @@ module Groovepacker
                 if record[:images].length > 0
                   new_order = 0
                   record[:images].each do |image|
-                    if image != "[DELETE]" 
+                    if image != "[DELETE]"
                       new_order = new_order + 1
                       product_image = ProductImage.new
                       product_image.image = image
@@ -369,7 +369,7 @@ module Groovepacker
 
                 if record[:cats].length > 0
                   record[:cats].each do |cat|
-                    if cat != "[DELETE]" 
+                    if cat != "[DELETE]"
                       product_cat = ProductCat.new
                       product_cat.category = cat
                       product_cat.product_id = product_id
@@ -380,7 +380,7 @@ module Groovepacker
 
                 if record[:inventory].length > 0
                   record[:inventory].each do |warehouse|
-                    if warehouse != "[DELETE]" 
+                    if warehouse != "[DELETE]"
                       product_inv_wh = ProductInventoryWarehouses.new
                       product_inv_wh.inventory_warehouse_id = warehouse[:inventory_warehouse_id]
                       product_inv_wh.location_primary = warehouse[:location_primary] if warehouse[:location_primary] != "[DELETE]"
@@ -423,6 +423,25 @@ module Groovepacker
             product.update_attribute(:name, "Product created from CSV import") if record[:name] == "[DELETE]"
             pro_barcodes = product.try(:product_barcodes)
             barcodes = record[:all_barcodes]
+
+
+            if record[:barcodes].length > 0
+              record[:barcodes].each do |barcode|
+                if barcode != "[DELETE]"
+                  begin
+                    product_barcode = ProductBarcode.new
+                    product_barcode.barcode = barcode
+                    product_barcode.packing_count = record[:all_barcodes_qty][barcode][0] rescue 1
+                    product_barcode.is_multipack_barcode = true
+                    product_barcode.product_id = product.id
+                    product_barcode.save
+                  rescue Exception => e
+                    Rollbar.error(e, e.message)
+                  end
+                end
+              end
+            end
+
             (pro_barcodes || []).each_with_index do |barcode, index|
               pro_barcodes.where(:order => index)[0].destroy if barcodes["#{index}"][0] == "[DELETE]"  rescue nil
             end
@@ -475,5 +494,4 @@ module Groovepacker
       end
     end
   end
-end    
-    
+end
