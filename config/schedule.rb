@@ -117,6 +117,11 @@ every 1.month do
     rake "doo:scheduled_tenant_details"
   end  
 end
+
+every 1.day, :at => '12:00 am' do
+  rake "doo:update_last_imported_store"
+end
+
 # every 1.day, :at => '03:00 am' do
 #   runner "backup perform --trigger db_backup"
 # end

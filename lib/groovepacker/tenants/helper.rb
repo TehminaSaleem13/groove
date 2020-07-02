@@ -397,7 +397,7 @@ module Groovepacker
         tenant_hash['test_tenant_toggle'] = tenant.reload.test_tenant_toggle
         tenant_hash['last_charge_in_stripe'] = tenant.last_charge_in_stripe.strftime('%a %m/%e/%Y %l:%M:%S %p') rescue nil
         Apartment::Tenant.switch tenant.name
-        tenant_hash['last_import_store_type'] = ImportItem.last.store.store_type rescue nil
+        tenant_hash['last_import_store_type'] = tenant.last_import_store_type || ImportItem.last.try(:store).try(:store_type)
         Apartment::Tenant.switch
       end
 
@@ -456,11 +456,11 @@ module Groovepacker
       end
 
       def build_query(search, sort_key, sort_order)
-        'SELECT tenants.id as id, tenants.name as name, tenants.scheduled_import_toggle as scheduled_import_toggle, tenants.note as note, tenants.is_modified as is_modified, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url
+        'SELECT tenants.id as id, tenants.name as name, tenants.scheduled_import_toggle as scheduled_import_toggle, tenants.note as note, tenants.is_modified as is_modified, tenants.updated_at as updated_at, tenants.created_at as created_at, subscriptions.subscription_plan_id as plan, subscriptions.stripe_customer_id as stripe_url, tenants.last_import_store_type as last_import_store_type
           FROM tenants LEFT JOIN subscriptions ON (subscriptions.tenant_id = tenants.id)
             WHERE
               (
-                tenants.name like ' + search + ' OR subscriptions.subscription_plan_id like ' + search + '
+                tenants.name like ' + search + ' OR subscriptions.subscription_plan_id like ' + search + ' OR tenants.last_import_store_type like ' + search + '
               )
               ' + '
             GROUP BY tenants.id ORDER BY ' + sort_key + ' ' + sort_order
