@@ -66,9 +66,9 @@ class ProductKitSkus < ActiveRecord::Base
         count = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id).order_item_kit_products.count rescue 0
         if count > 200
           result["success_messages"] = "Your request for 'remove item' has been queued"
-          result["job"] = self.delay.remove_single_kit_product(kit, kit_product, params, result, tenant, current_user) 
+          result["job"] = self.delay.remove_single_kit_product(kit.id, kit_product, params, result, tenant, current_user.id) 
         else
-          result =self.remove_single_kit_product(kit, kit_product, params, result, tenant, current_user) 
+          result =self.remove_single_kit_product(kit.id, kit_product, params, result, tenant, current_user.id) 
         end
       end
     end
@@ -76,8 +76,10 @@ class ProductKitSkus < ActiveRecord::Base
     return result
   end
 
-  def self.remove_single_kit_product(kit, kit_product, params, result, tenant, current_user)
+  def self.remove_single_kit_product(kit_id, kit_product, params, result, tenant, current_user_id)
     Apartment::Tenant.switch tenant
+    kit = Product.find(kit_id)
+    current_user = User.find(current_user_id)
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id)
     if product_kit_sku.nil?
       result['messages'].push("Product #{kit_product} not found in item")
