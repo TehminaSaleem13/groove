@@ -319,6 +319,8 @@ module Groovepacker
               if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty? && product.product_barcodes.blank?
                 product.product_barcodes.create(barcode: sku)
               end
+              product.isbn = product_hash["isbn"] if product_hash["isbn"].present?
+              product.asin = product_hash["asin"] if product_hash["asin"].present?
               make_product_intangible(product)
               product.set_product_status
               product
