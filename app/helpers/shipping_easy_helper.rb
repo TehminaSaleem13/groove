@@ -125,5 +125,56 @@ module ShippingEasyHelper
     end
   end
 
+  def update_multi_shipment_status(prime_order_id)
+    return unless @credential.store.split_order == 'shipment_handling_v2'
+    prime_order = Order.where(store_order_id: prime_order_id).present?
+    multi_shipments = Order.where('orders.store_order_id != orders.prime_order_id AND orders.prime_order_id = ? AND orders.status != ?', prime_order_id, 'scanned')
+    if prime_order
+      multi_shipments.each do |order|
+        order.status = 'onhold'
+        order.save
+        order.addactivity("Order Moved To #{order.status.capitalize} Status by Shipment Handling v2")
+      end
+    end
+  end
 
+  def check_prev_splitted_order(order)
+    delete_split_combined_orders(order)
+    if order['split_from_order_id'].present?
+      # prime_order = Order.where(store_order_id: order['split_from_order_id'].to_s)
+      split_orders = Order.where('prime_order_id = ? AND store_order_id != ?', order['prime_order_id'].to_s, order['prime_order_id'].to_s)
+      extra_count = Order.where('increment_id LIKE ? AND store_order_id != ?', "%#{order['external_order_identifier']}%", order['split_from_order_id']).group(:prime_order_id).count.count
+      if split_orders.blank?
+        order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
+        order['external_order_identifier'] = order['external_order_identifier'] + " (S1)"
+      else
+        splitted_inc_id = split_orders.pluck(:increment_id).sort.last.split(" (S")
+        main_increment = splitted_inc_id[0..(splitted_inc_id.length - 2)].join rescue order['external_order_identifier']
+        shipment_increment = splitted_inc_id.last.chop rescue nil
+        inc_no = shipment_increment.to_i + 1 if shipment_increment.to_i.to_s == shipment_increment
+        order['external_order_identifier'] = main_increment + " (S#{inc_no})" if inc_no
+      end
+    else
+      order['external_order_identifier'] = order['external_order_identifier'] + " (C)" if order['source_order_ids'].present?
+      extra_count = Order.where("increment_id LIKE ?", "%#{order['external_order_identifier']}%").group(:prime_order_id).count.count
+      order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
+    end
+    order
+  end
+
+  def delete_split_combined_orders(order)
+    # Delete previous order after split in SE
+    order['deleted_after_split'] = Order.joins(:order_items).where("order_items.scanned_status = 'unscanned' OR order_items.scanned_status = 'notscanned' AND store_order_id = ?", order['split_from_order_id'].to_s).destroy_all.map(&:increment_id)
+
+    # Delete previous order after combined in SE
+    order['deleted_after_combined'] = Order.joins(:order_items).where("order_items.scanned_status = 'unscanned' OR order_items.scanned_status = 'notscanned' AND store_order_id IN (?)", order['source_order_ids']).destroy_all.map(&:increment_id)
+  end
+
+  def add_split_combined_activity(order, shiping_easy_order)
+    user_name = User.find_by_id(@import_item.order_import_summary.user_id).name rescue nil
+
+    shiping_easy_order.addactivity("Order with ##{order['deleted_after_split'].join(", ")} removed from GP after the original order is splitted in ShippingEasy", user_name) if order['deleted_after_split'].present?
+
+    shiping_easy_order.addactivity("Order with ##{order['deleted_after_combined'].join(", ")} removed from GP after the original order is combined in ShippingEasy", user_name) if order['deleted_after_combined'].present?
+  end
 end

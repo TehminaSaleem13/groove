@@ -105,6 +105,8 @@ class OrdersController < ApplicationController
     unless @order.nil?
       @result['order'] = {'basicinfo' => @order}
       retrieve_order_items
+      @result['order']['se_old_shipments'] = se_old_shipments(@order) if @order.store.store_type == 'ShippingEasy'
+      @result['order']['se_all_shipments'] = se_all_shipments(@order) if @order.store.store_type == 'ShippingEasy' && @result['order']['se_old_shipments'].blank?
     else
       set_status_and_message(false, "Could not find order" ['error_messages'])
     end
@@ -353,22 +355,25 @@ class OrdersController < ApplicationController
   end
 
   def next_split_order
-    key_array = params[:id].split("-")
-    if key_array.count == 1
-      key = key_array.first
-    else
-      last_value = Integer(key_array.last) rescue nil
-      last_value = nil if key_array.last[0] == "0"
-      if last_value.blank?
-        key = key_array.join("-")
-      elsif last_value.between?(1, 50)
-        key_array.pop
-        key = key_array.join('-') rescue key_array.first
-      else
-        key = key_array.join('-')
-      end
-    end
-    order = Order.where("increment_id LIKE ? AND increment_id != ? AND status != ?", "#{key}%", params[:id], "scanned").order("created_at asc").first
+    original_id = params[:id]
+    key = params[:id].split(" (S")[0..(params[:id].split(" (S").length-2)].join + " (S#{params[:id].split(" (S").last.to_i + 1})" rescue nil
+    # key_array = params[:id].split("-")
+    # if key_array.count == 1
+    #   key = key_array.first
+    # else
+    #   last_value = Integer(key_array.last) rescue nil
+    #   last_value = nil if key_array.last[0] == "0"
+    #   if last_value.blank?
+    #     key = key_array.join("-")
+    #   elsif last_value.between?(1, 50)
+    #     key_array.pop
+    #     key = key_array.join('-') rescue key_array.first
+    #   else
+    #     key = key_array.join('-')
+    #   end
+    # end
+    # order = Order.where("increment_id LIKE ? AND increment_id != ? AND status != ?", "#{key}%", original_id, "scanned").order("created_at asc").first
+    order = Order.where("increment_id = ? AND increment_id != ? AND status != ?", key, original_id, "scanned").order("created_at asc").first
     render json: order
   end
 

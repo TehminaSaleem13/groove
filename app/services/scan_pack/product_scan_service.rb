@@ -45,7 +45,8 @@ module ScanPack
           @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order
         end
         @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy"
-
+        @result["data"]["order"]['se_old_shipments'] = se_old_shipments(order) if order.store.store_type == 'ShippingEasy'
+        @result["data"]["order"]['se_all_shipments'] = se_all_shipments(order) if order.store.store_type == 'ShippingEasy' && @result["data"]["order"]['se_old_shipments'].blank?
         do_set_result_for_boxes(order)
       rescue
       end

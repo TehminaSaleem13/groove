@@ -31,6 +31,8 @@ module ScanPack
         @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         do_set_result_for_boxes(order)
+        @result["data"]["order"]['se_old_shipments'] = se_old_shipments(order) if order.store.store_type == 'ShippingEasy'
+        @result["data"]["order"]['se_all_shipments'] = se_all_shipments(order) if order.store.store_type == 'ShippingEasy' && @result["data"]["order"]['se_old_shipments'].blank?
       end
       if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
        stores = Store.where("status=? and on_demand_import=?", true, true)

@@ -33,7 +33,7 @@ module OrderConcern
               elsif @params[:orderArray].present?
                 list_of_orders_from_orderArray(sort_by_order_number)
               elsif @params[:id].present?
-                Order.find(@params[:id])
+                Order.where(id: @params[:id])
               else
                 list_of_orders_by_sort_order(sort_by_order_number)
               end

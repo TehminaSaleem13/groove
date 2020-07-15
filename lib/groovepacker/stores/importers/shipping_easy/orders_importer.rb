@@ -125,8 +125,8 @@ module Groovepacker
               @result[:total_imported] = response["orders"].uniq.length
               update_import_item_obj_values
               uniq_response = response["orders"].uniq rescue []
-              verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
-              if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together" 
+              verify_separately = (@import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately)) ? true : false
+              if @import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately verify_together)
                 @split_order = true
               else
                 @split_order = false
@@ -199,7 +199,7 @@ module Groovepacker
                   end        
                 else
                   shiping_easy_order = find_shipping_easy_order(order)
-                  if shiping_easy_order && @group_orders && @import_item.store.split_order == "verify_separately"
+                  if shiping_easy_order && @group_orders && (@import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately))
                     g_orders = Marshal.load(Marshal.dump(@group_orders[order["external_order_identifier"]]))
                     g_orders.each_with_index do |odr, index|
                       unless index == 0
@@ -213,10 +213,14 @@ module Groovepacker
                   end
                 end
                 if shiping_easy_order.blank?
-                  shiping_easy_order = Order.where("increment_id LIKE ?","#{order['external_order_identifier']}%")
-                  #unless @credential.allow_duplicate_id
-                    order['external_order_identifier'] = "#{order['external_order_identifier']}-#{shiping_easy_order.count}" if shiping_easy_order.count > 0   
-                  #end
+                  if @import_item.store.split_order == 'shipment_handling_v2'
+                    order = check_prev_splitted_order(order)
+                  else
+                    shiping_easy_order = Order.where("increment_id LIKE ?","#{order['external_order_identifier'].strip}%")
+                    #unless @credential.allow_duplicate_id
+                      order['external_order_identifier'] = "#{order['external_order_identifier']}-#{shiping_easy_order.count}" if shiping_easy_order.count > 0
+                    #end
+                  end
                   shiping_easy_order = Order.new
                 else
                   # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
@@ -244,6 +248,8 @@ module Groovepacker
               end  
               import_order_items_and_create_products(shiping_easy_order, order)
               update_success_import_count
+              update_multi_shipment_status(shiping_easy_order.prime_order_id)
+              add_split_combined_activity(order, shiping_easy_order)
               @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) if @import_item.status != 'cancelled' && @regular_import
             end
 
@@ -342,7 +348,9 @@ module Groovepacker
                                                     custom_field_one: custom_1,
                                                     custom_field_two: custom_2,
                                                     customer_comments: order["notes"],
-                                                    last_modified: order["updated_at"].to_datetime
+                                                    last_modified: order["updated_at"].to_datetime,
+                                                    prime_order_id: order["prime_order_id"],
+                                                    split_from_order_id: order["source_order_ids"].to_a.join(',')
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end

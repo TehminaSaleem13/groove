@@ -85,6 +85,22 @@ module ScanPack
           '#{input_without_special_char}', '\##{input_without_special_char}'\
         \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
       )
+      if (Store.where(store_type: 'ShippingEasy').pluck(:split_order).include? 'shipment_handling_v2')
+        %(\
+          (#{id} LIKE '#{input_with_special_char}%' and \(\
+            status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
+          \))
+        )
+      else
+        %(\
+          (#{id} IN \(\
+            '#{input_with_special_char}', '\##{input_with_special_char}'\
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char}', '\##{input_without_special_char}'\
+          \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
+        )
+      end
     end
 
     def get_single_order_with_result
