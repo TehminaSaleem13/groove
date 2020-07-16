@@ -105,8 +105,9 @@ module ScanPackHelper
     end
 
     # If the item is not required in any toted orders, the oldest multi-item order requiring the item is found in our DB.
-    order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').first
-    available_tote = Tote.order('number ASC').where(order_id: nil).first
+    order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').reject { |o| o.id.in? Tote.pluck(:pending_order_id).compact }.first
+    available_tote = Tote.where(pending_order_id: order.id).first if order.present?
+    available_tote = Tote.order('number ASC').where(order_id: nil, pending_order_id: nil).first unless available_tote.try(:present?)
     tote_set = ToteSet.last || ToteSet.create(name: 'T')
     available_tote = tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1) if Tote.all.count < tote_set.max_totes && !available_tote
 
@@ -128,6 +129,7 @@ module ScanPackHelper
       current_item['qty_remaining'] = current_item['qty_remaining'] - 1
       current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
       @result[:status] = true
+      available_tote.update_attributes(pending_order_id: order.id)
       return @result
     end
 

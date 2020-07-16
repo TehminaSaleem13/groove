@@ -72,7 +72,8 @@ module Groovepacker
             order_item.scanned_status = 'scanned'
             order_item.save
           end
-          Tote.find_by(order_id: order.id).update(order_id: nil) if order.tote
+          Tote.find_by_order_id(order.id).update_attributes(order_id: nil, pending_order_id: nil) if order.tote
+          Tote.where(pending_order_id: order.id).update_all(pending_order_id: nil)
         else
           order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
         end
@@ -126,7 +127,8 @@ module Groovepacker
         init_results
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
         orders.each do |order|
-          order.tote.update(order: nil) if order.tote
+          order.tote.update(order: nil, pending_order_id: nil) if order.tote
+          Tote.where(pending_order_id: order.id).update_all(pending_order_id: nil)
         end
         bulk_action.update_attributes(completed: orders.count)
         check_bulk_action_completed_or_not(bulk_action)
@@ -149,6 +151,9 @@ module Groovepacker
         #     @result['messages'].push('There was a problem deleting order '+ order.increment_id )
         #   end
         # end
+
+        Tote.where(order_id: order_ids).update_all(order_id: nil, pending_order_id: nil)
+        Tote.where(pending_order_id: order_ids).update_all(order_id: nil, pending_order_id: nil)
 
         Order.delete_all(['id IN (?)', order_ids])
         destroy_orders_associations(order_ids)

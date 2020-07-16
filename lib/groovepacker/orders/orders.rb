@@ -64,6 +64,7 @@ module Groovepacker
           set_status_and_message(false, "Could not find order item", ['&', 'push'])
           return @result
         end
+
         remove_item_if_not_scanned
         return @result
       end
@@ -74,6 +75,7 @@ module Groovepacker
           set_status_and_message(false, 'Order has already been scanned and cannot be modified', ['push'])
           return
         end
+
         @products = Product.find(@params[:productids]) rescue []
         add_if_products_exist
         return @result

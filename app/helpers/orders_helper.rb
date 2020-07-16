@@ -263,7 +263,7 @@ module OrdersHelper
                           'custom_field_two' => order.custom_field_two,
                           'store_order_id' => order.store_order_id,
                           'last_modified' => order.last_modified,
-                          'tote' => (order.tote.name rescue nil)})
+                          'tote' => ((order.tote.name rescue nil) || (Tote.where(pending_order_id: order.id).first.name + '-PENDING' rescue nil))})
   end
 
   def avg_time_per_item(username)

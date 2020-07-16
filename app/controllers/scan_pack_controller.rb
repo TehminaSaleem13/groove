@@ -133,6 +133,7 @@ class ScanPackController < ApplicationController
             order_item.order.update_attributes(last_suggested_at: DateTime.now)
             order_item.process_item(nil, @current_user.username, 1, nil)
             order_item.order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
+            tote.update_attributes(pending_order_id: nil)
             @result[:success_messages] = "#{order_item.order.increment_id} is successfully assigned to #{ScanPackSetting.last.tote_identifier}: #{tote.name}"
           end
         else
@@ -181,7 +182,7 @@ class ScanPackController < ApplicationController
           @result[:order_items_partial_scanned] = []
           @result[:tote_name_identifier] = ScanPackSetting.last.tote_identifier + ' ' + tote.name
           @result[:order] = order
-          tote.update_attributes(order_id: nil)
+          tote.update_attributes(order_id: nil, pending_order_id: nil)
         else
           @result[:status] = false
           @result[:error_messages] = "Whoops! That’s the wrong #{ScanPackSetting.last.tote_identifier}. Please scan the correct #{ScanPackSetting.last.tote_identifier} and then add the item to it."
