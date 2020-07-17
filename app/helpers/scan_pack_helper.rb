@@ -57,7 +57,7 @@ module ScanPackHelper
     end
 
     # If no single item orders are found with that item then all orders that have been assigned to a tote are searched to see if the item is required. If any toted orders require that item a check is done to see if that item completes any of the orders.
-    orders = Order.where("orders.id IN (?) AND status = 'awaiting'", Tote.includes(:order).map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id)
+    orders = Order.where("orders.id IN (?) AND status = 'awaiting'", Tote.includes(:order).map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.pluck(:pending_order_id).compact }
     if orders.any?
       can_complete_orders = orders.select { |o| o.get_unscanned_items.count == 1 && o.get_unscanned_items[0]['qty_remaining'] == 1}
       if can_complete_orders.any?
@@ -76,6 +76,7 @@ module ScanPackHelper
         @result[:order_items_unscanned] = []
         @result[:order_items_partial_scanned] = []
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
+        tote.update_attributes(pending_order_id: order.id)
         current_item['scanned_qty'] = current_item['scanned_qty'] + 1
         current_item['qty_remaining'] = current_item['qty_remaining'] - 1
         @result[:order_items_scanned] << current_item
@@ -96,9 +97,10 @@ module ScanPackHelper
         @result[:order_items_unscanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
         @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
+        tote.update_attributes(pending_order_id: order.id)
         current_item['scanned_qty'] = current_item['scanned_qty'] + 1
         current_item['qty_remaining'] = current_item['qty_remaining'] - 1
-        current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item  
+        current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
         @result[:status] = true
       end
       return @result

@@ -152,6 +152,7 @@ class ScanPackController < ApplicationController
           order_item.order.update_attributes(last_suggested_at: DateTime.now)
           order_item.process_item(nil, @current_user.username, 1, nil)
           order_item.order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
+          tote.update_attributes(pending_order_id: nil)
           @result[:success_messages] = "#{order_item.product.name} is successfully scanned to #{ScanPackSetting.last.tote_identifier}: #{tote.name}"
         else
           @result[:status] = false

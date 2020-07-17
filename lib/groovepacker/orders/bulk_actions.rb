@@ -127,8 +127,9 @@ module Groovepacker
         init_results
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
         orders.each do |order|
-          order.tote.update(order: nil, pending_order_id: nil) if order.tote
+          order.tote.update_attributes(order_id: nil, pending_order_id: nil) if order.tote
           Tote.where(pending_order_id: order.id).update_all(pending_order_id: nil)
+          order.reset_scanned_status(User.find_by_id(user_id))
         end
         bulk_action.update_attributes(completed: orders.count)
         check_bulk_action_completed_or_not(bulk_action)
