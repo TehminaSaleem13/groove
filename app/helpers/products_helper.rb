@@ -52,6 +52,10 @@ module ProductsHelper
     ProductsService::GenerateCSV.call(products, csv, bulk_actions_id, bulk_csv)
   end
 
+  def self.kit_csv(products, csv, bulk_actions_id = nil, bulk_csv = nil)
+    ProductsService::GenerateKitCSV.call(products, csv, bulk_actions_id, bulk_csv)
+  end
+
   def add_inventory_report_products(params)
     product_report = ProductInventoryReport.where(id: params[:data][:report_id]).first
     if product_report
