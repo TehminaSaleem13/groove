@@ -57,7 +57,7 @@ module ScanPackHelper
     end
 
     # If no single item orders are found with that item then all orders that have been assigned to a tote are searched to see if the item is required. If any toted orders require that item a check is done to see if that item completes any of the orders.
-    orders = Order.where("orders.id IN (?) AND status = 'awaiting'", Tote.includes(:order).map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.pluck(:pending_order_id).compact }
+    orders = Order.where("orders.id IN (?) AND status = 'awaiting'", Tote.includes(:order).map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }
     if orders.any?
       can_complete_orders = orders.select { |o| o.get_unscanned_items.count == 1 && o.get_unscanned_items[0]['qty_remaining'] == 1}
       if can_complete_orders.any?
@@ -76,9 +76,11 @@ module ScanPackHelper
         @result[:order_items_unscanned] = []
         @result[:order_items_partial_scanned] = []
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
-        tote.update_attributes(pending_order_id: order.id)
+        tote.update_attributes(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = current_item['scanned_qty'] + 1
         current_item['qty_remaining'] = current_item['qty_remaining'] - 1
+        @result[:barcode_input] = input
+        order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{tote.name}.", @current_user.name)
         @result[:order_items_scanned] << current_item
         @result[:status] = true
       else
@@ -97,19 +99,21 @@ module ScanPackHelper
         @result[:order_items_unscanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
         @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
-        tote.update_attributes(pending_order_id: order.id)
+        tote.update_attributes(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = current_item['scanned_qty'] + 1
         current_item['qty_remaining'] = current_item['qty_remaining'] - 1
         current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
+        order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{tote.name}.", @current_user.name)
+        @result[:barcode_input] = input
         @result[:status] = true
       end
       return @result
     end
 
     # If the item is not required in any toted orders, the oldest multi-item order requiring the item is found in our DB.
-    order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').reject { |o| o.id.in? Tote.pluck(:pending_order_id).compact }.first
-    available_tote = Tote.where(pending_order_id: order.id).first if order.present?
-    available_tote = Tote.order('number ASC').where(order_id: nil, pending_order_id: nil).first unless available_tote.try(:present?)
+    order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }.first
+    available_tote = Tote.where(order_id: order.id, pending_order: false).first if order.present?
+    available_tote = Tote.order('number ASC').where(order_id: nil, pending_order: false).first unless available_tote.try(:present?)
     tote_set = ToteSet.last || ToteSet.create(name: 'T')
     available_tote = tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1) if Tote.all.count < tote_set.max_totes && !available_tote
 
@@ -130,8 +134,10 @@ module ScanPackHelper
       current_item['scanned_qty'] = current_item['scanned_qty'] + 1
       current_item['qty_remaining'] = current_item['qty_remaining'] - 1
       current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
+      @result[:barcode_input] = input
+      order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{available_tote.name}.", @current_user.name)
       @result[:status] = true
-      available_tote.update_attributes(pending_order_id: order.id)
+      available_tote.update_attributes(order_id: order.id, pending_order: true)
       return @result
     end
 

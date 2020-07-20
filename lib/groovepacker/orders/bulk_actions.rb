@@ -72,8 +72,7 @@ module Groovepacker
             order_item.scanned_status = 'scanned'
             order_item.save
           end
-          Tote.find_by_order_id(order.id).update_attributes(order_id: nil, pending_order_id: nil) if order.tote
-          Tote.where(pending_order_id: order.id).update_all(pending_order_id: nil)
+          Tote.find_by_order_id(order.id).update_attributes(order_id: nil, pending_order: false) if order.tote
         else
           order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
         end
@@ -127,8 +126,8 @@ module Groovepacker
         init_results
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
         orders.each do |order|
-          order.tote.update_attributes(order_id: nil, pending_order_id: nil) if order.tote
-          Tote.where(pending_order_id: order.id).update_all(pending_order_id: nil)
+          order.addactivity("Order manually cleared from #{ScanPackSetting.last.tote_identifier} #{order.tote.name}.", User.find_by_id(user_id).try(:name)) if order.tote
+          order.tote.update_attributes(order_id: nil, pending_order: false) if order.tote
           order.reset_scanned_status(User.find_by_id(user_id))
         end
         bulk_action.update_attributes(completed: orders.count)
@@ -153,8 +152,7 @@ module Groovepacker
         #   end
         # end
 
-        Tote.where(order_id: order_ids).update_all(order_id: nil, pending_order_id: nil)
-        Tote.where(pending_order_id: order_ids).update_all(order_id: nil, pending_order_id: nil)
+        Tote.where(order_id: order_ids).update_all(order_id: nil, pending_order: false)
 
         Order.delete_all(['id IN (?)', order_ids])
         destroy_orders_associations(order_ids)

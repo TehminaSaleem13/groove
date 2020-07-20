@@ -64,7 +64,14 @@ class ApplicationController < ActionController::Base
     session[:redirect_uri] = nil
     super(resource_or_scope)
   end
-  
+
+  def current_time_in_gp(time = Time.current)
+    general_setting = GeneralSetting.all.first
+    offset = general_setting.try(:time_zone).to_i
+    offset = general_setting.try(:dst) ? offset : offset + 3600
+    time + offset
+  end
+
   private
     def save_bc_auth_if_present
       bc_auth = cookies[:bc_auth]

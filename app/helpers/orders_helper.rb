@@ -244,26 +244,29 @@ module OrdersHelper
     else
       store_name = ""
     end
-    @orders_result.push({ 'id' => order.id,
-                          'store_name' => store_name,
-                          'notes' => order.notes_internal,
-                          'ordernum' => order.increment_id,
-                          'order_date' => order.order_placed_time,
-                          'itemslength' => itemslength,
-                          'status' => order.status,
-                          'recipient' => "#{order.firstname} #{order.lastname}",
-                          'email' => order.email,
-                          'tracking_num' => order.tracking_num,
-                          'city' => order.city,
-                          'state' => order.state,
-                          'postcode' => order.postcode,
-                          'country' => order.country,
-                          'tags' => order.order_tags,
-                          'custom_field_one' => order.custom_field_one,
-                          'custom_field_two' => order.custom_field_two,
-                          'store_order_id' => order.store_order_id,
-                          'last_modified' => order.last_modified,
-                          'tote' => ((Tote.where(pending_order_id: order.id).first.name + '-PENDING' rescue nil) || (order.tote.name rescue nil))})
+    order_data = { 'id' => order.id,
+      'store_name' => store_name,
+      'notes' => order.notes_internal,
+      'ordernum' => order.increment_id,
+      'order_date' => order.order_placed_time,
+      'itemslength' => itemslength,
+      'status' => order.status,
+      'recipient' => "#{order.firstname} #{order.lastname}",
+      'email' => order.email,
+      'tracking_num' => order.tracking_num,
+      'city' => order.city,
+      'state' => order.state,
+      'postcode' => order.postcode,
+      'country' => order.country,
+      'tags' => order.order_tags,
+      'custom_field_one' => order.custom_field_one,
+      'custom_field_two' => order.custom_field_two,
+      'store_order_id' => order.store_order_id,
+      'last_modified' => order.last_modified
+      }
+    tote = order.tote
+    order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
+    @orders_result.push(order_data)
   end
 
   def avg_time_per_item(username)

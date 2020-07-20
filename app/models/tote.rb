@@ -1,5 +1,5 @@
 class Tote < ActiveRecord::Base
-  attr_accessible :name, :order_id, :number, :pending_order_id
+  attr_accessible :name, :order_id, :number, :pending_order
 
   belongs_to :order
   belongs_to :tote_set
