@@ -1,5 +1,5 @@
 class Tenant < ActiveRecord::Base
-  attr_accessible :name, :duplicate_tenant_id, :initial_plan_id, :is_modified, :magento_tracking_push_enabled, :is_multi_box, :orders_delete_days, :api_call, :allow_rts, :last_import_store_type
+  attr_accessible :name, :duplicate_tenant_id, :initial_plan_id, :is_modified, :magento_tracking_push_enabled, :is_multi_box, :orders_delete_days, :api_call, :allow_rts, :last_import_store_type, :scan_pack_workflow
   validates :name, uniqueness: true
   has_one :subscription
   has_one :access_restriction
