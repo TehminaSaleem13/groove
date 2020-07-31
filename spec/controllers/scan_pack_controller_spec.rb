@@ -14,7 +14,7 @@ RSpec.describe ScanPackController, type: :controller do
     Tenant.create(name: Apartment::Tenant.current, scan_pack_workflow: 'product_first_scan_to_put_wall')
 
     @products = {}
-    skus = %w(ACTION NEW DIGI-RED DIGI-BLU)
+    skus = %w[ACTION NEW DIGI-RED DIGI-BLU]
     skus.each_with_index do |sku, index|
       @products["product_#{index + 1}"] = FactoryGirl.create(:product)
       FactoryGirl.create(:product_sku, :product=> @products["product_#{index + 1}"], :sku => sku)
@@ -22,6 +22,55 @@ RSpec.describe ScanPackController, type: :controller do
     end
 
     ProductBarcode.where(barcode: 'NEW').destroy_all
+  end
+
+  describe 'Check Tracking Number Validation' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+      Tenant.find_by_name(Apartment::Tenant.current).update_attributes(scan_pack_workflow: 'default')
+      ScanPackSetting.last.update_attributes(tracking_number_validation_enabled: true, tracking_number_validation_prefixes: 'VERIFY TRACKING, CUSTOM TRACKING', post_scanning_option: 'Record')
+
+      product = FactoryGirl.create(:product)
+      FactoryGirl.create(:product_sku, product: product, sku: 'TRACKING')
+      FactoryGirl.create(:product_barcode, product: product, barcode: 'TRACKING')
+
+      order = FactoryGirl.create(:order, status: 'awaiting', store: @store)
+      FactoryGirl.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order, name: product.name)
+    end
+
+    it 'Show Invalid Tracking Number Entered' do
+      post :scan_barcode, { input: 'TRACKING', state: 'scanpack.rfp.default', id: Order.last.id, rem_qty: 1 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to be true
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
+
+      post :scan_barcode, { input: 'TRACKINGNO', state: 'scanpack.rfp.recording', id: Order.last.id, rem_qty: 1 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to be false
+      expect(result['error_messages']).to include('Doh! The tracking number you have scanned does not appear to be valid. If this scan should be permitted please check your Tracking Number Validation setting in Settings > System > Scan & Pack > Post Scanning Functions')
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
+    end
+
+    it 'Tracking Number Accepted' do
+      post :scan_barcode, { input: 'TRACKING', state: 'scanpack.rfp.default', id: Order.last.id, rem_qty: 1 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to be true
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
+
+      post :scan_barcode, { input: 'CUSTOM TRACKINGNO', state: 'scanpack.rfp.recording', id: Order.last.id, rem_qty: 1 }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to be true
+      expect(result['data']['next_state']).to eq('scanpack.rfo')
+      expect(result['data']['order_complete']).to eq true
+    end
   end
 
   describe 'Product First Scan to Put Wall' do

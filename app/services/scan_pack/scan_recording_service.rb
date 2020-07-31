@@ -11,6 +11,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
     }
     @order = Order.where(id: @id).last
     @scanpack_settings_post_scanning_option_second = ScanPackSetting.last.post_scanning_option_second
+    @scanpack_setting = ScanPackSetting.last
   end
 
   def run
@@ -30,12 +31,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
     if @order.status == 'awaiting'
       #allow tracking id to be saved without special permissions
       if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Record" 
-        @order.tracking_num = @input
-        @order.set_order_to_scanned_state(@current_user.username)
-        @result['data']['order_complete'] = true
-        @result['data']['next_state'] = 'scanpack.rfo'
-        #update inventory when inventory warehouses is implemented.
-        @order.save
+        check_tracking_number_validation
       else
         @order.tracking_num = @input
         @order.save
@@ -45,7 +41,21 @@ class ScanPack::ScanRecordingService < ScanPack::Base
       set_error_messages("The order is not in awaiting state. Cannot scan the tracking number")
     end
   end
-  
+
+  def check_tracking_number_validation
+    set_tracking_info && return unless @scanpack_setting.tracking_number_validation_enabled
+    @input.starts_with?(*@scanpack_setting.tracking_number_validation_prefixes.split(',').map(&:strip)) ? set_tracking_info : set_error_messages('Doh! The tracking number you have scanned does not appear to be valid. If this scan should be permitted please check your Tracking Number Validation setting in Settings > System > Scan & Pack > Post Scanning Functions')
+  end
+
+  def set_tracking_info
+    @order.tracking_num = @input
+    @order.set_order_to_scanned_state(@current_user.username)
+    @result['data']['order_complete'] = true
+    @result['data']['next_state'] = 'scanpack.rfo'
+    #update inventory when inventory warehouses is implemented.
+    @order.save
+  end
+
   def apply_second_action
     case @scanpack_settings_post_scanning_option_second
       when "Verify"
