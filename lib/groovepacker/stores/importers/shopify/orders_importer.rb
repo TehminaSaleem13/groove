@@ -161,7 +161,7 @@ module Groovepacker
               shopify_order.order_items.each_with_index do |item, index|
                 if order["line_items"][index]["name"] == item.product.name &&  order["line_items"][index]["sku"] == item.product.primary_sku
                   next if item.product.nil? || item.product.primary_sku.nil?
-                  shopify_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", @store.name+" Import")
+                  shopify_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import")
                 else
                   intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
                   intangible_strings.each do |string|
