@@ -460,7 +460,13 @@ module Groovepacker
                 if order["items"][index]["name"] == item.product.name && order["items"][index]["sku"] == item.product.primary_sku
                   update_activity_for_single_item(shipstation_order, item)
                 else
-                  shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                  intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
+                  intangible_strings.each do |string|
+                    if order["items"][index]["name"].downcase.include?(string) || order["items"][index]["sku"].downcase.include?(string)
+                      shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                      break
+                    end
+                  end
                 end
               end
               shipstation_order.set_order_status

@@ -163,7 +163,13 @@ module Groovepacker
                   next if item.product.nil? || item.product.primary_sku.nil?
                   shopify_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", @store.name+" Import")
                 else
-                  shopify_order.addactivity("Intangible item with SKU #{order["line_items"][index]["sku"]}  and Name #{order["line_items"][index]["name"]} was replaced with GP Coupon.",@store.name+" Import")
+                  intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
+                  intangible_strings.each do |string|
+                    if order["line_items"][index]["name"].downcase.include?(string) || order["line_items"][index]["sku"].downcase.include?(string)
+                      shopify_order.addactivity("Intangible item with SKU #{order["line_items"][index]["sku"]}  and Name #{order["line_items"][index]["name"]} was replaced with GP Coupon.","#{@store.name} Import")
+                      break
+                    end
+                  end
                 end 
               end  
             end
