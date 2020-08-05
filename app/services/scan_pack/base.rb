@@ -191,7 +191,7 @@ module ScanPack
         g.user_id = User.where(username: username).first.id rescue nil
         g.save
       else
-        GroovRealtime::emit('barcode_lable', { url: generate_url, last_batch: last_batch }, :tenant)
+        GroovRealtime::emit('barcode_lable', { url: generate_url, last_batch: last_batch, username: username }, :tenant)
       end
     end
 
