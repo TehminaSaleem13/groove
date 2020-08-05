@@ -246,11 +246,31 @@ module Groovepacker
           case true
           when barcode["id"].present?
             db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"]}
-            # status = @product.create_or_update_productbarcode(barcode, index, nil, db_barcode, @current_user)
-            status = @product.create_or_update_product_sku_or_barcode(barcode, index, nil, db_barcode, @current_user, 'barcode')
+            if barcode["barcode"].present? && (@product.product_barcodes.where('id != ?', db_barcode.id).pluck(:barcode).include? barcode["barcode"])
+              @result['status'] = false
+              @result['message'] = "The Barcode \"#{barcode['barcode']}\" is already associated with this product"
+              status = false
+            else
+              status = @product.create_or_update_product_sku_or_barcode(barcode, index, nil, db_barcode, @current_user, 'barcode')
+            end
           when barcode["barcode"].present? && db_barcode.blank?
             # status = @product.create_or_update_productbarcode(barcode, index, 'new', @current_user)
             status = @product.create_or_update_product_sku_or_barcode(barcode, index, 'new', @current_user, 'barcode')
+          when barcode["barcode"].present? && db_barcode.present? && (@product.product_barcodes.pluck(:barcode).exclude? barcode["barcode"])
+            if barcode[:permit_same_barcode]
+              status = @product.create_or_update_product_sku_or_barcode(barcode, index, 'new', @current_user, 'barcode')
+            else
+              @result['current_product_data'] = { id: @product.id, name: @product.name, sku: @product.product_skus.map(&:sku).join(', '), barcode: @product.product_barcodes.map(&:barcode).join(', ') }
+              @result['alias_product_data'] = { id: db_barcode.product.id, name: db_barcode.product.name, sku: db_barcode.product.product_skus.map(&:sku).join(', '), barcode: db_barcode.product.product_barcodes.map(&:barcode).join(', ') }
+              @result['after_alias_product_data'] = @result['alias_product_data'].dup
+              @result['after_alias_product_data'][:sku] = (@result['alias_product_data'][:sku].split(', ') << @product.product_skus.map(&:sku)).flatten.compact.join(', ')
+              @result['shared_bacode_products'] = ProductBarcode.get_shared_barcode_products(barcode['barcode'])
+              @result['matching_barcode'] = barcode['barcode']
+              @result['show_alias_popup'] = true
+              status = true
+            end
+            # @result['status'] = false
+            # @result['message'] = "The Barcode \"#{barcode['barcode']}\" is already associated with: <br> #{db_barcode.product.name} <br> #{db_barcode.product.primary_sku}"
           when barcode["barcode"].present? && db_barcode.present?
             @result['status'] = false
             @result['message'] = "Barcode #{barcode['barcode']} already exists"

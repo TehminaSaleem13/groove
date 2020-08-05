@@ -320,7 +320,7 @@ module Groovepacker
                 product.product_cats.create(category: product_hash["product_category_name"])
                 product.product_lots.create(lot_number: product_hash["bin_picking_number"])
               end
-              product.product_barcodes.create(barcode: product_hash["upc"]) if product_hash["upc"].present?
+              product.product_barcodes.create(barcode: product_hash["upc"]) if product_hash["upc"].present? && (product.product_barcodes.map(&:barcode).exclude? product_hash["upc"])
 
               if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty? && product.product_barcodes.blank?
                 product.product_barcodes.create(barcode: sku)

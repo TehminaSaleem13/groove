@@ -203,4 +203,26 @@ module ProductMethodsHelper
     # Takes 9.5e-05 seconds
     product_barcodes.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
   end
+
+  def check_barcode_add_update(params, result)
+    db_barcode = ProductBarcode.find_by_barcode(params[:value])
+    if db_barcode && (product_barcodes.pluck(:barcode).exclude? params[:value]) && !params[:permit_same_barcode]
+      result['current_product_data'] = { id: id, name: name, sku: product_skus.map(&:sku).join(', '), barcode: product_barcodes.map(&:barcode).join(', ') }
+      result['alias_product_data'] = { id: db_barcode.product.id, name: db_barcode.product.name, sku: db_barcode.product.product_skus.map(&:sku).join(', '), barcode: db_barcode.product.product_barcodes.map(&:barcode).join(', ') }
+      result['after_alias_product_data'] = result['alias_product_data'].dup
+      result['after_alias_product_data'][:sku] = (result['alias_product_data'][:sku].split(', ') << product_skus.map(&:sku)).flatten.compact.join(', ')
+      result['shared_bacode_products'] = ProductBarcode.get_shared_barcode_products(params[:value])
+      result['matching_barcode'] = params[:value]
+      result['show_alias_popup'] = true
+      result['status'] = false
+    elsif (product_barcodes.pluck(:barcode).include? params[:value])
+      result['status'] = false
+      result['error_msg'] = "The Barcode \"#{params[:value]}\" is already associated with: <br> #{db_barcode.product.name} <br> #{primary_sku}"
+    elsif (params[:permit_same_barcode] && (product_barcodes.pluck(:barcode).exclude? params[:value])) || db_barcode.blank?
+      response = updatelist(self, params[:var], params[:value], params[:current_user])
+      errors = response.errors.full_messages rescue nil
+      result = result.merge('status' => false, 'error_msg' => errors) if errors
+    end
+    result
+  end
 end
