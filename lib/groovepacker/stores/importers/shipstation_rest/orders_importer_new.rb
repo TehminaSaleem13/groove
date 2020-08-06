@@ -457,17 +457,27 @@ module Groovepacker
             def update_order_activity_log_for_gp_coupon(shipstation_order, order)
               shipstation_order.addactivity("Order Import", @credential.store.name+" Import")
               shipstation_order.order_items.each_with_index do |item, index|
-                if order["items"][index]["name"] == item.product.name && order["items"][index]["sku"] == item.product.primary_sku
-                  update_activity_for_single_item(shipstation_order, item)
-                else
-                  intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
-                  intangible_strings.each do |string|
-                    if order["items"][index]["name"].downcase.include?(string) || order["items"][index]["sku"].downcase.include?(string)
-                      shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
-                      break
-                    end
+                intangible = false
+                intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
+                intangible_strings.each do |string|
+                  if order["items"][index]["name"].downcase.include?(string) || order["items"][index]["sku"].downcase.include?(string)
+                    shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                    intangible = true
+                    break
                   end
                 end
+                update_activity_for_single_item(shipstation_order, item) unless intangible
+                # if order["items"][index]["name"] == item.product.name && order["items"][index]["sku"] == item.product.primary_sku
+                #   update_activity_for_single_item(shipstation_order, item)
+                # else
+                #   intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
+                #   intangible_strings.each do |string|
+                #     if order["items"][index]["name"].downcase.include?(string) || order["items"][index]["sku"].downcase.include?(string)
+                #       shipstation_order.addactivity("Intangible item with SKU #{order["items"][index]["sku"]}  and Name #{order["items"][index]["name"]} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                #       break
+                #     end
+                #   end
+                # end
               end
               shipstation_order.set_order_status
               update_import_result
