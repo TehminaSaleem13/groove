@@ -97,7 +97,7 @@ module ProductsHelper
     intangible_strings = scan_pack_settings.intangible_string.strip.split(',')
     intangible_strings.each do |string|
       next unless (product.name.downcase.include?(string.downcase)) ||
-                  (product.primary_sku.downcase.include?(string.downcase))
+                  (product.primary_sku.try(:downcase).try(:include?, string.downcase))
       product = Product.find(product.id, :readonly => false)
       product.is_intangible = true
       product.save 

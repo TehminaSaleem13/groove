@@ -85,17 +85,27 @@ module Groovepacker
               end
 
               #add productdb sku
-              @productdbsku = ProductSku.new
-              if @item.sKU.nil?
-                @productdbsku.sku = "not_available"
-              else
-                @productdbsku.sku = @item.sKU
-              end
-              #@item.productListingType.uPC
-              @productdbsku.purpose = 'primary'
+              # @productdbsku = ProductSku.new
+              # if @item.sKU.nil?
+              #   @productdbsku.sku = "not_available"
+              # else
+              #   @productdbsku.sku = @item.sKU
+              # end
+              # #@item.productListingType.uPC
+              # @productdbsku.purpose = 'primary'
+              
+              # #publish the sku to the product record
+              # @productdb.product_skus << @productdbsku
 
-              #publish the sku to the product record
-              @productdb.product_skus << @productdbsku
+              if @item.sKU.present?
+                @productdbsku = ProductSku.new
+                @productdbsku.sku = @item.sKU
+                #@item.productListingType.uPC
+                @productdbsku.purpose = 'primary'
+
+                #publish the sku to the product record
+                @productdb.product_skus << @productdbsku
+              end
 
               if credential.import_images
                 if !@item.pictureDetails.nil?

@@ -23,7 +23,7 @@ module Groovepacker
                 seller_list = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'PaidAndShipped'})
               else
                 seller_list = ebay.GetMyeBaySelling(:soldList =>{:orderStatusFilter => 'AwaitingShipment'})
-              end             
+              end
               if (seller_list.soldList != nil &&
                 seller_list.soldList.orderTransactionArray != nil)
                 order_or_transactionArray =
@@ -50,16 +50,19 @@ module Groovepacker
 
                     #get sellingmanager SalesRecordNumber
                     item_transactions = ebay.GetItemTransactions(:itemID => itemID,
-                                                                 :transactionID => transactionID)
+                                                                 :transactionID => transactionID, :includeContainingOrder => true)
                     if item_transactions.transactionArray.length == 1
                       transaction = item_transactions.transactionArray.first
                       sellingManagerSalesRecordNumber =
                         transaction.shippingDetails.sellingManagerSalesRecordNumber
-                      import_item.current_increment_id = sellingManagerSalesRecordNumber
+                      order_id_ebay = transaction.containingOrder.try(:orderID)
+                      order_id_ebay = order_id_ebay ? order_id_ebay : sellingManagerSalesRecordNumber
+                      # import_item.current_increment_id = sellingManagerSalesRecordNumber
+                      import_item.current_increment_id = order_id_ebay
                       import_item.current_order_items = -1
                       import_item.current_order_imported_item = -1
                       import_item.save
-                      if Order.where(:increment_id => sellingManagerSalesRecordNumber).length == 0
+                      if Order.where(:increment_id => order_id_ebay).length == 0
                         order = Order.new
 
                         order = build_order_with_single_item_from_ebay(order, transaction,
@@ -99,13 +102,14 @@ module Groovepacker
                       else
                         sellingManagerSalesRecordNumber = nil
                       end
-                      import_item.current_increment_id = sellingManagerSalesRecordNumber
+                      # import_item.current_increment_id = sellingManagerSalesRecordNumber
+                      import_item.current_increment_id = order_id
                       import_item.current_order_items = -1
                       import_item.current_order_imported_item = -1
                       import_item.save
-                      if Order.where(:increment_id => sellingManagerSalesRecordNumber).length == 0
+                      if Order.where(:increment_id => order_id).length == 0
                         order = Order.new
-                        order = build_order_with_multiple_items_from_ebay(order, order_detail, handler)
+                        order = build_order_with_multiple_items_from_ebay(order, order_detail, handler, order_id)
                         if order.save
                           order.addactivity("Order Import", "#{credential.store.name} Import")
                           order.order_items.each do |item|
@@ -155,7 +159,8 @@ module Groovepacker
 
             order.status = 'awaiting'
             order.store = credential.store
-            order.increment_id = transaction.shippingDetails.sellingManagerSalesRecordNumber
+            # order.increment_id = transaction.shippingDetails.sellingManagerSalesRecordNumber
+            order.increment_id = transaction.containingOrder.try(:orderID) || transaction.shippingDetails.sellingManagerSalesRecordNumber
             order.order_placed_time = transaction.createdDate
 
             if !transaction.buyer.nil? && !transaction.buyer.buyerInfo.nil? &&
@@ -196,13 +201,14 @@ module Groovepacker
             order
           end
 
-          def build_order_with_multiple_items_from_ebay(order, order_detail, handler)
+          def build_order_with_multiple_items_from_ebay(order, order_detail, handler, order_id = nil)
             credential = handler[:credential]
             ebay = handler[:store_handle]
             import_item = handler[:import_item]
             order.status = 'awaiting'
             order.store = credential.store
-            order.increment_id = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+            # order.increment_id = order_detail.shippingDetails.sellingManagerSalesRecordNumber
+            order.increment_id = order_id
             order.order_placed_time = order_detail.createdTime
 
             if !order_detail.shippingAddress.nil?
