@@ -1,5 +1,12 @@
 image: ruby:2.1.6
 
+clone:
+  depth: full
+  
+options:
+  docker: true
+  size: 2x
+  
 pipelines:
   default:
     - step:
@@ -14,6 +21,13 @@ pipelines:
           - bundle exec rake db:create RAILS_ENV=test
           - bundle exec rake db:migrate RAILS_ENV=test
           - RAILS_ENV=test rspec
+          - pipe: sonarsource/sonarcloud-scan:1.0.1
+            variables:
+                SONAR_TOKEN: ${SONAR_TOKEN}
+          - pipe: sonarsource/sonarcloud-quality-gate:0.1.3
+            variables:
+                SONAR_TOKEN: ${SONAR_TOKEN}
+
 definitions:
   caches:
     bundler: vendor/bundle
@@ -27,3 +41,5 @@ definitions:
         MYSQL_ROOT_PASSWORD: root_user_password
         MYSQL_USER: test_user
         MYSQL_PASSWORD: test_user_password
+    docker:
+      memory: 4096
