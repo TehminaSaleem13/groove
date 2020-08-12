@@ -42,18 +42,20 @@ module Groovepacker
         filters = {includes: "products", order_number: order, page: 1, per_page: 4, last_updated_at: "1900-04-27T16:42:43Z", status: ["shipped", "ready_for_shipment", "pending", "cleared", "pending_shipment"]} rescue nil
         filters = filters.merge(api_key_and_secret)
         response = ::ShippingEasy::Resources::Order.find_all(filters) rescue nil
-        if response && response["orders"].count > 1
-          response["orders"].each_with_index do |odr, index|
-            unless index == 0
-              if response["orders"].first["external_order_identifier"] == odr["external_order_identifier"] && response["orders"].first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
-                response["orders"].first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
-                response["orders"].first["recipients"].first["line_items"].flatten!
-                # response["orders"].first["shipments"] << odr["shipments"]
-                # response["orders"].first["shipments"].flatten!
-              end
-            end
-          end
-        end
+        response["cleared_orders_ids"] = get_cleared_orders_ids(response["orders"])
+        response["orders"] = remove_cleared_and_drop_shipped(response["orders"])
+        # if response && response["orders"].count > 1
+        #   response["orders"].each_with_index do |odr, index|
+        #     unless index == 0
+        #       if response["orders"].first["external_order_identifier"] == odr["external_order_identifier"] && response["orders"].first["recipients"].first["original_order"]["store_id"] == odr["recipients"].first["original_order"]["store_id"]
+        #         response["orders"].first["recipients"].first["line_items"] << odr["recipients"].first["line_items"]
+        #         response["orders"].first["recipients"].first["line_items"].flatten!
+        #         # response["orders"].first["shipments"] << odr["shipments"]
+        #         # response["orders"].first["shipments"].flatten!
+        #       end
+        #     end
+        #   end
+        # end
         response
       end
 

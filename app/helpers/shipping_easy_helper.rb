@@ -75,7 +75,13 @@ module ShippingEasyHelper
   def ondemand_import_single_order(order)
     init_common_objects
     response = @client.get_single_order(order)
-    import_single_order(response["orders"][0]) rescue nil
+    res = response['orders'][0] rescue nil
+    if res && res['split_from_order_id']
+      response['orders'] = response['orders'].reject { |o| o['split_from_order_id'] != res['split_from_order_id'] }
+      import_orders_from_response(response, nil)
+    elsif res
+      import_single_order(res)
+    end
     remove_duplicate_order_items
     @import_item.destroy rescue nil
   end
@@ -145,7 +151,7 @@ module ShippingEasyHelper
       split_orders = Order.where('prime_order_id = ? AND store_order_id != ?', order['prime_order_id'].to_s, order['prime_order_id'].to_s)
       extra_count = Order.where('increment_id LIKE ? AND store_order_id != ?', "%#{order['external_order_identifier']}%", order['split_from_order_id']).group(:prime_order_id).count.count
       if split_orders.blank?
-        order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
+        order['external_order_identifier'] = order['external_order_identifier'] + " (D#{extra_count})" if extra_count > 0
         order['external_order_identifier'] = order['external_order_identifier'] + " (S1)"
       else
         splitted_inc_id = split_orders.pluck(:increment_id).sort.last.split(" (S")
@@ -157,7 +163,7 @@ module ShippingEasyHelper
     else
       order['external_order_identifier'] = order['external_order_identifier'] + " (C)" if order['source_order_ids'].present?
       extra_count = Order.where("increment_id LIKE ?", "%#{order['external_order_identifier']}%").group(:prime_order_id).count.count
-      order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
+      order['external_order_identifier'] = order['external_order_identifier'] + " (D#{extra_count})" if extra_count > 0
     end
     order
   end

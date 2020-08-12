@@ -227,7 +227,7 @@ module ProductsHelper
   def se_old_shipments(order)
     old_shipments = []
     shipments = Order.where(store_order_id: order.split_from_order_id.split(',').map(&:to_i)) if order.split_from_order_id.present?
-    shipments = Order.where('orders.prime_order_id = ? AND orders.store_order_id != ? AND orders.status != ?', order.prime_order_id, order.store_order_id, 'scanned') if Order.where(prime_order_id: order.prime_order_id).count > 1 && Order.where(store_order_id: order.prime_order_id, prime_order_id: order.prime_order_id).any? && shipments.blank?
+    shipments = Order.where('orders.prime_order_id = ?', order.prime_order_id) if Order.where(prime_order_id: order.prime_order_id).count > 1 && Order.where(store_order_id: order.prime_order_id, prime_order_id: order.prime_order_id).any? && shipments.blank?
     return old_shipments if shipments.blank?
     shipments.each do |shipment|
       if shipment.status == 'scanned'

@@ -254,7 +254,7 @@ module Groovepacker
             end
 
             def find_shipping_easy_order(order)
-              if !@credential.allow_duplicate_id
+              if !@credential.allow_duplicate_id && @credential.store.split_order == 'shipment_handling_v2'
                 shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
               else
                 shiping_easy_order = Order.find_by_store_order_id(order['id'])
