@@ -146,12 +146,23 @@ module ShippingEasyHelper
 
   def check_prev_splitted_order(order)
     delete_split_combined_orders(order)
-    if order['split_from_order_id'].present?
+    duplicated_in_se = Order.where('prime_order_id = ? AND store_order_id = ?', order['prime_order_id'].to_s, order['id'].to_s)
+    if duplicated_in_se.any?
+      if duplicated_in_se.count == 1
+        order['external_order_identifier'] = duplicated_in_se.first.increment_id + ' (D1)'
+      else
+        duplicated_inc_id = duplicated_in_se.pluck(:increment_id).sort.last.split(" (D")
+        main_increment = duplicated_inc_id[0..(duplicated_inc_id.length - 2)].join rescue order['external_order_identifier']
+        shipment_increment = duplicated_inc_id.last.chop rescue nil
+        inc_no = shipment_increment.to_i + 1 if shipment_increment.to_i.to_s == shipment_increment
+        order['external_order_identifier'] = main_increment + " (D#{inc_no})" if inc_no
+      end
+    elsif order['split_from_order_id'].present?
       # prime_order = Order.where(store_order_id: order['split_from_order_id'].to_s)
       split_orders = Order.where('prime_order_id = ? AND store_order_id != ?', order['prime_order_id'].to_s, order['prime_order_id'].to_s)
       extra_count = Order.where('increment_id LIKE ? AND store_order_id != ?', "%#{order['external_order_identifier']}%", order['split_from_order_id']).group(:prime_order_id).count.count
       if split_orders.blank?
-        order['external_order_identifier'] = order['external_order_identifier'] + " (D#{extra_count})" if extra_count > 0
+        order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
         order['external_order_identifier'] = order['external_order_identifier'] + " (S1)"
       else
         splitted_inc_id = split_orders.pluck(:increment_id).sort.last.split(" (S")
@@ -161,9 +172,14 @@ module ShippingEasyHelper
         order['external_order_identifier'] = main_increment + " (S#{inc_no})" if inc_no
       end
     else
+      same_order = Order.where(increment_id: order['external_order_identifier'].strip, store_id: @credential.store.id).first
+      if same_order
+        same_order.update_attributes(increment_id: same_order.increment_id + ' (' + same_order.store_order_id + ')')
+        order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')'
+      end
       order['external_order_identifier'] = order['external_order_identifier'] + " (C)" if order['source_order_ids'].present?
-      extra_count = Order.where("increment_id LIKE ?", "%#{order['external_order_identifier']}%").group(:prime_order_id).count.count
-      order['external_order_identifier'] = order['external_order_identifier'] + " (D#{extra_count})" if extra_count > 0
+      # extra_count = Order.where("increment_id LIKE ?", "%#{order['external_order_identifier']}%").group(:prime_order_id).count.count
+      # order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
     end
     order
   end

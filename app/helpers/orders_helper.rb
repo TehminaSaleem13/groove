@@ -407,6 +407,24 @@ module OrdersHelper
     end
   end
 
+  def se_duplicate_orders(order)
+    return [] unless order.store.store_type == 'ShippingEasy'
+
+    duplicate_orders = []
+    se_shipments = Order.where('orders.prime_order_id = ? AND orders.store_order_id = ? AND orders.id != ?', order.prime_order_id, order.store_order_id, order.id).order(:increment_id)
+    return duplicate_orders if se_shipments.blank?
+
+    se_shipments.each do |shipment|
+      if shipment.status == 'scanned'
+        shipment_status = 'Scanned'
+      else
+        shipment_status = shipment.scanning_count[:scanned].to_i.positive? ? 'Partial Scanned' : 'Unscanned'
+      end
+      duplicate_orders << [shipment.id, shipment.increment_id, shipment_status, shipment.order_placed_time.try(:strftime, '%A, %d %b %Y %l:%M %p'), shipment.scanned_on.try(:strftime, '%A, %d %b %Y %l:%M %p'), shipment.tracking_num]
+    end
+    duplicate_orders
+  end
+
   def se_old_shipments(order)
     old_shipments = []
     shipments = Order.where(store_order_id: order.split_from_order_id.split(',').map(&:to_i)) if order.split_from_order_id.present?
