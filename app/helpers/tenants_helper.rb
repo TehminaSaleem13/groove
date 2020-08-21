@@ -163,6 +163,7 @@ module TenantsHelper
     result['tenant']['subscription_info'] = helper.get_subscription_data(tenant.name, "show")
     access_info = Groovepacker::Dashboard::Stats::ShipmentStats.new
     result['tenant']['access_restrictions_info'] = access_info.get_shipment_stats(tenant.name)
+    result['tenant']['se_import_data'] = tenant.retrieve_se_import_data
   end
 
   def list_selected_tenants

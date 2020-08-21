@@ -148,6 +148,14 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_store_order_respose_log
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.store_order_respose_log = !tenant.store_order_respose_log
+    tenant.save
+    GroovS3.bucket.objects({prefix: "#{tenant.name}/se_import_log"}).each { |obj| obj.destroy }
+    render json: {}
+  end
+
   def update_groovelytic_stat
     tenant = Tenant.find(params["tenant_id"])
     tenant.groovelytic_stat = !tenant.groovelytic_stat

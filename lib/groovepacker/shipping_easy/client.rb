@@ -35,6 +35,7 @@ module Groovepacker
         combined_response["cleared_orders_ids"] = get_cleared_orders_ids(combined_response["orders"])
         combined_response["orders"] = remove_cleared_and_drop_shipped(combined_response["orders"])
         combined_response["error"] = response["error"]
+        Tenant.save_se_import_data("========SE Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Filters', filters, '==Combined Response', combined_response)
         combined_response
       end
 
@@ -44,6 +45,7 @@ module Groovepacker
         response = ::ShippingEasy::Resources::Order.find_all(filters) rescue nil
         response["cleared_orders_ids"] = get_cleared_orders_ids(response["orders"])
         response["orders"] = remove_cleared_and_drop_shipped(response["orders"])
+        Tenant.save_se_import_data("========SE On Demand Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Filters', filters, '==Response', response)
         # if response && response["orders"].count > 1
         #   response["orders"].each_with_index do |odr, index|
         #     unless index == 0

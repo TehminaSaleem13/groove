@@ -75,6 +75,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_groovelytic_stat'=> 'tenants#update_groovelytic_stat'
   get '/tenants/update_is_delay'=> 'tenants#update_is_delay'
   get '/tenants/update_scan_workflow'=> 'tenants#update_scan_workflow'
+  get '/tenants/update_store_order_respose_log'=> 'tenants#update_store_order_respose_log'
   root :to => "home#index"
 
   resources :home do

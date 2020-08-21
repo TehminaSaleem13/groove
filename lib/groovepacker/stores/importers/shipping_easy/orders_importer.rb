@@ -165,6 +165,7 @@ module Groovepacker
   
               # @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
               # update_orders_status
+              Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
               unless @credential.allow_duplicate_id
                 a = Order.group(:increment_id).having("count(*) >1").count.keys
                 unless a.empty?
