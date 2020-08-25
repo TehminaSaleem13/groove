@@ -82,6 +82,7 @@ module Groovepacker
           @order_items.each do |order_item|
             order_item.product_id = @product_orig.id
             set_status_and_msg('order item', order_item) unless order_item.save
+            order_item.add_kit_products
           end
         end
 

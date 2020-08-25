@@ -24,13 +24,31 @@ module OrderMethodsHelper
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
         products_list << product.as_json(
-            include: {
-              product_images: {
-                only: [:image]
-              }
+          include: {
+            product_images: {
+              only: [:image]
             }
-          ).merge({sku: product.primary_sku, barcode: product.primary_barcode})
+          }
+        ).merge(sku: product.primary_sku, barcode: product.primary_barcode)
+        products_list = check_and_add_inactive_kit_items(products_list, product_kit_skuss)
       end
+    end
+    products_list
+  end
+
+  def check_and_add_inactive_kit_items(products_list, product_kit_skuss)
+    return products_list if product_kit_skuss.blank?
+    product_kit_skuss.each do |kit_sku|
+      kit_sku_product = kit_sku.option_product
+      is_new_or_inactive = kit_sku_product.status.eql?('new') || kit_sku_product.status.eql?('inactive')
+      next unless is_new_or_inactive
+      products_list << kit_sku_product.as_json(
+        include: {
+          product_images: {
+            only: [:image]
+          }
+        }
+      ).merge(sku: kit_sku_product.primary_sku, barcode: kit_sku_product.primary_barcode)
     end
     products_list
   end
