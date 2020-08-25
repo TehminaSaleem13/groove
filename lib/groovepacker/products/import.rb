@@ -11,18 +11,17 @@ module Groovepacker
           @result['messages'].push('You can not import products')
           return @result
         end
-        init_import(current_tenant, @params[:product_import_type])
-        
+        init_import(current_tenant, @params[:product_import_type], @params[:product_import_range_days])
         return @result
       end
 
       private
 
-        def init_import(current_tenant, product_import_type)
+        def init_import(current_tenant, product_import_type, product_import_range_days)
           begin
             #import if magento products
             # if @store.store_type != 'Amazon'
-            run_import_for_stores(current_tenant, product_import_type)
+            run_import_for_stores(current_tenant, product_import_type, product_import_range_days)
             # else
             #   run_import_for_amazon
             # end
@@ -32,10 +31,10 @@ module Groovepacker
           end
         end
 
-        def run_import_for_stores(current_tenant, product_import_type)
+        def run_import_for_stores(current_tenant, product_import_type, product_import_range_days)
           #context = Groovepacker::Stores::Context.new(get_handler)
           import_orders_obj = ImportOrders.new
-          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_product_from_store(current_tenant, @store.id, product_import_type)
+          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_product_from_store(current_tenant, @store.id, product_import_type, product_import_range_days)
           # context.import_products
         end
 

@@ -17,9 +17,9 @@ module Groovepacker
             self.build_handle).import
         end
 
-        def import_products(product_import_type)
+        def import_products(product_import_type, product_import_range_days)
           Groovepacker::Stores::Importers::Shopify::ProductsImporter.new(
-            self.build_handle).import(product_import_type)
+            self.build_handle).import(product_import_type, product_import_range_days)
         end
         
         def pull_inventory

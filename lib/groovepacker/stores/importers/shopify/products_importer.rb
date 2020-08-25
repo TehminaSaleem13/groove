@@ -5,10 +5,10 @@ module Groovepacker
         class ProductsImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
 
-          def import(product_import_type)
+          def import(product_import_type, product_import_range_days)
             initialize_import_objects
             begin
-              response = @client.products(product_import_type)
+              response = @client.products(product_import_type, product_import_range_days)
             rescue
               Product.emit_message_for_access_token
             end
@@ -20,7 +20,7 @@ module Groovepacker
             products_response = response["products"].compact.sort_by { |products| Time.zone.parse(products['updated_at']) }
             products_response.each do |product|
               create_single_product(product)
-              @credential.update_attributes(product_last_import: Time.zone.parse(product['updated_at'])) if products_response.last == product
+              @credential.update_attributes(product_last_import: Time.zone.parse(product['updated_at'])) # if products_response.last == product
             end
             update_orders_status
             send_products_import_complete_email(response["products"].count)

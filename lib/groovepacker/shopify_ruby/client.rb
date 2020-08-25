@@ -29,7 +29,7 @@ module Groovepacker
         combined_response
       end
 
-      def products(product_import_type)
+      def products(product_import_type, product_import_range_days)
         page_index = 1
         combined_response = {}
         combined_response["products"] = []
@@ -51,7 +51,9 @@ module Groovepacker
         # end
         puts "======================Fetching Page #{page_index}======================"
         query_opts = { "limit" => 100 }.as_json
+
         add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? "?updated_at_min=#{shopify_credential.product_last_import.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : ''
+        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now - product_import_range_days.to_i).strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : '' unless add_url.present?
 
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/products#{add_url}", 
                                   query: query_opts, 
