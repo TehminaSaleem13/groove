@@ -10,8 +10,9 @@ module ShippingEasyHelper
     return s3_image_url
   end
 
-  def not_to_update(shiping_easy_order)
+  def not_to_update(shiping_easy_order, se_order)
     not_update = (shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned")))
+    not_update = not_update ? not_update : shiping_easy_order.last_modified == se_order["updated_at"].to_datetime
     @order_to_update = not_update
     not_update
   end

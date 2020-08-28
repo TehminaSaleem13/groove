@@ -226,7 +226,7 @@ module Groovepacker
                 else
                   # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
                   # shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned"))
-                  update_success_import_count && return if not_to_update(shiping_easy_order)
+                  update_success_import_count && return if not_to_update(shiping_easy_order, order)
                   order['external_order_identifier'] = shiping_easy_order.increment_id
                 end
               else
@@ -234,7 +234,7 @@ module Groovepacker
                 shiping_easy_order = Order.new if shiping_easy_order.blank?
                 # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
                 #   shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned"))
-                update_success_import_count && return if not_to_update(shiping_easy_order)
+                update_success_import_count && return if not_to_update(shiping_easy_order, order)
               end
               @order_to_update = true if shiping_easy_order.persisted?
               shiping_easy_order.order_items.destroy_all
