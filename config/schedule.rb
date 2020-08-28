@@ -41,7 +41,7 @@ every '*/5 5-12,0 * * *' do # 1.minute 1.day 1.week 1.month 1.year is also suppo
 end
 
 every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
-  rake "check:failed_imports"
+  # rake "check:failed_imports"
 end
 
 every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
