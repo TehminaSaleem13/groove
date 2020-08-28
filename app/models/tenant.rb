@@ -20,10 +20,10 @@ class Tenant < ActiveRecord::Base
     file = GroovS3.get_file("#{Apartment::Tenant.current}/se_import_log/#{file_name}")
     if file.nil?
       file = GroovS3.create(Apartment::Tenant.current, "se_import_log/#{file_name}", 'text/json')
-      File.open(file_name, 'w') { |f| f.write(data.to_yaml) }
+      File.open(file_name, 'w') { |f| f.write(data.to_yaml.force_encoding('utf-8')) }
     else
-      File.open(file_name, 'w') { |f| f.write(file.content) }
-      File.open(file_name, 'a') { |f| f.write(data.to_yaml) }
+      File.open(file_name, 'w') { |f| f.write(file.content.force_encoding('utf-8')) }
+      File.open(file_name, 'a') { |f| f.write(data.to_yaml.force_encoding('utf-8')) }
     end
     file.acl = 'public-read'
     file.content = File.read(file_name)
