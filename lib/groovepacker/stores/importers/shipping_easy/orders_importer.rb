@@ -230,6 +230,7 @@ module Groovepacker
                   order['external_order_identifier'] = shiping_easy_order.increment_id
                 end
               else
+                update_success_import_count && return if Order.where(store_order_id: order['id'], prime_order_id: order['prime_order_id'], last_modified: order["updated_at"].to_datetime).any?
                 shiping_easy_order = find_shipping_easy_order(order)
                 shiping_easy_order = Order.new if shiping_easy_order.blank?
                 # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
@@ -255,7 +256,7 @@ module Groovepacker
             end
 
             def find_shipping_easy_order(order)
-              if !@credential.allow_duplicate_id && @credential.store.split_order == 'shipment_handling_v2'
+              if !@credential.allow_duplicate_id && !@credential.store.split_order == 'shipment_handling_v2'
                 shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
               else
                 shiping_easy_order = Order.find_by_store_order_id(order['id'])

@@ -147,8 +147,8 @@ module ShippingEasyHelper
 
   def check_prev_splitted_order(order)
     delete_split_combined_orders(order)
-    duplicated_in_se = Order.where('prime_order_id = ? AND store_order_id = ?', order['prime_order_id'].to_s, order['id'].to_s)
-    if duplicated_in_se.any?
+    duplicated_in_se = Order.where('prime_order_id = ? AND store_order_id = ?', order['prime_order_id'].to_s, order['id'].to_s) if (order["shipments"][0]['cloned_from_shipment_id'].present? rescue nil)
+    if duplicated_in_se.try(:any?)
       if duplicated_in_se.count == 1
         order['external_order_identifier'] = duplicated_in_se.first.increment_id + ' (D1)'
       else
