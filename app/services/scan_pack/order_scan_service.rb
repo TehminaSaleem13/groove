@@ -85,7 +85,7 @@ module ScanPack
           '#{input_without_special_char}', '\##{input_without_special_char}'\
         \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
       )
-      if (Store.where(store_type: 'ShippingEasy').pluck(:split_order).include? 'shipment_handling_v2')
+      if (Store.where(store_type: 'ShippingEasy').pluck(:split_order) & %w[shipment_handling_v2 verify_separately]).any?
         %(\
           (#{id} LIKE '#{input_with_special_char}%' and \(\
             status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}

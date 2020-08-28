@@ -280,7 +280,7 @@ class OrdersController < ApplicationController
   end
 
   def no_running_imports(store_id)
-    ImportItem.where('status != ? AND status != ? AND store_id = ?', 'cancelled', 'completed', store_id).blank?
+    ImportItem.where('status NOT IN (?) AND store_id = ?', %w(cancelled completed failed), store_id).blank?
   end
 
   def import_xml

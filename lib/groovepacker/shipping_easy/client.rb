@@ -14,7 +14,7 @@ module Groovepacker
       def orders(statuses, importing_time, import_item, start_time = nil)
         page_index = 1
         combined_response = {"orders" => []}
-        filters = { page: page_index, per_page: 100, status: statuses, last_updated_at: @last_imported_at, includes: "products"}
+        filters = { page: page_index, per_page: 200, status: statuses, last_updated_at: @last_imported_at, includes: "products"}
         filters = filters.merge(api_key_and_secret)
         last_import = start_time.present? ? start_time : @credential.last_imported_at rescue (DateTime.now - 4.days)
 
@@ -29,7 +29,7 @@ module Groovepacker
           filters[:page] = page_index
           response = fetch_orders(filters)
           combined_response["orders"] += response["orders"]
-          break if response["orders"].length < 100
+          break if response["orders"].length < 200
           page_index += 1
         end
         combined_response["cleared_orders_ids"] = get_cleared_orders_ids(combined_response["orders"])

@@ -236,7 +236,7 @@ module ProductsHelper
       if shipment.status == 'scanned'
         shipment_status = 'Scanned'
       else
-        shipment_status = shipment.scanning_count[:scanned].to_i.positive? ? 'Partial Scanned' : 'Unscanned'
+        shipment_status = shipment.scanning_count[:scanned].to_i > 0 ? 'Partial Scanned' : 'Unscanned'
       end
       duplicate_orders << [shipment.id, shipment.increment_id, shipment_status, shipment.order_placed_time.try(:strftime, '%A, %d %b %Y %l:%M %p'), shipment.scanned_on.try(:strftime, '%A, %d %b %Y %l:%M %p'), shipment.tracking_num]
     end
