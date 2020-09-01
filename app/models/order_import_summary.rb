@@ -34,7 +34,7 @@ class OrderImportSummary < ActiveRecord::Base
       result['summary'] = "nil"
     end  
     # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
-    import_items = ImportItem.all
+    import_items = ImportItem.includes(:store).where('status IS NOT NULL')
     import_items.each do |import_item|
       if import_item.store.nil?
         import_item.destroy
