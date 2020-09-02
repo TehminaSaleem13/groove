@@ -9,6 +9,34 @@ RSpec.describe ProductsController, :type => :controller do
     @store = FactoryGirl.create(:store, :inventory_warehouse_id => inv_wh.id)
   end
 
+  describe 'Permit Shared Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+    end
+
+    it 'It permit same barcode' do
+      @product1 = FactoryGirl.create(:product, store_id: @store.id)
+      product_sku = FactoryGirl.create(:product_barcode, barcode: 'PRODUCT_SKU', product_id: @product1.id)
+      @product2 = FactoryGirl.create(:product, store_id: @store.id)
+
+      request.accept = 'application/json'
+
+      post :update_product_list, { id: @product2.id, var: 'barcode', value: 'PRODUCT_SKU' }
+      res = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(res['status']).to be false
+      expect(res['show_alias_popup']).to be true
+
+      post :update_product_list, { id: @product2.id, var: 'barcode', value: 'PRODUCT_SKU', permit_same_barcode: true }
+      res = JSON.parse(response.body)
+      expect(res['status']).to be true
+    end
+  end
+
   describe "Product kit modifications" do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

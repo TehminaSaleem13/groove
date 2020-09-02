@@ -78,6 +78,7 @@ module ProductMethodsHelper
   end
 
   def create_or_update_product_sku_or_barcode(item, order, status = nil, db_item=nil,current_user, item_type)
+    return true if (item_type == 'barcode' && db_item && db_item.barcode == item[item_type.downcase])
     product_item = status == 'new' ? (item_type == 'barcode' ? ProductBarcode.new : ProductSku.new) : db_item
     product_item.product.add_product_activity( "The #{item_type} of this item was changed from #{product_item.send(item_type.downcase.to_sym)} to #{item[item_type.downcase]} ",current_user.username) if (status != 'new' && item[item_type.downcase] != product_item.send(item_type.downcase.to_sym))
     product_item.send(item_type.downcase + '=', item[item_type.downcase])
@@ -85,7 +86,7 @@ module ProductMethodsHelper
     product_item.product_id = id unless product_item.persisted?
     product_item.order = order
     product_item.product.add_product_activity( "The #{item_type} #{product_item.send(item_type.downcase.to_sym)} was added to this item",current_user.username) if status == 'new'
-    product_item.save
+    item[:permit_same_barcode] ? product_item.save(validate: false) : product_item.save
   end
 
   def create_or_update_productimage(image, order, images=[])
@@ -215,11 +216,13 @@ module ProductMethodsHelper
       result['matching_barcode'] = params[:value]
       result['show_alias_popup'] = true
       result['status'] = false
-    elsif (product_barcodes.pluck(:barcode).include? params[:value])
+    elsif (product_barcodes.pluck(:barcode).include? params[:value]) && Product.find(id).primary_barcode != params[:value]
       result['status'] = false
       result['error_msg'] = "The Barcode \"#{params[:value]}\" is already associated with: <br> #{db_barcode.product.name} <br> #{primary_sku}"
+    elsif (product_barcodes.pluck(:barcode).include? params[:value]) && Product.find(id).primary_barcode == params[:value]
+      result['status'] = true
     elsif (params[:permit_same_barcode] && (product_barcodes.pluck(:barcode).exclude? params[:value])) || db_barcode.blank?
-      response = updatelist(self, params[:var], params[:value], params[:current_user])
+      response = updatelist(self, params[:var], params[:value], params[:current_user], params[:permit_same_barcode])
       errors = response.errors.full_messages rescue nil
       result = result.merge('status' => false, 'error_msg' => errors) if errors
     end

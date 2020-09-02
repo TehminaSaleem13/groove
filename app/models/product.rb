@@ -373,12 +373,12 @@ class Product < ActiveRecord::Base
     end
   end
 
-  def primary_barcode=(value)
+  def primary_barcode=(value, permit_same_barcode = nil)
     primary = primary_barcode_obj
     primary = product_barcodes.new if primary.nil?
     primary.order = 0
     primary.barcode = value
-    errors.add(:base, "Barcode #{primary.barcode} already exists") unless primary.save
+    errors.add(:base, "Barcode #{primary.barcode} already exists") unless permit_same_barcode ? primary.save(validate: false) : primary.save
   end
 
   # provides primary category if exists

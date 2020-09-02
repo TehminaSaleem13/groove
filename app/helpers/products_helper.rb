@@ -10,8 +10,8 @@ module ProductsHelper
     ProductsService::AmazonImport.call(store_id, product_sku, product_id)
   end
 
-  def updatelist(product, var, value, current_user = nil)
-    ProductsService::UpdateList.call(product, var, value, current_user)
+  def updatelist(product, var, value, current_user = nil, permit_same_barcode = nil)
+    ProductsService::UpdateList.call(product, var, value, current_user, permit_same_barcode)
   end
 
   # gets called from orders helper

@@ -1,7 +1,7 @@
 module ProductsService
   class UpdateList < ProductsService::Base
     def initialize(*args)
-      @product, @var, @value, @current_user = args
+      @product, @var, @value, @current_user, @permit_same_barcode = args
     end
 
     def call
@@ -40,7 +40,7 @@ module ProductsService
     end
 
     def update_product_for_unmatched_var
-      @product.send("primary_#{@var}=", @value)
+      @permit_same_barcode ? @product.send("primary_#{@var}=", @value, @permit_same_barcode) : @product.send("primary_#{@var}=", @value)
       @product.errors.any?
     end
 
