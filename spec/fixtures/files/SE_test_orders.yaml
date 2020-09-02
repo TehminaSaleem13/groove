@@ -1,0 +1,892 @@
+---
+orders:
+- id: 1586499753
+  external_order_identifier: M-073120-002
+  ext_order_reference_id: 37c26bc1c2b8eff4dc12f3e81b77c69a
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-07-31T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Nickel Dread Bead
+      sku: DC-NICKEL-BEAD
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '0.16'
+      quantity: 9
+      total_excluding_tax: '0.85'
+      price_excluding_tax: '0.85'
+      unit_price: '0.85'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: e781ef43-f973-4567-9828-2d9dcec1b66b
+      order_source_id: 3542267283
+      gift_message: 
+      product:
+        id: 771601
+        description: Nickel Dread Bead
+        sku: DC-NICKEL-BEAD
+        weight_in_ounces: '0.16'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: '0.0'
+        width_as_inches: '0.0'
+        height_as_inches: '0.0'
+        country_of_manufacture: ''
+        harmonized_code: ''
+        declared_value: '0.85'
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: Deco
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/771/601/thumb/nickel-dread-bead_3.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/771/601/medium/nickel-dread-bead_3.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/771/601/original/nickel-dread-bead_3.jpg
+        tags: []
+    original_order:
+      id: 1586499753
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1597459933
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '1.44'
+      total_quantity: 9
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-07-31T11:40:28Z'
+      updated_at: '2020-07-31T11:42:44Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: nickel dread bead
+      line_item_sku: dc-nickel-bead
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1586499753
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-07-31T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: M-073120-002
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 37c26bc1c2b8eff4dc12f3e81b77c69a
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4071022843
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 
+    ship_date: '2020-07-31'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '1.44'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-07-31T11:42:44Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1586499753
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1586499663
+  external_order_identifier: M-073120-001
+  ext_order_reference_id: 7913e4dc697fe0cb12257658a31d236a
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-07-31T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Waxless Dread Kit
+      sku: K-WAXLESS
+      bin_picking_number: 
+      bundled_product: 
+      weight_in_ounces: '19.2'
+      quantity: 4
+      total_excluding_tax: '0.00'
+      price_excluding_tax: '37.00'
+      unit_price: '37.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: 19128cfd-1ed6-47e2-99b9-92a2b1a8f23f
+      order_source_id: 
+      gift_message: 
+      product:
+        id: 753403
+        description: Waxless Dread Kit
+        sku: K-WAXLESS
+        weight_in_ounces: '19.2'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '37.00'
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/753/403/thumb/kit_waxless_150.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/753/403/medium/kit_waxless_150.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/753/403/original/kit_waxless_150.png
+        tags: []
+    - item_name: DreadHead Dreadlocks Wax
+      sku: P-WAX
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 6
+      total_excluding_tax: '15.00'
+      price_excluding_tax: '15.00'
+      unit_price: '15.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: 0dfe447e-fb33-4b66-b513-3cb6ffbe3061
+      order_source_id: 3542266643
+      gift_message: 
+      product:
+        id: 753396
+        description: DreadHead Dreadlocks Wax
+        sku: P-WAX
+        weight_in_ounces: '1.0'
+        bin_picking_number: 
+        upc: P-WAXUPC
+        asin: ''
+        isbn: ''
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '15.00'
+        active: true
+        sku_aliases:
+        - A-WAX
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/753/396/thumb/dreadhead-dreadlocks-wax_1_1.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/753/396/medium/dreadhead-dreadlocks-wax_1_1.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/753/396/original/dreadhead-dreadlocks-wax_1_1.jpg
+        tags: []
+    original_order:
+      id: 1586499663
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1597459843
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '82.8'
+      total_quantity: 10
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-07-31T11:40:07Z'
+      updated_at: '2020-07-31T11:42:44Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: dreadhead dreadlocks wax
+      line_item_sku: p-wax
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1586499663
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-07-31T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: M-073120-001
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 7913e4dc697fe0cb12257658a31d236a
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4071022853
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: ParcelSelect
+    shipment_cost: 
+    ship_date: '2020-07-31'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '82.8'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-07-31T11:42:44Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1586499663
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1586500043
+  external_order_identifier: M-073120-004
+  ext_order_reference_id: d8070d7393dba49d3cf9508c02331cae
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-07-31T04:00:00Z'
+  order_status: shipped
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: 'Zippy Product Bundle. Includes: Vegan Dread Wax1'
+      sku: P-BUNDLE
+      bin_picking_number: 
+      bundled_product: 
+      weight_in_ounces: '7104.0'
+      quantity: 2
+      total_excluding_tax: '0.00'
+      price_excluding_tax: '17.00'
+      unit_price: '17.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: d22810b5-5960-44be-b591-d4d93c0dcbca
+      order_source_id: 
+      gift_message: 
+      product:
+        id: 3361574
+        description: 'Zippy Product Bundle. Includes: Vegan Dread Wax1'
+        sku: P-BUNDLE
+        weight_in_ounces: '7104.0'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '17.00'
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image: 
+        tags: []
+    - item_name: Locking Accelerator
+      sku: P-ACCEL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 4
+      total_excluding_tax: '9.00'
+      price_excluding_tax: '9.00'
+      unit_price: '9.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: b1d9d199-8805-4f0f-bc86-3e691a50a7d7
+      order_source_id: 3542268973
+      gift_message: 
+      product:
+        id: 756854
+        description: Locking Accelerator
+        sku: P-ACCEL
+        weight_in_ounces: '1.0'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '9.00'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/756/854/thumb/accelerator_800_1.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/756/854/medium/accelerator_800_1.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/756/854/original/accelerator_800_1.png
+        tags: []
+    original_order:
+      id: 1586500043
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1597460223
+      workflow_state: shipped
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '14212.0'
+      total_quantity: 6
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-07-31T11:41:21Z'
+      updated_at: '2020-07-31T11:43:14Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: locking accelerator
+      line_item_sku: p-accel
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1586500043
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-07-31T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: M-073120-004
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: d8070d7393dba49d3cf9508c02331cae
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4071022823
+    tracking_number: '8888888888888888888888'
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 284
+    ship_date: '2020-07-31'
+    workflow_state: label_ready
+    cloned_from_shipment_id: 
+    weight_in_ounces: '1.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-07-31T11:43:14Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1586500043
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1586499893
+  external_order_identifier: M-073120-003
+  ext_order_reference_id: eab792fc9604828ad861d68920d96268
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-07-31T04:00:00Z'
+  order_status: shipped
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: DreadHead Dreadlocks Wax
+      sku: P-WAX
+      bin_picking_number: 
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 7
+      total_excluding_tax: '0.00'
+      price_excluding_tax: '15.00'
+      unit_price: '15.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: 5b522b09-2d82-46c8-94c1-14b2f95ac343
+      order_source_id: 
+      gift_message: 
+      product:
+        id: 753396
+        description: DreadHead Dreadlocks Wax
+        sku: P-WAX
+        weight_in_ounces: '1.0'
+        bin_picking_number: 
+        upc: P-WAXUPC
+        asin: ''
+        isbn: ''
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '15.00'
+        active: true
+        sku_aliases:
+        - A-WAX
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/753/396/thumb/dreadhead-dreadlocks-wax_1_1.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/753/396/medium/dreadhead-dreadlocks-wax_1_1.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/753/396/original/dreadhead-dreadlocks-wax_1_1.jpg
+        tags: []
+    - item_name: DreadHead Dread Soap (8oz)
+      sku: P-8oz-SOAP
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '11.2'
+      quantity: 5
+      total_excluding_tax: '7.00'
+      price_excluding_tax: '7.00'
+      unit_price: '7.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: {}
+      uuid: 5bfe9a04-90a6-4fcb-82e2-e1ffe290490e
+      order_source_id: 3542268353
+      gift_message: 
+      product:
+        id: 754668
+        description: DreadHead Dread Soap (8oz)
+        sku: P-8oz-SOAP
+        weight_in_ounces: '11.2'
+        bin_picking_number: ''
+        upc: P-8oz-SOAP-UPC
+        asin: ''
+        isbn: ''
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '7.00'
+        active: true
+        sku_aliases:
+        - P-8oz-SOAP-2
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/754/668/thumb/dread-head-dread-soap-8oz_3.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/754/668/medium/dread-head-dread-soap-8oz_3.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/754/668/original/dread-head-dread-soap-8oz_3.png
+        tags: []
+    original_order:
+      id: 1586499893
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1597460073
+      workflow_state: shipped
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '63.0'
+      total_quantity: 12
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-07-31T11:41:03Z'
+      updated_at: '2020-07-31T11:43:20Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: dreadhead dread soap (8oz)
+      line_item_sku: p-8oz-soap
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1586499893
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-07-31T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: M-073120-003
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: eab792fc9604828ad861d68920d96268
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4071022833
+    tracking_number: '8888888888888888888888'
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 527
+    ship_date: '2020-07-31'
+    workflow_state: label_ready
+    cloned_from_shipment_id: 
+    weight_in_ounces: '15.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-07-31T11:43:20Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1586499893
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+meta:
+  current_page: 1
+  next_page: 
+  prev_page: 
+  total_pages: 1
+  total_count: 4
+  last_updated_at: '2020-07-29T23:26:41Z'
+  status:
+  - cleared
+  - shipped
+  - pending_shipment
+  order_number: 
+  order_tags: []

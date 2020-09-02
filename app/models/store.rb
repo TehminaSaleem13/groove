@@ -1,5 +1,5 @@
 class Store < ActiveRecord::Base
-  attr_accessible :name, :order_date, :status, :store_type, :inventory_warehouse, :inventory_warehouse_id
+  attr_accessible :name, :order_date, :status, :store_type, :inventory_warehouse, :inventory_warehouse_id, :split_order, :troubleshooter_option
   has_many :orders
   has_many :products
   has_one :magento_credentials

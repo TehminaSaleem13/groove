@@ -95,7 +95,7 @@ RSpec.describe ProductsController, :type => :controller do
       product_kit_sku = FactoryGirl.create(:product_kit_sku, product: @kit, option_product_id: @product.id)
       (1..201).to_a.each do |index|
         order = FactoryGirl.create(:order, increment_id: "ORDER-#{index}", store: @store)
-        order.order_items.create(product: @kit)
+        order.order_items.create(product: @kit, qty: 1)
       end
     end
 
