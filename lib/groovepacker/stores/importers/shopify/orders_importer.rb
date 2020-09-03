@@ -11,13 +11,15 @@ module Groovepacker
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
-            return @result if response["orders"].nil?
+            return @result if response["orders"].nil? || response['orders'].blank?
+            response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.status == 'cancelled'
+
               import_single_order(order) if order.present?
             end
-            @credential.update_attributes( :last_imported_at => Time.now ) if @import_item.status != 'cancelled'
+            @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at'])) if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end
@@ -40,10 +42,10 @@ module Groovepacker
                 order_in_gp_present = true
                 is_scanned = order_in_gp && (order_in_gp.status=="scanned" || order_in_gp.status=="cancelled" || order_in_gp.order_items.map(&:scanned_status).include?("partially_scanned") || order_in_gp.order_items.map(&:scanned_status).include?("scanned"))
                 #mark previously imported
-                update_import_count('success_updated') && return if is_scanned
-                order_in_gp.destroy
+                update_import_count('success_updated') && return if is_scanned || (order_in_gp.last_modified == Time.zone.parse(order['updated_at']))
+                order_in_gp.order_items.destroy_all
               end
-              import_order_and_items(order)
+              import_order_and_items(order, order_in_gp)
               # #create order
               # shopify_order = Order.new(store: @store)
               # shopify_order = import_order(shopify_order, order)
@@ -73,6 +75,7 @@ module Groovepacker
               #update shipping_amount and order weight
               shopify_order = update_shipping_amount_and_weight(shopify_order, order)
               shopify_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
+              shopify_order.last_modified = order['updated_at']
               return shopify_order
             end
 
@@ -174,9 +177,9 @@ module Groovepacker
               end  
             end
 
-            def import_order_and_items(order)
+            def import_order_and_items(order, order_in_gp)
               #create order
-              shopify_order = Order.new(store: @store)
+              shopify_order = order_in_gp ? order_in_gp : Order.new(store: @store)
               shopify_order = import_order(shopify_order, order)
               #import items in an order
               shopify_order = import_order_items(shopify_order, order)
