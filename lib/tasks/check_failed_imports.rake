@@ -11,7 +11,7 @@ namespace :check do
         failed_import_items = []
         in_progress_items.each do |import_item|
           if (Time.zone.now.to_i - import_item.updated_at.to_i) > 90
-            import_item.update_attributes(status: 'failed', message: 'Import Failed. Please try again.')
+            import_item.update_attributes(status: 'cancelled', message: 'Import Failed. Please try again.')
             import_item.order_import_summary.update_attributes(status: 'cancelled') rescue nil
             failed_import_items << import_item
           end
