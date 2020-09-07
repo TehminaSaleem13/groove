@@ -54,7 +54,7 @@ module ScanPack
     def collect_orders
       find_order
       if @orders.empty? && @scanpack_settings.scan_by_tracking_number
-        @orders = Order.includes([:store, :order_items]).where('tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',@input, @input)
+        @orders = Order.includes([:store, :order_items]).where('tracking_num = ? or tracking_num LIKE CONCAT("%", ? ,"%") ',@input, @input)
         # @orders =
         #   Order
         #   .where(

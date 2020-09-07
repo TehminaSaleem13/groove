@@ -201,4 +201,30 @@ RSpec.describe ScanPackController, type: :controller do
       expect(result['scan_tote_to_completed']).to eq(true)
     end
   end
+
+  describe 'Get Order For Scan' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+
+      ScanPackSetting.last.update_attributes(scan_by_tracking_number: true)
+    end
+
+    it 'Cue order by tracking number' do
+      order1 = FactoryGirl.create(:order, increment_id:'order1', :status=>'awaiting', store: @store, tracking_num: 'tracking_order_1')
+      FactoryGirl.create(:order_item, :product_id=>@products['product_3'].id, :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>@products['product_3'].name)
+
+      order2 = FactoryGirl.create(:order, increment_id:'order2', :status=>'awaiting', store: @store, tracking_num: 'tracking_order_2')
+      FactoryGirl.create(:order_item, :product_id=>@products['product_3'].id, :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>@products['product_3'].name)
+
+      get :scan_barcode, { input: 'tracking_order_2', state: 'scanpack.rfo' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('order2')
+    end
+  end
 end
