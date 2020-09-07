@@ -182,6 +182,12 @@ module Groovepacker
             index = index + 1 
             bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
           end while orderslist.present?
+          neworder.cloned_from_shipment_id = ''
+          neworder.shipment_id = ''
+          neworder.prime_order_id = ''
+          neworder.source_order_ids = ''
+          neworder.split_from_order_id = ''
+          neworder.store_order_id = ''
           neworder.save(:validate => false)
           neworder.persisted? ? Order.add_activity_to_new_order(neworder, order.order_items, username) : @result['status'] = false
         end

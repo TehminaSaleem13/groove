@@ -179,7 +179,7 @@ module Groovepacker
 
             def import_single_order(order)
               update_current_import_item(order)
-              if @split_order
+              if (@split_order ||= @import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately verify_together))
                 if order["shipments"].any?
                   if order["shipments"].count == 1
                      shiping_easy_order = Order.find_by_store_order_id(order['id'])
@@ -194,7 +194,8 @@ module Groovepacker
                       if shiping_easy_order.blank?
                         @shipment_value = shipment["id"]
                         @tracking_value = shipment["tracking_number"]
-                        break 
+                        @cloned_shipment_id = shipment['cloned_from_shipment_id']
+                        break
                       end
                     end
                   end        
@@ -244,10 +245,12 @@ module Groovepacker
               if order["shipments"].count == 1
                 shiping_easy_order.shipment_id = order["shipments"][0]["id"] rescue nil
                 shiping_easy_order.tracking_num = order["shipments"][0]["tracking_number"] rescue nil
+                shiping_easy_order.cloned_from_shipment_id = order["shipments"][0]['cloned_from_shipment_id'] rescue nil
               elsif order["shipments"].count >= 2
                 shiping_easy_order.shipment_id = @shipment_value rescue nil
                 shiping_easy_order.tracking_num = @tracking_value rescue nil
-              end  
+                shiping_easy_order.cloned_from_shipment_id = @cloned_shipment_id rescue nil
+              end
               import_order_items_and_create_products(shiping_easy_order, order)
               update_success_import_count
               update_multi_shipment_status(shiping_easy_order.prime_order_id)
@@ -352,7 +355,8 @@ module Groovepacker
                                                     customer_comments: order["notes"],
                                                     last_modified: order["updated_at"].to_datetime,
                                                     prime_order_id: order["prime_order_id"],
-                                                    split_from_order_id: order["source_order_ids"].to_a.join(',')
+                                                    source_order_ids: order["source_order_ids"].to_a.join(','),
+                                                    split_from_order_id: order["split_from_order_id"]
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end

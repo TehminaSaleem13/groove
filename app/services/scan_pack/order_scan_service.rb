@@ -107,19 +107,19 @@ module ScanPack
       # assign @single_order = first order for only one order
       return [@orders.first, @single_order_result] if @orders.size == 1
 
-      @orders.each do |matched_single|
-        matched_single_status, matched_single_order_placed_time,
-        single_order_status, single_order_order_placed_time,
-        order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
-        do_check_order_status_for_single_and_matched(
-          matched_single, single_order_status, matched_single_status,
-          order_placed_for_single_before_than_matched_single
-        ) if @single_order
+      # @orders.each do |matched_single|
+      #   matched_single_status, matched_single_order_placed_time,
+      #   single_order_status, single_order_order_placed_time,
+      #   order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
+      #   do_check_order_status_for_single_and_matched(
+      #     matched_single, single_order_status, matched_single_status,
+      #     order_placed_for_single_before_than_matched_single
+      #   ) if @single_order
 
-        unless %w(scanned cancelled).include?(matched_single_status)
-          @single_order_result['matched_orders'].push(matched_single)
-        end
-      end
+      #   unless %w(scanned cancelled).include?(matched_single_status)
+      #     @single_order_result['matched_orders'].push(matched_single)
+      #   end
+      # end
 
       [@single_order, @single_order_result]
     end

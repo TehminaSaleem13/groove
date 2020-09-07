@@ -147,16 +147,27 @@ module ShippingEasyHelper
 
   def check_prev_splitted_order(order)
     delete_split_combined_orders(order)
-    duplicated_in_se = Order.where('prime_order_id = ? AND store_order_id = ?', order['prime_order_id'].to_s, order['id'].to_s) if (order["shipments"][0]['cloned_from_shipment_id'].present? rescue nil)
-    if duplicated_in_se.try(:any?)
-      if duplicated_in_se.count == 1
+    duplicated_in_se = Order.where('shipment_id = ?', order["shipments"][0]['cloned_from_shipment_id'].to_s) if order["shipments"].any? && order["shipments"][0]['cloned_from_shipment_id'].present?
+    if duplicated_in_se.try(:any?) # || (order["shipments"].try(:any?) && order["shipments"][0]['cloned_from_shipment_id'].present?)
+      if duplicated_in_se.try(:count) == 1
         order['external_order_identifier'] = duplicated_in_se.first.increment_id + ' (D1)'
-      else
+      elsif duplicated_in_se.try(:count) > 1
         duplicated_inc_id = duplicated_in_se.pluck(:increment_id).sort.last.split(" (D")
         main_increment = duplicated_inc_id[0..(duplicated_inc_id.length - 2)].join rescue order['external_order_identifier']
         shipment_increment = duplicated_inc_id.last.chop rescue nil
         inc_no = shipment_increment.to_i + 1 if shipment_increment.to_i.to_s == shipment_increment
         order['external_order_identifier'] = main_increment + " (D#{inc_no})" if inc_no
+      # else
+        # similar_duplicate_orders = Order.where('increment_id LIKE ?', "#{order['external_order_identifier'] + ' (' + order['id'].to_s + ')'}%")
+        # if similar_duplicate_orders.blank?
+        #   order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')' 
+        # else
+        #   similar_dup_inc_id = similar_duplicate_orders.pluck(:increment_id).sort.last.split(" (D")
+        #   main_increment = similar_dup_inc_id[0..(similar_dup_inc_id.length - 2)].join rescue order['external_order_identifier']
+        #   shipment_increment = similar_dup_inc_id.last.chop rescue nil
+        #   inc_no = shipment_increment.to_i + 1 if shipment_increment.to_i.to_s == shipment_increment
+        #   order['external_order_identifier'] = inc_no ? main_increment + " (D#{inc_no})" : order['external_order_identifier'] + ' (' + order['id'].to_s + ')'  + " (D1)"
+        # end
       end
     elsif order['split_from_order_id'].present?
       # prime_order = Order.where(store_order_id: order['split_from_order_id'].to_s)
@@ -173,9 +184,9 @@ module ShippingEasyHelper
         order['external_order_identifier'] = main_increment + " (S#{inc_no})" if inc_no
       end
     else
-      same_order = Order.where(increment_id: order['external_order_identifier'].strip, store_id: @credential.store.id).first
+      same_order = Order.where(increment_id: order['external_order_identifier'].strip).first
       if same_order
-        same_order.update_attributes(increment_id: same_order.increment_id + ' (' + same_order.store_order_id + ')')
+        same_order.update_attributes(increment_id: same_order.increment_id + ' (' + same_order.store_order_id + ')') if same_order.store_order_id.present?
         order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')'
       end
       order['external_order_identifier'] = order['external_order_identifier'] + " (C)" if order['source_order_ids'].present?

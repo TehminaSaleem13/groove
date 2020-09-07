@@ -195,9 +195,10 @@ module OrderConcern
     @result['order']['order_item_boxes'] = box_data[:order_item_boxes]
     @result['order']['order_item_in_boxes'] = box_data[:order_item_in_boxes]
     @result['order']['list'] = box_data[:list]
-    @result['order']['se_duplicate_orders'] = se_duplicate_orders(@order)
-    @result['order']['se_old_shipments'] = se_old_shipments(@order) if @result['order']['se_duplicate_orders'].blank?
-    @result['order']['se_all_shipments'] = se_all_shipments(@order) if @result['order']['se_old_shipments'].blank?
+    @result['order'] = @order.get_se_old_shipments(@result['order'])
+    # @result['order']['se_duplicate_orders'] = se_duplicate_orders(@order)
+    # @result['order']['se_old_shipments'] = se_old_shipments(@order) if @result['order']['se_duplicate_orders'].blank?
+    # @result['order']['se_all_shipments'] = se_all_shipments(@order) if @result['order']['se_old_shipments'].blank?
   end
 
   def retrieve_order_item(orderitem)

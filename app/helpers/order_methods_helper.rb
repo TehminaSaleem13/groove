@@ -1,4 +1,48 @@
 module OrderMethodsHelper
+  def get_se_old_shipments(result_order)
+    return result_order unless store.store_type == 'ShippingEasy'
+
+    se_old_shipments = []
+
+    prime_orders = Order.where(store_order_id: split_from_order_id) if split_from_order_id.present?
+    shipments = Order.where(prime_order_id: split_from_order_id.to_i).where('cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?', '') if split_from_order_id.present? && prime_orders.any?
+    if shipments.blank?
+      shipments = Order.where(split_from_order_id: prime_order_id).to_a if prime_order_id.present? && (prime_order_id == store_order_id)
+      shipments << self if shipments.try(:any?)
+    end
+    se_old_split_shipments = true if shipments.try(:any?)
+
+    shipments = Order.where(store_order_id: source_order_ids.split(',').map(&:to_i)) if source_order_ids.present? unless se_old_split_shipments
+    se_old_combined_shipments = (shipments.try(:any?) && !se_old_split_shipments) ? true : false
+
+    if se_old_split_shipments || se_old_combined_shipments
+      shipments.each do |shipment|
+        if shipment.status == 'scanned'
+          current_status = "Imported #{shipment.created_at.strftime('%B %e %Y %l:%M %p')} - Scanned #{shipment.scanned_on.strftime('%B %e %Y %l:%M %p')}"
+        else
+          shipment_status = (shipment.scanning_count[:scanned].to_i > 0 ? 'Partial Scanned' : 'Unscanned') rescue 'Unscanned'
+          current_status = "Imported #{shipment.created_at.strftime('%B %e %Y %l:%M %p')} - #{shipment_status}"
+        end
+        se_old_shipments << { id: shipment.id, increment_id: shipment.increment_id, status: current_status }
+      end
+      result_order['se_old_split_shipments'] = se_old_split_shipments ? se_old_shipments : nil
+      result_order['se_old_combined_shipments'] = se_old_combined_shipments ? se_old_shipments : nil
+    else
+      all_shipments = { shipments: [] }
+      shipments = Order.where('orders.prime_order_id = ? AND orders.status != ? AND split_from_order_id != ? AND (cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?)', prime_order_id, 'scanned', '', '') if prime_order_id.present? && Order.where('split_from_order_id != ? AND (cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?)', '', '').where(prime_order_id: prime_order_id).count > 1
+      return result_order if shipments.blank? || shipments.count == 1
+
+      all_shipments[:present] = true
+      shipments.each do |shipment|
+        items_count = shipment.get_items_count
+        all_shipments[:shipments] << { id: shipment.id, increment_id: shipment.increment_id, items_count: items_count }
+      end
+      result_order['se_all_shipments'] = all_shipments
+    end
+
+    result_order
+  end
+
   def has_inactive_or_new_products
     result = false
     order_items.includes(product: :product_kit_skuss).each do |order_item|
