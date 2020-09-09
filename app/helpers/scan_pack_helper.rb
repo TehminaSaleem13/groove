@@ -57,7 +57,7 @@ module ScanPackHelper
     end
 
     # If no single item orders are found with that item then all orders that have been assigned to a tote are searched to see if the item is required. If any toted orders require that item a check is done to see if that item completes any of the orders.
-    orders = Order.where("orders.id IN (?) AND status = 'awaiting'", Tote.includes(:order).map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }
+    orders = Order.includes([:tote]).where("orders.id IN (?) AND status = 'awaiting'", Tote.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }
     if orders.any?
       can_complete_orders = orders.select { |o| o.get_unscanned_items.count == 1 && o.get_unscanned_items[0]['qty_remaining'] == 1}
       if can_complete_orders.any?

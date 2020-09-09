@@ -414,7 +414,7 @@ class ProductsController < ApplicationController
     @result["setting"] = JSON.parse(setting.to_json)
     @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
     @result["products"] = {}
-    reports = ProductInventoryReport.all
+    reports = ProductInventoryReport.includes([:products]).all
     reports.each_with_index do |report, index|
     @result["products"][index] = {"id" => report.id, "name" => report.name,
                                   "no_of_items" => get_item_count(report),

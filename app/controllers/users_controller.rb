@@ -3,7 +3,7 @@ class UsersController < ApplicationController
   include UsersHelper
 
   def index
-    @users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
+    @users = User.includes([:role]).where('username != ? and is_deleted = ?', 'gpadmin', false)
     # respond_to do |format|
     #   format.html # show.html.erb
     #   format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role }

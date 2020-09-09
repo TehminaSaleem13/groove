@@ -146,7 +146,7 @@ class Product < ActiveRecord::Base
         # To reduce individual product query fire on order items
         multi_product_order_items =
           OrderItem.where(product_id: @kit_products.map{|kp| kp.product.id}, scanned_status: 'notscanned')
-          .includes(order: [order_items: [:product, :order_item_kit_products]])
+          # .includes(order: [order_items: [:product, :order_item_kit_products]])
 
         #result_kit = true
         @kit_products.each do |kit_product|

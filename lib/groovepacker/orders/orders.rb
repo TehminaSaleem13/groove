@@ -59,7 +59,7 @@ module Groovepacker
       end
 
       def remove_item_from_order
-        @orderitem = OrderItem.where(id: @params[:orderitem])
+        @orderitem = OrderItem.includes([:order, :product, :order_item_boxes, :order_item_kit_products, :order_item_boxes, :order_item_scan_times]).where(id: @params[:orderitem])
         if @orderitem.blank?
           set_status_and_message(false, "Could not find order item", ['&', 'push'])
           return @result
@@ -131,7 +131,7 @@ module Groovepacker
             orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN totes ON totes.order_id = orders.id #{status_filter_text} ORDER BY totes.name #{sort_order} #{query_add}")
             preloader(orders)
           else
-            orders = Order.includes(:order_items, :store, :order_tags).order("#{sort_key} #{sort_order}")
+            orders = Order.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
             orders = orders.where(:status => status_filter) unless status_filter == "all"
             orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
           end
@@ -139,7 +139,7 @@ module Groovepacker
         end
 
         def preloader(orders)
-          ActiveRecord::Associations::Preloader.new(orders, [:order_items, :store, :order_tags]).run
+          ActiveRecord::Associations::Preloader.new(orders, [:tote, :store, :order_tags]).run
         end
 
         def update_list_for_not_scanned(order)

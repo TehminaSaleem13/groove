@@ -259,7 +259,7 @@ module Groovepacker
         end
 
         def delete_existing_order_items(order, orderXML)
-          order.order_items.each do |order_item|
+          order.order_items.includes([product: [:product_skus]]).each do |order_item|
             found = false
             first_sku = order_item.product.product_skus.first
             unless first_sku.nil?

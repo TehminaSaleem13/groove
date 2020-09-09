@@ -29,7 +29,7 @@ module OrderMethodsHelper
       result_order['se_old_combined_shipments'] = se_old_combined_shipments ? se_old_shipments : nil
     else
       all_shipments = { shipments: [] }
-      shipments = Order.where('orders.prime_order_id = ? AND orders.status != ? AND split_from_order_id != ? AND (cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?)', prime_order_id, 'scanned', '', '') if prime_order_id.present? && Order.where('split_from_order_id != ? AND (cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?)', '', '').where(prime_order_id: prime_order_id).count > 1
+      shipments = Order.includes(:order_items).where('orders.prime_order_id = ? AND orders.status != ? AND split_from_order_id != ? AND (cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?)', prime_order_id, 'scanned', '', '') if prime_order_id.present? && Order.where('split_from_order_id != ? AND (cloned_from_shipment_id IS NULL OR cloned_from_shipment_id = ?)', '', '').where(prime_order_id: prime_order_id).count > 1
       return result_order if shipments.blank? || shipments.count == 1
 
       all_shipments[:present] = true

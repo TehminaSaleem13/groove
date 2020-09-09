@@ -54,7 +54,7 @@ module ScanPack
     def collect_orders
       find_order
       if @orders.empty? && @scanpack_settings.scan_by_tracking_number
-        @orders = Order.where('tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',@input, @input)
+        @orders = Order.includes([:store, :order_items]).where('tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%") ',@input, @input)
         # @orders =
         #   Order
         #   .where(
@@ -69,7 +69,7 @@ module ScanPack
       ["('awaiting')", "('onhold')", "('serviceissue', 'cancelled', 'scanned')"].each do |status|
         return unless @orders.blank?
         query = generate_query(status)
-        @orders = Order.where(query)
+        @orders = Order.includes([:store, :order_items]).where(query)
       end
     end
 

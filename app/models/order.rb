@@ -196,7 +196,7 @@ class Order < ActiveRecord::Base
   end
 
   def reset_scanned_status(current_user)
-    self.order_items.each do |order_item|
+    self.order_items.includes([:order_item_kit_products]).each do |order_item|
       order_item.reset_scanned
     end
     self.addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
