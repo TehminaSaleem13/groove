@@ -108,4 +108,32 @@ RSpec.describe ProductsController, :type => :controller do
       expect(ProductKitSkus.count).to eq(0)
     end
   end
+
+  describe 'Product Update' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+    end
+
+    it 'Update Open Order Status' do
+      product = FactoryGirl.create(:product, store_id: @store.id)
+      product_sku = FactoryGirl.create(:product_sku, sku: 'PRODUCT_SKU', product_id: product.id)
+
+      order = FactoryGirl.create(:order, increment_id: 'ORDER', status: 'onhold', store: @store)
+      FactoryGirl.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order, name: product.name)
+
+      request.accept = 'application/json'
+
+      expect(order.status).to eq('onhold')
+
+      post :update_product_list, { id: product.id, var: 'barcode', value: 'PRODUCT_BARCODE', order_id: order.id }
+      res = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(res['status']).to be true
+      expect(order.reload.status).to eq('awaiting')
+    end
+  end
 end

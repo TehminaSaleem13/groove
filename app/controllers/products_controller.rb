@@ -321,6 +321,7 @@ class ProductsController < ApplicationController
   def update_product_list
     params["current_user"] = current_user.name
     @result = Product.update_product_list(params, @result)
+    Order.find(params[:order_id]).update_order_status rescue nil if params[:order_id].present?
     render json: @result
   end
 
