@@ -1,0 +1,1917 @@
+---
+orders:
+- id: 1660148593
+  external_order_identifier: 04092020T
+  ext_order_reference_id: 89b59b5bcb02b6012f56670ebe5793f2
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Dream Dread Cuff
+      sku: DC-CUFF-DREAM
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '0.16'
+      quantity: 4
+      total_excluding_tax: '2.00'
+      price_excluding_tax: '0.00'
+      unit_price: '2.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: ad395008-d705-4f40-bdf5-8f462922ef21
+      order_source_id: 3822059603
+      gift_message: 
+      product:
+        id: 876456
+        description: Dream Dread Cuff
+        sku: DC-CUFF-DREAM
+        weight_in_ounces: '0.16'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '2.00'
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/876/456/thumb/20150615_132335_1_.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/876/456/medium/20150615_132335_1_.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/876/456/original/20150615_132335_1_.jpg
+        tags: []
+    original_order:
+      id: 1660148593
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671354083
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '0.64'
+      total_quantity: 4
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:46:36Z'
+      updated_at: '2020-09-04T10:51:24Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: dream dread cuff
+      line_item_sku: dc-cuff-dream
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660148593
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 89b59b5bcb02b6012f56670ebe5793f2
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369127533
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '0.64'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:51:24Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660148593
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1660151273
+  external_order_identifier: 04092020T
+  ext_order_reference_id: 7176cd34c757a178c8dbae8aa4f5d305
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: ADIDAS | CLASSIC BACKPACK | LEGEND INK MULTICOLOUR - OS / blue
+      sku: AD-04 -blue-OS
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '0.0'
+      quantity: 10
+      total_excluding_tax: '0.10'
+      price_excluding_tax: '0.00'
+      unit_price: '0.10'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 31676b82-47d2-4bbe-8de7-8a611eb7e27c
+      order_source_id: 3822065083
+      gift_message: 
+      product:
+        id: 205970783
+        description: ADIDAS | CLASSIC BACKPACK | LEGEND INK MULTICOLOUR - OS / blue
+        sku: AD-04 -blue-OS
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '0.10'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/205/970/783/thumb/8072c8b5718306d4be25aac21836ce16.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/205/970/783/medium/8072c8b5718306d4be25aac21836ce16.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/205/970/783/original/8072c8b5718306d4be25aac21836ce16.jpg
+        tags: []
+    original_order:
+      id: 1660151273
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671356763
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '0.0'
+      total_quantity: 10
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:47:30Z'
+      updated_at: '2020-09-04T10:52:10Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: adidas | classic backpack | legend ink multicolour - os / blue
+      line_item_sku: ad-04 -blue-os
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660151273
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 7176cd34c757a178c8dbae8aa4f5d305
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369135053
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: 
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '0.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:52:10Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660151273
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1660160343
+  external_order_identifier: 04092020T2
+  ext_order_reference_id: 149bfaf4bb67970d1e006fc5ca71a0b4
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 
+  source_order_ids:
+  - 1660160213
+  - 1660159733
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: VANS | ERA 59 MOROCCAN | GEO/DRESS BLUES - 10 / blue
+      sku: VN-04-blue-10
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 11
+      total_excluding_tax: '0.10'
+      price_excluding_tax: '0.00'
+      unit_price: '0.10'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 23219009-cc9d-46b1-95cd-709f9c989e9b
+      order_source_id: 3822124843
+      gift_message: 
+      product:
+        id: 205970763
+        description: "VANS | \nERA 59 MOROCCAN | GEO/DRESS BLUES - 10 / blue"
+        sku: VN-04-blue-10
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '0.10'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/205/970/763/thumb/7902bf65776d504e75f86c8e8781d802.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/205/970/763/medium/7902bf65776d504e75f86c8e8781d802.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/205/970/763/original/7902bf65776d504e75f86c8e8781d802.jpg
+        tags: []
+    - item_name: Dragon Ball Z Vegeta Action Figure
+      sku: TOY144
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 8
+      total_excluding_tax: '0.10'
+      price_excluding_tax: '0.00'
+      unit_price: '0.10'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: e8c4b5d0-4030-493b-aaae-a3765b2e1463
+      order_source_id: 3822124843
+      gift_message: 
+      product:
+        id: 206783723
+        description: Dragon Ball Z Vegeta Action Figure
+        sku: TOY144
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '0.10'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/206/783/723/thumb/254ff86497b7808bac4420b95498161a.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/206/783/723/medium/254ff86497b7808bac4420b95498161a.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/206/783/723/original/254ff86497b7808bac4420b95498161a.jpg
+        tags: []
+    - item_name: Crayola My First Jumbo Paintbrushes
+      sku: TOY302
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 4
+      total_excluding_tax: '13.99'
+      price_excluding_tax: '0.00'
+      unit_price: '13.99'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: feee68db-db18-40a7-bcc5-96fb8fbe8832
+      order_source_id: 3822130133
+      gift_message: 
+      product:
+        id: 204120053
+        description: Crayola My First Jumbo Paintbrushes
+        sku: TOY302
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '13.99'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/204/120/053/thumb/89efce590983e858313bf8bde4c4716f.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/204/120/053/medium/89efce590983e858313bf8bde4c4716f.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/204/120/053/original/89efce590983e858313bf8bde4c4716f.jpg
+        tags: []
+    original_order:
+      id: 1660160343
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671365993
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '23.0'
+      total_quantity: 23
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:54:44Z'
+      updated_at: '2020-09-04T10:54:57Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: 
+      line_item_sku: 
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660160343
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: 
+      denormalized_ext_order_id: 04092020T2
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 149bfaf4bb67970d1e006fc5ca71a0b4
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369153173
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: Priority
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '23.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:54:57Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660160343
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1660160923
+  external_order_identifier: 04092020T3
+  ext_order_reference_id: 83f45be4a27854bc27bb844b47ceab50
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 1660160773
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Caramel Cat's Eye Dread Beads
+      sku: DC-CAT-CARAMEL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.44'
+      quantity: 2
+      total_excluding_tax: '1.97'
+      price_excluding_tax: '0.00'
+      unit_price: '1.97'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 4b23eb3a-84b6-459d-9efa-c66ef40fc000
+      order_source_id: 3822134333
+      gift_message: 
+      product:
+        id: 765264
+        description: Caramel Cat's Eye Dread Beads
+        sku: DC-CAT-CARAMEL
+        weight_in_ounces: '1.44'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: '0.0'
+        width_as_inches: '0.0'
+        height_as_inches: '0.0'
+        country_of_manufacture: ''
+        harmonized_code: ''
+        declared_value: '1.97'
+        active: true
+        sku_aliases:
+        - DC-WBEAD-7
+        - DC-WBEAD-FOREST
+        - T-HONCHO
+        properties: 
+        product_category_name: Deco
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/thumb/caramel-cat_2.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/medium/caramel-cat_2.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/original/caramel-cat_2.jpg
+        tags: []
+    original_order:
+      id: 1660160923
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671366613
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 1660160773
+      total_weight_in_ounces: '2.88'
+      total_quantity: 2
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:56:01Z'
+      updated_at: '2020-09-04T10:56:06Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: caramel cat's eye dread beads
+      line_item_sku: dc-cat-caramel
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660160773
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T3
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 83f45be4a27854bc27bb844b47ceab50
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369157023
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '2.88'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:56:06Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660160773
+  is_prime: 
+  split_from_order_id: 1660160773
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1660160913
+  external_order_identifier: 04092020T3
+  ext_order_reference_id: 83f45be4a27854bc27bb844b47ceab50
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 1660160773
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Caramel Cat's Eye Dread Beads
+      sku: DC-CAT-CARAMEL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.44'
+      quantity: 4
+      total_excluding_tax: '1.97'
+      price_excluding_tax: '0.00'
+      unit_price: '1.97'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 4b23eb3a-84b6-459d-9efa-c66ef40fc000
+      order_source_id: 3822134333
+      gift_message: 
+      product:
+        id: 765264
+        description: Caramel Cat's Eye Dread Beads
+        sku: DC-CAT-CARAMEL
+        weight_in_ounces: '1.44'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: '0.0'
+        width_as_inches: '0.0'
+        height_as_inches: '0.0'
+        country_of_manufacture: ''
+        harmonized_code: ''
+        declared_value: '1.97'
+        active: true
+        sku_aliases:
+        - DC-WBEAD-7
+        - DC-WBEAD-FOREST
+        - T-HONCHO
+        properties: 
+        product_category_name: Deco
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/thumb/caramel-cat_2.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/medium/caramel-cat_2.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/original/caramel-cat_2.jpg
+        tags: []
+    original_order:
+      id: 1660160913
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671366603
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 1660160773
+      total_weight_in_ounces: '5.76'
+      total_quantity: 4
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:56:01Z'
+      updated_at: '2020-09-04T10:56:06Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: caramel cat's eye dread beads
+      line_item_sku: dc-cat-caramel
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660160773
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T3
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 83f45be4a27854bc27bb844b47ceab50
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369157033
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '5.76'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:56:06Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660160773
+  is_prime: 
+  split_from_order_id: 1660160773
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1660155893
+  external_order_identifier: 04092020T1
+  ext_order_reference_id: 04a3b7bb2b7ac72417609b0c22aba9ef
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:00:00Z'
+  order_status: shipped
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: CONVERSE | CHUCK TAYLOR ALL STAR II HI
+      sku: C-02-black-7
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '0.0'
+      quantity: 7
+      total_excluding_tax: '140.00'
+      price_excluding_tax: '0.00'
+      unit_price: '140.00'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 77be29bd-0709-4032-b9f8-7dff1e724a86
+      order_source_id: 3822081233
+      gift_message: 
+      product:
+        id: 205971563
+        description: CONVERSE | CHUCK TAYLOR ALL STAR II HI
+        sku: C-02-black-7
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '140.00'
+        active: true
+        sku_aliases: []
+        properties:
+          Size: '7'
+          Color: black
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/205/971/563/thumb/23550440c4ccab05e4fc1ebd85e742cc.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/205/971/563/medium/23550440c4ccab05e4fc1ebd85e742cc.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/205/971/563/original/23550440c4ccab05e4fc1ebd85e742cc.jpg
+        tags: []
+    original_order:
+      id: 1660155893
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671361533
+      workflow_state: shipped
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '0.0'
+      total_quantity: 7
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:48:58Z'
+      updated_at: '2020-09-04T11:01:05Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: converse | chuck taylor all star ii hi
+      line_item_sku: c-02-black-7
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660155893
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T1
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 04a3b7bb2b7ac72417609b0c22aba9ef
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: ''
+      custom_2: ''
+      custom_3: ''
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369180063
+    tracking_number: '8888888888888888888888'
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 284
+    ship_date: '2020-09-04'
+    workflow_state: label_printed
+    cloned_from_shipment_id: 4369116313
+    weight_in_ounces: '1.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  - id: 4369123403
+    tracking_number: '8888888888888888888888'
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 284
+    ship_date: '2020-09-04'
+    workflow_state: label_printed
+    cloned_from_shipment_id: 4369116313
+    weight_in_ounces: '1.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  - id: 4369116313
+    tracking_number: '8888888888888888888888'
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 284
+    ship_date: '2020-09-04'
+    workflow_state: label_printed
+    cloned_from_shipment_id: 
+    weight_in_ounces: '1.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T11:01:05Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660155893
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1698560923
+  external_order_identifier: 04092020T4
+  ext_order_reference_id: 83f45be4a27854bc27bb844b47vasc50
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T01:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 1660119073
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Caramel Cat's Eye Dread Beads
+      sku: DC-CAT-CARAMEL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.44'
+      quantity: 2
+      total_excluding_tax: '1.97'
+      price_excluding_tax: '0.00'
+      unit_price: '1.97'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 4b23eb3a-84b6-459d-9efa-c66ef40fc000
+      order_source_id: 3822134333
+      gift_message: 
+      product:
+        id: 765264
+        description: Caramel Cat's Eye Dread Beads
+        sku: DC-CAT-CARAMEL
+        weight_in_ounces: '1.44'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: '0.0'
+        width_as_inches: '0.0'
+        height_as_inches: '0.0'
+        country_of_manufacture: ''
+        harmonized_code: ''
+        declared_value: '1.97'
+        active: true
+        sku_aliases:
+        - DC-WBEAD-7
+        - DC-WBEAD-FOREST
+        - T-HONCHO
+        properties: 
+        product_category_name: Deco
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/thumb/caramel-cat_2.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/medium/caramel-cat_2.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/original/caramel-cat_2.jpg
+        tags: []
+    original_order:
+      id: 1698560923
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671366613
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 1660119073
+      total_weight_in_ounces: '2.88'
+      total_quantity: 2
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T09:56:01Z'
+      updated_at: '2020-09-04T10:56:06Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: caramel cat's eye dread beads
+      line_item_sku: dc-cat-caramel
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660119073
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T01:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T4
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 83f45be4a27854bc27bb844b47vasc50
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-v8sd-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f65-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369157023
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '2.88'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:56:06Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660119073
+  is_prime: 
+  split_from_order_id: 1660119073
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-v8sd-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1669680913
+  external_order_identifier: 04092020T4
+  ext_order_reference_id: 83f45be4a27854bc27bb844b47vasc50
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T01:00:00Z'
+  order_status: pending_shipment
+  parent_order_id: 1660119073
+  source_order_ids: 
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: Caramel Cat's Eye Dread Beads
+      sku: DC-CAT-CARAMEL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.44'
+      quantity: 4
+      total_excluding_tax: '1.97'
+      price_excluding_tax: '0.00'
+      unit_price: '1.97'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 4b23eb3a-84b6-459d-9efa-c66ef40fc000
+      order_source_id: 3822134333
+      gift_message: 
+      product:
+        id: 765264
+        description: Caramel Cat's Eye Dread Beads
+        sku: DC-CAT-CARAMEL
+        weight_in_ounces: '1.44'
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: '0.0'
+        width_as_inches: '0.0'
+        height_as_inches: '0.0'
+        country_of_manufacture: ''
+        harmonized_code: ''
+        declared_value: '1.97'
+        active: true
+        sku_aliases:
+        - DC-WBEAD-7
+        - DC-WBEAD-FOREST
+        - T-HONCHO
+        properties: 
+        product_category_name: Deco
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/thumb/caramel-cat_2.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/medium/caramel-cat_2.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/000/765/264/original/caramel-cat_2.jpg
+        tags: []
+    original_order:
+      id: 1669680913
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671366603
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 1660119073
+      total_weight_in_ounces: '5.76'
+      total_quantity: 4
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T09:56:01Z'
+      updated_at: '2020-09-04T10:56:06Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: caramel cat's eye dread beads
+      line_item_sku: dc-cat-caramel
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1660119073
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T01:00:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: ''
+      denormalized_ext_order_id: 04092020T4
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 83f45be4a27854bc27bb844b47vasc50
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-v8sd-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f65-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369157033
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: First
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '5.76'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:56:06Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1660119073
+  is_prime: 
+  split_from_order_id: 1660119073
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-v8sd-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+- id: 1612350343
+  external_order_identifier: 04092020T5
+  ext_order_reference_id: 149bfaf4bb67970d2f666fc5ca71a0b4
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2020-09-04T04:03:00Z'
+  order_status: pending_shipment
+  parent_order_id: 
+  source_order_ids:
+  - 1660160885
+  - 1660965874
+  total_including_tax: '0.00'
+  total_excluding_tax: '0.00'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '0.00'
+  subtotal_excluding_tax: '0.00'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '0.00'
+  shipping_cost_including_tax: '0.00'
+  shipping_cost_excluding_tax: '0.00'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: Groovepacker
+  billing_first_name: Alpha
+  billing_last_name: Tester
+  billing_address: 110 Cobblestone Cir
+  billing_address2: ''
+  billing_city: North Little Rock
+  billing_state: AR
+  billing_country: United States
+  billing_postal_code: '72116'
+  billing_phone_number: 111-111-1111
+  billing_email: alphatester@yopmail.com
+  buyer_email: alphatester@yopmail.com
+  recipients:
+  - company: Groovepacker
+    first_name: Alpha
+    last_name: Tester
+    address: 110 Cobblestone Cir
+    address2: 
+    address3: 
+    city: North Little Rock
+    residential: true
+    state: AR
+    province: 
+    country: United States
+    postal_code: '72116'
+    postal_code_plus_4: '3739'
+    phone_number: 111-111-1111
+    email: alphatester@yopmail.com
+    base_cost: '0.00'
+    cost_excluding_tax: '0.00'
+    cost_including_tax: '0.00'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 
+    shipping_zone_name: 
+    items_total: 0
+    shipping_method: 
+    items_shipped: 0
+    ext_shipping_detail_id: 
+    line_items:
+    - item_name: VANS | ERA 59 MOROCCAN | GEO/DRESS BLUES - 10 / blue
+      sku: VN-04-blue-10
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 11
+      total_excluding_tax: '0.10'
+      price_excluding_tax: '0.00'
+      unit_price: '0.10'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: 23219009-cc9d-46b1-95cd-709f9c989e9b
+      order_source_id: 3822124843
+      gift_message: 
+      product:
+        id: 205970763
+        description: "VANS | \nERA 59 MOROCCAN | GEO/DRESS BLUES - 10 / blue"
+        sku: VN-04-blue-10
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '0.10'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/205/970/763/thumb/7902bf65776d504e75f86c8e8781d802.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/205/970/763/medium/7902bf65776d504e75f86c8e8781d802.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/205/970/763/original/7902bf65776d504e75f86c8e8781d802.jpg
+        tags: []
+    - item_name: Dragon Ball Z Vegeta Action Figure
+      sku: TOY144
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 8
+      total_excluding_tax: '0.10'
+      price_excluding_tax: '0.00'
+      unit_price: '0.10'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: e8c4b5d0-4030-493b-aaae-a3765b2e1463
+      order_source_id: 3822124843
+      gift_message: 
+      product:
+        id: 206783723
+        description: Dragon Ball Z Vegeta Action Figure
+        sku: TOY144
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '0.10'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/206/783/723/thumb/254ff86497b7808bac4420b95498161a.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/206/783/723/medium/254ff86497b7808bac4420b95498161a.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/206/783/723/original/254ff86497b7808bac4420b95498161a.jpg
+        tags: []
+    - item_name: Crayola My First Jumbo Paintbrushes
+      sku: TOY302
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.0'
+      quantity: 4
+      total_excluding_tax: '13.99'
+      price_excluding_tax: '0.00'
+      unit_price: '13.99'
+      ext_line_item_id: 
+      ext_product_id: 
+      product_options: 
+      uuid: feee68db-db18-40a7-bcc5-96fb8fbe8832
+      order_source_id: 3822130133
+      gift_message: 
+      product:
+        id: 204120053
+        description: Crayola My First Jumbo Paintbrushes
+        sku: TOY302
+        weight_in_ounces: 
+        bin_picking_number: 
+        upc: 
+        asin: 
+        isbn: 
+        length_as_inches: 
+        width_as_inches: 
+        height_as_inches: 
+        country_of_manufacture: 
+        harmonized_code: 
+        declared_value: '13.99'
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/204/120/053/thumb/89efce590983e858313bf8bde4c4716f.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/204/120/053/medium/89efce590983e858313bf8bde4c4716f.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/204/120/053/original/89efce590983e858313bf8bde4c4716f.jpg
+        tags: []
+    original_order:
+      id: 1612350343
+      customer_id: 22059
+      store_id: 46940
+      order_detail_id: 1671365993
+      workflow_state: pending_shipment
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '23.0'
+      total_quantity: 23
+      is_international: false
+      usps_shipping_zone: 5
+      created_at: '2020-09-04T10:58:44Z'
+      updated_at: '2020-09-04T10:59:17Z'
+      ext_shipment_confirmation_id: 
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 
+      internal_notes: ''
+      line_item_name: 
+      line_item_sku: 
+      address_kind: R
+      recipient_last_name: tester
+      recipient_requested_service: 
+      gift: false
+      prime_order_id: 1612350343
+      state: AR
+      owner_id: 
+      denormalized_ordered_at: '2020-09-04T04:03:00Z'
+      grab_bag: {}
+      line_item_bin_picking_number: 
+      denormalized_ext_order_id: 04092020T5
+      packing_slip_generated: 
+      denormalized_ext_order_reference_id: 149bfaf4bb67970d2f666fc5ca71a0b4
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+      origin_override_id: 
+      channel_id: eafb63ca-510a-4ddd-9f35-14a9e555c3bd
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: c5e58c6487141ab7eb43bcd064fb9520
+  shipments:
+  - id: 4369153173
+    tracking_number: 
+    carrier_key: USPS
+    carrier_service_key: Priority
+    shipment_cost: 
+    ship_date: '2020-09-04'
+    workflow_state: pending
+    cloned_from_shipment_id: 
+    weight_in_ounces: '23.0'
+    length_in_inches: 
+    width_in_inches: 
+    height_in_inches: 
+    additional_packages: []
+    ship_from_address_id: 39149
+    shipment_type: outbound
+  updated_at: '2020-09-04T10:54:57Z'
+  internal_notes: ''
+  meta_data: 
+  prime_order_id: 1612350343
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 63ece0a0-78cc-4973-a1ed-5582ba2de3b0
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
+  

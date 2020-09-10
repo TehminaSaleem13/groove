@@ -56,23 +56,32 @@ RSpec.describe OrdersController, type: :controller do
       se_store_credentials = ShippingEasyCredential.create(store_id: se_store.id, api_key: 'apikeyapikeyapikeyapikeyapikeyse', api_secret: 'apisecretapisecretapisecretapisecretapisecretapisecretapisecrets', import_ready_for_shipment: false, import_shipped: true, gen_barcode_from_sku: false, popup_shipping_label: false, ready_to_ship: true, import_upc: true, allow_duplicate_id: true)
     end
 
+    it 'Import SE Shipment Handling V2 Orders' do
+      se_store = Store.where(store_type: 'ShippingEasy').last
 
-    it 'Import SE Orders' do
-      expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/SE_test_orders.yaml'))))
+      product = FactoryGirl.create(:product, name: 'PRODUCT1')
+      FactoryGirl.create(:product_sku, product: product, sku: 'PRODUCT1')
+      FactoryGirl.create(:product_barcode, product: product, barcode: 'PRODUCT1')
+
+      order1 = FactoryGirl.create(:order, increment_id: 'ORDER1', status: 'awaiting', store: se_store, prime_order_id: '1660160213', store_order_id: '1660160213')
+      FactoryGirl.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order1, name: product.name)
+
+      order2 = FactoryGirl.create(:order, increment_id: 'ORDER2', status: 'awaiting', store: se_store, prime_order_id: '1660159733', store_order_id: '1660159733')
+      FactoryGirl.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order2, name: product.name)
+
+      order3 = FactoryGirl.create(:order, increment_id: 'ORDER3', status: 'awaiting', store: se_store, prime_order_id: '1660160773', store_order_id: '1660160773')
+      FactoryGirl.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order3, name: product.name)
+
+      expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/se_shipment_v2.yaml'))))
 
       request.accept = 'application/json'
 
       get :import_all
       expect(response.status).to eq(200)
-      expect(Order.count).to eq(4)
-      expect(Product.count).to eq(6)
 
-      se_store = Store.where(store_type: 'ShippingEasy').last
       se_import_item = ImportItem.find_by_store_id(se_store.id)
-      expect(se_import_item.success_imported).to eq(4)
       expect(se_import_item.status).to eq('completed')
     end
-
 
     it 'Import SE QF Range Orders' do
       expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/SE_test_qf_range_orders.yaml'))))
