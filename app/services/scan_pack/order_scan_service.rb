@@ -77,18 +77,18 @@ module ScanPack
       input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       id = @scanpack_settings.scan_by_hex_number ?  "store_order_id" : "increment_id"
-      %(\
-        (#{id} IN \(\
-          '#{input_with_special_char}', '\##{input_with_special_char}'\
-        \) or \
-        non_hyphen_increment_id IN \(\
-          '#{input_without_special_char}', '\##{input_without_special_char}'\
-        \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
-      )
+      # %(\
+      #   (#{id} IN \(\
+      #     '#{input_with_special_char}', '\##{input_with_special_char}'\
+      #   \) or \
+      #   non_hyphen_increment_id IN \(\
+      #     '#{input_without_special_char}', '\##{input_without_special_char}'\
+      #   \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
+      # )
       if (Store.where(store_type: 'ShippingEasy').pluck(:split_order) & %w[shipment_handling_v2 verify_separately]).any?
         %(\
           (#{id} LIKE '#{input_with_special_char}%' and \(\
-            status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
+            orders.status IN #{status} and orders.updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
           \))
         )
       else
@@ -98,7 +98,7 @@ module ScanPack
           \) or \
           non_hyphen_increment_id IN \(\
             '#{input_without_special_char}', '\##{input_without_special_char}'\
-          \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
+          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
         )
       end
     end
