@@ -136,4 +136,32 @@ RSpec.describe ProductsController, :type => :controller do
       expect(order.reload.status).to eq('awaiting')
     end
   end
+
+  describe 'Import Shopify Products' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+
+      shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last)
+      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false, import_inventory_qoh: true)
+    end
+
+    it 'Refresh the entire catalog' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:products).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_products.yaml'))))
+
+      request.accept = 'application/json'
+
+      expect(Product.count).to eq(0)
+
+      post :import_products, { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
+      res = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+
+      expect(Product.count).to eq(36)
+    end
+  end
 end

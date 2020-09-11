@@ -73,8 +73,9 @@ RSpec.describe OrdersController, type: :controller do
       FactoryGirl.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order3, name: product.name)
 
       expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/se_shipment_v2.yaml'))))
-
       request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
       expect(response.status).to eq(200)
@@ -97,6 +98,69 @@ RSpec.describe OrdersController, type: :controller do
       expect(se_import_item.success_imported).to eq(6)
       expect(se_import_item.import_type).to eq('range_import')
       expect(se_import_item.status).to eq('completed')
+    end
+  end
+
+  describe 'Shopify Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+
+      shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last)
+      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false, import_inventory_qoh: true)
+    end
+
+    it 'Import Orders' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
+
+      shopify_import_item = ImportItem.find_by_store_id(shopify_store.id)
+      expect(shopify_import_item.status).to eq('completed')
+    end
+  end
+
+  describe 'Shipstation API 2 Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+
+      ss_store = Store.create(name: 'Shipstation API 2', status: true, store_type: 'Shipstation API 2', inventory_warehouse: InventoryWarehouse.last, on_demand_import_v2: true, regular_import_v2: true, troubleshooter_option: true)
+      ss_store_credentials = ShipstationRestCredential.create(api_key: 'shipstationapiv2shipstationapiv2', api_secret: 'shipstationapiv2shipstationapiv2', store_id: ss_store.id, shall_import_awaiting_shipment: false, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: true, shall_import_pending_fulfillment: false, use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: true, allow_duplicate_order: true, tag_import_option: true, bulk_import: false, order_import_range_days: 30, import_tracking_info: true)
+    end
+
+    it 'Import Orders' do
+      ss_store = Store.where(store_type: 'ShipStation API 2').last
+
+      expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
+      allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:remove_gp_tags_from_ss).and_return(true)
+      allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:should_fetch_shipments?).and_return(false)
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(2)
+      expect(Product.count).to eq(2)
+
+      ss_import_item = ImportItem.find_by_store_id(ss_store.id)
+      expect(ss_import_item.status).to eq('completed')
     end
   end
 end

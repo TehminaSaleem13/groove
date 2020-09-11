@@ -192,8 +192,8 @@ module Groovepacker
                 update_import_item_and_import_order(order, shipments_response)
               rescue Exception => e
               end
-              break if Rails.env == "test"
-              sleep 0.3
+              # break if Rails.env == "test"
+              # sleep 0.3
             end
             cred = @store.shipstation_rest_credential
             cred.bulk_import = @import_item.status == 'in_progress' && @bulk_ss_import >= 25 ? true : false

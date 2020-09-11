@@ -1,5 +1,5 @@
 class ShipstationRestCredential < ActiveRecord::Base
-  attr_accessible :api_key, :api_secret, :store_id, :shall_import_, :regular_import_range, :gen_barcode_from_sku, :import_upc, :allow_duplicate_order, :bulk_import, :quick_import_last_modified, :quick_import_last_modified_v2
+  attr_accessible :api_key, :api_secret, :store_id, :shall_import_, :regular_import_range, :gen_barcode_from_sku, :import_upc, :allow_duplicate_order, :bulk_import, :quick_import_last_modified, :quick_import_last_modified_v2, :shall_import_awaiting_shipment, :shall_import_shipped, :warehouse_location_update, :shall_import_customer_notes, :shall_import_internal_notes, :shall_import_pending_fulfillment, :use_chrome_extention, :switch_back_button, :auto_click_create_label, :download_ss_image, :return_to_order, :tag_import_option, :order_import_range_days, :import_tracking_info
   validates_presence_of :regular_import_range
   before_save :check_if_null_or_undefined
   belongs_to :store
