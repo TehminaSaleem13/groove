@@ -227,4 +227,60 @@ RSpec.describe ScanPackController, type: :controller do
       expect(result['data']['order']['increment_id']).to eq('order2')
     end
   end
+
+  describe 'Order Scan' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryGirl.create(:access_token, resource_owner_id: @user.id).token }
+      request.env['Authorization'] = header['Authorization']
+      ScanPackSetting.last.update_attributes(partial: true)
+    end
+
+    it 'Scan Order using Partial Barcode' do
+      product1 = FactoryGirl.create(:product, is_skippable: true)
+      FactoryGirl.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryGirl.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+
+      product2 = FactoryGirl.create(:product)
+      FactoryGirl.create(:product_sku, product: product2, sku: 'PRODUCT2')
+      FactoryGirl.create(:product_barcode, product: product2, barcode: 'PRODUCT2')
+
+      order = FactoryGirl.create(:order, increment_id:'ORDER', :status=>'awaiting', store: @store)
+      FactoryGirl.create(:order_item, product_id: product1.id, qty: 5, price: '10', row_total: '10', order: order, name: product1.name)
+      FactoryGirl.create(:order_item, product_id: product2.id, qty: 4, price: '10', row_total: '10', order: order, name: product2.name)
+
+      expect(order.get_items_count).to eq(9)
+
+      get :scan_barcode, { input: 'ORDER', state: 'scanpack.rfo' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('ORDER')
+
+      get :scan_barcode, { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, { id: order.id, input: 'SKIP', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      expect(order.reload.get_items_count).to eq(7)
+
+      get :scan_barcode, { id: order.id, input: 'PRODUCT2', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, { id: order.id, input: 'PRODUCT2', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, { id: order.id, input: 'PARTIAL', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(order.reload.get_items_count).to eq(5)
+      expect(order.reload.status).to eq('scanned')
+      expect(result['data']['next_state']).to eq('scanpack.rfo')
+    end
+  end
 end

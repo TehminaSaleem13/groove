@@ -62,6 +62,8 @@ module ScanPack
         do_if_restart_code_is_enabled_and_and_eql_to_input
       when @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
         do_if_service_issue_code_is_enabled_and_and_eql_to_input
+      when @scanpack_settings.partial? && @input == @scanpack_settings.partial_barcode
+        do_if_partial_code_is_enabled_and_and_eql_to_input
       else
         do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
       end
@@ -75,6 +77,15 @@ module ScanPack
     def update_session
       return unless @result['data']['next_state'].eql?('scanpack.rfo')
       @session[:most_recent_scanned_product] = nil
+    end
+
+    def do_if_partial_code_is_enabled_and_and_eql_to_input
+      @single_order.order_activities.last.try(:destroy)
+      @single_order.get_unscanned_items(limit: nil).each do |item|
+        qty = remove_skippable_product(item)
+        @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username))
+      end
+      do_if_barcode_found
     end
 
     def do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)

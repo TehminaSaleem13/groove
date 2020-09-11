@@ -55,8 +55,18 @@ module ScanPack::Utilities::ProductScan::SingleProductType
   # is SKIP entered as the barcode.
   def remove_skippable_product(item)
     order_item = OrderItem.find(item['order_item_id'])
-    order = order_item.order
-    order.order_items.delete(order_item)
-    order.save
+    qty = 0
+    if order_item.scanned_status == 'partially_scanned'
+      qty = order_item.qty - order_item.scanned_qty
+      order_item.qty = order_item.scanned_qty
+      order_item.scanned_status = 'scanned'
+      order_item.save
+    else
+      qty = order_item.qty - order_item.scanned_qty
+      order = order_item.order
+      order.order_items.delete(order_item)
+      order.save
+    end
+    qty
   end
 end
