@@ -210,11 +210,11 @@ RSpec.describe ScanPackController, type: :controller do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
-
-      ScanPackSetting.last.update_attributes(scan_by_tracking_number: true)
     end
 
     it 'Cue order by tracking number' do
+      ScanPackSetting.last.update(scan_by_shipping_label: true, scan_by_packing_slip: false)
+
       order1 = FactoryBot.create(:order, increment_id:'order1', :status=>'awaiting', store: @store, tracking_num: 'tracking_order_1')
       FactoryBot.create(:order_item, :product_id=>@products['product_3'].id, :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>@products['product_3'].name)
 
@@ -226,6 +226,64 @@ RSpec.describe ScanPackController, type: :controller do
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['data']['order']['increment_id']).to eq('order2')
+    end
+
+    it 'Cue order by Scan to view_order' do
+      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, store_order_id: 439041093)
+      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+
+      get :scan_barcode, params: { input: '^#^1A2B3C45^', state: 'scanpack.rfo' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('order')
+    end
+
+    it 'Cue order by order number' do
+      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, store_order_id: 439041093)
+      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+
+      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('order')
+    end
+
+    it 'No order by tracking number' do
+      ScanPackSetting.last.update_attributes(scan_by_shipping_label: true, scan_by_packing_slip: false)
+
+      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, store_order_id: 439041093)
+      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+
+      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to eq(["Order with tracking number order cannot be found. It may not have been imported yet"])
+    end
+
+    it 'No order by order number' do
+      ScanPackSetting.last.update_attributes(scan_by_packing_slip: true, scan_by_shipping_label: false)
+
+      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to eq(["Order with number order cannot be found. It may not have been imported yet"])
+    end
+
+    it 'Cue order by tracking number or order number' do
+      ScanPackSetting.last.update_attributes(scan_by_packing_slip_or_shipping_label: true, scan_by_shipping_label: false, scan_by_packing_slip: false)
+
+      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, tracking_num: '439041093')
+      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+
+      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('order')
     end
   end
 

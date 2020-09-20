@@ -151,7 +151,7 @@ module ScanPack
           output = send(
             state_func, @params[:input], @params[:state], @params[:id], @params[:store_order_id],
             {
-              current_user: @current_user, session: @session
+              current_user: @current_user, session: @session, order_by_number: @params[:order_by_number].to_b
             }
           )
         else
