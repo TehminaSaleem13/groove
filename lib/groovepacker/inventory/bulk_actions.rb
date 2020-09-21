@@ -4,11 +4,17 @@ module Groovepacker
 
       include Groovepacker::Inventory::Helper
 
-      def process_unprocessed
+      def process_unprocessed(order_id = nil)
         unless inventory_tracking_enabled?
           return true
         end
-        order_items = OrderItem.includes(:order).where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
+
+        order = Order.where(id: order_id).first if order_id
+        if order.try(:present?)
+          order_items = order.order_items.includes(:order).where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
+        else
+          order_items = OrderItem.includes(:order).where(inv_status: OrderItem::DEFAULT_INV_STATUS, scanned_status: 'notscanned')
+        end
         order_items.each do |single_order_item|
           process(single_order_item)
           # if single_order_item.is_not_ghost?

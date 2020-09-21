@@ -81,6 +81,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_is_delay'=> 'tenants#update_is_delay'
   get '/tenants/update_scan_workflow'=> 'tenants#update_scan_workflow'
   get '/tenants/update_store_order_respose_log'=> 'tenants#update_store_order_respose_log'
+  get '/tenants/update_inventory_update_delay'=> 'tenants#update_inventory_update_delay'
   root :to => "home#index"
 
   resources :home do

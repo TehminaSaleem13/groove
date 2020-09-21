@@ -58,8 +58,13 @@ class Order < ActiveRecord::Base
   end
 
   def process_unprocessed_orders
-    bulkaction = Groovepacker::Inventory::BulkActions.new
-    bulkaction.process_unprocessed
+    # bulkaction = Groovepacker::Inventory::BulkActions.new
+    # bulkaction.process_unprocessed
+    if (Tenant.find_by_name(Apartment::Tenant.current).try(:delayed_inventory_update) rescue nil)
+      Groovepacker::Inventory::BulkActions.new.process_unprocessed(self.id)
+    else
+      Groovepacker::Inventory::BulkActions.new.process_unprocessed
+    end
     true
   end
 

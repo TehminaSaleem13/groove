@@ -156,6 +156,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_inventory_update_delay
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.delayed_inventory_update = !tenant.delayed_inventory_update
+    tenant.save
+    render json: {}
+  end
+
   def update_groovelytic_stat
     tenant = Tenant.find(params["tenant_id"])
     tenant.groovelytic_stat = !tenant.groovelytic_stat
