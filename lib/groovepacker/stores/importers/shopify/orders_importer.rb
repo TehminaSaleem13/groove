@@ -19,7 +19,7 @@ module Groovepacker
 
               import_single_order(order) if order.present?
             end
-            @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at'])) if @import_item.status != 'cancelled'
+            @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at'])) rescue nil if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end
