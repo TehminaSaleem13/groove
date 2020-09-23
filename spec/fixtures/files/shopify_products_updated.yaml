@@ -1,0 +1,50 @@
+---
+products:
+- id: 5028212546843
+  title: Shopify Updated Product
+  body_html: 'Covered with soft and smooth plush, for comfortable touch. A great addition
+    to child''s alpaca collection. '
+  vendor: DIGIMON
+  product_type: TOYS
+  created_at: '2020-03-20T20:28:57-04:00'
+  handle: 10inch-anime-cute-digital-monster-digimon-koromon-soft-plush-toy-doll-pillow
+  updated_at: '2020-07-07T07:30:30-04:00'
+  published_at: '2020-03-20T20:28:57-04:00'
+  template_suffix: 
+  published_scope: web
+  tags: digimon, egnition-sample-data, stuffed-toys, toys
+  admin_graphql_api_id: gid://shopify/Product/5028212546843
+  variants:
+  - id: 32855512345091
+    product_id: 5028212546843
+    title: Default Title
+    price: '9.99'
+    sku: SHOPIFYUPDATEDSKU
+    position: 1
+    inventory_policy: deny
+    compare_at_price: '0.00'
+    fulfillment_service: manual
+    inventory_management: shopify
+    option1: Default Title
+    option2: 
+    option3: 
+    created_at: '2020-03-20T20:28:57-04:00'
+    updated_at: '2020-07-07T07:25:35-04:00'
+    taxable: true
+    barcode: '123'
+    grams: 0
+    image_id: 
+    weight: 0.0
+    weight_unit: lb
+    inventory_item_id: 34380569051478
+    inventory_quantity: -7
+    old_inventory_quantity: -7
+    requires_shipping: true
+    admin_graphql_api_id: gid://shopify/ProductVariant/32855512345091
+  options:
+  - id: 6050959422596
+    product_id: 5028212546843
+    name: Title
+    position: 1
+    values:
+    - Default Title

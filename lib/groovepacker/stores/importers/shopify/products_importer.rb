@@ -71,22 +71,30 @@ module Groovepacker
                 product = create_product_from_variant(variant, shopify_product)   
                 product = product.reload rescue product
                 product.product_inventory_warehousess.first.update_attributes(available_inv: variant['inventory_quantity']) if @credential.import_inventory_qoh
-                product.set_product_status 
+                product.set_product_status
               end
             end
-            
+
             def create_product_from_variant(variant, shopify_product)
               if variant["sku"].blank?
                 product = create_product_with_temp_sku(variant, shopify_product)
+              elsif @credential.import_updated_sku && ProductSku.where(sku: variant["sku"]).length == 0 &&  Product.where(store_product_id: variant["product_id"]).length != 0
+                product = Product.where(store_product_id: variant["product_id"]).first
+                product.product_skus.create(sku: variant["sku"])
+                update_product_details_barcode(product, variant)
               elsif ProductSku.where(sku: variant["sku"]).length == 0
                 # if non-nil sku is not found
                 product = create_new_product_from_order(variant, variant["sku"], shopify_product)
               else
                 product = ProductSku.where(sku: variant["sku"]).first.product
-                product.update_attributes(name: variant['title'])
-                add_barcode_to_product(product, variant) if variant['barcode'].present? && product.product_barcodes.where(barcode: variant['barcode']).blank?
+                update_product_details_barcode(product, variant)
               end
               return product
+            end
+
+            def update_product_details_barcode(product, variant)
+              product.update_attributes(name: variant['title'])
+              add_barcode_to_product(product, variant) if variant['barcode'].present? && product.product_barcodes.where(barcode: variant['barcode']).blank?
             end
 
             def add_barcode_to_product(product, variant)

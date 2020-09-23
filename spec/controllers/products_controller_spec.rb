@@ -146,7 +146,7 @@ RSpec.describe ProductsController, :type => :controller do
       @request.headers.merge! header
 
       shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last)
-      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false, import_inventory_qoh: true)
+      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false, import_inventory_qoh: true, import_updated_sku: true)
     end
 
     it 'Refresh the entire catalog' do
@@ -161,7 +161,25 @@ RSpec.describe ProductsController, :type => :controller do
       res = JSON.parse(response.body)
       expect(response.status).to eq(200)
 
-      expect(Product.count).to eq(36)
+      expect(Product.count).to eq(35)
+    end
+
+    it 'Import New and Updated Items' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:products).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_products_updated.yaml'))))
+
+      request.accept = 'application/json'
+
+      product = FactoryBot.create(:product, store_product_id: '5028212546843', name: 'ShopifyProductz')
+      FactoryBot.create(:product_sku, product: product, sku: 'SHOPIFYSKU')
+      expect(Product.count).to eq(1)
+      expect(product.product_skus.count).to eq(1)
+
+      post :import_products, params: { id: shopify_store.id, product_import_type: 'new_updated' }
+      res = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(product.product_skus.count).to eq(2)
     end
   end
 end
