@@ -69,4 +69,12 @@ module ScanPack::Utilities::ProductScan::SingleProductType
     end
     qty
   end
+
+  def remove_product_from_order(item)
+    order_item = OrderItem.find(item['order_item_id'])
+    order = order_item.order
+    order.order_items.delete(order_item)
+    order.save
+    order_item.qty
+  end
 end

@@ -63,7 +63,9 @@ module ScanPack
       when @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
         do_if_service_issue_code_is_enabled_and_and_eql_to_input
       when @scanpack_settings.partial? && @input == @scanpack_settings.partial_barcode
-        do_if_partial_code_is_enabled_and_and_eql_to_input
+        do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input('PARTIAL')
+      when @scanpack_settings.remove_enabled? && @input == @scanpack_settings.remove_barcode
+        do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input('REMOVE')
       else
         do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
       end
@@ -79,11 +81,17 @@ module ScanPack
       @session[:most_recent_scanned_product] = nil
     end
 
-    def do_if_partial_code_is_enabled_and_and_eql_to_input
+    def do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input(code_type)
       @single_order.order_activities.last.try(:destroy)
-      @single_order.get_unscanned_items(limit: nil).each do |item|
-        qty = remove_skippable_product(item)
-        @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username))
+      if code_type == 'PARTIAL'
+        @single_order.get_unscanned_items(limit: nil).each do |item|
+          qty = remove_skippable_product(item)
+          @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username))
+        end
+      elsif code_type == 'REMOVE'
+        item = @single_order.get_unscanned_items(limit: nil).first
+        qty = remove_product_from_order(item)
+        @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the REMOVE barcode", @current_user.try(:username))
       end
       do_if_barcode_found
     end

@@ -420,7 +420,7 @@ RSpec.describe ScanPackController, type: :controller do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
-      ScanPackSetting.last.update(partial: true)
+      ScanPackSetting.last.update(partial: true, remove_enabled: true)
     end
 
     it 'Scan Order using Partial Barcode' do
@@ -466,6 +466,38 @@ RSpec.describe ScanPackController, type: :controller do
       expect(order.reload.get_items_count).to eq(5)
       expect(order.reload.status).to eq('scanned')
       expect(result['data']['next_state']).to eq('scanpack.rfo')
+    end
+
+    it 'Scan Order using Remove Barcode' do
+      product1 = FactoryBot.create(:product, is_skippable: true)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+
+      product2 = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product2, sku: 'PRODUCT2')
+      FactoryBot.create(:product_barcode, product: product2, barcode: 'PRODUCT2')
+
+      order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product1.id, qty: 5, price: '10', row_total: '10', order: order, name: product1.name)
+      FactoryBot.create(:order_item, product_id: product2.id, qty: 4, price: '10', row_total: '10', order: order, name: product2.name)
+
+      expect(order.get_items_count).to eq(9)
+
+      get :scan_barcode, params: { input: 'ORDER', state: 'scanpack.rfo' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('ORDER')
+
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, params: { id: order.id, input: 'REMOVE', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      expect(order.reload.get_items_count).to eq(4)
     end
   end
 end
