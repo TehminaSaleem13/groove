@@ -268,7 +268,7 @@ class ImportCsv
         column_name = row.as_json[column_number][0]
         order_numbers << row[column_name].strip unless row[column_name].blank? 
       end
-      $redis.sadd("#{Apartment::Tenant.current}_csv_array", order_numbers.uniq)
+      $redis.sadd("#{Apartment::Tenant.current}_csv_array", order_numbers.uniq) if order_numbers.present?
     rescue Exception => e
       Rollbar.error(e, e.message)
     end
