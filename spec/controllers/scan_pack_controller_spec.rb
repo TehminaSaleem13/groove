@@ -497,7 +497,7 @@ RSpec.describe ScanPackController, type: :controller do
       get :scan_barcode, params: { id: order.id, input: 'REMOVE', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
 
-      expect(order.reload.get_items_count).to eq(4)
+      expect(order.reload.get_items_count).to eq(6)
     end
   end
 end

@@ -70,11 +70,9 @@ module ScanPack::Utilities::ProductScan::SingleProductType
     qty
   end
 
-  def remove_product_from_order(item)
-    order_item = OrderItem.find(item['order_item_id'])
-    order = order_item.order
-    order.order_items.delete(order_item)
-    order.save
-    order_item.qty
+  def remove_kit_product_item_from_order(item)
+    order_item_kit_product = OrderItemKitProduct.find(item['kit_product_id'])
+    order_item_kit_product.process_item(nil, @current_user.username, 1, true)
+    remove_kit_item_from_order(item)
   end
 end
