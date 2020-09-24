@@ -80,6 +80,7 @@ module Groovepacker
                 product = create_product_with_temp_sku(variant, shopify_product)
               elsif @credential.import_updated_sku && ProductSku.where(sku: variant["sku"]).length == 0 &&  Product.where(store_product_id: variant["product_id"]).length != 0
                 product = Product.where(store_product_id: variant["product_id"]).first
+                product.product_skus.destroy_all if @credential.updated_sku_handling == 'remove_all'
                 product.product_skus.create(sku: variant["sku"])
                 update_product_details_barcode(product, variant)
               elsif ProductSku.where(sku: variant["sku"]).length == 0
