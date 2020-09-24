@@ -497,12 +497,15 @@ module Groovepacker
                   shiping_easy_order.addactivity("QTY #{item.qty} of item with SKU: #{primary_sku} Added", "#{@credential.store.name} Import")
                 elsif check_for_replace_product
                   intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
+                  activity_added = false
                   intangible_strings.each do |string|
                     if product_name.downcase.include?(string) || params_item[index]["sku"].downcase.include?(string)
                       shiping_easy_order.addactivity("Intangible item with SKU #{params_item[index]["sku"]}  and Name #{product_name} was replaced with GP Coupon.","#{@credential.store.name} Import")
+                      activity_added = true
                       break
                     end
                   end
+                  shiping_easy_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@credential.store.name} Import") if !activity_added && item.product.try(:primary_sku)
                 end
               end
             end
