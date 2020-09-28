@@ -65,6 +65,12 @@ module ScanPack
       if (@scanpack_settings.scan_by_shipping_label || @scanpack_settings.scan_by_packing_slip_or_shipping_label) && !@order_by_number
         @orders = Order.includes([:store, :order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 10').order("LENGTH(tracking_num) DESC")
         @orders = Order.includes([:store, :order_items]).where('? LIKE CONCAT("%", tracking_num) and LENGTH(tracking_num) >= 10', @input).order("LENGTH(tracking_num) DESC") if @orders.blank?
+        if @orders.first.try(:status) == 'scanned' && @scanpack_settings.scan_by_packing_slip_or_shipping_label
+          old_orders = @orders
+          @orders = []
+          find_order
+          @orders = old_orders unless @orders.any?
+        end
         find_order if @orders.blank? && @scanpack_settings.scan_by_packing_slip_or_shipping_label
       else
         find_order
