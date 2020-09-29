@@ -76,6 +76,7 @@ module Groovepacker
               shopify_order = update_shipping_amount_and_weight(shopify_order, order)
               shopify_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
               shopify_order.last_modified = order['updated_at']
+              shopify_order.tracking_num = order['fulfillments'].first['tracking_number'] rescue nil
               return shopify_order
             end
 
