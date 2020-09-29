@@ -118,6 +118,7 @@ Groovepacks::Application.routes.draw do
       post 'bulk_import_xml'
       get 'next_split_order'
       get 'import_for_ss'
+      get 'cancel_all'
     end
     member do
       post 'add_item_to_order'

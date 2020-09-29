@@ -99,6 +99,42 @@ RSpec.describe OrdersController, type: :controller do
       expect(se_import_item.import_type).to eq('range_import')
       expect(se_import_item.status).to eq('completed')
     end
+
+    it 'Import All shows import Running' do
+      OrderImportSummary.create(status: 'in_progress')
+
+      request.accept = 'application/json'
+
+      get :import_all
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include('Import is in progress')
+    end
+
+    it 'Import for single store shows import Running' do
+      se_store = Store.where(store_type: 'ShippingEasy').last
+      ImportItem.create(status: 'in_progress', store: se_store)
+
+      request.accept = 'application/json'
+      get :import, params: { store_id: se_store.id }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include('Import is in progress')
+    end
+
+    it 'Range or Quickfix Import shows import Running' do
+      se_store = Store.where(store_type: 'ShippingEasy').last
+      ImportItem.create(status: 'in_progress', store: se_store)
+
+      request.accept = 'application/json'
+      get :import_for_ss, params: { store_id: se_store.id, days: 0, import_type: 'range_import', start_date: '2020-09-26%2007:22:39', end_date: '2020-09-27%2007:22:39', order_date_type: 'modified'}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include('An Import is already in queue or running, please wait for it to complete!')
+    end
   end
 
   describe 'Shopify Imports' do
@@ -110,7 +146,7 @@ RSpec.describe OrdersController, type: :controller do
       @request.headers.merge! header
 
       shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last)
-      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: true)
+      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false)
     end
 
     it 'Import Orders' do

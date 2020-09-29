@@ -257,7 +257,7 @@ class OrdersController < ApplicationController
   end
 
   def import
-    if order_summary.nil?   #order_summary defined in application helper
+    if order_summary.nil? && no_running_imports(params[:store_id]) # order_summary defined in application helper
       initiate_import_for_single_store
     else
       set_status_and_message(false, "Import is in progress", ['push', 'error_messages'])
@@ -337,6 +337,19 @@ class OrdersController < ApplicationController
         time: Time.now,
       )
     end
+    render json: @result
+  end
+
+  def cancel_all
+    @result = {}
+    import_items = ImportItem.where(status: %w(in_progress not_started)).update_all(status: 'cancelled', message: 'cancel_all')
+    top_summary = OrderImportSummary.top_summary
+    if top_summary
+      top_summary.update_attributes(status: 'cancelled')
+      top_summary.emit_data_to_user(true)
+    end
+    OrderImportSummary.destroy_all
+    set_status_and_message(true, 'Status Updated')
     render json: @result
   end
 
