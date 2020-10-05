@@ -452,7 +452,7 @@ RSpec.describe ScanPackController, type: :controller do
       get :scan_barcode, params: { id: order.id, input: 'SKIP', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
 
-      expect(order.reload.get_items_count).to eq(7)
+      expect(order.reload.get_items_count).to eq(6)
 
       get :scan_barcode, params: { id: order.id, input: 'PRODUCT2', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
@@ -463,7 +463,7 @@ RSpec.describe ScanPackController, type: :controller do
       get :scan_barcode, params: { id: order.id, input: 'PARTIAL', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
-      expect(order.reload.get_items_count).to eq(5)
+      expect(order.reload.get_items_count).to eq(4)
       expect(order.reload.status).to eq('scanned')
       expect(result['data']['next_state']).to eq('scanpack.rfo')
     end
@@ -498,6 +498,49 @@ RSpec.describe ScanPackController, type: :controller do
       expect(response.status).to eq(200)
 
       expect(order.reload.get_items_count).to eq(6)
+    end
+
+    it 'Retain Skipped Items' do
+      ScanPackSetting.last.update_attributes(remove_skipped: false)
+      @store.update_attributes(inventory_warehouse_id: InventoryWarehouse.first.id)
+
+      product1 = FactoryBot.create(:product, is_skippable: true, store: @store)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+      product1_inventory = product1.product_inventory_warehousess.first
+      product1_inventory.update_attributes(available_inv: 10)
+
+      product2 = FactoryBot.create(:product, store: @store)
+      FactoryBot.create(:product_sku, product: product2, sku: 'PRODUCT2')
+      FactoryBot.create(:product_barcode, product: product2, barcode: 'PRODUCT2')
+
+      order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product1.id, qty: 5, price: '10', row_total: '10', order: order, name: product1.name)
+      FactoryBot.create(:order_item, product_id: product2.id, qty: 4, price: '10', row_total: '10', order: order, name: product2.name)
+
+      expect(product1_inventory.reload.available_inv).to eq(5)
+      expect(order.get_items_count).to eq(9)
+
+      get :scan_barcode, params: { input: 'ORDER', state: 'scanpack.rfo' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('ORDER')
+
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      get :scan_barcode, params: { id: order.id, input: 'SKIP', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      expect(product1_inventory.reload.available_inv).to eq(8)
+      expect(order.reload.get_items_count).to eq(6)
+
+      skipped_item = order.order_items.where(product_id: product1.id).first
+
+      expect(skipped_item.skipped_qty + skipped_item.qty).to eq(5)
     end
   end
 end

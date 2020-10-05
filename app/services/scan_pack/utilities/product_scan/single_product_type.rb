@@ -9,7 +9,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
           order_item = OrderItem.find(item['order_item_id'])
 
           # from LotNumber Module
-          store_lot_number(order_item, serial_added)
+          # store_lot_number(order_item, serial_added)
 
           # unless serial_added
           #   @result['data']['serial']['order_item_id'] = order_item.id
@@ -31,12 +31,18 @@ module ScanPack::Utilities::ProductScan::SingleProductType
           #   end
           # end
 
-          process_scan(clicked, order_item, serial_added)
+          # process_scan(clicked, order_item, serial_added)
 
           # If the product was skippable and CODE is SKIP
           # then we can remove that order_item from the order
           if @scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && item['skippable']
-            remove_skippable_product(item)
+            qty = remove_skippable_product(item)
+            order_item.update_attributes(skipped_qty: qty) unless @scanpack_settings.remove_skipped
+            @single_order.order_items.delete(order_item) if @scanpack_settings.remove_skipped && order_item.scanned_status != 'partially_scanned'
+            @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was skipped using the SKIP barcode", @current_user.try(:username))
+          else
+            store_lot_number(order_item, serial_added)
+            process_scan(clicked, order_item, serial_added)
           end
           break
         end
@@ -54,23 +60,25 @@ module ScanPack::Utilities::ProductScan::SingleProductType
   # Remove those order_items that are skippable when the scanned barcode
   # is SKIP entered as the barcode.
   def remove_skippable_product(item)
+    @single_order.order_activities.last.try(:destroy)
     order_item = OrderItem.find(item['order_item_id'])
-    qty = 0
-    if order_item.scanned_status == 'partially_scanned'
+    # qty = 0
+    # if order_item.scanned_status == 'partially_scanned'
       qty = order_item.qty - order_item.scanned_qty
       order_item.qty = order_item.scanned_qty
       order_item.scanned_status = 'scanned'
       order_item.save
-    else
-      qty = order_item.qty - order_item.scanned_qty
-      order = order_item.order
-      order.order_items.delete(order_item)
-      order.save
-    end
+    # else
+    #   qty = order_item.qty - order_item.scanned_qty
+    #   order = order_item.order
+    #   order.order_items.delete(order_item)
+    #   order.save
+    # end
     qty
   end
 
   def remove_kit_product_item_from_order(item)
+    @single_order.order_activities.last.try(:destroy)
     order_item_kit_product = OrderItemKitProduct.find(item['kit_product_id'])
     order_item_kit_product.process_item(nil, @current_user.username, 1, true)
     remove_kit_item_from_order(item)

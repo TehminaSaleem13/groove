@@ -8,6 +8,8 @@ module Groovepacker
         @result = Hash.new
         @result['messages'] = []
         @result['status'] = true
+        @scanpack_settings = ScanPackSetting.last
+        @remove_skipped = @scanpack_settings.remove_skipped
       end
       # Changes the status of orders
       def status_update(tenant, params, bulk_actions_id, username)
@@ -38,7 +40,7 @@ module Groovepacker
 
       def check_inactive_product_exist(product_not_active, params, order)
         return unless params['status'].eql?('awaiting')
-        if order.order_items.present? && order.order_items.map(&:qty).sum == 0
+        if order.order_items.present? && (order.order_items.map(&:qty).sum == 0 && order.order_items.map(&:skipped_qty).sum == 0)
           order.update_attribute(:status, "onhold")
           @result['status'] &= false
           @result['messages'].push('Only orders containing Active items can be Awaiting') 
@@ -62,6 +64,7 @@ module Groovepacker
         non_scanning_states = { 'serviceissue' => 'Service Issue', 'onhold' => 'Action Required' }
         return if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
         return if order_has_inactive_or_new_products(order, params)
+        order_status = order.status
         order.status = params[:status]
         order.scanned_on = nil if params[:status] != 'scanned'
         order.reallocate_inventory = params[:reallocate_inventory]
@@ -74,6 +77,13 @@ module Groovepacker
           end
           Tote.find_by_order_id(order.id).update_attributes(order_id: nil, pending_order: false) if order.tote
         else
+          order.save
+          retain_items = !@remove_skipped && order_status == 'scanned' && params[:status] == 'awaiting'
+          if retain_items
+            order.order_items.where('skipped_qty != 0').each do |order_item|
+              order_item.update_attributes(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
+            end
+          end
           order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
         end
         order.packing_user_id = User.find_by_username(username).try(:id)

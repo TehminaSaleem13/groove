@@ -201,7 +201,9 @@ module OrderConcern
   end
 
   def retrieve_order_item(orderitem)
-    order_item = { 'iteminfo' => orderitem }
+    orderitem_attributes = orderitem.attributes
+    orderitem_attributes['qty'] = orderitem.qty + orderitem.skipped_qty
+    order_item = { 'iteminfo' => orderitem_attributes }
     product = orderitem.product
     if product.nil?
       order_item['productinfo'] = nil

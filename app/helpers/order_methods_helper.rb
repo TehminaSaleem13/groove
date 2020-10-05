@@ -51,7 +51,7 @@ module OrderMethodsHelper
       product_kit_skuss = product.product_kit_skuss
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
       # If item has 0 qty
-      if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
+      if is_new_or_inactive || (order_item.qty.eql?(0) && order_item.skipped_qty.eql?(0)) || product_kit_skuss.map(&:qty).index(0)
         result = true
         break
       end
@@ -66,7 +66,7 @@ module OrderMethodsHelper
       product_kit_skuss = product.product_kit_skuss
       next if product.blank?
       is_new_or_inactive = product.status.eql?('new') || product.status.eql?('inactive')
-      if is_new_or_inactive || order_item.qty.eql?(0) || product_kit_skuss.map(&:qty).index(0)
+      if is_new_or_inactive || (order_item.qty.eql?(0) && order_item.skipped_qty.eql?(0)) || product_kit_skuss.map(&:qty).index(0)
         products_list << product.as_json(
           include: {
             product_images: {

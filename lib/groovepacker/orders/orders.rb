@@ -8,6 +8,7 @@ module Groovepacker
           return @result
         end
         if @params[:var] == 'status'
+          order_status = order.status
           check = order.order_items.map(&:qty).include? (0)
           if check
            set_status_and_message(false, 'Only orders containing Active items can be Awaiting', ['&', 'error_msg'])  
@@ -21,6 +22,13 @@ module Groovepacker
             end
             add_activity(order, @current_user.name)
           else
+            order.save
+            retain_items = !ScanPackSetting.last.remove_skipped && order_status == 'scanned' && @params[:value] == 'awaiting'
+            if retain_items
+              order.order_items.where('skipped_qty != 0').each do |order_item|
+                order_item.update_attributes(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
+              end
+            end
             order.scanned_by_status_change = false
             order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", @current_user.name)
           end
@@ -162,14 +170,14 @@ module Groovepacker
           else
             product = @orderitem.product
             sku = product.product_skus.first.sku rescue nil
-            if @params[:qty] > @orderitem.qty
-              value = @params[:qty] -  @orderitem.qty
+            if @params[:qty] > (@orderitem.qty + @orderitem.skipped_qty)
+              value = @params[:qty] - (@orderitem.qty + @orderitem.skipped_qty)
               @orderitem.order.addactivity("Item with sku " + sku.to_s + " QTY increased by #{value}", @current_user.name)
             else
-              value = @orderitem.qty - @params[:qty]
+              value = (@orderitem.qty + @orderitem.skipped_qty) - @params[:qty]
               @orderitem.order.addactivity("Item with sku " + sku.to_s + " QTY decreased by #{value} ", @current_user.name)
             end 
-
+            @orderitem.skipped_qty = 0
             if @orderitem.scanned_status == "scanned" &&  @params[:qty] > @orderitem.qty 
               @orderitem.scanned_status = 'partially_scanned'
               if @orderitem.order_item_kit_products.count > 0

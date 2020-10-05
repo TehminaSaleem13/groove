@@ -82,7 +82,6 @@ module ScanPack
     end
 
     def do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input(code_type)
-      @single_order.order_activities.last.try(:destroy)
       if code_type == 'PARTIAL'
         @single_order.get_unscanned_items(limit: nil).each do |item|
           qty = remove_skippable_product(item)
