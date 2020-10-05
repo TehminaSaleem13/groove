@@ -204,6 +204,7 @@ Groovepacks::Application.routes.draw do
       post 'update_store_list'
       get 'get_order_details'
       get 'update_store_lro'
+      post 'update_shopify_token'
     end
     member do
       get 'verify_tags'

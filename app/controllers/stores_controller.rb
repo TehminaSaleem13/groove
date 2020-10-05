@@ -643,4 +643,16 @@ class StoresController < ApplicationController
     store_list_update
     render json: @result
   end
+
+  def update_shopify_token
+    @result = { status: true }
+    begin
+      shopify_credential = Store.find(params[:id]).shopify_credential
+      shopify_credential.update_attributes(access_token: params[:token])
+    rescue => e
+      @result[:status] = false
+      @result[:error_messages] = e
+    end
+    render json: @result
+  end
 end
