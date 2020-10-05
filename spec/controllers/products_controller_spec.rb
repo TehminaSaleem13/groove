@@ -161,7 +161,7 @@ RSpec.describe ProductsController, :type => :controller do
       res = JSON.parse(response.body)
       expect(response.status).to eq(200)
 
-      expect(Product.count).to eq(35)
+      expect(Product.count).to eq(36)
     end
 
     it 'Import New and Updated Items' do
@@ -171,7 +171,7 @@ RSpec.describe ProductsController, :type => :controller do
 
       request.accept = 'application/json'
 
-      product = FactoryBot.create(:product, store_product_id: '5028212546843', name: 'ShopifyProductz')
+      product = FactoryBot.create(:product, store_product_id: '32855512345091', name: 'ShopifyProductz')
       FactoryBot.create(:product_sku, product: product, sku: 'SHOPIFYSKU')
       expect(Product.count).to eq(1)
       expect(product.product_skus.count).to eq(1)

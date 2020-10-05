@@ -78,8 +78,8 @@ module Groovepacker
             def create_product_from_variant(variant, shopify_product)
               if variant["sku"].blank?
                 product = create_product_with_temp_sku(variant, shopify_product)
-              elsif @credential.import_updated_sku && ProductSku.where(sku: variant["sku"]).length == 0 &&  Product.where(store_product_id: variant["product_id"]).length != 0
-                product = Product.where(store_product_id: variant["product_id"]).first
+              elsif @credential.import_updated_sku && ProductSku.where(sku: variant["sku"]).length == 0 &&  Product.where(store_product_id: variant["id"]).length != 0
+                product = Product.where(store_product_id: variant["id"]).first
                 product.product_skus.destroy_all if @credential.updated_sku_handling == 'remove_all'
                 product.product_skus.create(sku: variant["sku"])
                 update_product_details_barcode(product, variant)
@@ -128,7 +128,7 @@ module Groovepacker
                 return coupon_product unless coupon_product.nil? 
               end 
               product = Product.create(name: variant["title"], store: @store,
-                                       store_product_id: variant["product_id"])
+                                       store_product_id: variant["id"])
               
               product.add_product_activity("Product Import","#{product.store.try(:name)}")
               product.product_skus.create(sku: sku)
