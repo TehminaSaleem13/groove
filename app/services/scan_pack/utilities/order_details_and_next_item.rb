@@ -12,6 +12,8 @@ module ScanPack
         data['scanning_count'] = @single_order.scanning_count
         do_if_unscanned_items_present(data) unless data['unscanned_items'].length == 0
         data['next_item']['location'] = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0].location_primary rescue nil
+        data['next_item']['location2'] = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0].location_secondary rescue nil
+        data['next_item']['location3'] = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0].location_tertiary rescue nil
         return data
       end
 

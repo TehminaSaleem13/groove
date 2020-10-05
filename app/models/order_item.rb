@@ -102,6 +102,8 @@ class OrderItem < ActiveRecord::Base
     result['barcodes'] = sort_by_order[item.cached_product_barcodes]
     result['product_id'] = item.id
     result['location'] = item.product_inventory_warehousess[0].location_primary rescue nil
+    result['location2'] = item.product_inventory_warehousess[0].location_secondary rescue nil
+    result['location3'] = item.product_inventory_warehousess[0].location_tertiary rescue nil
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
     result['click_scan_enabled'] = item.click_scan_enabled
