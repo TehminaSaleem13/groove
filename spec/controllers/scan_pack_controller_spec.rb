@@ -210,80 +210,198 @@ RSpec.describe ScanPackController, type: :controller do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
+
+      product = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCTTEST')
+      FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCTTEST')
+
+      order = FactoryBot.create(:order, increment_id: '100', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: '10', status: 'awaiting', tracking_num: '100', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: 'T', status: 'awaiting', tracking_num: '9400111298370613423837', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: 'TR', status: 'awaiting', tracking_num: '12345', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: '1234512345', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: 'TRA', status: 'awaiting', tracking_num: '1234512345', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
     end
 
-    it 'Cue order by tracking number' do
-      ScanPackSetting.last.update(scan_by_shipping_label: true, scan_by_packing_slip: false)
+    describe 'Scan Packing Slip' do
+      before do
+        ScanPackSetting.last.update_attributes(scan_by_packing_slip: true, scan_by_shipping_label: false, scan_by_packing_slip_or_shipping_label: false)
+      end
 
-      order1 = FactoryBot.create(:order, increment_id:'order1', :status=>'awaiting', store: @store, tracking_num: 'tracking_order_1')
-      FactoryBot.create(:order_item, :product_id=>@products['product_3'].id, :qty=>1, :price=>"10", :row_total=>"10", :order=>order1, :name=>@products['product_3'].name)
+      it 'exact order number match' do
+        get :scan_barcode, params: { input: '100', state: 'scanpack.rfo' }
 
-      order2 = FactoryBot.create(:order, increment_id:'order2', :status=>'awaiting', store: @store, tracking_num: 'tracking_order_2')
-      FactoryBot.create(:order_item, :product_id=>@products['product_3'].id, :qty=>1, :price=>"10", :row_total=>"10", :order=>order2, :name=>@products['product_3'].name)
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
 
-      get :scan_barcode, params: { input: 'tracking_order_2', state: 'scanpack.rfo' }
+      it 'no matching order number' do
+        get :scan_barcode, params: { input: '500', state: 'scanpack.rfo' }
 
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['data']['order']['increment_id']).to eq('order2')
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Order with number 500 cannot be found. It may not have been imported yet')
+      end
+
+      it 'scan to view match' do
+        get :scan_barcode, params: { input: '^#^64', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
+
+      it 'hashtag removal' do
+        get :scan_barcode, params: { input: '#100', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
+
+      it 'hashtag and hyphen removal' do
+        get :scan_barcode, params: { input: '#1-00', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
+
+      it 'spaces before, after, inside removal' do
+        get :scan_barcode, params: { input: ' 1 00 ', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
+
+      it 'order number is contained in other number' do
+        get :scan_barcode, params: { input: '10', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('10')
+      end
+
+      it 'order number is contained and does not exist' do
+        get :scan_barcode, params: { input: '1', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Order with number 1 cannot be found. It may not have been imported yet')
+      end
     end
 
-    it 'Cue order by Scan to view_order' do
-      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, store_order_id: 439041093)
-      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+    describe 'Scan Shipping Label' do
+      before do
+        ScanPackSetting.last.update_attributes(scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false)
+      end
 
-      get :scan_barcode, params: { input: '^#^1A2B3C45^', state: 'scanpack.rfo' }
+      it 'tracking number less than 10 characters' do
+        get :scan_barcode, params: { input: '100', state: 'scanpack.rfo' }
 
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['data']['order']['increment_id']).to eq('order')
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Please provide a valid tracking number with 10 or more characters.')
+      end
+
+      it 'exact tracking number match' do
+        get :scan_barcode, params: { input: '9400111298370613423837', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('T')
+      end
+
+      it 'tracking number with last 5 removed' do
+        get :scan_barcode, params: { input: '94001112983706134', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Order with tracking number 94001112983706134 cannot be found. It may not have been imported yet')
+      end
+
+      it 'tracking of 10 or more with prefix' do
+        get :scan_barcode, params: { input: 'XX9400111298370613423837', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('T')
+      end
+
+      it 'tracking no. after prefix is too short' do
+        get :scan_barcode, params: { input: '100000000012345', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Order with tracking number 100000000012345 cannot be found. It may not have been imported yet')
+      end
+
+      it 'tracking no. is close to matching but does not' do
+        get :scan_barcode, params: { input: '9600111298370613423837', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Order with tracking number 9600111298370613423837 cannot be found. It may not have been imported yet')
+      end
     end
 
-    it 'Cue order by order number' do
-      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, store_order_id: 439041093)
-      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+    describe 'Scan Packing Slip or Shipping Label' do
+      before do
+        ScanPackSetting.last.update_attributes(scan_by_packing_slip_or_shipping_label: true, scan_by_shipping_label: false, scan_by_packing_slip: false)
+      end
 
-      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+      it 'exact match on order number with both enabled' do
+        get :scan_barcode, params: { input: 'T', state: 'scanpack.rfo' }
 
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['data']['order']['increment_id']).to eq('order')
-    end
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('T')
+      end
 
-    it 'No order by tracking number' do
-      ScanPackSetting.last.update_attributes(scan_by_shipping_label: true, scan_by_packing_slip: false)
+      it 'prefix added on order number should not be valid' do
+        get :scan_barcode, params: { input: '100T', state: 'scanpack.rfo' }
 
-      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, store_order_id: 439041093)
-      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include('Order with number 100T cannot be found. It may not have been imported yet')
+      end
 
-      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+      it 'order number hashtag removal with both option' do
+        get :scan_barcode, params: { input: '#100', state: 'scanpack.rfo' }
 
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['error_messages']).to eq(["Order with tracking number order cannot be found. It may not have been imported yet"])
-    end
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
 
-    it 'No order by order number' do
-      ScanPackSetting.last.update_attributes(scan_by_packing_slip: true, scan_by_shipping_label: false)
+      it 'tracking of 10 or more with prefix' do
+        get :scan_barcode, params: { input: '100', state: 'scanpack.rfo' }
 
-      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('100')
+      end
 
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['error_messages']).to eq(["Order with number order cannot be found. It may not have been imported yet"])
-    end
+      it 'Order and tracking number are valid match' do
+        get :scan_barcode, params: { input: '1234512345', state: 'scanpack.rfo' }
 
-    it 'Cue order by tracking number or order number' do
-      ScanPackSetting.last.update_attributes(scan_by_packing_slip_or_shipping_label: true, scan_by_shipping_label: false, scan_by_packing_slip: false)
-
-      order = FactoryBot.create(:order, increment_id: 'order', status: 'awaiting', store: @store, tracking_num: '439041093')
-      FactoryBot.create(:order_item, product_id: @products['product_3'].id, qty: 1, price: '10', row_total: '10', order: order, name: @products['product_3'].name)
-
-      get :scan_barcode, params: { input: 'order', state: 'scanpack.rfo' }
-
-      expect(response.status).to eq(200)
-      result = JSON.parse(response.body)
-      expect(result['data']['order']['increment_id']).to eq('order')
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('TRA')
+      end
     end
   end
 
@@ -294,7 +412,7 @@ RSpec.describe ScanPackController, type: :controller do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
-      ScanPackSetting.last.update_attributes(partial: true)
+      ScanPackSetting.last.update(partial: true)
     end
 
     it 'Scan Order using Partial Barcode' do

@@ -26,6 +26,7 @@ module ScanPack
       @scan_by_id = check_for_hex
       @se_shipment_handling_v2_present = (Store.where(store_type: 'ShippingEasy').pluck(:split_order) & %w(shipment_handling_v2 verify_separately)).any?
       @order_by_number = order_by_number
+      @scan_by_tracking_num = @scanpack_settings.scan_by_shipping_label && !@order_by_number
     end
 
     def run
@@ -34,10 +35,16 @@ module ScanPack
     end
 
     def valid_input?
-      validity = @input.present?
+      if @scan_by_tracking_num
+        validity = @input.strip.length >= 10
+        msg = 'Please provide a valid tracking number with 10 or more characters.'
+      else
+        validity = @input.present?
+        msg = 'Please specify a barcode to scan the order'
+      end
       unless validity
         @result['status'] &= false
-        @result['error_messages'].push('Please specify a barcode to scan the order')
+        @result['error_messages'].push(msg)
       end
       validity
     end
@@ -56,13 +63,8 @@ module ScanPack
 
     def collect_orders
       if (@scanpack_settings.scan_by_shipping_label || @scanpack_settings.scan_by_packing_slip_or_shipping_label) && !@order_by_number
-        @orders = Order.includes([:store, :order_items]).where('tracking_num = ? or ? LIKE CONCAT("%", tracking_num ,"%") ', @input, @input).order("LENGTH(tracking_num) DESC")
-        # @orders =
-        #   Order
-        #   .where(
-        #     'status IN ("awaiting","onhold") AND (tracking_num = ? or ? LIKE CONCAT("%",tracking_num,"%"))',
-        #     @input, @input
-        #   )
+        @orders = Order.includes([:store, :order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 10').order("LENGTH(tracking_num) DESC")
+        @orders = Order.includes([:store, :order_items]).where('? LIKE CONCAT("%", tracking_num ,"%") and LENGTH(tracking_num) >= 10', @input).order("LENGTH(tracking_num) DESC") if @orders.blank?
         find_order if @orders.blank? && @scanpack_settings.scan_by_packing_slip_or_shipping_label
       else
         find_order
@@ -81,6 +83,9 @@ module ScanPack
     def generate_query(status)
       input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
       input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
+      se_order_input = input_without_special_char + ' ('
+      input_with_special_char_without_space = input_with_special_char.gsub(/\s+/, "")
+      input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, "")
       # id = @scanpack_settings.scan_by_hex_number ? 'store_order_id' : 'increment_id'
       # %(\
       #   (#{id} IN \(\
@@ -91,10 +96,27 @@ module ScanPack
       #   \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
       # )
       if @se_shipment_handling_v2_present
+        # %(\
+        #   (#{@scan_by_id} LIKE '#{input_with_special_char}%' and \(\
+        #     orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
+        #   \))
+        # )
         %(\
-          (#{@scan_by_id} LIKE '#{input_with_special_char}%' and \(\
-            orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
-          \))
+          (#{@scan_by_id} IN \(\
+            '#{input_with_special_char}', '\##{input_with_special_char}'\
+          \) or \
+          #{@scan_by_id} LIKE \(\
+            '#{se_order_input}%'
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char}', '\##{input_without_special_char}'\
+          \) or \
+            #{@scan_by_id} IN \(\
+            '#{input_with_special_char_without_space}', '\##{input_with_special_char_without_space}'\
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
+          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
         )
       else
         %(\
@@ -103,6 +125,12 @@ module ScanPack
           \) or \
           non_hyphen_increment_id IN \(\
             '#{input_without_special_char}', '\##{input_without_special_char}'\
+          \) or \
+            #{@scan_by_id} IN \(\
+            '#{input_with_special_char_without_space}', '\##{input_with_special_char_without_space}'\
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
           \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
         )
       end
