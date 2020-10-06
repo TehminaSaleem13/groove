@@ -1,7 +1,7 @@
 class OrderImportSummary < ActiveRecord::Base
   belongs_to :store
   has_many :import_items
-  attr_accessible :user_id, :status, :user, :import_summary_type, :display_summary
+  # attr_accessible :user_id, :status, :user, :import_summary_type, :display_summary
   after_save :emit_data_to_user
   belongs_to :user
 
@@ -16,7 +16,7 @@ class OrderImportSummary < ActiveRecord::Base
 
   def emit_data_to_user(send_data=false)
     require 'open-uri'
-    return true unless (self.changes["status"].present? || send_data)
+    return true unless (self.saved_changes["status"].present? || send_data)
     result = Hash.new
     import_summary = self.reload
     time_zone = GeneralSetting.last.time_zone.to_i

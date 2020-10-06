@@ -1,4 +1,4 @@
-class CreateMagentoRestCredentials < ActiveRecord::Migration
+class CreateMagentoRestCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :magento_rest_credentials do |t|
       t.integer :store_id

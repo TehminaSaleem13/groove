@@ -1,5 +1,5 @@
 class CsvProductImport < ActiveRecord::Base
-  attr_accessible :success, :store_id, :current_sku, :status, :total, :cancel, :delayed_job_id
+  #attr_accessible :success, :store_id, :current_sku, :status, :total, :cancel, :delayed_job_id
   after_save :emit_data_to_user
 
   def emit_data_to_user

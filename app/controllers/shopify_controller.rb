@@ -1,6 +1,6 @@
 class ShopifyController < ApplicationController
-  before_filter :groovepacker_authorize!, :except => [:auth, :callback, :preferences, :help, :complete, :get_auth, :recurring_application_fee, :recurring_tenant_charges, :finalize_payment, :payment_failed, :invalid_request, :store_subscription_data, :get_store_data, :update_customer_plan]
-  skip_before_filter  :verify_authenticity_token
+  before_action :groovepacker_authorize!, :except => [:auth, :callback, :preferences, :help, :complete, :get_auth, :recurring_application_fee, :recurring_tenant_charges, :finalize_payment, :payment_failed, :invalid_request, :store_subscription_data, :get_store_data, :update_customer_plan]
+  skip_before_action  :verify_authenticity_token
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c", 
   #  "hmac"=>"0542bc2a50645289f1af07d4f85f3ebe9883af6ab402ea24f2c1c1bbac57f8c8", 
@@ -30,7 +30,7 @@ class ShopifyController < ApplicationController
       # @store_id = cookies[:store_id]
       @tenant_name = $redis.get("tenant_name")
       @store_id = $redis.get("store_id")
-      Apartment::Tenant.switch(@tenant_name)
+      Apartment::Tenant.switch!(@tenant_name)
       store = Store.find(@store_id) rescue nil
       @shopify_credential = store.shopify_credential
       ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
@@ -51,7 +51,7 @@ class ShopifyController < ApplicationController
   def update_plan(token, shop_name)
     price = $redis.get("#{shop_name}_plan_id").split("-")[1].to_f rescue nil
     tenant_name = $redis.get("#{shop_name}_tenant")
-    Apartment::Tenant.switch tenant_name
+    Apartment::Tenant.switch! tenant_name
     ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new(shop_name, token)
     ShopifyAPI::Base.activate_session(session)

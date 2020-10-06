@@ -1,5 +1,5 @@
 class ExportsettingsController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
 
   def get_export_settings
     @result = build_result_hash
@@ -97,7 +97,7 @@ class ExportsettingsController < ApplicationController
           )
         # export_setting.export_data(Apartment::Tenant.current)
         # export_setting.update_attributes(manual_export: false)
-        ExportOrder.delay.export(Apartment::Tenant.current)
+        ExportOrder.delay.export(Apartment::Tenant.current).deliver!
       else
         update_false_status(result, 'We need a start and an end time')
       end

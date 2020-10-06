@@ -1,4 +1,4 @@
-class ChangeProductFields < ActiveRecord::Migration
+class ChangeProductFields < ActiveRecord::Migration[5.1]
   def up
     rename_column :products, :spl_instructions_4_packer, :packing_instructions if column_exists? :products, :spl_instructions_4_packer
     rename_column :products, :spl_instructions_4_confirmation, :packing_instructions_conf if column_exists? :products, :spl_instructions_4_confirmation

@@ -2,14 +2,14 @@ class StripeInvoiceEmail < ActionMailer::Base
   default from: "app@groovepacker.com"
 
   def send_success_invoice(invoice)
-    Apartment::Tenant.switch()
+    Apartment::Tenant.switch!()
     unless Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).empty?
       subscription = Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).first
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         @email = get_customer_email_from_stripe(subscription)
         unless @email.nil?
-          Apartment::Tenant.switch(tenant)
+          Apartment::Tenant.switch!(tenant)
           @tenant_name = tenant
           @invoice = invoice
           mail to: [@email, 'groovepacker@gmail.com'].flatten,
@@ -20,14 +20,14 @@ class StripeInvoiceEmail < ActionMailer::Base
   end
 
   def send_failure_invoice(invoice)
-    Apartment::Tenant.switch()
+    Apartment::Tenant.switch!()
     unless Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).empty?
       subscription = Subscription.where(customer_subscription_id: invoice.subscription_id, is_active: true).first
       unless subscription.tenant.nil? || subscription.tenant.name.nil?
         tenant = subscription.tenant.name
         @email = get_customer_email_from_stripe(subscription)
         unless @email.nil?
-          Apartment::Tenant.switch(tenant)
+          Apartment::Tenant.switch!(tenant)
           @tenant_name = tenant
           @invoice = invoice
           mail to: [@email, 'groovepacker@gmail.com'],

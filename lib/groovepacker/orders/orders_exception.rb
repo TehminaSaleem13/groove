@@ -74,7 +74,7 @@ module Groovepacker
           if @params[:single]['exception'].nil? && order.order_exception.present?
               order.order_exception.destroy
           elsif @params[:single]['exception'].present?
-            exception = OrderException.find_or_create_by_order_id(order.id)
+            exception = OrderException.find_or_create_by(order_id: order.id)
             assign_values_to(exception, @params[:single]['exception'], 'exception')
           end
           send_exception_data(order.id, tenant)
@@ -117,7 +117,7 @@ module Groovepacker
           return if @params[:single]['items'].blank?
 
           @params[:single]['items'].each do |current_item|
-            single_item = OrderItem.find_or_create_by_order_id_and_product_id(order.id, current_item['iteminfo']['product_id'])
+            single_item = OrderItem.find_or_create_by(order_id: order.id,product_id: current_item['iteminfo']['product_id'])
             single_item = assign_values_to(single_item, current_item, 'item')
             update_product_list(current_item)
           end

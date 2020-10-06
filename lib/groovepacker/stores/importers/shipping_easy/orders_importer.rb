@@ -3,8 +3,7 @@ module Groovepacker
     module Importers
       module ShippingEasy
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
-          include ProductsHelper
-          include ProductsImporter
+          include Groovepacker::Stores::Importers::ShippingEasy::ProductsImporter
           include ShippingEasyHelper
 
           def import
@@ -312,7 +311,7 @@ module Groovepacker
             end
 
             def create_product(sku, product_hash, store_product_id)
-              product = Product.includes(:product_skus).where("product_skus.sku = ?", sku)[0]
+              product = Product.joins(:product_skus).where("product_skus.sku = ?", sku)[0]
               if product.blank?
                 product_weight = product_hash["weight_in_ounces"] || "0.0"
                 product_hash["description"] = "created by #{@credential.store.name}" if product_hash["description"].blank?

@@ -1,6 +1,6 @@
 module Groovepacker
   module Stores
-    class Stores
+    class LibStores
 
     	def initialize(store, params, result)
     		@store = store
@@ -17,7 +17,8 @@ module Groovepacker
 		    else
 		      @amazon = @amazon.first
 		    end
-		    @amazon.assign_attributes(:marketplace_id => params[:marketplace_id], :merchant_id => params[:merchant_id], :mws_auth_token => params[:mws_auth_token], :import_products => params[:import_products], :import_images => params[:import_images], :show_shipping_weight_only => params[:show_shipping_weight_only], :unshipped_status => params[:unshipped_status], :shipped_status => params[:shipped_status], :afn_fulfillment_channel => params[:afn_fulfillment_channel], :mfn_fulfillment_channel => params[:mfn_fulfillment_channel])
+		    @amazon.assign_attributes(:store_id => @store.id ,:marketplace_id => params[:marketplace_id], :merchant_id => params[:merchant_id], :mws_auth_token => params[:mws_auth_token], :import_products => params[:import_products], :import_images => params[:import_images], :show_shipping_weight_only => params[:show_shipping_weight_only], :unshipped_status => params[:unshipped_status], :shipped_status => params[:shipped_status].to_boolean, :afn_fulfillment_channel => params[:afn_fulfillment_channel].to_boolean, :mfn_fulfillment_channel => params[:mfn_fulfillment_channel].to_boolean)
+		    @amazon.save if !new_record
 		    @store.amazon_credentials = @amazon
 		    begin
 		      @store.save!
@@ -41,8 +42,8 @@ module Groovepacker
 		    @ebay.ebay_auth_expiration = session[:ebay_auth_expiration]
 		    @ebay.import_products = params[:import_products]
 		    @ebay.import_images = params[:import_images]
-		    @ebay.shipped_status = params[:shipped_status]
-		    @ebay.unshipped_status = params[:unshipped_status]
+		    @ebay.shipped_status = params[:shipped_status].to_boolean
+		    @ebay.unshipped_status = params[:unshipped_status].to_boolean
 		    @store.ebay_credentials = @ebay
 		    new_record = true if @ebay.id.blank?
 		    begin
@@ -122,19 +123,19 @@ module Groovepacker
 		    end
 		    @shipstation.api_key = params[:api_key]
 		    @shipstation.api_secret = params[:api_secret]
-		    @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment]
-		    @shipstation.shall_import_shipped = params[:shall_import_shipped]
-		    @shipstation.shall_import_pending_fulfillment = params[:shall_import_pending_fulfillment]
-		    @shipstation.warehouse_location_update = params[:warehouse_location_update]
-		    @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes]
-		    @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes]
+		    @shipstation.shall_import_awaiting_shipment = params[:shall_import_awaiting_shipment].to_boolean
+		    @shipstation.shall_import_shipped = params[:shall_import_shipped].to_boolean
+		    @shipstation.shall_import_pending_fulfillment = params[:shall_import_pending_fulfillment].to_boolean
+		    @shipstation.warehouse_location_update = params[:warehouse_location_update].to_boolean
+		    @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes].to_boolean
+		    @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes].to_boolean
 		    @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
-		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku]
-		    @shipstation.return_to_order = params[:return_to_order]
-		    @shipstation.import_upc = params[:import_upc]
-		    @shipstation.allow_duplicate_order = params[:allow_duplicate_order]
-		    @shipstation.tag_import_option = params[:tag_import_option]
-		    @shipstation.import_tracking_info = params[:import_tracking_info]
+		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku].to_boolean
+		    @shipstation.return_to_order = params[:return_to_order].to_boolean
+		    @shipstation.import_upc = params[:import_upc].to_boolean
+		    @shipstation.allow_duplicate_order = params[:allow_duplicate_order].to_boolean
+		    @shipstation.tag_import_option = params[:tag_import_option].to_boolean
+		    @shipstation.import_tracking_info = params[:import_tracking_info].to_boolean
 		    @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
@@ -154,7 +155,7 @@ module Groovepacker
 	            params = @params
 			    @shippingeasy = @store.shipping_easy_credential || @store.create_shipping_easy_credential
 			    new_record = true unless @shippingeasy.persisted?
-			    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship], import_upc: params[:import_upc], allow_duplicate_id: params[:allow_duplicate_id]}
+			    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment].to_boolean, import_shipped: params[:import_shipped].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean, ready_to_ship: params[:ready_to_ship].to_boolean, import_upc: params[:import_upc].to_boolean, allow_duplicate_id: params[:allow_duplicate_id].to_boolean}
 			    @shippingeasy.save
 			    @shippingeasy.import_ready_for_shipment = false  if @shippingeasy.ready_to_ship || @shippingeasy.import_shipped
 			    @shippingeasy.save
@@ -175,10 +176,10 @@ module Groovepacker
 		    @shipworks = ShipworksCredential.find_by_store_id(@store.id)
 		    begin
 		      if @shipworks.nil?
-		        @store.shipworks_credential = ShipworksCredential.new( auth_token: Store.get_sucure_random_token, import_store_order_number: params[:import_store_order_number], shall_import_in_process: params[:shall_import_in_process], shall_import_new_order: params[:shall_import_new_order], shall_import_not_shipped: params[:shall_import_not_shipped], shall_import_shipped: params[:shall_import_shipped], shall_import_no_status: params[:shall_import_no_status], shall_import_ignore_local: params[:shall_import_ignore_local], gen_barcode_from_sku: params[:gen_barcode_from_sku])
+		        @store.shipworks_credential = ShipworksCredential.new( auth_token: Store.get_sucure_random_token, import_store_order_number: params[:import_store_order_number].to_boolean, shall_import_in_process: params[:shall_import_in_process].to_boolean, shall_import_new_order: params[:shall_import_new_order].to_boolean, shall_import_not_shipped: params[:shall_import_not_shipped].to_boolean, shall_import_shipped: params[:shall_import_shipped].to_boolean, shall_import_no_status: params[:shall_import_no_status].to_boolean, shall_import_ignore_local: params[:shall_import_ignore_local].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean)
 		        new_record = true
 		      else
-		        @shipworks.update_attributes( import_store_order_number: params[:import_store_order_number], shall_import_in_process: params[:shall_import_in_process], shall_import_new_order: params[:shall_import_new_order], shall_import_not_shipped: params[:shall_import_not_shipped], shall_import_shipped: params[:shall_import_shipped], shall_import_no_status: params[:shall_import_no_status], shall_import_ignore_local: params[:shall_import_ignore_local], gen_barcode_from_sku: params[:gen_barcode_from_sku])
+		        @shipworks.update_attributes( import_store_order_number: params[:import_store_order_number].to_boolean, shall_import_in_process: params[:shall_import_in_process].to_boolean, shall_import_new_order: params[:shall_import_new_order].to_boolean, shall_import_not_shipped: params[:shall_import_not_shipped].to_boolean, shall_import_shipped: params[:shall_import_shipped].to_boolean, shall_import_no_status: params[:shall_import_no_status].to_boolean, shall_import_ignore_local: params[:shall_import_ignore_local].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean)
 		      end
 		      @store.save
 		    rescue ActiveRecord::RecordInvalid => e

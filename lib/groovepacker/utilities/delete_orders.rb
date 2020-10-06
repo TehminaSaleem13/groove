@@ -29,7 +29,7 @@ class DeleteOrders
   end
 
   def destroy_order_items(tenant)
-    Apartment::Tenant.switch(tenant.name)
+    Apartment::Tenant.switch!(tenant.name)
     OrderItem
       .where(is_deleted: true)
       .includes(:order)
@@ -45,13 +45,13 @@ class DeleteOrders
         order_items.map(&:delete_inventory)
         #  Removed destroy, for avioding the callbacks
         # as child associations are already deleted
-        OrderItem.delete_all(['id IN (?)', order_items_ids])
+        OrderItem.where(['id IN (?)', order_items_ids]).delete_all
       end
   end
 
   # def perform_for_single_tenant(tenant)
   #   begin
-  #     Apartment::Tenant.switch(tenant.name)
+  #     Apartment::Tenant.switch!(tenant.name)
   #     orders_ninety_days_ago_ids = []
   #     orders_custom_days_id = []
   #     delete_orders_days = tenant.orders_delete_days

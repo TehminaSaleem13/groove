@@ -1,4 +1,4 @@
-class RemoveColumnsFromUsers < ActiveRecord::Migration
+class RemoveColumnsFromUsers < ActiveRecord::Migration[5.1]
   def up
     remove_column :users,   :access_scanpack
     remove_column :users,   :access_orders

@@ -1,5 +1,5 @@
 class ApplicationController < ActionController::Base
-  before_filter :set_current_user_id
+  before_action :set_current_user_id
   protect_from_forgery with: :null_session
 
   respond_to :html, :json

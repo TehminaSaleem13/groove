@@ -1,4 +1,4 @@
-class CreateCsvImportLogEntries < ActiveRecord::Migration
+class CreateCsvImportLogEntries < ActiveRecord::Migration[5.1]
   def change
     unless table_exists? :csv_import_log_entries
       create_table :csv_import_log_entries do |t|

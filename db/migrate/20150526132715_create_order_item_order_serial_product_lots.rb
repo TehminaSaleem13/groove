@@ -1,4 +1,4 @@
-class CreateOrderItemOrderSerialProductLots < ActiveRecord::Migration
+class CreateOrderItemOrderSerialProductLots < ActiveRecord::Migration[5.1]
   def up
     create_table :order_item_order_serial_product_lots do |t|
       t.integer :order_item_id

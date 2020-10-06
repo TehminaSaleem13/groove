@@ -3,7 +3,7 @@ module StoreConcern
  include StoresHelper
 
  def check_store_type
-  init_store = Groovepacker::Stores::Stores.new(@store, params, @result)
+  init_store = Groovepacker::Stores::LibStores.new(@store, params, @result)
   case @store.store_type
   when 'Magento'    
   @result = init_store.magento_update_create
@@ -50,14 +50,18 @@ module StoreConcern
         @result['order']['settings'] = default_csv_map 
       else
         temp_mapping = csv_map.order_csv_map[:map]
-        new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
+        begin
+         new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash} 
+        rescue Exception => e
+          new_map = temp_mapping[:map].to_unsafe_h.inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
+        end
         csv_map.order_csv_map.update_attributes(map: temp_mapping.merge(map: new_map))
         @result['order']['settings'] = csv_map.order_csv_map
       end
       order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
       if File.exist? order_file_path
         order_file_data = csv_data('order')
-        @result['order']['data'] = order_file_data
+        @result['order']['data'] = order_file_data.force_encoding("ISO-8859-1").encode("UTF-8")
         File.delete(order_file_path)
         $redis.del("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/order.#{@store.id}.csv")
       end
@@ -84,7 +88,7 @@ module StoreConcern
       if File.exist? product_file_path
         product_file_data = csv_data('product')
         # product_file_data = Net::HTTP.get(URI.parse("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")).split(/[\r\n]+/).first(200).join("\r\n")
-        @result['product']['data'] = product_file_data
+        @result['product']['data'] = product_file_data.force_encoding("ISO-8859-1").encode("UTF-8")
         File.delete(product_file_path)
         $redis.del("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/product.#{@store.id}.csv")
       end
@@ -114,7 +118,7 @@ module StoreConcern
       if check_csv_condition
         @result['store_id'] = @store.id
         default_csv_map = { 'name' => '', 'map' => {'rows' => 2,'sep' => ',','other_sep' => 0,'delimiter' => '"','fix_width' => 0,'fixed_width' => 4, 'contains_unique_order_items' => false,'generate_barcode_from_sku' => false, 'use_sku_as_product_name' => false, 'order_placed_at' => nil,'order_date_time_format' => 'Default','day_month_sequence' => 'MM/DD','map' => {}, 'encoding_format' => 'ASCII + UTF-8'}}
-        csv_map = CsvMapping.find_or_create_by_store_id(@store.id)
+        csv_map = CsvMapping.find_or_create_by(store_id: @store.id)
         csv_directory = 'uploads/csv'
         current_tenant = Apartment::Tenant.current
         order_csv_mapping(csv_map, csv_directory, current_tenant, default_csv_map) 
@@ -223,7 +227,7 @@ module StoreConcern
       result['status'] = false
       result['messages'].push('You need kind and store id to delete csv map')
     else
-      mapping = CsvMapping.find_or_create_by_store_id(params[:id])
+      mapping = CsvMapping.find_or_create_by(store_id: params[:id])
       if params[:kind] == 'order'
         mapping.order_csv_map_id = nil
       elsif params[:kind] == 'product'
@@ -241,7 +245,7 @@ module StoreConcern
       result['status'] = false
       result['messages'].push('You need map and store id to update csv map')
     else
-      mapping = CsvMapping.find_or_create_by_store_id(params[:id])
+      mapping = CsvMapping.find_or_create_by(store_id: params[:id])
       if params[:map]['kind'] == 'order'
         mapping.order_csv_map_id = params[:map]['id']
       elsif params[:map]['kind'] == 'product'

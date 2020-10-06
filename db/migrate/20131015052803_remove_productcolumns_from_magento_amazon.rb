@@ -1,4 +1,4 @@
-class RemoveProductcolumnsFromMagentoAmazon < ActiveRecord::Migration
+class RemoveProductcolumnsFromMagentoAmazon < ActiveRecord::Migration[5.1]
   def change
   remove_column :amazon_credentials, :productmerchant_id
   remove_column :amazon_credentials, :productmarketplace_id

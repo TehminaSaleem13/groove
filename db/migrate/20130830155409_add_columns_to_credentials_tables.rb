@@ -1,4 +1,4 @@
-class AddColumnsToCredentialsTables < ActiveRecord::Migration
+class AddColumnsToCredentialsTables < ActiveRecord::Migration[5.1]
   def change
   add_column :magento_credentials, :producthost, :string, :default=>'', :null=>false
   add_column :magento_credentials, :productusername, :string, :default=>'', :null=>false

@@ -1,4 +1,4 @@
-class CreateGrooveBulkActions < ActiveRecord::Migration
+class CreateGrooveBulkActions < ActiveRecord::Migration[5.1]
   def change
     create_table :groove_bulk_actions do |t|
       t.string  :identifier, :null => false

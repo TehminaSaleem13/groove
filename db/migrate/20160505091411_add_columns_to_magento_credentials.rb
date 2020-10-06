@@ -1,4 +1,4 @@
-class AddColumnsToMagentoCredentials < ActiveRecord::Migration
+class AddColumnsToMagentoCredentials < ActiveRecord::Migration[5.1]
   def change
     add_column :magento_credentials, :shall_import_processing, :boolean, :default => false
     add_column :magento_credentials, :shall_import_pending, :boolean, :default => false

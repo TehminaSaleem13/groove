@@ -284,9 +284,9 @@ class ProductsController < ApplicationController
         render :pdf => "file_name",
                :template => "products/#{get_barcode_slip_template}",
                :orientation => 'Portrait',
-               :page_height => '1.2in',
+               :page_height => '0.9in',
                :page_width => '3in',
-               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
+               :margin => {:top => '1', :bottom => '0', :left => '0', :right => '0'}
       }
     end
     # base_file_name = File.basename(pdf_path)
@@ -311,9 +311,9 @@ class ProductsController < ApplicationController
         render :pdf => "file_name",
                :template => "products/bulk_barcode_pdf.html.erb",
                :orientation => 'Portrait',
-               :page_height => '1.12in',
+               :page_height => '0.9in',
                :page_width => '3in',
-               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
+               :margin => {:top => '0.9', :bottom => '0', :left => '0', :right => '0'}
       }
     end
   end
@@ -442,7 +442,7 @@ class ProductsController < ApplicationController
     setting = InventoryReportsSetting.last
     setting = setting.blank? ? InventoryReportsSetting.new : InventoryReportsSetting.last
     atrs = params["setting"].except("updated_at", "created_at", "id")
-    setting.assign_attributes(atrs)
+    setting.assign_attributes(atrs.permit!)
     setting.save
     @result["status"] = true
     render json: @result

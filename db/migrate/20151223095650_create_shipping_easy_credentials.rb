@@ -1,4 +1,4 @@
-class CreateShippingEasyCredentials < ActiveRecord::Migration
+class CreateShippingEasyCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :shipping_easy_credentials do |t|
       t.integer :store_id

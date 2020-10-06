@@ -1,4 +1,4 @@
-class AddPredefinedOrderTags < ActiveRecord::Migration
+class AddPredefinedOrderTags < ActiveRecord::Migration[5.1]
   def up
   	add_column :order_tags, :predefined, :boolean, :default => 0
   	contains_new_tag = OrderTag.create(:name=>'Contains New', :color=>'#FF0000', :predefined => true)

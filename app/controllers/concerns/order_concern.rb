@@ -2,11 +2,10 @@ module OrderConcern
   extend ActiveSupport::Concern
 
   included do
-    before_filter :groovepacker_authorize!, except: [:import_shipworks, :generate_all_packing_slip]
-    prepend_before_filter :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip, :run_orders_status_update, :create, :generate_all_packing_slip]
-    before_filter :find_order, only: [:update, :show, :record_exception, :clear_exception, :update_order_list]
-    before_filter :check_order_edit_permissions, only: [:add_item_to_order, :update_item_in_order, :remove_item_from_order]
-
+    before_action :groovepacker_authorize!, except: [:import_shipworks, :generate_all_packing_slip]
+    prepend_before_action :initialize_result_obj, only: [:index, :importorders, :clear_exception, :record_exception, :import_all, :order_items_export, :update_order_list, :cancel_packing_slip, :duplicate_orders, :delete_orders, :change_orders_status, :generate_pick_list, :update, :show, :update_item_in_order, :rollback, :remove_item_from_order, :add_item_to_order, :search, :import, :cancel_import, :generate_packing_slip, :run_orders_status_update, :create, :generate_all_packing_slip]
+    before_action :find_order, only: [:update, :show, :record_exception, :clear_exception, :update_order_list]
+    before_action :check_order_edit_permissions, only: [:add_item_to_order, :update_item_in_order, :remove_item_from_order]
     require 'csv'
     include OrdersHelper
     include ProductsHelper
@@ -224,8 +223,9 @@ module OrderConcern
   def set_unacknowledged_activities
     @result['order']['unacknowledged_activities'] = @order.unacknowledged_activities
     @result['order']['exception'] = @order.order_exception if current_user.can?('view_packing_ex')
-    @result['order']['exception']['assoc'] =
-      User.find(@order.order_exception.user_id) if current_user.can?('view_packing_ex') && !@order.order_exception.nil? && @order.order_exception.user_id != 0
+    if current_user.can?('view_packing_ex') && !@order.order_exception.nil? && @order.order_exception.user_id != 0
+      @result['order']['exception'] = @result['order']['exception'].attributes.merge('assoc'=> User.find(@order.order_exception.user_id))
+    end
   end
 
   def order_item_available_inv(product)
@@ -259,7 +259,7 @@ module OrderConcern
     dummy_user.name = 'Nobody'
     dummy_user.id = 0
     @result['order']['users'] = User.all
-    @result['order']['users'].unshift(dummy_user)
+    #@result['order']['users'].unshift(dummy_user)
 
     user = @result['order']['users'].select { |user| user.id == @order.packing_user_id }.first
     user.name = "#{user.name} (Packing User)" if user
@@ -322,7 +322,7 @@ module OrderConcern
       end
     else 
       ImportItem.where("status='in_progress' OR status='not_started'").update_all(status: 'cancelled')
-      items = ImportItem.includes(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started' OR import_items.status='failed')")
+      items = ImportItem.joins(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started' OR import_items.status='failed')")
       items.each {|item| item.update_attributes(status: 'cancelled')} rescue nil
       order_import_summary = OrderImportSummary.all
       order_import_summary.each do |import_summary|

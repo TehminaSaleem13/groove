@@ -1,4 +1,4 @@
-class RefactorColumnPreferences < ActiveRecord::Migration
+class RefactorColumnPreferences < ActiveRecord::Migration[5.1]
   def up
     remove_column :column_preferences, :shown
     remove_column :column_preferences, :order

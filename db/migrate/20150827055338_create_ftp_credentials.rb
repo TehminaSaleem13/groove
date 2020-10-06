@@ -1,4 +1,4 @@
-class CreateFtpCredentials < ActiveRecord::Migration
+class CreateFtpCredentials < ActiveRecord::Migration[5.1]
   def up
     create_table :ftp_credentials do |t|
       t.string   "host",      :defaule => ""

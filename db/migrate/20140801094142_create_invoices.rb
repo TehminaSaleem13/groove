@@ -1,4 +1,4 @@
-class CreateInvoices < ActiveRecord::Migration
+class CreateInvoices < ActiveRecord::Migration[5.1]
   def up
     create_table :invoices do |t|
     	t.datetime :date

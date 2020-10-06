@@ -5,7 +5,7 @@ namespace :subscription do
     tenants = Tenant.all
     tenants.each do |tenant|
       begin
-      	Apartment::Tenant.switch(tenant.name)
+      	Apartment::Tenant.switch!(tenant.name)
         subscription = Subscription.where(:tenant_name => tenant.name).first 	
       	next if subscription.blank?
       	subscription.interval = Stripe::Plan.retrieve(subscription.subscription_plan_id)["interval"] rescue nil

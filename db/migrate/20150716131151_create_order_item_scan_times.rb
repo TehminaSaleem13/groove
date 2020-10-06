@@ -1,4 +1,4 @@
-class CreateOrderItemScanTimes < ActiveRecord::Migration
+class CreateOrderItemScanTimes < ActiveRecord::Migration[5.1]
   def change
     create_table :order_item_scan_times do |t|
       t.datetime :scan_start

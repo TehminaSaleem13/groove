@@ -1,4 +1,4 @@
-class CreateCsvProductImports < ActiveRecord::Migration
+class CreateCsvProductImports < ActiveRecord::Migration[5.1]
   def change
     create_table :csv_product_imports do |t|
       t.string :status

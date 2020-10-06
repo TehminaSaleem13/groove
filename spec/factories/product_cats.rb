@@ -1,8 +1,8 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :product_cat do
-    category "MyString"
-    product nil
+    category {"MyString"}
+    product {nil}
   end
 end

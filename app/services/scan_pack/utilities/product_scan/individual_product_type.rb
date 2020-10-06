@@ -98,7 +98,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
   def insert_in_box(item, kit_id)
     if @box_id.blank?
-      box = Box.find_or_create_by_name_and_order_id(:name => "Box 1", :order_id => item.order.id)  
+      box = Box.find_or_create_by(:name => "Box 1", :order_id => item.order.id)  
       @box_id = box.id
       order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
       if order_item_box.nil?

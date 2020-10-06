@@ -1,4 +1,4 @@
-class CreateProductActivities < ActiveRecord::Migration
+class CreateProductActivities < ActiveRecord::Migration[5.1]
   def change
     create_table :product_activities do |t|
       t.datetime :activitytime
@@ -11,7 +11,7 @@ class CreateProductActivities < ActiveRecord::Migration
       
       t.timestamps
     end
-    add_index :product_activities, :product_id
-    add_index :product_activities, :user_id
+    # add_index :product_activities, :product_id
+    # add_index :product_activities, :user_id
   end
 end

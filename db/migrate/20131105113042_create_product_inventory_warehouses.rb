@@ -1,4 +1,4 @@
-class CreateProductInventoryWarehouses < ActiveRecord::Migration
+class CreateProductInventoryWarehouses < ActiveRecord::Migration[5.1]
   def change
     create_table :product_inventory_warehouses do |t|
       t.string :location
@@ -7,6 +7,6 @@ class CreateProductInventoryWarehouses < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :product_inventory_warehouses, :product_id
+    # add_index :product_inventory_warehouses, :product_id
   end
 end

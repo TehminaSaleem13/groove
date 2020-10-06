@@ -6,7 +6,7 @@ class StripeController < ApplicationController
     # Webhook.create(event: event_json)
     # Verify the event by fetching it from Stripe
     event = Stripe::Event.retrieve(event_json['id'])
-    Apartment::Tenant.switch
+    Apartment::Tenant.switch!
     Webhook.create(event: event)
     type = event.type
     if ['invoice.payment_succeeded', 'invoice.payment_failed'].include? type
@@ -24,7 +24,7 @@ class StripeController < ApplicationController
         StripeInvoiceEmail.send_failure_invoice(@invoice).deliver
       end
     end
-    render status: 200, nothing: true
+    render body: nil
   end
 
   def get_invoice(event)

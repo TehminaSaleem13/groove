@@ -8,7 +8,7 @@ module Groovepacker
         def stream_detail(tenant_name, trace_untraced = false)
           begin
             stat_stream = []
-            Apartment::Tenant.switch(tenant_name)
+            Apartment::Tenant.switch!(tenant_name)
             puts "switched tenant."
             orders = get_list(trace_untraced)
             puts "found all orders with scanned status"
@@ -73,7 +73,7 @@ module Groovepacker
         end
 
         def get_order_stream(tenant, order_id)
-          Apartment::Tenant.switch(tenant)
+          Apartment::Tenant.switch!(tenant)
           order = Order.find(order_id)
           build_stream(order)
         end

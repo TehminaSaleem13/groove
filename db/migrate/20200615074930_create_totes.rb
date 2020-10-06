@@ -1,4 +1,4 @@
-class CreateTotes < ActiveRecord::Migration
+class CreateTotes < ActiveRecord::Migration[5.1]
   def change
     create_table :totes do |t|
       t.string :name

@@ -3,8 +3,8 @@ namespace :check do
   task :umi_import => :environment do
   tenant = "unitedmedco"
     if Rails.env=="production"
-      Apartment::Tenant.switch tenant
-      import_item = ImportItem.includes(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started')")
+      Apartment::Tenant.switch! tenant
+      import_item = ImportItem.joins(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started')")
       begin
         import_item.each do |csv_import|
           if (Time.now.to_i - csv_import.updated_at.to_i) > 600

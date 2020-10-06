@@ -26,7 +26,7 @@ module ProductsHelper
     blob = outputter.to_png # Raw PNG data
     image_name = Digest::MD5.hexdigest(barcode_string)
     File.open("#{Rails.root}/public/images/#{image_name}.png",
-              'w') do |f|
+              'wb') do |f|
       f.write blob
     end
     image_name
@@ -98,7 +98,7 @@ module ProductsHelper
     intangible_strings.each do |string|
       next unless (product.name.downcase.include?(string.downcase)) ||
                   (product.primary_sku.try(:downcase).try(:include?, string.downcase))
-      product = Product.find(product.id, :readonly => false)
+      product = Product.readonly(false).find(product.id)
       product.is_intangible = true
       product.save 
       break
@@ -184,7 +184,7 @@ module ProductsHelper
   end
 
   def barcode_labels_generate(tenant, params, bulk_actions_id, username)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     result = {"messages"=>[], "status"=>true}
     bulk_action = GrooveBulkActions.find(bulk_actions_id)
     bulk_action_type = bulk_action.activity == 'order_product_barcode_label' ? 'order_items' : 'products'
@@ -223,60 +223,4 @@ module ProductsHelper
       Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
     end
   end
-
-  # def se_duplicate_orders(order)
-  #   return [] unless order.store.store_type == 'ShippingEasy'
-
-  #   duplicate_orders = []
-
-  #   se_shipments = Order.where('orders.prime_order_id = ? AND orders.store_order_id = ? AND orders.id != ?', order.prime_order_id, order.store_order_id, order.id).order(:increment_id)
-  #   return duplicate_orders if se_shipments.blank?
-
-  #   se_shipments.each do |shipment|
-  #     if shipment.status == 'scanned'
-  #       shipment_status = 'Scanned'
-  #     else
-  #       shipment_status = shipment.scanning_count[:scanned].to_i > 0 ? 'Partial Scanned' : 'Unscanned'
-  #     end
-  #     duplicate_orders << [shipment.id, shipment.increment_id, shipment_status, shipment.order_placed_time.try(:strftime, '%A, %d %b %Y %l:%M %p'), shipment.scanned_on.try(:strftime, '%A, %d %b %Y %l:%M %p'), shipment.tracking_num]
-  #   end
-  #   duplicate_orders
-  # end
-
-  # def se_old_shipments(order)
-  #   old_shipments = []
-  #   shipments = Order.where(store_order_id: order.split_from_order_id.split(',').map(&:to_i)) if order.split_from_order_id.present?
-  #   shipments = Order.where('orders.prime_order_id = ?', order.prime_order_id) if Order.where(prime_order_id: order.prime_order_id).count > 1 && Order.where(store_order_id: order.prime_order_id, prime_order_id: order.prime_order_id).any? && shipments.blank?
-  #   return old_shipments if shipments.blank?
-  #   shipments.each do |shipment|
-  #     if shipment.status == 'scanned'
-  #       shipment_status = 'Scanned'
-  #     else
-  #       shipment_status = shipment.scanning_count[:scanned].to_i > 0 ? 'Partial Scanned' : 'Unscanned'
-  #     end
-  #     old_shipments << [shipment.id, shipment.increment_id, shipment_status]
-  #   end
-  #   old_shipments
-  # end
-
-  # def se_all_shipments(order)
-  #   all_shipments = { shipments: [] }
-  #   shipments = Order.where('orders.prime_order_id = ? AND orders.store_order_id != ? AND orders.status != ?', order.prime_order_id, order.store_order_id, 'scanned') if Order.where(prime_order_id: order.prime_order_id).count > 1
-  #   return all_shipments if shipments.blank?
-  #   order_split_inc = order.increment_id.split(" (S")
-  #   order_shipment_no = order_split_inc.last.chop.to_i rescue 1
-  #   order_inc_id = order_split_inc[0..(order_split_inc.length-2)].join rescue order.increment_id
-  #   all_shipments[:present] = true
-  #   all_shipments[:order_shipment_no] = order_shipment_no
-  #   all_shipments[:order_shipment_count] = shipments.count + 1
-  #   all_shipments[:order_inc_id] = order_inc_id
-  #   shipments.each do |shipment|
-  #     split_inc = shipment.increment_id.split(" (S")
-  #     shipment_no = split_inc.last.chop.to_i rescue 1
-  #     inc_id = split_inc[0..(split_inc.length-2)].join rescue shipment.increment_id
-  #     items_count = shipment.get_items_count
-  #     all_shipments[:shipments] << [shipment_no, inc_id, shipment.increment_id, items_count, shipment.id]
-  #   end
-  #   all_shipments
-  # end
 end

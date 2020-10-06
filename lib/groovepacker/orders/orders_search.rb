@@ -9,11 +9,11 @@ module Groovepacker
         offset = get_limit_or_offset('offset')
         sort_key = set_final_sort_key(sort_order, sort_key)
         sort_key = "store_type" if sort_key == "store_name"
-        search = ActiveRecord::Base::sanitize('%'+@params[:search]+'%')
+        search = ActiveRecord::Base.connection.quote('%'+@params[:search]+'%')
         base_query = get_base_query(search, sort_key, sort_order)
         query_add = get_query_limit_offset(limit, offset)
         result_rows = Order.find_by_sql(base_query + query_add)
-        ActiveRecord::Associations::Preloader.new(result_rows, [:order_items, :store, :order_tags]).run
+        ActiveRecord::Associations::Preloader.new.preload(result_rows, [:order_items, :store, :order_tags])
         return get_search_result(results_only, result_rows, base_query)
       end
 

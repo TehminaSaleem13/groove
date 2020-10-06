@@ -171,7 +171,7 @@ module OrderMethodsHelper
     )
     unscanned_list = []
 
-    limited_order_items = order_items_with_eger_load_and_cache(order_item_status, limit, offset)
+    limited_order_items = order_items_with_eger_load_and_cache(order_item_status, limit, offset).to_a
 
     if barcode
       barcode_in_order_item = find_unscanned_order_item_with_barcode(barcode)

@@ -1,6 +1,6 @@
 class MagentoCredentials < ActiveRecord::Base
 
-  attr_accessible :host, :password, :username, :api_key, :import_products, :import_images, :push_tracking_number, :status_to_update, :enable_status_update, :shall_import_fraud, :shall_import_complete, :shall_import_closed, :shall_import_pending, :shall_import_processing, :updated_patch
+  # attr_accessible :host, :password, :username, :api_key, :import_products, :import_images, :push_tracking_number, :status_to_update, :enable_status_update, :shall_import_fraud, :shall_import_complete, :shall_import_closed, :shall_import_pending, :shall_import_processing, :updated_patch
 
   validates_presence_of :host, :username, :api_key
 
@@ -18,7 +18,7 @@ class MagentoCredentials < ActiveRecord::Base
     end
 
     def schedule_magento_status_update_job
-      return true unless self.changes["enable_status_update"].present?
+      return true unless self.saved_changes["enable_status_update"].present?
       current_tenant = Apartment::Tenant.current
       tenant = Tenant.find_by_name(current_tenant)
       if self.enable_status_update and get_scheduled_jobs_for_status_update.blank?

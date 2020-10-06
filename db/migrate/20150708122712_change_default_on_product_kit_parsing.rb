@@ -1,4 +1,4 @@
-class ChangeDefaultOnProductKitParsing < ActiveRecord::Migration
+class ChangeDefaultOnProductKitParsing < ActiveRecord::Migration[5.1]
   def up
     change_column :products, :kit_parsing, :string,:default => 'individual'
   end

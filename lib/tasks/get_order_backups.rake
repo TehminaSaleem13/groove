@@ -4,7 +4,7 @@ namespace :gob do
   task :get_order_backups, [:arg1, :arg2] => :environment do |t, args|
     args.each do |arg|
       begin
-        Apartment::Tenant.switch(arg[1])
+        Apartment::Tenant.switch!(arg[1])
         tenant = Apartment::Tenant.current
         bucket = GroovS3.get_bucket
         count = bucket.objects(prefix: tenant + '/deleted_orders/').count

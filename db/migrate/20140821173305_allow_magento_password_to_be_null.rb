@@ -1,4 +1,4 @@
-class AllowMagentoPasswordToBeNull < ActiveRecord::Migration
+class AllowMagentoPasswordToBeNull < ActiveRecord::Migration[5.1]
   def up
     change_column_null(:magento_credentials, :password, true)
     change_column_default(:magento_credentials, :password, '')

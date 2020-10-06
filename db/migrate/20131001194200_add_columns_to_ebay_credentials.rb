@@ -1,4 +1,4 @@
-class AddColumnsToEbayCredentials < ActiveRecord::Migration
+class AddColumnsToEbayCredentials < ActiveRecord::Migration[5.1]
   def change
     add_column :ebay_credentials, :ebay_auth_expiration, :date
     remove_column :ebay_credentials, :auth_token

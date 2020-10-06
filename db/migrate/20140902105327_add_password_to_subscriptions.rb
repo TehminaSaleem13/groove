@@ -1,4 +1,4 @@
-class AddPasswordToSubscriptions < ActiveRecord::Migration
+class AddPasswordToSubscriptions < ActiveRecord::Migration[5.1]
   def up
     add_column :subscriptions, :password, :string, :null=> false
   end

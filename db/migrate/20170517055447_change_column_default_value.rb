@@ -1,4 +1,4 @@
-class ChangeColumnDefaultValue < ActiveRecord::Migration
+class ChangeColumnDefaultValue < ActiveRecord::Migration[5.1]
   def up
   	change_column :amazon_credentials, :unshipped_status, :boolean, :default => true
   end

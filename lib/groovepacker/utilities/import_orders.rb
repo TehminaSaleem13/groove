@@ -3,7 +3,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   include AhoyEvent
 
   def import_orders(tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     # we will remove all the jobs pertaining to import which are not started
     # we will also remove all the import summary which are not started.
     @order_import_summary = get_order_import_summary
@@ -57,7 +57,7 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   # params should have hash of tenant, store, import_type = 'regular', user
   def import_order_by_store(params, result = {})
-    Apartment::Tenant.switch(params[:tenant])
+    Apartment::Tenant.switch!(params[:tenant])
     if OrderImportSummary.where(status: 'in_progress').empty?
       run_import_for_single_store(params)
     else
@@ -68,7 +68,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def import_range_import(params)
-    Apartment::Tenant.switch params[:tenant]
+    Apartment::Tenant.switch! params[:tenant]
     import_item = ImportItem.create(store_id: params[:store_id], import_type: params[:import_type])
     store = Store.find(params[:store_id])
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
@@ -82,7 +82,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def import_missing_order(params)
-    Apartment::Tenant.switch params[:tenant]
+    Apartment::Tenant.switch! params[:tenant]
     store = Store.find(params[:store_id])
     import_item = ImportItem.create(store_id: store.id)
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
@@ -95,7 +95,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def run_import_for_single_store(params)
-    Apartment::Tenant.switch(params[:tenant])
+    Apartment::Tenant.switch!(params[:tenant])
     #delete existing completed and cancelled order import summaries
     delete_existing_order_import_summaries
     #add a new import summary
@@ -110,7 +110,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def reschedule_job(type, tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     date = DateTime.now + 1.day
     job_scheduled = false
     general_settings = GeneralSetting.all.first
@@ -193,7 +193,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     map = mapping.order_csv_map
     data = build_data(map,store)
     import_csv = ImportCsv.new
-    result = import_csv.import(tenant, data.to_s)
+    result = import_csv.import(tenant, data.as_json.to_s)
     #check_or_assign_import_item(import_item)
     new_import_item = import_item
     import_item = ImportItem.find(import_item.id) rescue new_import_item
@@ -266,7 +266,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def start_shipwork_import(cred, status, value, tenant)
-    Apartment::Tenant.switch tenant
+    Apartment::Tenant.switch! tenant
     credential = ShipworksCredential.find(cred[:id])
     import_item = ImportItem.find_by_store_id(credential.store.id)
     shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)
@@ -275,7 +275,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def import_product_from_store(tenant, store_id, product_import_type, product_import_range_days)
-    Apartment::Tenant.switch tenant
+    Apartment::Tenant.switch! tenant
     store = Store.find store_id
     handler = get_handler_for_products(store)
     context = Groovepacker::Stores::Context.new(handler)

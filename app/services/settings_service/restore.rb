@@ -15,7 +15,7 @@ module SettingsService
     end
 
     def call
-      Apartment::Tenant.switch @tenant
+      Apartment::Tenant.switch! @tenant
       if current_user.can? 'restore_backups'
         process_restore if valid_params?
       else
@@ -186,9 +186,9 @@ module SettingsService
       single_row, csv_row, default_warehouse_map
     )
       warehouse = ProductInventoryWarehouses
-                  .find_or_create_by_product_id_and_inventory_warehouse_id(
-                    single_row.id,
-                    InventoryWarehouse.where(is_default: true).first.id
+                  .find_or_create_by(
+                    product_id: single_row.id,
+                    inventory_warehouse_id: InventoryWarehouse.where(is_default: true).first.id
                   )
       default_warehouse_map.each do |warehouse_map|
         warehouse[warehouse_map[1]] = csv_row[warehouse_map[0]]

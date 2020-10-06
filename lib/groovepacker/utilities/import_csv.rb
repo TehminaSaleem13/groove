@@ -5,8 +5,9 @@ class ImportCsv
     result[:messages] = []
     result[:status] = true
     begin
-      Apartment::Tenant.switch(tenant)
+      Apartment::Tenant.switch!(tenant)
       params = eval(params)
+      params = params.with_indifferent_access
       # track_user(tenant, params, "Import Started", "#{params[:type].capitalize} Import Started")
       # download CSV and save
       track_user(tenant, params, 'Import Started', "#{params[:type].capitalize} Import Started")
@@ -240,7 +241,7 @@ class ImportCsv
   end
 
   def check_mapping_for_tracking_num(params)
-    default_map = CsvMap.find_or_initialize_by_name("Tracking Number Update")
+    default_map = CsvMap.find_or_initialize_by(name: "Tracking Number Update")
     default_map.update_attributes(kind: "order", name: "Tracking Number Update", custom: true, map: {:rows=>2, :sep=>",", :other_sep=>0, :delimiter=>"\"", :fix_width=>0, :fixed_width=>4, :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YYYY TIME", :day_month_sequence=>"MM/DD", :map=>{"0"=>{"name"=>"Order number", "value"=>"increment_id"}, "1"=>{"name"=>"Tracking Number", "value"=>"tracking_num"}}})
     
     mappings_for_tracking_num = ['increment_id', 'tracking_num']

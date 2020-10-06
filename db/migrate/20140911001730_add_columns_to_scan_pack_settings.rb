@@ -1,4 +1,4 @@
-class AddColumnsToScanPackSettings < ActiveRecord::Migration
+class AddColumnsToScanPackSettings < ActiveRecord::Migration[5.1]
   def change
     add_column :scan_pack_settings, :show_success_image, :boolean, :default => true
     add_column :scan_pack_settings, :success_image_src, :string, :default => '/assets/images/scan_success.png'

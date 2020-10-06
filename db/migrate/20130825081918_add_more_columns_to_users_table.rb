@@ -1,4 +1,4 @@
-class AddMoreColumnsToUsersTable < ActiveRecord::Migration
+class AddMoreColumnsToUsersTable < ActiveRecord::Migration[5.1]
   def change
    	add_column :users, :edit_user_status, :boolean, :null => false, :default => 0
    	add_column :users, :add_order_items_ALL, :boolean, :null => false, :default => 0

@@ -1,4 +1,4 @@
-class ChangeEbayAuthkeyTypeToLong < ActiveRecord::Migration
+class ChangeEbayAuthkeyTypeToLong < ActiveRecord::Migration[5.1]
   def up
   	  remove_column :ebay_credentials, :auth_token
   	  remove_column :ebay_credentials, :productauth_token

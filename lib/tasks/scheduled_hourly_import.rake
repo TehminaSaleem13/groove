@@ -6,7 +6,7 @@ namespace :doo do
       $redis.expire("schedule_hourly_import", 1800)
       tenants = Tenant.where(scheduled_import_toggle: true) 
       tenants.each do |tenant|
-        Apartment::Tenant.switch tenant.name	
+        Apartment::Tenant.switch! tenant.name	
         setting = GeneralSetting.last
         result = setting.should_import_orders_today
 

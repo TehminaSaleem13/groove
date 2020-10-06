@@ -1,5 +1,5 @@
 class UsersController < ApplicationController
-  before_filter :groovepacker_authorize! , except: [:get_user_email,:update_password]
+  before_action :groovepacker_authorize! , except: [:get_user_email,:update_password]
   include UsersHelper
 
   def index
@@ -217,8 +217,7 @@ class UsersController < ApplicationController
     if !@user.nil?
       result['status'] = true
       result['user'] = @user
-      result['user']['role'] = @user.role
-      result['user']['current_user'] = current_user
+      result['user'] = result['user'].attributes.merge('role'=> @user.role,'current_user'=> current_user)
     else
       result['status'] = false
     end
@@ -237,11 +236,11 @@ class UsersController < ApplicationController
 
     if tenant.save
       Apartment::Tenant.create(tenant.name)
-      Apartment::Tenant.switch(tenant.name)
+      Apartment::Tenant.switch!(tenant.name)
       seed_obj = Groovepacker::SeedTenant.new
       seed_obj.seed
       result['messages'] = 'Tenant successfully created'
-      Apartment::Tenant.switch()
+      Apartment::Tenant.switch!()
     else
       result['messages'] = tenant.errors.full_messages
     end

@@ -3,7 +3,7 @@ namespace :change_password do
 	task :gpadmin => :environment do
 		Tenant.pluck(:name).each do |tenant|
 			begin
-				Apartment::Tenant.switch(tenant)
+				Apartment::Tenant.switch!(tenant)
 				User.find_by_name('gpadmin').update_attribute(:password,'098poi)(*POI')
 			rescue => e
 				puts 'Error occurred: ' + e.message
@@ -14,7 +14,7 @@ namespace :change_password do
 
 	desc "Create separate user and password for everybody"
 	task :admintools => :environment do
-		Apartment::Tenant.switch('admintools')
+		Apartment::Tenant.switch!('admintools')
 		%w(dan svisamsetty kalakar kapil ashish).each do |name|
 			rand_no = Random.rand(99999999999)
 			user = User.find_by_username(name)

@@ -42,13 +42,13 @@ module StoresHelper
       @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
       @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
       @store.auto_update_products = params[:auto_update_products]
-      @store.on_demand_import = params[:on_demand_import]
+      @store.on_demand_import = params[:on_demand_import].to_boolean
       @store.update_inv = params[:update_inv]
       @store.split_order = params[:split_order]
-      @store.on_demand_import_v2 = params[:on_demand_import_v2]
-      @store.regular_import_v2 = params[:regular_import_v2]
-      @store.quick_fix = params[:quick_fix]
-      @store.troubleshooter_option = params[:troubleshooter_option]
+      @store.on_demand_import_v2 = params[:on_demand_import_v2].to_boolean
+      @store.regular_import_v2 = params[:regular_import_v2].to_boolean
+      @store.quick_fix = params[:quick_fix].to_boolean
+      @store.troubleshooter_option = params[:troubleshooter_option].to_boolean
       @store.save
     end
   end
@@ -90,8 +90,8 @@ module StoresHelper
       params['_json'].each do |store|
         @store = Store.where(id: store["id"]).first
         unless @store.nil?
-          Product.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
-          Order.update_all('store_id = '+system_store_id, 'store_id ='+@store.id.to_s)
+          Product.update_all(['store_id = '+system_store_id, 'store_id ='+@store.id.to_s])
+          Order.update_all(['store_id = '+system_store_id, 'store_id ='+@store.id.to_s])
           destroy_csv_store
           # if @store.store_type == 'CSV'
           #   csv_mapping = CsvMapping.find_by_store_id(@store.id)
@@ -187,7 +187,7 @@ module StoresHelper
       sep: params[:sep],
       delimiter: params[:delimiter],
       rows: params[:rows],
-      map: params[:map],
+      map: params[:map].to_unsafe_h,
       store_id: params[:store_id],
       user_id: current_user.id,
       import_action: params[:import_action],

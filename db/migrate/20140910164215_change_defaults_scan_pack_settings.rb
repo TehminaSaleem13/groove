@@ -1,4 +1,4 @@
-class ChangeDefaultsScanPackSettings < ActiveRecord::Migration
+class ChangeDefaultsScanPackSettings < ActiveRecord::Migration[5.1]
   def up
     change_column :scan_pack_settings, :enable_click_sku, :boolean, :default=>true
     change_column :scan_pack_settings, :ask_tracking_number, :boolean, :default=>false

@@ -1,4 +1,4 @@
-class AddColumnsToProducts2 < ActiveRecord::Migration
+class AddColumnsToProducts2 < ActiveRecord::Migration[5.1]
   def change
     add_column :products, :status, :string
     add_column :products, :spl_instructions_4_packer, :text

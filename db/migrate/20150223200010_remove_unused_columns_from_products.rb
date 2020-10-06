@@ -1,4 +1,4 @@
-class RemoveUnusedColumnsFromProducts < ActiveRecord::Migration
+class RemoveUnusedColumnsFromProducts < ActiveRecord::Migration[5.1]
   def change
     remove_column :products, :inv_wh1
     remove_column :products, :alternate_location

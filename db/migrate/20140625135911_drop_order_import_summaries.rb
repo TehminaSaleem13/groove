@@ -1,4 +1,4 @@
-class DropOrderImportSummaries < ActiveRecord::Migration
+class DropOrderImportSummaries < ActiveRecord::Migration[5.1]
   def up
   	drop_table :orders_import_summaries
   end

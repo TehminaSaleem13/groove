@@ -1,5 +1,5 @@
 class DashboardController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
   include ActionView::Helpers::NumberHelper
   # perform authorization too
 

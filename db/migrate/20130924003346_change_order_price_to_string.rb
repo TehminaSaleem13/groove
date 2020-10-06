@@ -1,4 +1,4 @@
-class ChangeOrderPriceToString < ActiveRecord::Migration
+class ChangeOrderPriceToString < ActiveRecord::Migration[5.1]
   def up
   	change_column :orders, :price, :string
   end

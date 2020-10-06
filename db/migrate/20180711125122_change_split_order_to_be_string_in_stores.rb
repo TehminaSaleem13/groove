@@ -1,4 +1,4 @@
-class ChangeSplitOrderToBeStringInStores < ActiveRecord::Migration
+class ChangeSplitOrderToBeStringInStores < ActiveRecord::Migration[5.1]
   def up
     change_column :stores, :split_order, :string, :default => "disabled"
   end

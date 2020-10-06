@@ -1,4 +1,4 @@
-class CreateGeneralSettings < ActiveRecord::Migration
+class CreateGeneralSettings < ActiveRecord::Migration[5.1]
   def change
     create_table :general_settings do |t|
       t.boolean :inventory_tracking, :default=>1

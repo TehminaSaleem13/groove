@@ -1,5 +1,5 @@
 class Store < ActiveRecord::Base
-  attr_accessible :name, :order_date, :status, :store_type, :inventory_warehouse, :inventory_warehouse_id, :split_order, :troubleshooter_option, :on_demand_import_v2, :regular_import_v2
+  # attr_accessible :name, :order_date, :status, :store_type, :inventory_warehouse, :inventory_warehouse_id, :split_order, :troubleshooter_option, :on_demand_import_v2, :regular_import_v2
   has_many :orders
   has_many :products
   has_one :magento_credentials
@@ -23,8 +23,12 @@ class Store < ActiveRecord::Base
 
   include StoresHelper
 
-  before_create 'Store.can_create_new?'
+  before_create :check_for_new_store
 
+  def check_for_new_store
+    self.class.can_create_new?
+  end
+  
   def ensure_warehouse?
     if self.inventory_warehouse.nil?
       self.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first
@@ -83,8 +87,7 @@ class Store < ActiveRecord::Base
       @credentials = ShipstationRestCredential.where(:store_id => self.id)
       if !@credentials.nil? && @credentials.length > 0
         @result['shipstation_rest_credentials'] = @credentials.first
-        @result['shipstation_rest_credentials']['gp_ready_tag_name'] = @credentials.first.gp_ready_tag_name
-        @result['shipstation_rest_credentials']['gp_imported_tag_name'] = @credentials.first.gp_imported_tag_name
+        @result['shipstation_rest_credentials'] = @result['shipstation_rest_credentials'].attributes.merge('gp_ready_tag_name' => @credentials.first.gp_ready_tag_name ,'gp_imported_tag_name' => @credentials.first.gp_imported_tag_name)
         @result['status'] =true
       end
     end

@@ -2,7 +2,7 @@ class InventoryReportMailer < ActionMailer::Base
 	  default from: "app@groovepacker.com"
 
 	  def manual_inventory_report(id, tenant)
-	  	Apartment::Tenant.switch tenant
+	  	Apartment::Tenant.switch! tenant
 	  	@product_inv_setting = InventoryReportsSetting.last
 	    selected_reports = ProductInventoryReport.where("id in (?)", id)
 	    start_time = @product_inv_setting.start_time.strftime("%m-%d-%Y") rescue nil
@@ -27,10 +27,11 @@ class InventoryReportMailer < ActionMailer::Base
 			      	csv << row 
 			      end
 			    end
-			    attachments[file_name] = File.read("public/#{file_name}")
+			    # attachments[file_name] = File.read("public/#{file_name}")
 		     	subject = "Inventory Projection Report"
 		      email = @product_inv_setting.report_email
-		      mail to: email, subject: subject
+					# mail to: email, subject: subject
+					mail(to: email, subject: subject).attachments[file_name] = File.read("public/#{file_name}")
 		    else
 		    	flag = true
 		    	auto_inventory_report(flag, report, tenant)
@@ -39,7 +40,7 @@ class InventoryReportMailer < ActionMailer::Base
 	  end
 
 	  def auto_inventory_report(flag, report=nil, tenant)
-	  	Apartment::Tenant.switch tenant if tenant.present?
+	  	Apartment::Tenant.switch! tenant if tenant.present?
 	  	reports = report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
 	  	@product_inv_setting = InventoryReportsSetting.last
 	  	headers = "DATE_FOR_DAILY_TOTAL,SKU,PRODUCT_NAME,DAILY_SKU_QTY\n"
@@ -66,10 +67,11 @@ class InventoryReportMailer < ActionMailer::Base
 		    		end
 		    	end
 		    end
-		    attachments[file_name] = File.read("public/#{file_name}")
+		    # attachments[file_name] = File.read("public/#{file_name}")
 	     	subject = "Sku Per Day Report"
 	      email = @product_inv_setting.report_email
-	      mail to: email, subject: subject
+	      # mail to: email, subject: subject
+				mail(to: email, subject: subject).attachments[file_name] = File.read("public/#{file_name}")
 	  	end
 	  end
 

@@ -7,7 +7,7 @@ namespace :dpwf do
     unless tenants.empty?
       tenants.each do |tenant|
         begin
-          Apartment::Tenant.switch(tenant)
+          Apartment::Tenant.switch!(tenant)
           if GeneralSetting.all.length == 1
             general_settings = GeneralSetting.all.first
             general_settings.product_weight_format = 'oz'

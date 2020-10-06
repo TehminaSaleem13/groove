@@ -1,4 +1,4 @@
-class AddfieldsToScanPackSettings < ActiveRecord::Migration
+class AddfieldsToScanPackSettings < ActiveRecord::Migration[5.1]
   def change
   	add_column :scan_pack_settings, :string_removal_enabled, :boolean, :default => true
     add_column :scan_pack_settings, :string_removal, :string

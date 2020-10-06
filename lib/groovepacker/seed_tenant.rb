@@ -220,7 +220,7 @@ module Groovepacker
           :restore_backups => false
         }
       ].each do |role|
-        cur_role = Role.find_or_create_by_name(role[:name])
+        cur_role = Role.find_or_create_by(name: role[:name])
         role.each do |key, value|
           cur_role[key] = value
         end
@@ -250,13 +250,13 @@ module Groovepacker
       end
 
       if User.all.length == 0 || (User.where(:username => username).length == 0 && create)
-        created_user = User.create([{:username => username, :name => username, :email => email, :password => password,
-                                     :password_confirmation => password, :role_id => role_super_admin.id, :confirmation_code => '12345678901', :active => true}], :without_protection => true)
+        created_user = User.create({:username => username, :name => username, :email => email, :password => password,
+                                     :password_confirmation => password, :role_id => role_super_admin.id, :confirmation_code => '12345678901', :active => true})
       end
 
       if User.where(:username => 'gpadmin').length == 0
-        created_super_user = User.create([{:username => 'gpadmin', :name => 'gpadmin', :password => '098poi)(*POI', :email => 'groovepacker@gmail.com',
-                                           :password_confirmation => '098poi)(*POI', :role_id => role_super_super_admin.id, :confirmation_code => '12345678900', :active => true, :view_dashboard => "admin_dashboard_with_packer_stats"}], :without_protection => true)
+        created_super_user = User.create({:username => 'gpadmin', :name => 'gpadmin', :password => '098poi)(*POI', :email => 'groovepacker@gmail.com',
+                                           :password_confirmation => '098poi)(*POI', :role_id => role_super_super_admin.id, :confirmation_code => '12345678900', :active => true, :view_dashboard => "admin_dashboard_with_packer_stats"})
       end
 
       User.all.each do |user|

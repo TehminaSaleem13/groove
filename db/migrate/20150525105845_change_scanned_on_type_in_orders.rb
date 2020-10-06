@@ -1,4 +1,4 @@
-class ChangeScannedOnTypeInOrders < ActiveRecord::Migration
+class ChangeScannedOnTypeInOrders < ActiveRecord::Migration[5.1]
   def up
   	change_column :orders, :scanned_on, :datetime
   end

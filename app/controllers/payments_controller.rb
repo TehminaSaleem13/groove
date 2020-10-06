@@ -1,6 +1,6 @@
 class PaymentsController < ApplicationController
 
-  before_filter :groovepacker_authorize!, :get_current_tenant
+  before_action :groovepacker_authorize!, :get_current_tenant
   include PaymentsHelper
 
   def index

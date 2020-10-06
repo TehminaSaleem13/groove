@@ -1,4 +1,4 @@
-class MoveCsvMapToNewTable < ActiveRecord::Migration
+class MoveCsvMapToNewTable < ActiveRecord::Migration[5.1]
   def up
     CsvMapping.find_each do |mapping|
       unless mapping.product_map.blank? || mapping.store.nil?

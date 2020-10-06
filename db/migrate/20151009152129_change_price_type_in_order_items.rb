@@ -1,4 +1,4 @@
-class ChangePriceTypeInOrderItems < ActiveRecord::Migration
+class ChangePriceTypeInOrderItems < ActiveRecord::Migration[5.1]
   def up
     change_column :order_items, :price, :decimal, :precision => 10, :scale => 2
   end

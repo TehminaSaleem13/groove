@@ -1,4 +1,4 @@
-class CreateTeapplixCredentials < ActiveRecord::Migration
+class CreateTeapplixCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :teapplix_credentials do |t|
       t.integer :store_id

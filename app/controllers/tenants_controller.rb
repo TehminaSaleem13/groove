@@ -2,7 +2,7 @@ class TenantsController < ApplicationController
   include PaymentsHelper
   include TenantsHelper
 
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
 
   def index
     result = admin_list_info
@@ -43,9 +43,9 @@ class TenantsController < ApplicationController
   end
 
   def update_list_plan_restriction(type)
-    current_tenant = Apartment::Tenant.current_tenant
+    current_tenant = Apartment::Tenant.current
     result = update_plan_ar(type)
-    Apartment::Tenant.switch(current_tenant)
+    Apartment::Tenant.switch!(current_tenant)
     result["shopify_customer"] = Tenant.find(params["basicinfo"]["id"]).subscription.shopify_customer rescue nil
     respond_to do |format|
       format.html # show.html.erb
@@ -54,9 +54,9 @@ class TenantsController < ApplicationController
   end
 
   def destroy
-    current_tenant = Apartment::Tenant.current_tenant
+    current_tenant = Apartment::Tenant.current
     result = delete_data_single
-    Apartment::Tenant.switch(current_tenant)
+    Apartment::Tenant.switch!(current_tenant)
 
     respond_to do |format|
       format.html # show.html.erb
@@ -90,7 +90,7 @@ class TenantsController < ApplicationController
 
   def update_import_mode
     tenant = Tenant.find(params["tenant"])
-    Apartment::Tenant.switch tenant.name
+    Apartment::Tenant.switch! tenant.name
     # setting = GeneralSetting.last
     #tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
     #tenant.inventory_report_toggle = params["inventory_report_toggle"]
@@ -141,9 +141,9 @@ class TenantsController < ApplicationController
   def update_scan_workflow
     tenant = Tenant.find(params["tenant_id"])
     tenant.scan_pack_workflow = params['workflow'] if params['workflow'].in? %w(default product_first_scan_to_put_wall)
-    Apartment::Tenant.switch tenant.name
+    Apartment::Tenant.switch! tenant.name
     ToteSet.last || ToteSet.create(name: 'T')
-    Apartment::Tenant.switch
+    Apartment::Tenant.switch!
     tenant.save
     render json: {}
   end
@@ -161,7 +161,7 @@ class TenantsController < ApplicationController
     tenant.groovelytic_stat = !tenant.groovelytic_stat
     tenant.save
     unless tenant.groovelytic_stat
-      Apartment::Tenant.switch tenant.name
+      Apartment::Tenant.switch! tenant.name
       users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
       users.update_all(view_dashboard: "none")
     end
@@ -214,7 +214,7 @@ class TenantsController < ApplicationController
   def delete_summary
     result = {}
     name = Tenant.find(params["tenant"]).name
-    Apartment::Tenant.switch name
+    Apartment::Tenant.switch! name
     OrderImportSummary.where("status = ? or status = ? ", "not_started", "in_progress").update_all(status: "cancelled")
     ImportItem.where("status = ? or status = ? ", "not_started", "in_progress").update_all(status: "cancelled")
     result[:status] = true
@@ -242,9 +242,9 @@ class TenantsController < ApplicationController
 
   def clear_all_imports
     Tenant.find_each do |tenant|
-      Apartment::Tenant.switch(tenant.name)
+      Apartment::Tenant.switch!(tenant.name)
       ImportItem.where("status='in_progress' OR status='not_started'").update_all(status: 'cancelled')
-      items = ImportItem.includes(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started' OR import_items.status='failed')")
+      items = ImportItem.joins(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started' OR import_items.status='failed')")
       items.each {|item| item.update_attributes(status: 'cancelled')} rescue nil
       order_import_summary = OrderImportSummary.all
       order_import_summary.each do |import_summary|

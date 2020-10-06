@@ -1,4 +1,4 @@
-class CreateShipstationRestCredentialTable < ActiveRecord::Migration
+class CreateShipstationRestCredentialTable < ActiveRecord::Migration[5.1]
   def up
     create_table :shipstation_rest_credentials do |t|
       t.string :api_key, null: false

@@ -1,4 +1,4 @@
-class ChangeColumnsInAccessRestrictions < ActiveRecord::Migration
+class ChangeColumnsInAccessRestrictions < ActiveRecord::Migration[5.1]
   def up
   	remove_column :access_restrictions, :tenant_id
   	change_column :access_restrictions, :num_users, :integer, :null => false, :default => '0'

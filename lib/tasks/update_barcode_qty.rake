@@ -4,7 +4,7 @@ namespace :doo do
     tenants = Tenant.order(:name) rescue Tenant.all
     tenants.each do |tenant|
     	begin
-	    	Apartment::Tenant.switch tenant.name
+	    	Apartment::Tenant.switch! tenant.name
 	        ProductBarcode.all.each do |pro|
 				pro.is_multipack_barcode = true
 				pro.packing_count = 1 if pro.packing_count.blank?

@@ -1,4 +1,4 @@
-class AddColumnsToGeneralSettings < ActiveRecord::Migration
+class AddColumnsToGeneralSettings < ActiveRecord::Migration[5.1]
   def change
     add_column :general_settings, :send_email_on_mon, :boolean, :default => false
     add_column :general_settings, :send_email_on_tue, :boolean, :default => false

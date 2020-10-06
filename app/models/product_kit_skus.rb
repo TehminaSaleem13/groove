@@ -1,6 +1,6 @@
 class ProductKitSkus < ActiveRecord::Base
   belongs_to :product
-  attr_accessible :sku, :option_product_id, :qty
+  # attr_accessible :sku, :option_product_id, :qty
   has_many :order_item_kit_products, dependent: :destroy
   belongs_to :option_product, class_name: 'Product'
   after_save :add_product_in_order_items
@@ -32,7 +32,7 @@ class ProductKitSkus < ActiveRecord::Base
   end
 
   def update_inventory_levels
-    changed_hash = self.changes
+    changed_hash = self.saved_changes
     if changed_hash['qty'].nil?
       return true
     end
@@ -77,7 +77,7 @@ class ProductKitSkus < ActiveRecord::Base
   end
 
   def self.remove_single_kit_product(kit_id, kit_product, params, result, tenant, current_user_id)
-    Apartment::Tenant.switch tenant
+    Apartment::Tenant.switch! tenant
     kit = Product.find(kit_id)
     current_user = User.find(current_user_id)
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id)

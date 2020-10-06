@@ -69,7 +69,7 @@ class SendStatStream
   end
 
   def update_restriction(tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     restriction = AccessRestriction.order("created_at").last
     unless restriction.nil?
       restriction.total_scanned_shipments += 1

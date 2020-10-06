@@ -11,7 +11,7 @@ module Groovepacker
         end
 
         def search_and_import_single_order(hash)
-          Apartment::Tenant.switch(hash[:tenant])
+          Apartment::Tenant.switch!(hash[:tenant])
           order_no = hash[:order_no]
           user_id = hash[:user_id]
           stores = Store.where("status=? and store_type NOT IN (?)", true, ['CSV', 'system'])

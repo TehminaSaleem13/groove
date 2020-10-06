@@ -1,4 +1,4 @@
-class AddMoreColumnsToGeneralSettings < ActiveRecord::Migration
+class AddMoreColumnsToGeneralSettings < ActiveRecord::Migration[5.1]
   def change
   	add_column :general_settings, :import_orders_on_mon, :boolean, :default => false
     add_column :general_settings, :import_orders_on_tue, :boolean, :default => false

@@ -1,4 +1,4 @@
-class AddNewFieldsToProduct < ActiveRecord::Migration
+class AddNewFieldsToProduct < ActiveRecord::Migration[5.1]
   def change
     add_column :products, :fnsku, :string unless column_exists? :products, :fnsku
     add_column :products, :asin, :string unless column_exists? :products, :asin

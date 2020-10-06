@@ -1,4 +1,4 @@
-class AddMoreColumnsToGenerateBarcodes < ActiveRecord::Migration
+class AddMoreColumnsToGenerateBarcodes < ActiveRecord::Migration[5.1]
   def up
     add_column :generate_barcodes, :cancel, :boolean, default: false
     add_column :generate_barcodes, :next_order_increment_id, :string

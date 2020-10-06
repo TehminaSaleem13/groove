@@ -1,4 +1,4 @@
-class CreateOrderExceptions < ActiveRecord::Migration
+class CreateOrderExceptions < ActiveRecord::Migration[5.1]
   def change
     create_table :order_exceptions do |t|
       t.string :reason
@@ -7,6 +7,6 @@ class CreateOrderExceptions < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :order_exceptions, :user_id
+    # add_index :order_exceptions, :user_id
   end
 end

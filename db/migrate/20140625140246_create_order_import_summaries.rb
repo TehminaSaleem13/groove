@@ -1,4 +1,4 @@
-class CreateOrderImportSummaries < ActiveRecord::Migration
+class CreateOrderImportSummaries < ActiveRecord::Migration[5.1]
   def up
   	create_table :order_import_summaries do |t|
   		t.integer :user_id

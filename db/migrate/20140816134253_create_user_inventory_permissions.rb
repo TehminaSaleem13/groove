@@ -1,4 +1,4 @@
-class CreateUserInventoryPermissions < ActiveRecord::Migration
+class CreateUserInventoryPermissions < ActiveRecord::Migration[5.1]
   def up
     create_table :user_inventory_permissions do |t|
       t.references :user, :null => false

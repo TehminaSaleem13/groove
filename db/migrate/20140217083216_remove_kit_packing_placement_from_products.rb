@@ -1,4 +1,4 @@
-class RemoveKitPackingPlacementFromProducts < ActiveRecord::Migration
+class RemoveKitPackingPlacementFromProducts < ActiveRecord::Migration[5.1]
   def up
     remove_column :products, :kit_packing_placement
   end

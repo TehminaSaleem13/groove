@@ -1,6 +1,6 @@
 class OrderImportSummariesController < ApplicationController
-  before_filter :groovepacker_authorize!, except: [:download_summary_details]
-
+  before_action :groovepacker_authorize!, except: [:download_summary_details]
+  
   def update_display_setting
     orderimportsummary = OrderImportSummary.last
     if orderimportsummary.present?

@@ -1,4 +1,4 @@
-class CreateShipstationCredentials < ActiveRecord::Migration
+class CreateShipstationCredentials < ActiveRecord::Migration[5.1]
   def up
     create_table :shipstation_credentials do |t|
     	t.string :username, :null=>false

@@ -1,4 +1,4 @@
-class CreateToteSets < ActiveRecord::Migration
+class CreateToteSets < ActiveRecord::Migration[5.1]
   def change
     create_table :tote_sets do |t|
       t.integer :max_totes, default: 40

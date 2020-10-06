@@ -1,5 +1,5 @@
 class ScanPackController < ApplicationController
-  before_filter :groovepacker_authorize!, :set_result_instance
+  before_action :groovepacker_authorize!, :set_result_instance
   include ScanPackHelper
 
   def scan_barcode

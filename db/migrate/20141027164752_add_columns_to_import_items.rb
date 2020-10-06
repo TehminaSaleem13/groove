@@ -1,4 +1,4 @@
-class AddColumnsToImportItems < ActiveRecord::Migration
+class AddColumnsToImportItems < ActiveRecord::Migration[5.1]
   def change
     add_column :import_items, :to_import, :integer, :default => 0
     add_column :import_items, :current_increment_id, :string, :default => ''

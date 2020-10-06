@@ -1,4 +1,4 @@
-class CreateOrderShippings < ActiveRecord::Migration
+class CreateOrderShippings < ActiveRecord::Migration[5.1]
   def change
     create_table :order_shippings do |t|
       t.string :firstname

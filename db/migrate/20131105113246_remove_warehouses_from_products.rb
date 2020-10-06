@@ -1,4 +1,4 @@
-class RemoveWarehousesFromProducts < ActiveRecord::Migration
+class RemoveWarehousesFromProducts < ActiveRecord::Migration[5.1]
   def up
   	remove_column :products, :inv_alert_wh1
     remove_column :products, :inv_wh2_qty

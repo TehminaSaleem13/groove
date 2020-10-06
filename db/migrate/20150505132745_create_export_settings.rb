@@ -1,4 +1,4 @@
-class CreateExportSettings < ActiveRecord::Migration
+class CreateExportSettings < ActiveRecord::Migration[5.1]
   def change
     create_table :export_settings do |t|
     	t.boolean :auto_email_export, :default=>true

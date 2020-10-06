@@ -10,7 +10,7 @@ class CostCalculatorMailer < ActionMailer::Base
     recipients.each do |recipient| 
       emails << recipient if recipient != "undefined"   
     end
-    @object_url = "http://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/settings/cost_calculator?" + URI.encode(params.except!("controller", "action", "cost_calculator", "recipient_one", "recipient_two" , "recipient_three", "recipient_four", "follow_up_email").to_query)
+    @object_url = "http://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/settings/cost_calculator?" + URI.encode(params.permit!.except("controller", "action", "cost_calculator", "recipient_one", "recipient_two" , "recipient_three", "recipient_four", "follow_up_email").to_query)
   	subject = params["recipient_name"].present? ? "Fulfillment error cost calculator / Sent by #{params["recipient_name"]}" : "Fulfillment error cost calculator"
     mail to: emails, subject: subject if !(recipients.all? &:blank?)
   end

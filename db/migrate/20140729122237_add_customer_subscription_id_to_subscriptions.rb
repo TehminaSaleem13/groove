@@ -1,4 +1,4 @@
-class AddCustomerSubscriptionIdToSubscriptions < ActiveRecord::Migration
+class AddCustomerSubscriptionIdToSubscriptions < ActiveRecord::Migration[5.1]
   def up
     add_column :subscriptions, :customer_subscription_id, :string
   end

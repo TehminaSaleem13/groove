@@ -1,4 +1,4 @@
-class ChangeDefaultValueForScanPackSetting < ActiveRecord::Migration
+class ChangeDefaultValueForScanPackSetting < ActiveRecord::Migration[5.1]
   def up
   	change_column :scan_pack_settings, :string_removal_enabled, :boolean, :default => false
   end

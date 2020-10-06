@@ -1,4 +1,4 @@
-class CreateInventoryReportsSettings < ActiveRecord::Migration
+class CreateInventoryReportsSettings < ActiveRecord::Migration[5.1]
   def change
     create_table :inventory_reports_settings do |t|
 		t.boolean  :send_email_on_mon,    :default => false,    :null => false

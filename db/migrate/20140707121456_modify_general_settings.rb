@@ -1,4 +1,4 @@
-class ModifyGeneralSettings < ActiveRecord::Migration
+class ModifyGeneralSettings < ActiveRecord::Migration[5.1]
   def up
   	general_setting = GeneralSetting.all.first
   	if !general_setting.nil?

@@ -3,7 +3,7 @@ class LowInventoryLevel < ActionMailer::Base
 
   def notify(general_settings, tenant)
     begin
-      Apartment::Tenant.switch(tenant)
+      Apartment::Tenant.switch!(tenant)
       general_setting = GeneralSetting.all.first
       @products_list = get_entire_list(tenant)
       @products_list.each_slice(4000).with_index  do |products_list, page_no|
@@ -25,7 +25,7 @@ class LowInventoryLevel < ActionMailer::Base
   end
 
   def error_on_low_inv_email(ex, tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     @tenant = tenant
     @exception = ex
     mail to: ENV["FAILED_IMPORT_NOTIFICATION_EMAILS"],
@@ -37,7 +37,7 @@ class LowInventoryLevel < ActionMailer::Base
   end
 
   def get_entire_list(tenant)
-    low_limit = ActiveRecord::Base::sanitize(GeneralSetting.all.first.default_low_inventory_alert_limit)
+    low_limit = ActiveRecord::Base.connection.quote(GeneralSetting.all.first.default_low_inventory_alert_limit)
     # warehouses = ProductInventoryWarehouses.find_by_sql('SELECT * FROM '+tenant+'.product_inventory_warehouses WHERE (product_inv_alert = 0 AND available_inv <='+low_limit.to_s+') OR (product_inv_alert = 1 AND available_inv <= product_inv_alert_level AND product_inv_alert_level != 0)')
     # product_ids = []
     # warehouses.each do |warehouse|

@@ -1,4 +1,4 @@
-class DeleteColumnsFromAmazonCredentials < ActiveRecord::Migration
+class DeleteColumnsFromAmazonCredentials < ActiveRecord::Migration[5.1]
   def up
   remove_column :amazon_credentials, :productaccess_key_id
   remove_column :amazon_credentials, :productsecret_access_key

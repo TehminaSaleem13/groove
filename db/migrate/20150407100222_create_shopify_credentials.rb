@@ -1,4 +1,4 @@
-class CreateShopifyCredentials < ActiveRecord::Migration
+class CreateShopifyCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :shopify_credentials do |t|
       t.string :shop_name

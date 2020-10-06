@@ -1,7 +1,7 @@
 class DailyPacked
   def send_daily_pack_csv(tenant)
     require 'csv'
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     export_setting = ExportSetting.first
     duration = export_setting.daily_packed_export_type.to_i
     email = export_setting.daily_packed_email
@@ -21,7 +21,7 @@ class DailyPacked
 
   def send_csv_daily_pack(params,tenant)
     require 'csv'
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     tenant = Apartment::Tenant.current
     processing = ExportSetting.first.processing_time
     headers = ["OrderNumber", "ShipDate", "WeekDay","Status", " Tracking Number" ]

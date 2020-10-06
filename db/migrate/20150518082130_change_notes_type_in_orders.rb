@@ -1,4 +1,4 @@
-class ChangeNotesTypeInOrders < ActiveRecord::Migration
+class ChangeNotesTypeInOrders < ActiveRecord::Migration[5.1]
   def up
     change_column :orders, :notes_internal, :text
     change_column :orders, :notes_toPacker, :text

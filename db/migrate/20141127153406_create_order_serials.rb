@@ -1,4 +1,4 @@
-class CreateOrderSerials < ActiveRecord::Migration
+class CreateOrderSerials < ActiveRecord::Migration[5.1]
   def change
     create_table :order_serials do |t|
       t.references :order
@@ -7,7 +7,7 @@ class CreateOrderSerials < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :order_serials, :order_id
-    add_index :order_serials, :product_id
+    # add_index :order_serials, :order_id
+    # add_index :order_serials, :product_id
   end
 end

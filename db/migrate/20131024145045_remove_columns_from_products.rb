@@ -1,4 +1,4 @@
-class RemoveColumnsFromProducts < ActiveRecord::Migration
+class RemoveColumnsFromProducts < ActiveRecord::Migration[5.1]
   def up
   	remove_column :products, :kit_skus
   end

@@ -1,4 +1,4 @@
-class CreateWebhooks < ActiveRecord::Migration
+class CreateWebhooks < ActiveRecord::Migration[5.1]
   def up
     create_table :webhooks do |t|
     	t.binary :event, :limit => 1.megabyte

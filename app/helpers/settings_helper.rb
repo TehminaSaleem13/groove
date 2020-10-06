@@ -17,7 +17,7 @@ module SettingsHelper
   end
 
   def import_orders_helper(tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     order_summary = OrderImportSummary.where(
       status: 'in_progress')
 

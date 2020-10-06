@@ -1,8 +1,8 @@
 # Require whichever elevator you're using below here...
 #
 # require 'apartment/elevators/generic'
-# require 'apartment/elevators/domain'
-# require 'apartment/elevators/subdomain'
+require 'apartment/elevators/domain'
+require 'apartment/elevators/subdomain'
 
 #
 # Apartment Configuration
@@ -21,7 +21,7 @@ Apartment.configure do |config|
 
   # use postgres schemas?
   config.use_schemas = true
-
+  Apartment::Elevators::Subdomain.excluded_subdomains = ['34','35', '10','100', 'admin']
   # use raw SQL dumps for creating postgres schemas? (only appies with use_schemas set to true)
   #config.use_sql = true
 

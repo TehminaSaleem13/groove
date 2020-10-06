@@ -1,4 +1,4 @@
-class AddTrackingNumberValidationToScanPackSettings < ActiveRecord::Migration
+class AddTrackingNumberValidationToScanPackSettings < ActiveRecord::Migration[5.1]
   def up
     add_column :scan_pack_settings, :tracking_number_validation_enabled, :boolean, :default => false
     add_column :scan_pack_settings, :tracking_number_validation_prefixes, :string

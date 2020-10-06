@@ -6,7 +6,7 @@ namespace :doo do
       $redis.expire("send_email", 500)
       Tenant.all.each do |tenant|
         begin
-          Apartment::Tenant.switch tenant.name
+          Apartment::Tenant.switch! tenant.name
           access_restriction = AccessRestriction.order("created_at").last
           if (Date.today - Date.parse(access_restriction.created_at.strftime("%F"))).to_i > 31
             unless tenant.test_tenant_toggle

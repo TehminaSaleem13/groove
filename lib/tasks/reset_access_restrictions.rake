@@ -9,7 +9,7 @@ namespace :schedule do
         if @subscription && !@subscription.tenant.nil?
           tenant_name = tenant.name
           plan_id = @subscription.subscription_plan_id
-          Apartment::Tenant.switch(tenant_name)
+          Apartment::Tenant.switch!(tenant_name)
           @access_restriction = AccessRestriction.order("created_at").last
           if @access_restriction
             Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all

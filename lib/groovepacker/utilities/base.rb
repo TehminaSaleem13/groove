@@ -9,7 +9,7 @@ module Groovepacker
       end
 
       def init_import(tenant)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
       end
       
       def get_handler(store_type, store, import_item)
@@ -78,7 +78,7 @@ module Groovepacker
 
       ImportJob = Struct.new(:tenant, :order_import_summary_id) do
         def perform
-          Apartment::Tenant.switch(tenant)
+          Apartment::Tenant.switch!(tenant)
           ois = OrderImportSummary.find_by_id(order_import_summary_id)
           if ois
             ois.update_attributes(status: 'in_progress')

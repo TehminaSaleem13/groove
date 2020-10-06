@@ -2,7 +2,7 @@ module Groovepacker
   module Products
     class ActionIntangible
       def update_intangibleness(tenant, params, intangible_setting_enabled, intangible_string)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         intangible_strings = intangible_string.split(",")
         intangible_param_strings = params[:intangible_string].split(",")
         if params[:intangible_setting_enabled]

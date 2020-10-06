@@ -1,4 +1,4 @@
-class AddTransactionIdToSubscriptions < ActiveRecord::Migration
+class AddTransactionIdToSubscriptions < ActiveRecord::Migration[5.1]
   def up
     add_column :subscriptions, :transaction_id, :string
   end

@@ -1,4 +1,4 @@
-class CreateAccessRestrictions < ActiveRecord::Migration
+class CreateAccessRestrictions < ActiveRecord::Migration[5.1]
   def up
     create_table :access_restrictions do |t|
     	t.integer :tenant_id

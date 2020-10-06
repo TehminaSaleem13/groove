@@ -1,4 +1,4 @@
-class CreateEbayCredentials < ActiveRecord::Migration
+class CreateEbayCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :ebay_credentials do |t|
       t.string :dev_id, :null=>false

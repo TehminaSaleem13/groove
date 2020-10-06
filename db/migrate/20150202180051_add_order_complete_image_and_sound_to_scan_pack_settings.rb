@@ -1,4 +1,4 @@
-class AddOrderCompleteImageAndSoundToScanPackSettings < ActiveRecord::Migration
+class AddOrderCompleteImageAndSoundToScanPackSettings < ActiveRecord::Migration[5.1]
   def change
     add_column :scan_pack_settings, :show_order_complete_image, :boolean, :default => true
     add_column :scan_pack_settings, :order_complete_image_src, :string, :default => '/assets/images/scan_order_complete.png'

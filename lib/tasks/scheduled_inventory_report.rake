@@ -8,7 +8,7 @@ namespace :doo do
 	    tenants = Tenant.order(:name) rescue Tenant.all
 	    tenants.each do |tenant|
 	    	begin	
-	    		Apartment::Tenant.switch tenant.name 
+	    		Apartment::Tenant.switch! tenant.name 
 	    		product_inv_setting = InventoryReportsSetting.last
 			    gn_setting = GeneralSetting.first
 	    		time = product_inv_setting.time_to_send_report_email - gn_setting.time_zone.to_i.seconds

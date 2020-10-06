@@ -1,4 +1,4 @@
-class AddAdminEmailToGeneralSettings < ActiveRecord::Migration
+class AddAdminEmailToGeneralSettings < ActiveRecord::Migration[5.1]
   def up
     add_column :general_settings, :admin_email, :string
 

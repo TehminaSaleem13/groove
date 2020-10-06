@@ -1,4 +1,4 @@
-class AddProductFtpFieldsToFtpCredentials < ActiveRecord::Migration
+class AddProductFtpFieldsToFtpCredentials < ActiveRecord::Migration[5.1]
   def change
     add_column :ftp_credentials, :use_product_ftp_import, :boolean, default: false
     add_column :ftp_credentials, :product_ftp_connection_method, :string, default: 'ftp'

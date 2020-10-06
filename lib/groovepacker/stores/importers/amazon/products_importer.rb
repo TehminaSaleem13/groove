@@ -50,7 +50,7 @@ module Groovepacker
           end
 
           def import_all_products
-            csv_url = GroovS3.find_csv(Apartment::Tenant.current_tenant, 'amazon_product', @credential.store.id).url rescue nil
+            csv_url = GroovS3.find_csv(Apartment::Tenant.current, 'amazon_product', @credential.store.id).url rescue nil
             file_data = open(csv_url).read().split("\n")
             response = file_data.drop(1)
             header = file_data.first.split("\t")

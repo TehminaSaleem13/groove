@@ -1,4 +1,4 @@
-class CreateOrderActivities < ActiveRecord::Migration
+class CreateOrderActivities < ActiveRecord::Migration[5.1]
   def change
     create_table :order_activities do |t|
       t.datetime :activitytime
@@ -8,7 +8,7 @@ class CreateOrderActivities < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :order_activities, :order_id
-    add_index :order_activities, :user_id
+    # add_index :order_activities, :order_id
+    # add_index :order_activities, :user_id
   end
 end

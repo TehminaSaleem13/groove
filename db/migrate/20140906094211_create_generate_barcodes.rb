@@ -1,4 +1,4 @@
-class CreateGenerateBarcodes < ActiveRecord::Migration
+class CreateGenerateBarcodes < ActiveRecord::Migration[5.1]
   def change
     create_table :generate_barcodes do |t|
       t.string :status

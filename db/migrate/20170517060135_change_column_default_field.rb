@@ -1,4 +1,4 @@
-class ChangeColumnDefaultField < ActiveRecord::Migration
+class ChangeColumnDefaultField < ActiveRecord::Migration[5.1]
   def up
   	change_column :ebay_credentials, :unshipped_status, :boolean, :default => true
   end

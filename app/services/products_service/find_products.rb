@@ -331,7 +331,7 @@ module ProductsService
 
     def query_if_no_products
       return unless @products.length == 0
-      @products = Product.where(1)
+      @products = Product.where(id: 1)
       default_query
     end
 

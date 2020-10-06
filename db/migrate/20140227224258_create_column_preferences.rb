@@ -1,4 +1,4 @@
-class CreateColumnPreferences < ActiveRecord::Migration
+class CreateColumnPreferences < ActiveRecord::Migration[5.1]
   def change
     create_table :column_preferences do |t|
       t.references :user
@@ -8,6 +8,6 @@ class CreateColumnPreferences < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :column_preferences, :user_id
+    # add_index :column_preferences, :user_id
   end
 end

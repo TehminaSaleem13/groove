@@ -10,7 +10,7 @@ namespace :doo do
       tenants.each do |tenant|
         begin
           scheduled = ImportOrders.new.reschedule_job('export_order', tenant.name)
-          Apartment::Tenant.switch tenant.name
+          Apartment::Tenant.switch! tenant.name
           export_settings = ExportSetting.all.first
           setting = export_settings.present? && export_settings.auto_email_export? && export_settings.order_export_email.present? && export_settings.should_export_orders(DateTime.now + 1.day) 
           job = Delayed::Job.where("queue LIKE ? and created_at >= ?", "%order_export_email_scheduled_#{tenant.name}%", DateTime.now.strftime('%F'))

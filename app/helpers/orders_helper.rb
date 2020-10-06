@@ -205,7 +205,7 @@ module OrdersHelper
     image_name = Digest::MD5.hexdigest(increment_id)
     if !File.exist?("#{Rails.root}/public/images/#{image_name}.png")
       File.open("#{Rails.root}/public/images/#{image_name}.png",
-                'w') do |f|
+                'wb') do |f|
         f.write blob
       end
     end

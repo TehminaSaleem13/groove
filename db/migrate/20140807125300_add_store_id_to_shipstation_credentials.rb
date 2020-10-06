@@ -1,4 +1,4 @@
-class AddStoreIdToShipstationCredentials < ActiveRecord::Migration
+class AddStoreIdToShipstationCredentials < ActiveRecord::Migration[5.1]
   def up
     add_column :shipstation_credentials, :store_id, :integer
   end

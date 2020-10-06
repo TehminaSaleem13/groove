@@ -1,4 +1,4 @@
-class CreateProductInventoryReports < ActiveRecord::Migration
+class CreateProductInventoryReports < ActiveRecord::Migration[5.1]
   def change
     create_table :product_inventory_reports do |t|
       t.string   :name

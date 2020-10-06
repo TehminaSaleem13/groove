@@ -45,7 +45,7 @@ module Groovepacker
       end
 
       def create_product_export(params, result, tenant)
-        Apartment::Tenant.switch tenant
+        Apartment::Tenant.switch! tenant
         products = ProductsService::ListSelectedProducts.call(params, include_association = true)
         export_type = (params[:product][:is_kit] == 1 rescue nil) ? 'kits' : 'products'
         result['filename'] = export_type + '-'+Time.now.to_s+'.csv'

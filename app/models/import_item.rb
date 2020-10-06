@@ -1,13 +1,13 @@
 class ImportItem < ActiveRecord::Base
   belongs_to :order_import_summary
   belongs_to :store
-  attr_accessible :status, :store_id, :previous_imported,
-                  :success_imported, :import_type, :store,
-                  :current_increment_id, :current_order_items,
-                  :current_order_imported_item, :to_import, :message, :days,
-                  :updated_orders_import, :import_error, :failed_count, :order_import_summary_id
-  #after_save :emit_data_to_user
-  #after_save :emit_countdown_data_to_user
+  # attr_accessible :status, :store_id, :previous_imported,
+  #                 :success_imported, :import_type, :store,
+  #                 :current_increment_id, :current_order_items,
+  #                 :current_order_imported_item, :to_import, :message, :days,
+  #                 :updated_orders_import, :import_error, :failed_count
+  # after_save :emit_data_to_user
+  # after_save :emit_countdown_data_to_user
 
 
   # def emit_data_to_user
@@ -46,7 +46,7 @@ class ImportItem < ActiveRecord::Base
   # end
 
   def emit_countdown_data_to_user
-    if self.changes["current_increment_id"].present?
+    if self.saved_changes["current_increment_id"].present?
       result = {'progress_info' => self.reload }
       GroovRealtime::emit('countdown_update', result, :tenant)
     end

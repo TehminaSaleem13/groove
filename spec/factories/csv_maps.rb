@@ -1,9 +1,9 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :csv_map do
-    type ""
-    custom false
-    map "MyText"
+    type {""}
+    custom {false}
+    map {"MyText"}
   end
 end

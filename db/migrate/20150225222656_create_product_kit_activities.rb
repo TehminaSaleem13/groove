@@ -1,4 +1,4 @@
-class CreateProductKitActivities < ActiveRecord::Migration
+class CreateProductKitActivities < ActiveRecord::Migration[5.1]
   def change
     create_table :product_kit_activities do |t|
       t.integer :product_id

@@ -122,14 +122,15 @@ module Groovepacker
                 import_item = order_import_summary.import_items
               end
               import_item = import_item.first
-              @time_of_import = import_item.created_at 
+              import_item.update(updated_orders_import: 0) if import_item.updated_orders_import.nil?
+              @time_of_import = import_item.created_at
               if import_item
                 import_item.with_lock do
                   import_item.to_import = @order.total_count
                   if result[:status]
                     import_item.status = "in_progress"
                     if order_persisted
-                      import_item.updated_orders_import += 1 rescue import_item.updated_orders_import = 1
+                      import_item.updated_orders_import += 1
                     else
                       import_item.success_imported += 1
                     end

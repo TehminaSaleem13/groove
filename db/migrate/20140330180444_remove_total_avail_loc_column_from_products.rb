@@ -1,4 +1,4 @@
-class RemoveTotalAvailLocColumnFromProducts < ActiveRecord::Migration
+class RemoveTotalAvailLocColumnFromProducts < ActiveRecord::Migration[5.1]
   def up
   	remove_column :products, :total_avail_loc
   end

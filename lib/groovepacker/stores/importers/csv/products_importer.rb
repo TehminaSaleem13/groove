@@ -18,7 +18,7 @@ module Groovepacker
             Product.last(@products_to_import.length).each { |product| product.add_product_activity("Product Import","#{product.store.try(:name)}") }
             found_products_raw = []
             @all_unique_ids.each_slice(20000) do |ids|
-              found_products_raw << Product.find_all_by_store_product_id(ids)  
+              found_products_raw << Product.where(store_product_id: ids)  
             end
             found_products_raw = found_products_raw.flatten
             # found_products_raw = Product.find_all_by_store_product_id(@all_unique_ids)
@@ -97,14 +97,14 @@ module Groovepacker
           def prepare_to_import
             found_skus_raw = []
             @all_skus.each_slice(20000) do |skus|
-              found_skus_raw << ProductSku.find_all_by_sku(skus)  
+              found_skus_raw << ProductSku.where(sku: skus)  
             end
             found_skus_raw = found_skus_raw.flatten
             # found_skus_raw = ProductSku.find_all_by_sku(@all_skus)
             @found_skus = {}
             found_barcodes_raw = []
             @all_barcodes.each_slice(20000) do |barcodes|
-              found_barcodes_raw << ProductBarcode.find_all_by_barcode(barcodes)  
+              found_barcodes_raw << ProductBarcode.where(barcode: barcodes)  
             end
             found_barcodes_raw = found_barcodes_raw.flatten
             # found_barcodes_raw = ProductBarcode.find_all_by_barcode(@all_barcodes)
@@ -202,7 +202,7 @@ module Groovepacker
             @success_updated += 1
 
             if (!self.mapping['inv_wh1'].nil? || !self.mapping['location_primary'].nil? || !self.mapping['location_secondary'].nil? || !self.mapping['location_tertiary'].nil?)
-              default_inventory = ProductInventoryWarehouses.find_or_create_by_inventory_warehouse_id_and_product_id(@default_inventory_warehouse_id, duplicate_product.id)
+              default_inventory = ProductInventoryWarehouses.find_or_create_by(inventory_warehouse_id: @default_inventory_warehouse_id,product_id: duplicate_product.id)
               updatable_record = record[:inventory].first
               if !self.mapping['inv_wh1'].nil? && updatable_record[:quantity_on_hand] != "[DELETE]" #&& self.mapping['inv_wh1'][:action] =='overwrite'
                 default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]

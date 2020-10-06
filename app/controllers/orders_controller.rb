@@ -1,5 +1,5 @@
 class OrdersController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
   include OrderConcern
   # Import orders from store based on store id
   def importorders
@@ -13,7 +13,7 @@ class OrdersController < ApplicationController
   def import_shipworks
     status = gp_orders_import.import_shipworks(params[:auth_token], request)
 
-    render status: status, nothing: true
+    render body: nil
   end
 
   def update

@@ -71,7 +71,7 @@ module ProductsService
     end
 
     def set_search_query
-      @search = ActiveRecord::Base.sanitize("%#{params[:search]}%")
+      @search = ActiveRecord::Base.connection.quote("%#{params[:search]}%")
     end
 
     def set_is_kit

@@ -1,6 +1,6 @@
 class ProductImage < ActiveRecord::Base
   belongs_to :product
-  attr_accessible :image, :caption
+  #attr_accessible :image, :caption
 
   after_save :delete_empty
 

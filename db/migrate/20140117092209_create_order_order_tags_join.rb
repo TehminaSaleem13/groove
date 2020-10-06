@@ -1,4 +1,4 @@
-class CreateOrderOrderTagsJoin < ActiveRecord::Migration
+class CreateOrderOrderTagsJoin < ActiveRecord::Migration[5.1]
   def up
           create_table :order_tags_orders, :id => false do |t|
                   t.integer "order_id"

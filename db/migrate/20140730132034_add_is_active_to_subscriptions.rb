@@ -1,4 +1,4 @@
-class AddIsActiveToSubscriptions < ActiveRecord::Migration
+class AddIsActiveToSubscriptions < ActiveRecord::Migration[5.1]
   def up
     add_column :subscriptions, :is_active, :boolean
   end

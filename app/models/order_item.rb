@@ -9,8 +9,8 @@ class OrderItem < ActiveRecord::Base
   has_many :order_item_scan_times, :dependent => :destroy
   has_one :product_barcode
   has_one :product_sku
-  attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id,
-                  :cached_methods, :box_id
+  # attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id,
+  #                 :cached_methods, :box_id
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
@@ -343,7 +343,7 @@ class OrderItem < ActiveRecord::Base
 
   def update_inventory_levels
     result = true
-    changed_hash = self.changes
+    changed_hash = self.saved_changes
     if !changed_hash.nil? and (!changed_hash['qty'].nil?)
       result &= Groovepacker::Inventory::Orders.item_update(self, changed_hash['qty'][0], changed_hash['qty'][1])
     end

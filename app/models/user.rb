@@ -7,7 +7,7 @@ class User < ActiveRecord::Base
          :recoverable, :rememberable, :trackable, :validatable
 
   # Setup accessible (or protected) attributes for your model
-  attr_accessible :username, :password, :password_confirmation, :remember_me, :confirmation_code, :email
+  # attr_accessible :username, :password, :password_confirmation, :remember_me, :confirmation_code, :email
   validates_presence_of :username, :confirmation_code
   validates_uniqueness_of :username, :case_sensitive => false
   validates_uniqueness_of :confirmation_code
@@ -30,6 +30,10 @@ class User < ActiveRecord::Base
   end
 
   def email_changed?
+    false
+  end
+
+  def will_save_change_to_email?
     false
   end
 

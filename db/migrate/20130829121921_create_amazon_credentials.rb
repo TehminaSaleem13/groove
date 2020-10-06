@@ -1,4 +1,4 @@
-class CreateAmazonCredentials < ActiveRecord::Migration
+class CreateAmazonCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :amazon_credentials do |t|
       t.string :access_key_id, :null=>false

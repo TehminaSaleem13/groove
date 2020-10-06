@@ -1,4 +1,4 @@
-class CreateSoldInventoryWarehouses < ActiveRecord::Migration
+class CreateSoldInventoryWarehouses < ActiveRecord::Migration[5.1]
   def change
     create_table :sold_inventory_warehouses do |t|
       t.integer :product_inventory_warehouses_id, references: :product_inventory_warehousess

@@ -5,7 +5,7 @@ module Groovepacker
       include SettingsHelper
 
       def update_ordere_item_kit_product(tenant, product_id, product_kit_sku_id)
-        Apartment::Tenant.switch tenant 
+        Apartment::Tenant.switch! tenant 
         order_items = OrderItem.where(:product_id => product_id)
         order_items.each do |order_item|
           order_item_kit_product = OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id)
@@ -21,7 +21,7 @@ module Groovepacker
       end
 
       def status_update(tenant, params, bulk_actions_id, username)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         result = Hash.new
         result['messages'] =[]
         result['status'] = true
@@ -84,7 +84,7 @@ module Groovepacker
       end
 
       def delete(tenant, params, bulk_actions_id, username)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         result = Hash.new
         result['messages'] =[]
         result['status'] = true
@@ -100,7 +100,7 @@ module Groovepacker
             )
 
           products_kit_skus =
-            ProductKitSkus.where(option_product_id: products.pluck(:id))
+            ProductKitSkus.where(option_product_id: products.map(&:id))
             .includes(product: :product_kit_skuss)
 
           bulk_action.total = products.length
@@ -171,7 +171,7 @@ module Groovepacker
       end
 
       def duplicate(tenant, params, bulk_actions_id)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         result = Hash.new
         result['messages'] =[]
         result['status'] = true
@@ -294,7 +294,7 @@ module Groovepacker
       def export(tenant, params, bulk_actions_id, user)
         require 'csv'
 
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         result = Hash.new
         result['messages'] =[]
         result['status'] = true

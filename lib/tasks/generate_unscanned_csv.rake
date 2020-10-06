@@ -3,7 +3,7 @@ namespace :doo do
 
   task :unscanned_csv, [:tenant, :from, :upto] => [:environment] do |t, args|
     begin
-    	Apartment::Tenant.switch(args[:tenant])
+    	Apartment::Tenant.switch!(args[:tenant])
       activities = OrderActivity.where("created_at>=? and created_at<=? and action Like ?" ,DateTime.now-args[:from].to_i, DateTime.now-args[:upto].to_i,  '%INVALID SCAN%')
       file_name = "#{activities.count}_unscanned_#{DateTime.now}.csv"
       headers = "Order Id,Activity,User,Activity Time\n"

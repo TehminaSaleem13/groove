@@ -43,7 +43,7 @@ module Groovepacker
       end
 
       # def import_ftp_order(tenant)
-      #   Apartment::Tenant.switch(tenant)
+      #   Apartment::Tenant.switch!(tenant)
       #   user = User.where(username: "gpadmin").first
       #   if OrderImportSummary.where(status: 'in_progress').blank?
       #     stores = Store.includes(:ftp_credential).where('host IS NOT NULL and username IS NOT NULL and password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
@@ -70,7 +70,7 @@ module Groovepacker
       # end
 
       def ftp_order_import(tenant)
-        stores = Store.includes(:ftp_credential).where('host IS NOT NULL and username IS NOT NULL and password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
+        stores = Store.joins(:ftp_credential).where('host IS NOT NULL and username IS NOT NULL and password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_ftp_import = ?', 'CSV', true)
         stores.each do |store|
           params = {}
           ftp_csv_import = ImportOrders.new
@@ -84,7 +84,7 @@ module Groovepacker
       end
 
       def create_order_import_summary(store, user, tenant)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         @order_summary = OrderImportSummary.last
         @order_summary.update_attribute(:status, "not_started") if @order_summary.present?
         @order_summary = OrderImportSummary.create(user_id: user.id, import_summary_type: "import_orders", status: 'not_started') if @order_summary.blank?
@@ -104,8 +104,9 @@ module Groovepacker
           #find store/credential by using the auth_token
           credential = ShipworksCredential.find_by_auth_token(auth_token)
           tenant = Apartment::Tenant.current
-          if Tenant.where(name: tenant).last.is_delay == false 
-            status = create_or_update_item(credential, status)
+          value = Hash.from_xml(request.body.read)
+          if Tenant.where(name: tenant).last.is_delay == false
+            status = create_or_update_item(credential, status, value)
           else
             return 401 unless !(credential.nil? || !credential.store.status)
             cred = {}
@@ -113,7 +114,7 @@ module Groovepacker
             import_item = ImportItem.find_by_store_id(credential.store.id)
             import_item = ImportItem.create_or_update(import_item, credential)
             import_orders_obj = ImportOrders.new(@params)
-            import_orders_obj.delay(:run_at => 1.seconds.from_now, :priority => 10, :queue => "shipworks_importing_orders_#{tenant}").start_shipwork_import(cred, status, @params, tenant)
+            import_orders_obj.delay(:run_at => 1.seconds.from_now, :priority => 10, :queue => "shipworks_importing_orders_#{tenant}").start_shipwork_import(cred, status, value, tenant)
           end
         rescue Exception => e
           tenant = Apartment::Tenant.current
@@ -139,12 +140,12 @@ module Groovepacker
           # import_orders_obj.import_orders tenant
         end
 
-        def create_or_update_item(credential, status)
+        def create_or_update_item(credential, status, value)
           return 401 unless !(credential.nil? || !credential.store.status)
           @import_item = ImportItem.find_by_store_id(credential.store.id)
           @import_item = ImportItem.create_or_update(@import_item, credential)
           shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, @import_item)
-          Groovepacker::Stores::Context.new(shipwork_handler).import_order(@params["ShipWorks"]["Customer"]["Order"]) if @params["ShipWorks"]["Customer"].present?
+          Groovepacker::Stores::Context.new(shipwork_handler).import_order(value["ShipWorks"]["Customer"]["Order"]) if value["ShipWorks"]["Customer"].present?
           change_status_if_not_failed
           return status
         end

@@ -2,7 +2,7 @@ class CsvExportMailer < ActionMailer::Base
   default from: "app@groovepacker.com"
 
   def send_s3_object_url(filename, object_url, tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     general_setting = GeneralSetting.all.first
     recipients = [general_setting.admin_email]
     user_emails = general_setting.export_csv_email.split(',') rescue []
@@ -16,7 +16,7 @@ class CsvExportMailer < ActionMailer::Base
   end
 
   def send_daily_packed(object_url,tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     @object_url = object_url
     #general_setting = GeneralSetting.all.first
     #recipients = [general_setting.email_address_for_packer_notes]
@@ -28,7 +28,7 @@ class CsvExportMailer < ActionMailer::Base
   end
 
   def send_s3_product_object_url(filename, object_url, tenant, no_product)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     general_setting = GeneralSetting.all.first
     recipients = [general_setting.email_address_for_packer_notes]
     @no_product = "Empty" if no_product
@@ -39,13 +39,13 @@ class CsvExportMailer < ActionMailer::Base
   end
 
   def unscanned_csv(filename, tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     attachments[filename] = File.read("public/#{filename}")
     mail to: ENV["UNSCANNED_ORDERS_EMAILS"], subject: "GroovePacker Unscanned Export Report"
   end
 
   def product_restore(tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     recipients = GeneralSetting.all.first.export_csv_email.split(',') rescue []
     mail to: recipients, subject: "GroovePacker Product Restore Is Completed"
   end

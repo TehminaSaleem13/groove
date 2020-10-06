@@ -1,4 +1,4 @@
-class AddNonHyphenIncrementIdToOrders < ActiveRecord::Migration
+class AddNonHyphenIncrementIdToOrders < ActiveRecord::Migration[5.1]
   include ApplicationHelper
   def change
     add_column :orders, :non_hyphen_increment_id, :string

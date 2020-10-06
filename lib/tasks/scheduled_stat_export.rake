@@ -6,7 +6,7 @@ namespace :doo do
         $redis.expire("scheduled_stat_export", 5400) 
 	    Tenant.all.each do |tenant|
 	    	begin
-		      Apartment::Tenant.switch tenant.name
+		      Apartment::Tenant.switch! tenant.name
 			  export_setting = ExportSetting.last
 			  if export_setting.auto_stat_email_export && export_setting.stat_export_email.present?
 		  	    day = DateTime.now.strftime("%A")

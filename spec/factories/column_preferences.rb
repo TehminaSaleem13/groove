@@ -1,8 +1,8 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :column_preference do
-    user nil
-    identifier "MyString"
+    user {nil}
+    identifier {"MyString"}
   end
 end

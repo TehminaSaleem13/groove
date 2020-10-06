@@ -139,7 +139,7 @@ module Groovepacker
         end
 
         def preloader(orders)
-          ActiveRecord::Associations::Preloader.new(orders, [:tote, :store, :order_tags]).run
+          ActiveRecord::Associations::Preloader.new.preload(orders, [:tote, :store, :order_tags])
         end
 
         def update_list_for_not_scanned(order)

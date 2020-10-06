@@ -519,7 +519,7 @@ module Groovepacker
             end
 
             def create_import_summary(log)
-              summary = CsvImportSummary.find_or_create_by_log_record(log.to_json)
+              summary = CsvImportSummary.find_or_create_by(log_record: log.to_json)
               summary.file_name = ''
               summary.import_type = 'On demand import'
               summary.save

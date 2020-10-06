@@ -24,7 +24,7 @@ module CachedMethods
     def cached_methods(*methods)
       methods.each do |association|
         define_method("cached_#{association}") do |key = nil, cached = nil|
-          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant}"
+          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant_value}"
           cached = begin
             instance = "@cached_#{association}"
             (
@@ -55,7 +55,7 @@ module CachedMethods
         end
 
         define_method("#{association}_is_cached?") do
-          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant}"
+          key = "#{association}_for_#{self.class.to_s.underscore}_#{id}_for_tenant_#{tenant_value}"
           instance = "@cached_#{association}"
           (
             instance_variable_defined?(instance) &&
@@ -80,7 +80,7 @@ module CachedMethods
   end
 
   def multi_key
-    @multi_key ||= "#{self.class.to_s.underscore}_#{id}_cache_keys_for_tenant_#{tenant}"
+    @multi_key ||= "#{self.class.to_s.underscore}_#{id}_cache_keys_for_tenant_#{tenant_value}"
   end
 
   def keys
@@ -91,7 +91,7 @@ module CachedMethods
     keys.present?
   end
 
-  def tenant
+  def tenant_value
     Apartment::Tenant.current
   end
 

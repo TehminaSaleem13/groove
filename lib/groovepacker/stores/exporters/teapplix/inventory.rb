@@ -9,7 +9,7 @@ module Groovepacker
             @credential = handler[:credential]
             @client = handler[:store_handle]
             current_tenant = handler[:current_tenant]
-            Apartment::Tenant.switch(current_tenant)
+            Apartment::Tenant.switch!(current_tenant)
 
             products = Product.joins(:sync_option).where("sync_with_teapplix=true and (teapplix_product_sku IS NOT NULL)")
             header = "\"Post Date\",\"Post Type\",\"Post Comment\",SKU,Quantity,Total,Location\n"

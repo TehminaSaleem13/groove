@@ -1,4 +1,4 @@
-class ChangeColumnDatatypeInEbayCredentials < ActiveRecord::Migration
+class ChangeColumnDatatypeInEbayCredentials < ActiveRecord::Migration[5.1]
   def up
     remove_column :ebay_credentials, :productauth_token
     remove_column :ebay_credentials, :auth_token

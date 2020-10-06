@@ -19,7 +19,7 @@ module ScanPack
       }
       @orders = []
       @scanpack_settings = ScanPackSetting.all.first
-      @session = session.merge(most_recent_scanned_product: nil,
+      @session = session.merge!(most_recent_scanned_product: nil,
                                parent_order_item: false)
       @single_order = nil
       @single_order_result = { 'matched_orders' => [] }

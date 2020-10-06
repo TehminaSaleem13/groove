@@ -160,7 +160,7 @@ module ProductService
       def get_pending_orders_of_products
         @result['product']['pendingorders'] = nil
         return unless @product.product_skus.length > 0
-        pending_orders = Order.where(:status => 'awaiting', :status => 'onhold', :sku => @product.product_skus.first.sku)
+        pending_orders = Order.where(:status => ['awaiting','onhold'], :sku => @product.product_skus.first.sku)
         @result['product']['pendingorders'] = pending_orders
       end
 

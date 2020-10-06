@@ -6,13 +6,13 @@ module ProductsService
     require 'mws-connect'
 
     def preload_associations(products)
-      ActiveRecord::Associations::Preloader.new(
+      ActiveRecord::Associations::Preloader.new.preload(
         products,
         [
           :product_barcodes, :product_skus, :product_cats, :product_images,
           :store, :product_kit_skuss, product_inventory_warehousess: [:inventory_warehouse]
         ]
-      ).run
+      )
     end
   end
 end

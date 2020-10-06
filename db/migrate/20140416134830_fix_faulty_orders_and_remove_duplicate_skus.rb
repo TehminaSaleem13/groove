@@ -1,4 +1,4 @@
-class FixFaultyOrdersAndRemoveDuplicateSkus < ActiveRecord::Migration
+class FixFaultyOrdersAndRemoveDuplicateSkus < ActiveRecord::Migration[5.1]
   def up
 
   	ProductSku.all.each do |sku|

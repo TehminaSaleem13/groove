@@ -7,7 +7,7 @@
     <body style="line-height: 90%; margin-left: 3px; margin-top: 3px; margin-right: 2px; margin-bottom: 1px">
     <% if !item.product.nil? && !item.product.product_barcodes.first.nil? && !item.product.product_barcodes.first.barcode.nil? %>
       <% unless item.product.primary_sku.nil? %>
-        <div style="line-height: 70%; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: -5px;"><%= item.product.primary_sku %></div>
+        <div style="line-height: 90%; font-size: 13px; margin-left: 10px; margin-top: 0px; margin-bottom: -5px;"><%= item.product.primary_sku %></div>
         <br/>
       <% end %>
       <div style="font-size: 12px; margin-left: 10px; margin-top:-5px; margin-bottom: 3px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= item.product.name %></div>

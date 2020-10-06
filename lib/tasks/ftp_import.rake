@@ -4,9 +4,9 @@ namespace :ftp_csv_file_import do
     # current_time = Time.now.in_time_zone('Eastern Time (US & Canada)').strftime("%I:%M")
     Tenant.all.each do |tenant|
       begin
-        Apartment::Tenant.switch "#{tenant.name}"
+        Apartment::Tenant.switch! "#{tenant.name}"
         import_no_inprogress = OrderImportSummary.where("status in (?) and updated_at >= ?", ['in_progress', "not_started"], (DateTime.now - 1.hour)).blank?
-        item = !ImportItem.includes(:store).where(:stores => {:store_type => "CSV"}).map(&:status).include?("in_progress")
+        item = !ImportItem.joins(:store).where(:stores => {:store_type => "CSV"}).map(&:status).include?("in_progress")
         puts "====================FTP import for #{tenant.name}======================"
         # cred = !Store.where("csv_beta = ? and status = ?", true, true).map(&:ftp_credential).map(&:use_ftp_import).include?(true) rescue true
         if import_no_inprogress && item 

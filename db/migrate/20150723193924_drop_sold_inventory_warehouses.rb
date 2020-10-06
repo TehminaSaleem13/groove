@@ -1,4 +1,4 @@
-class DropSoldInventoryWarehouses < ActiveRecord::Migration
+class DropSoldInventoryWarehouses < ActiveRecord::Migration[5.1]
   def up
     drop_table :sold_inventory_warehouses
   end

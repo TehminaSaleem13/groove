@@ -5,7 +5,7 @@ class TenantMiddleware < Apartment::Elevators::Subdomain
     database = @processor.call(request)
 
     begin
-      Apartment::Tenant.switch database if database
+      Apartment::Tenant.switch! database if database
     rescue Apartment::DatabaseNotFound, Apartment::SchemaNotFound
       Rails.logger.error "ERROR: Apartment Tenant not found: #{Apartment::Tenant.current.inspect}"
       return [

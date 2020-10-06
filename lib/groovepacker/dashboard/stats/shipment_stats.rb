@@ -11,11 +11,11 @@ module Groovepacker
             tenants.find{ |tenant| tenant.name.eql?(name) } ||
             Tenant.where(name: name).first
           
-          current_tenant = Apartment::Tenant.current_tenant
+          current_tenant = Apartment::Tenant.current
           if @tenant
             return shipping_result unless !access_restrictions && switch_tenant(@tenant.name)
 
-            Apartment::Tenant.switch(@tenant.name) unless access_restrictions
+            Apartment::Tenant.switch!(@tenant.name) unless access_restrictions
 
             @access_restrictions = access_restrictions || AccessRestriction.order('created_at')
 
@@ -26,7 +26,7 @@ module Groovepacker
               get_avg_data(shipping_result) if avg_data
               get_old_shipped_count(shipping_result)
             end
-            Apartment::Tenant.switch(current_tenant) unless access_restrictions
+            Apartment::Tenant.switch!(current_tenant) unless access_restrictions
           end
 
           shipping_result

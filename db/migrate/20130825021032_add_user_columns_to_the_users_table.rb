@@ -1,4 +1,4 @@
-class AddUserColumnsToTheUsersTable < ActiveRecord::Migration
+class AddUserColumnsToTheUsersTable < ActiveRecord::Migration[5.1]
   def change
    	add_column :users, :access_scanpack, :boolean, :null => false, :default => 0
    	add_column :users, :access_orders, :boolean, :null => false, :default => 0

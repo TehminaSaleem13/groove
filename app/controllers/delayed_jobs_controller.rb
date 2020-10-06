@@ -1,6 +1,6 @@
 class DelayedJobsController < ApplicationController
-	before_filter :groovepacker_authorize!
-	prepend_before_filter :initialize_result_obj
+	before_action :groovepacker_authorize!
+	prepend_before_action :initialize_result_obj
 
 	def index
 		delayed_jobs = params[:search].present? ? Delayed::Job.where("(handler like ? or queue like ?) and updated_at > ?", "%#{params[:search]}%", "%#{params[:search]}%", Date.today - 2 ) : Delayed::Job.where("updated_at > ?", Date.today - 2)

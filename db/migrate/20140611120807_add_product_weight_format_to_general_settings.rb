@@ -1,4 +1,4 @@
-class AddProductWeightFormatToGeneralSettings < ActiveRecord::Migration
+class AddProductWeightFormatToGeneralSettings < ActiveRecord::Migration[5.1]
   def up
     add_column :general_settings, :product_weight_format, :string
   end

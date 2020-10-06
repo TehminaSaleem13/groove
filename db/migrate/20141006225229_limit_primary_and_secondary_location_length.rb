@@ -1,4 +1,4 @@
-class LimitPrimaryAndSecondaryLocationLength < ActiveRecord::Migration
+class LimitPrimaryAndSecondaryLocationLength < ActiveRecord::Migration[5.1]
   def up
     change_column :product_inventory_warehouses, :location_primary, :string, :limit => 50
     change_column :product_inventory_warehouses, :location_secondary, :string, :limit => 50

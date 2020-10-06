@@ -81,7 +81,7 @@ module Groovepacker
             end
             updated_products = Product.where(status_updated: true)
             if updated_products.any?
-              orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+              orders = Order.joins(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
               (orders||[]).find_each(:batch_size => 100) do |order|
                 order.update_order_status
               end
@@ -209,7 +209,7 @@ module Groovepacker
 
             #Location
             unless item["Location"].nil?
-              inv_wh = ProductInventoryWarehouses.find_or_create_by_product_id_and_inventory_warehouse_id(product.id, store.inventory_warehouse_id)
+              inv_wh = ProductInventoryWarehouses.find_or_create_by(product_id: product.id, inventory_warehouse_id: store.inventory_warehouse_id)
               inv_wh.location_primary = item["Location"]
               inv_wh.save
             end

@@ -10,7 +10,7 @@ namespace :delete do
     end
     tenants.each do |tenant|
       begin
-        Apartment::Tenant.switch(tenant.name)
+        Apartment::Tenant.switch!(tenant.name)
         Order.all.group_by(&:increment_id).each do |key, orders|
           next if orders.count == 1
           scanned_true = ((orders.map(&:status).include? ("scanned")) || (orders.map(&:status).include? ("cancelled")))

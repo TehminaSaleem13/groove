@@ -1,6 +1,6 @@
 class BigCommerceController < ApplicationController
-  before_filter :groovepacker_authorize!, :only => [:check_connection, :disconnect]
-  before_filter :find_store, :only => [:check_connection, :disconnect]
+  before_action :groovepacker_authorize!, :only => [:check_connection, :disconnect]
+  before_action :find_store, :only => [:check_connection, :disconnect]
 
   def setup
     # redirect to admin page with the big-commerce and with groove-solo plan
@@ -18,7 +18,7 @@ class BigCommerceController < ApplicationController
     app_session = JSON.parse(app_session) rescue {}
     unless app_session["tenant"].blank?
       @store_id = app_session["store_id"] 
-      Apartment::Tenant.switch(app_session["tenant"])
+      Apartment::Tenant.switch!(app_session["tenant"])
       update_bc_credentials
       $redis.del(key)
       redirect_to big_commerce_complete_path
@@ -28,7 +28,7 @@ class BigCommerceController < ApplicationController
       redirect_to big_commerce_setup_path(:shop => "#{bc_store_name}.mybigcommerce.com")
     end
     # unless cookies[:tenant_name].blank?
-    #   Apartment::Tenant.switch(cookies[:tenant_name])
+    #   Apartment::Tenant.switch!(cookies[:tenant_name])
     #   update_bc_credentials
     #   redirect_to big_commerce_complete_path
     # else

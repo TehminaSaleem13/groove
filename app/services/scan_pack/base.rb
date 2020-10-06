@@ -19,7 +19,7 @@ module ScanPack
 
     def request_api(params)
       require "net/http"
-      Apartment::Tenant.switch params[:tenant]
+      Apartment::Tenant.switch! params[:tenant]
       order = Order.find(params[:scan_pack][:_json])
       store  = order.store 
       magento_credential =  MagentoCredentials.where(:store_id => store.id).first unless MagentoCredentials.where(:store_id => store.id).empty?
@@ -201,16 +201,16 @@ module ScanPack
       when 'order_items'
         pdf_template = 'products/bulk_barcode_generation.html.erb'
         template_locals = {:@order_items => items}
-        height_per_page = '1.12in'
+        height_per_page = '0.9in'
         reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
       when 'products'
         pdf_template = 'products/print_barcode_label.html.erb'
         template_locals = {:@products => items}
-        height_per_page = '1.12in'
+        height_per_page = '0.9in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
       pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-      common(pdf_html, reader_file_path, height_per_page, '3in', {:top => type == 'order_items' ? '0' : '0.9', :bottom => '0', :left => '0', :right => '0'})
+      common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0.9', :bottom => '0', :left => '0', :right => '0'})
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
       base_file_name = File.basename(pdf_path)
       pdf_file = File.open(reader_file_path)
@@ -221,7 +221,7 @@ module ScanPack
 
     def print_label_with_delay(params)
       require 'wicked_pdf'
-      Apartment::Tenant.switch params[:tenant]
+      Apartment::Tenant.switch! params[:tenant]
       @products = list_selected_products(params)
       action_view = do_get_action_view_object_for_html_rendering
       reader_file_path = do_get_pdf_file_path(@products.count.to_s)
@@ -257,7 +257,7 @@ module ScanPack
     end
 
     def finding_products(tenant)
-      Apartment::Tenant.switch tenant
+      Apartment::Tenant.switch! tenant
       products = Product.where("updated_at < ? ", Time.now - 90.days ).pluck(:id)
 
       products = Product.includes(:order_items).where(id: products , order_items: {product_id: nil}).map(&:id)

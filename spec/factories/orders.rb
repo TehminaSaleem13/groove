@@ -1,6 +1,6 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :order do
     increment_id {"ORDER-#{('a'..'z').to_a.shuffle.first(5).join}"}
     order_placed_time {"2013-09-03 23:21:02"}

@@ -1,4 +1,4 @@
-class CreateImportItems < ActiveRecord::Migration
+class CreateImportItems < ActiveRecord::Migration[5.1]
   def up
   	create_table :import_items do |t|
       t.string :status

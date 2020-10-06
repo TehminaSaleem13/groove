@@ -1,4 +1,4 @@
-class AddPackingSlipMessageToCustomerToGeneralSettings < ActiveRecord::Migration
+class AddPackingSlipMessageToCustomerToGeneralSettings < ActiveRecord::Migration[5.1]
   def up
     add_column :general_settings, :packing_slip_message_to_customer, :text
   end

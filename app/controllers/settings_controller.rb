@@ -1,5 +1,5 @@
 class SettingsController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
   include SettingsHelper
 
   def restore
@@ -77,7 +77,7 @@ class SettingsController < ApplicationController
       @result['messages'] = ['No Identifier for state preference given']
       @result['status'] &= false
     else
-      preference = ColumnPreference.find_or_create_by_user_id_and_identifier(current_user.id, params[:identifier])
+      preference = ColumnPreference.find_or_create_by(user_id: current_user.id, identifier: params[:identifier])
       preference.theads = params[:theads]
       preference.save!
     end
@@ -109,7 +109,7 @@ class SettingsController < ApplicationController
 
     if general_setting.present?
       @result['data']['settings'] = general_setting
-      @result['data']['settings']['packing_type'] = $redis.get("#{Apartment::Tenant.current}_packing_type")
+      @result['data']['settings'] = @result['data']['settings'].attributes.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type"))
     else
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
@@ -314,7 +314,7 @@ class SettingsController < ApplicationController
   def auto_complete
     data = []
     Tenant.select(:name).each do |tenant|
-      Apartment::Tenant.switch(tenant.name)
+      Apartment::Tenant.switch!(tenant.name)
       if params[:type] == 'general_settings'
 
         data << GeneralSetting.select(:custom_user_field_one).where('custom_user_field_one LIKE ?', "%#{params[:value]}%").pluck(:custom_user_field_one)

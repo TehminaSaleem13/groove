@@ -1,4 +1,4 @@
-class AddIsDelayInTenants < ActiveRecord::Migration
+class AddIsDelayInTenants < ActiveRecord::Migration[5.1]
   def change
   	add_column :tenants, :is_delay, :boolean, :default => false
   end

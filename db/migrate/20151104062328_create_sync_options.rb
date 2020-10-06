@@ -1,4 +1,4 @@
-class CreateSyncOptions < ActiveRecord::Migration
+class CreateSyncOptions < ActiveRecord::Migration[5.1]
   def change
     create_table :sync_options do |t|
       t.integer :product_id

@@ -2,7 +2,7 @@ class ExportOrder < ActionMailer::Base
   default from: "app@groovepacker.com"
 
   def export(tenant)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     export_settings = ExportSetting.first
     begin
       @status = false

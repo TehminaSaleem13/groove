@@ -28,7 +28,7 @@ module ProductClassMethodsHelper
   # end
 
   def generate_eager_loaded_obj(products)
-    product_ids = products.pluck(:id)
+    product_ids = products.map(&:id)
 
     #delete all caches
     Rails.cache.delete_matched("*for_tenant_#{Apartment::Tenant.current}") rescue nil
@@ -47,7 +47,7 @@ module ProductClassMethodsHelper
         )
 
       kit_skus_if_kit_zero =
-        ProductKitSkus.where(option_product_id: products.where(is_kit: 0).pluck(:id))
+        ProductKitSkus.where(option_product_id: products.where(is_kit: 0).map(&:id))
         .includes(product: :product_kit_skuss)
 
       multi_base_sku_products = Product.where(base_sku: products.map(&:primary_sku))

@@ -1,4 +1,4 @@
-class AddDefaultTrueToCsvBeta < ActiveRecord::Migration
+class AddDefaultTrueToCsvBeta < ActiveRecord::Migration[5.1]
   def up
     change_column :stores, :csv_beta, :boolean, default: true
   end

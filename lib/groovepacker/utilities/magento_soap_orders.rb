@@ -18,7 +18,7 @@ class MagentoSoapOrders
 
   def perform_for_tenant(tenant)
     begin
-      Apartment::Tenant.switch(tenant.name)
+      Apartment::Tenant.switch!(tenant.name)
       stores = Store.where(store_type: "Magento", status: true)
       return if stores.blank?
       stores.each do |store|

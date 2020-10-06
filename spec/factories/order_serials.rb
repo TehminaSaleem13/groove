@@ -1,9 +1,9 @@
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
-FactoryGirl.define do
+FactoryBot.define do
   factory :order_serial do
-    order nil
-    product nil
-    serial "MyString"
+    order {nil}
+    product {nil}
+    serial {"MyString"}
   end
 end

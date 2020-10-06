@@ -1,4 +1,4 @@
-class AddColumnsToShipworksCredential < ActiveRecord::Migration
+class AddColumnsToShipworksCredential < ActiveRecord::Migration[5.1]
   def change
     add_column :shipworks_credentials, :shall_import_in_process, :boolean, default: false
     add_column :shipworks_credentials, :shall_import_new_order, :boolean, default: false

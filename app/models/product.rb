@@ -4,45 +4,45 @@ class Product < ActiveRecord::Base
   include ProductMethodsHelper
   belongs_to :store
 
-  attr_accessible :name,
-                  :product_type,
-                  :store_product_id,
-                  :status,
-                  :packing_instructions,
-                  :packing_instructions_conf,
-                  :is_skippable,
-                  :packing_placement,
-                  :pack_time_adj,
-                  :is_kit,
-                  :kit_parsing,
-                  :disable_conf_req,
-                  :store,
-                  :weight,
-                  :add_to_any_order,
-                  :is_intangible,
-                  :base_sku,
-                  :product_receiving_instructions,
-                  :second_record_serial,
-                  :record_serial,
-                  :click_scan_enabled,
-                  :is_skippable,
-                  :add_to_any_order,
-                  :type_scan_enabled,
-                  :custom_product_1,
-                  :custom_product_2,
-                  :custom_product_3,
-                  :custom_product_display_1,
-                  :custom_product_display_2,
-                  :custom_product_display_3,
-                  :fnsku, :asin, :fba_upc, :isbn, :ean,
-                  :supplier_sku, :avg_cost, :count_group
+  # attr_accessible :name,
+  #                 :product_type,
+  #                 :store_product_id,
+  #                 :status,
+  #                 :packing_instructions,
+  #                 :packing_instructions_conf,
+  #                 :is_skippable,
+  #                 :packing_placement,
+  #                 :pack_time_adj,
+  #                 :is_kit,
+  #                 :kit_parsing,
+  #                 :disable_conf_req,
+  #                 :store,
+  #                 :weight,
+  #                 :add_to_any_order,
+  #                 :is_intangible,
+  #                 :base_sku,
+  #                 :product_receiving_instructions,
+  #                 :second_record_serial,
+  #                 :record_serial,
+  #                 :click_scan_enabled,
+  #                 :is_skippable,
+  #                 :add_to_any_order,
+  #                 :type_scan_enabled,
+  #                 :custom_product_1,
+  #                 :custom_product_2,
+  #                 :custom_product_3,
+  #                 :custom_product_display_1,
+  #                 :custom_product_display_2,
+  #                 :custom_product_display_3,
+  #                 :fnsku, :asin, :fba_upc, :isbn, :ean,
+  #                 :supplier_sku, :avg_cost, :count_group
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy
-  has_many :product_barcodes, dependent: :destroy
-  has_many :product_images, dependent: :destroy
-  has_many :product_kit_skuss, dependent: :destroy
-  has_many :product_inventory_warehousess, dependent: :destroy
+  has_many :product_barcodes,:class_name => 'ProductBarcode', dependent: :destroy
+  has_many :product_images,:class_name => 'ProductImage', dependent: :destroy
+  has_many :product_kit_skuss, :class_name => 'ProductKitSkus',  dependent: :destroy
+  has_many :product_inventory_warehousess,:class_name => 'ProductInventoryWarehouses',  dependent: :destroy
   has_many :order_serial
   has_many :order_items
   has_many :product_kit_activities, dependent: :destroy
@@ -196,7 +196,7 @@ class Product < ActiveRecord::Base
     obj = self
     obj.update_column(:status_updated, true)
     updated_products = Product.where(status_updated: true)
-    orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+    orders = Order.eager_load(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
     return if orders.length<1
     action = GrooveBulkActions.where(identifier: "order", activity: "status_update", status: "pending").first
     action = GrooveBulkActions.new(identifier: "order", activity: "status_update", status: "pending") if action.blank?
@@ -205,7 +205,7 @@ class Product < ActiveRecord::Base
   end
 
   def check_and_update_status_updated_column
-    process_order_item if self.changes["status"].present?
+    process_order_item if self.saved_changes["status"].present?
   end
 
   def update_due_to_inactive_product

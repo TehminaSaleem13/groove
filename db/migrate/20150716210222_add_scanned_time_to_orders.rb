@@ -1,4 +1,4 @@
-class AddScannedTimeToOrders < ActiveRecord::Migration
+class AddScannedTimeToOrders < ActiveRecord::Migration[5.1]
   def change
     add_column :orders, :total_scan_time, :integer, default: 0
     add_column :orders, :total_scan_count, :integer, default: 0

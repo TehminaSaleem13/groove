@@ -1,5 +1,5 @@
 class ShipstationRestCredentialsController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
 
   def fix_import_dates
   	@result = {"status" => true, "messages" => ""}

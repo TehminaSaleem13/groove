@@ -1,4 +1,4 @@
-class ChangeDefaultScanPackSettingTimes < ActiveRecord::Migration
+class ChangeDefaultScanPackSettingTimes < ActiveRecord::Migration[5.1]
   def up
     change_column :scan_pack_settings, :fail_image_time, :float, :default=> 1.0
     change_column :scan_pack_settings, :success_image_time, :float, :default=> 0.5

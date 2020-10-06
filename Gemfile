@@ -1,22 +1,23 @@
 source 'http://rubygems.org'
 
-gem 'rails', '3.2.13'
+gem 'rails', '5.1.7'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'mysql2', '>=0.3.19'
+gem 'mysql2', '0.5.2'
 
 gem 'json'
 
 # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
-  gem 'sass-rails',   '~> 3.2.3'
-  gem 'coffee-rails', '~> 3.2.1'
+  gem 'sass-rails',   '~> 5.0.7'
+  gem 'coffee-rails', '~> 4.2.2'
   gem 'uglifier', '>= 1.0.3'
   gem 'jquery-fileupload-rails'
-  gem 'therubyracer','~> 0.11.4', :platform => :ruby
+  gem 'jquery-ui-rails'
+  gem 'therubyracer','~> 0.12.3', :platform => :ruby
   gem 'angularjs-rails','>= 1.2.18'
   gem 'less-rails-bootstrap'
   gem 'angular-ui-bootstrap-rails'
@@ -26,19 +27,19 @@ end
 
 group :development do
   gem 'webrick', '~> 1.3.1'
-  gem 'quiet_assets', '>= 1.0.1'
+  #gem 'quiet_assets', '>= 1.0.1'
   gem 'better_errors', '>= 0.2.0'
   gem 'binding_of_caller', '>= 0.6.8'
 end
 
 group :development,:test do
-  gem 'rspec-rails', '>= 2.13.2'
-  gem 'rspec_junit_formatter'
-  gem 'factory_girl_rails', '>= 4.1.0'
+  gem 'rspec-rails', '~> 3.5.0'
+  gem 'rspec_junit_formatter', '~> 0.4.0.pre2'
+  gem 'factory_bot_rails'
   gem 'protractor-rails'
-  gem "rubycritic", :require => false
+  gem "rubycritic",'~> 2.0.0', :require => false
   gem 'pry'
-  gem 'parallel_tests'
+  gem 'parallel_tests', '~> 2.29.1'
 end
 
 group :test do
@@ -53,15 +54,14 @@ group :test do
 end
 
 gem 'jquery-rails'
-gem 'jquery-ui-rails'
 gem 'redis-session-store'
-gem 'devise', '>= 2.1.2'
-gem 'simple_form', '>= 2.0.4'
+gem 'devise'
+gem 'simple_form', '4.0.0'
 gem 'figaro', '>= 0.5.0'
-gem 'fog', '~> 1.0'
+gem 'fog', '~> 1.41.0'
 gem 'carrierwave_direct'
 gem 'client_side_validations'
-gem 'client_side_validations-simple_form'
+gem 'client_side_validations-simple_form', '~> 6.8.0'
 gem 'rubber'
 gem 'open4'
 gem 'gelf'
@@ -79,7 +79,7 @@ gem 'spring-commands-rspec'
 gem 'listen'
 gem 'rubyzip'
 gem 'daemons'
-gem 'delayed_job_active_record'
+gem 'delayed_job_active_record', '~>4.1.2'
 #gem 'debugger'
 gem 'wkhtmltopdf-binary'
 gem 'wicked_pdf', '>= 0.11'
@@ -88,29 +88,29 @@ gem 'barby'
 gem 'chunky_png'
 gem 'prawn'
 gem 'pdftk'
-gem 'apartment','>=0.25.1', :git=>'https://github.com/influitive/apartment.git'
+gem 'apartment','~>2.2.0'
 gem 'stripe', '~> 1.57', '>= 1.57.1'
 gem 'ruby_odata'
-gem 'activerecord-import', '= 0.3.1'
-gem 'shopify_api'
+gem 'activerecord-import', '= 0.26.0'
+gem 'shopify_api', '5.2.0'
 gem 'intercom-rails'
 gem 's3'
 gem 'ng-rails-csrf'
-gem 'doorkeeper'
+gem 'doorkeeper', '~> 5.0.0'
 gem 'oauth'
-gem 'rubocop', require: false
+gem 'rubocop','~> 0.51.0', require: false
 gem 'shipping_easy', '0.7.0'
 gem 'delayed_job_recurring'
 gem 'aws_cf_signer'
 gem 'aws-sdk', '~> 2'
 gem 'wannabe_bool'
 gem 'dotenv-rails'
-gem 'redis-rails'
+gem 'redis-rails', '5.0.1'
 gem 'hiredis'
 gem "delayed_job_web"
 gem 'rack-cors', :require => 'rack/cors'
 gem 'rollbar'
 gem 'whenever', :require => false
 gem 'scout_apm', '~> 3.0.x'
-gem 'ahoy_matey', require: false
+gem 'ahoy_matey','~> 2.2.0'
 gem "appsignal"

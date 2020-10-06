@@ -1,4 +1,4 @@
-class ChangeDefaultPackingPlacementForProducts < ActiveRecord::Migration
+class ChangeDefaultPackingPlacementForProducts < ActiveRecord::Migration[5.1]
   def up
   	change_column :products, :packing_placement, :integer, {:default=>50}
   end

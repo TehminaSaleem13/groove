@@ -2,7 +2,7 @@ namespace :check do
   desc "check failed imports"
   task :failed_imports => :environment do
     Tenant.all.each do |tenant|
-      Apartment::Tenant.switch tenant.name
+      Apartment::Tenant.switch! tenant.name
       import_items = ImportItem.joins(:store).where("stores.status=1 and (import_items.status='in_progress' OR import_items.status='not_started')").readonly(false)
       next unless import_items.any?
       in_progress_items = import_items.where(status: 'in_progress')

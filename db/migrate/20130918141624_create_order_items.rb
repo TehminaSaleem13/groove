@@ -1,4 +1,4 @@
-class CreateOrderItems < ActiveRecord::Migration
+class CreateOrderItems < ActiveRecord::Migration[5.1]
   def change
     create_table :order_items do |t|
       t.string :sku
@@ -9,6 +9,6 @@ class CreateOrderItems < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :order_items, :order_id
+    # add_index :order_items, :order_id
   end
 end

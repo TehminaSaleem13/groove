@@ -4,7 +4,7 @@ namespace :doo do
     tenants = Tenant.all
     tenants.each do |tenant|
       begin 
-        Apartment::Tenant.switch tenant.name
+        Apartment::Tenant.switch! tenant.name
         ProductInventoryReport.create(name: "All_Products_Report", is_locked: true)
         ProductInventoryReport.create(name: "Active_Products_Report", is_locked: true)
       rescue

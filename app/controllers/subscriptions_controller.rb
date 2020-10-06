@@ -1,8 +1,8 @@
 class SubscriptionsController < ApplicationController
   include PaymentsHelper
   include StoresHelper
-  skip_before_filter  :verify_authenticity_token
-  # before_filter :check_tenant_name
+  skip_before_action  :verify_authenticity_token
+  # before_action :check_tenant_name
 
   def new
     @subscription = Subscription.new
@@ -45,7 +45,7 @@ class SubscriptionsController < ApplicationController
         render json: response_for_successful_subscription
       else
         # switch tenant
-        Apartment::Tenant.switch(@subscription.tenant_name)
+        Apartment::Tenant.switch!(@subscription.tenant_name)
         # response = create_store_and_credential
         render json: create_store_and_credential
       end

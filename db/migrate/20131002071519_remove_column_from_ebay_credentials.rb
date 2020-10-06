@@ -1,4 +1,4 @@
-class RemoveColumnFromEbayCredentials < ActiveRecord::Migration
+class RemoveColumnFromEbayCredentials < ActiveRecord::Migration[5.1]
   def up
     remove_column :ebay_credentials, :dev_id
   end

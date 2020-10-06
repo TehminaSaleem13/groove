@@ -18,7 +18,7 @@ namespace :mr do
             created_at += 1.month
           end
         end
-        Apartment::Tenant.switch(tenant.name)
+        Apartment::Tenant.switch!(tenant.name)
         for i in 1..5
           data = []
           created_at -= 1.month

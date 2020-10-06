@@ -1,4 +1,4 @@
-class AddColumnsToExportSetting < ActiveRecord::Migration
+class AddColumnsToExportSetting < ActiveRecord::Migration[5.1]
   def change
   	add_column :export_settings, :auto_stat_email_export, :boolean, :default => true
   	add_column :export_settings, :time_to_send_stat_export_email, :datetime

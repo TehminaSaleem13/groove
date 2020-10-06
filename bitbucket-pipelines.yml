@@ -1,4 +1,4 @@
-image: ruby:2.1.6
+image: ruby:2.4.0
 
 clone:
   depth: full
@@ -10,7 +10,7 @@ options:
 pipelines:
   default:
     - step:
-        name: 'Master Rspec'
+        name: 'Master Rails 5 Rspec'
         caches:
           - bundler
         services:

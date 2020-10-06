@@ -1,4 +1,4 @@
-class ChangeDefaultAlertEmailSetting < ActiveRecord::Migration
+class ChangeDefaultAlertEmailSetting < ActiveRecord::Migration[5.1]
   def up
     change_column :general_settings, :default_low_inventory_alert_limit, :integer, :default => 1
     change_column :general_settings, :low_inventory_alert_email, :boolean, :default => false

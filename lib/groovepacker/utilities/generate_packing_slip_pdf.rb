@@ -1,7 +1,7 @@
 class GeneratePackingSlipPdf
   def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header, gen_barcode_id, boxes)
     begin
-      Apartment::Tenant.switch(tenant_name)
+      Apartment::Tenant.switch!(tenant_name)
       packing_slip_obj =
         Groovepacker::PackingSlip::PdfMerger.new
       generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)

@@ -1,6 +1,6 @@
 class ProductCat < ActiveRecord::Base
   belongs_to :product
-  attr_accessible :category
+  # attr_accessible :category
 
   after_save :delete_empty
 

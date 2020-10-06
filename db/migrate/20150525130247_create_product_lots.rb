@@ -1,4 +1,4 @@
-class CreateProductLots < ActiveRecord::Migration
+class CreateProductLots < ActiveRecord::Migration[5.1]
   def up
     create_table :product_lots do |t|
       t.references :product
@@ -7,8 +7,8 @@ class CreateProductLots < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :product_lots, :product_id
-    add_index :product_lots, :order_item_id
+    # add_index :product_lots, :product_id
+    # add_index :product_lots, :order_item_id
   end
 
   def down

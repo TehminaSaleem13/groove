@@ -36,7 +36,7 @@ module Groovepacker
       end
 
       def process_all(tenant, bulk_actions_id)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         if bulk_action.cancel?
           bulk_action.status = 'cancelled'
@@ -48,7 +48,7 @@ module Groovepacker
           return true
         end
         begin
-          Apartment::Tenant.switch(tenant)
+          Apartment::Tenant.switch!(tenant)
           if inventory_tracking_enabled?
             orders = Order.where("status != 'scanned'")
             check_length = check_after_every(orders.length)
@@ -93,7 +93,7 @@ module Groovepacker
       end
 
       def unprocess_all(tenant, bulk_actions_id)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         if bulk_action.cancel?
           bulk_action.status = 'cancelled'

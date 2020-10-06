@@ -1,6 +1,6 @@
 class UserInventoryPermission < ActiveRecord::Base
 
-  attr_accessible :see, :edit, :user_id, :inventory_warehouse_id
+  # attr_accessible :see, :edit, :user_id, :inventory_warehouse_id
 
   belongs_to :inventory_warehouse
   belongs_to :user

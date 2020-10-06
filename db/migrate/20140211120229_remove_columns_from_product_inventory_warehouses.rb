@@ -1,4 +1,4 @@
-class RemoveColumnsFromProductInventoryWarehouses < ActiveRecord::Migration
+class RemoveColumnsFromProductInventoryWarehouses < ActiveRecord::Migration[5.1]
   def up
   	# remove_column :product_inventory_warehouses, :location
   	# remove_column :product_inventory_warehouses, :name

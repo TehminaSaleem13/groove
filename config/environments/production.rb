@@ -9,7 +9,7 @@ Groovepacks::Application.configure do
   config.action_controller.perform_caching = true
 
   # Disable Rails's static asset server (Apache or nginx will already do this)
-  config.serve_static_assets = false
+  config.public_file_server.enabled = false
 
   # Compress JavaScripts and CSS
   config.assets.compress = true
@@ -20,6 +20,7 @@ Groovepacks::Application.configure do
   # Generate digests for assets URLs
   config.assets.digest = true    
   config.action_mailer.default_url_options = { :host => ENV['HOST_NAME'] }
+  config.eager_load = true
   # Defaults to nil and saved in location specified by config.assets.prefix
   # config.assets.manifest = YOUR_PATH
 

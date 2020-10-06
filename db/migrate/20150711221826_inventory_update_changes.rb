@@ -1,4 +1,4 @@
-class InventoryUpdateChanges < ActiveRecord::Migration
+class InventoryUpdateChanges < ActiveRecord::Migration[5.1]
   def up
     add_column :sold_inventory_warehouses, :order_item_id ,:integer
     add_index :sold_inventory_warehouses, :order_item_id

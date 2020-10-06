@@ -4,7 +4,7 @@ namespace :delete do
   task :duplicate_images => :environment do
     tenants = Tenant.all
     tenants.each do |tenant|
-      Apartment::Tenant.switch tenant.name
+      Apartment::Tenant.switch! tenant.name
       begin
         if Store.all.map(&:store_type).include?("ShippingEasy")
           Product.all.each do |pro|

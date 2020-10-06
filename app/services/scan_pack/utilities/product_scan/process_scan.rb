@@ -34,7 +34,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
 
   def insert_order_item_in_box
     if @box_id.blank?
-      box = Box.find_or_create_by_name_and_order_id(:name => "Box 1", :order_id => @order_item.order.id)
+      box = Box.find_or_create_by(:name => "Box 1", :order_id => @order_item.order.id)
       @box_id = box.id
       order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
       if order_item_box.nil?

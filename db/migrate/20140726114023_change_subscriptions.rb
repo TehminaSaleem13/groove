@@ -1,4 +1,4 @@
-class ChangeSubscriptions < ActiveRecord::Migration
+class ChangeSubscriptions < ActiveRecord::Migration[5.1]
   def up
   	drop_table :subscriptions
   	create_table :subscriptions do |t|

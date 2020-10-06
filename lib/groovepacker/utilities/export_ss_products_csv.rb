@@ -1,7 +1,7 @@
 class ExportSsProductsCsv
    include ProductsHelper
   def export_active_products(tenant_name)
-  	Apartment::Tenant.switch(tenant_name)
+  	Apartment::Tenant.switch!(tenant_name)
     require 'csv'
     result = {'status' => true, 'messages' => []}
     products = Product.where(status: 'active')
@@ -45,7 +45,7 @@ class ExportSsProductsCsv
   end
 
   def export_broken_image(tenant, params)
-    Apartment::Tenant.switch tenant
+    Apartment::Tenant.switch! tenant
     products = ProductsService::ListSelectedProducts.call(params, true)
     result = {}
     filter_products = []
@@ -65,7 +65,7 @@ class ExportSsProductsCsv
   end
 
   def fix_shopify_product_images(tenant, params)
-    Apartment::Tenant.switch tenant
+    Apartment::Tenant.switch! tenant
     store = Store.find(params[:store_id])
     shopify_credential = store.shopify_credential
     if shopify_credential
@@ -128,7 +128,7 @@ class ExportSsProductsCsv
   end
 
   def generate_barcode_with_delay(params, data, tenant_name)
-    Apartment::Tenant.switch(tenant_name)
+    Apartment::Tenant.switch!(tenant_name)
     @result = data[:result]
     @products = list_selected_products(params).includes(:product_kit_skuss, :product_barcodes, :product_skus,:product_kit_activities, :product_inventory_warehousess)
 

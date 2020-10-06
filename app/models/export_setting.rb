@@ -1,17 +1,17 @@
 class ExportSetting < ActiveRecord::Base
   include ExportData
 
-  attr_accessible :auto_email_export, :time_to_send_export_email, :send_export_email_on_mon,
-                  :send_export_email_on_tue, :send_export_email_on_wed, :send_export_email_on_thu,
-                  :send_export_email_on_fri, :send_export_email_on_sat, :send_export_email_on_sun,
-                  :last_exported, :export_orders_option, :order_export_type, :order_export_email,
-                  :start_time, :end_time, :manual_export, :auto_stat_email_export, :time_to_send_stat_export_email,
-                  :send_stat_export_email_on_mon, :send_stat_export_email_on_tue, :send_stat_export_email_on_wed,
-                  :send_stat_export_email_on_thu, :send_stat_export_email_on_fri, :send_stat_export_email_on_sat,
-                  :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email, :processing_time,
-                  :daily_packed_email_export, :time_to_send_daily_packed_export_email, :daily_packed_email_on_mon,
-                  :daily_packed_email_on_tue, :daily_packed_email_on_wed, :daily_packed_email_on_thu, :daily_packed_email_on_fri,
-                  :daily_packed_email_on_sat, :daily_packed_email_on_sun, :daily_packed_email ,:daily_packed_export_type
+  # attr_accessible :auto_email_export, :time_to_send_export_email, :send_export_email_on_mon,
+  #                 :send_export_email_on_tue, :send_export_email_on_wed, :send_export_email_on_thu,
+  #                 :send_export_email_on_fri, :send_export_email_on_sat, :send_export_email_on_sun,
+  #                 :last_exported, :export_orders_option, :order_export_type, :order_export_email,
+  #                 :start_time, :end_time, :manual_export, :auto_stat_email_export, :time_to_send_stat_export_email,
+  #                 :send_stat_export_email_on_mon, :send_stat_export_email_on_tue, :send_stat_export_email_on_wed,
+  #                 :send_stat_export_email_on_thu, :send_stat_export_email_on_fri, :send_stat_export_email_on_sat,
+  #                 :send_stat_export_email_on_sun, :stat_export_type, :stat_export_email, :processing_time,
+  #                 :daily_packed_email_export, :time_to_send_daily_packed_export_email, :daily_packed_email_on_mon,
+  #                 :daily_packed_email_on_tue, :daily_packed_email_on_wed, :daily_packed_email_on_thu, :daily_packed_email_on_fri,
+  #                 :daily_packed_email_on_sat, :daily_packed_email_on_sun, :daily_packed_email ,:daily_packed_export_type
 
   after_save :scheduled_export
 
@@ -70,7 +70,7 @@ class ExportSetting < ActiveRecord::Base
 
   def export_data(tenant=nil)
     require 'csv'
-    Apartment::Tenant.switch (tenant)
+    Apartment::Tenant.switch! (tenant)
     # result = set_result_hash
     start_time, end_time = set_start_and_end_time
     return with_error_filename if start_time.blank?
@@ -91,16 +91,16 @@ class ExportSetting < ActiveRecord::Base
 
   def auto_email_export_with_changed_hash
     auto_email_export &&
-      changes[:time_to_send_export_email].present? &&
+      saved_change_to_time_to_send_export_email.present? &&
       order_export_email.present?
   end
 
   def auto_stat_email_export_with_changed_hash
-    auto_stat_email_export && changes[:time_to_send_stat_export_email].present? && stat_export_email.present?
+    auto_stat_email_export && saved_change_to_time_to_send_stat_export_email.present? && stat_export_email.present?
   end
 
   def auto_email_daily_export_with_changed_hash
-    daily_packed_email_export && changes[:time_to_send_daily_packed_export_email].present? && daily_packed_email.present?
+    daily_packed_email_export && saved_change_to_time_to_send_daily_packed_export_email.present? && daily_packed_email.present?
   end
 
   def schedule_job(type, time)

@@ -1,5 +1,5 @@
 class ProductKitActivitiesController < ApplicationController
-  before_filter :groovepacker_authorize!
+  before_action :groovepacker_authorize!
 
   def acknowledge
     result = Hash.new

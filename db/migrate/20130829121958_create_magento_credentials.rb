@@ -1,4 +1,4 @@
-class CreateMagentoCredentials < ActiveRecord::Migration
+class CreateMagentoCredentials < ActiveRecord::Migration[5.1]
   def change
     create_table :magento_credentials do |t|
       t.string :host, :null=>false

@@ -2,7 +2,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   belongs_to :order_item
   belongs_to :product_kit_skus
   has_many :order_item_kit_product_scan_times
-  attr_accessible :scanned_qty, :scanned_status
+  # attr_accessible :scanned_qty, :scanned_status
 
   cached_methods :product_kit_skus
   after_save :delete_cache

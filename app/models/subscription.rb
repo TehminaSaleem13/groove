@@ -1,9 +1,9 @@
 class Subscription < ActiveRecord::Base
-  attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, 
-                  :subscription_plan_id, :status, :user_name, :password, :coupon_id,
-                  :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
-                  :progress, :customer_subscription_id, :created_at, :updated_at, :interval,
-                  :app_charge_id, :tenant_charge_id, :shopify_shop_name, :tenant_data, :shopify_payment_token
+  # attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, 
+  #                 :subscription_plan_id, :status, :user_name, :password, :coupon_id,
+  #                 :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
+  #                 :progress, :customer_subscription_id, :created_at, :updated_at, :interval,
+  #                 :app_charge_id, :tenant_charge_id, :shopify_shop_name, :tenant_data, :shopify_payment_token
   belongs_to :tenant
   has_many :transactions
   include PaymentsHelper
@@ -19,7 +19,7 @@ class Subscription < ActiveRecord::Base
     begin
       if valid?
         if self.coupon_id
-          Apartment::Tenant.switch()
+          Apartment::Tenant.switch!()
           one_time_payment = calculate_otp(self.coupon_id, one_time_payment.to_i)
         end
         unless self.shopify_customer
@@ -114,7 +114,7 @@ class Subscription < ActiveRecord::Base
     end
     CreateTenant.new.create_tenant self
 
-    Apartment::Tenant.switch()
+    Apartment::Tenant.switch!()
     create_transaction(customer) unless self.shopify_customer
     self.update_progress('transaction_complete')
   end

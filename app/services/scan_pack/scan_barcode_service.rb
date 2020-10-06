@@ -93,7 +93,7 @@ module ScanPack
       if @params[:box_id].nil?
         GeneralSetting.last.multi_box_shipments? ? @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.name) :  @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
       else
-        box = Box.where(@params[:box_id]).last
+        box = Box.where(id: @params[:box_id]).last
         @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.name)
       end  
     end

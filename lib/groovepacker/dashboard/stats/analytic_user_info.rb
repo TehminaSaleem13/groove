@@ -5,7 +5,7 @@ module Groovepacker
         def users_details(tenant, user_change_hash)
           users_info = []
           begin
-            Apartment::Tenant.switch(tenant)
+            Apartment::Tenant.switch!(tenant)
             @users = User.all
             unless @users.empty?
               general_setting = GeneralSetting.first

@@ -1,30 +1,29 @@
 class GeneralSetting < ActiveRecord::Base
   include SettingsHelper
-  attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
-                  :hold_orders_due_to_inventory,
-                  :inventory_tracking, :low_inventory_alert_email,
-                  :low_inventory_email_address, :time_to_send_email,
-                  :packing_slip_message_to_customer, :product_weight_format,
-                  :packing_slip_size, :packing_slip_orientation,
-                  :strict_cc, :conf_code_product_instruction,
-                  :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
-                  :hold_orders_due_to_inventory, :inventory_tracking,
-                  :low_inventory_alert_email, :low_inventory_email_address,
-                  :send_email_for_packer_notes, :default_low_inventory_alert_limit,
-                  :email_address_for_billing_notification, :export_items,
-                  :max_time_per_item, :send_email_on_mon,
-                  :send_email_on_tue, :send_email_on_wed, :send_email_on_thurs,
-                  :send_email_on_fri, :send_email_on_sat, :send_email_on_sun,
-                  :scheduled_order_import, :time_to_import_orders,
-                  :import_orders_on_mon, :import_orders_on_tue, :import_orders_on_wed,
-                  :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
-                  :import_orders_on_sun, :tracking_error_order_not_found,
-                  :tracking_error_info_not_found, :custom_field_one,
-                  :custom_field_two, :export_csv_email,
-                  :show_primary_bin_loc_in_barcodeslip, :html_print,
-                  :time_zone, :auto_detect, :schedule_import_mode, :master_switch, :idle_timeout, :hex_barcode,
-                  :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
-                  :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import
+  # attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
+  #                 :hold_orders_due_to_inventory,
+  #                 :inventory_tracking, :low_inventory_alert_email,
+  #                 :low_inventory_email_address, :time_to_send_email,
+  #                 :packing_slip_message_to_customer, :product_weight_format,
+  #                 :packing_slip_size, :packing_slip_orientation,
+  #                 :strict_cc, :conf_code_product_instruction,
+  #                 :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
+  #                 :hold_orders_due_to_inventory, :inventory_tracking,
+  #                 :low_inventory_alert_email, :low_inventory_email_address,
+  #                 :send_email_for_packer_notes, :default_low_inventory_alert_limit,
+  #                 :export_items, :max_time_per_item, :send_email_on_mon,
+  #                 :send_email_on_tue, :send_email_on_wed, :send_email_on_thurs,
+  #                 :send_email_on_fri, :send_email_on_sat, :send_email_on_sun,
+  #                 :scheduled_order_import, :time_to_import_orders,
+  #                 :import_orders_on_mon, :import_orders_on_tue, :import_orders_on_wed,
+  #                 :import_orders_on_thurs, :import_orders_on_fri, :import_orders_on_sat,
+  #                 :import_orders_on_sun, :tracking_error_order_not_found,
+  #                 :tracking_error_info_not_found, :custom_field_one,
+  #                 :custom_field_two, :export_csv_email,
+  #                 :show_primary_bin_loc_in_barcodeslip, :html_print,
+  #                 :time_zone, :auto_detect, :schedule_import_mode, :master_switch, :idle_timeout, :hex_barcode,
+  #                 :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
+  #                 :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import
   # validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
   validates :email_address_for_packer_notes, :format => { :with => /(\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})(,\s*([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,}))*\z)/i }, :allow_blank => true
   after_save :send_low_inventory_alert_email
@@ -72,7 +71,7 @@ class GeneralSetting < ActiveRecord::Base
   end
 
   def inventory_state_change_check
-    changes = self.changes
+    changes = self.saved_changes
     GeneralSetting.unset_setting
     if changes.nil? || changes['inventory_tracking'].nil?
       return true
@@ -98,7 +97,7 @@ class GeneralSetting < ActiveRecord::Base
 
   def scheduled_import
     result = Hash.new
-    changed_hash = self.changes
+    changed_hash = self.saved_changes
     if self.scheduled_order_import && !changed_hash[:time_to_import_orders].nil?
       job_scheduled = false
       date = DateTime.now
@@ -173,7 +172,7 @@ class GeneralSetting < ActiveRecord::Base
   end
 
   def send_low_inventory_alert_email
-    changed_hash = self.changes
+    changed_hash = self.saved_changes
     if (self.inventory_tracking || self.low_inventory_alert_email) && !changed_hash['time_to_send_email'].nil? && !self.low_inventory_email_address.blank?
       job_scheduled = false
       date = DateTime.now

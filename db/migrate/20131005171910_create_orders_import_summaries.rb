@@ -1,4 +1,4 @@
-class CreateOrdersImportSummaries < ActiveRecord::Migration
+class CreateOrdersImportSummaries < ActiveRecord::Migration[5.1]
   def change
     create_table :orders_import_summaries do |t|
       t.integer :total_retrieved
@@ -10,6 +10,6 @@ class CreateOrdersImportSummaries < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :orders_import_summaries, :store_id
+    # add_index :orders_import_summaries, :store_id
   end
 end

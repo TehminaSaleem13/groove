@@ -1,5 +1,5 @@
 class StoresController < ApplicationController
-  before_filter :groovepacker_authorize!, :except => [:handle_ebay_redirect ,:update_ebay_user_token]
+  before_action :groovepacker_authorize!, :except => [:handle_ebay_redirect ,:update_ebay_user_token]
   include StoreConcern
 
   def index
@@ -185,7 +185,7 @@ class StoresController < ApplicationController
   end
 
   def csv_map_data
-    result = {'product' => CsvMap.find_all_by_kind('product'), 'order' => CsvMap.find_all_by_kind('order'), 'kit' => CsvMap.find_all_by_kind('kit')}
+    result = {'product' => CsvMap.where(kind: 'product'), 'order' => CsvMap.where(kind: 'order'), 'kit' => CsvMap.where(kind: 'kit')}
     render json: result
   end
 
@@ -245,6 +245,7 @@ class StoresController < ApplicationController
     #   @result["messages"].push("No store selected")
     # end
     # csv_data_import if @result["status"]
+
     render json: @result
   end
 

@@ -1,4 +1,4 @@
-class CreateProductImages < ActiveRecord::Migration
+class CreateProductImages < ActiveRecord::Migration[5.1]
   def change
     create_table :product_images do |t|
       t.references :product
@@ -6,6 +6,6 @@ class CreateProductImages < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :product_images, :product_id
+    # add_index :product_images, :product_id
   end
 end

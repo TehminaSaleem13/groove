@@ -1,4 +1,4 @@
-class CreateProductSkus < ActiveRecord::Migration
+class CreateProductSkus < ActiveRecord::Migration[5.1]
   def change
     create_table :product_skus do |t|
       t.string :sku
@@ -7,6 +7,6 @@ class CreateProductSkus < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :product_skus, :product_id
+    # add_index :product_skus, :product_id
   end
 end

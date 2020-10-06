@@ -1,4 +1,4 @@
-class CreateOrderItemKitProducts < ActiveRecord::Migration
+class CreateOrderItemKitProducts < ActiveRecord::Migration[5.1]
   def change
     create_table :order_item_kit_products do |t|
       t.references :order_item
@@ -8,7 +8,7 @@ class CreateOrderItemKitProducts < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :order_item_kit_products, :order_item_id
-    add_index :order_item_kit_products, :product_kit_skus_id
+    # add_index :order_item_kit_products, :order_item_id
+    # add_index :order_item_kit_products, :product_kit_skus_id
   end
 end

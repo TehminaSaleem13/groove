@@ -1,6 +1,6 @@
 class AddLogCsv
   def add_log_csv(tenant,time_of_import,file_name)
-    Apartment::Tenant.switch(tenant)
+    Apartment::Tenant.switch!(tenant)
     @time_of_import = time_of_import
     @file_name = file_name
     n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
@@ -10,7 +10,7 @@ class AddLogCsv
     orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
 
     log = {"Time_Stamp_Tenant_TZ" => "#{time_of_import_tz}","Time_Stamp_UTC" => "#{@time_of_import}" , "Tenant" => "#{Apartment::Tenant.current}","Name_of_imported_file" => "#{@file_name}","Orders_in_file" => "#{orders.count}".to_i, "New_orders_imported" => "#{$redis.get("new_order_#{tenant}")}".to_i, "Existing_orders_updated" =>"#{$redis.get("update_order_#{tenant}")}".to_i , "Existing_orders_skipped" => "#{$redis.get("skip_order_#{tenant}")}".to_i, "Orders_in_GroovePacker_before_import" => "#{$redis.get("total_orders_#{tenant}")}".to_i, "Orders_in_GroovePacker_after_import" =>"#{@after_import_count}".to_i }
-    summary = CsvImportSummary.find_or_create_by_log_record(log.to_json)
+    summary = CsvImportSummary.find_or_create_by(log_record: log.to_json)
     summary.file_name =  @file_name
     summary.import_type = "Order"
     summary.save
@@ -23,7 +23,7 @@ class AddLogCsv
     file_data = header
     
     Tenant.find_each do |tenant|
-    Apartment::Tenant.switch(tenant.name)
+    Apartment::Tenant.switch!(tenant.name)
     file_data +=
       Ahoy::Event
       .where('time > ?', Time.now.ago(7.days))
@@ -49,7 +49,7 @@ class AddLogCsv
           begin
             t = Tenant.where(name: "#{sub.tenant_name}").last
             if t.present? && t.test_tenant_toggle == false
-              Apartment::Tenant.switch "#{sub.tenant_name}"
+              Apartment::Tenant.switch! "#{sub.tenant_name}"
               tenant_id = Tenant.find_by_name("#{sub.tenant_name}").id
               access_restriction, tenant_user, product_count, scanned_orders = get_tenant_details("#{sub.tenant_name}") 
               customer = Stripe::Customer.retrieve("#{sub.stripe_customer_id}") rescue nil
@@ -84,7 +84,7 @@ class AddLogCsv
   end
 
   def get_tenant_details(tenant)
-    Apartment::Tenant.switch tenant
+    Apartment::Tenant.switch! tenant
     access_restriction = AccessRestriction.order("created_at").last
     tenant_user = (User.where(is_deleted: false, active: true).count - 1 )
     product_sku_count = Product.all.count

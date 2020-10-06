@@ -8,7 +8,7 @@ module Groovepacker
           @product_orig = Product.find(@params[:id])
           skus_len = @product_orig.product_skus.all.length
           barcodes_len = @product_orig.product_barcodes.all.length
-          @product_aliases = Product.find_all_by_id(@params[:product_alias_ids])
+          @product_aliases = Product.where(id: @params[:product_alias_ids])
           if @product_aliases.length < 1
             @result['status'] = false
             @result['messages'].push('No products found to alias')

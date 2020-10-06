@@ -26,7 +26,7 @@ module Groovepacker
         @tenants = tenants
         @tenant_names = tenants.map(&:name)
 
-        ActiveRecord::Associations::Preloader.new(tenants, :subscription).run
+        ActiveRecord::Associations::Preloader.new.preload(tenants, :subscription)
         latest_scanned_order_for_all_tenants
         latest_scanned_order_packing_user_for_all_tenants
         get_access_restrictions_for_all_tenants
@@ -60,7 +60,7 @@ module Groovepacker
         # Get passed in parameter variables if they are valid.
         limit = params[:limit].to_i || 10
 
-        search = ActiveRecord::Base::sanitize('%' + params[:search] + '%')
+        search = ActiveRecord::Base.connection.quote('%' + params[:search] + '%')
 
         unless params[:select_all] || params[:inverted]
           query_add = ' LIMIT ' + limit.to_s + ' OFFSET 0'
@@ -90,7 +90,7 @@ module Groovepacker
 
       def delete_data(tenant, params, result, current_user)
         begin
-          Apartment::Tenant.switch(tenant.name)
+          Apartment::Tenant.switch!(tenant.name)
           if params[:action_type] == 'orders'
             delete_orders(result)
           elsif params[:action_type] == 'products'
@@ -167,7 +167,7 @@ module Groovepacker
       end
 
       def reset_inventory(result, tenant)
-        Apartment::Tenant.switch tenant
+        Apartment::Tenant.switch! tenant
         ProductInventoryWarehouses.where("allocated_inv != 0").each do |inventory|
           inventory.update_allocated_inv
         end
@@ -254,7 +254,7 @@ module Groovepacker
       def update_restrictions(tenant, params)
         result = result_hash
         begin
-          Apartment::Tenant.switch(tenant.name)
+          Apartment::Tenant.switch!(tenant.name)
           @access_restriction = AccessRestriction.all.last
           unless params["basicinfo"]["is_multi_box"]
             setting = GeneralSetting.all.first
@@ -402,9 +402,9 @@ module Groovepacker
         tenant_hash['inventory_report_toggle'] = tenant.reload.inventory_report_toggle
         tenant_hash['test_tenant_toggle'] = tenant.reload.test_tenant_toggle
         tenant_hash['last_charge_in_stripe'] = tenant.last_charge_in_stripe.strftime('%a %m/%e/%Y %l:%M:%S %p') rescue nil
-        Apartment::Tenant.switch tenant.name
+        Apartment::Tenant.switch! tenant.name
         tenant_hash['last_import_store_type'] = tenant.last_import_store_type || ImportItem.last.try(:store).try(:store_type)
-        Apartment::Tenant.switch
+        Apartment::Tenant.switch!
       end
 
       def retrieve_plan_data(tenant_name, tenant_hash)
@@ -447,8 +447,8 @@ module Groovepacker
 
       def construct_query_and_get_result(params, search, sort_key, sort_order, query_add)
         result = result_hash
-        current_tenant = Apartment::Tenant.current_tenant
-        Apartment::Tenant.switch
+        current_tenant = Apartment::Tenant.current
+        Apartment::Tenant.switch!
         base_query = build_query(search, sort_key, sort_order)
 
         result['tenants'] = Tenant.find_by_sql(base_query + query_add)
@@ -457,7 +457,7 @@ module Groovepacker
         else
           result['count'] = Tenant.count_by_sql('SELECT count(*) as count from(' + base_query + ') as tmp')
         end
-        Apartment::Tenant.switch(current_tenant)
+        Apartment::Tenant.switch!(current_tenant)
         result
       end
 
@@ -618,13 +618,13 @@ module Groovepacker
           tenant_hash["last_activity"] = nil
           check_split_or_production          
         end
-        Apartment::Tenant.switch(current_tenant)
+        Apartment::Tenant.switch!(current_tenant)
       end
 
       def check_split_or_production
-        Apartment::Tenant.switch
+        Apartment::Tenant.switch!
         db_name = Apartment::Tenant.current
-        db_name.include?("split") ? Apartment::Tenant.switch('scadmintools') : Apartment::Tenant.switch('admintools')
+        db_name.include?("split") ? Apartment::Tenant.switch!('scadmintools') : Apartment::Tenant.switch!('admintools')
       end
 
       def activity_data_hash

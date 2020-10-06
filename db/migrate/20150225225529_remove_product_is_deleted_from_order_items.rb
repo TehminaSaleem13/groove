@@ -1,4 +1,4 @@
-class RemoveProductIsDeletedFromOrderItems < ActiveRecord::Migration
+class RemoveProductIsDeletedFromOrderItems < ActiveRecord::Migration[5.1]
   def up
     remove_column :order_items, :product_is_deleted
   end

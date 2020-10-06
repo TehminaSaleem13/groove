@@ -1,4 +1,4 @@
-class CreateProductCats < ActiveRecord::Migration
+class CreateProductCats < ActiveRecord::Migration[5.1]
   def change
     create_table :product_cats do |t|
       t.string :category
@@ -6,6 +6,6 @@ class CreateProductCats < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :product_cats, :product_id
+    # add_index :product_cats, :product_id
   end
 end

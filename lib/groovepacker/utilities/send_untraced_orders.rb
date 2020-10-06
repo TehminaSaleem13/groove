@@ -4,7 +4,7 @@ class SendUntracedOrders
     tenants.each do |tenant|
       begin
         tenant_name = tenant.name
-        Apartment::Tenant.switch(tenant_name)
+        Apartment::Tenant.switch!(tenant_name)
         stat_stream_obj =
           Groovepacker::Dashboard::Stats::AnalyticStatStream.new()
         stat_stream = stat_stream_obj.stream_detail(tenant_name, true)

@@ -1,4 +1,4 @@
-class CreateProductBarcodes < ActiveRecord::Migration
+class CreateProductBarcodes < ActiveRecord::Migration[5.1]
   def change
     create_table :product_barcodes do |t|
       t.references :product
@@ -6,6 +6,6 @@ class CreateProductBarcodes < ActiveRecord::Migration
 
       t.timestamps
     end
-    add_index :product_barcodes, :product_id
+    # add_index :product_barcodes, :product_id
   end
 end

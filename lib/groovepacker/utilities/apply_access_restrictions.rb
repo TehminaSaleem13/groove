@@ -4,7 +4,7 @@ class ApplyAccessRestrictions
       @subscription = Subscription.where(tenant_name: tenant_name, is_active: true).first
       if @subscription && @subscription.tenant
         plan_id = @subscription.subscription_plan_id
-        Apartment::Tenant.switch(tenant_name)
+        Apartment::Tenant.switch!(tenant_name)
         # tenant = Tenant.find_by_name(tenant_name)
         # day = tenant.created_at.strftime("%d").to_i
         apply(plan_id)

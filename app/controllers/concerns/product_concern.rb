@@ -2,11 +2,11 @@ module ProductConcern
   extend ActiveSupport::Concern
 
   included do
-    prepend_before_filter :groovepacker_authorize!, :except => [:generate_barcode_slip, :bulk_barcode_pdf]
-    prepend_before_filter :init_result_object
-    before_filter :check_permissions, only: [:generate_barcode, :scan_per_product, :add_product_to_kit, :remove_products_from_kit, :update_product_list, :add_image, :update_intangibleness, :change_product_status, :delete_product, :duplicate_product]
-    before_filter :find_kit_product, only: [:add_product_to_kit, :remove_products_from_kit]
-    before_filter :init_products_service, only: [:import_images]
+    prepend_before_action :groovepacker_authorize!, :except => [:generate_barcode_slip, :bulk_barcode_pdf]
+    prepend_before_action :init_result_object
+    before_action :check_permissions, only: [:generate_barcode, :scan_per_product, :add_product_to_kit, :remove_products_from_kit, :update_product_list, :add_image, :update_intangibleness, :change_product_status, :delete_product, :duplicate_product]
+    before_action :find_kit_product, only: [:add_product_to_kit, :remove_products_from_kit]
+    before_action :init_products_service, only: [:import_images]
     include ProductsHelper
     include Groovepacker::Orders::ResponseMessage
   end
@@ -91,9 +91,6 @@ module ProductConcern
               'type_scan_enabled' => product.type_scan_enabled,
               'click_scan_enabled' => product.click_scan_enabled,
               'qty' => 0,
-              'barcode' => '',
-              'sku' => '',
-              'cat' => '',
               'image' => '',
               'barcode' => product.primary_barcode,
               'sku' => product.primary_sku,

@@ -1,9 +1,14 @@
 Groovepacks::Application.routes.draw do
 
   use_doorkeeper
+  get 'subscriptions', :to => 'subscriptions#new'
+  get 'subscriptions_login', :to => 'subscriptions#login'
+  post 'subscriptions', :to => 'subscriptions#new'
+  post 'subscriptions_login', :to => 'subscriptions#login'
 
-  match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
-  match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
+
+  #match 'subscriptions', :to => 'subscriptions#new', :as => 'subscriptions'
+  #match 'subscriptions_login', :to => 'subscriptions#login', :as => 'subscriptions/login'
   match "/delayed_job" => DelayedJobWeb, :anchor => false, via: [:get, :post]
 
   get "/404", :to => "specials#error_404"
@@ -38,13 +43,13 @@ Groovepacks::Application.routes.draw do
   get 'shipstation_rest_credentials/auto_click_create_label' => 'shipstation_rest_credentials#auto_click_create_label'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
   get '/settings/print_tote_barcodes' => 'settings#print_tote_barcodes'
-  put '/order_import_summary/update_display_setting' => 'OrderImportSummaries#update_display_setting'
-  get '/order_import_summary/update_order_import_summary' => 'OrderImportSummaries#update_order_import_summary'
-  get 'order_import_summary/download_summary_details' => 'OrderImportSummaries#download_summary_details'
-  get '/order_import_summary/fix_imported_at' => 'OrderImportSummaries#fix_imported_at'
-  get '/order_import_summary/delete_import_summary' => 'OrderImportSummaries#delete_import_summary'
-  get '/order_import_summary/get_last_modified' => 'OrderImportSummaries#get_last_modified'
-  get '/order_import_summary/get_import_details' => 'OrderImportSummaries#get_import_details'
+  put '/order_import_summary/update_display_setting' => 'order_import_summaries#update_display_setting'
+  get '/order_import_summary/update_order_import_summary' => 'order_import_summaries#update_order_import_summary'
+  get 'order_import_summary/download_summary_details' => 'order_import_summaries#download_summary_details'
+  get '/order_import_summary/fix_imported_at' => 'order_import_summaries#fix_imported_at'
+  get '/order_import_summary/delete_import_summary' => 'order_import_summaries#delete_import_summary'
+  get '/order_import_summary/get_last_modified' => 'order_import_summaries#get_last_modified'
+  get '/order_import_summary/get_import_details' => 'order_import_summaries#get_import_details'
   get '/orders/run_orders_status_update' => 'orders#run_orders_status_update'
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
   put '/shipstation_rest_credentials/:store_id/update_product_image' => 'shipstation_rest_credentials#update_product_image'

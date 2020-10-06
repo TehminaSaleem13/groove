@@ -1,11 +1,11 @@
 class AccessRestriction < ActiveRecord::Base
-  attr_accessible :tenant_id, :num_users, :num_shipments, :num_import_sources, :total_scanned_shipments, :added_through_ui
+  #attr_accessible :tenant_id, :num_users, :num_shipments, :num_import_sources, :total_scanned_shipments, :added_through_ui
   has_one :tenant
 
   after_save :remove_from_new_customers_if_scanned_30
 
   def remove_from_new_customers_if_scanned_30
-    if self.total_scanned_shipments_changed?
+    if self.saved_change_to_total_scanned_shipments?
       initialize_campaingmonitor.remove_subscriber_from_new_customers_list if self.total_scanned_shipments==30
     end
   end

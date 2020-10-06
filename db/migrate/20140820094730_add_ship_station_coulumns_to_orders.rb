@@ -1,4 +1,4 @@
-class AddShipStationCoulumnsToOrders < ActiveRecord::Migration
+class AddShipStationCoulumnsToOrders < ActiveRecord::Migration[5.1]
   def up
   	add_column :orders, :order_number, :string
   	add_column :orders, :seller_id, :integer

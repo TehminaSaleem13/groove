@@ -1,4 +1,4 @@
-class CreateOrderItemBoxes < ActiveRecord::Migration
+class CreateOrderItemBoxes < ActiveRecord::Migration[5.1]
   def change
     create_table :order_item_boxes do |t|
       t.integer :box_id

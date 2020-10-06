@@ -129,7 +129,7 @@ module Groovepacker
           end
 
           def import_barcode(barcode, single_row)
-            product_barcode = ProductBarcode.find_or_create_by_barcode(single_row[self.mapping[barcode][:position]].strip)
+            product_barcode = ProductBarcode.find_or_create_by(barcode: single_row[self.mapping[barcode][:position]].strip)
 
             product_barcode
           end
@@ -167,7 +167,7 @@ module Groovepacker
             @update_status_products << single_import_product
 
             if not_blank?('part_qty', single_row)
-              product_kit_part_sku = ProductKitSkus.find_or_create_by_product_id_and_option_product_id(kit_product.id, single_import_product.id)
+              product_kit_part_sku = ProductKitSkus.find_or_create_by(product_id: kit_product.id, option_product_id: single_import_product.id)
               product_kit_part_sku.qty = single_row[self.mapping['part_qty'][:position]]
               product_kit_part_sku.packing_order = single_row[self.mapping['kit_part_scanning_sequence'][:position]].to_i if not_blank?('kit_part_scanning_sequence',single_row) && single_row[self.mapping['kit_part_scanning_sequence'][:position]].to_i != 0
               product_kit_part_sku.save

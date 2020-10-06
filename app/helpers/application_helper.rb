@@ -13,7 +13,7 @@ module ApplicationHelper
     blob = outputter.to_png #Raw PNG data
     image_name = Digest::MD5.hexdigest(increment_id)
     File.open("#{Rails.root}/public/images/#{image_name}.png",
-              'w') do |f|
+              'wb') do |f|
       f.write blob
     end
     image_name
@@ -113,7 +113,7 @@ module ApplicationHelper
 
   def switch_tenant(tenant)
     begin
-      Apartment::Tenant.switch(tenant)
+      Apartment::Tenant.switch!(tenant)
       true
     rescue => e
       false

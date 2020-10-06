@@ -11,7 +11,7 @@ module Groovepacker
       end
       # Changes the status of orders
       def status_update(tenant, params, bulk_actions_id, username)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         orders = $redis.get("bulk_action_data_#{tenant}_#{bulk_actions_id}")
         orders = Marshal.load(orders)
@@ -136,7 +136,7 @@ module Groovepacker
       end
 
       def delete(current_tenant, bulkaction_id)
-        Apartment::Tenant.switch(current_tenant)
+        Apartment::Tenant.switch!(current_tenant)
         bulk_action = GrooveBulkActions.find(bulkaction_id)
         orders = $redis.get("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
         orders = Marshal.load(orders)
@@ -154,7 +154,7 @@ module Groovepacker
 
         Tote.where(order_id: order_ids).update_all(order_id: nil, pending_order: false)
 
-        Order.delete_all(['id IN (?)', order_ids])
+        Order.where(['id IN (?)', order_ids]).delete_all
         destroy_orders_associations(order_ids)
         bulk_action.update_attributes(completed: orders.count)
 
@@ -164,7 +164,7 @@ module Groovepacker
       end
 
       def duplicate(tenant, bulk_actions_id, username)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         init_results
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         orders = $redis.get("bulk_action_duplicate_data_#{tenant}_#{bulk_actions_id}")
@@ -212,7 +212,7 @@ module Groovepacker
       end
 
       def import_csv_orders(tenant, store_id, data, current_user_id)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         if OrderImportSummary.where(status: 'in_progress').blank?
           OrderImportSummary.delete_all
           order_import_summary = OrderImportSummary.create(user_id: current_user_id, status: 'not_started')
@@ -241,13 +241,13 @@ module Groovepacker
       end
 
       def update_bulk_orders_status(result, params, tenant)
-        Apartment::Tenant.switch(tenant)
+        Apartment::Tenant.switch!(tenant)
         bulk_action = GrooveBulkActions.where("identifier='order' and activity='status_update'").last
         return if bulk_action.blank?
         bulk_action_update_status(bulk_action, "in_progress")
         count = 1
         updated_products = Product.where(status_updated: true)
-        orders = Order.includes(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
+        orders = Order.eager_load(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
         (orders||[]).find_each(:batch_size => 100) do |order|
           order.update_order_status
           bulk_action.completed = count
@@ -266,16 +266,16 @@ module Groovepacker
 
       def update_all_pending_order_bulk_actions
         bulk_actions = GrooveBulkActions.where("identifier='order' and activity='status_update' and (status!='cancelled' or status='completed' and total!=completed)")
-        bulk_actions.update_all("status='completed', completed=total")
+        bulk_actions.update_all(["status='completed', completed=total"])
       end
 
       private
 
       def destroy_orders_associations(order_ids)
-        OrderActivity.delete_all(['order_id IN (?)', order_ids])
-        OrderException.delete_all(['order_id IN (?)', order_ids])
-        OrderSerial.delete_all(['order_id IN (?)', order_ids])
-        OrderShipping.delete_all(['order_id IN (?)', order_ids])
+        OrderActivity.where(['order_id IN (?)', order_ids]).delete_all
+        OrderException.where(['order_id IN (?)', order_ids]).delete_all
+        OrderSerial.where(['order_id IN (?)', order_ids]).delete_all
+        OrderShipping.where(['order_id IN (?)', order_ids]).delete_all
         Tote.where(order_id: order_ids).update_all(order_id: nil)
         destroy_order_items(order_ids)
       end
@@ -300,11 +300,10 @@ module Groovepacker
 
 
       def delete_order_items(order_items_ids)
-        OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
-        OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
-        OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
-
-        OrderItem.delete_all(['id IN (?)', order_items_ids])
+        OrderItemKitProduct.where(['order_item_id IN (?)', order_items_ids]).delete_all
+        OrderItemOrderSerialProductLot.where(['order_item_id IN (?)', order_items_ids]).delete_all
+        OrderItemScanTime.where(['order_item_id IN (?)', order_items_ids]).delete_all
+        OrderItem.where(['id IN (?)', order_items_ids]).delete_all
       end
 
       def delete_boxes order
