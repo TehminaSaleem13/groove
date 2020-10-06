@@ -50,9 +50,10 @@ module ScanPackHelper
       @result[:barcode] = product.primary_sku
       @result[:order] = order
       @result[:store_type] = order.store.store_type
-      @result[:single_item_order_message] = ScanPackSetting.last.single_item_order_complete_msg
-      @result[:single_item_order_message_time] = ScanPackSetting.last.single_item_order_complete_msg_time
+      @result[:single_item_order_message] = @scanpack_setting.single_item_order_complete_msg
+      @result[:single_item_order_message_time] = @scanpack_setting.single_item_order_complete_msg_time
       @result[:popup_shipping_label] = order.store.shipping_easy_credential.popup_shipping_label rescue nil
+      ScanPack::ScanBarcodeService.new(current_user, session, params).generate_order_barcode_slip(order) if @scanpack_setting.post_scanning_option == 'Barcode' && !@result[:popup_shipping_label]
       return @result
     end
 
@@ -67,7 +68,7 @@ module ScanPackHelper
         order = tote.order
         order_item = OrderItem.find(order.get_unscanned_items.first['order_item_id'])
         @result[:tote] = tote
-        @result[:tote_identifier] = ScanPackSetting.last.tote_identifier
+        @result[:tote_identifier] = @scanpack_setting.tote_identifier
         @result[:product] = product
         @result[:barcode] = product.primary_sku
         @result[:order] = order
@@ -90,7 +91,7 @@ module ScanPackHelper
         order = tote.order
         order_item = order.order_items.where(product_id: product.id).first
         @result[:tote] = tote
-        @result[:tote_identifier] = ScanPackSetting.last.tote_identifier
+        @result[:tote_identifier] = @scanpack_setting.tote_identifier
         @result[:product] = product
         @result[:barcode] = product.primary_sku
         @result[:order] = order
@@ -122,7 +123,7 @@ module ScanPackHelper
       order_item = order.order_items.where(product_id: product.id).first
       @result[:assigned_to_tote] = true
       @result[:tote] = available_tote
-      @result[:tote_identifier] = ScanPackSetting.last.tote_identifier
+      @result[:tote_identifier] = @scanpack_setting.tote_identifier
       @result[:product] = product
       @result[:barcode] = product.primary_sku
       @result[:order] = order

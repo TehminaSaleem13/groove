@@ -86,6 +86,7 @@ RSpec.describe ScanPackController, type: :controller do
       Range.new(1, (tote_set.max_totes - tote_set.totes.count)).to_a.each do
         tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1)
       end
+      ScanPackSetting.last.update(post_scanning_option: 'Barcode')
     end
 
     it 'Single Item Marked Scan' do
