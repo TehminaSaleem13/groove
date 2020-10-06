@@ -14,10 +14,11 @@ module Groovepacker
           Apartment::Tenant.switch!(hash[:tenant])
           order_no = hash[:order_no]
           user_id = hash[:user_id]
+          scan_pack_setting = ScanPackSetting.last
           stores = Store.where("status=? and store_type NOT IN (?)", true, ['CSV', 'system'])
           s_stores = stores.where("store_type='Shipstation API 2'")
-          o_stores = stores.where("store_type='BigCommerce'")
-          se_stores = stores.where("store_type='ShippingEasy'")
+          o_stores = scan_pack_setting.scan_by_shipping_label ? [] : stores.where("store_type='BigCommerce'")
+          se_stores = scan_pack_setting.scan_by_shipping_label ? [] : stores.where("store_type='ShippingEasy'")
           #o_stores = stores.where("store_type!='Shipstation API 2'")
           [s_stores, o_stores, se_stores].each { |st| run_for_each_store(st, order_no, user_id) }
           #run_for_each_store(s_stores, order_no)
