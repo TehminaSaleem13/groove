@@ -163,4 +163,45 @@ RSpec.describe OrdersController, type: :controller do
       expect(ss_import_item.status).to eq('completed')
     end
   end
+
+  describe 'Order Search' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      product = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCTTEST')
+      FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCTTEST')
+
+      order = FactoryBot.create(:order, increment_id: '100', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: '10', status: 'awaiting', tracking_num: '100', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: 'T', status: 'awaiting', tracking_num: '9400111298370613423837', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: 'TR', status: 'awaiting', tracking_num: '12345', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: '1234512345', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: 'TRA', status: 'awaiting', tracking_num: '1234512345', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+    end
+
+    it 'find order search by tracking number ending' do
+      post :search, params: { search: '837', order: 'DESC', limit: 20, offset: 0, product_search_toggle: true }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['orders'].first['ordernum']).to eq('T')
+      expect(result['orders'].first['tracking_num']).to eq('9400111298370613423837')
+    end
+  end
 end
