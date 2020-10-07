@@ -323,7 +323,7 @@ module ScanPack
       if GeneralSetting.last.remove_order_items
         data = []
         @single_order.reload.order_items.each do |order_item|
-          data << order_item if order_item.qty.eql?(0)
+          data << order_item if order_item.qty.eql?(0) && order_item.skipped_qty.eql?(0)
         end
         if data.any?
           data.each do |item|
