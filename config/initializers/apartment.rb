@@ -4,6 +4,9 @@
 require 'apartment/elevators/domain'
 require 'apartment/elevators/subdomain'
 
+require 'rescued_apartment_middleware'
+Rails.application.config.middleware.use Apartment::Elevators::Subdomain
+Apartment::Elevators::Subdomain.prepend RescuedApartmentMiddleware
 #
 # Apartment Configuration
 #
