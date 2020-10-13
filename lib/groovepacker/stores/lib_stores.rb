@@ -202,7 +202,7 @@ module Groovepacker
 		        @store.shopify_credential = ShopifyCredential.new(shop_name: params[:shop_name])
 		        new_record = true
 		      else
-		        @shopify.update_attributes(shop_name: params[:shop_name], shopify_status: params[:shopify_status], shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b, partial_status:  params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling], generating_barcodes: params[:generating_barcodes], import_inventory_qoh: params[:import_inventory_qoh], import_updated_sku: params[:import_updated_sku], updated_sku_handling: params[:updated_sku_handling])
+		        @shopify.update_attributes(shop_name: params[:shop_name], shopify_status: params[:shopify_status], shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b, partial_status:  params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling], generating_barcodes: params[:generating_barcodes], import_inventory_qoh: params[:import_inventory_qoh], import_updated_sku: params[:import_updated_sku], updated_sku_handling: params[:updated_sku_handling], permit_shared_barcodes: params[:permit_shared_barcodes])
 		      end
 		      @store.save
 		    rescue ActiveRecord::RecordInvalid => e
