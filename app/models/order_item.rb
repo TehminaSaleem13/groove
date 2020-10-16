@@ -329,6 +329,8 @@ class OrderItem < ActiveRecord::Base
     self.kit_split_scanned_qty = 0
     self.single_scanned_qty = 0
     self.clicked_qty = 0
+    self.qty += self.skipped_qty if self.skipped_qty > 0
+    self.skipped_qty = 0
     self.save
   end
 
