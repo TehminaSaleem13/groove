@@ -105,7 +105,8 @@ class SettingsController < ApplicationController
     offset = general_setting.try(:dst) ? offset : offset + 3600
     @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
-    @result['scan_pack_workflow'] = Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow rescue 'default'
+    @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
+    @result['daily_packed_toggle'] = current_tenant.daily_packed_toggle rescue false
 
     if general_setting.present?
       @result['data']['settings'] = general_setting
