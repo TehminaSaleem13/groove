@@ -193,17 +193,18 @@ module ScanPack
       case type
       when 'order_items'
         pdf_template = 'products/bulk_barcode_generation.html.erb'
-        template_locals = { :@order_items => items }
-        height_per_page = '1.12in'
-        reader_file_path = Rails.root.join('public', 'pdfs', 'bulk_barcode_generation.pdf')
+
+        template_locals = {:@order_items => items}
+        height_per_page = '1.08in'
+        reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
       when 'products'
         pdf_template = 'products/print_barcode_label.html.erb'
-        template_locals = { :@products => items }
-        height_per_page = '1.12in'
+        template_locals = {:@products => items}
+        height_per_page = '1.08in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
-      pdf_html = action_view.render template: pdf_template, layout: nil, locals: template_locals
-      common(pdf_html, reader_file_path, height_per_page, '3in', top: type == 'order_items' ? '0' : '0.9', bottom: '0', left: '0', right: '0')
+      pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
+      common(pdf_html, reader_file_path, height_per_page, '2.9in', {:top => '0.9', :bottom => '0', :left => '0', :right => '0'})
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
       base_file_name = File.basename(pdf_path)
       pdf_file = File.open(reader_file_path)
