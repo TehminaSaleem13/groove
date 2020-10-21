@@ -6560,7 +6560,7 @@
                   </td>  
                 </tr>
               <% end %>
-               <%if  order_item.order_item_kit_products.any? && get_display_kit_parts %>
+               <%if order_item.product.kit_parsing != 'single' && order_item.order_item_kit_products.any? && get_display_kit_parts %>
                   <% n = order_item.order_item_kit_products.count %>
                   <tr>
                     <td rowspan="<%=n+1%>" style="background: #000; color: #fff; width:5px"></td>
