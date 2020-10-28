@@ -84,25 +84,37 @@ module Groovepacker
         end
 
         def order_export_row_map
-          return {:order_number => '',
-                  :order_date_time => '',
-                  :sku => '',
-                  :product_name => '',
-                  :barcode => '',
-                  :qty => '',
-                  :first_name => '',
-                  :last_name => '',
-                  :email => '',
-                  :address_1 => '',
-                  :address_2 => '',
-                  :city => '',
-                  :state => '',
-                  :postal_code => '',
-                  :country => '',
-                  :customer_comments => '',
-                  :internal_notes => '',
-                  :tracking_num => '',
-                }
+          export_row_map = {
+            :order_number => '',
+            :order_date_time => '',
+            :sku => '',
+            :product_name => '',
+            :barcode => '',
+            :qty => '',
+            :first_name => '',
+            :last_name => '',
+            :email => '',
+            :address_1 => '',
+            :address_2 => '',
+            :city => '',
+            :state => '',
+            :postal_code => '',
+            :country => '',
+            :customer_comments => '',
+            :internal_notes => '',
+            :tracking_num => '',
+          }
+
+          export_row_map = export_row_map.merge(
+            { :order_num => '',
+              :sku => '',
+              :tote => '',
+              :qty_remaining => '',
+              :qty_in_tote => '',
+              :qty_ordered => '',
+              }
+          ) if @current_workflow == 'product_first_scan_to_put_wall'
+          return export_row_map
         end
 
         def get_context(store)

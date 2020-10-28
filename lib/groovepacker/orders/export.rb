@@ -4,6 +4,7 @@ module Groovepacker
 
       def order_items_export(selected_orders)
         @general_settings = GeneralSetting.all.first
+        @current_workflow = Tenant.find_by_name(Apartment::Tenant.current).try(:scan_pack_workflow)
         if @general_settings.export_items == 'disabled'
           set_status_and_message(false, 'Order export items is disabled.', ['push'])
           return @result
@@ -51,14 +52,14 @@ module Groovepacker
 
           product_sku = @product.product_skus.order("product_skus.order ASC").first
           return if product_sku.nil?
-          create_single_row(order, product_sku)
+          create_single_row(order, product_sku, single_item)
         end
 
-        def create_single_row(order, product_sku)
+        def create_single_row(order, product_sku, single_item)
           if @items_list.has_key?(product_sku.sku) && @general_settings.export_items == 'by_sku'
             @items_list[product_sku.sku][:quantity] = @items_list[product_sku.sku][:quantity] + @item_quantity
           else
-            single_row_list = @general_settings.export_items == 'standard_order_export' ? fetch_standard_single_row(order, product_sku) : fetch_single_row(order, product_sku)
+            single_row_list = @general_settings.export_items == 'standard_order_export' ? fetch_standard_single_row(order, product_sku, single_item) : fetch_single_row(order, product_sku)
             push_item_row(single_row_list, product_sku)
           end
         end
@@ -78,7 +79,7 @@ module Groovepacker
           single_row_list
         end
 
-        def fetch_standard_single_row(order, product_sku)
+        def fetch_standard_single_row(order, product_sku, single_item)
           product_barcodes = @product.product_barcodes.order("product_barcodes.order ASC")
           single_row_list = order_export_row_map.dup
           single_row_list = single_row_list.merge(
@@ -102,6 +103,16 @@ module Groovepacker
               :tracking_num => order.tracking_num,
               }
             )
+
+            single_row_list = single_row_list.merge(
+              { :order_num => order.increment_id,
+                :sku => product_sku.sku,
+                :tote => order.tote.try(:name) || 'NA',
+                :qty_remaining => (single_item.scanned_status == 'scanned') ? 0 : single_item.qty - single_item.scanned_qty,
+                :qty_in_tote => order.tote.try(:name) ? single_item.scanned_qty : 0,
+                :qty_ordered => single_item.qty
+                }
+              ) if @current_workflow == 'product_first_scan_to_put_wall'
           single_row_list
         end
 
