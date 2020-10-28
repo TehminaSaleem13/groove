@@ -63,6 +63,7 @@ module Groovepacker
           mapping = CsvMapping.find_by_store_id(store.id)
           next unless check_connection_for_product_ftp_import(mapping, store)
           map = mapping.product_csv_map
+          map.map[:map] = map.map[:map].class == ActionController::Parameters ? map.map[:map].permit!.to_h : map.map[:map] rescue nil
           data = build_product_data(map,store)
           data[:tenant] = tenant
           data[:user_id] = User.find_by_name('gpadmin').try(:id)
