@@ -34,7 +34,14 @@ module Groovepacker
         def run_import_for_stores(current_tenant, product_import_type, product_import_range_days)
           #context = Groovepacker::Stores::Context.new(get_handler)
           import_orders_obj = ImportOrders.new
-          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_product_from_store(current_tenant, @store.id, product_import_type, product_import_range_days)
+          if @store.store_type == 'Shopify'
+            Product.emit_message_for_shopify_running_imports && raise if StoreProductImport.any?
+            store_product_import = StoreProductImport.create(store_id: @store.id, status: 'not_started')
+            d_job = import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "import_shopify_products_#{current_tenant}").import_product_from_store(current_tenant, @store.id, product_import_type, product_import_range_days)
+            store_product_import.update(delayed_job_id: d_job.id)
+          else
+            import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "import_products_scheduled_#{current_tenant}").import_product_from_store(current_tenant, @store.id, product_import_type, product_import_range_days)
+          end
           # context.import_products
         end
 

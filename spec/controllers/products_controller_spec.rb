@@ -158,10 +158,32 @@ RSpec.describe ProductsController, :type => :controller do
       expect(Product.count).to eq(0)
 
       post :import_products, params: { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
-      res = JSON.parse(response.body)
       expect(response.status).to eq(200)
 
       expect(Product.count).to eq(36)
+    end
+
+    it 'Cancel Running Shopify Imports' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+      StoreProductImport.create(store_id: shopify_store.id)
+
+      expect(StoreProductImport.count).to eq(1)
+
+      request.accept = 'application/json'
+      post :cancel_shopify_product_imports
+      res = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(res['status']).to be true
+      expect(StoreProductImport.count).to eq(0)
+    end
+
+    it 'Import Already Running' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+      StoreProductImport.create(store_id: shopify_store.id)
+
+      request.accept = 'application/json'
+      post :import_products, params: { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
+      expect(response.status).to eq(200)
     end
 
     it 'Import New and Updated Items' do

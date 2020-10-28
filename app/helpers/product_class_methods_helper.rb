@@ -67,6 +67,12 @@ module ProductClassMethodsHelper
     GroovRealtime::emit('access_token_message', result, :tenant)
   end
 
+  def emit_message_for_shopify_running_imports
+    result = { message: 'Another Shopify import is in queue, Please wait for it to complete.' }
+    GroovRealtime::emit('access_token_message', result, :user)
+  end
+
+
   def update_action_intangibleness(params)
     action_intangible = Groovepacker::Products::ActionIntangible.new
     scan_pack_setting = ScanPackSetting.all.first

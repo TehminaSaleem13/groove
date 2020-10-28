@@ -10,18 +10,24 @@ module Groovepacker
             begin
               response = @client.products(product_import_type, product_import_range_days)
             rescue
+              @store_product_import.try(:destroy)
               Product.emit_message_for_access_token
             end
             if response["products"] == [nil]
+              @store_product_import.try(:destroy)
               Product.emit_message_for_access_token
               return
             end
-            return if response["products"].blank?
+            @store_product_import.try(:destroy) && return if response["products"].blank?
             products_response = response["products"].compact.sort_by { |products| Time.zone.parse(products['updated_at']) }
+            @store_product_import.update(status: 'in_progress', total: products_response.count) rescue nil
             products_response.each do |product|
+              return unless (@store_product_import.reload.present? rescue false)
               create_single_product(product)
-              @credential.update_attributes(product_last_import: Time.zone.parse(product['updated_at'])) # if products_response.last == product
+              @store_product_import.update(success_imported: @store_product_import.success_imported + 1) rescue nil
+              @credential.update(product_last_import: Time.zone.parse(product['updated_at'])) # if products_response.last == product
             end
+            @store_product_import.try(:destroy)
             update_orders_status
             send_products_import_complete_email(response["products"].count)
           end
@@ -62,6 +68,7 @@ module Groovepacker
               @credential = handler[:credential]
               @store = @credential.try(:store)
               @client = handler[:store_handle]
+              @store_product_import = StoreProductImport.find_by_store_id(@store.id)
             end
 
             def create_single_product(shopify_product)

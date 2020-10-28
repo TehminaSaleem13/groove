@@ -393,6 +393,13 @@ class ProductsController < ApplicationController
     render json: result
   end
 
+  def cancel_shopify_product_imports
+    result = { }
+    StoreProductImport.destroy_all
+    result["status"] = true
+    render json: result
+  end
+
   def update_intangibleness
     Product.update_action_intangibleness(params)
 

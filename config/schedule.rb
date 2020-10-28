@@ -44,6 +44,10 @@ every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   rake "check:failed_imports"
 end
 
+every 5.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
+  rake "check:failed_product_imports"
+end
+
 every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   if environment=='staging'
     command "/home/ubuntu/groove/scripts-staging/meganto_status_update.sh"
