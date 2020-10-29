@@ -311,6 +311,7 @@ module Groovepacker
           attr_array.each do |attr|
             product_location.send("#{attr}=", inv_wh[:info][attr])
           end
+          @product.touch if product_location.changes.include? 'location_primary'
           product_location.save
         end
 

@@ -97,6 +97,21 @@ module Groovepacker
           end
         end
 
+        def update_product_bin_locations(products)
+          response = {}
+          products.each do |product|
+            next unless product.primary_warehouse.try(:location_primary).present?
+            product_hash = @service.query("/products/#{product.store_product_id}", {}, 'get')
+            body = product_hash.to_h.merge('warehouseLocation' => product.primary_warehouse.location_primary).to_json
+            begin
+              response = @service.query("/products/#{product.store_product_id}", body, 'put')
+            rescue => e
+              puts e
+            end
+          end
+          response
+        end
+
         def get_order_by_tracking_number(tracking_number)
           on_demand_logger.info("********")
           response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")

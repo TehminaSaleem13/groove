@@ -44,6 +44,21 @@ class ExportSsProductsCsv
     generate_csv(result, data, filename, products)
   end
 
+  def update_ss_product_locations(tenant_name, store_id)
+    Apartment::Tenant.switch!(tenant_name)
+    begin
+      response = {}
+      @store = Store.find(store_id)
+      @credential = ShipstationRestCredential.find_by_store_id(@store.id)
+      @client = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store).build_handle[:store_handle]
+      products = Product.includes(product_inventory_warehousess: [:inventory_warehouse]).where('store_id = ? AND status = ? AND updated_at > ?', store_id, 'active', @credential.last_location_push.present? ? @credential.last_location_push : 10.year.ago)
+      response = @client.update_product_bin_locations(products) if products.present?
+      @credential.update_attributes(last_location_push: Time.zone.now) if response['success']
+    rescue => e
+      puts e
+    end
+  end
+
   def export_broken_image(tenant, params)
     Apartment::Tenant.switch! tenant
     products = ProductsService::ListSelectedProducts.call(params, true)

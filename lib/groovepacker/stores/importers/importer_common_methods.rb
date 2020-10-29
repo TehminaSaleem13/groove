@@ -48,7 +48,7 @@ module Groovepacker
             coupon_product = replace_product(item["name"], sku)
             return coupon_product unless coupon_product.nil? 
           end 
-          product = Product.create(name: item["name"], store: @credential.store, store_product_id: 0)
+          product = Product.create(name: item["name"], store: @credential.store, store_product_id: item['productId'])
           product.add_product_activity("Product Import","#{@credential.store.name}")
           product.product_skus.create(sku: sku)
           if @credential.gen_barcode_from_sku &&  @credential.import_upc && item["upc"].present? && item["upc"] != "0"

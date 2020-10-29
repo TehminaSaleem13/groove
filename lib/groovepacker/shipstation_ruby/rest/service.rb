@@ -78,6 +78,8 @@ module Groovepacker
           @query = query
           if method == "get"
             HTTParty.get("#{@endpoint}#{query}", headers: headers, debug_output: debug_output)
+          elsif method == 'put'
+            HTTParty.put("#{@endpoint}#{query}", body: body, headers: headers.merge({'Content-Type': 'application/json'}), debug_output: debug_output)
           else
             HTTParty.post("#{@endpoint}#{query}", body: body, headers: headers, debug_output: debug_output)
           end
