@@ -81,6 +81,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_groovelytic_stat'=> 'tenants#update_groovelytic_stat'
   get '/tenants/update_is_delay'=> 'tenants#update_is_delay'
   get '/tenants/update_scan_workflow'=> 'tenants#update_scan_workflow'
+  get '/tenants/update_is_cf'=> 'tenants#update_is_cf'
   get '/tenants/update_store_order_respose_log'=> 'tenants#update_store_order_respose_log'
   get '/tenants/update_inventory_update_delay'=> 'tenants#update_inventory_update_delay'
   get '/tenants/update_daily_packed_toggle'=> 'tenants#update_daily_packed_toggle'

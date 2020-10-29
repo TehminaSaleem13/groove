@@ -2,7 +2,7 @@ namespace :ftp_csv_file_import do
   desc "import file from server"
   task :ftp_import => :environment do
     # current_time = Time.now.in_time_zone('Eastern Time (US & Canada)').strftime("%I:%M")
-    Tenant.all.each do |tenant|
+    Tenant.where(is_cf: true).each do |tenant|
       begin
         Apartment::Tenant.switch! "#{tenant.name}"
         import_no_inprogress = OrderImportSummary.where("status in (?) and updated_at >= ?", ['in_progress', "not_started"], (DateTime.now - 1.hour)).blank?

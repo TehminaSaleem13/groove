@@ -148,6 +148,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_is_cf
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.is_cf = !tenant.is_cf
+    tenant.save
+    render json: {}
+  end
+
   def update_store_order_respose_log
     tenant = Tenant.find(params["tenant_id"])
     tenant.store_order_respose_log = !tenant.store_order_respose_log

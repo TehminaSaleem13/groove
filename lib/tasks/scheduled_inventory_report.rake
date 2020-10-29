@@ -5,7 +5,7 @@ namespace :doo do
     #   $redis.set("schedule_inventory_report", true) 
     #   $redis.expire("schedule_inventory_report", 5400)
 	    failed_tenant = []
-	    tenants = Tenant.order(:name) rescue Tenant.all
+	    tenants = Tenant.where(is_cf: true).order(:name) rescue Tenant.where(is_cf: true)
 	    tenants.each do |tenant|
 	    	begin	
 	    		Apartment::Tenant.switch! tenant.name 

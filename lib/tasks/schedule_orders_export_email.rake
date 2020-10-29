@@ -6,7 +6,7 @@ namespace :doo do
       $redis.expire("schedule_orders_export_email", 5400)
       failed_tenant = []
       scheduled_tenants = []
-      tenants = Tenant.order(:name) rescue Tenant.all
+      tenants = Tenant.where(is_cf: true).order(:name) rescue Tenant.where(is_cf: true)
       tenants.each do |tenant|
         begin
           scheduled = ImportOrders.new.reschedule_job('export_order', tenant.name)

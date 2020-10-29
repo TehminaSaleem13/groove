@@ -1,7 +1,7 @@
 namespace :doo do
   desc "update last imported store for tenant"
   task :update_last_imported_store => :environment do
-    tenants = Tenant.all
+    tenants = Tenant.where(is_cf: true)
     tenants.each do |tenant|
       begin
         Apartment::Tenant.switch(tenant.name)

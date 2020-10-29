@@ -1,7 +1,7 @@
 namespace :doo do
   desc "Schedule AccessRestriction"
   task :schedule_access_restriction => :environment do
-    Tenant.all.each do |tenant|
+    Tenant.where(is_cf: true).each do |tenant|
       tenant_name = tenant.name
       day = tenant.created_at.strftime("%d").to_i
       Delayed::Job.where(queue: "reset_access_restrictions_#{tenant_name}").destroy_all

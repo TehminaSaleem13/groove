@@ -4,7 +4,7 @@ namespace :doo do
     if $redis.get("schedule_hourly_import").blank?
       $redis.set("schedule_hourly_import", true) 
       $redis.expire("schedule_hourly_import", 1800)
-      tenants = Tenant.where(scheduled_import_toggle: true) 
+      tenants = Tenant.where(scheduled_import_toggle: true, is_cf: true)
       tenants.each do |tenant|
         Apartment::Tenant.switch! tenant.name	
         setting = GeneralSetting.last

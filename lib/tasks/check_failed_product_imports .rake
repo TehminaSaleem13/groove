@@ -1,7 +1,7 @@
 namespace :check do
   desc "check failed product imports"
   task :failed_product_imports => :environment do
-    Tenant.all.each do |tenant|
+    Tenant.where(is_cf: true).each do |tenant|
       Apartment::Tenant.switch! tenant.name
       in_progress_items = StoreProductImport.where(status: 'in_progress')
       not_started_items = StoreProductImport.where(status: 'not_started')
