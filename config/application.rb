@@ -84,6 +84,7 @@ module Groovepacks
       end
     end
     config.time_zones = YAML.load(File.open(Rails.root.join('config', 'time_zones.yml')))
+    config.time_zone_names = YAML.load(File.open(Rails.root.join('config', 'time_zone_names.yml')))
     config.tz_abbreviations = YAML.load(File.open(Rails.root.join('config', 'tz_abbreviations.yml')))
   end
 end

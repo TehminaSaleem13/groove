@@ -73,4 +73,4 @@ time_zones:
   (GMT-09:00) Alaskan Standard Time (Alaska): -09:00:01
   (GMT-10:00) Hawaiian Standard Time (Hawaii): -10:00:01
   (GMT-11:00) Samoa Standard Time  (Midway Island, Samoa): -11:00:01
-  (GMT-12:00) Dateline Standard Time  (International Date Line West): -12:00:01
+  # (GMT-12:00) Dateline Standard Time  (International Date Line West): -12:00:01

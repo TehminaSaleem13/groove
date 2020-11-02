@@ -102,7 +102,10 @@ class SettingsController < ApplicationController
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_setting = GeneralSetting.all.first
     offset = general_setting.try(:time_zone).to_i
-    offset = general_setting.try(:dst) ? offset : offset + 3600
+    # offset = general_setting.try(:dst) ? offset : offset + 3600
+    @result['gp_tz_dst'] = check_for_dst(offset)
+    @result['pst_tz_dst'] = check_for_dst(-28799) # PST offset as per YML file
+    offset = check_for_dst(offset) ? offset + 3600 : offset
     @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
     @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
@@ -281,7 +284,8 @@ class SettingsController < ApplicationController
       end
       @result = {};
       offset = params["add_time_zone"].to_i
-      offset = setting.dst ? offset : offset+3600
+      # offset = setting.dst ? offset : offset+3600
+      offset = check_for_dst(offset) ? offset + 3600 : offset
       @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
       #@result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
     end

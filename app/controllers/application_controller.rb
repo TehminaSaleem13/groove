@@ -72,6 +72,12 @@ class ApplicationController < ActionController::Base
     time + offset
   end
 
+  def check_for_dst(offset)
+    tz_name = Groovepacks::Application.config.time_zone_names.values.first.key(offset.to_i)
+    return false if tz_name.nil? || GeneralSetting.all.first.try(:dst)
+    ActiveSupport::TimeZone[tz_name].tzinfo.current_period.dst?
+  end
+
   private
     def save_bc_auth_if_present
       bc_auth = cookies[:bc_auth]
@@ -98,5 +104,4 @@ class ApplicationController < ActionController::Base
       end
       return url
     end
-
 end
