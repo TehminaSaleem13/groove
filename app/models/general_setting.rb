@@ -85,12 +85,12 @@ class GeneralSetting < ActiveRecord::Base
       groove_bulk_actions.activity = 'enable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at => 2.seconds.from_now, :queue => 'inventory_process').process_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 2.seconds.from_now, :queue => 'inventory_process', priority: 95).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
     else
       groove_bulk_actions.activity = 'disable'
       groove_bulk_actions.save
 
-      bulk_actions.delay(:run_at => 2.seconds.from_now, :queue => 'inventory_unprocess').unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      bulk_actions.delay(:run_at => 2.seconds.from_now, :queue => 'inventory_unprocess', priority: 95).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
     end
     true
   end
@@ -206,13 +206,13 @@ class GeneralSetting < ActiveRecord::Base
         if self.low_inventory_alert_email? && !self.low_inventory_email_address.blank? && self.should_send_email(time)
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "low_inventory_email_scheduled_#{tenant}", time, time).destroy_all #unless self.changes.blank?
           # LowInventoryLevel.notify(self,tenant).deliver
-          LowInventoryLevel.delay(:run_at => time, :queue => "low_inventory_email_scheduled_#{tenant}").notify(self, tenant)
+          LowInventoryLevel.delay(:run_at => time, :queue => "low_inventory_email_scheduled_#{tenant}", priority: 95).notify(self, tenant)
           job_scheduled = true
         end
       elsif job_type == 'import_orders'
         if self.should_import_orders(date)
           Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
-          self.delay(:run_at => time, :queue => "import_orders_scheduled_#{tenant}").import_orders_helper tenant
+          self.delay(:run_at => time, :queue => "import_orders_scheduled_#{tenant}", priority: 95).import_orders_helper tenant
           job_scheduled = true
         end
       elsif job_type == 'export_order'
@@ -220,7 +220,7 @@ class GeneralSetting < ActiveRecord::Base
         if export_setting.should_export_orders(time)
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
           ExportSetting.update_all(manual_export: false)
-          ExportOrder.delay(:run_at => time, :queue => "order_export_email_scheduled_#{tenant}").export(tenant)
+          ExportOrder.delay(:run_at => time, :queue => "order_export_email_scheduled_#{tenant}", priority: 95).export(tenant)
           # ExportOrder.export(tenant).deliver
           job_scheduled = true
         end
@@ -231,7 +231,7 @@ class GeneralSetting < ActiveRecord::Base
           ExportSetting.update_all(manual_export: false)
           params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
           stat_stream_obj = SendStatStream.new()
-          stat_stream_obj.delay(:run_at => time, :queue => "generate_stat_export_#{tenant}").generate_export(tenant, params)
+          stat_stream_obj.delay(:run_at => time, :queue => "generate_stat_export_#{tenant}", priority: 95).generate_export(tenant, params)
           job_scheduled = true
         end
       elsif job_type == 'daily_packed'
@@ -240,7 +240,7 @@ class GeneralSetting < ActiveRecord::Base
           Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%generate_daily_packed_export_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
           ExportSetting.update_all(manual_export: false)
           daily_pack  = DailyPacked.new()
-          daily_pack.delay(:run_at => time, :queue => "generate_daily_packed_export_#{tenant}").send_daily_pack_csv(tenant)
+          daily_pack.delay(:run_at => time, :queue => "generate_daily_packed_export_#{tenant}", priority: 95).send_daily_pack_csv(tenant)
           job_scheduled = true
         end
       end

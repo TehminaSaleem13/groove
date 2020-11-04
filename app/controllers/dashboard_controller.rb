@@ -23,7 +23,7 @@ class DashboardController < ApplicationController
     results = {"status"=> true, "message" => "Your request has been queued."}
     tenant = Apartment::Tenant.current
     stat_stream_obj = SendStatStream.new()
-    stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats').update_stats(tenant)
+    stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'update_stats', priority: 95).update_stats(tenant)
     render json: results
   end
 
@@ -40,7 +40,7 @@ class DashboardController < ApplicationController
     tenant = Apartment::Tenant.current
     stat_stream_obj = SendStatStream.new()
     # stat_stream_obj.generate_export(tenant, params)
-    stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'generate_export').generate_export(tenant, params)
+    stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'generate_export', priority: 95).generate_export(tenant, params)
     render json: results
   end
 
@@ -75,7 +75,7 @@ class DashboardController < ApplicationController
 
   def download_daily_packed_csv
     daily_pack = DailyPacked.new
-    daily_pack.delay(:run_at => 1.seconds.from_now, :queue => "download_daily_packed_csv").send_csv_daily_pack(params,Apartment::Tenant.current)
+    daily_pack.delay(:run_at => 1.seconds.from_now, :queue => "download_daily_packed_csv", priority: 95).send_csv_daily_pack(params,Apartment::Tenant.current)
     render json: {}
   end
 end

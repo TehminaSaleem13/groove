@@ -104,7 +104,7 @@ class Order < ActiveRecord::Base
     self.save
     update_access_restriction
     tenant = Apartment::Tenant.current
-    SendStatStream.new.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled').build_send_stream(tenant, self.id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
+    SendStatStream.new.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled', priority: 95).build_send_stream(tenant, self.id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
   end
 
   def contains_zero_qty_order_item?
@@ -355,7 +355,7 @@ class Order < ActiveRecord::Base
     if order_exception.destroy
       addactivity("Order Exception Cleared", current_user.name)
       stat_stream_obj = SendStatStream.new()
-      stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'clear_order_exception_#{self.id}').send_order_exception(self.id, tenant)
+      stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'clear_order_exception_#{self.id}', priority: 95).send_order_exception(self.id, tenant)
     else
       result['status'] &= false
       result['messages'].push('Error clearing exceptions')

@@ -31,7 +31,7 @@ namespace :doo do
 			      result = true
 			    end
 	    		tenant_name = tenant.name
-				InventoryReportMailer.delay(run_at: time.strftime("%H:%M:%S")).auto_inventory_report(false,nil,tenant_name) if result == true
+				InventoryReportMailer.delay(run_at: time.strftime("%H:%M:%S"), priority: 95).auto_inventory_report(false,nil,tenant_name) if result == true
 	    	rescue
 	    	end
 	    end

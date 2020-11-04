@@ -296,7 +296,7 @@ module OrdersHelper
   def update_access_restriction
     tenant = Apartment::Tenant.current
     stat_stream_obj = SendStatStream.new()
-    stat_stream_obj.delay.update_restriction(tenant)
+    stat_stream_obj.delay(priority: 95).update_restriction(tenant)
   end
 
   def add_new_product_for_item(item, result)

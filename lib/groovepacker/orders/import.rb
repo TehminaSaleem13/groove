@@ -114,7 +114,7 @@ module Groovepacker
             import_item = ImportItem.find_by_store_id(credential.store.id)
             import_item = ImportItem.create_or_update(import_item, credential)
             import_orders_obj = ImportOrders.new(@params)
-            import_orders_obj.delay(:run_at => 1.seconds.from_now, :priority => 10, :queue => "shipworks_importing_orders_#{tenant}").start_shipwork_import(cred, status, value, tenant)
+            import_orders_obj.delay(:run_at => 1.seconds.from_now, :priority => 10, :queue => "shipworks_importing_orders_#{tenant}", priority: 95).start_shipwork_import(cred, status, value, tenant)
           end
         rescue Exception => e
           tenant = Apartment::Tenant.current
@@ -136,7 +136,7 @@ module Groovepacker
           @params[:user_id] = @current_user.id
           import_orders_obj = ImportOrders.new(@params)
           Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}").import_orders tenant
+          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}", priority: 95).import_orders tenant
           # import_orders_obj.import_orders tenant
         end
 

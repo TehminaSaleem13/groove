@@ -26,7 +26,7 @@ class AmazonsController < ApplicationController
 	    @result['csv_import'] = true
 	    handler = Groovepacker::Stores::Handlers::AmazonHandler.new(@store)
 	    context = Groovepacker::Stores::Context.new(handler)
-	    context.delay(:run_at => 1.seconds.from_now, :queue => 'import_products_for_amazon').import_products
+	    context.delay(:run_at => 1.seconds.from_now, :queue => 'import_products_for_amazon', priority: 95).import_products
 	    # context.import_products
 	  else
 	    @result['status'] = false

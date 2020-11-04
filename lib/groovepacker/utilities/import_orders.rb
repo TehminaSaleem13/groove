@@ -14,7 +14,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
     initiate_import(tenant)
     last_status = GrooveBulkActions.last.try(:status)
-    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending")
+    Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending")
   end
 
   def add_import_item_for_active_stores(store)
@@ -106,7 +106,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
     track_user(params[:tenant], params, "Import Started", "Order Import Started")
-    Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant]
+    Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant], priority: 95
   end
 
   def reschedule_job(type, tenant)

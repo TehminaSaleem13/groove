@@ -418,7 +418,7 @@ module ScanPackHelper
       @result['notice_messages'] = 'The order you have scanned is not available in GroovePacker. An import is already in progress so we are not able to request it directly. Please try scanning it again after the import completes.'
     else
       order_importer = Groovepacker::Stores::Importers::OrdersImporter.new(nil)
-      order_importer.delay(:run_at => 1.seconds.from_now, :queue => "on_demand_scan_#{Apartment::Tenant.current}_#{order_no_input}").search_and_import_single_order(tenant: Apartment::Tenant.current, order_no: order_no_input, user_id: @current_user.id)
+      order_importer.delay(:run_at => 1.seconds.from_now, :queue => "on_demand_scan_#{Apartment::Tenant.current}_#{order_no_input}", priority: 95).search_and_import_single_order(tenant: Apartment::Tenant.current, order_no: order_no_input, user_id: @current_user.id)
       #order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
       if store.present? && store.on_demand_import == true
         @result['notice_messages'] = "It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."

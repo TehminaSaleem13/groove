@@ -218,7 +218,7 @@ module StoresHelper
       groove_bulk_actions.save
       data[:bulk_action_id] = groove_bulk_actions.id
       import_csv = ImportCsv.new
-      import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_kit_from_csv#{Apartment::Tenant.current}").import Apartment::Tenant.current, data.to_s
+      import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_kit_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
       # import_csv.import(Apartment::Tenant.current, data.to_s)
     elsif params[:type] == 'product'
       product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -229,7 +229,7 @@ module StoresHelper
       #   product_import.save
       # end
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}").import Apartment::Tenant.current, data.to_s
+      delayed_job = import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
       # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
       product_import.update_attributes(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
     end
@@ -239,7 +239,7 @@ module StoresHelper
   def order_csv_import(data)
     if OrderImportSummary.where(status: 'in_progress').empty?
       bulk_actions = Groovepacker::Orders::BulkActions.new
-      bulk_actions.delay(:run_at => 1.seconds.from_now, :queue => 'import_csv_orders').import_csv_orders(Apartment::Tenant.current, @store.id, data.to_s, current_user.id)
+      bulk_actions.delay(:run_at => 1.seconds.from_now, :queue => 'import_csv_orders', priority: 95).import_csv_orders(Apartment::Tenant.current, @store.id, data.to_s, current_user.id)
       # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
     else
       @result['status'] = false
@@ -389,7 +389,7 @@ module StoresHelper
       end
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
-      ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}").import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
+      ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}", priority: 95).import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
       result[:store_type] = store.store_type
     end
     order_found = Order.where(increment_id: "#{params[:order_no]}").last

@@ -100,7 +100,7 @@ module Groovepacker
             delete_all_product_data
           elsif params[:action_type] == 'inventory'
             helper = Groovepacker::Tenants::Helper.new
-            helper.delay.reset_inventory(result, Apartment::Tenant.current)
+            helper.delay(priority: 95).reset_inventory(result, Apartment::Tenant.current)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
               ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations'
@@ -348,7 +348,7 @@ module Groovepacker
           Subscription.create!(tenant_name: created_tenant.name, tenant_id: created_tenant.id,progress: "transaction_complete" , interval: "month", status: "completed" , user_name: "test", password: "12345678", subscription_plan_id: created_tenant.initial_plan_id)
           @tenant.duplicate_tenant_id = created_tenant.id
           @tenant.save
-          SendStatStream.new.delay.duplicate_groovlytic_tenant(current_tenant, duplicate_name)
+          SendStatStream.new.delay(priority: 95).duplicate_groovlytic_tenant(current_tenant, duplicate_name)
         rescue => e
           update_fail_status(result, e.message)
           Rollbar.error(e, e.message)

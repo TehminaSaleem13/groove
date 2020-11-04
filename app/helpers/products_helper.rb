@@ -148,7 +148,7 @@ module ProductsHelper
 
   def generate_report(ids)
     tenant = Apartment::Tenant.current
-    InventoryReportMailer.delay.manual_inventory_report(ids, tenant)
+    InventoryReportMailer.delay(priority: 95).manual_inventory_report(ids, tenant)
     # InventoryReportMailer.manual_inventory_report(ids).deliver
   end
 

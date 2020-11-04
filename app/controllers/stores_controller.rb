@@ -602,7 +602,7 @@ class StoresController < ApplicationController
 
   def bin_location_api_push
     result = { status: true }
-    ExportSsProductsCsv.new.delay.update_ss_product_locations(Apartment::Tenant.current, params[:id])
+    ExportSsProductsCsv.new.delay(priority: 95).update_ss_product_locations(Apartment::Tenant.current, params[:id])
     render json: result
   end
 

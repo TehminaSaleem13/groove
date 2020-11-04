@@ -17,7 +17,7 @@ namespace :doo do
           order_summary_info.save
           # ImportOrders.new.import_orders(tenant.name)
           import_orders_obj = ImportOrders.new
-          import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'hourly import orders').import_orders(tenant.name)
+          import_orders_obj.delay(:run_at => 1.seconds.from_now,:queue => 'hourly import orders', priority: 95).import_orders(tenant.name)
         end
       end
     end

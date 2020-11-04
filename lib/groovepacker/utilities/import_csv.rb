@@ -128,7 +128,7 @@ class ImportCsv
           rescue Net::ReadTimeout
             nil
           end
-          Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status({}, {}, Apartment::Tenant.current)
+          Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status({}, {}, Apartment::Tenant.current)
         else
           final_record = []
           if params[:fix_width] == 1

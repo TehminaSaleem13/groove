@@ -22,6 +22,6 @@ class SendUntracedOrders
         puts e.message
       end
     end
-    self.delay(:run_at => 1.hours.from_now, :queue => 'send_untraced_ordes').fetch_info_and_send
+    self.delay(:run_at => 1.hours.from_now, :queue => 'send_untraced_ordes', priority: 95).fetch_info_and_send
   end
 end

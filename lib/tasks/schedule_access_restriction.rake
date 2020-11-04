@@ -7,7 +7,8 @@ namespace :doo do
       Delayed::Job.where(queue: "reset_access_restrictions_#{tenant_name}").destroy_all
       ApplyAccessRestrictions.new.delay(
           run_at: Time.now.change(day: "#{day}").beginning_of_day,
-          queue: "reset_access_restrictions_#{tenant_name}"
+          queue: "reset_access_restrictions_#{tenant_name}",
+          priority: 95
         ).apply_access_restrictions(tenant_name)
     end
     exit(1)

@@ -66,7 +66,7 @@ class ProductKitSkus < ActiveRecord::Base
         count = ProductKitSkus.find_by_option_product_id_and_product_id(kit_product, kit.id).order_item_kit_products.count rescue 0
         if count > 200
           result["success_messages"] = "Your request for 'remove item' has been queued"
-          result["job"] = self.delay.remove_single_kit_product(kit.id, kit_product, params, result, tenant, current_user.id) 
+          result["job"] = self.delay(priority: 95).remove_single_kit_product(kit.id, kit_product, params, result, tenant, current_user.id) 
         else
           result =self.remove_single_kit_product(kit.id, kit_product, params, result, tenant, current_user.id) 
         end

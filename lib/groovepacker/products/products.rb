@@ -67,7 +67,7 @@ module Groovepacker
           data = build_product_data(map,store)
           data[:tenant] = tenant
           data[:user_id] = User.find_by_name('gpadmin').try(:id)
-          ImportCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}").import Apartment::Tenant.current, data.to_s
+          ImportCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
         end
       end
 

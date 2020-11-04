@@ -24,7 +24,7 @@ namespace :check do
             $redis.set("import_restarted_#{tenant.name}", import_start_count.to_i + 1)
             $redis.expire("import_restarted_#{tenant.name}", 30.minutes.to_i)
             OrderImportSummary.create(user_id: nil, status: 'not_started')
-            ImportOrders.new.delay(:run_at => 1.seconds.from_now).import_orders(tenant.name)
+            ImportOrders.new.delay(:run_at => 1.seconds.from_now, priority: 95).import_orders(tenant.name)
           else
             $redis.del("import_restarted_#{tenant.name}")
             ImportMailer.failed_imports(tenant.name, failed_import_items).deliver

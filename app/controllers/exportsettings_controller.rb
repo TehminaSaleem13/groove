@@ -97,7 +97,7 @@ class ExportsettingsController < ApplicationController
           )
         # export_setting.export_data(Apartment::Tenant.current)
         # export_setting.update_attributes(manual_export: false)
-        ExportOrder.delay.export(Apartment::Tenant.current).deliver!
+        ExportOrder.delay(priority: 95).export(Apartment::Tenant.current).deliver!
       else
         update_false_status(result, 'We need a start and an end time')
       end
@@ -118,13 +118,13 @@ class ExportsettingsController < ApplicationController
     stat_stream_obj = SendStatStream.new()
     export_setting = ExportSetting.first
     params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
-    stat_stream_obj.delay(:queue => "generate_stat_export_#{Apartment::Tenant.current}").generate_export(Apartment::Tenant.current, params)
+    stat_stream_obj.delay(:queue => "generate_stat_export_#{Apartment::Tenant.current}", priority: 95).generate_export(Apartment::Tenant.current, params)
     render json: {}
   end
 
   def daily_packed
     daily_pack  = DailyPacked.new()
-    daily_pack.delay(:queue => "generate_daily_packed_export_#{Apartment::Tenant.current}").send_daily_pack_csv(Apartment::Tenant.current)
+    daily_pack.delay(:queue => "generate_daily_packed_export_#{Apartment::Tenant.current}", priority: 95).send_daily_pack_csv(Apartment::Tenant.current)
     render json: {}
   end
 

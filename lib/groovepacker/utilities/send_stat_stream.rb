@@ -54,9 +54,9 @@ class SendStatStream
 
   def generate_export(tenant, params)
     stat_stream_obj = SendStatStream.new()
-    stat_stream_obj.delay(:queue => 'update_stats').update_stats(tenant)
+    stat_stream_obj.delay(:queue => 'update_stats', priority: 95).update_stats(tenant)
     stat_stream_obj = SendStatStream.new()
-    stat_stream_obj.delay(:run_at => 15.seconds.from_now, :queue => "generate_stat_report_#{tenant}").generate_stat_report(tenant, params)
+    stat_stream_obj.delay(:run_at => 15.seconds.from_now, :queue => "generate_stat_report_#{tenant}", priority: 95).generate_stat_report(tenant, params)
   end
 
   def generate_stat_report(tenant, params)

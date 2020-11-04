@@ -182,7 +182,7 @@ class ProductsController < ApplicationController
     params[:tenant] =  Apartment::Tenant.current
     scan_pack_object = ScanPack::Base.new
     if (params["productArray"].count > 20 || params["select_all"] == true)
-      val = scan_pack_object.delay.print_label_with_delay(params)
+      val = scan_pack_object.delay(priority: 95).print_label_with_delay(params)
       render json: {}
     else
       url = scan_pack_object.print_label_with_delay(params)
@@ -200,7 +200,7 @@ class ProductsController < ApplicationController
     data[:result] = @result
     tenant_name = Apartment::Tenant.current
     if (params["productArray"].count > 20 || params["select_all"] == true)
-      export_product.delay.generate_barcode_with_delay(params, data, tenant_name)
+      export_product.delay(priority: 95).generate_barcode_with_delay(params, data, tenant_name)
     else
       export_product.generate_barcode_with_delay(params, data, tenant_name)
     end  
@@ -378,7 +378,7 @@ class ProductsController < ApplicationController
     result = {};
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
-    export_product.delay.export_broken_image(tenant, params)
+    export_product.delay(priority: 95).export_broken_image(tenant, params)
     result["status"] = true
     render json: result
   end
@@ -387,7 +387,7 @@ class ProductsController < ApplicationController
     result = {};
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
-    export_product.delay.fix_shopify_product_images(tenant, params)
+    export_product.delay(priority: 95).fix_shopify_product_images(tenant, params)
     # export_product.fix_shopify_product_images(tenant, params)
     result["status"] = true
     render json: result
@@ -498,7 +498,7 @@ class ProductsController < ApplicationController
 
   def find_inactive_product
     scan_pack_object = ScanPack::Base.new
-    scan_pack_object.delay.finding_products(Apartment::Tenant.current)
+    scan_pack_object.delay(priority: 95).finding_products(Apartment::Tenant.current)
     render json: @result
   end
 

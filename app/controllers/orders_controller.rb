@@ -270,7 +270,7 @@ class OrdersController < ApplicationController
     params[:tenant] = Apartment::Tenant.current
     params[:current_user_id] = current_user.id
     if no_running_imports(params[:store_id])
-      ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}").import_range_import(params)
+      ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}", priority: 95).import_range_import(params)
       result[:success_messages] = params[:import_type] == 'range_import' ? 'Range Import will start!' : 'Quickfix Import will start!'
       result[:status] = true
     end
@@ -361,7 +361,7 @@ class OrdersController < ApplicationController
   end
 
   def run_orders_status_update
-    Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(@result, params, Apartment::Tenant.current)
+    Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(@result, params, Apartment::Tenant.current)
     render json: @result
   end
 

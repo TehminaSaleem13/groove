@@ -21,7 +21,7 @@ namespace :check do
             dj.destroy
             import_item.destroy
             store_product_import = StoreProductImport.create(store_id: dj_args[1], status: 'not_started')
-            d_job = ImportOrders.new.delay(:run_at => 1.seconds.from_now, :queue => "import_shopify_products_#{dj_args[0]}").import_product_from_store(dj_args[0], dj_args[1], dj_args[2], dj_args[3])
+            d_job = ImportOrders.new.delay(:run_at => 1.seconds.from_now, :queue => "import_shopify_products_#{dj_args[0]}", priority: 95).import_product_from_store(dj_args[0], dj_args[1], dj_args[2], dj_args[3])
             store_product_import.update(delayed_job_id: d_job.id)
           end
         elsif StoreProductImport.where(status: 'not_started').any?
@@ -33,7 +33,7 @@ namespace :check do
               dj.destroy
               import_item.destroy
               store_product_import = StoreProductImport.create(store_id: dj_args[1], status: 'not_started')
-              d_job = ImportOrders.new.delay(:run_at => 1.seconds.from_now, :queue => "import_shopify_products_#{dj_args[0]}").import_product_from_store(dj_args[0], dj_args[1], dj_args[2], dj_args[3])
+              d_job = ImportOrders.new.delay(:run_at => 1.seconds.from_now, :queue => "import_shopify_products_#{dj_args[0]}", priority: 95).import_product_from_store(dj_args[0], dj_args[1], dj_args[2], dj_args[3])
               store_product_import.update(delayed_job_id: d_job.id)
             end
           end

@@ -116,7 +116,7 @@ module Groovepacker
 
         def update_orders_status
           result = { 'status' => true, 'messages' => [], 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [] }
-          Groovepacker::Orders::BulkActions.new.delay.update_bulk_orders_status(result, {}, Apartment::Tenant.current)
+          Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(result, {}, Apartment::Tenant.current)
         end
 
         protected

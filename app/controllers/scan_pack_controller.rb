@@ -80,7 +80,7 @@ class ScanPackController < ApplicationController
       current_tenant = Apartment::Tenant.current
       params[:tenant] =  current_tenant
       scan_pack_object = ScanPack::Base.new
-      scan_pack_object.delay(:run_at => 1.seconds.from_now, :queue => "shopakira_request").request_api(params)
+      scan_pack_object.delay(:run_at => 1.seconds.from_now, :queue => "shopakira_request", priority: 95).request_api(params)
     end
     render json: {}
   end

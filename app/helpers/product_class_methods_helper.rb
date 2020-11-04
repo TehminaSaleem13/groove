@@ -78,7 +78,7 @@ module ProductClassMethodsHelper
     scan_pack_setting = ScanPackSetting.all.first
     intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
     intangible_string = scan_pack_setting.intangible_string
-    action_intangible.delay(run_at: 1.seconds.from_now, queue: "update_intangibleness").update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+    action_intangible.delay(run_at: 1.seconds.from_now, queue: "update_intangibleness", priority: 95).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
     # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
   end
 

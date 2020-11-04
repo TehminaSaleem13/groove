@@ -11,7 +11,7 @@ namespace :doo do
         	Apartment::Tenant.switch!(tenant.name)
         	stores = Store.joins(:magento_credentials).where("store_type='Magento' and status=true and magento_credentials.enable_status_update=true")
         	next if stores.blank?
-        	MagentoSoapOrders.new(tenant: tenant.name ).delay(run_at: 1.seconds.from_now, queue: "update_magento_orders_status").perform rescue nil
+        	MagentoSoapOrders.new(tenant: tenant.name ).delay(run_at: 1.seconds.from_now, queue: "update_magento_orders_status", priority: 95).perform rescue nil
         rescue
         end
       end

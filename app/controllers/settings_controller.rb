@@ -10,7 +10,7 @@ class SettingsController < ApplicationController
       params: params,
       tenant: Apartment::Tenant.current
     )
-    @result = restore.delay.call
+    @result = restore.delay(priority: 95).call
     respond_to do |format|
       format.json { render json: @result }
     end

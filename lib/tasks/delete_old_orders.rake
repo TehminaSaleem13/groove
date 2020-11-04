@@ -9,7 +9,7 @@ namespace :doo do
     if $redis.get("delete_old_orders").blank?
       $redis.set("delete_old_orders", true) 
       $redis.expire("delete_old_orders", 5400) 
-      DeleteOrders.new.delay(run_at: 1.seconds.from_now, queue: 'delete_old_orders').perform
+      DeleteOrders.new.delay(run_at: 1.seconds.from_now, queue: 'delete_old_orders', priority: 95).perform
     end
     # DeleteOrders.new.perform
     # p Time.now - t1
