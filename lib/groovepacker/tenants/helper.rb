@@ -401,6 +401,7 @@ module Groovepacker
         tenant_hash['scheduled_import_toggle'] = tenant.scheduled_import_toggle
         tenant_hash['inventory_report_toggle'] = tenant.reload.inventory_report_toggle
         tenant_hash['test_tenant_toggle'] = tenant.reload.test_tenant_toggle
+        tenant_hash['is_cf'] = tenant.reload.is_cf
         tenant_hash['last_charge_in_stripe'] = tenant.last_charge_in_stripe.strftime('%a %m/%e/%Y %l:%M:%S %p') rescue nil
         Apartment::Tenant.switch! tenant.name
         tenant_hash['last_import_store_type'] = tenant.last_import_store_type || ImportItem.last.try(:store).try(:store_type)
