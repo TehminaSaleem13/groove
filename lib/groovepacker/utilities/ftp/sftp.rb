@@ -175,6 +175,39 @@ module FTP
       result
     end
 
+    def upload_file(url, filename)
+      result = self.build_result
+      begin
+        response = connect
+        on_demand_logger = Logger.new("#{Rails.root}/log/ftp_export_upload.log")
+        if response[:error_messages].empty? && response[:status] == true
+          connection_obj = response[:connection_obj]
+          begin
+            data = Net::HTTP.get(URI.parse(url)) rescue nil
+            File.open(filename, 'wb') {|f| f.write(data) }
+            connection_obj.upload!(File.open(filename), "#{self.directory}/#{filename}")
+          rescue => e
+            log = { tenant: Apartment::Tenant.current, data: self.as_json, error: e, time: Time.now.utc }
+            on_demand_logger.info(log)
+          end
+        else
+          result[:status] = false
+          response[:error_messages].each do |message|
+            result[:error_messages].push(message)
+          end
+          log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+          on_demand_logger.info(log)
+          return result
+        end
+      rescue Exception => e
+        result[:status] = false
+        result[:error_messages].push(e.message)
+        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+        on_demand_logger.info(log)
+      end
+      result
+    end
+
     private
 
     def find_file(connection_obj)

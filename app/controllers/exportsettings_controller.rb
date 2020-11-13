@@ -12,6 +12,7 @@ class ExportsettingsController < ApplicationController
         @export_setting.save
       end
       @result['data']['settings'] = @export_setting
+      @result['data']['ftp_settings'] = FtpCredential.find_or_create_by(store_id: Store.find_by(store_type: 'system').id)
     else
       update_false_status(@result, 'No export settings available for the system. Contact administrator.')
     end
@@ -65,8 +66,10 @@ class ExportsettingsController < ApplicationController
           daily_packed_email_on_sat: params[:daily_packed_email_on_sat],
           daily_packed_email_on_sun: params[:daily_packed_email_on_sun],
           daily_packed_email: params[:daily_packed_email],
-          daily_packed_export_type: params[:daily_packed_export_type]
+          daily_packed_export_type: params[:daily_packed_export_type],
+          auto_ftp_export: params[:auto_ftp_export]
           )
+          update_ftp_creds(params) if params[:auto_ftp_export]
         @result['success_messages'].push('Export settings updated successfully.')
         # else
         #   update_false_status(@result, 'Error saving export settings.')
@@ -133,6 +136,11 @@ class ExportsettingsController < ApplicationController
   def update_false_status(result, message)
     result['status'] = false
     result['error_messages'].push(message)
+  end
+
+  def update_ftp_creds(params)
+    ftp_credential = FtpCredential.find_or_create_by(store_id: Store.find_by(store_type: 'system').id)
+    ftp_credential.update(host: params[:host], username: params[:username], password: params[:password], connection_method: params[:connection_method])
   end
 
   def build_result_hash
