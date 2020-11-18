@@ -78,7 +78,8 @@ module Groovepacker
 		      current_tenant = Apartment::Tenant.current
 		      unless params[:orderfile].nil?
 		        path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")
-		        order_file_data = params[:orderfile].read.gsub(/\r\n?/, "\r\n")
+		        text_file_data = params[:orderfile].read
+		        order_file_data = text_file_data.force_encoding('UTF-8').gsub(/\r?\n/, "\r\n") rescue text_file_data.force_encoding("ISO-8859-1").encode('UTF-8').gsub(/\r?\n/, "\r\n")
 		        begin
 			      	if @store.fba_import
 			      		amazon_fba = Groovepacker::Stores::AmazonFbaStore.new(@store, params, @result)

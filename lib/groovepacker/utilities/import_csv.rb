@@ -79,7 +79,7 @@ class ImportCsv
             file_content = file.content
             regex = /(?<=\s)("[^"]+")(?=\s)/
             begin
-              file_content[regex] = file_content[regex][1..-2]
+              file_content[regex] = file_content[regex][1..-2] 
             rescue
               nil
             end
@@ -88,7 +88,7 @@ class ImportCsv
             elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
               File.write(file_path, file_content.force_encoding("ISO-8859-1").encode("UTF-8"))
             elsif params[:encoding_format] == "UTF-8"
-              File.write(file_path, file_content.force_encoding("UTF-8"))
+              File.write(file_path, file_content.force_encoding("UTF-8").encode('UTF-8'))
             end
           rescue Exception => e
             File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
