@@ -114,7 +114,7 @@ module Groovepacker
             end
           end
           # update the importsummary if import summary is available
-          if !@order.import_summary_id.nil?
+          if !@order.import_summary_id.nil? && OrderImportSummary.find_by_id(@order.import_summary_id)
             begin
               order_import_summary = OrderImportSummary.find(@order.import_summary_id)
               import_item = order_import_summary.import_items.where(store_id: order.store_id)
