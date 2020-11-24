@@ -127,6 +127,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
       order_item = OrderItem.where(id: child_item['order_item_id']).first
       order_item_kit_product = order_item.order_item_kit_products.find(child_item['kit_product_id']) rescue nil if order_item
       order_item_kit_product.destroy if order_item_kit_product
+      order_item.destroy if order_item.order_item_kit_products.blank?
       child_item['product_qty_in_kit']
   end
 
