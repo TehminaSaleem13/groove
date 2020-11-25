@@ -37,6 +37,13 @@ module Groovepacker
             fetch_product(item)
             if @shopify_product.present?
               variant = @shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
+
+              if variant.blank?
+                on_demand_logger = Logger.new("#{Rails.root}/log/shopify_missing_product_import_#{Apartment::Tenant.current}.log")
+                log = { item: item, Time: Time.zone.now, shopify_product: @shopify_product }
+                on_demand_logger.info(log)
+              end
+
               begin
                 variant["title"] = item["name"] 
                 product = create_product_from_variant(variant, @shopify_product)
@@ -58,6 +65,13 @@ module Groovepacker
                 break if loop_count >= 1
               end
             end
+
+            if shopify_product["product"].blank?
+              on_demand_logger = Logger.new("#{Rails.root}/log/shopify_product_import_#{Apartment::Tenant.current}.log")
+              log = { item: item, Time: Time.zone.now, shopify_product: shopify_product }
+              on_demand_logger.info(log)
+            end
+
             @shopify_product = shopify_product["product"]
           end
 
