@@ -11,7 +11,7 @@ module Groovepacker
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
-            return @result if response["orders"].nil? || response['orders'].blank?
+            return @result if response["orders"].nil? || response['orders'].blank? || response['orders'].first.nil?
             response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
             response["orders"].each do |order|
               import_item_fix
@@ -19,6 +19,7 @@ module Groovepacker
 
               import_single_order(order) if order.present?
             end
+            Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
             @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at'])) rescue nil if @import_item.status != 'cancelled'
             update_orders_status
             @result
@@ -168,12 +169,16 @@ module Groovepacker
                   shopify_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import")
                 else
                   intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
+                  activity_added = false
                   intangible_strings.each do |string|
-                    if order["line_items"][index]["name"].downcase.include?(string) || order["line_items"][index]["sku"].downcase.include?(string)
+                    is_intangible = (order["line_items"][index]["name"].downcase.include?(string) || order["line_items"][index]["sku"].downcase.include?(string)) rescue nil
+                    if is_intangible
                       shopify_order.addactivity("Intangible item with SKU #{order["line_items"][index]["sku"]}  and Name #{order["line_items"][index]["name"]} was replaced with GP Coupon.","#{@store.name} Import")
+                      activity_added = true
                       break
                     end
                   end
+                  shopify_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import") if !activity_added && item.product.try(:primary_sku)
                 end 
               end  
             end
