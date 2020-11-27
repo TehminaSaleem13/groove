@@ -90,7 +90,7 @@ module Groovepacker
               order["line_items"].each do |item|
                 order_item = import_order_item(order_item, item)
                 @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
-                product = shopify_context.import_shopify_single_product(item)
+                product = Product.find_by(store_product_id: item['variant_id']) ? Product.find_by(store_product_id: item['variant_id']) : shopify_context.import_shopify_single_product(item)
                 if product.present?
                   order_item.product = product 
                   shopify_order.order_items << order_item
