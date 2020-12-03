@@ -39,16 +39,18 @@ module ScanPack
         @result["data"]["order"]["store_type"] = order.store.store_type
 
         if @result["data"]["order"]["store_type"] == "Shipstation API 2"
-          @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention
-          @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button
-          @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label
-          @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order
+          if Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label)
+            @result["data"]["order"]["use_api_create_label"] = order.store.shipstation_rest_credential.use_api_create_label if order.store.shipstation_rest_credential.present?
+            @result["data"]["order"]["ss_label_data"] = order.store.shipstation_rest_credential.fetch_label_related_data(order.ss_label_data, order.increment_id, order.store_order_id) if !order.has_unscanned_items && @result["data"]["order"]["use_api_create_label"]
+          else
+            @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if order.store.shipstation_rest_credential.present?
+            @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if order.store.shipstation_rest_credential.present?
+            @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if order.store.shipstation_rest_credential.present?
+            @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if order.store.shipstation_rest_credential.present?
+          end
         elsif @result["data"]["order"]["store_type"] == "ShippingEasy"
           @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label
           @result["data"]["order"] = order.get_se_old_shipments(@result["data"]["order"])
-          # @result["data"]["order"]['se_duplicate_orders'] = se_duplicate_orders(order)
-          # @result["data"]["order"]['se_old_shipments'] = se_old_shipments(order)
-          # @result["data"]["order"]['se_all_shipments'] = se_all_shipments(order) if @result["data"]["order"]['se_old_shipments'].blank?
         end
         do_set_result_for_boxes(order)
       rescue

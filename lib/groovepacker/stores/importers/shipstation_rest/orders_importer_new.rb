@@ -237,6 +237,7 @@ module Groovepacker
                                               order_placed_time: order["orderDate"], email: order["customerEmail"],
                                               shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
                                             }
+            shipstation_order.ss_label_data = order.slice('orderId', 'carrierCode', 'serviceCode', 'packageCode', 'confirmation', 'shipDate', 'weight', 'dimensions', 'insuranceOptions', 'internationalOptions', 'advancedOptions')
             shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
             shipstation_order = init_shipping_address(shipstation_order, order)
             shipstation_order = import_notes(shipstation_order, order)

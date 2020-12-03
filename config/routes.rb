@@ -40,6 +40,7 @@ Groovepacks::Application.routes.draw do
   get 'stores/popup_shipping_label' => 'stores#popup_shipping_label'
   get 'stores/amazon_fba' => 'stores#amazon_fba'
   get 'shipstation_rest_credentials/use_chrome_extention' => 'shipstation_rest_credentials#use_chrome_extention'
+  get 'shipstation_rest_credentials/use_api_create_label' => 'shipstation_rest_credentials#use_api_create_label'
   get 'shipstation_rest_credentials/switch_back_button' => 'shipstation_rest_credentials#switch_back_button'
   get 'shipstation_rest_credentials/auto_click_create_label' => 'shipstation_rest_credentials#auto_click_create_label'
   get '/settings/print_action_barcode/:id' => 'settings#print_action_barcode'
@@ -85,6 +86,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_store_order_respose_log'=> 'tenants#update_store_order_respose_log'
   get '/tenants/update_inventory_update_delay'=> 'tenants#update_inventory_update_delay'
   get '/tenants/update_daily_packed_toggle'=> 'tenants#update_daily_packed_toggle'
+  get '/tenants/update_ss_api_create_label'=> 'tenants#update_ss_api_create_label'
   root :to => "home#index"
 
   resources :home do
@@ -122,6 +124,8 @@ Groovepacks::Application.routes.draw do
       get 'next_split_order'
       get 'import_for_ss'
       get 'cancel_all'
+      post 'create_ss_label'
+      get 'fetch_services_packages'
     end
     member do
       post 'add_item_to_order'

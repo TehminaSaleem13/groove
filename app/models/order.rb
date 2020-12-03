@@ -28,6 +28,8 @@ class Order < ActiveRecord::Base
   include OrderMethodsHelper
   include ApplicationHelper
 
+  serialize :ss_label_data, JSON
+
   ALLOCATE_STATUSES = ['awaiting', 'onhold', 'serviceissue']
   UNALLOCATE_STATUSES = ['cancelled']
   SOLD_STATUSES = ['scanned']

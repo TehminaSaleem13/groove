@@ -400,6 +400,53 @@ class OrdersController < ApplicationController
   #   render 'match'
   # end
 
+  def create_ss_label
+    result = { status: true }
+
+    begin
+      ss_credential = ShipstationRestCredential.find(params[:credential_id])
+      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+      response = ss_client.create_label_for_order(params[:post_data].permit!.to_h)
+
+      if response['labelData'].present?
+        file_name = "SS_Label_#{params[:post_data][:orderId]}.pdf"
+        reader_file_path = Rails.root.join('public', 'pdfs', file_name)
+        label_data = Base64.decode64(response['labelData'])
+        File.open(reader_file_path, 'wb') do |file|
+          file.puts label_data
+        end
+        GroovS3.create_pdf(Apartment::Tenant.current, file_name, File.open(reader_file_path).read)
+        result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
+      else
+        result[:status] = false
+        result[:error_messages] = response.first(3).map { |res| res = res.join(': ')}.join('<br>')
+      end
+    rescue => e
+      result[:status] = false
+      result[:error_messages] = e.message
+    end
+
+    render json: result
+  end
+
+  def fetch_services_packages
+    result = { status: true }
+
+    begin
+      ss_credential = ShipstationRestCredential.find(params[:credential_id])
+      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+
+      result['available_services'] = JSON.parse(ss_client.list_services(params[:carrier_code]).body) rescue nil
+      result['available_packages'] = JSON.parse(ss_client.list_packages(params[:carrier_code]).body) rescue nil
+
+    rescue => e
+      result[:status] = false
+      result[:error_messages] = e.message
+    end
+
+    render json: result
+  end
+
   private
   def execute_groove_bulk_action(activity)
     params[:user_id] = current_user.id

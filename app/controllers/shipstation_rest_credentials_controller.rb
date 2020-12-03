@@ -44,6 +44,15 @@ class ShipstationRestCredentialsController < ApplicationController
     render json: result
   end
 
+
+  def use_api_create_label
+    result = {}
+    shipstation_cred = ShipstationRestCredential.find_by_store_id(params["store_id"])
+    shipstation_cred.update_attribute(:use_api_create_label, !shipstation_cred.use_api_create_label)
+    result['use_api_create_label'] = shipstation_cred.use_api_create_label
+    render json: result
+  end
+
   def auto_click_create_label
     result = {}
     shipstation_cred = ShipstationRestCredential.find_by_store_id(params["store_id"])

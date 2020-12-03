@@ -11,13 +11,14 @@ module Groovepacker
           @endpoint = 'https://ssapi.shipstation.com'
         end
 
-        def query(query, body, method)
+        def query(query, body, method, type = nil)
           response = nil
           trial_count = 0
           loop do          
             puts "loop #{trial_count}" unless Rails.env=="test"
             begin
               response = send(query, body, method)
+              return response if type == 'create_label'
             rescue Exception => e
               handle_request_exception(e, trial_count)
               trial_count += 1

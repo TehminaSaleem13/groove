@@ -116,6 +116,47 @@ module Groovepacker
           response
         end
 
+        def create_label_for_order(data)
+          response = {}
+          data['testLabel'] = Tenant.find_by_name(Apartment::Tenant.current).try(:test_tenant_toggle) || Rails.env.development?
+          begin
+            response = @service.query("/orders/createlabelfororder", data, 'post', 'create_label')
+          rescue => e
+            puts e
+          end
+          response
+        end
+
+        def list_carriers
+          response = {}
+          begin
+            response = @service.query("/carriers", {}, 'get')
+          rescue => e
+            puts e
+          end
+          response
+        end
+
+        def list_services(carrier_code)
+          response = {}
+          begin
+            response = @service.query("/carriers/listservices?carrierCode=#{carrier_code}", {}, 'get')
+          rescue => e
+            puts e
+          end
+          response
+        end
+
+        def list_packages(carrier_code)
+          response = {}
+          begin
+            response = @service.query("/carriers/listpackages?carrierCode=#{carrier_code}", {}, 'get')
+          rescue => e
+            puts e
+          end
+          response
+        end
+
         def get_order_by_tracking_number(tracking_number)
           on_demand_logger.info("********")
           response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")

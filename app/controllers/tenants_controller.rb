@@ -216,6 +216,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_ss_api_create_label
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.ss_api_create_label = !tenant.ss_api_create_label
+    tenant.save
+    render json: {}
+  end
+
   def update_custom_fields
     tenant = Tenant.find(params["tenant_id"])
     tenant.custom_product_fields = !tenant.custom_product_fields

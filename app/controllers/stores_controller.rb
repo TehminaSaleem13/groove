@@ -320,7 +320,7 @@ class StoresController < ApplicationController
   def show
     @store = Store.find_by_id(params[:id])
     @result = {"is_fba" => Tenant.find_by_name(Apartment::Tenant.current).try(:is_fba)}
-    @result = @result.merge!({"product_ftp_import" => Tenant.find_by_name(Apartment::Tenant.current).try(:product_ftp_import)})
+    @result = @result.merge!({'ss_api_create_label' => Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label), "product_ftp_import" => Tenant.find_by_name(Apartment::Tenant.current).try(:product_ftp_import)})
     show_store
     render json: @result
   end

@@ -92,5 +92,22 @@ class ShipstationRestCredential < ActiveRecord::Base
     statuses.push('pending_fulfillment') if self.shall_import_pending_fulfillment?
     return statuses
   end
+
+  def fetch_label_related_data(ss_label_data, order_number, store_order_id)
+    ss_label_data = ss_label_data || {}
+    ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(api_key, api_secret)
+    ss_label_data['order_number'] = order_number
+    ss_label_data['credential_id'] = id
+    ss_label_data['orderId'] ||= store_order_id
+    ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue nil
+    if ss_label_data['carrierCode'].present?
+      ss_label_data['available_services'] = JSON.parse(ss_client.list_services(ss_label_data['carrierCode']).body) rescue nil
+      ss_label_data['available_packages'] = JSON.parse(ss_client.list_packages(ss_label_data['carrierCode']).body) rescue nil
+      ss_label_data['carrier'] = ss_label_data['available_carriers'].select { |c| c['code'] == ss_label_data['carrierCode'] }.first
+      ss_label_data['service'] = ss_label_data['available_services'].select { |c| c['code'] == ss_label_data['serviceCode'] }.first if ss_label_data['serviceCode'].present?
+      ss_label_data['package'] = ss_label_data['available_packages'].select { |c| c['code'] == ss_label_data['packageCode'] }.first if ss_label_data['packageCode'].present?
+    end
+    ss_label_data
+  end
 end
 
