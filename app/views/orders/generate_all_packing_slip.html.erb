@@ -6567,7 +6567,11 @@
           <% image_name = Digest::MD5.hexdigest(barcode_string) %>
           <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
             <div style="position:absolute; top:0; left:0;">
-              <%= image_tag("/images/#{image_name}.png",  :class=> "lazy") %>
+              <% if Rails.env.development? %>
+                <%= image_tag("/images/#{image_name}.png",  :class=> "lazy") %>          
+              <% else %>
+                <%= image_tag("https://#{@public_ip}/images/#{image_name}.png",  :class=> "lazy") %>
+              <% end %>
               <%#= pdf_image_tag(barcode_string+".png", {:width => 100}) %></div>
           </div>
           <br>
@@ -6668,6 +6672,13 @@
       //  effect : "fadeIn"
     });
    });
+   window.addEventListener("load", event => {
+    var image = document.querySelector('img');
+    var isLoaded = image == null ? true : (image.complete && image.naturalHeight !== 0);
+    if (!isLoaded) {
+      browser_name = navigator.userAgent.split(')').reverse()[0].match(/(?!Gecko|Version|[A-Za-z]+?Web[Kk]it)[A-Z][a-z]+/g)[0]
+      alert('Images can not be loaded. Please click on Advanced and ' + (browser_name == 'Chrome' ? "\"Proceed\"" : "\"Accept the Risk and Continue\"" ) + ' in next popup and try refreshing this page again.');
+      window.open(image.src, '_blank');
+    }
+  });
 </script>
-
-

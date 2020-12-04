@@ -212,6 +212,7 @@ class OrdersController < ApplicationController
   end
 
   def generate_all_packing_slip
+    @public_ip = `curl http://checkip.amazonaws.com` unless Rails.env.development?
     if params[:select_all].blank?
       @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
       value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
