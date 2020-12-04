@@ -11,7 +11,8 @@ class GeneralSetting < ActiveRecord::Base
   #                 :hold_orders_due_to_inventory, :inventory_tracking,
   #                 :low_inventory_alert_email, :low_inventory_email_address,
   #                 :send_email_for_packer_notes, :default_low_inventory_alert_limit,
-  #                 :export_items, :max_time_per_item, :send_email_on_mon,
+  #                 :email_address_for_billing_notification, :export_items,
+  #                 :max_time_per_item, :send_email_on_mon,
   #                 :send_email_on_tue, :send_email_on_wed, :send_email_on_thurs,
   #                 :send_email_on_fri, :send_email_on_sat, :send_email_on_sun,
   #                 :scheduled_order_import, :time_to_import_orders,
@@ -23,7 +24,8 @@ class GeneralSetting < ActiveRecord::Base
   #                 :show_primary_bin_loc_in_barcodeslip, :html_print,
   #                 :time_zone, :auto_detect, :schedule_import_mode, :master_switch, :idle_timeout, :hex_barcode,
   #                 :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
-  #                 :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import
+  #                 :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import,
+  #                 :print_post_scanning_barcodes, :print_packing_slips, :print_ss_shipping_labels
   # validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
   validates :email_address_for_packer_notes, :format => { :with => /(\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})(,\s*([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,}))*\z)/i }, :allow_blank => true
   after_save :send_low_inventory_alert_email

@@ -110,6 +110,7 @@ class SettingsController < ApplicationController
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
     @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
     @result['daily_packed_toggle'] = current_tenant.daily_packed_toggle rescue false
+    @result['direct_printing_options'] = current_tenant.direct_printing_options rescue false
 
     if general_setting.present?
       @result['data']['settings'] = general_setting

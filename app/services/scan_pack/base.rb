@@ -118,6 +118,8 @@ module ScanPack
                                                                                             status: 'in_progress')
       base_file_name = do_generate_pdf_file_for_barcode(order)
       generate_barcode.url = ENV['S3_BASE_URL'] + '/' + @tenant_name + '/pdf/' + base_file_name
+      generate_barcode.dimensions = "1x3"
+      generate_barcode.print_type = 'order_barcode'
       generate_barcode.status = 'completed'
       generate_barcode.save
     end

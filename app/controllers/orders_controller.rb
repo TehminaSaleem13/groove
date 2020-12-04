@@ -416,6 +416,7 @@ class OrdersController < ApplicationController
           file.puts label_data
         end
         GroovS3.create_pdf(Apartment::Tenant.current, file_name, File.open(reader_file_path).read)
+        result[:dimensions] = '4x6'
         result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
       else
         result[:status] = false

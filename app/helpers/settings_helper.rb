@@ -100,7 +100,8 @@ module SettingsHelper
         :custom_field_two, :export_csv_email, :html_print,
         :show_primary_bin_loc_in_barcodeslip, :time_to_send_email, :schedule_import_mode, :master_switch,
         :idle_timeout, :hex_barcode, :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
-        :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import
+        :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import,
+        :print_post_scanning_barcodes, :print_packing_slips, :print_ss_shipping_labels
       ]
     )
   end

@@ -87,6 +87,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_inventory_update_delay'=> 'tenants#update_inventory_update_delay'
   get '/tenants/update_daily_packed_toggle'=> 'tenants#update_daily_packed_toggle'
   get '/tenants/update_ss_api_create_label'=> 'tenants#update_ss_api_create_label'
+  get '/tenants/update_direct_printing_options'=> 'tenants#update_direct_printing_options'
   root :to => "home#index"
 
   resources :home do

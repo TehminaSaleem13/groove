@@ -216,6 +216,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_direct_printing_options
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.direct_printing_options = !tenant.direct_printing_options
+    tenant.save
+    render json: {}
+  end
+
   def update_ss_api_create_label
     tenant = Tenant.find(params["tenant_id"])
     tenant.ss_api_create_label = !tenant.ss_api_create_label
