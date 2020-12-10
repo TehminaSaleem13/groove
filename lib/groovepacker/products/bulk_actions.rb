@@ -89,7 +89,8 @@ module Groovepacker
         result['messages'] =[]
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
-
+        Ahoy::Event.create(version_2: true, time: Time.now, properties: { title: 'Product Removal Start', tenant: tenant, username: username })
+        time_started = Time.current
         begin
           products =
             list_selected_products(params)
@@ -98,6 +99,9 @@ module Groovepacker
               :store, :product_kit_skuss, :product_inventory_warehousess,
               order_items: [:order]
             )
+
+          product_names = products.first(25).map(&:name)
+          products_count = products.count
 
           products_kit_skus =
             ProductKitSkus.where(option_product_id: products.map(&:id))
@@ -162,6 +166,12 @@ module Groovepacker
             bulk_action.current = ''
             bulk_action.save
           end
+
+          total_elapsed_time = (Time.current - time_started).round(2)
+          object_per_sec = total_elapsed_time * 60 / products_count
+
+          Ahoy::Event.create(version_2: true, time: Time.now, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: product_names, elapsed_time:  total_elapsed_time, object_per_sec: object_per_sec})
+
         rescue Exception => e
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']

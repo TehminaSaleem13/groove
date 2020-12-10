@@ -41,6 +41,31 @@ class AddLogCsv
     CsvExportMailer.send_csv(url).deliver
   end
 
+  def send_activity_log_v2(params)
+    store_id = "complete"
+    current_tenant = Apartment::Tenant.current
+    header = ['Tenant Name', 'Timestamp', 'Event', 'User', 'Orders/Products Involved', 'Elapsed Time', 'Rate (orders or products/sec)', 'Object Id', 'Saved Changes']
+    file_data = header
+    params = params.with_indifferent_access
+    tenants_list = params[:select_all] ? Tenant.all : Tenant.where(name: params[:tenant_names])
+
+    tenants_list.find_each do |tenant|
+      Apartment::Tenant.switch!(tenant.name)
+      file_data = CSV.generate do |csv|
+        csv << header if csv.count.eql? 0
+        ahoy_events = Ahoy::Event.where('time > ?', Time.now.ago(7.days)).version_2
+        ahoy_events.each do |record|
+          properties = record.properties
+          csv << [properties['tenant'], record.time.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p'), properties['title'], properties['username'], (properties['objects_involved_count'] ? properties['objects_involved_count'].to_s + ' = [' + properties['objects_involved'].to_s.gsub(/\"/, '\'').gsub(/[\[\]]/, '') + ']' : '' rescue nil), properties['elapsed_time'] ? Time.at(properties['elapsed_time']).utc.strftime("%H:%M:%S") : '', properties['object_per_sec'], properties['object_id'], properties['changes']]
+        end
+      end
+    end
+
+    GroovS3.create_csv(current_tenant, 'activity_log_v2', store_id, file_data, :public_read)
+    url = GroovS3.find_csv(current_tenant, 'activity_log_v2', store_id).url
+    CsvExportMailer.send_csv(url).deliver
+  end
+
   def send_tenant_log
     headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Active Users(in tenant)" , "Number of Products", "Stipe Products Count" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "QTY Scanned in last 30", "Is Delinquent", "Admintools URL","Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|

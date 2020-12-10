@@ -13,4 +13,18 @@ module AhoyEvent
     ahoy.save!
   end
 
+  def track_changes(params)
+    ahoy = Ahoy::Event.new
+    ahoy.name = params[:title]
+    ahoy.version_2 = true
+    ahoy.properties = {
+      title: params[:title],
+      tenant: params[:tenant],
+      username: params[:username],
+      object_id: params[:object_id],
+      changes: params[:changes]
+    }
+    ahoy.time = Time.now
+    ahoy.save!
+  end
 end

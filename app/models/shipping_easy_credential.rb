@@ -4,6 +4,14 @@ class ShippingEasyCredential < ActiveRecord::Base
 
   belongs_to :store
 
+  include AhoyEvent
+  after_commit :log_events
+
+  def log_events
+    track_changes(title: 'ShippingEasyCredential Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+  end
+
   private
   def check_if_null_or_undefined
   	self.api_key = nil if self.api_key=="null" or self.api_key=="undefined"

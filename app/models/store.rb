@@ -22,6 +22,8 @@ class Store < ActiveRecord::Base
   validates_presence_of :inventory_warehouse
 
   include StoresHelper
+  include AhoyEvent
+  after_commit :log_events
 
   before_create :check_for_new_store
 
@@ -29,6 +31,11 @@ class Store < ActiveRecord::Base
     self.class.can_create_new?
   end
   
+  def log_events
+    track_changes(title: 'Store Settings Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+  end
+
   def ensure_warehouse?
     if self.inventory_warehouse.nil?
       self.inventory_warehouse = InventoryWarehouse.where(:is_default => true).first

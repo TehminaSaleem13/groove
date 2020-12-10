@@ -1,5 +1,6 @@
 class GeneralSetting < ActiveRecord::Base
   include SettingsHelper
+  include AhoyEvent
   # attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
   #                 :hold_orders_due_to_inventory,
   #                 :inventory_tracking, :low_inventory_alert_email,
@@ -32,7 +33,13 @@ class GeneralSetting < ActiveRecord::Base
   after_save :scheduled_import
   after_update :inventory_state_change_check
   before_save :validate_params
+  after_commit :log_events
   @@all_tenants_settings = {}
+
+  def log_events
+    track_changes(title: 'General Settings Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+  end
 
   def validate_params
     if packing_slip_size == '4 x 6'

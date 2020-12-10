@@ -55,7 +55,7 @@ module StoreConcern
         rescue Exception => e
           new_map = temp_mapping[:map].to_unsafe_h.inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
         end
-        csv_map.order_csv_map.update_attributes(map: temp_mapping.merge(map: new_map))
+        csv_map.order_csv_map.update_attributes(map: temp_mapping.merge(map: new_map)) if csv_map.order_csv_map.map != temp_mapping.merge(map: new_map)
         @result['order']['settings'] = csv_map.order_csv_map
       end
       order_file_path = File.join(csv_directory, "#{current_tenant}.#{@store.id}.order.csv")

@@ -25,6 +25,14 @@ class User < ActiveRecord::Base
   # before_create 'User.can_create_new?'
   before_validation :assign_confirmation_code
 
+  def self.current
+    Thread.current[:user]
+  end
+
+  def self.current=(user)
+    Thread.current[:user] = user
+  end
+
   def email_required?
     false
   end

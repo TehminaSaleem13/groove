@@ -5,6 +5,14 @@ class ShopifyCredential < ActiveRecord::Base
 
   belongs_to :store
 
+  include AhoyEvent
+  after_commit :log_events
+
+  def log_events
+    track_changes(title: 'ShopifyCredential Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+  end
+
   def get_status
   	val = ""
     val = "shipped%2C" if self.shipped_status?

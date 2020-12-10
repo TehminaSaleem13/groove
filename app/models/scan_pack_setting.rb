@@ -1,4 +1,5 @@
 class ScanPackSetting < ActiveRecord::Base
+  include AhoyEvent
   # attr_accessible :ask_tracking_number, :enable_click_sku,
   #                 :enable_click_sku, :ask_tracking_number, :show_success_image,
   #                 :show_order_complete_image, :success_image_time,
@@ -11,12 +12,18 @@ class ScanPackSetting < ActiveRecord::Base
   #                 :type_scan_code_enabled, :type_scan_code, :post_scanning_option,
   #                 :escape_string_enabled, :escape_string, :record_lot_number,
   #                 :show_customer_notes, :show_internal_notes,
-  #                 :scan_by_tracking_number, :intangible_setting_enabled,
+  #                 :scan_by_shipping_label, :intangible_setting_enabled,
   #                 :intangible_string, :intangible_setting_gen_barcode_from_sku,
   #                 :post_scan_pause_enabled, :post_scan_pause_time, :display_location,
   #                 :string_removal_enabled, :string_removal, :first_escape_string_enabled, 
-  #                 :second_escape_string_enabled, :second_escape_string, :order_verification, :scan_by_hex_number, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode, :post_scanning_option_second, :require_serial_lot, :valid_prefixes, :replace_gp_code,
-  #                 :single_item_order_complete_msg, :single_item_order_complete_msg_time, :multi_item_order_complete_msg, :multi_item_order_complete_msg_time, :tote_identifier, :show_expanded_shipments, :tracking_number_validation_enabled, :tracking_number_validation_prefixes, :partial, :partial_barcode
+  #                 :second_escape_string_enabled, :second_escape_string, :order_verification, :scan_by_packing_slip, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode, :post_scanning_option_second, :require_serial_lot, :valid_prefixes, :replace_gp_code,
+  #                 :single_item_order_complete_msg, :single_item_order_complete_msg_time, :multi_item_order_complete_msg, :multi_item_order_complete_msg_time, :tote_identifier, :show_expanded_shipments, :tracking_number_validation_enabled, :tracking_number_validation_prefixes, :partial, :partial_barcode, :scan_by_packing_slip_or_shipping_label, :remove_enabled, :remove_barcode, :remove_skipped, :display_location2, :display_location3
+  after_commit :log_events
+
+  def log_events
+    track_changes(title: 'ScanPack Settings Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+  end
 
   def self.is_action_code(code)
     setting = all.first

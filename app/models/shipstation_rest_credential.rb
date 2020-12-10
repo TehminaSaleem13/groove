@@ -4,7 +4,14 @@ class ShipstationRestCredential < ActiveRecord::Base
   before_save :check_if_null_or_undefined
   belongs_to :store
 
-  
+  include AhoyEvent
+  after_commit :log_events
+
+  def log_events
+    track_changes(title: 'ShipstationRestCredential Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at'] && saved_changes.keys != ['updated_at']
+  end
+
   def check_if_null_or_undefined
     self.api_key = nil if self.api_key=="null" or self.api_key=="undefined"
     self.api_secret = nil if self.api_secret=="null" or self.api_secret=="undefined"
