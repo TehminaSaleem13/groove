@@ -103,13 +103,14 @@ module Groovepacker
             helper.delay(priority: 95).reset_inventory(result, Apartment::Tenant.current)
           elsif params[:action_type] == 'all'
             ActiveRecord::Base.connection.tables.each do |table|
-              ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations'
+              ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations' || table == 'users'
             end
-            Groovepacker::SeedTenant.new.seed()
-            users = User.where(:name => 'admin')
-            unless users.empty?
-              users.first.destroy unless users.first.nil?
-            end
+            # Groovepacker::SeedTenant.new.seed()
+            # users = User.where(:name => 'admin')
+            # unless users.empty?
+            #   users.first.destroy unless users.first.nil?
+            # end
+            User.where('username != ?', 'gpadmin').destroy_all
             subscription = tenant.subscription if tenant.subscription
             CreateTenant.new.apply_restrictions_and_seed(subscription)
           end
@@ -175,11 +176,12 @@ module Groovepacker
 
       def delete_all(tenant_name)
         ActiveRecord::Base.connection.tables.each do |table|
-          ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations'
+          ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations' || table == 'users'
         end
-        Groovepacker::SeedTenant.new.seed
-        @user = User.where(name: 'admin').first
-        @user.destroy if @user
+        # Groovepacker::SeedTenant.new.seed
+        # @user = User.where(name: 'admin').first
+        # @user.destroy if @user
+        User.where('username != ?', 'gpadmin').destroy_all
         ApplyAccessRestrictions.new.apply_access_restrictions(tenant_name)
       end
 
