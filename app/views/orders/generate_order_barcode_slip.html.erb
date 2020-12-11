@@ -2,11 +2,11 @@
 <html>
 <head>
 </head>
-<body style="margin-left: 3px; margin-top: 3px; margin-right: 2px; margin-bottom: 1px">
+<body style="margin-left: 2px; margin-top: 2px; margin-right: 2px; margin-bottom: 1px">
 <% unless @order.increment_id.nil? %>
   <% unless @order.get_items_count.nil? %>
-    <div style="font-size: 19px; margin-left: 10px; margin-top: 0px; margin-bottom: 5px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
-      <span style="font-size: 31px; font-weight: bold;"><%= @order.get_items_count %></span>&nbsp;<%= @order.firstname %>&nbsp;<%= @order.lastname %>
+    <div style="font-size: 17px; margin-left: 10px; margin-top: 0px; margin-bottom: 5px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+      <span style="font-size: 29px; font-weight: bold;"><%= @order.get_items_count %></span>&nbsp;<%= @order.firstname %>&nbsp;<%= @order.lastname %>
     </div>
   <% end %>
 
@@ -14,7 +14,7 @@
   <div style="margin-top:3px;">
     <center><%= pdf_image_tag(barcode_string+".png", {:width => 320, :height => 60}) %></center>
   </div>
-  <div style="line-height: 8px; font-size:14px;">
+  <div style="line-height: 6px; font-size:12px;">
     <center>*<%= @order.increment_id %>*</center>
   </div>
 <% else %>
