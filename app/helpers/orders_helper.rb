@@ -233,7 +233,7 @@ module OrdersHelper
 
     orders.each do |order|
       itemslength = orders_scanning_count[order.id].values.sum rescue 0
-      generate_order_hash(order, itemslength)
+      (params[:app] rescue @params[:app]) ? generate_order_hash_v2(order, itemslength) : generate_order_hash(order, itemslength)
     end
     return @orders_result
   end
@@ -266,6 +266,45 @@ module OrdersHelper
       }
     tote = order.tote
     order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
+    @orders_result.push(order_data)
+  end
+
+  def generate_order_hash_v2(order, itemslength)
+  	store_name = order.store != nil ? order.store.name : ''
+    order_data = { 'id' => order.id,
+      'ordernum' => order.increment_id,
+      'itemslength' => itemslength,
+      }
+    order_data[:order_info] = { 'id' => order.id,
+      'store_name' => store_name,
+      'notes' => order.notes_internal,
+      'ordernum' => order.increment_id,
+      'order_date' => order.order_placed_time,
+      'itemslength' => itemslength,
+      'status' => order.status,
+      'recipient' => "#{order.firstname} #{order.lastname}",
+      'email' => order.email,
+      'tracking_num' => order.tracking_num,
+      'city' => order.city,
+      'state' => order.state,
+      'postcode' => order.postcode,
+      'country' => order.country,
+      'tags' => order.order_tags,
+      'custom_field_one' => order.custom_field_one,
+      'custom_field_two' => order.custom_field_two,
+      'store_order_id' => order.store_order_id,
+      'last_modified' => order.last_modified
+      }
+    tote = order.tote
+    order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
+    order_data[:scan_hash] = {
+      data: {
+        order: order.as_json
+      }
+    }
+    order_data[:scan_hash][:data][:order].merge!({unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {}})
+    order_data[:scan_hash][:data][:order][:multi_shipments] = order.get_se_old_shipments(order_data[:scan_hash][:data][:order][:multi_shipments])
+    order_data[:scan_hash][:data][:order][:activities] = []
     @orders_result.push(order_data)
   end
 

@@ -10,6 +10,13 @@ module ScanPackHelper
     order_scan_object.run
   end
 
+  def order_scan_v2(input, state, id,store_order_id,options={}, params)
+    order_scan_object = ScanPack::OrderScanServiceV2.new(
+      options[:current_user], options[:session], input, state, id, store_order_id, params, options[:order_by_number]
+    )
+    order_scan_object.run
+  end
+
   # def can_order_be_scanned
   #   #result = false
   #   #max_shipments = AccessRestriction.order("created_at").last.num_shipments
@@ -159,6 +166,16 @@ module ScanPackHelper
 
   def product_scan(input, state, id, box_id, options={})
     product_scan_object = ScanPack::ProductScanService.new(
+      [
+        options[:current_user], options[:session],
+        input, state, id, box_id, options[:typein_count] || 1
+      ]
+    )
+    product_scan_object.run(options[:clicked], options[:serial_added])
+  end
+
+  def product_scan_v2(input, state, id, box_id, options={})
+    product_scan_object = ScanPack::ProductScanServiceV2.new(
       [
         options[:current_user], options[:session],
         input, state, id, box_id, options[:typein_count] || 1

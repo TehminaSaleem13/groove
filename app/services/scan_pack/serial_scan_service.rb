@@ -66,7 +66,9 @@ module ScanPack
       else
         do_if_product_lot_id_present(order_serial)
       end
-      if !@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]
+      should_scan_serial = (!@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]) rescue (!@params['is_scan'] && @params['ask'] && @params['ask_2'])
+      # if !@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]
+      if should_scan_serial
         @order.addactivity("Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"", @current_user.name)
       else
         do_product_scan(serial_added) 
@@ -107,7 +109,9 @@ module ScanPack
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
         order_serial_id: order_serial.id
       )
-      if !(@params["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"])
+      check_serial_lot = (!(@params["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"])) rescue (!(@params["is_scan"] && @params["ask"] && @params["ask_2"]))
+      # if !(@params["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"])
+      if check_serial_lot
         if order_item_serial_lots.empty?
           OrderItemOrderSerialProductLot.create!(
             order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],

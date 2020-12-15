@@ -24,6 +24,7 @@ class HomeController < ApplicationController
       user['current_tenant'] = Apartment::Tenant.current
       user['is_active'] = current_user.active
       user['dashboard_switch'] = current_user.dashboard_switch
+      user['confirmation_code'] = current_user.confirmation_code
     end
 
     respond_to do |format|

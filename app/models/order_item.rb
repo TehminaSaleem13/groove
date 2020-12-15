@@ -10,7 +10,7 @@ class OrderItem < ActiveRecord::Base
   has_one :product_barcode
   has_one :product_sku
   # attr_accessible :price, :qty, :row_total, :sku, :product, :product_is_deleted, :name, :product_id,
-  #                 :cached_methods, :box_id
+  #                 :cached_methods, :box_id, :skipped_qty, :scanned_status
   #===========================================================================================
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
@@ -106,6 +106,7 @@ class OrderItem < ActiveRecord::Base
     result['location3'] = item.product_inventory_warehousess[0].location_tertiary rescue nil
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
+    result['second_record_serial'] = item.second_record_serial
     result['click_scan_enabled'] = item.click_scan_enabled
     result['type_scan_enabled'] = item.type_scan_enabled
     result['order_item_id'] = self.id

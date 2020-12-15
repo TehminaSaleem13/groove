@@ -288,6 +288,7 @@ Groovepacks::Application.routes.draw do
       post 'order_change_into_scanned'
       post 'product_first_scan'
       post 'scan_to_tote'
+      post 'scan_pack_v2'
     end
     member do
     end

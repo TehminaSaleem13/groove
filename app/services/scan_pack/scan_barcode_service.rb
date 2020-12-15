@@ -21,7 +21,7 @@ module ScanPack
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
       do_scan_now
-      if @result["data"].present? && @result["data"]["order"].present?
+      if @result["data"].present? && @result["data"]["order"].present? && !@params[:app]
         order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"])
         @result["data"]["order"]["store_type"] = order.store.store_type rescue nil
         @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy" && order.store.shipping_easy_credential.present?
@@ -66,7 +66,7 @@ module ScanPack
     end
 
     def do_scan_now
-      rem_qty = @params["scan_pack"]["rem_qty"] rescue nil
+      rem_qty = @params["rem_qty"] || @params["scan_pack"]["rem_qty"] rescue nil
       barcode = ProductBarcode.where(barcode: @params[:input]).last
       packing_count = barcode.packing_count rescue 1
       if packing_count.present? && packing_count.to_i > 1
@@ -146,12 +146,27 @@ module ScanPack
 
     def do_if_packing_count_not_present
       @matcher[@params[:state]].each do |state_func|
-        if state_func == "product_scan"
+        if state_func == "product_scan" && @params[:app]
+          output = send(
+            'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id],
+            {
+              current_user: @current_user, session: @session
+            }
+          )
+        elsif state_func == "product_scan"
           output = send(
             state_func, @params[:input], @params[:state], @params[:id], @params[:box_id],
             {
               current_user: @current_user, session: @session
             }
+          )
+        elsif state_func == "order_scan" && @params[:app]
+          output = send(
+            'order_scan_v2', @params[:input], @params[:state], @params[:id], @params[:store_order_id],
+            {
+              current_user: @current_user, session: @session
+            },
+            @params
           )
         elsif state_func == "order_scan"
           output = send(

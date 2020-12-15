@@ -44,6 +44,10 @@ class OrdersController < ApplicationController
     #GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current+'?'},:tenant)
     #GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
+    if params[:app]
+      @result['scan_pack_settings'] = ScanPackSetting.last
+      @result['general_settings'] = GeneralSetting.last
+    end
     @result['orders_count'] = get_orders_count()
     render json: @result
   end
