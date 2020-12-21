@@ -37,7 +37,9 @@ module Groovepacker
                       country: ship_address["CountryCode"],
                       order_total: order["Total"],
                       tracking_num: tracking_num,
-                      notes_internal: notes_internal)
+                      notes_internal: notes_internal,
+                      custom_field_one: order['CustomField1'],
+                      custom_field_two: order['CustomField2'])
 
                     import_item.current_order_items = order["Item"].length rescue 0
                     import_item.current_order_imported_item = 0
