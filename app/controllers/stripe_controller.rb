@@ -14,7 +14,7 @@ class StripeController < ApplicationController
       case type
       when 'invoice.payment_succeeded'
         subs = Subscription.where(customer_subscription_id: @invoice.subscription_id).last
-        if subs.present?
+        if subs.present? && subs.tenant.present?
           tenant = subs.tenant
           tenant.last_charge_in_stripe = @invoice.date 
           tenant.save
