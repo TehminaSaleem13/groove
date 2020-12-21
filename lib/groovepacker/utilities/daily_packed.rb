@@ -51,7 +51,7 @@ class DailyPacked
   end
 
   def create_csv_and_send_email(tenant, data)
-    url = GroovS3.create_public_csv(tenant, 'order',Time.now.to_i, data).url
+    url = GroovS3.create_public_csv(tenant, 'order',Time.now.to_i, data).url.gsub('http:', 'https:')
     CsvExportMailer.send_daily_packed(url,tenant).deliver
   end
 end

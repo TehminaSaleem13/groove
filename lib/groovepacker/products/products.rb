@@ -51,7 +51,7 @@ module Groovepacker
         result['filename'] = export_type + '-'+Time.now.to_s+'.csv'
         CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
           data = export_type == 'kits' ? ProductsHelper.kit_csv(products, csv) : ProductsHelper.products_csv(products, csv)
-          result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url
+          result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url.gsub('http:', 'https:')
         end
         CsvExportMailer.send_s3_export_product_url(result['filename'], Apartment::Tenant.current).deliver
       end

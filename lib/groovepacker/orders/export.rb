@@ -180,7 +180,7 @@ module Groovepacker
           #   new_row << "\n"
           #   csv << new_row
           # end
-          @result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url
+          @result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
         end
     end
   end

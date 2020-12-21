@@ -61,7 +61,7 @@ module SettingsService
         end
       end
 
-      public_url =  GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-exceptions","#{Time.now}", data).url
+      public_url =  GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-exceptions","#{Time.now}", data).url.gsub('http:', 'https:')
       @result['filename'] = {'url' => public_url, 'filename' => @result['filename']}
     end
 

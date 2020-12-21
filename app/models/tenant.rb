@@ -38,7 +38,7 @@ class Tenant < ActiveRecord::Base
     GroovS3.bucket.objects({prefix: "#{name}/se_import_log"}).last(3).each do |obj|
       data = {
               date: Date.parse(obj.key.split('/se_import_log/').last),
-              url: obj.url
+              url: obj.url.gsub('http:', 'https:')
              }
       se_import_data << data
     end

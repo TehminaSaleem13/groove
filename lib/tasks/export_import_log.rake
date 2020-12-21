@@ -8,7 +8,7 @@ namespace :doo do
 		    if file_response.present?	
 		    	file_name = "#{tenant}_import_log_#{Time.now.strftime("%Y_%d_%m")}"
 		    	GroovS3.create_csv(tenant, file_name, 1, file_response, :public_read)
-		    	url = GroovS3.find_csv(tenant, file_name, 1).url
+		    	url = GroovS3.find_csv(tenant, file_name, 1).url.gsub('http:', 'https:')
 		    	import = (order == "1" ? "Import" : "ReImport")
 		    	CsvExportMailer.import_log(url, tenant, import).deliver
 		    end
@@ -20,7 +20,7 @@ namespace :doo do
 			if 	file_response.present?
 				file_name = "#{tenant}_#{log_name}_#{Time.now.strftime("%Y_%d_%m")}"	
 				GroovS3.create_csv(tenant, file_name, 1, file_response, :public_read)
-		    	url = GroovS3.find_csv(tenant, file_name, 1).url
+		    	url = GroovS3.find_csv(tenant, file_name, 1).url.gsub('http:', 'https:')
 		    	CsvExportMailer.import_log(url, tenant, log_name.gsub("_", " ")).deliver
 		    end
 	    end

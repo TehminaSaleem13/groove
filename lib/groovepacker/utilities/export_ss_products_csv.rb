@@ -73,7 +73,7 @@ class ExportSsProductsCsv
     result['filename'] = 'products-'+Time.now.to_s+'.csv'
     CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
       data = ProductsHelper.products_csv(products, csv)
-      result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url
+      result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url.gsub('http:', 'https:')
     end
     result['status'] = true
     CsvExportMailer.send_s3_broken_image_url(result['filename'], tenant).deliver
@@ -131,7 +131,7 @@ class ExportSsProductsCsv
       filename = 'error.csv'
     end
     no_product = products.blank?
-    object_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'product', filename, data).url rescue nil
+    object_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'product', filename, data).url.gsub('http:', 'https:') rescue nil
     CsvExportMailer.send_s3_product_object_url(filename, object_url, Apartment::Tenant.current, no_product).deliver 
   end
 

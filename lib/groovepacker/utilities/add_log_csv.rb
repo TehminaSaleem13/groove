@@ -37,7 +37,7 @@ class AddLogCsv
     end
 
     GroovS3.create_csv(current_tenant, 'activity_log', store_id, file_data, :public_read)
-    url = GroovS3.find_csv(current_tenant, 'activity_log', store_id).url
+    url = GroovS3.find_csv(current_tenant, 'activity_log', store_id).url.gsub('http:', 'https:')
     CsvExportMailer.send_csv(url).deliver
   end
 
@@ -62,7 +62,7 @@ class AddLogCsv
     end
 
     GroovS3.create_csv(current_tenant, 'activity_log_v2', store_id, file_data, :public_read)
-    url = GroovS3.find_csv(current_tenant, 'activity_log_v2', store_id).url
+    url = GroovS3.find_csv(current_tenant, 'activity_log_v2', store_id).url.gsub('http:', 'https:')
     CsvExportMailer.send_csv(url).deliver
   end
 
@@ -104,7 +104,7 @@ class AddLogCsv
           end  
       end
     end 
-    url = GroovS3.create_public_csv("admintools", 'subscription',Time.now.to_i, data).url
+    url = GroovS3.create_public_csv("admintools", 'subscription',Time.now.to_i, data).url.gsub('http:', 'https:')
     StripeInvoiceEmail.send_tenant_details(url).deliver
   end
 

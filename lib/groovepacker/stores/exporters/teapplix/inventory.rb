@@ -27,7 +27,7 @@ module Groovepacker
             upload_folder = "teapplix_csv_uploads/csv/#{current_tenant}/#{@credential.store_id}"
             GroovS3.create_teapplix_csv(upload_folder, "upload", inv_export_data)
             resp = GroovS3.find_teapplix_csv(upload_folder, "upload")
-            csv_url = resp.url rescue nil
+            csv_url = resp.url.gsub('http:', 'https:') rescue nil
             return if csv_url.blank?
             
             update_inv_on_teapplix_for_sync_option(csv_url)

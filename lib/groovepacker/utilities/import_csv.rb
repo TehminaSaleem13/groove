@@ -72,7 +72,7 @@ class ImportCsv
         end
       else
         file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
-        set_file_name(params,file.url)
+        set_file_name(params,file.url.gsub('http:', 'https:'))
         file_path = download_csv(file,tenant, params)
         if params[:encoding_format].present?
           begin

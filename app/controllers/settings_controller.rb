@@ -4,7 +4,7 @@ class SettingsController < ApplicationController
 
   def restore
     data = File.read(params[:file].path)
-    params[:file] = GroovS3.create_public_zip(Apartment::Tenant.current, data).url
+    params[:file] = GroovS3.create_public_zip(Apartment::Tenant.current, data).url.gsub('http:', 'https:')
     restore = SettingsService::Restore.new(
       current_user: current_user,
       params: params,

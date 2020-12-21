@@ -39,7 +39,7 @@ class OrderImportSummariesController < ApplicationController
           end
         end
       end
-      url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url
+      url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url.gsub('http:', 'https:')
       render json: {url: url}
     rescue Exception => e
       Rollbar.error(e, e.message)
