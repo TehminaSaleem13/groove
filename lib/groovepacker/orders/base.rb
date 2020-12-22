@@ -115,6 +115,8 @@ module Groovepacker
               :qty_ordered => '',
               }
           ) if @current_workflow == 'product_first_scan_to_put_wall'
+          export_row_map = export_row_map.merge({ @general_settings.custom_field_one.parameterize.underscore.to_sym => ''}) if @general_settings.custom_field_one
+          export_row_map = export_row_map.merge({ @general_settings.custom_field_two.parameterize.underscore.to_sym => ''}) if @general_settings.custom_field_two
           return export_row_map
         end
 

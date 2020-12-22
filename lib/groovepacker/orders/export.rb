@@ -113,6 +113,9 @@ module Groovepacker
                 :qty_ordered => single_item.qty
                 }
               ) if @current_workflow == 'product_first_scan_to_put_wall'
+
+            single_row_list = single_row_list.merge({ @general_settings.custom_field_one.parameterize.underscore.to_sym => order.custom_field_one}) if @general_settings.custom_field_one
+            single_row_list = single_row_list.merge({ @general_settings.custom_field_two.parameterize.underscore.to_sym => order.custom_field_two}) if @general_settings.custom_field_two
           single_row_list
         end
 
