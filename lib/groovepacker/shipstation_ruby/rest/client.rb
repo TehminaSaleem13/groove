@@ -127,6 +127,16 @@ module Groovepacker
           response
         end
 
+        def get_ss_label_rates(data)
+          response = {}
+          begin
+            response = @service.query("/shipments/getrates", data, 'post', 'create_label')
+          rescue => e
+            puts e
+          end
+          response
+        end
+
         def list_carriers
           response = {}
           begin

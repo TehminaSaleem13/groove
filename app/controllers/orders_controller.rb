@@ -435,6 +435,28 @@ class OrdersController < ApplicationController
     render json: result
   end
 
+  def get_rates
+    result = { status: true }
+
+    begin
+      ss_credential = ShipstationRestCredential.find(params[:credential_id])
+      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+      response = ss_client.get_ss_label_rates(params[:post_data].permit!.to_h)
+
+      if response.code == 200
+        result[:rates] = JSON.parse(response.body)
+      else
+        result[:status] = false
+        result[:error_messages] = response.first(3).map { |res| res = res.join(': ')}.join('<br>')
+      end
+    rescue => e
+      result[:status] = false
+      result[:error_messages] = e.message
+    end
+
+    render json: result
+  end
+
   def fetch_services_packages
     result = { status: true }
 

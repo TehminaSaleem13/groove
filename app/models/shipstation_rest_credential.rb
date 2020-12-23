@@ -101,12 +101,17 @@ class ShipstationRestCredential < ActiveRecord::Base
   end
 
   def fetch_label_related_data(ss_label_data, order_number, store_order_id)
+    order = Order.find_by_store_order_id(store_order_id)
     ss_label_data = ss_label_data || {}
     ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(api_key, api_secret)
     ss_label_data['order_number'] = order_number
     ss_label_data['credential_id'] = id
     ss_label_data['orderId'] ||= store_order_id
     ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue nil
+    ss_label_data['fromPostalCode'] = postcode
+    ss_label_data['toCountry'] = order.country
+    ss_label_data['toState'] = order.state
+    ss_label_data['toPostalCode'] = order.postcode
     if ss_label_data['carrierCode'].present?
       ss_label_data['available_services'] = JSON.parse(ss_client.list_services(ss_label_data['carrierCode']).body) rescue nil
       ss_label_data['available_packages'] = JSON.parse(ss_client.list_packages(ss_label_data['carrierCode']).body) rescue nil

@@ -128,6 +128,7 @@ Groovepacks::Application.routes.draw do
       get 'cancel_all'
       post 'create_ss_label'
       get 'fetch_services_packages'
+      post 'get_rates'
     end
     member do
       post 'add_item_to_order'
