@@ -4,7 +4,8 @@ class BoxController < ApplicationController
   def create
     box = Box.find_or_create_by(:name => params[:name], :order_id => params[:order_id])  
     if box.save
-      return render json: box.as_json(only: [:id, :name])
+      result = { box: box.as_json(only: [:id, :name]), ss_label_data: fetch_ss_label_data(params[:order_id])}
+      return render json: result
     end
     render json:  { status: false } 
   end
@@ -176,5 +177,19 @@ class BoxController < ApplicationController
 
   def add_activity_for_delete(order, box)
     order.addactivity("#{box.try(:name)} with #{box.order_item_boxes.count} order items is deleted.", current_user.username)
+  end
+
+  def fetch_ss_label_data(order_id)
+    ss_label_data = {}
+    return ss_label_data unless GeneralSetting.last.per_box_shipping_label_creation == 'per_box_shipping_label_creation_after_box' 
+    ss_api_create_label = Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label)
+    return ss_label_data unless ss_api_create_label
+    order = Order.find(order_id)
+    return ss_label_data if order.store.store_type != 'Shipstation API 2' || !order.store.shipstation_rest_credential.use_api_create_label
+    credential = order.store.shipstation_rest_credential
+    ss_label_data = credential.fetch_label_related_data(order.ss_label_data, order.increment_id, order.store_order_id)
+    return ss_label_data
+  rescue
+    {}
   end
 end
