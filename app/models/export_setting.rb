@@ -138,7 +138,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_number] = order.increment_id
     single_row[:order_status] = order.status
     single_row[:order_date] = order.order_placed_time
-    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M %p")
+    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M:%S %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M:%S %p")
     single_row[:address1] = order.address_1
     single_row[:address2] = order.address_2
     single_row[:city] = order.city
@@ -256,7 +256,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_status] = order.status
     single_row[:scanned_qty] = order.scanned_items_count
     single_row[:order_date] = order.order_placed_time
-    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M %p")
+    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M:%S %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M:%S %p")
     single_row[:tracking_num] = order.tracking_num
     single_row
   end
