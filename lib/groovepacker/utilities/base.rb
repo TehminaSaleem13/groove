@@ -46,9 +46,18 @@ module Groovepacker
       end
 
       def build_data(map,store)
+        map = fix_corrupted_map(map)
         data = {:flag => "ftp_download", :type => "order", :store_id => store.id}
         common_data_attributes.each { |attr| data[attr.to_sym] = map[:map][attr.to_sym] }
         return data
+      end
+
+      def fix_corrupted_map(map)
+        return map unless map.map.class == String
+        map.update_attributes(map: YAML.load(map.map.gsub("!ruby/object:ActionController::Parameters\n  parameters: ", '').gsub("  permitted: false\n", '')))
+        map.reload
+      rescue
+        map
       end
 
       def get_order_import_summary

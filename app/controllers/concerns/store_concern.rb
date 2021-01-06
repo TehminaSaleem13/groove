@@ -205,6 +205,7 @@ module StoreConcern
     end  
     begin
       map_data.name = params[:name]
+      params[:map] = params[:map].to_h rescue params[:map]
       map_data.map = { :rows => params[:rows], :sep => params[:sep], :other_sep => params[:other_sep], :delimiter => params[:delimiter], :fix_width => params[:fix_width], :fixed_width => params[:fixed_width], :import_action => params[:import_action], :contains_unique_order_items => params[:contains_unique_order_items], :generate_barcode_from_sku => params[:generate_barcode_from_sku], :use_sku_as_product_name => params[:use_sku_as_product_name], :order_date_time_format => params[:order_date_time_format], :day_month_sequence => params[:day_month_sequence],:encoding_format => params[:encoding_format],:map => params[:map] }
       map_data.save!
       map_data.map[:map].values.each_with_index do |data, index|
