@@ -87,6 +87,7 @@ module Groovepacker
               @import_item.current_order_imported_item = 0
               @import_item.save
               order["line_items"] = order["line_items"].reject {|h| h['fulfillment_status'] == nil && h['fulfillable_quantity'] == 0 }
+              order["line_items"] = check_removed_items_quantity(order)
               order["line_items"].each do |item|
                 order_item = import_order_item(order_item, item)
                 @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
@@ -198,6 +199,18 @@ module Groovepacker
                 add_order_activities(shopify_order)
               end
             end
+
+          def check_removed_items_quantity(order)
+            order_refunds = order['refunds'].map { |h| h['refund_line_items'] }
+            order['line_items'].each do |line_item|
+              order_refunds.each do |refund|
+                line_item['quantity'] -= refund.select { |ref| ref['line_item_id'] == line_item['id'] && (ref['restock_type']  == 'cancel' || ref['restock_type']  == 'no_restock') }.map { |h| h['quantity'] }.sum rescue nil
+              end
+            end
+            order['line_items']
+          rescue
+            order['line_items']
+          end
         end
       end
     end
