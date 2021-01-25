@@ -78,13 +78,14 @@ module ProductMethodsHelper
   end
 
   def create_or_update_product_sku_or_barcode(item, order, status = nil, db_item=nil,current_user, item_type)
-    return true if (item_type == 'barcode' && db_item && db_item.barcode == item[item_type.downcase])
+    return true if (item_type == 'barcode' && db_item && db_item.barcode == item[item_type.downcase] && db_item.packing_count.to_i == item['packing_count'].to_i)
     product_item = status == 'new' ? (item_type == 'barcode' ? ProductBarcode.new : ProductSku.new) : db_item
     product_item.product.add_product_activity( "The #{item_type} of this item was changed from #{product_item.send(item_type.downcase.to_sym)} to #{item[item_type.downcase]} ",current_user.username) if (status != 'new' && item[item_type.downcase] != product_item.send(item_type.downcase.to_sym))
     product_item.send(item_type.downcase + '=', item[item_type.downcase])
     product_item.purpose = item['purpose'] if item_type == 'SKU'
     product_item.product_id = id unless product_item.persisted?
     product_item.order = order
+    product_item.packing_count = item['packing_count'] if item_type.downcase == 'barcode' 
     product_item.product.add_product_activity( "The #{item_type} #{product_item.send(item_type.downcase.to_sym)} was added to this item",current_user.username) if status == 'new'
     item[:permit_same_barcode] ? product_item.save(validate: false) : product_item.save
   end

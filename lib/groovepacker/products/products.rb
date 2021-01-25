@@ -109,7 +109,7 @@ module Groovepacker
         end
 
         def update_category_sku_barcode
-          return if @params['post_fn'].blank?
+          # return if @params['post_fn'].blank?
           # if @params['post_fn'] == ''
           #   #Update product inventory warehouses
           #   #check if a product inventory warehouse is defined.
@@ -177,13 +177,28 @@ module Groovepacker
           #   end
           # end
 
-          case @params['post_fn']
-          when 'category'
-          	create_or_update_product_cats
-          when 'sku'
-          	create_or_update_product_skus
-          when 'barcode'
-          	create_or_update_product_barcode
+          # case @params['post_fn']
+          # when 'category'
+          # 	create_or_update_product_cats
+          # when 'sku'
+          # 	create_or_update_product_skus
+          # when 'barcode'
+          # 	create_or_update_product_barcode
+          # end
+
+          if @params[:app].present?
+            create_or_update_product_cats
+            create_or_update_product_skus
+            create_or_update_product_barcode
+          elsif @params['post_fn'].present?
+            case @params['post_fn']
+            when 'category'
+              create_or_update_product_cats
+            when 'sku'
+              create_or_update_product_skus
+            when 'barcode'
+              create_or_update_product_barcode
+            end
           end
         end
 

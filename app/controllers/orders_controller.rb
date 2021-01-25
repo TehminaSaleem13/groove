@@ -27,6 +27,13 @@ class OrdersController < ApplicationController
     if @result['status'] && @order.save
       @result['messages'].push(@order.errors.full_messages)
     end
+
+    if (params[:app] rescue @params[:app])
+      orders_scanning_count = Order.multiple_orders_scanning_count(Order.where(id: @order.id))
+      itemslength = orders_scanning_count[@order.id].values.sum rescue 0
+      @result['scan_pack_data'] = generate_order_hash_v2(@order, itemslength)
+    end
+
     render json: @result
   end
 

@@ -268,6 +268,7 @@ module OrderConcern
   end
 
   def find_order
+    @orders_result = []
     @order = Order.find_by_id(params[:id])
   end
 

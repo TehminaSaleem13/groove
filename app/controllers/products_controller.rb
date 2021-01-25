@@ -268,7 +268,7 @@ class ProductsController < ApplicationController
 
   def update
     @result = gp_products_module.update_product_attributes
-
+    product_hash_scan_pack_v2(@params ? @params : params) if (params[:app] rescue @params[:app])
     render json: @result
   end
 
@@ -509,5 +509,35 @@ class ProductsController < ApplicationController
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
 
     render json: @result
+  end
+
+  def product_hash_scan_pack_v2(params)
+    product = Product.find_by_id(params[:basicinfo][:id]) rescue nil
+    if product.is_kit? && product.kit_parsing != 'single'
+      result = Hash.new
+      result = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
+      result['product_type'] =  product.kit_parsing
+      result['child_items'] = []
+      option_products_array = product.product_kit_skuss.map(&:option_product)
+      option_products_array.each do |kit_product|
+        child_item = {}
+        product_kit_sku = ProductKitSkus.find_by(option_product_id: kit_product.id)
+        option_product = option_products_array.find { |op| op.id == product_kit_sku.option_product_id }
+        child_item = OrderItem.new.build_basic_item(kit_product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
+        child_item['kit_packing_placement'] = product_kit_sku.packing_order
+        child_item['kit_product_id'] = kit_product.id
+        child_item["product_qty_in_kit"] = product_kit_sku.qty
+        result['child_items'].push(child_item)
+      end
+      result['child_items'] = result['child_items'].sort_by { |hsh| hsh['kit_packing_placement'] }
+      @result['scan_pack_product'] = result
+    else
+      @result['scan_pack_product'] = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
+    end
+  rescue => e
+    on_demand_logger = Logger.new("#{Rails.root}/log/product_hash_scan_pack_v2.log")
+    on_demand_logger.info("=========================================")
+    log = { tenant: Apartment::Tenant.current, params: params, result: @result, error: e }
+    on_demand_logger.info(log)
   end
 end
