@@ -183,7 +183,7 @@ module OrderMethodsHelper
       end
     end
     chek_for_recently_scanned(limited_order_items, most_recent_scanned_product) if most_recent_scanned_product
-    update_unscanned_list(limited_order_items, unscanned_list)
+    update_unscanned_list(limited_order_items, unscanned_list, scan_pack_v2)
 
     unscanned_list = unscanned_list.sort do |a, b|
       o = (a['packing_placement'] <=> b['packing_placement']);

@@ -233,6 +233,7 @@ module OrdersHelper
 
     orders.each do |order|
       itemslength = orders_scanning_count[order.id].values.sum rescue 0
+      order.scan_pack_v2 = (params[:app].present? rescue @params[:app].present?)
       (params[:app] rescue @params[:app]) ? generate_order_hash_v2(order, itemslength) : generate_order_hash(order, itemslength)
     end
     return @orders_result
@@ -383,7 +384,7 @@ module OrdersHelper
     end
   end
 
-  def update_unscanned_list(limited_order_items, unscanned_list)
+  def update_unscanned_list(limited_order_items, unscanned_list, scan_pack_v2 = false)
     limited_order_items.each do |order_item|
       if order_item.cached_product.try(:is_kit) == 1
         option_products = order_item.cached_option_products
@@ -400,7 +401,13 @@ module OrdersHelper
 
             if order_item.qty > order_item.kit_split_qty
               unscanned_item = order_item.build_unscanned_single_item(true)
-              unscanned_list.push(unscanned_item) if unscanned_item['qty_remaining'] > 0
+              return unless unscanned_item['qty_remaining'] > 0
+              if scan_pack_v2
+                order_item.scan_pack_v2 = true
+                unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
+              else
+                unscanned_list.push(unscanned_item)
+              end
             end
             # unscanned_qty = order_item.qty - order_item.scanned_qty
             # added_to_list_qty = true
@@ -426,6 +433,9 @@ module OrdersHelper
             #     end
             #   end
             # end
+          elsif self.scan_pack_v2
+            order_item.scan_pack_v2 = true
+            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
           else
             unscanned_item = order_item.build_unscanned_single_item
             unscanned_list.push(unscanned_item) if unscanned_item['qty_remaining'] > 0

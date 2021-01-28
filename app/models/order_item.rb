@@ -23,6 +23,8 @@ class OrderItem < ActiveRecord::Base
   cached_methods :product, :order_item_kit_products, :option_products
   after_save :delete_cache_for_associated_obj
 
+  attr_accessor :scan_pack_v2
+
   include OrdersHelper
 
   # Move to enum when possible
@@ -174,7 +176,7 @@ class OrderItem < ActiveRecord::Base
   def build_individual_kit(depends_kit)
     result = Hash.new
     result = build_basic_item(self.product)
-    result['product_type'] = 'individual'
+    result['product_type'] = self.scan_pack_v2 ? 'depends' : 'individual'
     if depends_kit
       result['qty_remaining'] = self.kit_split_qty - self.kit_split_scanned_qty
     else

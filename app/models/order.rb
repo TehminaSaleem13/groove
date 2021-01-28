@@ -24,6 +24,8 @@ class Order < ActiveRecord::Base
   # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
   validates_uniqueness_of :increment_id, unless: :check_for_duplicate
 
+  attr_accessor :scan_pack_v2
+
   extend OrderClassMethodsHelper
   include ProductsHelper
   include OrdersHelper
