@@ -275,6 +275,7 @@ class ProductsController < ApplicationController
   #This method will genearte barcode pdf file and store it in S3 and return url of the file from S3.
   def generate_barcode_slip
     require 'wicked_pdf'
+    @show_bin_locations = GeneralSetting.last.try(:show_primary_bin_loc_in_barcodeslip)
     @item = OrderItem.find(params[:item_id]) rescue nil
     @product = Product.find(params[:id])
     @barcode = params["barcode"]
@@ -282,11 +283,11 @@ class ProductsController < ApplicationController
       format.html
       format.pdf {
         render :pdf => "file_name",
-               :template => "products/#{get_barcode_slip_template}",
+               :template => "products/generate_barcode_slip.html.erb",
                :orientation => 'Portrait',
-               :page_height => '0.9in',
+               :page_height => '1in',
                :page_width => '3in',
-               :margin => {:top => '1', :bottom => '0', :left => '0', :right => '0'}
+               :margin => {:top => '0.1', :bottom => '0', :left => '0', :right => '1'}
       }
     end
     # base_file_name = File.basename(pdf_path)
@@ -304,16 +305,17 @@ class ProductsController < ApplicationController
   def bulk_barcode_pdf
     require 'wicked_pdf'
     order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
+    @show_bin_locations = GeneralSetting.last.try(:show_primary_bin_loc_in_barcodeslip)
     @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
     respond_to do |format|
       format.html
-      format.pdf { 
+      format.pdf {
         render :pdf => "file_name",
                :template => "products/bulk_barcode_pdf.html.erb",
                :orientation => 'Portrait',
-               :page_height => '1.08in',
-               :page_width => '2.9in',
-               :margin => {:top => '0.9', :bottom => '0', :left => '0', :right => '0'}
+               :page_height => '1in',
+               :page_width => '3in',
+               :margin => {:top => '0.1', :bottom => '0', :left => '0', :right => '1'}
       }
     end
   end

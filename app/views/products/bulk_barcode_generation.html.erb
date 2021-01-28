@@ -2,33 +2,53 @@
 <html>
 <head>
 </head>
-<% @order_items.each do |item| %>
-  <% item.qty.times do %>
-    <body style="line-height: 90%; margin-left: 3px; margin-top: 3px; margin-right: 2px; margin-bottom: 1px">
-      <div style="page-break-before: always;">
+<body style="margin-top:0px;">
+  <% @order_items.each do |item| %>
+    <% item.qty.times do %>
+      <div id="main_div" style="width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:112px;background:white;max-height:112px">
         <% if !item.product.nil? && !item.product.product_barcodes.first.nil? && !item.product.product_barcodes.first.barcode.nil? %>
-          <% unless item.product.primary_sku.nil? %>
-            <div style="line-height: 80%; font-size: 16px; margin-left: 10px; margin-top: 0px; margin-bottom: -5px;"><%= item.product.primary_sku %></div>
-            <br/>
-          <% end %>
-          <div style="font-size: 16px; margin-left: 10px; margin-top:-5px; margin-bottom: 3px; max-width: 320px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= item.product.name %></div>
-          <% barcode_string = generate_barcode(item.product.primary_barcode) %>
-          <div style="margin-top:7px;">
-            <center><%= pdf_image_tag(barcode_string+".png", {:width => 320, :height => 60}) %></center>
+          <div class="header_div" style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
+            <% unless item.product.primary_sku.nil? %>
+              <div style="font-size: 13px;max-height:13px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space: nowrap;"><%= item.product.primary_sku %></div>
+            <% end %>
+
+            <% if item.product.name.length <= 63 %>
+              <div style="font-size: 13px; width: 100%; overflow: hidden"><%= item.product.name %></div> 
+            <% elsif item.product.name.length > 63 && item.product.name.length < 72 %>
+              <div style="font-size: 13px; width: 100%; overflow: hidden;max-height:30px;"><%= item.product.name %></div> 
+            <% elsif item.product.name.length > 72 %>
+              <div style="font-size: 10px; width: 100%; overflow: hidden;max-height:24px;"><%= item.product.name %></div> 
+            <% end %>
+
+            <% if @show_bin_locations && item.product.primary_warehouse && (item.product.primary_warehouse.location_primary.present? || item.product.primary_warehouse.location_secondary.present? || item.product.primary_warehouse.location_tertiary.present?) %>
+              <div class="product_label_locations" style="font-size: 8px;width: 100%;overflow:hidden;max-height:10px">
+                <% locations = [item.product.primary_warehouse.location_primary, item.product.primary_warehouse.location_secondary, item.product.primary_warehouse.location_tertiary, '', nil].select(&:present?) %>
+                <% locations.each_with_index do |loc, index| %>
+                  <div style="display:inline-block;float:left;width:<%= 100/locations.count.to_f.round(2) %>%;<%= 'text-align:center;' if index == 1 && locations.count == 3 %><%= 'text-align:right;' if index == 2 && locations.count == 3 %><%= 'text-align:right;' if index == 1 && locations.count == 2 %><%= 'text-align:center;' if locations.count == 1 %>">
+                    <%= loc %>
+                  </div>
+                <% end %>
+              </div>
+            <% end %>
           </div>
-          <div style="line-height: 8px; font-size:12px; margin-bottom: 0px; margin-top:6px;">
-            <%= item.order.increment_id rescue nil%><center>*<%=  item.product.primary_barcode %>*</center>
+
+          <% barcode_string = generate_barcode(item.product.primary_barcode) %>
+          <div class="barcode_div" style="height:90px;overflow:hidden;position: absolute;bottom:-8px;width:90%;left:5%">
+            <%= wicked_pdf_image_tag('/images/'+ barcode_string+".png", {:width => '100%', height: '100%', class: 'barcode_img'}) %>
+          </div>
+
+          <div class="footer_div" style="width: 100%;position:absolute;bottom:-8px;background:white">
+            <center style="font-size:10px;"><%=  item.product.primary_barcode %></center>
+            <% if item.order %>
+              <div style="font-size:8px;"><%= item.order.increment_id.starts_with?('#') ? item.order.increment_id : item.order.increment_id.insert(0, '#') %></div>
+            <% end %>
           </div>
         <% else %>
-          <% unless item.product.primary_sku.nil? %>
-            <div style="line-height: 90%; font-size: 15px; margin-left: 10px; margin-top: 0px; margin-bottom: -5px;"><%= item.product.primary_sku %></div>
-            <br />
-          <% end %>
-          <div style="font-size: 15px; margin-left: 10px; margin-top:-5px; margin-bottom: 3px; max-width: 255px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= item.product.name %></div>
-          <div style="font-size: 20px; margin-top:20px; margin-bottom: 10px; margin-left: 45px;">Barcode not available</div>
+          <br/>
+          <div style="font-size: 18px; margin: 0 auto;">Barcode not available</div>
         <% end %>
       </div>
-    </body>
-  <%end%>
-<%end%>
+    <% end %>
+  <% end %>
+</body>
 </html>
