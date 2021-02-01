@@ -34,7 +34,7 @@ module CachedMethods
           rescue
             nil
           end
-          if cached
+          if cached.present?
             begin
               if cached.class.in?([ActiveRecord::Relation, Array])
                 cached = cached.to_a
@@ -47,6 +47,7 @@ module CachedMethods
             end
             return cached
           end
+          reload
           load_assoc = send(association)
           load_assoc = load_assoc.to_a if load_assoc.class == ActiveRecord::Relation
           Rails.cache.write(key, load_assoc, expires_in: 5.minutes)
