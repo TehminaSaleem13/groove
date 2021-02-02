@@ -202,7 +202,8 @@ class GeneralSetting < ActiveRecord::Base
     job_scheduled = false
     run_at_date = date.getutc
     run_at_date = run_at_date.change({:hour => time.hour, :min => time.min, :sec => time.sec})
-    time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i + Random.rand(120)
+    # time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i + Random.rand(120)
+    time_diff = ((run_at_date.to_time - Time.current)).to_i + Random.rand(120)
     time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
     time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
     gn_setting = GeneralSetting.first
