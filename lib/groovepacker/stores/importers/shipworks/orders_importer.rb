@@ -5,6 +5,7 @@ module Groovepacker
         include ProductsHelper
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           def import_order(order)
+            sw_start_time = Time.current
             handler = self.get_handler
             credential = handler[:credential]
             store = handler[:store_handle]
@@ -89,6 +90,13 @@ module Groovepacker
               end
             end
             #update_orders_status
+            sw_end_time = "#{(Time.current - sw_start_time).round(2)} Seconds"
+            log_sw_tenants = %w(pinehurstcoins gp55 gp50 ftdi)
+            if Apartment::Tenant.current.in? log_sw_tenants
+              on_demand_logger = Logger.new("#{Rails.root}/log/sw_delay_logs.log")
+              log = { tenant: Apartment::Tenant.current, order_number: (order_number rescue nil), import_time: sw_end_time, current_time: Time.current.to_formatted_s(:rfc822) }
+              on_demand_logger.info(log)
+            end
           end
 
           private
