@@ -661,4 +661,17 @@ class StoresController < ApplicationController
     end
     render json: @result
   end
+
+  def fetch_label_related_data
+    result = { status: true }
+    begin
+      order = Order.find(params[:id])
+      ss_label_data = order.ss_label_order_data
+      result[:ss_label_data] = ss_label_data
+    rescue => e
+      result[:status] = false
+      result[:error] = e
+    end
+    render json: result
+  end
 end

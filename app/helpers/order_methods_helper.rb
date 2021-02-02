@@ -1,4 +1,6 @@
 module OrderMethodsHelper
+  include ActionView::Helpers::NumberHelper
+
   def get_se_old_shipments(result_order)
     return result_order unless store.store_type == 'ShippingEasy'
 
@@ -321,5 +323,60 @@ module OrderMethodsHelper
     end
     list = list.group_by { |d| d[:box] }
     result = { box: boxes.as_json(only: [:id, :name]), order_item_boxes: order_item_boxes.flatten, list: list   }
+  end
+
+  def ss_label_order_data
+    begin
+      ss_rest_credential = store.shipstation_rest_credential
+      order_ss_label_data = ss_label_data || {}
+      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_rest_credential.api_key, ss_rest_credential.api_secret)
+      order_ss_label_data['order_number'] = increment_id
+      order_ss_label_data['credential_id'] = ss_rest_credential.id
+      order_ss_label_data['orderId'] ||= store_order_id
+      order_ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
+      order_ss_label_data['fromPostalCode'] = ss_rest_credential.postcode
+      order_ss_label_data['toCountry'] = country
+      order_ss_label_data['toState'] = state
+      order_ss_label_data['toPostalCode'] = postcode
+      order_ss_label_data['toName'] = customer_name
+      order_ss_label_data['toAddress1'] = address_1
+      order_ss_label_data['toAddress2'] = address_2
+      order_ss_label_data['toCity'] = city
+      order_ss_label_data['label_shortcuts'] = ss_rest_credential.label_shortcuts
+      order_ss_label_data['available_carriers'].each do |carrier|
+        carrier['visible'] = !(ss_rest_credential.disabled_carriers.include? carrier['code'])
+        next unless carrier['visible']
+        data = {
+          carrierCode: carrier['code'],
+          fromPostalCode: ss_rest_credential.postcode,
+          toCountry: country,
+          toState: state,
+          toPostalCode: postcode,
+          confirmation: order_ss_label_data['confirmation']
+        }
+        data = data.merge(weight: order_ss_label_data['weight']) if order_ss_label_data['weight']
+        rates_response = ss_client.get_ss_label_rates(data.to_h)
+        carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ')}.join('<br>') unless rates_response.ok?
+        next unless rates_response.ok?
+        carrier['rates'] = JSON.parse(rates_response.body)
+        carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
+        carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
+        if order_ss_label_data['carrierCode'].present? && carrier['code'] == order_ss_label_data['carrierCode']
+          order_ss_label_data['carrier'] = carrier
+          order_ss_label_data['service'] = carrier['services'].select { |c| c['code'] == order_ss_label_data['serviceCode'] }.first if order_ss_label_data['serviceCode'].present? && carrier['code'] == 'stamps_com' 
+          order_ss_label_data['package'] = carrier['packages'].select { |c| c['code'] == order_ss_label_data['packageCode'] }.first if order_ss_label_data['packageCode'].present? && carrier['code'] == 'stamps_com'
+        end
+        carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
+        carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
+        carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
+        next unless carrier['code'] == 'stamps_com'
+        carrier['rates'].each do |rate|
+          rate['packageCode'] = carrier['packages'].select { |h| h['name'] == rate['serviceName'].split(' - ').last }.first['code'] rescue nil
+        end
+      end
+      order_ss_label_data
+    rescue => e
+      puts e
+    end
   end
 end

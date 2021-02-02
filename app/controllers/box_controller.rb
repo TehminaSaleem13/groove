@@ -186,8 +186,7 @@ class BoxController < ApplicationController
     return ss_label_data unless ss_api_create_label
     order = Order.find(order_id)
     return ss_label_data if order.store.store_type != 'Shipstation API 2' || !order.store.shipstation_rest_credential.use_api_create_label
-    credential = order.store.shipstation_rest_credential
-    ss_label_data = credential.fetch_label_related_data(order.ss_label_data, order.increment_id, order.store_order_id)
+    ss_label_data = order.ss_label_order_data
     return ss_label_data
   rescue
     {}

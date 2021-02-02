@@ -41,7 +41,6 @@ module ScanPack
         if @result["data"]["order"]["store_type"] == "Shipstation API 2"
           if Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label)
             @result["data"]["order"]["use_api_create_label"] = order.store.shipstation_rest_credential.use_api_create_label if order.store.shipstation_rest_credential.present?
-            @result["data"]["order"]["ss_label_data"] = order.store.shipstation_rest_credential.fetch_label_related_data(order.ss_label_data, order.increment_id, order.store_order_id) if !order.has_unscanned_items && @result["data"]["order"]["use_api_create_label"]
           else
             @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if order.store.shipstation_rest_credential.present?
             @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if order.store.shipstation_rest_credential.present?

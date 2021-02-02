@@ -1,6 +1,8 @@
 class OrdersController < ApplicationController
   before_action :groovepacker_authorize!
   include OrderConcern
+  include ActionView::Helpers::NumberHelper
+
   # Import orders from store based on store id
   def importorders
     if check_user_permissions('import_orders')
@@ -442,20 +444,41 @@ class OrdersController < ApplicationController
     render json: result
   end
 
-  def get_rates
+  def get_realtime_rates
     result = { status: true }
 
     begin
+      ss_label_data = {}
       ss_credential = ShipstationRestCredential.find(params[:credential_id])
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
-      response = ss_client.get_ss_label_rates(params[:post_data].permit!.to_h)
-
-      if response.code == 200
-        result[:rates] = JSON.parse(response.body)
-      else
-        result[:status] = false
-        result[:error_messages] = response.first(3).map { |res| res = res.join(': ')}.join('<br>')
+      ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
+      ss_label_data['available_carriers'].each do |carrier|
+        carrier['visible'] = !(ss_credential.disabled_carriers.include? carrier['code'])
+        next unless carrier['visible']
+        data = {
+          carrierCode: carrier['code'],
+          weight: params[:post_data][:weight].try(:permit!).try(:to_h),
+          fromPostalCode: params[:post_data][:fromPostalCode],
+          toCountry: params[:post_data][:toCountry],
+          toState: params[:post_data][:toState],
+          toPostalCode: params[:post_data][:toPostalCode],
+          confirmation: params[:post_data][:confirmation]
+        }
+        rates_response = ss_client.get_ss_label_rates(data.to_h)
+        carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ')}.join('<br>') unless rates_response.ok?
+        next unless rates_response.ok?
+        carrier['rates'] = JSON.parse(rates_response.body)
+        carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
+        carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
+        carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
+        carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
+        carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
+        next unless carrier['code'] == 'stamps_com'
+        carrier['rates'].each do |rate|
+          rate['packageCode'] = carrier['packages'].select { |h| h['name'] == rate['serviceName'].split(' - ').last }.first['code'] rescue nil
+        end
       end
+      result[:ss_label_data] = ss_label_data
     rescue => e
       result[:status] = false
       result[:error_messages] = e.message
@@ -464,19 +487,29 @@ class OrdersController < ApplicationController
     render json: result
   end
 
-  def fetch_services_packages
+  def update_order_address
     result = { status: true }
 
     begin
-      ss_credential = ShipstationRestCredential.find(params[:credential_id])
-      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+      order = Order.find_by(increment_id: params[:order_number])
 
-      result['available_services'] = JSON.parse(ss_client.list_services(params[:carrier_code]).body) rescue nil
-      result['available_packages'] = JSON.parse(ss_client.list_packages(params[:carrier_code]).body) rescue nil
-
-    rescue => e
-      result[:status] = false
-      result[:error_messages] = e.message
+      name = params[:shipping_address][:name].split(' ')
+      if name.present?
+        order.firstname = name.first
+        order.lastname = name[1..name.length].join(' ')
+      else
+        order.firstname = ''
+        order.lastname = ''
+      end
+      order.address_1 = params[:shipping_address][:address1] || ''
+      order.address_2 = params[:shipping_address][:address2] || ''
+      order.state = params[:shipping_address][:state] || ''
+      order.city = params[:shipping_address][:city] || ''
+      order.postcode = params[:shipping_address][:postal_code] || ''
+      order.country = params[:shipping_address][:country] || ''
+      order.save
+    rescue
+      result = { status: false }
     end
 
     render json: result

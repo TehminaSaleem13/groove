@@ -61,4 +61,28 @@ class ShipstationRestCredentialsController < ApplicationController
     render json: result
   end
 
+  def set_label_shortcut
+    result = { status: true }
+    shipstation_cred = ShipstationRestCredential.find_by_id(params['credential_id'])
+    shortcuts = shipstation_cred.label_shortcuts || {}
+    new_shortcut = params[:shortcut].permit!.to_h
+    shortcuts.delete(shortcuts.key(new_shortcut.values.first)) if shortcuts.key(new_shortcut.values.first)
+    shortcuts[new_shortcut.keys.first] = new_shortcut.values.first
+    shipstation_cred.label_shortcuts = shortcuts
+    shipstation_cred.save
+    result[:label_shortcuts] = shipstation_cred.label_shortcuts
+    render json: result
+  end
+
+  def set_carrier_visibility
+    result = { status: true }
+    shipstation_cred = ShipstationRestCredential.find_by_id(params['credential_id'])
+    if shipstation_cred.disabled_carriers.include? params[:carrier_code]
+      shipstation_cred.disabled_carriers = shipstation_cred.disabled_carriers.reject! { |c| c == params[:carrier_code] }
+    else
+      shipstation_cred.disabled_carriers = shipstation_cred.disabled_carriers.push(params[:carrier_code]).uniq
+    end
+    shipstation_cred.save
+    render json: result
+  end
 end

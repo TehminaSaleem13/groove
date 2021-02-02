@@ -89,6 +89,8 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_daily_packed_toggle'=> 'tenants#update_daily_packed_toggle'
   get '/tenants/update_ss_api_create_label'=> 'tenants#update_ss_api_create_label'
   get '/tenants/update_direct_printing_options'=> 'tenants#update_direct_printing_options'
+  post 'shipstation_rest_credentials/set_label_shortcut' => 'shipstation_rest_credentials#set_label_shortcut'
+  post 'shipstation_rest_credentials/set_carrier_visibility' => 'shipstation_rest_credentials#set_carrier_visibility'
   root :to => "home#index"
 
   resources :home do
@@ -127,8 +129,8 @@ Groovepacks::Application.routes.draw do
       get 'import_for_ss'
       get 'cancel_all'
       post 'create_ss_label'
-      get 'fetch_services_packages'
-      post 'get_rates'
+      post 'get_realtime_rates'
+      post 'update_order_address'
     end
     member do
       post 'add_item_to_order'
@@ -216,6 +218,7 @@ Groovepacks::Application.routes.draw do
       get 'get_order_details'
       get 'update_store_lro'
       post 'update_shopify_token'
+      post 'fetch_label_related_data'
     end
     member do
       get 'verify_tags'
