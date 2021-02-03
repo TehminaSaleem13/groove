@@ -33,4 +33,4 @@ test:
 
 staging:
   <<: *defaults
-  monitor: false
+  # monitor: false
