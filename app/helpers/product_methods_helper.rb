@@ -63,6 +63,30 @@ module ProductMethodsHelper
     result
   end
 
+  def generate_numeric_barcode(result, eager_loaded_obj = {})
+    barcode = product_barcodes.new
+    barcode.barcode = numeric_barcode
+    unless barcode.save
+      result['status'] &= false
+      result['messages'].push(barcode.errors.full_messages)
+    end
+    update_product_status(nil, eager_loaded_obj)
+    result
+  end
+
+  def numeric_barcode
+    starting_value = GeneralSetting.last.starting_value
+    temp_barcode = ProductBarcode.where(barcode: starting_value).blank?
+    unless temp_barcode
+      while temp_barcode == false
+        new_barcode = starting_value.to_i + 1
+        temp_barcode = ProductBarcode.where(barcode: new_barcode).blank?
+      end
+      GeneralSetting.last.update(starting_value: new_barcode)
+    end
+    barcode = GeneralSetting.last.starting_value
+  end
+
   def create_or_update_productkitsku(kit_product, products=[])
     actual_product =
       products.find do |_product|

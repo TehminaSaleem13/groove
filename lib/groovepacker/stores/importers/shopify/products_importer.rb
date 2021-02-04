@@ -4,6 +4,7 @@ module Groovepacker
       module Shopify
         class ProductsImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
+          include ProductMethodsHelper
 
           def import(product_import_type, product_import_range_days)
             initialize_import_objects
@@ -117,6 +118,7 @@ module Groovepacker
             def update_product_details_barcode(product, variant)
               product.update_attributes(name: variant['title'])
               add_barcode_to_product(product, variant) if variant['barcode'].present? && product.product_barcodes.where(barcode: variant['barcode']).blank?
+              product.generate_numeric_barcode({}) if !variant['barcode'].present? && product.product_barcodes.blank? && @credential.generating_barcodes == 'generate_numeric_barcode'
             end
 
             def add_barcode_to_product(product, variant)
@@ -138,6 +140,7 @@ module Groovepacker
                   product = create_new_product_from_order(variant, ProductSku.get_temp_sku, shopify_product)
                 else
                   product = get_product_with_temp_skus(products)
+                  product.generate_numeric_barcode({}) if !variant['barcode'].present? && product.product_barcodes.blank? && @credential.generating_barcodes == 'generate_numeric_barcode'
                 end
               end
               return product
@@ -191,6 +194,14 @@ module Groovepacker
               when 'do_not_generate'
                 barcode_created = product.product_barcodes.create(barcode: variant['barcode']) if variant['barcode'].present?
                 product.product_barcodes.new(barcode: variant['barcode']).save(validate: false) if variant['barcode'].present? && (!barcode_created.reload.present? rescue true) && @credential.permit_shared_barcodes
+              when 'generate_numeric_barcode'
+                if variant['barcode'].present?
+                  barcode = variant['barcode'].present? ? variant['barcode'] : variant['sku']
+                  barcode_created = product.product_barcodes.create(barcode: barcode) if barcode.present?
+                  product.product_barcodes.new(barcode: barcode).save(validate: false) if barcode.present? && (!barcode_created.reload.present? rescue true) && @credential.permit_shared_barcodes
+                else
+                  product.generate_numeric_barcode({})
+                end
               end
             end
 

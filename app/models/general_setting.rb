@@ -34,7 +34,13 @@ class GeneralSetting < ActiveRecord::Base
   after_update :inventory_state_change_check
   before_save :validate_params
   after_commit :log_events
+  before_save :validate_barcode_length_and_starting_value
   @@all_tenants_settings = {}
+
+  def validate_barcode_length_and_starting_value
+    throw(:abort) if !self.barcode_length.positive? || !self.starting_value.to_i.positive? || self.starting_value.to_i.to_s.length > self.barcode_length
+    self.starting_value = self.starting_value.to_s.ljust(self.barcode_length, '0') if self.starting_value.to_s.length < self.barcode_length
+  end
 
   def log_events
     track_changes(title: 'General Settings Changed', tenant: Apartment::Tenant.current,
@@ -302,7 +308,6 @@ class GeneralSetting < ActiveRecord::Base
     elsif day == 'Sunday' && self.send_email_on_sun
       result = true
     end
-
     result
   end
 end

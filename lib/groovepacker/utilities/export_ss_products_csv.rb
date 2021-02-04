@@ -146,10 +146,18 @@ class ExportSsProductsCsv
     Apartment::Tenant.switch!(tenant_name)
     @result = data[:result]
     @products = list_selected_products(params).includes(:product_kit_skuss, :product_barcodes, :product_skus,:product_kit_activities, :product_inventory_warehousess)
+    eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
+    @products.each { |product| @result = product.generate_barcode(@result, eager_loaded_obj) }
+    GroovRealtime::emit('gen_barcode_with_delay',{}, :tenant) if (params["productArray"].count > 20 || params["select_all"] == true)
+  end
+
+  def generate_numeric_barcode_with_delay(params, data, tenant_name)
+    Apartment::Tenant.switch!(tenant_name)
+    @result = data[:result]
+    @products = list_selected_products(params).includes(:product_kit_skuss, :product_barcodes, :product_skus,:product_kit_activities, :product_inventory_warehousess)
 
     eager_loaded_obj = Product.generate_eager_loaded_obj(@products)
-
-    @products.each { |product| @result = product.generate_barcode(@result, eager_loaded_obj) }
+    @products.each { |product| @result = product.generate_numeric_barcode(@result, eager_loaded_obj) }
     GroovRealtime::emit('gen_barcode_with_delay',{}, :tenant) if (params["productArray"].count > 20 || params["select_all"] == true)
   end
 end

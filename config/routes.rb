@@ -154,6 +154,7 @@ Groovepacks::Application.routes.draw do
       post 'duplicate_product'
       post 'change_product_status'
       post 'generate_barcode'
+      post 'generate_numeric_barcode'
       post 'scan_per_product'
       post 'generate_products_csv'
       post 'generate_broken_image'

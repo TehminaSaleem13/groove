@@ -207,8 +207,20 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
-  # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
-  # If limit and offset are not passed, then it will be default to 10 and 0
+  def generate_numeric_barcode  
+    data = {}
+    data[:result] = @result
+    tenant_name = Apartment::Tenant.current
+    if (params["productArray"].count > 20 || params["select_all"] == true)
+      export_product = ExportSsProductsCsv.new
+      export_product.delay.generate_numeric_barcode_with_delay(params, data, tenant_name)
+    else
+      export_product = ExportSsProductsCsv.new
+      export_product.generate_numeric_barcode_with_delay(params, data, tenant_name)
+    end
+    render json: @result 
+  end
+
   def search
     unless params[:search].blank?
       @products = do_search(params, false)
