@@ -268,7 +268,7 @@ module Groovepacker
 
             def create_alias_and_product(order_item, item)
               s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present? && ProductSku.find_by_sku(item["product"]["sku"]).try(:product).try(:product_images).blank?
-              sku = item["product"]["sku"]
+              sku = item['sku'] || item["product"]["sku"]
               alias_skus = item["product"]["sku_aliases"]
               store_product_id =  item["ext_line_item_id"]
               product = create_product(sku, item["product"], store_product_id)
