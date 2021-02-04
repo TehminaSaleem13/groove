@@ -20,7 +20,7 @@ module ProductsHelper
   end
 
   def generate_barcode(barcode_string)
-    barcode = Barby::Code128B.new(barcode_string)
+    barcode = Barby::Code128.new(barcode_string)
     outputter = Barby::PngOutputter.new(barcode)
     outputter.margin = 0
     blob = outputter.to_png # Raw PNG data

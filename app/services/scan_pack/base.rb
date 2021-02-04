@@ -207,7 +207,7 @@ module ScanPack
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
       pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-      common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0.1', :bottom => '0', :left => '0', :right => '1'})
+      common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
       base_file_name = File.basename(pdf_path)
       pdf_file = File.open(reader_file_path)

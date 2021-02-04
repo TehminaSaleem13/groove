@@ -196,7 +196,7 @@ module OrdersHelper
   end
 
   def generate_order_barcode_for_html(increment_id)
-    order_barcode = Barby::Code128B.new(increment_id)
+    order_barcode = Barby::Code128.new(increment_id)
     outputter = Barby::PngOutputter.new(order_barcode)
     outputter.margin = 0
     outputter.xdim = 2

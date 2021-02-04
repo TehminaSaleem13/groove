@@ -2,24 +2,26 @@
 <html>
 <head>
 </head>
-<body style="margin-top:0px;">
-  <div id="main_div" style="width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:112px;background:white;max-height:112px">
+<style>
+</style>
+<body style="margin-top:0pt;font-family:'Poppins'">
+  <div id="main_div" style="width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:80pt;background:white;max-height:80pt">
     <% if !@product.nil? && !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
-      <div class="header_div" style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
+      <div style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
         <% unless @product.primary_sku.nil? %>
-          <div style="font-size: 13px;max-height:13px;width:100%;overflow:hidden;text-overflow:ellipsis;white-space: nowrap;"><%= @product.primary_sku %></div>
+          <div style="font-size: 13pt;font-weight: bold;max-height:13pt;width:100%;overflow:hidden;text-overflow:clip;white-space: nowrap;line-height: 13pt;text-align:justify"><%= @product.primary_sku %></div>
         <% end %>
 
         <% if @product.name.length <= 63 %>
-          <div style="font-size: 13px; width: 100%; overflow: hidden;max-height:13px;"><%= @product.name %></div> 
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:14pt;line-height: 12pt;text-align:justify;word-break: break-all;"><%= @product.name %></div> 
         <% elsif @product.name.length > 63 && @product.name.length < 72 %>
-          <div style="font-size: 13px; width: 100%; overflow: hidden;max-height:30px;"><%= @product.name %></div> 
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:38pt;line-height: 12pt;text-align:justify;word-break: break-all;"><%= @product.name %></div> 
         <% elsif @product.name.length > 72 %>
-          <div style="font-size: 10px; width: 100%; overflow: hidden;max-height:24px;"><%= @product.name %></div> 
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:38pt;line-height: 12pt;text-align:justify;word-break: break-all;"><%= @product.name %></div> 
         <% end %>
 
         <% if @show_bin_locations && @product.primary_warehouse && (@product.primary_warehouse.location_primary.present? || @product.primary_warehouse.location_secondary.present? || @product.primary_warehouse.location_tertiary.present?) %>
-          <div class="product_label_locations" style="font-size: 8px;width: 100%;overflow:hidden;max-height:10px">
+          <div style="font-size: 11pt;font-weight: bold;width: 100%;overflow:hidden;max-height:11pt;line-height: 11pt;">
             <% locations = [@product.primary_warehouse.location_primary, @product.primary_warehouse.location_secondary, @product.primary_warehouse.location_tertiary, '', nil].select(&:present?) %>
             <% locations.each_with_index do |loc, index| %>
               <div style="display:inline-block;float:left;width:<%= 100/locations.count.to_f.round(2) %>%;<%= 'text-align:center;' if index == 1 && locations.count == 3 %><%= 'text-align:right;' if index == 2 && locations.count == 3 %><%= 'text-align:right;' if index == 1 && locations.count == 2 %><%= 'text-align:center;' if locations.count == 1 %>">
@@ -31,16 +33,16 @@
       </div>
 
       <% barcode_string = generate_barcode(@product.primary_barcode) %>
-      <div class="barcode_div" style="height:90px;overflow:hidden;position: absolute;bottom:-8px;width:90%;left:5%">
+      <div style="height:80pt;overflow:hidden;position: absolute;bottom:-8pt;width:90%;left:5%">
         <%= wicked_pdf_image_tag('/images/'+ barcode_string+".png", {:width => '100%', height: '100%', class: 'barcode_img'}) %>
       </div>
 
-      <div class="footer_div" style="width: 100%;position:absolute;bottom:-8px;background:white">
-        <center style="font-size:10px;"><%=  @product.primary_barcode %></center>
+      <div style="width: 100%;position:absolute;bottom:-8pt;background:white">
+        <center style="font-size:10pt;line-height:10pt"><%=  @product.primary_barcode %></center>
       </div>
     <% else %>
       <br/>
-      <div style="font-size: 18px; margin: 0 auto;">Barcode not available</div>
+      <div style="font-size: 18pt; margin: 0 auto;">Barcode not available</div>
     <% end %>
   </div>
 </body>

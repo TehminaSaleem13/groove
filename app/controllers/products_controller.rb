@@ -287,7 +287,7 @@ class ProductsController < ApplicationController
                :orientation => 'Portrait',
                :page_height => '1in',
                :page_width => '3in',
-               :margin => {:top => '0.1', :bottom => '0', :left => '0', :right => '1'}
+               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
       }
     end
     # base_file_name = File.basename(pdf_path)
@@ -315,7 +315,7 @@ class ProductsController < ApplicationController
                :orientation => 'Portrait',
                :page_height => '1in',
                :page_width => '3in',
-               :margin => {:top => '0.1', :bottom => '0', :left => '0', :right => '1'}
+               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
       }
     end
   end
