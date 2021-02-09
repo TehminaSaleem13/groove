@@ -111,6 +111,7 @@ class SettingsController < ApplicationController
     @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
     @result['daily_packed_toggle'] = current_tenant.daily_packed_toggle rescue false
     @result['direct_printing_options'] = current_tenant.direct_printing_options rescue false
+    @result['ss_api_create_label'] = current_tenant.ss_api_create_label rescue false
 
     if general_setting.present?
       @result['data']['settings'] = general_setting

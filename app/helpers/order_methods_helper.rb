@@ -334,7 +334,7 @@ module OrderMethodsHelper
       order_ss_label_data['credential_id'] = ss_rest_credential.id
       order_ss_label_data['orderId'] ||= store_order_id
       order_ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
-      order_ss_label_data['fromPostalCode'] = ss_rest_credential.postcode
+      order_ss_label_data['fromPostalCode'] = User.current.try(:warehouse_postcode).present? ? User.current.warehouse_postcode : ss_rest_credential.postcode
       order_ss_label_data['toCountry'] = country
       order_ss_label_data['toState'] = state
       order_ss_label_data['toPostalCode'] = postcode
@@ -348,7 +348,7 @@ module OrderMethodsHelper
         next unless carrier['visible']
         data = {
           carrierCode: carrier['code'],
-          fromPostalCode: ss_rest_credential.postcode,
+          fromPostalCode: order_ss_label_data['fromPostalCode'],
           toCountry: country,
           toState: state,
           toPostalCode: postcode,
