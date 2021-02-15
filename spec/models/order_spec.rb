@@ -1,0 +1,61 @@
+require 'rails_helper'
+
+RSpec.describe Order, type: :model do
+  it 'should have unique increament_id' do
+    inv_wh = FactoryBot.create(:inventory_warehouse, :name=>'csv_inventory_warehouse')
+    store = FactoryBot.create(:store, :name=>'csv_store', :store_type=>'CSV', :inventory_warehouse=>inv_wh, :status => true)
+    Order.create(increment_id: '1', store_id: store.id)
+    order = Order.new(increment_id: '1', store_id: store.id)
+    order.should_not be_valid
+    order.errors[:increment_id].should include('has already been taken')
+  end
+
+  describe Order do
+    it 'order should have many order item' do
+      t = Order.reflect_on_association(:order_items)
+      expect(t.macro).to eq(:has_many)
+    end
+  end
+
+  describe Order do
+    it ' order should have one order shipping' do
+      t = Order.reflect_on_association(:order_shipping)
+      expect(t.macro).to eq(:has_one)
+    end
+  end
+
+  describe Order do
+    it 'order should have one  tote' do
+      t = Order.reflect_on_association(:tote)
+      expect(t.macro).to eq(:has_one)
+    end
+  end
+
+  describe Order do
+    it 'order should have one  order exception' do
+      t = Order.reflect_on_association(:order_exception)
+      expect(t.macro).to eq(:has_one)
+    end
+  end
+
+  describe Order do
+    it 'order should have many  order activities' do
+      t = Order.reflect_on_association(:order_activities)
+      expect(t.macro).to eq(:has_many)
+    end
+  end
+
+  describe Order do
+    it 'order should have many  order serials' do
+      t = Order.reflect_on_association(:order_serials)
+      expect(t.macro).to eq(:has_many)
+    end
+  end
+
+  describe Order do
+    it 'order should have many  order tags' do
+      t = Order.reflect_on_association(:order_tags)
+      expect(t.macro).to eq(:has_and_belongs_to_many)
+    end
+  end
+end
