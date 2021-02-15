@@ -12,7 +12,7 @@ module ElixirApi
             import_summary_id: find_summary
           )
           tenant = Apartment::Tenant.current
-          $redis.set("total_orders_#{tenant}", Order.all.count)
+          $redis.set("total_orders_#{tenant}", Order.count)
           $redis.set("new_order_#{tenant}",  0 )
           $redis.set("update_order_#{tenant}", 0)
           $redis.set("skip_order_#{tenant}", 0)
