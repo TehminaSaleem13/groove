@@ -245,6 +245,7 @@ module FTP
       rescue
         files = connection_obj.nlst('*.csv') rescue connection_obj.nlst('*.CSV')
       end
+      files = files.sort_by { |filename| connection_obj.mtime(filename) }
       files.each do |individual_file|
         unless '-imported'.in? individual_file
           file = individual_file
