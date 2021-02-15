@@ -26,6 +26,7 @@ module Groovepacker
             n = $redis.get("new_order_#{tenant}").to_i + 1
             $redis.set("new_order_#{tenant}" , n)
           end
+          @store = Store.find(@order.store_id) || order.store
 
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") ||  order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if check_for_update || @check_new_order
@@ -54,7 +55,7 @@ module Groovepacker
                   end
                 end
               end
-              order.addactivity("Order Import", "#{order.store.try(:name)} Import") unless order_persisted
+              order.addactivity("Order Import", "#{@store.try(:name)} Import") unless order_persisted
               # @order[:order_items] = @order.order_items
               order_item_result = process_order_items(order, @order)
               if order_item_result[:status]
@@ -117,7 +118,7 @@ module Groovepacker
           if !@order.import_summary_id.nil? && OrderImportSummary.find_by_id(@order.import_summary_id)
             begin
               order_import_summary = OrderImportSummary.find(@order.import_summary_id)
-              import_item = order_import_summary.import_items.where(store_id: order.store_id)
+              import_item = order_import_summary.import_items.where(store_id: @store.id)
               if import_item.empty?
                 import_item = order_import_summary.import_items
               end
@@ -171,7 +172,7 @@ module Groovepacker
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
-                        groove_ftp = FTP::FtpConnectionManager.get_instance(order.store)
+                        groove_ftp = FTP::FtpConnectionManager.get_instance(@store)
                         begin
 
                           if @after_import_count - $redis.get("new_order_#{tenant}").to_i ==  $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
@@ -219,10 +220,7 @@ module Groovepacker
           return true if db_orders.count == @order.total_count && orders.count == @order.total_count
           @skipped_count = @order.total_count - db_orders.count
           @skipped_ids = orders - db_orders
-          if @order.total_count == 1
-            store = Store.find_by_id(@order.store_id)
-            return true if store.fba_import == true
-          end
+          return true if @order.total_count == 1 && @store.fba_import == true
           false
         end
 
@@ -288,14 +286,14 @@ module Groovepacker
                 coupon_product = replace_product(order_item_XML[:product][:name], first_sku)
                 if coupon_product.nil?
                   product = Product.new
-                  product.store = order.store
+                  product.store = @store
                 else
                   product = coupon_product
                   @gp_coupon_found  = true
                 end  
               else 
                 product = Product.new
-                product.store = order.store
+                product.store = @store
               end  
             else
               product = product_sku.product
@@ -307,10 +305,10 @@ module Groovepacker
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
                 if check_for_replace_product && @gp_coupon_found == true 
-                  order.addactivity("Intangible item with SKU #{order_item_XML[:product][:skus].first}  and Name #{order_item_XML[:product][:name]} was replaced with GP Coupon.","#{order.store.name} Import")
+                  order.addactivity("Intangible item with SKU #{order_item_XML[:product][:skus].first}  and Name #{order_item_XML[:product][:name]} was replaced with GP Coupon.","#{@store.name} Import")
                 else
                   order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
-                  "#{order.store.name} Import")
+                  "#{@store.name} Import")
                 end  
               else
                 order_item = order.order_items.where(product_id: product.id)
