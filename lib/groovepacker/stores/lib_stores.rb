@@ -139,6 +139,7 @@ module Groovepacker
 				@shipstation.import_tracking_info = params[:import_tracking_info].to_boolean
 				@shipstation.postcode = params[:postcode] || ''
 		    @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'
+				@shipstation.skip_ss_label_confirmation = params[:skip_ss_label_confirmation] unless params[:skip_ss_label_confirmation].nil?
 		    @store.shipstation_rest_credential = @shipstation
 		    begin
 		      @store.save!

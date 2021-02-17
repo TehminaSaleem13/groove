@@ -415,33 +415,7 @@ class OrdersController < ApplicationController
   # end
 
   def create_ss_label
-    result = { status: true }
-
-    begin
-      ss_credential = ShipstationRestCredential.find(params[:credential_id])
-      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
-      response = ss_client.create_label_for_order(params[:post_data].permit!.to_h)
-
-      if response['labelData'].present?
-        file_name = "SS_Label_#{params[:post_data][:orderId]}.pdf"
-        reader_file_path = Rails.root.join('public', 'pdfs', file_name)
-        label_data = Base64.decode64(response['labelData'])
-        File.open(reader_file_path, 'wb') do |file|
-          file.puts label_data
-        end
-        GroovS3.create_pdf(Apartment::Tenant.current, file_name, File.open(reader_file_path).read)
-        result[:dimensions] = '4x6'
-        result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
-      else
-        result[:status] = false
-        result[:error_messages] = response.first(3).map { |res| res = res.join(': ')}.join('<br>')
-      end
-    rescue => e
-      result[:status] = false
-      result[:error_messages] = e.message
-    end
-
-    render json: result
+    render json: Order.new.create_label(params[:credential_id], params[:post_data].permit!.to_h)
   end
 
   def get_realtime_rates
@@ -472,6 +446,7 @@ class OrdersController < ApplicationController
         carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
         carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
         carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
+        carrier['rates'].map { |r| r['visible'] = !((ss_credential.disabled_rates[carrier['code']].include? r['serviceName']) rescue false) }
         carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
         next unless carrier['code'] == 'stamps_com'
         carrier['rates'].each do |rate|
@@ -512,6 +487,24 @@ class OrdersController < ApplicationController
       result = { status: false }
     end
 
+    render json: result
+  end
+
+  def print_shipping_label
+    result = { status: true }
+    begin
+      order = Order.includes(:store).find(params[:id])
+      if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
+        result = order.try_creating_label
+        result[:error] = 'Insufficient data to create label' if !result[:status] && !result[:error_messages].present?
+      else
+        result[:status] = false
+        result[:error] = 'Please Check Order Store Settings'
+      end
+    rescue => e
+      result[:status] = false
+      result[:error] = e
+    end
     render json: result
   end
 

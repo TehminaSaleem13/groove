@@ -329,9 +329,19 @@ module OrderMethodsHelper
     begin
       ss_rest_credential = store.shipstation_rest_credential
       order_ss_label_data = ss_label_data || {}
+      direct_print_data = {}
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_rest_credential.api_key, ss_rest_credential.api_secret)
+      general_settings = GeneralSetting.last
+      direct_print_data = try_creating_label if ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
+      if direct_print_data[:status]
+        order_ss_label_data['direct_printed'] = true
+        order_ss_label_data['direct_printed_url'] = direct_print_data[:url]
+        return order_ss_label_data
+      end
+
       order_ss_label_data['order_number'] = increment_id
       order_ss_label_data['credential_id'] = ss_rest_credential.id
+      order_ss_label_data['skip_ss_label_confirmation'] = ss_rest_credential.skip_ss_label_confirmation
       order_ss_label_data['orderId'] ||= store_order_id
       order_ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
       order_ss_label_data['fromPostalCode'] = User.current.try(:warehouse_postcode).present? ? User.current.warehouse_postcode : ss_rest_credential.postcode
@@ -369,6 +379,7 @@ module OrderMethodsHelper
         carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
         carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
         carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
+        carrier['rates'].map { |r| r['visible'] = !((ss_rest_credential.disabled_rates[carrier['code']].include? r['serviceName']) rescue false) }
         next unless carrier['code'] == 'stamps_com'
         carrier['rates'].each do |rate|
           rate['packageCode'] = carrier['packages'].select { |h| h['name'] == rate['serviceName'].split(' - ').last }.first['code'] rescue nil
@@ -378,5 +389,50 @@ module OrderMethodsHelper
     rescue => e
       puts e
     end
+  end
+
+  def try_creating_label
+    return { status: false } unless check_valid_label_data
+    post_data = {
+      "orderId" => ss_label_data['orderId'],
+      "carrierCode" => ss_label_data['carrierCode'],
+      "serviceCode" => ss_label_data['serviceCode'],
+      "confirmation" => ss_label_data['confirmation'],
+      "shipDate" => Time.zone.parse(ss_label_data['shipDate']).strftime("%a, %d %b %Y"),
+      "weight" => { "value"=> ss_label_data['weight']['value'], "units"=> ss_label_data['weight']['units'] }
+    }
+    post_data.merge!("dimensions" => ss_label_data['dimensions']) if ss_label_data['dimensions'].present? && ss_label_data['dimensions']['units'].present? && ss_label_data['dimensions']['length'].present? && ss_label_data['dimensions']['width'].present? && ss_label_data['dimensions']['height'].present?
+    result = create_label(store.shipstation_rest_credential.id, post_data)
+  end
+
+  def check_valid_label_data
+    ss_label_data['shipDate'].present? && ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present? && ss_label_data['weight']['WeightUnits'].present?
+  end
+  
+  def create_label(credential_id, post_data)
+    begin
+      result = { status: true}
+      ss_credential = ShipstationRestCredential.find(credential_id)
+      ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+      response = ss_client.create_label_for_order(post_data)
+      if response['labelData'].present?
+        file_name = "SS_Label_#{post_data['orderId']}.pdf"
+        reader_file_path = Rails.root.join('public', 'pdfs', file_name)
+        label_data = Base64.decode64(response['labelData'])
+        File.open(reader_file_path, 'wb') do |file|
+            file.puts label_data
+        end
+        GroovS3.create_pdf(Apartment::Tenant.current, file_name, File.open(reader_file_path).read)
+        result[:dimensions] = '4x6'
+        result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
+      else
+        result[:status] = false
+        result[:error_messages] = response.first(3).map { |res| res = res.join(': ')}.join('<br>')
+      end
+    rescue => e
+      result[:status] = false
+      result[:error_messages] = e.message
+    end
+    result
   end
 end

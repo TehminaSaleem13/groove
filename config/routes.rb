@@ -90,7 +90,9 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_ss_api_create_label'=> 'tenants#update_ss_api_create_label'
   get '/tenants/update_direct_printing_options'=> 'tenants#update_direct_printing_options'
   post 'shipstation_rest_credentials/set_label_shortcut' => 'shipstation_rest_credentials#set_label_shortcut'
+  post '/shipstation_rest_credentials/set_ss_label_advanced' => 'shipstation_rest_credentials#set_ss_label_advanced'
   post 'shipstation_rest_credentials/set_carrier_visibility' => 'shipstation_rest_credentials#set_carrier_visibility'
+  post 'shipstation_rest_credentials/set_rate_visibility' => 'shipstation_rest_credentials#set_rate_visibility'
   root :to => "home#index"
 
   resources :home do
@@ -133,6 +135,7 @@ Groovepacks::Application.routes.draw do
       post 'update_order_address'
     end
     member do
+      get 'print_shipping_label'
       post 'add_item_to_order'
       post 'record_exception'
       post 'clear_exception'

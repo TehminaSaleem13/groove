@@ -74,6 +74,14 @@ class ShipstationRestCredentialsController < ApplicationController
     render json: result
   end
 
+  def set_ss_label_advanced
+    result = { status: true }
+    shipstation_cred = ShipstationRestCredential.find_by_id(params["credential_id"])
+    shipstation_cred.skip_ss_label_confirmation = params[:skip_ss_label_confirmation]
+    shipstation_cred.save
+    render json: result
+  end
+
   def set_carrier_visibility
     result = { status: true }
     shipstation_cred = ShipstationRestCredential.find_by_id(params['credential_id'])
@@ -82,6 +90,14 @@ class ShipstationRestCredentialsController < ApplicationController
     else
       shipstation_cred.disabled_carriers = shipstation_cred.disabled_carriers.push(params[:carrier_code]).uniq
     end
+    shipstation_cred.save
+    render json: result
+  end
+
+  def set_rate_visibility
+    result = { status: true }
+    shipstation_cred = ShipstationRestCredential.find_by_id(params["credential_id"])
+    shipstation_cred.disabled_rates[params[:disable_rates].keys.first] = params[:disable_rates].values.first if params[:disable_rates]
     shipstation_cred.save
     render json: result
   end
