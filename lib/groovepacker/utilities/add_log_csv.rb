@@ -53,7 +53,7 @@ class AddLogCsv
       Apartment::Tenant.switch!(tenant.name)
       file_data = CSV.generate do |csv|
         csv << header if csv.count.eql? 0
-        ahoy_events = Ahoy::Event.where('time > ?', Time.now.ago(7.days)).version_2
+        ahoy_events = Ahoy::Event.version_2.where('time > ?', Time.now.ago(7.days))
         ahoy_events.each do |record|
           properties = record.properties
           csv << [properties['tenant'], record.time.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p'), properties['title'], properties['username'], (properties['objects_involved_count'] ? properties['objects_involved_count'].to_s + ' = [' + properties['objects_involved'].to_s.gsub(/\"/, '\'').gsub(/[\[\]]/, '') + ']' : '' rescue nil), properties['elapsed_time'] ? Time.at(properties['elapsed_time']).utc.strftime("%H:%M:%S") : '', properties['object_per_sec'], properties['object_id'], properties['changes']]
