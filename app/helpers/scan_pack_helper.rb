@@ -157,8 +157,25 @@ module ScanPackHelper
       # “The remaining orders that contain this item are not ready to be scanned. This is usually because one or more items in the order do not have a barcode assigned yet. You can find all products that require barcodes in the New Products List”
       @result[:notice_messages] = 'The remaining orders that contain this item are not ready to be scanned. This is usually because one or more items in the order do not have a barcode assigned yet. You can find all products that require barcodes in the New Products List'
     else
-      # If there are no open orders requiring the item that was scanned we will alert the user: Sorry, no orders require that item.
-      @result[:notice_messages] = 'Sorry, no orders can be found that require that item. Please check that all orders have been imported. If this is a new item that may not have the barcode saved you can search for the item by SKU in the products section and add it.'
+      pending_order = Order.includes(%i[tote order_items]).where("orders.id IN (?) AND status = 'awaiting'", tote_set.totes.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? tote_set.totes.where(pending_order: false).pluck(:order_id).compact }.first
+      if pending_order
+        @result[:no_order] = false
+        @result[:pending_order] = true
+        @result[:order] = pending_order
+        @result[:product] = product
+        @result[:barcode] = product.primary_sku
+        @result[:can_complete_order] = pending_order.get_unscanned_items.count == 1 && pending_order.get_unscanned_items[0]['qty_remaining']
+        @result[:order_item] = pending_order.order_items.where(product_id: product.id).first
+        @result[:order_items_scanned] = pending_order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
+        @result[:order_items_unscanned] = pending_order.get_unscanned_items.select { |item| item['scanned_qty'] == 0 }
+        @result[:order_items_partial_scanned] = pending_order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 }
+        @result[:tote] = pending_order.tote
+        @result[:tote_name_identifier] = @scanpack_setting.tote_identifier + ' ' + @result[:tote].name
+        @result[:barcode_input] = input
+      else
+        # If there are no open orders requiring the item that was scanned we will alert the user: Sorry, no orders require that item.
+        @result[:notice_messages] = 'Sorry, no orders can be found that require that item. Please check that all orders have been imported. If this is a new item that may not have the barcode saved you can search for the item by SKU in the products section and add it.'
+      end
     end
 
     @result

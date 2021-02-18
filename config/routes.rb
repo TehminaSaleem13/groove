@@ -140,6 +140,7 @@ Groovepacks::Application.routes.draw do
       post 'record_exception'
       post 'clear_exception'
       get 'importorders'
+      get 'clear_order_tote'
     end
   end
 

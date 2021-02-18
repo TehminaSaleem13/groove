@@ -135,11 +135,7 @@ module Groovepacker
         order_ids = orders.pluck(:id)
         init_results
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
-        orders.each do |order|
-          order.addactivity("Order manually cleared from #{ScanPackSetting.last.tote_identifier} #{order.tote.name}.", User.find_by_id(user_id).try(:name)) if order.tote
-          order.tote.update_attributes(order_id: nil, pending_order: false) if order.tote
-          order.reset_scanned_status(User.find_by_id(user_id))
-        end
+        orders.each { |order| order.reset_assigned_tote(user_id) }
         bulk_action.update_attributes(completed: orders.count)
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}") 

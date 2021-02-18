@@ -114,6 +114,11 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def clear_order_tote
+    @order.reset_assigned_tote(current_user.id)
+    render json: { status: true }
+  end
+
   def show
     unless @order.nil?
       @result['order'] = {'basicinfo' => @order}
