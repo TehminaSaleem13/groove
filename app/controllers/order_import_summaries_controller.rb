@@ -125,11 +125,12 @@ class OrderImportSummariesController < ApplicationController
       result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue (DateTime.now - 4.days).strftime('%Y-%m-%d %H:%M:%S')
       result[:current_time] = Time.zone.now.strftime('%Y-%m-%d %H:%M:%S')
     else
-      if store.regular_import_v2
-        result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
-      else
-        result[:last_imported_at] = cred.quick_import_last_modified.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : (cred.quick_import_last_modified - 8.hours).strftime('%Y-%m-%d %H:%M:%S')
-      end
+      # if store.regular_import_v2
+      #   result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
+      # else
+      #   result[:last_imported_at] = cred.quick_import_last_modified.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : (cred.quick_import_last_modified - 8.hours).strftime('%Y-%m-%d %H:%M:%S')
+      # end
+      result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
       result[:current_time] = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(Time.zone.now.to_s).strftime('%Y-%m-%d %H:%M:%S')
     end
   end

@@ -42,7 +42,8 @@ module ScanPack
         # @result["data"]["order"]['se_all_shipments'] = se_all_shipments(order) if order.store.store_type == 'ShippingEasy' && @result["data"]["order"]['se_old_shipments'].blank?
       end
       if @result["data"]["next_state"]=="scanpack.rfo" && !@result["matched"] && @result['do_on_demand_import']
-       stores = Store.where("status=? and on_demand_import=?", true, true)
+      #  stores = Store.where("status=? and on_demand_import=?", true, true)
+       stores = Store.where("status=? and on_demand_import=?", true, true) | Store.where("status=? and store_type=?", true, 'Shipstation API 2')
        check_stores = Store.where("status=? and on_demand_import_v2=?", true, true)
        run_import_for_not_found_order if (stores.present? || check_stores.present?)
       end

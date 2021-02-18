@@ -19,13 +19,15 @@ module Groovepacker
         end
 
         def import_orders
-          if @store.regular_import_v2 == true
-            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).import
-          else
-            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
-              self.build_handle).import
-          end
+          # if @store.regular_import_v2 == true
+          #   Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+          #     self.build_handle).import
+          # else
+          #   Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
+          #     self.build_handle).import
+          # end
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+            self.build_handle).import
         end
 
         def import_images
@@ -54,13 +56,15 @@ module Groovepacker
         end
 
         def import_single_order_from(order_no, user_id, on_demand_quickfix, controller)
-          if @store.on_demand_import_v2 == true
-            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).import_single_order(order_no, user_id, on_demand_quickfix, controller)
-          else
-            Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
-              self.build_handle).import_single_order(order_no)
-          end
+          # if @store.on_demand_import_v2 == true
+          #   Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+          #     self.build_handle).import_single_order(order_no, user_id, on_demand_quickfix, controller)
+          # else
+          #   Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
+          #     self.build_handle).import_single_order(order_no)
+          # end
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+            self.build_handle).import_single_order(order_no, user_id, on_demand_quickfix, controller)
         end
 
         def find_or_create_product(item)

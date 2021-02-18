@@ -15,7 +15,7 @@ module Groovepacker
             )
           end
       end
-
+      
       if OrderTag.where(:name => 'Contains New').length == 0
         contains_new_tag = OrderTag.create(:name => 'Contains New', :color => '#FF0000', :predefined => true)
       end
@@ -55,7 +55,7 @@ module Groovepacker
       end
 
       if ScanPackSetting.all.length == 0
-        ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number => false, :intangible_setting_enabled => true, :intangible_setting_gen_barcode_from_sku => true, :intangible_string => "Coupon:")
+        ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number => false, :intangible_setting_enabled => true, :intangible_setting_gen_barcode_from_sku => true, :intangible_string => "Coupon:", replace_gp_code: true)
       end
 
       [

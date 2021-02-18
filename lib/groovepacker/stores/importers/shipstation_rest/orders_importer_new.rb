@@ -123,17 +123,19 @@ module Groovepacker
           def notify_and_reset_lro(store_orders)
             @regular_import_triggered = true
             Order.emit_notification_ondemand_quickfix(@notify_user_id) if @notify_regular_import
-            @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
+            # @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
+            @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank?
           end
 
           def get_qf_range_start_date
-            if @store.regular_import_v2 && @credential.quick_import_last_modified_v2
-              @credential.quick_import_last_modified_v2
-            elsif @store.regular_import_v2 == false && @credential.quick_import_last_modified
-              @credential.quick_import_last_modified - 8.hours
-            else
-              convert_to_pst(1.day.ago)
-            end
+            # if @store.regular_import_v2 && @credential.quick_import_last_modified_v2
+            #   @credential.quick_import_last_modified_v2
+            # elsif @store.regular_import_v2 == false && @credential.quick_import_last_modified
+            #   @credential.quick_import_last_modified - 8.hours
+            # else
+            #   convert_to_pst(1.day.ago)
+            # end
+            @credential.quick_import_last_modified_v2 ? @credential.quick_import_last_modified_v2 : convert_to_pst(1.day.ago)
           end
 
           def get_gp_time_in_pst(time)
@@ -388,7 +390,8 @@ module Groovepacker
               Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
               shipstation_order = find_or_init_new_order(order)
               import_order_form_response(shipstation_order, order, shipments_response)
-              @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
+              # @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
+              @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
             end
 
             def fetch_orders_if_import_type_is_not_tagged(response)

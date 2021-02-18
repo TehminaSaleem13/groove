@@ -427,11 +427,12 @@ module StoresHelper
       if store_orders_blank
         get_time_in_pst(1.day.ago)
       else
-        if store.regular_import_v2
-          !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
-        else
-          !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified - 8.hours : get_time_in_pst(1.day.ago)
-        end
+        # if store.regular_import_v2
+        #   !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
+        # else
+        #   !credential.quick_import_last_modified.nil? ? credential.quick_import_last_modified - 8.hours : get_time_in_pst(1.day.ago)
+        # end
+        !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
       end
     elsif store.store_type == 'ShippingEasy'
       store_orders_blank ? (credential.last_imported_at.nil? ? 1.day.ago : credential.last_imported_at) : 1.day.ago
