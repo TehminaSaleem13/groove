@@ -39,7 +39,7 @@ class ExportOrder < ActionMailer::Base
       #import_orders_obj.reschedule_job('export_order', tenant)
       #File.delete(file_locatin) rescue nil
     rescue => e
-      ExportOrder.failed_export(e).deliver      
+      ExportOrder.failed_export(e).deliver
     end
   end
 

@@ -100,7 +100,7 @@ class ExportsettingsController < ApplicationController
           )
         # export_setting.export_data(Apartment::Tenant.current)
         # export_setting.update_attributes(manual_export: false)
-        ExportOrder.delay(priority: 95).export(Apartment::Tenant.current).deliver!
+        ExportOrder.delay(priority: 95).export(Apartment::Tenant.current)
       else
         update_false_status(result, 'We need a start and an end time')
       end
