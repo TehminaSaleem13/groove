@@ -10,7 +10,7 @@
       <div id="main_div" style="width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:80pt;background:white;max-height:80pt">
         <% if !item.product.nil? && !item.product.product_barcodes.first.nil? && !item.product.product_barcodes.first.barcode.nil? %>
           <div style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
-            <% unless item.product.primary_sku.nil? %>
+            <% if @show_sku_in_barcodeslip && item.product.primary_sku.present? %>
               <div style="font-size: 13pt;font-weight: bold;max-height:13pt;width:100%;overflow:hidden;text-overflow:clip;white-space: nowrap;line-height: 13pt;text-align:justify"><%= item.product.primary_sku %></div>
             <% end %>
 

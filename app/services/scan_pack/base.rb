@@ -191,18 +191,20 @@ module ScanPack
     end
 
     def generate_barcodes_pdf_and_url(type, items, action_view)
+      general_settings = GeneralSetting.last
       file_name = Apartment::Tenant.current + Time.now.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_bulk_barcode_generation_#{type}"
-      show_bin_locations = GeneralSetting.last.try(:show_primary_bin_loc_in_barcodeslip)
+      show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
+      show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
       case type
       when 'order_items'
         pdf_template = 'products/bulk_barcode_generation.html.erb'
 
-        template_locals = {:@order_items => items, :@show_bin_locations => show_bin_locations}
+        template_locals = { :@order_items => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip }
         height_per_page = '1in'
         reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
       when 'products'
         pdf_template = 'products/print_barcode_label.html.erb'
-        template_locals = {:@products => items, :@show_bin_locations => show_bin_locations}
+        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip }
         height_per_page = '1in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end

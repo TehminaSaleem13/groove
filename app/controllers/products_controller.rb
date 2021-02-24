@@ -287,7 +287,9 @@ class ProductsController < ApplicationController
   #This method will genearte barcode pdf file and store it in S3 and return url of the file from S3.
   def generate_barcode_slip
     require 'wicked_pdf'
-    @show_bin_locations = GeneralSetting.last.try(:show_primary_bin_loc_in_barcodeslip)
+    general_settings = GeneralSetting.last
+    @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
+    @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
     @item = OrderItem.find(params[:item_id]) rescue nil
     @product = Product.find(params[:id])
     @barcode = params["barcode"]
@@ -316,8 +318,10 @@ class ProductsController < ApplicationController
 
   def bulk_barcode_pdf
     require 'wicked_pdf'
+    general_settings = GeneralSetting.last
     order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
-    @show_bin_locations = GeneralSetting.last.try(:show_primary_bin_loc_in_barcodeslip)
+    @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
+    @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
     @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
     respond_to do |format|
       format.html

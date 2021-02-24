@@ -26,7 +26,8 @@ class GeneralSetting < ActiveRecord::Base
   #                 :time_zone, :auto_detect, :schedule_import_mode, :master_switch, :idle_timeout, :hex_barcode,
   #                 :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
   #                 :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import,
-  #                 :print_post_scanning_barcodes, :print_packing_slips, :print_ss_shipping_labels
+  #                 :print_post_scanning_barcodes, :print_packing_slips, :print_ss_shipping_labels, :per_box_shipping_label_creation,
+  #                 :starting_value, :barcode_length, :show_sku_in_barcodeslip
   # validates_format_of :email_address_for_packer_notes, with: Devise.email_regexp, allow_blank: true
   validates :email_address_for_packer_notes, :format => { :with => /(\A([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,})(,\s*([\w\.%\+\-]+)@([\w\-]+\.)+([\w]{2,}))*\z)/i }, :allow_blank => true
   after_save :send_low_inventory_alert_email
