@@ -13,16 +13,16 @@
           <div style="font-size: 13pt;font-weight: bold;max-height:13pt;width:100%;overflow:hidden;text-overflow:clip;white-space: nowrap;line-height: 13pt;text-align:justify"><%= product.primary_sku %></div>
         <% end %>
 
-        <% if product.name.length <= 63 %>
-          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:14pt;line-height: 12pt;text-align:justify;word-break: break-all;"><%= product.name %></div> 
-        <% elsif product.name.length > 63 && product.name.length < 72 %>
-          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:38pt;line-height: 12pt;text-align:justify;word-break: break-all;"><%= product.name %></div> 
+        <% if product.name.length <= 40 %>
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:14pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= product.name %></div> 
+        <% elsif product.name.length > 40 && product.name.length < 72 %>
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= product.name %></div> 
         <% elsif product.name.length > 72 %>
-          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:38pt;line-height: 12pt;text-align:justify;word-break: break-all;"><%= product.name %></div> 
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= product.name %></div> 
         <% end %>
 
         <% if @show_bin_locations && product.primary_warehouse && (product.primary_warehouse.location_primary.present? || product.primary_warehouse.location_secondary.present? || product.primary_warehouse.location_tertiary.present?) %>
-          <div style="font-size: 11pt;font-weight: bold;width: 100%;overflow:hidden;max-height:11pt;line-height: 11pt;">
+          <div style="font-size: 11pt;font-weight: bold;width: 100%;overflow:hidden;max-height:11pt;line-height: 11pt;padding-bottom: 1pt;">
             <% locations = [product.primary_warehouse.location_primary, product.primary_warehouse.location_secondary, product.primary_warehouse.location_tertiary, '', nil].select(&:present?) %>
             <% locations.each_with_index do |loc, index| %>
               <div style="display:inline-block;float:left;width:<%= 100/locations.count.to_f.round(2) %>%;<%= 'text-align:center;' if index == 1 && locations.count == 3 %><%= 'text-align:right;' if index == 2 && locations.count == 3 %><%= 'text-align:right;' if index == 1 && locations.count == 2 %><%= 'text-align:center;' if locations.count == 1 %>">
