@@ -398,7 +398,7 @@ module OrderMethodsHelper
       "carrierCode" => ss_label_data['carrierCode'],
       "serviceCode" => ss_label_data['serviceCode'],
       "confirmation" => ss_label_data['confirmation'],
-      "shipDate" => Time.zone.parse(ss_label_data['shipDate']).strftime("%a, %d %b %Y"),
+      "shipDate" => ss_label_data['shipDate'].present? ? Time.zone.parse(ss_label_data['shipDate']).strftime("%a, %d %b %Y") : Time.current.strftime("%a, %d %b %Y"),
       "weight" => { "value"=> ss_label_data['weight']['value'], "units"=> ss_label_data['weight']['units'] }
     }
     post_data.merge!("dimensions" => ss_label_data['dimensions']) if ss_label_data['dimensions'].present? && ss_label_data['dimensions']['units'].present? && ss_label_data['dimensions']['length'].present? && ss_label_data['dimensions']['width'].present? && ss_label_data['dimensions']['height'].present?
@@ -406,7 +406,7 @@ module OrderMethodsHelper
   end
 
   def check_valid_label_data
-    ss_label_data['shipDate'].present? && ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present? && ss_label_data['weight']['WeightUnits'].present?
+    ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present? && ss_label_data['weight']['WeightUnits'].present?
   end
   
   def create_label(credential_id, post_data)
