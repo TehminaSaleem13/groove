@@ -393,7 +393,7 @@ class Order < ActiveRecord::Base
             product: %i(product_skus product_images product_barcodes)
           ]
         ],
-        product: %i(product_skus product_images product_barcodes)
+        product: %i(product_skus product_images product_barcodes product_inventory_warehousess)
       )
     end
   rescue

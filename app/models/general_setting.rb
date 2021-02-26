@@ -72,10 +72,11 @@ class GeneralSetting < ActiveRecord::Base
     if @@all_tenants_settings.nil?
       @@all_tenants_settings = {}
     end
-    if @@all_tenants_settings[Apartment::Tenant.current].nil?
-      @@all_tenants_settings[Apartment::Tenant.current] = self.all.first
+    current_tenant = Apartment::Tenant.current
+    if @@all_tenants_settings[current_tenant].nil?
+      @@all_tenants_settings[current_tenant] = self.all.first
     end
-    @@all_tenants_settings[Apartment::Tenant.current]
+    @@all_tenants_settings[current_tenant]
   end
 
   def self.unset_setting

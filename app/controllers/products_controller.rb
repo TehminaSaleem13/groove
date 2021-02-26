@@ -322,7 +322,7 @@ class ProductsController < ApplicationController
     order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
     @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
     @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
-    @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
+    @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).where("id in (?)", order_ids).map(&:order_items).flatten
     respond_to do |format|
       format.html
       format.pdf {

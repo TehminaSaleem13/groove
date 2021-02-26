@@ -297,7 +297,7 @@ class OrdersController < ApplicationController
 
   def import_xml
     begin
-      order_import_summary = OrderImportSummary.find(params[:import_summary_id])
+      order_import_summary = OrderImportSummary.includes(:import_items).find(params[:import_summary_id])
       import_item = order_import_summary.import_items.where(store_id: params[:store_id])
       import_item = import_item.first
     rescue

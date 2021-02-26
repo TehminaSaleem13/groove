@@ -186,8 +186,8 @@ class StoresController < ApplicationController
   end
 
   def csv_map_data
-    result = {'product' => CsvMap.where(kind: 'product'), 'order' => CsvMap.where(kind: 'order'), 'kit' => CsvMap.where(kind: 'kit')}
-    render json: result
+    csv_maps = CsvMap.where(kind: %w[product order kit]).group_by(&:kind)
+    render json: { 'product' => csv_maps['product'], 'order' => csv_maps['order'], 'kit' => csv_maps['kit'] }
   end
 
   def delete_csv_map
@@ -320,8 +320,8 @@ class StoresController < ApplicationController
 
   def show
     @store = Store.find_by_id(params[:id])
-    @result = {"is_fba" => Tenant.find_by_name(Apartment::Tenant.current).try(:is_fba)}
-    @result = @result.merge!({'ss_api_create_label' => Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label), "product_ftp_import" => Tenant.find_by_name(Apartment::Tenant.current).try(:product_ftp_import)})
+    tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    @result = { 'is_fba' => tenant.try(:is_fba), 'ss_api_create_label' => tenant.try(:ss_api_create_label), 'product_ftp_import' => tenant.try(:product_ftp_import) }
     show_store
     render json: @result
   end

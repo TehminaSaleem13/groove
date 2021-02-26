@@ -12,8 +12,9 @@ module Groovepacker
 
         def process
           tenant = Apartment::Tenant.current
+          @current_tenant = tenant
           result = {status: true, errors: [], order: nil}
-          order = Order.find_by_increment_id(@order.increment_id)
+          order = Order.includes(order_items: :product).find_by_increment_id(@order.increment_id)
           @old_order = Order.find_by_increment_id(@order.increment_id)
           @update_count = 0
           @emit_value = false
@@ -46,7 +47,7 @@ module Groovepacker
           order_persisted = order.persisted? ? true : false
           begin
             if order.save!
-              if (Apartment::Tenant.current == "living" || Apartment::Tenant.current == "unitedmedco" || Apartment::Tenant.current == "toririchard")
+              if @current_tenant.in? %w[living unitedmedco toririchard]
                 order_item_dup = OrderItem.where("created_at >= ?", Time.now.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
                 unless order_item_dup.empty?
                   order_item_dup.each do |i|
@@ -279,7 +280,7 @@ module Groovepacker
           @gp_coupon_found  = false
           first_sku = order_item_XML[:product][:skus].first
           unless first_sku.nil?
-            product_sku = ProductSku.find_by_sku(first_sku)
+            product_sku = ProductSku.includes(product: :store).find_by_sku(first_sku)
             if product_sku.nil?
               # add product
               if check_for_replace_product
