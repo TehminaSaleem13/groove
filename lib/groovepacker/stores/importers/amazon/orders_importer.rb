@@ -148,7 +148,7 @@ module Groovepacker
 
           def check_shipping_order(order)
             unless order.shipping_address.nil?
-              split_name = order.shipping_address.name.split(' ')
+              split_name = order.shipping_address.name.to_s.split(' ')
               @order.assign_attributes(address_1: order.shipping_address.address_line1, city: order.shipping_address.city, country: order.shipping_address.country_code, postcode: order.shipping_address.postal_code, state: order.shipping_address.state_or_region, email: order.buyer_email, lastname: split_name.pop, firstname: split_name.join(' '))
             end
           end
