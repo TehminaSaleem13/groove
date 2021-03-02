@@ -1,6 +1,12 @@
 GIT
-  remote: https://github.com/navaratan-tech/ruby-mws.git
-  revision: 6e52b2217e685dcfde60e764e680d97a6faecd99
+  remote: https://github.com/kcpatel006/ebay4r.git
+  revision: 464fb8f7c3222d67853f23f95b3bfc6bbee6975a
+  specs:
+    ebay (1.1)
+
+GIT
+  remote: https://github.com/kcpatel006/ruby-mws.git
+  revision: 8dd63bf0b596bc624990f6c4ccec62273d103f38
   specs:
     ruby-mws (0.0.8)
       hashie
@@ -240,7 +246,6 @@ GEM
       dotenv (= 2.7.5)
       railties (>= 3.2, < 6.1)
     dry-inflector (0.2.0)
-    ebay (1.1)
     email_spec (2.2.0)
       htmlentities (~> 4.3.3)
       launchy (~> 2.1)
@@ -439,7 +444,7 @@ GEM
     http-accept (1.7.0)
     http-cookie (1.0.3)
       domain_name (~> 0.5)
-    httparty (0.18.0)
+    httparty (0.18.1)
       mime-types (~> 3.0)
       multi_xml (>= 0.5.2)
     httpclient (2.8.3)
@@ -845,7 +850,7 @@ DEPENDENCIES
   devise
   doorkeeper (~> 5.0.0)
   dotenv-rails
-  ebay (~> 1.1)
+  ebay (= 1.1)!
   email_spec (>= 1.4.0)
   excon
   factory_bot_rails
@@ -885,7 +890,7 @@ DEPENDENCIES
   rspec_junit_formatter (~> 0.4.0.pre2)
   rubber
   rubocop (~> 0.51.0)
-  ruby-mws (~> 0.0.8)!
+  ruby-mws!
   ruby_odata
   rubycritic (~> 2.0.0)
   rubyzip
