@@ -71,6 +71,7 @@ class ExportOrder < ActionMailer::Base
     result['onhold'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'onhold').size
     result['cancelled'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'cancelled').size
     result['service_issue'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'serviceissue').size
+    result['incorrect_scans'] = scanned_orders.pluck(:inaccurate_scan_count).sum
     # result['total'] = result['imported'] + result['scanned']
     result
   end

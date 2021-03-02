@@ -141,6 +141,7 @@ module ScanPack
           if check_scanning_item(unscanned_items,clean_input)
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
+            @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
             @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
             @result['status'] &= false
             message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : 'Please scan items in the suggested order'
@@ -163,6 +164,7 @@ module ScanPack
           if list.empty? || list.include?(clean_input) || check_for_skip_settings(clean_input)
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
+            @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
             @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
             @result['status'] &= false
             @result['error_messages'].push("Please scan items in the suggested order")

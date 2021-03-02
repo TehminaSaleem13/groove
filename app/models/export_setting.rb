@@ -146,6 +146,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:zip] = order.postcode
     single_row[:customer_name] = order.customer_name
     single_row[:tracking_num] = order.tracking_num
+    single_row[:incorrect_scans] = order.inaccurate_scan_count
   end
 
   def update_single_row_for_packing_user(single_row, order_item, order)
@@ -246,7 +247,8 @@ class ExportSetting < ActiveRecord::Base
       packing_user: '',
       scanned_date: '',
       click_scanned_qty: '',
-      tracking_num: ''
+      tracking_num: '',
+      incorrect_scans: ''
     }
   end
 
@@ -258,6 +260,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_date] = order.order_placed_time
     single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M:%S %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M:%S %p")
     single_row[:tracking_num] = order.tracking_num
+    single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row
   end
 

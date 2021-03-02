@@ -14,6 +14,7 @@
             <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">New & Existing Orders Scanned Today: <span><%= @counts['scanned'] %></span></h2>
             <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Items Scanned Today (New & Existing Orders): <span><%= @counts['item_scanned'] %></span></h2>
             <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">New Orders Imported Today But Not Scanned: <span><%= @counts['unscanned'].to_i %></span></h2>
+            <h2 style="margin: 0; line-height: 40px; font-family: 'Play',sans-serif">Incorrect Scans: <span><%= @counts['incorrect_scans'].to_i %></span></h2>
           </div>
           <div style="width: 50%; float: right;">
             <% if @counts['imported'] > 0 %>
