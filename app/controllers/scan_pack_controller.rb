@@ -219,11 +219,13 @@ class ScanPackController < ApplicationController
     when 'assigned_to_tote'
       begin
         tote = params[:tote][:id].present? ? Tote.find(params[:tote][:id]) : Tote.create(params[:tote].permit!)
-        if tote.name.downcase == params[:tote_barcode].downcase
-          order_item = OrderItem.find(params[:order_item_id])
-          tote.order = order_item.order
+        order_item = OrderItem.find(params[:order_item_id])
+        order = order_item.order
+        if tote.order != order
+          @result[:status] = false
+          @result[:error_messages] = "Whoops! The #{@scanpack_setting.tote_identifier} is already assigned. Please clear the #{@scanpack_setting.tote_identifier} for the order from Orders List and try again."
+        elsif tote.name.downcase == params[:tote_barcode].downcase
           if tote.save
-            order = order_item.order
             barcode = ProductBarcode.find_by_barcode(params[:barcode_input])
             order.update_attributes(last_suggested_at: DateTime.now)
             order_item.process_item(nil, @current_user.username, 1, nil)
