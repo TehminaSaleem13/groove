@@ -137,6 +137,7 @@ class OrderItem < ActiveRecord::Base
         result['qty_remaining'] =
           self.qty - self.scanned_qty
       end
+      result['total_qty'] = qty
     end
     result
   end
@@ -154,6 +155,7 @@ class OrderItem < ActiveRecord::Base
       child_item['qty_remaining'] = self.qty * kit_product.cached_product_kit_skus.qty -
         kit_product.scanned_qty
     end
+    child_item['total_qty'] = qty
     child_item['kit_packing_placement'] = kit_product.cached_product_kit_skus.packing_order
     child_item['kit_product_id'] = kit_product.id
     child_item['updated_at'] = self.updated_at
@@ -177,6 +179,7 @@ class OrderItem < ActiveRecord::Base
       result['qty_remaining'] = self.qty - self.scanned_qty
     end
     result['scanned_qty'] = self.scanned_qty
+    result['total_qty'] = qty
     result['child_items'] = []
     result
   end
