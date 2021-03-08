@@ -128,7 +128,7 @@ module PaymentsHelper
 
   def calculate_discount_amount(coupon_id)
     create_result_hash
-    coupons = Stripe::Coupon.all(limit: 30)
+    coupons = Stripe::Coupon.list(limit: 30)
     valid = false
     @result['discount_amount'] = 0
     coupons.each do |coupon|

@@ -121,6 +121,16 @@ class SubscriptionsController < ApplicationController
     render json: result
   end
 
+  def create_payment_intent
+    intent = Stripe::PaymentIntent.create(
+      amount: params[:amount].to_i,
+      currency: 'usd',
+      metadata: { integration_check: 'accept_a_payment' }
+    )
+ 
+    render json: { client_secret: intent.client_secret, stripe_public_key: ENV['STRIPE_PUBLIC_KEY'] }.to_json
+  end
+
   private
 
   def create_store_and_credential

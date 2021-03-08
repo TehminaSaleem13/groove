@@ -130,7 +130,7 @@ class Subscription < ActiveRecord::Base
   end
 
   def create_transaction(customer)
-    transactions = Stripe::BalanceTransaction.all(:limit => 1)
+    transactions = Stripe::BalanceTransaction.list(:limit => 1)
     @transaction = transactions.first
     if @transaction
       self.stripe_transaction_identifier = @transaction.id

@@ -393,6 +393,7 @@ Groovepacks::Application.routes.draw do
       get 'complete'
       get 'shopify_final_process'
       get 'get_one_time_payment_fee'
+      post 'create_payment_intent'
     end
   end
 
