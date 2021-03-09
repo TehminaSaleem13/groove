@@ -159,7 +159,7 @@ module Groovepacker
                 usable_record[:all_barcodes]["0"] = barcodes
                 barcodes.each do |single_barcode|
                   usable_record[:all_barcodes_qty][single_barcode] = barcode_qty
-                  break unless ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!@all_barcodes.include? single_barcode.strip)
+                  break unless (ProductBarcode.where(:barcode => single_barcode.strip).empty? && (!@all_barcodes.include? single_barcode.strip)) || params['permit_duplicate_barcodes']
                   @all_barcodes << single_barcode.strip
                   usable_record[:barcodes] << single_barcode.strip
                 end

@@ -60,6 +60,10 @@ every 1.day, :at => '7:40 am' do
   rake "doo:schedule_inventory_email"
 end
 
+every 1.day, :at => '2:00 am' do
+  rake "product_ftp_csv_file_import:ftp_product_import"
+end
+
 every 1.day, :at => '7:50 am' do
   rake "doo:schedule_orders_export_email"
 end

@@ -194,6 +194,7 @@ module StoresHelper
       contains_unique_order_items: params[:contains_unique_order_items],
       generate_barcode_from_sku: params[:generate_barcode_from_sku],
       use_sku_as_product_name: params[:use_sku_as_product_name],
+      permit_duplicate_barcodes: params[:permit_duplicate_barcodes],
       order_placed_at: params[:order_placed_at],
       order_date_time_format: params[:order_date_time_format],
       day_month_sequence: params[:day_month_sequence],
