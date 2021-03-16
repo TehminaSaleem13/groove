@@ -18,7 +18,7 @@
               <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:14pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= item.product.name %></div> 
             <% elsif item.product.name.length > 40 && item.product.name.length < 72 %>
               <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= item.product.name %></div> 
-            <% elsif item.product.name.length > 72 %>
+            <% elsif item.product.name.length >= 72 %>
               <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= item.product.name %></div> 
             <% end %>
 
