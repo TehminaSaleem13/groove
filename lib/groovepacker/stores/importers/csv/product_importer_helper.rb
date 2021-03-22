@@ -334,7 +334,7 @@ module Groovepacker
                   new_order = 0
                   record[:barcodes].each do |barcode|
                     if barcode != "[DELETE]"
-                      unless @found_barcodes.include? barcode
+                      if params['permit_duplicate_barcodes'] || !(@found_barcodes.include? barcode)
                         begin
                           product_barcode = ProductBarcode.new
                           product_barcode.barcode = barcode
