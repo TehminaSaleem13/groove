@@ -128,8 +128,8 @@ module Groovepacker
 		    @shipstation.shall_import_shipped = params[:shall_import_shipped].to_boolean
 		    @shipstation.shall_import_pending_fulfillment = params[:shall_import_pending_fulfillment].to_boolean
 		    @shipstation.warehouse_location_update = params[:warehouse_location_update].to_boolean
-		    @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes].to_boolean
-		    @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes].to_boolean
+		    @shipstation.shall_import_customer_notes = params[:shall_import_customer_notes].to_boolean unless params[:shall_import_customer_notes].nil?
+		    @shipstation.shall_import_internal_notes = params[:shall_import_internal_notes].to_boolean unless params[:shall_import_internal_notes].nil?
 		    @shipstation.regular_import_range = params[:regular_import_range] unless params[:regular_import_range].nil?
 		    @shipstation.gen_barcode_from_sku = params[:gen_barcode_from_sku].to_boolean
 		    @shipstation.return_to_order = params[:return_to_order].to_boolean
