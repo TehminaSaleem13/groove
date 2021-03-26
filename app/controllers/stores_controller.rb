@@ -250,6 +250,48 @@ class StoresController < ApplicationController
     render json: @result
   end
 
+  def csv_check_data
+    check_store
+    data = {
+      flag: params[:flag],
+      type: params[:type],
+      fix_width: params[:fix_width],
+      fixed_width: params[:fixed_width],
+      sep: params[:sep],
+      delimiter: params[:delimiter],
+      rows: params[:rows],
+      map: params[:map].to_unsafe_h,
+      store_id: params[:store_id],
+      user_id: current_user.id,
+      import_action: params[:import_action],
+      contains_unique_order_items: params[:contains_unique_order_items],
+      generate_barcode_from_sku: params[:generate_barcode_from_sku],
+      use_sku_as_product_name: params[:use_sku_as_product_name],
+      permit_duplicate_barcodes: params[:permit_duplicate_barcodes],
+      order_placed_at: params[:order_placed_at],
+      order_date_time_format: params[:order_date_time_format],
+      day_month_sequence: params[:day_month_sequence],
+      reimport_from_scratch: params[:reimport_from_scratch],
+      encoding_format: params[:encoding_format]
+    }
+
+    @result = {}
+    result = ImportCsv.new.check_import_file(Apartment::Tenant.current, data)
+    message_text = ''
+    result.keys.each do |type|
+      if result[type].count > 5
+        message_text << result[type].first(5).join('<br>') + '.... and so on.<br>'
+      else
+        message_text << result[type].join('<br>')
+      end
+      message_text << '<br>' unless result[type].blank?
+    end
+    @result[:messages] = message_text
+    @result[:status] = !message_text.present?
+
+    render json: @result
+  end
+
   def file_delete(file_path, type)
     if File.exists? file_path
       file_data = IO.read(file_path, 40960)
