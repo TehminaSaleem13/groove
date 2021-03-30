@@ -11,3 +11,7 @@ Delayed::Backend::ActiveRecord::Job.class_eval do
     #                 :last_error, :attempts
   end
 end
+
+Delayed::Backend::ActiveRecord.configure do |config|
+  config.reserve_sql_strategy = :default_sql
+end
