@@ -111,6 +111,6 @@ gem "delayed_job_web"
 gem 'rack-cors', :require => 'rack/cors'
 gem 'rollbar'
 gem 'whenever', :require => false
-gem 'scout_apm'
+gem 'scout_apm', '~> 3.0.x'
 gem 'ahoy_matey','~> 2.2.0'
 gem "appsignal"
