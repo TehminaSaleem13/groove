@@ -14,7 +14,7 @@ module Groovepacker
               @store_product_import.try(:destroy)
               Product.emit_message_for_access_token
             end
-            if response["products"] == [nil]
+            if response["products"] == nil
               @store_product_import.try(:destroy)
               Product.emit_message_for_access_token
               return

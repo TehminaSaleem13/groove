@@ -85,8 +85,8 @@ module ScanPackHelper
         @result[:order_items_partial_scanned] = []
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
         tote.update_attributes(order_id: order.id, pending_order: true)
-        current_item['scanned_qty'] = current_item['scanned_qty'] + 1
-        current_item['qty_remaining'] = current_item['qty_remaining'] - 1
+        current_item['scanned_qty'] = current_item['scanned_qty'] + 1 rescue nil
+        current_item['qty_remaining'] = current_item['qty_remaining'] - 1 rescue nil
         @result[:barcode_input] = input
         order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{tote.name}.", @current_user.name)
         @result[:order_items_scanned] << current_item
@@ -108,8 +108,8 @@ module ScanPackHelper
         @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
         tote.update_attributes(order_id: order.id, pending_order: true)
-        current_item['scanned_qty'] = current_item['scanned_qty'] + 1
-        current_item['qty_remaining'] = current_item['qty_remaining'] - 1
+        current_item['scanned_qty'] = current_item['scanned_qty'] + 1 rescue nil 
+        current_item['qty_remaining'] = (current_item['qty_remaining'] || 0) - 1
         current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
         order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{tote.name}.", @current_user.name)
         @result[:barcode_input] = input
@@ -139,8 +139,8 @@ module ScanPackHelper
       @result[:order_items_unscanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
       @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
       current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
-      current_item['scanned_qty'] = current_item['scanned_qty'] + 1
-      current_item['qty_remaining'] = current_item['qty_remaining'] - 1
+      current_item['scanned_qty'] = current_item['scanned_qty'] + 1 rescue nil
+      current_item['qty_remaining'] = (current_item['qty_remaining'] || 0) - 1
       current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
       @result[:barcode_input] = input
       order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{available_tote.name}.", @current_user.name)
