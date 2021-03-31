@@ -69,12 +69,14 @@ module CachedMethods
   define_method('update_cache_keys') do |key|
     keys = Rails.cache.read(multi_key) || []
     keys << key
+    keys = keys.class == String ? Marshal.load(keys) : keys
     Rails.cache.write(multi_key, keys.uniq)
   end
 
   def delete_cache
     cached = Rails.cache.read(multi_key)
     return unless cached
+    cached = cached.class == String ? Marshal.load(cached) : cached
     cached.each { |key| Rails.cache.delete(key) }
     Rails.cache.delete(multi_key)
   end
@@ -92,7 +94,7 @@ module CachedMethods
   end
 
   def tenant_value
-    Apartment::Tenant.current
+    @tenant_value ||= Apartment::Tenant.current
   end
 
   def read_multi(key)
