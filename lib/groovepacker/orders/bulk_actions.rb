@@ -128,7 +128,7 @@ module Groovepacker
       # end
 
       def clear_assigned_tote(current_tenant, bulkaction_id, user_id)
-        Apartment::Tenant.switch(current_tenant)
+        Apartment::Tenant.switch!(current_tenant)
         bulk_action = GrooveBulkActions.find(bulkaction_id)
         orders = $redis.get("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}")
         orders = Marshal.load(orders)
