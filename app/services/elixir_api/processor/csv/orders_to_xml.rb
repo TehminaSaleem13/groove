@@ -71,6 +71,7 @@ module ElixirApi
           key = redis_key_for_elixir_pid
           val = response['data']['pid'].to_s
           Rails.cache.write(key, val)
+        rescue
         end
 
         def find_elixir_process_pid
