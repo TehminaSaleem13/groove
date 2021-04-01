@@ -519,12 +519,14 @@ module Groovepacker
 
       def update_stripe_subscription(plan_id)
         @customer = get_stripe_customer(@subscription.stripe_customer_id)
+        plan = Stripe::Plan.retrieve(plan_id) rescue nil
         if @customer
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
           @trial_end_time = subscription.trial_end
+          customer_subscription = @customer.subscriptions.first
           if @trial_end_time && (@trial_end_time > Time.now.to_i)
             begin
-              @customer.update_subscription(plan: plan_id, trial_end: @trial_end_time, prorate: false)
+              Stripe::Subscription.update(customer_subscription.id, plan: plan, trial_end: @trial_end_time, prorate: false)
               @updated_in_stripe = true
             rescue Exception => e
               Rollbar.error(e, e.message)
@@ -532,7 +534,7 @@ module Groovepacker
             end  
           else
             begin
-              @customer.update_subscription(plan: plan_id, prorate: true)
+              Stripe::Subscription.update(customer_subscription.id, plan: plan, prorate: true)
               @updated_in_stripe = true
             rescue Exception => e
                Rollbar.error(e, e.message)
