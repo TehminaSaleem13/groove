@@ -14,6 +14,7 @@ class Order < ActiveRecord::Base
   has_many :order_activities, :dependent => :destroy
   has_many :order_serials, :dependent => :destroy
   has_and_belongs_to_many :order_tags
+  before_save :assign_increment_id
   after_update :update_inventory_levels_for_items
   before_save :perform_pre_save_checks
   # before_save :unique_order_items
@@ -33,6 +34,12 @@ class Order < ActiveRecord::Base
   ALLOCATE_STATUSES = ['awaiting', 'onhold', 'serviceissue']
   UNALLOCATE_STATUSES = ['cancelled']
   SOLD_STATUSES = ['scanned']
+
+  def assign_increment_id
+    return if increment_id.present?
+
+    self.increment_id = Order.get_temp_increment_id
+  end
 
   def check_for_duplicate
     duplicate_condition  = (self.store.store_type == "ShippingEasy" && self.store.shipping_easy_credential.allow_duplicate_id) || (self.store.store_type == "Shipstation API 2" && self.store.shipstation_rest_credential.allow_duplicate_order)

@@ -144,4 +144,29 @@ module OrderClassMethodsHelper
       tmp_hash[:scanned] += data_hash['order_item_scanned_qty']
     end
   end
+
+  def get_temp_increment_id
+    temp_increment_ids = Order.where("increment_id LIKE 'GP-Manual-Order-%'").order(:increment_id).pluck(:increment_id)
+    while true
+      if temp_increment_ids.length.positive?
+        next_inc_id = 'GP-Manual-Order-' + (get_last_temp_increment_id(temp_increment_ids) + 1).to_s
+      else
+        next_inc_id = 'GP-Manual-Order-1'
+      end
+      if !Order.find_by_increment_id(next_inc_id)
+        break
+      else
+        temp_increment_ids << next_inc_id
+      end
+    end
+    next_inc_id
+  end
+
+  def get_last_temp_increment_id(temp_increment_ids)
+    inc_ids = []
+    temp_increment_ids.each do |inc_id|
+      inc_ids << inc_id.split('-').last.to_i
+    end
+    inc_ids.sort.last
+  end
 end
