@@ -1,5 +1,6 @@
 class ExportSetting < ActiveRecord::Base
   include ExportData
+  include AhoyEvent
 
   # attr_accessible :auto_email_export, :time_to_send_export_email, :send_export_email_on_mon,
   #                 :send_export_email_on_tue, :send_export_email_on_wed, :send_export_email_on_thu,
@@ -14,6 +15,12 @@ class ExportSetting < ActiveRecord::Base
   #                 :daily_packed_email_on_sat, :daily_packed_email_on_sun, :daily_packed_email ,:daily_packed_export_type
 
   after_save :scheduled_export
+  after_commit :log_events
+
+  def log_events
+    track_changes(title: 'Export Settings Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+  end
 
   def scheduled_export
     if auto_stat_email_export_with_changed_hash
