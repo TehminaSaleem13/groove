@@ -9,6 +9,7 @@ module Groovepacker
         offset = get_limit_or_offset('offset')
         sort_key = set_final_sort_key(sort_order, sort_key)
         sort_key = "store_type" if sort_key == "store_name"
+        @params[:search].gsub!(/\s|"|'/, '')
         search = ActiveRecord::Base.connection.quote('%'+@params[:search]+'%')
         base_query = get_base_query(search, sort_key, sort_order)
         query_add = get_query_limit_offset(limit, offset)
