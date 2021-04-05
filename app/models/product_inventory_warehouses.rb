@@ -15,7 +15,6 @@ class ProductInventoryWarehouses < ActiveRecord::Base
   def self.copy_inventory_data_for_aliasing(product_alias, product_orig)
     orig_product_inv_wh = product_orig.primary_warehouse
     aliased_inventory = product_alias.primary_warehouse
-    
 
     if orig_product_inv_wh.blank?
       orig_product_inv_wh = self.create_inv_warehouse_if_nil(orig_product_inv_wh, aliased_inventory)
@@ -45,7 +44,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
     orig_product_inv_wh.allocated_inv = orig_product_inv_wh.allocated_inv + aliased_inventory.allocated_inv
 
     orig_product_inv_wh.sold_inv = orig_product_inv_wh.sold_inv + aliased_inventory.sold_inv
-    orig_product_inv_wh.quantity_on_hand = orig_product_qoh
+    orig_product_inv_wh.quantity_on_hand = orig_product_qoh + aliased_inventory&.quantity_on_hand.to_i
     orig_product_inv_wh.save
     orig_product_inv_wh
   end
@@ -58,7 +57,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
       kit_option_product_wh.allocated_inv = kit_option_product_wh.allocated_inv + (kit_sku.qty * aliased_inventory.allocated_inv)
 
       kit_option_product_wh.sold_inv = kit_option_product_wh.sold_inv + (kit_sku.qty * aliased_inventory.sold_inv)
-      kit_option_product_wh.quantity_on_hand = orig_kit_product_qoh
+      kit_option_product_wh.quantity_on_hand = orig_kit_product_qoh + aliased_inventory&.quantity_on_hand.to_i
       kit_option_product_wh.save
     end
   end
