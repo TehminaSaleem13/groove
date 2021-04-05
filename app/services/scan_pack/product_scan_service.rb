@@ -38,6 +38,7 @@ module ScanPack
         order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"]) 
         @result["data"]["order"]["store_type"] = order.store.store_type 
         @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy"
+        @result["data"]["order"]["large_popup"] = order.store.shipping_easy_credential.large_popup if @result["data"]["order"]["store_type"] == "ShippingEasy"
         @result["data"]["order"]["use_api_create_label"] = order.store.shipstation_rest_credential.use_api_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         # @result["data"]["order"]["ss_label_data"] = order.store.shipstation_rest_credential.fetch_label_related_data(order.ss_label_data, order.increment_id, order.store_order_id) if !order.has_unscanned_items && @result["data"]["order"]["use_api_create_label"]        @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
         @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?

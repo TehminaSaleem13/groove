@@ -158,9 +158,9 @@ module Groovepacker
           params = @params
 			    @shippingeasy = @store.shipping_easy_credential || @store.build_shipping_easy_credential
 			    new_record = true unless @shippingeasy.persisted?
-			    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment], import_shipped: params[:import_shipped], gen_barcode_from_sku: params[:gen_barcode_from_sku], ready_to_ship: params[:ready_to_ship], import_upc: params[:import_upc], allow_duplicate_id: params[:allow_duplicate_id]}
+			    @shippingeasy.attributes = {  api_key: params[:api_key], api_secret: params[:api_secret], store_api_key: params[:store_api_key], import_ready_for_shipment: params[:import_ready_for_shipment].to_boolean, import_shipped: params[:import_shipped].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean, ready_to_ship: params[:ready_to_ship].to_boolean, import_upc: params[:import_upc].to_boolean, large_popup: params[:large_popup].to_boolean, allow_duplicate_id: params[:allow_duplicate_id].to_boolean}
           if new_record
-            @shippingeasy.attributes = { gen_barcode_from_sku: false, allow_duplicate_id: true, popup_shipping_label: false }
+            @shippingeasy.attributes = { gen_barcode_from_sku: false, allow_duplicate_id: true, popup_shipping_label: false, large_popup: true }
             @store.split_order = 'verify_separately'
             @store.on_demand_import = true
             @store.save

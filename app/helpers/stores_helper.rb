@@ -155,6 +155,17 @@ module StoresHelper
     result
   end
 
+  def  check_include_pro_or_shipping_label_large_popup(flag)
+    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
+    result = {}
+    if flag == "large_popup"
+      shippingeasy_cred.large_popup = !shippingeasy_cred.large_popup
+      shippingeasy_cred.save
+      result["large_popup"] = shippingeasy_cred.large_popup
+    end  
+    result
+  end
+
   def update_store_status
     if current_user.can? 'add_edit_stores'
       params['_json'].each do |store|

@@ -17,6 +17,11 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def large_popup_shipping_label
+    result = check_include_pro_or_shipping_label_large_popup("large_popup")
+    render json: result
+  end
+
   def amazon_fba
     result = {}
     store = Store.find(params["store_id"]) rescue nil
