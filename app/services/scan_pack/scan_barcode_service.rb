@@ -3,7 +3,6 @@ module ScanPack
     include ScanPackHelper
 
     def initialize(current_user, session, params)
-      params[:input].gsub!(/\s|"|'/, '') rescue nil
       set_scan_pack_action_instances(current_user, session, params)
       @order = Order.where(id: @params[:id]).first
     end
