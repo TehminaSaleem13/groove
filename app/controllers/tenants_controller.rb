@@ -236,7 +236,14 @@ class TenantsController < ApplicationController
     tenant.save
     render json: {}
   end
-  
+
+  def update_expo_logs_delay
+    tenant = Tenant.find(params['tenant_id'])
+    tenant.expo_logs_delay = !tenant.expo_logs_delay
+    tenant.save
+    render json: {}
+  end
+
   def create_duplicate
     result = create_single_duplicate
 
