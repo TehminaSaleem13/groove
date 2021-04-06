@@ -6,6 +6,7 @@ module Groovepacker
       def process_logs(tenant, current_user_id, session = {}, params)
         Apartment::Tenant.switch! tenant
         @params = params
+        session = session.present? ? session : {}
         current_user = User.find_by_id current_user_id
         @params[:data].each do |scn_params|
           begin
