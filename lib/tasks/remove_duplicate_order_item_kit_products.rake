@@ -1,7 +1,7 @@
 namespace :doo do
   desc "delete duplicate order item kit product"
   task :remove_duplicate_order_item_kit_products , [:tenant] => :environment do |t, args|
-    if Rails.env=="production"
+    # if Rails.env=="production"
       Apartment::Tenant.switch! args[:tenant]
       OrderItem.includes(:product).where("products.is_kit" => 1).all.each do |item|
         begin
@@ -12,7 +12,7 @@ namespace :doo do
         rescue Exception => e      
         end 
       end    
-    end
+    # end
     exit(1)
   end
 end

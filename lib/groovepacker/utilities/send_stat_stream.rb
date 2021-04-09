@@ -14,7 +14,7 @@ class SendStatStream
 
   def send_stream(tenant, stat_stream, order_id, path)
     begin
-      HTTParty::Basement.default_options.update(verify: false) if !Rails.env.production?
+      HTTParty::Basement.default_options.update(verify: false) if Rails.env.development?
       response = HTTParty.post("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",
         query: {tenant_name: tenant},
         body: stat_stream.to_json,

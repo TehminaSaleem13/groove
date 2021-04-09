@@ -2,7 +2,7 @@ namespace :check do
   desc "check UMI import"
   task :umi_import => :environment do
   tenant = "unitedmedco"
-    if Rails.env=="production"
+    # if Rails.env=="production"
       Apartment::Tenant.switch! tenant
       import_item = ImportItem.joins(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started')")
       begin
@@ -22,6 +22,6 @@ namespace :check do
         end
       rescue
       end
-    end
+    # end
   end
 end
