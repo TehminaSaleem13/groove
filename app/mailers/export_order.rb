@@ -17,10 +17,9 @@ class ExportOrder < ActionMailer::Base
       # file_locatin = "#{Rails.root}/public/csv/#{filename}"
       @csv_data = []
       file_data = Net::HTTP.get(URI.parse(url)) rescue []
-      file_data = file_data.split("\n")
-      file_data.each do |row| 
-        row = row.gsub("\"",'') 
-        @csv_data << CSV.parse_line(row)
+      file_data = CSV.parse(file_data)
+      file_data.each do |row|
+        @csv_data << row
       end
       # @csv_data = Net::HTTP.get(URI.parse(url)) rescue []
       @csv_data.try(:first).try(:each_with_index) do |value, index|
