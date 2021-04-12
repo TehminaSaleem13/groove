@@ -13,4 +13,6 @@
 <b>Feedback: </b><%= @data[:feedback] %>
 </br>
 </br>
-Please find the attached file.
+<% if @data[:logs].present? %>
+  Please find the attached file.
+<% end %>

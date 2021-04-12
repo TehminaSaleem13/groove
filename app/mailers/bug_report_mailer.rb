@@ -6,10 +6,11 @@ class BugReportMailer < ActionMailer::Base
     @user = user
     @tenant = tenant
     file_name = @tenant + '_expo_logs.json'
-    @data = @data.permit!.to_h rescue @data
-    File.write(Rails.root.join('log', file_name), JSON.pretty_generate(@data[:logs]))
-    attachments[file_name] = File.read("log/#{file_name}")
+    if @data[:logs].present?
+      File.write(Rails.root.join('log', file_name), JSON.pretty_generate(@data[:logs].as_json))
+      attachments[file_name] = File.read("log/#{file_name}")
+    end
     subject = "Groovepacker [#{Rails.env}] - Expo Bug Report [#{tenant}]"
-    mail to: 'kcpatel006@gmail.com,groovepacker@gmail.com', subject: subject
+    mail to: 'kcpatel006@gmail.com,groovepacker@gmail.com,gyanig72@gmail.com', subject: subject
   end
 end
