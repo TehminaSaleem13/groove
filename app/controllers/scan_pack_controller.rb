@@ -2,6 +2,11 @@ class ScanPackController < ApplicationController
   before_action :groovepacker_authorize!, :set_result_instance
   include ScanPackHelper
 
+  def scan_pack_bug_report
+    BugReportMailer.report_bug(params, current_user.try(:username), Apartment::Tenant.current).deliver
+    render json: { status: 'OK' }
+  end
+
   def scan_barcode
     scan_barcode_obj = ScanPack::ScanBarcodeService.new(
       current_user, session, params
@@ -175,7 +180,7 @@ class ScanPackController < ApplicationController
     # render json: @result
   end
 
-  def send_request_to_api 
+  def send_request_to_api
     if params[:scan_pack][:_json].present?
       current_tenant = Apartment::Tenant.current
       params[:tenant] =  current_tenant
@@ -201,9 +206,9 @@ class ScanPackController < ApplicationController
       @result['data']['next_state'] = 'scanpack.rfo'
     else
       @result['status'] = false
-    end 
+    end
 
-    render json: @result 
+    render json: @result
   end
 
   def click_scan
@@ -337,7 +342,7 @@ class ScanPackController < ApplicationController
     filters = filters.merge(get_cred(params["store_id"]))
     response = ::ShippingEasy::Resources::Order.find(filters) rescue nil
     result[:shipment_id] = response["order"]["shipments"][0]["id"] rescue nil
-    render json: result 
+    render json: result
   end
 
   def update_scanned
@@ -346,7 +351,7 @@ class ScanPackController < ApplicationController
       order.already_scanned =  true
       order.save
     else
-      @result["notice_messages"] = "Order not found"  
+      @result["notice_messages"] = "Order not found"
     end
     render json: @result
   end
