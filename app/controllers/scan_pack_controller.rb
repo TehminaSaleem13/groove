@@ -3,7 +3,7 @@ class ScanPackController < ApplicationController
   include ScanPackHelper
 
   def scan_pack_bug_report
-    BugReportMailer.report_bug(params, current_user.try(:username), Apartment::Tenant.current).deliver
+    BugReportMailer.delay.report_bug(params, current_user.try(:username), Apartment::Tenant.current)
     render json: { status: 'OK' }
   end
 
