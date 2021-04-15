@@ -2,7 +2,7 @@ module ScanPackHelper
 
   include OrdersHelper
   include ScanPack
-  
+
   def order_scan(input, state, id,store_order_id,options={})
     order_scan_object = ScanPack::OrderScanService.new(
       options[:current_user], options[:session], input, state, id, store_order_id, options[:order_by_number]
@@ -60,6 +60,7 @@ module ScanPackHelper
       @result[:single_item_order_message] = @scanpack_setting.single_item_order_complete_msg
       @result[:single_item_order_message_time] = @scanpack_setting.single_item_order_complete_msg_time
       @result[:popup_shipping_label] = order.store.shipping_easy_credential.popup_shipping_label rescue nil
+      @result[:large_popup] = order.store.shipping_easy_credential.large_popup rescue nil
       ScanPack::ScanBarcodeService.new(current_user, session, params).generate_order_barcode_slip(order) if @scanpack_setting.post_scanning_option == 'Barcode' && !@result[:popup_shipping_label]
       return @result
     end
@@ -108,7 +109,7 @@ module ScanPackHelper
         @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
         current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
         tote.update_attributes(order_id: order.id, pending_order: true)
-        current_item['scanned_qty'] = current_item['scanned_qty'] + 1 rescue nil 
+        current_item['scanned_qty'] = current_item['scanned_qty'] + 1 rescue nil
         current_item['qty_remaining'] = (current_item['qty_remaining'] || 0) - 1
         current_item['qty_remaining'] > 0 ? @result[:order_items_partial_scanned] << current_item : @result[:order_items_scanned] << current_item
         order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{tote.name}.", @current_user.name)

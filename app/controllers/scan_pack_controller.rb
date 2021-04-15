@@ -298,6 +298,7 @@ class ScanPackController < ApplicationController
           @result[:multi_item_order_message_time] = @scanpack_setting.multi_item_order_complete_msg_time
           @result[:store_type] = order.store.store_type
           @result[:popup_shipping_label] = order.store.shipping_easy_credential.popup_shipping_label rescue nil
+          @result[:large_popup] = order.store.shipping_easy_credential.large_popup rescue nil
           ScanPack::ScanBarcodeService.new(current_user, session, params).generate_order_barcode_slip(order) if @scanpack_setting.post_scanning_option == 'Barcode' && !@result[:popup_shipping_label]
           @result[:order_items_scanned] = order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
           @result[:order_items_unscanned] = []
