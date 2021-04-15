@@ -86,7 +86,7 @@ module Groovepacker
 
           attributes = ["id", "created_at", "updated_at", "order_id", "product_id"] << new_attr
           if current_ex_or_items_array.present?
-            current_ex_or_items_array.each do |value|
+            current_ex_or_items_array.permit!.to_h.each do |value|
               single_item_or_ex[value[0]] = value[1] unless attributes.include?(value[0])
             end
           end
