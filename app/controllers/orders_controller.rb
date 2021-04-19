@@ -20,7 +20,7 @@ class OrdersController < ApplicationController
 
   def update
     if current_user.can?('create_edit_notes')
-      @order.notes_internal = params[:order]['notes_internal']
+      @order.notes_internal = params[:order]['notes_internal'] rescue  nil
     else
       set_status_and_message(false, 'You do not have the permissions to edit notes', ['push'])
     end

@@ -52,7 +52,7 @@ module ScanPack
         set_error_messages('Couldnt find child item')
       elsif @order_item.order_id != @order.id
         set_error_messages('Item doesnt belong to current order')
-      elsif @params[:count] > next_item[:qty]
+      elsif (@params[:count] || 0) > (next_item[:qty] || 0)
         set_error_messages('Wrong count has been entered. Please try again')
       end
 

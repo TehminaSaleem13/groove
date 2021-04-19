@@ -433,7 +433,7 @@ module Groovepacker
                     product_barcode.barcode = barcode
                     product_barcode.packing_count = record[:all_barcodes_qty][barcode][0] rescue 1
                     product_barcode.is_multipack_barcode = true
-                    product_barcode.product_id = product.id
+                    product_barcode.product_id = product.id rescue nil
                     product_barcode.save
                   rescue Exception => e
                     Rollbar.error(e, e.message)
