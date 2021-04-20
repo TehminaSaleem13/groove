@@ -46,7 +46,7 @@ module Groovepacker
               end
 
               begin
-                variant["title"] = item["name"] 
+                variant["title"] = item["name"]
                 product = create_product_from_variant(variant, @shopify_product)
               rescue
                 product = nil
@@ -77,7 +77,7 @@ module Groovepacker
           end
 
           private
-            
+
             def initialize_import_objects
               handler = self.get_handler
               @credential = handler[:credential]
@@ -90,7 +90,7 @@ module Groovepacker
               shopify_product["variants"].each do |variant|
                 variant_title = variant["title"]=="Default Title" ? "" : " - #{variant["title"]}"
                 variant["title"] = shopify_product["title"] + variant_title
-                product = create_product_from_variant(variant, shopify_product)   
+                product = create_product_from_variant(variant, shopify_product)
                 product = product.reload rescue product
                 product.product_inventory_warehousess.first.update_attributes(available_inv: variant['inventory_quantity']) if @credential.import_inventory_qoh
                 product.set_product_status
@@ -116,7 +116,7 @@ module Groovepacker
             end
 
             def update_product_details_barcode(product, variant)
-              product.update_attributes(name: variant['title'])
+              product.update_attributes(name: variant['title'], store_product_id: variant['id'])
               add_barcode_to_product(product, variant) if variant['barcode'].present? && product.product_barcodes.where(barcode: variant['barcode']).blank?
               product.generate_numeric_barcode({}) if !variant['barcode'].present? && product.product_barcodes.blank? && @credential.generating_barcodes == 'generate_numeric_barcode'
             end
@@ -150,11 +150,11 @@ module Groovepacker
               #create and import product
               if check_for_replace_product
                 coupon_product = replace_product(variant["title"], sku)
-                return coupon_product unless coupon_product.nil? 
-              end 
+                return coupon_product unless coupon_product.nil?
+              end
               product = Product.create(name: variant["title"], store: @store,
                                        store_product_id: variant["id"])
-              
+
               product.add_product_activity("Product Import","#{product.store.try(:name)}")
               product.product_skus.create(sku: sku)
               # get product categories
@@ -206,7 +206,7 @@ module Groovepacker
             end
 
             def assign_weight(product, variant)
-              weight_in = { 'lb' => variant["weight"]*16, 
+              weight_in = { 'lb' => variant["weight"]*16,
                             'kg' => variant["weight"]*35.274,
                             'g' =>  variant["weight"]*0.035274,
                             'oz' => variant["weight"]

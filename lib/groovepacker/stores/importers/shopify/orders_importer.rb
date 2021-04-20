@@ -60,13 +60,13 @@ module Groovepacker
               # else
               #   add_order_activities(shopify_order)
               # end
-              
+
               #increase successful import with 1 and save
               order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
             end
 
             def import_order(shopify_order, order)
-              shopify_order.increment_id = order["name"] 
+              shopify_order.increment_id = order["name"]
               shopify_order.store_order_id = order["id"].to_s
               shopify_order.order_placed_time = order["created_at"]
               #add order shipping address using separate method
@@ -91,14 +91,18 @@ module Groovepacker
               order["line_items"].each do |item|
                 order_item = import_order_item(order_item, item)
                 @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
-                product = Product.find_by(store_product_id: item['variant_id']) ? Product.find_by(store_product_id: item['variant_id']) : shopify_context.import_shopify_single_product(item)
+                product = Product.find_by(store_product_id: item['variant_id']) || shopify_context.import_shopify_single_product(item)
                 if product.present?
-                  order_item.product = product 
+                  order_item.product = product
                   shopify_order.order_items << order_item
+                else
+                  on_demand_logger = Logger.new("#{Rails.root}/log/shopify_missing_product_import_order_item_#{Apartment::Tenant.current}.log")
+                  log = { order_number: shopify_order.increment_id, Time: Time.zone.now, shopify_order_item: item, product: product }
+                  on_demand_logger.info(log)
                 end
               end
               shopify_order.save
-              return shopify_order
+              shopify_order
             end
 
             def import_order_item(order_item, line_item)
@@ -180,8 +184,8 @@ module Groovepacker
                     end
                   end
                   shopify_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import") if !activity_added && item.product.try(:primary_sku)
-                end 
-              end  
+                end
+              end
             end
 
             def import_order_and_items(order, order_in_gp)
