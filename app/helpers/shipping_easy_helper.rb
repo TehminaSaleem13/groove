@@ -108,10 +108,10 @@ module ShippingEasyHelper
   end
 
   def get_statuses
-    status = ["cleared"]
-    status << "ready_for_shipment" if @credential.import_ready_for_shipment
-    status << "shipped" if @credential.import_shipped
-    status << "pending_shipment" if @credential.ready_to_ship
+    status = ['cleared']
+    status << 'ready_for_shipment' if @credential&.import_ready_for_shipment
+    status << 'shipped' if @credential&.import_shipped
+    status << 'pending_shipment' if @credential&.ready_to_ship
     status
   end
 
@@ -160,7 +160,7 @@ module ShippingEasyHelper
       # else
         # similar_duplicate_orders = Order.where('increment_id LIKE ?', "#{order['external_order_identifier'] + ' (' + order['id'].to_s + ')'}%")
         # if similar_duplicate_orders.blank?
-        #   order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')' 
+        #   order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')'
         # else
         #   similar_dup_inc_id = similar_duplicate_orders.pluck(:increment_id).sort.last.split(" (D")
         #   main_increment = similar_dup_inc_id[0..(similar_dup_inc_id.length - 2)].join rescue order['external_order_identifier']

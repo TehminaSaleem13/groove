@@ -23,7 +23,7 @@ module Groovepacker
                     tracking_num = order["Shipment"]["TrackingNumber"]  if order["Shipment"].class.to_s.include?("Hash")
                     notes_internal = get_internal_notes(order) unless order["Note"].nil?
 
-                    order_m = Order.create!(
+                    order_m = Order.new(
                       increment_id: order_number,
                       order_placed_time: order["Date"],
                       store: store,
@@ -46,12 +46,14 @@ module Groovepacker
                     import_item.current_order_imported_item = 0
                     import_item.save
 
-                    if order["Item"].is_a? (Array)
-                      order["Item"].each do |item|
-                        import_order_item(item, import_item, order_m, store)
+                    if order_m.save
+                      if order["Item"].is_a? (Array)
+                        order["Item"].each do |item|
+                          import_order_item(item, import_item, order_m, store)
+                        end
+                      else
+                        import_order_item(order["Item"], import_item, order_m, store)
                       end
-                    else
-                      import_order_item(order["Item"], import_item, order_m, store)
                     end
 
                     order_m.set_order_status
@@ -153,8 +155,8 @@ module Groovepacker
             sku = nil
             if item.present?
               if item["SKU"].present?
-                sku = item["SKU"] 
-              else 
+                sku = item["SKU"]
+              else
                 sku = item["Code"] if item["Code"].present? && item["Code"] != item["SKU"]
               end
             end
