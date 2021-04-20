@@ -5,12 +5,12 @@ module StoreConcern
  def check_store_type
   init_store = Groovepacker::Stores::LibStores.new(@store, params, @result)
   case @store.store_type
-  when 'Magento'    
+  when 'Magento'
   @result = init_store.magento_update_create
   when "Magento API 2"
     @result = init_store.magento_rest_update_create
   when 'Amazon'
-    @result = init_store.amazon_update_create 
+    @result = init_store.amazon_update_create
   when 'Ebay'
     @result = init_store.ebay_update_create(session)
   when  'CSV' || 'system'
@@ -51,7 +51,7 @@ module StoreConcern
       else
         temp_mapping = Groovepacker::Utilities::Base.new.fix_corrupted_map(csv_map.order_csv_map)[:map]
         begin
-         new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash} 
+         new_map = temp_mapping[:map].inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
         rescue Exception => e
           new_map = temp_mapping[:map].to_unsafe_h.inject({}){|hash, (k, v)| hash.merge!(k => (v['value'].in?(%w(custom_field_one custom_field_two)) ? v.merge('name' => general_settings[v['value']]) : v)); hash}
         end
@@ -67,11 +67,15 @@ module StoreConcern
       end
     end
   end
-  
+
   def csv_data(kind)
     current_tenant = Apartment::Tenant.current
     begin
-      @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").encode("UTF-8").split("\n").first(30).join("\n").gsub("\r\n", "\n").gsub("\r", "\n")
+      begin
+        @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").encode("UTF-8").split("\n").first(30).join("\n").gsub("\r\n", "\n").gsub("\r", "\n")
+      rescue
+        @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv").force_encoding('ISO-8859-1').split("\n").first(30).join("\n").gsub("\r\n", "\n").gsub("\r", "\n")
+      end
     rescue
       @file_data = $redis.get("#{ENV['S3_BASE_URL']}/#{current_tenant}/csv/#{kind}.#{@store.id}.csv")
       @file_data = @file_data.gsub("\r\n", "\n") rescue @file_data unless @file_data == nil
@@ -121,7 +125,7 @@ module StoreConcern
         csv_map = CsvMapping.find_or_create_by(store_id: @store.id)
         csv_directory = 'uploads/csv'
         current_tenant = Apartment::Tenant.current
-        order_csv_mapping(csv_map, csv_directory, current_tenant, default_csv_map) 
+        order_csv_mapping(csv_map, csv_directory, current_tenant, default_csv_map)
         product_kit_csv_map(csv_map, csv_directory, current_tenant, default_csv_map)
       else
         @result['status'] = false
@@ -130,7 +134,7 @@ module StoreConcern
     else
       @result['status'] = false
       @result['messages'].push('Cannot find store')
-    end 
+    end
     @result
   end
 
@@ -143,7 +147,7 @@ module StoreConcern
       @result["status"] = false
       @result["messages"].push("No store selected")
     end
-    csv_data_import if @result["status"] 
+    csv_data_import if @result["status"]
   end
 
   def check_store
@@ -202,7 +206,7 @@ module StoreConcern
       else
         map_data = csv_map.order_csv_map
       end
-    end  
+    end
     begin
       map_data.name = params[:name]
       params[:map] = params[:map].to_h rescue params[:map]
@@ -296,7 +300,7 @@ module StoreConcern
     context
   end
 
-  def cancel_product_import 
+  def cancel_product_import
     result = {"status"=>true, "success_messages"=>[], "notice_messages"=>[], "error_messages"=>[]}
     if params[:id].nil?
       result['status'] = false
