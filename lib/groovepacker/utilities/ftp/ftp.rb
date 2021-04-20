@@ -85,6 +85,87 @@ module FTP
       end
       result
     end
+    
+    def download_imported(current_tenant)
+      result = self.build_result
+      result[:file_info] = {}
+      result[:file_info][:file_path] = ''
+      result[:file_info][:ftp_file_name] = ''
+      begin
+        response = connect
+        if response[:error_messages].empty? && response[:status] == true
+          connection_obj = response[:connection_obj]
+          system 'mkdir', '-p', "ftp_files/#{current_tenant}/verification"
+          
+          file_name = nil
+          file_path = nil
+          found_file = find_file(connection_obj)
+          
+          unless found_file.nil?
+            file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            # connection_obj.chdir("~/#{self.directory}")
+            connection_obj.getbinaryfile("#{found_file}", "ftp_files/#{current_tenant}/verification/#{file_name}")
+            
+            file_path = "#{Rails.root}/ftp_files/#{current_tenant}/verification#{file_name}"
+            result[:file_info][:file_path] = file_path
+            result[:file_info][:ftp_file_name] = found_file
+            connection_obj.close()
+          else
+            result[:status] = false
+            result[:error_messages].push("All CSV files on the server appears to be varified.")
+          end
+        else
+          result[:status] = false
+          response[:error_messages].each do |message|
+            result[:error_messages].push(message)
+          end
+          return result
+        end
+      rescue Net::FTPPermError => e
+        message = e.message
+        split_message = message.split(" ")
+        split_message.shift
+        result[:status] = false
+        result[:error_messages].push(split_message.join(" "))
+      rescue Exception => e
+        result[:status] = false
+        result[:error_messages].push(e.message)
+      end
+      result
+    end
+
+    def update_verified_status(ftp_file_name, verified = true)
+      result = self.build_result
+      begin
+        response = connect
+        if response[:error_messages].empty? && response[:status] == true
+          connection_obj = response[:connection_obj]
+          if verified
+            new_file = rename_file(ftp_file_name, '-v')
+            connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
+          else
+            new_file = ftp_file_name.gsub('-imported', '')
+            connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")         
+          end 
+          connection_obj.close()
+        else
+          result[:status] = false
+          result[:error_messages].push('Error in updating file name in the ftp server')
+          result[:error_messages].push(response[:error_messages])
+        end
+      rescue Net::FTPPermError => e
+        message = e.message
+        split_message = message.split(" ")
+        split_message.shift
+        result[:status] = false
+        result[:error_messages].push(split_message.join(" "))
+      rescue Exception => e
+        result[:status] = false
+        result[:error_messages].push('Error in updating file name in the ftp server')
+        result[:error_messages].push(e.message)
+      end
+      result       
+    end
 
     def retrieve
       result = self.build_result
@@ -270,6 +351,23 @@ module FTP
           return false
         end
       end
+    end
+    def find_imported_file(connection_obj)
+      file = nil
+    	connection_obj.chdir(self.directory)
+      begin
+        files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
+      rescue
+        files = connection_obj.nlst('*.csv') rescue connection_obj.nlst('*.CSV')
+      end
+      files = files.sort_by { |filename| connection_obj.mtime(filename) }
+      files.each do |individual_file|
+        unless '-imported-v'.in? individual_file
+          file = individual_file
+          break
+        end
+      end
+      return file
     end
   end
 end

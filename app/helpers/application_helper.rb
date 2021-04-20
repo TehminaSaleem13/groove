@@ -27,14 +27,14 @@ module ApplicationHelper
     request.original_url =~ /admin./
   end
 
-  def rename_file(file)
+  def rename_file(file, imported_string = '-imported')
     new_file = ''
     substrings = file.split('.')
     substrings.each do |value|
       if(value == substrings[-1])
         new_file+=('.'+value)
       elsif(value == substrings[-2])
-        new_file+=(value+'-imported')
+        new_file+=(value + imported_string)
       else
         new_file+=value
       end
@@ -81,9 +81,9 @@ module ApplicationHelper
 
   def settings_to_generate_packing_slip
     @page_height, @page_width = '11', '8.5'
-    
+
     @page_height, @page_width = '6', '4' if GeneralSetting.get_packing_slip_size == '4 x 6'
-    
+
     @size = GeneralSetting.get_packing_slip_size
     @orientation = GeneralSetting.get_packing_slip_orientation
     @result['data'] = { 'packing_slip_file_paths' => [] }
