@@ -246,7 +246,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     else
       error = ([e.message] << e.backtrace.first(3)).flatten.join(',') rescue e
       import_item.update_attributes(status: 'failed', message: import_item_message, import_error: error)
-      Rollbar.error(e, e.message)
+      Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
     check_and_restart_import(e, import_item, tenant)
   end

@@ -48,14 +48,14 @@ class ImportCsv
             end
           else
             new_file_data =  File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
-          end  
+          end
 
           File.write(file_path,new_file_data)
           if Apartment::Tenant.current == "unitedmedco"
             first_remove = new_file_data.gsub(/\"\"/,"\"")
             second_remove = first_remove.gsub(/\"\"/,"\"")
-            File.write(file_path, second_remove) 
-          end 
+            File.write(file_path, second_remove)
+          end
           csv_file = begin
                       File.read(file_path).encode(Encoding.find('ASCII'), encoding_options)
                      rescue
@@ -79,7 +79,7 @@ class ImportCsv
             file_content = file.content
             regex = /(?<=\s)("[^"]+")(?=\s)/
             begin
-              file_content[regex] = file_content[regex][1..-2] 
+              file_content[regex] = file_content[regex][1..-2]
             rescue
               nil
             end
@@ -95,21 +95,21 @@ class ImportCsv
           end
         else
           File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
-        end       
+        end
         if Apartment::Tenant.current == "unitedmedco"
           first_remove = file.content.gsub(/\"\"/,"\"")
           second_remove = first_remove.gsub(/\"\"/,"\"")
-          File.write(file_path, second_remove) 
-        end 
+          File.write(file_path, second_remove)
+        end
 
         csv_file = begin
                     file.content.encode(Encoding.find('ASCII'), encoding_options)
                    rescue
                      nil
-                   end if !(store.csv_beta && params[:type] == "order") 
-        
+                   end if !(store.csv_beta && params[:type] == "order")
+
         if check_mapping_for_tracking_num(params)
-          csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) 
+          csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options)
           params.merge!(only_for_tracking_num: true)
         end
 
@@ -118,7 +118,7 @@ class ImportCsv
       set_data_for_csv_import_count(params[:file_path]) if params[:file_path]
       $redis.set("#{Apartment::Tenant.current}_csv_filename", params[:file_name])
       $redis.expire("#{Apartment::Tenant.current}_csv_filename", 18000)
-      if csv_file.nil? && !store.csv_beta || file_path.blank? 
+      if csv_file.nil? && !store.csv_beta || file_path.blank?
         result[:status] = false
         result[:messages].push("No file present to import #{params[:type]}") if result[:messages].empty?
       else
@@ -159,10 +159,10 @@ class ImportCsv
           delete_index = 0
           params[:map].each_with_object({}) do |map_out|
             map_single_first_name = map_out[1].present? && map_out[1]['name']
-            params[:map].delete(delete_index.to_s) if map_single_first_name == 'Unmapped'  
+            params[:map].delete(delete_index.to_s) if map_single_first_name == 'Unmapped'
             delete_index += 1
           end
-         
+
           mapping = {}
           params[:map].each do |map_single|
             next unless map_single[1].present? && map_single[1]['value'] != 'none'
@@ -202,7 +202,7 @@ class ImportCsv
         end
       end
     rescue Exception => e
-      Rollbar.error(e, e.message)
+      Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
         track_user(tenant, params, 'Import Finished', "#{params[:type].capitalize} Import Finished")
     result
@@ -243,7 +243,7 @@ class ImportCsv
   def check_mapping_for_tracking_num(params)
     default_map = CsvMap.find_or_initialize_by(name: "Tracking Number Update")
     default_map.update_attributes(kind: "order", name: "Tracking Number Update", custom: true, map: {:rows=>2, :sep=>",", :other_sep=>0, :delimiter=>"\"", :fix_width=>0, :fixed_width=>4, :import_action=>nil, :contains_unique_order_items=>false, :generate_barcode_from_sku=>true, :use_sku_as_product_name=>false, :order_date_time_format=>"MM/DD/YYYY TIME", :day_month_sequence=>"MM/DD", :map=>{"0"=>{"name"=>"Order number", "value"=>"increment_id"}, "1"=>{"name"=>"Tracking Number", "value"=>"tracking_num"}}})
-    
+
     mappings_for_tracking_num = ['increment_id', 'tracking_num']
     mappings = []
     params[:map].values.each { |mapping| mappings << mapping['value'] }
@@ -266,11 +266,11 @@ class ImportCsv
       order_numbers = []
       csv.each do |row|
         column_name = row.as_json[column_number][0]
-        order_numbers << row[column_name].strip unless row[column_name].blank? 
+        order_numbers << row[column_name].strip unless row[column_name].blank?
       end
       $redis.sadd("#{Apartment::Tenant.current}_csv_array", order_numbers.uniq) if order_numbers.present?
     rescue Exception => e
-      Rollbar.error(e, e.message)
+      Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
   end
 end

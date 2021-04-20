@@ -4,7 +4,7 @@ module Groovepacker
       module MagentoRest
         module V1
           class OrdersImporter < Groovepacker::Stores::Importers::Importer
-            
+
             def import
               handler = self.get_handler
               credential = handler[:credential]
@@ -132,7 +132,7 @@ module Groovepacker
                 import_item.save
                 import_item = fix_import_item(import_item)
                 tenant = Apartment::Tenant.current
-                Rollbar.error(e, e.message)
+                Rollbar.error(e, e.message, Apartment::Tenant.current)
                 ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
               end
               import_item = fix_import_item(import_item)

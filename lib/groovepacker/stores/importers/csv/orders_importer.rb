@@ -43,7 +43,7 @@ module Groovepacker
           def check_or_assign_import_item
             return unless ImportItem.where(id: @import_item.id).blank?
             import_item_id = @import_item.id
-            @import_item = @import_item.dup  
+            @import_item = @import_item.dup
             @import_item.id = import_item_id
             @import_item.save
           end
@@ -69,7 +69,7 @@ module Groovepacker
                 begin
                   check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
                 rescue Exception => e
-                  Rollbar.error(e, e.message)
+                  Rollbar.error(e, e.message, Apartment::Tenant.current)
                 end
                 order_items_ar = []
               end
@@ -83,10 +83,10 @@ module Groovepacker
               import_single_order(single_row, index, inc_id, order_map, result)
               if final_records.count==index+1
                 begin
-                  check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result) 
+                  check_order_with_item(order_items_ar, index+1, current_inc_id, order_map, result)
                 rescue Exception => e
-                  Rollbar.error(e, e.message)
-                end 
+                  Rollbar.error(e, e.message, Apartment::Tenant.current)
+                end
                 order_items_ar = []
               end
             end
@@ -101,11 +101,11 @@ module Groovepacker
           def check_order_with_item(order_items_ar, index, current_inc_id, order_map, result)
             order = Order.includes(:order_items).find_by_increment_id("#{current_inc_id}-currupted")
             items_array = get_item_array(order_items_ar)
-            #items_array.each do |row|        
+            #items_array.each do |row|
             begin
               result = check_single_row_order_item(order, items_array, order_items_ar, index, current_inc_id, order_map, result) if order.present?
             rescue Exception => e
-              Rollbar.error(e, e.message)
+              Rollbar.error(e, e.message, Apartment::Tenant.current)
               result = nil
             end
               #break if result[:order_reimported] == true
@@ -114,7 +114,7 @@ module Groovepacker
               @order.increment_id = "#{origional_order_id}"
               @order.save
             end
-            # @order.update_attribute(increment_id: "#{origional_order_id}") 
+            # @order.update_attribute(increment_id: "#{origional_order_id}")
             result
           end
 
@@ -122,14 +122,14 @@ module Groovepacker
             record_hash = []
             new_array = []
             order_items_ar.each { |row| record_hash << @helper.get_row_data(row, 'increment_id') }
-            final_record.each do |row| 
-              new_array << row if @helper.get_row_data(row, 'increment_id').delete(' ').include?(record_hash[0].delete(' ')) 
-            end 
+            final_record.each do |row|
+              new_array << row if @helper.get_row_data(row, 'increment_id').delete(' ').include?(record_hash[0].delete(' '))
+            end
             order_items_ar = new_array
             qty = items_array.flatten.reject { |c| c.is_a?(String) }
             if order.order_items.count == order_items_ar.count && qty.sum == order.order_items.map(&:qty).sum
               log = {}
-            #if order.order_items.count == items_array.count 
+            #if order.order_items.count == items_array.count
               #order_item = order.order_items.where(:sku => row[0]).first
               #order_item.update_attribute(:qty, row[1]) if order_item.qty != row[1]
             else
@@ -152,14 +152,14 @@ module Groovepacker
             order_items_ar.each do |single_row|
               qty = @helper.get_row_data(single_row, 'qty').to_s.strip.to_i
               sku = @helper.get_row_data(single_row, 'sku').strip
-              #if new_sku.include? sku 
+              #if new_sku.include? sku
                 #items_array.last[1] = items_array.last[1] + qty rescue nil
               #else
                 items_array << [sku, qty]
               #end
-              new_sku = sku 
+              new_sku = sku
             end
-            return items_array 
+            return items_array
           end
 
           def import_single_order(single_row, index, inc_id, order_map, result)
@@ -258,7 +258,7 @@ module Groovepacker
 
               unless params[:only_for_tracking_num]
                 if existing_product.present?
-                  single_row[mapping['sku'][:position]] = existing_product.primary_sku 
+                  single_row[mapping['sku'][:position]] = existing_product.primary_sku
                 else
                   single_row[mapping['sku'][:position]] = ProductSku.get_temp_sku rescue nil
                 end

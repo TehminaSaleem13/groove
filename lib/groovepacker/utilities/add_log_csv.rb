@@ -21,7 +21,7 @@ class AddLogCsv
     current_tenant = Apartment::Tenant.current
     header = "Tenant,Event,Time(EST),Store Type,User Name\n"
     file_data = header
-    
+
     Tenant.find_each do |tenant|
     Apartment::Tenant.switch!(tenant.name)
     file_data +=
@@ -76,34 +76,34 @@ class AddLogCsv
             if t.present? && t.test_tenant_toggle == false
               Apartment::Tenant.switch! "#{sub.tenant_name}"
               tenant_id = Tenant.find_by_name("#{sub.tenant_name}").id
-              access_restriction, tenant_user, product_count, scanned_orders = get_tenant_details("#{sub.tenant_name}") 
+              access_restriction, tenant_user, product_count, scanned_orders = get_tenant_details("#{sub.tenant_name}")
               customer = Stripe::Customer.retrieve("#{sub.stripe_customer_id}") rescue nil
               subscription = customer.subscriptions.retrieve("#{sub.customer_subscription_id}")  rescue nil
               total_product =  Stripe::SubscriptionItem.list(subscription: "#{sub.customer_subscription_id}").count rescue nil
-              if customer.present? 
+              if customer.present?
                 last_stripe_amount = (customer.charges.first.amount / 100) rescue 0
-                billing_date = DateTime.strptime("#{customer.charges.first.created}",'%s') rescue nil 
+                billing_date = DateTime.strptime("#{customer.charges.first.created}",'%s') rescue nil
                 is_delinquent = customer.delinquent == true ? "delinquent" : "current"
               end
               unless billing_date.nil?
                 charge_in_30_days = ((Time.now - 30.days)..Time.now).cover?(billing_date) ?  1 : 0
                 charge_in_30_days = 0  if customer.charges.first.status == "failed"
               end
-              sub_amount = (sub.amount.to_f / 100) rescue 0   
+              sub_amount = (sub.amount.to_f / 100) rescue 0
               val = '*' if sub_amount == 0 || (sub_amount != (access_restriction.try(:num_users) * 50).to_f )
-              stripe_amount = 0    
+              stripe_amount = 0
               (subscription.try(:items) || []).each do |item|
                 stripe_amount =  stripe_amount + item.plan["amount"]
-              end  
-              stripe_amount = (stripe_amount.to_f / 100) rescue 0  
+              end
+              stripe_amount = (stripe_amount.to_f / 100) rescue 0
               val1 = '**'  if sub_amount != stripe_amount
               csv << ["#{sub.tenant_name}","#{t.note}","#{access_restriction.try(:num_users)}","#{tenant_user}", "#{product_count}" ,"#{total_product}","#{sub_amount}#{val}","#{stripe_amount}#{val1}","#{last_stripe_amount}", "#{charge_in_30_days}","#{scanned_orders}","#{is_delinquent}",  "https://scadmintools.groovepacker.com/#/admin_tools/tenant/1/#{tenant_id}","https://dashboard.stripe.com/customers/#{sub.try(:stripe_customer_id)}", "#{sub.created_at}", "#{billing_date}"]
             end
           rescue Exception => e
-            Rollbar.error(e, e.message)
-          end  
+            Rollbar.error(e, e.message, Apartment::Tenant.current)
+          end
       end
-    end 
+    end
     url = GroovS3.create_public_csv("admintools", 'subscription',Time.now.to_i, data).url.gsub('http:', 'https:')
     StripeInvoiceEmail.send_tenant_details(url).deliver
   end
@@ -114,13 +114,13 @@ class AddLogCsv
     tenant_user = (User.where(is_deleted: false, active: true).count - 1 )
     product_sku_count = Product.all.count
     if product_sku_count < 10000
-      product_count = product_sku_count 
+      product_count = product_sku_count
     elsif (product_sku_count > 10000 || product_sku_count < 100000)
       product_count =   "High SKU"
     elsif product_sku_count > 100000
       product_count = "Double High SKU"
     end
     scanned_orders = Order.where("status = ?  AND scanned_on > ?", "scanned", Time.now() - 30.days ).count
-    return access_restriction, tenant_user, product_count, scanned_orders 
+    return access_restriction, tenant_user, product_count, scanned_orders
   end
 end

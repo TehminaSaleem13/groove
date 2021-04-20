@@ -1,6 +1,6 @@
 class OrderImportSummariesController < ApplicationController
   before_action :groovepacker_authorize!, except: [:download_summary_details]
-  
+
   def update_display_setting
     orderimportsummary = OrderImportSummary.last
     if orderimportsummary.present?
@@ -42,7 +42,7 @@ class OrderImportSummariesController < ApplicationController
       url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url.gsub('http:', 'https:')
       render json: {url: url}
     rescue Exception => e
-      Rollbar.error(e, e.message)
+      Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
   end
 

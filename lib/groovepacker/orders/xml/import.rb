@@ -22,7 +22,7 @@ module Groovepacker
           # order does not exist create order
           if order.nil?
             order = Order.new
-            @check_new_order = true 
+            @check_new_order = true
             order.increment_id = @order.increment_id
             n = $redis.get("new_order_#{tenant}").to_i + 1
             $redis.set("new_order_#{tenant}" , n)
@@ -32,16 +32,16 @@ module Groovepacker
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") ||  order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if check_for_update || @check_new_order
               ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
-              "city", "state", "country", "postcode", "order_placed_time", "tracking_num", 
+              "city", "state", "country", "postcode", "order_placed_time", "tracking_num",
               "custom_field_one", "custom_field_two", "method", "order_total",
               "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
               order[attr] = @order.send(attr)
                 end
             end
-          end  
+          end
 
           if @old_order.try(:attributes) != order.attributes
-            @update_count = @update_count + 1 
+            @update_count = @update_count + 1
           end
           # update all order related info
           order_persisted = order.persisted? ? true : false
@@ -76,7 +76,7 @@ module Groovepacker
             if result[:status]
               upload_res = @order.save
               if upload_res.nil?
-                result[:status] = false 
+                result[:status] = false
                 result[:errors] = ["Error uploading to S3."]
               else
                 order.import_s3_key = upload_res
@@ -96,12 +96,12 @@ module Groovepacker
                   orders = Order.where(increment_id: o.increment_id)
                   orders.last.destroy if orders.count > 1
                 end
-              end  
-            end  
+              end
+            end
           end
 
           setting = ScanPackSetting.all.first
-          order.order_items.map(&:product).each do |product|  
+          order.order_items.map(&:product).each do |product|
             #product.set_product_status
             intangible_strings = setting.intangible_string.split(",")
             intangible_setting_enabled = setting.intangible_setting_enabled
@@ -146,28 +146,28 @@ module Groovepacker
                       import_item.status = "completed"
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                       begin
-                        
+
                         n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
                         @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
 
                         if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
                           $redis.set("new_order_#{tenant}" , orders.count)
                         end
-                        
+
                         new_orders_count = @after_import_count -  $redis.get("total_orders_#{tenant}").to_i
                         $redis.set("new_order_#{tenant}", new_orders_count)
 
                         $redis.set("skip_order_#{Apartment::Tenant.current}", import_item.updated_orders_import) if import_item.updated_orders_import != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
 
                         if @ftp_flag == "false"
-                          @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name") 
-                          $redis.del("#{Apartment::Tenant.current}/original_file_name") 
+                          @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name")
+                          $redis.del("#{Apartment::Tenant.current}/original_file_name")
                         end
                         log = AddLogCsv.new
                         log.add_log_csv(Apartment::Tenant.current,@time_of_import,@file_name)
                       rescue
                       end
-                    
+
                       if @ftp_flag == "true"
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                         order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
@@ -203,11 +203,11 @@ module Groovepacker
                     unless import_summary.nil?
                       import_summary.emit_data_to_user(true)
                     end
-                  end  
+                  end
                 end
               end
             rescue Exception => e
-              Rollbar.error(e, e.message)
+              Rollbar.error(e, e.message, Apartment::Tenant.current)
             end
           end
 
@@ -227,7 +227,7 @@ module Groovepacker
 
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
-          
+
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") || order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if order.order_items.empty?
               # create order items
@@ -243,10 +243,10 @@ module Groovepacker
                 orderXML.order_items.each do |order_item_XML|
                   create_update_order_item(order, order_item_XML)
                 end
-              end  
+              end
             end
           end
-          if !@check_new_order 
+          if !@check_new_order
             if @update_count >= 1
               n =  $redis.get("update_order_#{Apartment::Tenant.current}").to_i + 1
               $redis.set("update_order_#{Apartment::Tenant.current}", n)
@@ -291,11 +291,11 @@ module Groovepacker
                 else
                   product = coupon_product
                   @gp_coupon_found  = true
-                end  
-              else 
+                end
+              else
                 product = Product.new
                 product.store = @store
-              end  
+              end
             else
               product = product_sku.product
             end
@@ -305,23 +305,23 @@ module Groovepacker
               if order.order_items.where(product_id: product.id).empty?
                 order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
                 product_id: product.id, price: order_item_XML[:price])
-                if check_for_replace_product && @gp_coupon_found == true 
+                if check_for_replace_product && @gp_coupon_found == true
                   order.addactivity("Intangible item with SKU #{order_item_XML[:product][:skus].first}  and Name #{order_item_XML[:product][:name]} was replaced with GP Coupon.","#{@store.name} Import")
                 else
-                  order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added", 
+                  order.addactivity("QTY #{order_item_XML[:qty] || 0 } of item with SKU: #{product.primary_sku} Added",
                   "#{@store.name} Import")
-                end  
+                end
               else
                 order_item = order.order_items.where(product_id: product.id)
                 unless order_item.empty?
                   order_item = order_item.first
                   order_item.sku = first_sku
                   tenant = Apartment::Tenant.current
-                  if !(order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price]) 
+                  if !(order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price])
                     if check_for_update
                       @update_count = @update_count + 1
                     end
-                  end 
+                  end
 
                   if check_for_update
                     order_item.qty = order_item_XML[:qty] || 0
@@ -349,7 +349,7 @@ module Groovepacker
           product.kit_parsing = product_xml[:kit_parsing] if product.kit_parsing.blank?
           product.weight = product_xml[:weight] if product.weight.blank?
           product.weight_format = product_xml[:weight_format] if product.weight_format.blank?
-    
+
           if product.save
             #images
             product.add_product_activity("Product Import","#{product.store.try(:name)}") unless product.product_activities.any?

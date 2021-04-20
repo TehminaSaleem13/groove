@@ -2,7 +2,7 @@ module Groovepacker
   module Orders
     class Import < Groovepacker::Orders::Base
       require 'import_orders'
-      
+
       def execute_import
         store = Store.find(@params[:id])
         @result = @result.merge(import_status_hash)
@@ -34,7 +34,7 @@ module Groovepacker
             if s.shipstation_rest_credential.api_key.nil? || s.shipstation_rest_credential.api_secret.nil?
               set_status_and_message(false, 'Please click here to open your ShipStation connection settings and add your API details.', ['push', 'error_messages'])
             end
-          end  
+          end
           @result['success_messages'].push('Scouring the interwebs for new orders...')
         else
           set_status_and_message(false, 'You currently have no Active Stores in your Store List', ['push', 'error_messages'])
@@ -60,13 +60,13 @@ module Groovepacker
       #           rescue Exception => e
       #             result[:status] &= false
       #             @import_item.update_attribute(:message, e.message)
-      #             Rollbar.error(e, e.message)
+      #             Rollbar.error(e, e.message, Apartment::Tenant.current)
       #             ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver
       #           end
       #         end
-      #       #end             
+      #       #end
       #     end
-      #   end 
+      #   end
       # end
 
       def ftp_order_import(tenant)
@@ -122,7 +122,7 @@ module Groovepacker
           @import_item.status = 'failed'
           @import_item.message = e.message
           @import_item.save
-          Rollbar.error(e, e.message)
+          Rollbar.error(e, e.message, Apartment::Tenant.current)
           status = 401
         end
         return status
@@ -149,7 +149,7 @@ module Groovepacker
           change_status_if_not_failed
           return status
         end
-        
+
         def change_status_if_not_failed
           return unless @import_item.status != 'failed'
           @import_item.update_attributes(:status => 'completed')

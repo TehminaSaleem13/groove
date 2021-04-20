@@ -35,7 +35,7 @@
               import_item.message = e.message
               import_item.save
               tenant = Apartment::Tenant.current
-              Rollbar.error(e, e.message)
+              Rollbar.error(e, e.message, Apartment::Tenant.current)
               ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
             end
             import_item = fix_import_item(import_item)
@@ -90,7 +90,7 @@
               else
                 item1['key'] = 'created_at'
                 item1['value'] = [{'key' => 'from', 'value' => (Time.now - 4.days).utc.to_s}]
-              end     
+              end
               if item1.present?
                 @filter1['item'] = item1
                 @filters1['complex_filter'] = @filter1
@@ -109,7 +109,7 @@
                 6.times do
                   puts "==============================================================="
                   response = client.call(:sales_order_list, message: {sessionId: session, filters: filters_array}) rescue nil
-                  break response if response.present? 
+                  break response if response.present?
                 end
                   next if response.body[:sales_order_list_response][:result][:item].blank?
                 orders << response.body[:sales_order_list_response][:result][:item]
@@ -134,24 +134,24 @@
               end
               order_info = @order_info
               @order_info = nil
-              order_info = order_info.body[:sales_order_info_response][:result] 
+              order_info = order_info.body[:sales_order_info_response][:result]
               if Order.where(:increment_id => item[:increment_id]).length == 0
                 @order = Order.new
                 @order.increment_id = item[:increment_id]
-                @order.store_order_id = order_info[:order_id] 
+                @order.store_order_id = order_info[:order_id]
                 @order.status = 'awaiting'
                 @order.order_placed_time = item[:created_at]
                 #@order.storename = item[:store_name]
                 @order.store = credential.store
-                line_items = order_info[:items] 
+                line_items = order_info[:items]
                 if line_items[:item].is_a?(Hash)
                   import_item.current_order_items = 1
                   import_item.current_order_imported_item = 0
                   import_item.save
                   product_id = nil
-                  
+
                   if line_items[:item][:product_type] != 'configurable'
-                    
+
                     @order_item = OrderItem.new
                     @order_item.price = line_items[:item][:price]
                     @order_item.qty = line_items[:item][:qty_ordered]
@@ -173,7 +173,7 @@
                           ProductsImporter.new(handler).import_single({ product_id: line_items[:item][:product_id] })
                     end
                   end
-                  
+
                   import_item.current_order_imported_item = 1
                   import_item.save
                 else

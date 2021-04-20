@@ -324,7 +324,7 @@ module Groovepacker
                         #@import_product_skus << product_sku
                         new_order = new_order + 1
                       rescue Exception => e
-                        Rollbar.error(e, e.message)
+                        Rollbar.error(e, e.message, Apartment::Tenant.current)
                       end
                     end
                   end
@@ -346,7 +346,7 @@ module Groovepacker
                           #@import_product_barcodes << product_barcode
                           new_order = new_order + 1
                         rescue Exception => e
-                          Rollbar.error(e, e.message)
+                          Rollbar.error(e, e.message, Apartment::Tenant.current)
                         end
                       end
                     end
@@ -436,7 +436,7 @@ module Groovepacker
                     product_barcode.product_id = product.id rescue nil
                     product_barcode.save
                   rescue Exception => e
-                    Rollbar.error(e, e.message)
+                    Rollbar.error(e, e.message, Apartment::Tenant.current)
                   end
                 end
               end

@@ -77,7 +77,7 @@ module Groovepacker
         begin
           if state == "show"
             subscriptions = Stripe::Customer.retrieve(@tenant.subscription.stripe_customer_id).subscriptions
-            subscription_ids = subscriptions.data.map(&:id) 
+            subscription_ids = subscriptions.data.map(&:id)
             subscription_result['verified_stripe_account'] = subscription_ids.include? @tenant.subscription.customer_subscription_id
           end
         rescue
@@ -114,7 +114,7 @@ module Groovepacker
             subscription = tenant.subscription if tenant.subscription
             CreateTenant.new.apply_restrictions_and_seed(subscription)
           end
-          result 
+          result
         rescue Exception => e
           result['status'] = false
           result['error_messages'].push(e.message);
@@ -215,7 +215,7 @@ module Groovepacker
           delete_customer(customer_id) rescue nil
         else
           begin
-            duplicate_tenant_name = Tenant.find(duplicate_tenant_id).name 
+            duplicate_tenant_name = Tenant.find(duplicate_tenant_id).name
             create_subscription(subscription_data, duplicate_tenant_name, tenant)
             subscription_data.is_active = false
             subscription_data.save
@@ -353,7 +353,7 @@ module Groovepacker
           SendStatStream.new.delay(priority: 95).duplicate_groovlytic_tenant(current_tenant, duplicate_name)
         rescue => e
           update_fail_status(result, e.message)
-          Rollbar.error(e, e.message)
+          Rollbar.error(e, e.message, Apartment::Tenant.current)
         end
         result
       end
@@ -529,17 +529,17 @@ module Groovepacker
               Stripe::Subscription.update(customer_subscription.id, plan: plan, trial_end: @trial_end_time, prorate: false)
               @updated_in_stripe = true
             rescue Exception => e
-              Rollbar.error(e, e.message)
+              Rollbar.error(e, e.message, Apartment::Tenant.current)
               @updated_in_stripe = false
-            end  
+            end
           else
             begin
               Stripe::Subscription.update(customer_subscription.id, plan: plan, prorate: true)
               @updated_in_stripe = true
             rescue Exception => e
-               Rollbar.error(e, e.message)
+               Rollbar.error(e, e.message, Apartment::Tenant.current)
               @updated_in_stripe = false
-            end 
+            end
           end
         end
       end
@@ -557,13 +557,13 @@ module Groovepacker
                   Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
                   @updated_in_stripe = true
                 rescue Exception => e
-                  Rollbar.error(e, e.message)
+                  Rollbar.error(e, e.message, Apartment::Tenant.current)
                   @updated_in_stripe = false
                 end
               end
-            end  
+            end
           end
-        end  
+        end
       end
 
       def update_annual_subscription(plan_id)
@@ -575,7 +575,7 @@ module Groovepacker
                 Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
                 @updated_in_stripe = true
               rescue Exception => e
-                Rollbar.error(e, e.message)
+                Rollbar.error(e, e.message, Apartment::Tenant.current)
                 @updated_in_stripe = false
               end
             else
@@ -583,14 +583,14 @@ module Groovepacker
                 Stripe::Subscription.update(subscription.id, plan: plan_id, prorate: true)
                 @updated_in_stripe = true
               rescue Exception => e
-                Rollbar.error(e, e.message)
+                Rollbar.error(e, e.message, Apartment::Tenant.current)
                 @updated_in_stripe = false
               end
-            end  
+            end
           end
-        end  
+        end
       end
-      
+
       def update_app_subscription(plan_id, amount, interval)
         @subscription.subscription_plan_id = plan_id
         @subscription.amount = amount
@@ -609,19 +609,19 @@ module Groovepacker
           last_scan =  tenant_hash['last_activity']['most_recent_scan']
           if last_login["date_time"].to_i < last_scan["date_time"].to_i
             tenant_hash['last_activity']['most_recent_login'] = most_recent_scan(tenant_name)
-            tenant_hash['last_activity']['most_recent_login']['user'] = tenant_hash['last_activity']['most_recent_login']['user'].username 
+            tenant_hash['last_activity']['most_recent_login']['user'] = tenant_hash['last_activity']['most_recent_login']['user'].username
             tenant_hash['most_recent_activity'] = most_recent_scan(tenant_name)
           end
           if last_login["date_time"].to_i < last_scan["date_time"].to_i
             tenant_hash["latest_activity"] = last_scan["date_time"]
           else
             tenant_hash["latest_activity"] = last_login["date_time"]
-          end  
+          end
           check_split_or_production
         rescue => e
           tenant_hash['most_recent_activity'] = nil
           tenant_hash["last_activity"] = nil
-          check_split_or_production          
+          check_split_or_production
         end
         Apartment::Tenant.switch!(current_tenant)
       end
@@ -668,14 +668,14 @@ module Groovepacker
         end
 
         return unless query.present?
-        
+
         @recent_login_per_tenant.merge!(
           User.find_by_sql(query).group_by { |order| order.tenant_name })
       end
 
       def most_recent_scan(tenant_name)
         most_recent_scan_data = {}
-        
+
         @order = @latest_scanned_orders_per_tenant[tenant_name].first
 
         if @order

@@ -74,8 +74,8 @@ module TenantsHelper
           if stripe_subsc.data.present?
             subsc_data = stripe_subsc["data"][0]
             trial_end = subsc_data.trial_end
-            trial_period_days = Time.at(trial_end).to_datetime < Time.now ? 0 : DateTime.parse(Time.at(trial_end).strftime("%d-%m-%Y")).mjd - DateTime.now.mjd rescue 0 
-            subsc_data.delete 
+            trial_period_days = Time.at(trial_end).to_datetime < Time.now ? 0 : DateTime.parse(Time.at(trial_end).strftime("%d-%m-%Y")).mjd - DateTime.now.mjd rescue 0
+            subsc_data.delete
           end
           Stripe::Plan.create(amount: 0, interval: "month", name: new_plan.gsub("-", " ").capitalize, currency: "usd", id: new_plan) rescue nil
           new_subsc = stripe_subsc.create(:plan => new_plan, trial_period_days: trial_period_days)
@@ -206,10 +206,10 @@ module TenantsHelper
       tenant_price =  tenant.price
       tenant_price[feature]["stripe_id"] = response.id
       tenant.price = tenant_price
-      tenant.save 
+      tenant.save
     rescue Exception => e
-       Rollbar.error(e, e.message)
-    end  
+       Rollbar.error(e, e.message, Apartment::Tenant.current)
+    end
   end
 
   def new_plan_info_for_feature(tenant, feature)
@@ -246,9 +246,9 @@ def create_plan_for_feature(amount, interval, name, id)
           sub_item.delete()
           sub_plan.delete()
         end
-      end    
+      end
     rescue Exception => e
-       Rollbar.error(e, e.message)
-    end  
+       Rollbar.error(e, e.message, Apartment::Tenant.current)
+    end
   end
 end

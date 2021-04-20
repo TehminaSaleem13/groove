@@ -18,7 +18,7 @@ module Groovepacker
             Product.last(@products_to_import.length).each { |product| product.add_product_activity("Product Import","#{product.store.try(:name)}") }
             found_products_raw = []
             @all_unique_ids.each_slice(20000) do |ids|
-              found_products_raw << Product.where(store_product_id: ids)  
+              found_products_raw << Product.where(store_product_id: ids)
             end
             found_products_raw = found_products_raw.flatten
             # found_products_raw = Product.find_all_by_store_product_id(@all_unique_ids)
@@ -97,14 +97,14 @@ module Groovepacker
           def prepare_to_import
             found_skus_raw = []
             @all_skus.each_slice(20000) do |skus|
-              found_skus_raw << ProductSku.where(sku: skus)  
+              found_skus_raw << ProductSku.where(sku: skus)
             end
             found_skus_raw = found_skus_raw.flatten
             # found_skus_raw = ProductSku.find_all_by_sku(@all_skus)
             @found_skus = {}
             found_barcodes_raw = []
             @all_barcodes.each_slice(20000) do |barcodes|
-              found_barcodes_raw << ProductBarcode.where(barcode: barcodes)  
+              found_barcodes_raw << ProductBarcode.where(barcode: barcodes)
             end
             found_barcodes_raw = found_barcodes_raw.flatten
             # found_barcodes_raw = ProductBarcode.find_all_by_barcode(@all_barcodes)
@@ -129,7 +129,7 @@ module Groovepacker
 
             single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :packing_instructions => record[:packing_instructions], :packing_instructions_conf => record[:packing_instructions_conf], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3], :custom_product_display_1 =>  record[:custom_product_display_1], :custom_product_display_2 => record[:custom_product_display_2], :custom_product_display_3 => record[:custom_product_display_3], :fnsku => record[:fnsku], :asin => record[:asin], :fba_upc => record[:fba_upc], :isbn => record[:isbn], :ean => record[:ean], :supplier_sku => record[:supplier_sku], :avg_cost => record[:avg_cost], :count_group => record[:count_group])
 
-            single_import.packing_placement = record[:packing_placement] if record[:packing_placement].present? 
+            single_import.packing_placement = record[:packing_placement] if record[:packing_placement].present?
             single_import.store_id = self.params[:store_id]
             single_import.store_product_id = record[:store_product_id]
             single_import.status = (record[:skus].length > 0 && record[:barcodes].length > 0) ? 'active' : 'new'
@@ -180,7 +180,7 @@ module Groovepacker
               # end
             else
               duplicate_product.record_serial = 0
-            end  
+            end
             # if !self.mapping['product_weight'].nil? #&& self.mapping['product_weight'][:action] == 'overwrite'
             #   duplicate_product.weight = record[:weight] if record[:weight].to_f > 0
             # end
@@ -194,9 +194,9 @@ module Groovepacker
             if !self.mapping['receiving_instructions'].nil? && record[:product_receiving_instructions] != "[DELETE]" #&& self.mapping['receiving_instructions'][:action] == 'overwrite'
               duplicate_product.product_receiving_instructions = record[:product_receiving_instructions]
             end
-            
+
             assign_duplicate_product_attributes(record, duplicate_product)
-            
+
             @products_for_status_update << duplicate_product
             duplicate_product.save!
             @success_updated += 1
@@ -275,7 +275,7 @@ module Groovepacker
                     to_add_barcode.save!
                     #@import_product_barcodes << to_add_barcode
                   rescue Exception => e
-                    Rollbar.error(e, e.message) 
+                    Rollbar.error(e, e.message, Apartment::Tenant.current)
                   end
                 end
               end
@@ -295,7 +295,7 @@ module Groovepacker
                 end
               end
               record[:skus].each_with_index do |single_to_add_sku, index|
-                if !to_not_add_skus.include?(single_to_add_sku) && single_to_add_sku != "[DELETE]" 
+                if !to_not_add_skus.include?(single_to_add_sku) && single_to_add_sku != "[DELETE]"
                   begin
                     to_add_sku = ProductSku.new
                     to_add_sku.sku = single_to_add_sku
@@ -304,7 +304,7 @@ module Groovepacker
                     to_add_sku.save!
                     #@import_product_skus << to_add_sku
                   rescue Exception => e
-                    Rollbar.error(e, e.message) 
+                    Rollbar.error(e, e.message, Apartment::Tenant.current)
                   end
                 end
               end
@@ -431,7 +431,7 @@ module Groovepacker
             @import_product_skus.clear
             @product_import.status = 'importing_barcodes'
             @product_import.save
-            
+
             #ProductBarcode.import @import_product_barcodes
 
             @import_product_barcodes.clear
@@ -539,7 +539,7 @@ module Groovepacker
               # usable_record[:new_sku] <<  single_row[self.mapping['quinary_sku'][:position]].split(',')[0] rescue nil
               # usable_record[:new_sku] <<  single_row[self.mapping['senary_sku'][:position]].split(',')[0] rescue nil
             rescue Exception => e
-              Rollbar.error(e, e.message)
+              Rollbar.error(e, e.message, Apartment::Tenant.current)
             end
             @usable_records << build_usable_record(usable_record, single_row)
             @success += 1

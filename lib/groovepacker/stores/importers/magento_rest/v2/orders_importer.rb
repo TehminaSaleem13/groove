@@ -53,7 +53,7 @@ module Groovepacker
 	          	  	  	@order_item.row_total= line_item["row_total"]
 	          	  	  	@order_item.name = line_item["name"]
 	          	  	  	@order_item.sku = line_item["sku"]
-	          	  	  	
+
 	          	  	  	if ProductSku.where(:sku => @order_item.sku).length == 0
 	          	  	  	  product_id = Groovepacker::Stores::Importers::MagentoRest::
 	          	  	  	  ProductsImporter.new(handler).import_single(line_item_product)
@@ -76,7 +76,7 @@ module Groovepacker
                       @order.lastname = address["lastname"]
                       @order.firstname = address["firstname"]
                       @order.state = address["region"]
-              	  	  
+
               	  	  if @order.save
               	  	  	if !@order.addnewitems
               	  	  	  result[:status] &= false
@@ -119,7 +119,7 @@ module Groovepacker
               	import_item.save
                 import_item = fix_import_item(import_item)
                 tenant = Apartment::Tenant.current
-                Rollbar.error(e, e.message)
+                Rollbar.error(e, e.message, Apartment::Tenant.current)
                 ImportMailer.failed({ tenant: tenant, import_item: import_item, exception: e }).deliver
               end
               import_item = fix_import_item(import_item)
