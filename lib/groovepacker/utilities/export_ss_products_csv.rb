@@ -83,6 +83,7 @@ class ExportSsProductsCsv
     Apartment::Tenant.switch! tenant
     store = Store.find(params[:store_id])
     shopify_credential = store.shopify_credential
+    result = {}
     if shopify_credential
       products = Product.where(store_id: params[:store_id])
       filter_products = []
@@ -118,7 +119,7 @@ class ExportSsProductsCsv
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
       if response.code == "200" && !image.placeholder
-        result["broken_image"] = false 
+        result["broken_image"] = false
         return result["broken_image"]
       end
     end
@@ -132,7 +133,7 @@ class ExportSsProductsCsv
     end
     no_product = products.blank?
     object_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'product', filename, data).url.gsub('http:', 'https:') rescue nil
-    CsvExportMailer.send_s3_product_object_url(filename, object_url, Apartment::Tenant.current, no_product).deliver 
+    CsvExportMailer.send_s3_product_object_url(filename, object_url, Apartment::Tenant.current, no_product).deliver
   end
 
   def assign_single_row(product, single_row)
