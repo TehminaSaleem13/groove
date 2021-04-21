@@ -50,13 +50,7 @@ class ImportCsv
             new_file_data =  File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
           end
 
-          CSV.open(file_path, 'w') do |writer|
-            rows = CSV.parse(new_file_data, headers: true, header_converters: ->(f) { f&.strip }, converters: ->(f) { f&.strip })
-            rows.each do |row|
-              writer << row
-            end
-          end
-
+          File.write(file_path,new_file_data)
           if Apartment::Tenant.current == "unitedmedco"
             first_remove = new_file_data.gsub(/\"\"/,"\"")
             second_remove = first_remove.gsub(/\"\"/,"\"")
@@ -89,27 +83,19 @@ class ImportCsv
             rescue
               nil
             end
-            if params[:encoding_format] == 'ASCII + UTF-8'
-              content = file_content.encode(Encoding.find('ASCII'), encoding_options)
-            elsif params[:encoding_format] == 'ISO-8859-1 + UTF-8'
-              content = file_content.force_encoding('ISO-8859-1').encode('UTF-8')
-            elsif params[:encoding_format] == 'UTF-8'
-              content = file_content.force_encoding('UTF-8').encode('UTF-8')
+            if params[:encoding_format] == "ASCII + UTF-8"
+              File.write(file_path, file_content.encode(Encoding.find('ASCII'), encoding_options))
+            elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
+              File.write(file_path, file_content.force_encoding("ISO-8859-1").encode("UTF-8"))
+            elsif params[:encoding_format] == "UTF-8"
+              File.write(file_path, file_content.force_encoding("UTF-8").encode('UTF-8'))
             end
           rescue Exception => e
-            content = file.content.encode(Encoding.find('ASCII'), encoding_options)
+            File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
           end
         else
-          content = file.content.encode(Encoding.find('ASCII'), encoding_options)
+          File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
         end
-
-        CSV.open(file_path, 'w') do |writer|
-          rows = CSV.parse(content, headers: true, header_converters: ->(f) { f&.strip }, converters: ->(f) { f&.strip })
-          rows.each do |row|
-            writer << row
-          end
-        end
-
         if Apartment::Tenant.current == "unitedmedco"
           first_remove = file.content.gsub(/\"\"/,"\"")
           second_remove = first_remove.gsub(/\"\"/,"\"")
