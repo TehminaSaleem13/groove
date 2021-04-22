@@ -83,6 +83,7 @@ class ImportCsv
             rescue
               nil
             end
+
             if params[:encoding_format] == "ASCII + UTF-8"
               File.write(file_path, file_content.encode(Encoding.find('ASCII'), encoding_options))
             elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
@@ -102,12 +103,14 @@ class ImportCsv
           File.write(file_path, second_remove)
         end
 
-        csv_file = begin
-                    file.content.encode(Encoding.find('ASCII'), encoding_options)
-                   rescue
-                     nil
-                   end if !(store.csv_beta && params[:type] == "order")
-
+        if !params[:type] == "product" && params[:encoding_format].nil?
+          csv_file = begin
+                      file.content.encode(Encoding.find('ASCII'), encoding_options)
+                    rescue
+                      nil
+                    end if !(store.csv_beta && params[:type] == "order")
+        end
+        
         if check_mapping_for_tracking_num(params)
           csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options)
           params.merge!(only_for_tracking_num: true)
@@ -135,7 +138,11 @@ class ImportCsv
             if params[:flag] == 'ftp_download'
               initial_split = csv_file.split(/\n/).reject(&:empty?)
             else
-              initial_split = csv_file.content.split(/\n/).reject(&:empty?)
+              if csv_file
+               initial_split = csv_file.content.split(/\n/).reject(&:empty?)
+              else
+                initial_split = file_content.content.split(/\n/).reject(&:empty?)
+              end 
             end
             initial_split.each do |single|
               final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
@@ -143,15 +150,27 @@ class ImportCsv
           else
             require 'csv'
             params[:sep] = params[:sep] == '\\t' ? "\t" : params[:sep]
-            final_record = begin
-                              CSV.parse(csv_file, col_sep: params[:sep], quote_char: params[:delimiter], encoding: 'windows-1251:utf-8')
-                            rescue
-                              begin
-                                CSV.parse(csv_file, col_sep: params[:sep], quote_char: '|', encoding: 'windows-1251:utf-8')
+            if csv_file.nil? && !params[:encoding_format].nil?
+              final_record = begin
+                                CSV.parse(file_content, col_sep: params[:sep], quote_char: params[:delimiter], encoding: 'windows-1251:utf-8')
                               rescue
-                                []
+                                begin
+                                  CSV.parse(file_content, col_sep: params[:sep], quote_char: '|', encoding: 'windows-1251:utf-8')
+                                rescue
+                                  []
+                                end
                               end
-                            end
+            else
+              final_record = begin
+                CSV.parse(csv_file, col_sep: params[:sep], quote_char: params[:delimiter], encoding: 'windows-1251:utf-8')
+              rescue
+                begin
+                  CSV.parse(csv_file, col_sep: params[:sep], quote_char: '|', encoding: 'windows-1251:utf-8')
+                rescue
+                  []
+                end
+              end
+            end
           end
           if params[:rows].to_i && params[:rows].to_i > 1
             final_record.shift(params[:rows].to_i - 1)
