@@ -158,7 +158,7 @@ module Groovepacker
               delete_existing_prod(duplicate_product)
               return true
             end
-            duplicate_product.store_id = self.params[:store_id]
+            duplicate_product.store_id ||= self.params[:store_id]
             duplicate_product.name = record[:name] if !self.mapping['product_name'].nil? && record[:name]!='' && record[:name]!= "[DELETE]"
             if record[:product_second_record_serial] != nil
               duplicate_product.second_record_serial = ["ON","on","TRUE",true, 'true', "YES","yes","1" ].include?(record[:product_second_record_serial]) ? 1 : record[:product_second_record_serial].to_s.to_i
