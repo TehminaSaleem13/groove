@@ -9,13 +9,13 @@ module FTP
         unless self.host.nil? || self.username.nil? || self.password.nil?
           Timeout.timeout(20) do
             if self.host.include?(":")
-              string = self.host.split(":") 
+              string = self.host.split(":")
               ftp = Net::FTP.new
               ftp.connect(string[0], string[1])
               ftp.login(self.username, self.password)
               ftp.passive = true
               result[:connection_obj] = ftp
-            else 
+            else
               result[:connection_obj] = Net::FTP.new(self.host, self.username, self.password)
               result[:connection_obj].passive = true
             end
@@ -164,16 +164,16 @@ module FTP
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           system 'mkdir', '-p', "ftp_files/#{current_tenant}"
-          
+
           file_name = nil
           file_path = nil
           found_file = find_file(connection_obj)
-          
+
           unless found_file.nil?
             file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             # connection_obj.chdir("~/#{self.directory}")
             connection_obj.getbinaryfile("#{found_file}", "ftp_files/#{current_tenant}/#{file_name}")
-            
+
             file_path = "#{Rails.root}/ftp_files/#{current_tenant}/#{file_name}"
             result[:file_info][:file_path] = file_path
             result[:file_info][:ftp_file_name] = found_file
@@ -214,7 +214,7 @@ module FTP
           rescue Exception => e
             connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/#{new_file}")
           end
-          
+
           connection_obj.close()
         else
           result[:status] = false
@@ -240,11 +240,7 @@ module FTP
     def find_file(connection_obj)
       file = nil
     	connection_obj.chdir(self.directory)
-      begin
-        files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
-      rescue
-        files = connection_obj.nlst('*.csv') rescue connection_obj.nlst('*.CSV')
-      end
+      files = connection_obj.nlst.select { |f| f.end_with?('.csv', '.CSV') } rescue []
       files = files.sort_by { |filename| connection_obj.mtime(filename) }
       files.each do |individual_file|
         unless '-imported'.in? individual_file
