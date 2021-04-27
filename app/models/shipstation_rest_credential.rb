@@ -29,13 +29,13 @@ class ShipstationRestCredential < ActiveRecord::Base
   def verify_tags
     context = Groovepacker::Stores::Context.new(
       Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
-    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name, "GP READY", "GP IMPORTED"]) 
+    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name, "GP READY", "GP IMPORTED"])
   end
 
   def verify_awaits_tag
     context = Groovepacker::Stores::Context.new(
       Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
-    context.verify_awaiting_tags(gp_ready_tag_name) 
+    context.verify_awaiting_tags(gp_ready_tag_name)
   end
 
   def gp_ready_tag_name
@@ -69,7 +69,7 @@ class ShipstationRestCredential < ActiveRecord::Base
         store: store,
         import_type: import_type
       )
-      Delayed::Job.enqueue UpdateJob.new(tenant, import_summary.import_items.first.id), :queue => 'importing_orders_'+ tenant
+      ShipstationRestCredential.delay(queue: "importing_orders_#{Apartment::Tenant.current}", priority: 95).order_update_job(tenant, import_summary.import_items.first.id)
     else
       #import is already running. back off from importing
       result[:status] = false
@@ -78,28 +78,49 @@ class ShipstationRestCredential < ActiveRecord::Base
     result
   end
 
-  UpdateJob = Struct.new(:tenant, :import_item_id) do
-    def perform
-      Apartment::Tenant.switch!(tenant)
-      import_item = ImportItem.find(import_item_id)
-      order_import_summary = import_item.order_import_summary
-      order_import_summary.status = "in_progress"
-      order_import_summary.save
+  def self.order_update_job(tenant, import_item_id)
+    Apartment::Tenant.switch!(tenant)
+    import_item = ImportItem.find(import_item_id)
+    order_import_summary = import_item.order_import_summary
+    order_import_summary.status = "in_progress"
+    order_import_summary.save
 
-      begin
-        context = Groovepacker::Stores::Context.new(
-          Groovepacker::Stores::Handlers::ShipstationRestHandler.new(import_item.store, ImportItem.find(import_item_id)))
-        #start importing using delayed job
-        context.update_all_products
-      rescue Exception => e
-        import_item.message = "Import failed: " + e.message
-        import_item.status = 'failed'
-        import_item.save
-      end
-      order_import_summary.status = "completed"
-      order_import_summary.save
+    begin
+      context = Groovepacker::Stores::Context.new(
+        Groovepacker::Stores::Handlers::ShipstationRestHandler.new(import_item.store, ImportItem.find(import_item_id)))
+      #start importing using delayed job
+      context.update_all_products
+    rescue Exception => e
+      import_item.message = "Import failed: " + e.message
+      import_item.status = 'failed'
+      import_item.save
     end
+    order_import_summary.status = "completed"
+    order_import_summary.save
   end
+
+  # UpdateJob = Struct.new(:tenant, :import_item_id) do
+  #   def perform
+  #     Apartment::Tenant.switch!(tenant)
+  #     import_item = ImportItem.find(import_item_id)
+  #     order_import_summary = import_item.order_import_summary
+  #     order_import_summary.status = "in_progress"
+  #     order_import_summary.save
+
+  #     begin
+  #       context = Groovepacker::Stores::Context.new(
+  #         Groovepacker::Stores::Handlers::ShipstationRestHandler.new(import_item.store, ImportItem.find(import_item_id)))
+  #       #start importing using delayed job
+  #       context.update_all_products
+  #     rescue Exception => e
+  #       import_item.message = "Import failed: " + e.message
+  #       import_item.status = 'failed'
+  #       import_item.save
+  #     end
+  #     order_import_summary.status = "completed"
+  #     order_import_summary.save
+  #   end
+  # end
 
   def get_active_statuses
     statuses = []

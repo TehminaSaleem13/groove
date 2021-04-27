@@ -106,7 +106,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
     #start importing using delayed job (ImportJob is defined in base class)
     track_user(params[:tenant], params, "Import Started", "Order Import Started")
-    Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant], priority: 95
+    # Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant], priority: 95
+    Groovepacker::Utilities::Base.new.delay(queue: "importing_orders_#{Apartment::Tenant.current}", priority: 95).order_import_job(params[:tenant], import_summary.id)
   end
 
   def reschedule_job(type, tenant)

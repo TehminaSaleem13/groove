@@ -3,7 +3,7 @@ module Groovepacker
     class Base
       require 'import_orders'
       attr_accessor :import_params
-      
+
       def initialize(params={})
         self.import_params = params
       end
@@ -11,7 +11,7 @@ module Groovepacker
       def init_import(tenant)
         Apartment::Tenant.switch!(tenant)
       end
-      
+
       def get_handler(store_type, store, import_item)
         case store_type
         when 'Amazon'
@@ -85,19 +85,31 @@ module Groovepacker
         import_item.save!
       end
 
-      ImportJob = Struct.new(:tenant, :order_import_summary_id) do
-        def perform
-          Apartment::Tenant.switch!(tenant)
-          ois = OrderImportSummary.find_by_id(order_import_summary_id)
-          if ois
-            ois.update_attributes(status: 'in_progress')
-            ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
-            ois.reload
-            ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
-          end
-          GC.start
+      def order_import_job(tenant, order_import_summary_id)
+        Apartment::Tenant.switch!(tenant)
+        ois = OrderImportSummary.find_by_id(order_import_summary_id)
+        if ois
+          ois.update_attributes(status: 'in_progress')
+          ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
+          ois.reload
+          ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
         end
+        GC.start
       end
+
+      # ImportJob = Struct.new(:tenant, :order_import_summary_id) do
+      #   def perform
+      #     Apartment::Tenant.switch!(tenant)
+      #     ois = OrderImportSummary.find_by_id(order_import_summary_id)
+      #     if ois
+      #       ois.update_attributes(status: 'in_progress')
+      #       ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
+      #       ois.reload
+      #       ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
+      #     end
+      #     GC.start
+      #   end
+      # end
 
     end
   end
