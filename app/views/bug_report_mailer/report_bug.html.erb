@@ -9,6 +9,6 @@
 <b>Feedback: </b><%= @data[:feedback] %>
 </br>
 </br>
-<% if @data[:logs].present? %>
-  Please find the attached file.
+<% if @attachment_data.present? %>
+  Please find the attached file or <a href="<%= @data[:url] %>" target="_blank">Click Here</a> to download the file.
 <% end %>

@@ -3,7 +3,20 @@ class ScanPackController < ApplicationController
   include ScanPackHelper
 
   def scan_pack_bug_report
-    BugReportMailer.delay(priority: 95).report_bug(params, current_user.try(:username), Apartment::Tenant.current)
+    data = params.to_unsafe_hash
+    if data[:logs].present?
+      begin
+        file_name = Apartment::Tenant.current + '_expo_logs_' + Time.current.to_i.to_s  + '.json'
+        file = GroovS3.create(Apartment::Tenant.current, "expo_bugs/#{file_name}", 'text/json')
+        File.open(file_name, 'w') { |f| f.write(data[:logs].to_json) }
+        file.acl = 'public-read'
+        file.content = File.read(file_name)
+        file.save
+        data[:url] = file.url
+      rescue
+      end
+    end
+    BugReportMailer.delay(priority: 95).report_bug(data.except(:scan_pack, :logs), current_user.try(:username), Apartment::Tenant.current)
     render json: { status: 'OK' }
   end
 
