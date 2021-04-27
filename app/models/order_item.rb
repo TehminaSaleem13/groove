@@ -97,13 +97,15 @@ class OrderItem < ActiveRecord::Base
     result['instruction'] = item.packing_instructions
     result['confirmation'] = item.packing_instructions_conf
     result['images'] = sort_by_order[item.cached_product_images]
-    result['sku'] = sort_by_order[item.cached_product_skus].first.sku if item.cached_product_skus.length > 0
+    cached_item_product_skus = item.cached_product_skus
+    result['sku'] = sort_by_order[cached_item_product_skus].first.sku if cached_item_product_skus.length > 0
     result['packing_placement'] = item.packing_placement
     result['barcodes'] = sort_by_order[item.cached_product_barcodes]
     result['product_id'] = item.id
-    result['location'] = item.product_inventory_warehousess[0].location_primary rescue nil
-    result['location2'] = item.product_inventory_warehousess[0].location_secondary rescue nil
-    result['location3'] = item.product_inventory_warehousess[0].location_tertiary rescue nil
+    product_inv_warehouses = item.product_inventory_warehousess[0] rescue nil
+    result['location'] = product_inv_warehouses.try(:location_primary)
+    result['location2'] = product_inv_warehouses.try(:location_secondary)
+    result['location3'] = product_inv_warehouses.try(:location_tertiary)
     result['skippable'] = item.is_skippable
     result['record_serial'] = item.record_serial
     result['second_record_serial'] = item.second_record_serial
@@ -406,7 +408,7 @@ class OrderItem < ActiveRecord::Base
           self.order.addactivity("Item with SKU: " + sku + " has been click scanned in Box 1", username) if !ScanPackSetting.last.order_verification
         else
           self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
-        end     
+        end
       else
         box = Box.where(id: box_id).last
         self.order.addactivity("Item with SKU: " + sku + " has been click scanned in #{box.try(:name)}", username) if !ScanPackSetting.last.order_verification

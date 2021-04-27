@@ -198,10 +198,10 @@ module ShippingEasyHelper
 
   def delete_split_combined_orders(order)
     # Delete previous order after split in SE
-    order['deleted_after_split'] = Order.joins(:order_items).where("order_items.scanned_status = 'unscanned' OR order_items.scanned_status = 'notscanned' AND store_order_id = ?", order['split_from_order_id'].to_s).destroy_all.map(&:increment_id)
+    order['deleted_after_split'] = Order.joins(:order_items).where("order_items.scanned_status = 'unscanned' OR order_items.scanned_status = 'notscanned' AND store_order_id = ?", order['split_from_order_id'].to_s).destroy_all.pluck(:increment_id)
 
     # Delete previous order after combined in SE
-    order['deleted_after_combined'] = Order.joins(:order_items).where("order_items.scanned_status = 'unscanned' OR order_items.scanned_status = 'notscanned' AND store_order_id IN (?)", order['source_order_ids']).destroy_all.map(&:increment_id)
+    order['deleted_after_combined'] = Order.joins(:order_items).where("order_items.scanned_status = 'unscanned' OR order_items.scanned_status = 'notscanned' AND store_order_id IN (?)", order['source_order_ids']).destroy_all.pluck(:increment_id)
   end
 
   def add_split_combined_activity(order, shiping_easy_order)

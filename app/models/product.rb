@@ -56,7 +56,7 @@ class Product < ActiveRecord::Base
 
   cached_methods :product_skus, :product_images,
                  :product_barcodes, :product_kit_skuss,
-                 :primary_sku
+                 :primary_sku, :product_inventory_warehousess
   after_save :delete_cache
   after_save :check_and_update_status_updated_column
 
@@ -142,7 +142,7 @@ class Product < ActiveRecord::Base
           else
             ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
           end
-        
+
         # To reduce individual product query fire on order items
         multi_product_order_items =
           OrderItem.where(product_id: @kit_products.map{|kp| kp.product.id}, scanned_status: 'notscanned')

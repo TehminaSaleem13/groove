@@ -11,9 +11,10 @@ module ScanPack
         data['scanned_items'] = @single_order.get_scanned_items
         data['scanning_count'] = @single_order.scanning_count
         do_if_unscanned_items_present(data) unless data['unscanned_items'].length == 0
-        data['next_item']['location'] = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0].location_primary rescue nil
-        data['next_item']['location2'] = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0].location_secondary rescue nil
-        data['next_item']['location3'] = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0].location_tertiary rescue nil
+        product_inv_warehouse = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0] rescue nil
+        data['next_item']['location'] = product_inv_warehouse.try(:location_primary)
+        data['next_item']['location2'] = product_inv_warehouse.try(:location_secondary)
+        data['next_item']['location3'] = product_inv_warehouse.try(:location_tertiary)
         return data
       end
 
