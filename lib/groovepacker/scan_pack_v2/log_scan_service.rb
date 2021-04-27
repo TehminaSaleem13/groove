@@ -9,6 +9,7 @@ module Groovepacker
         session = session.present? ? session : {}
         current_user = User.find_by_id current_user_id
         @params[:data].each do |scn_params|
+          sleep 0.5
           begin
             if (scn_params[:event] == 'regular')
               scan_barcode_obj = ScanPack::ScanBarcodeService.new(
