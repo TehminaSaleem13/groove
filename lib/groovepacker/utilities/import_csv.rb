@@ -103,7 +103,7 @@ class ImportCsv
           File.write(file_path, second_remove)
         end
 
-        if !params[:type] == "product" && params[:encoding_format].nil?
+        if params[:type] != "product"
           csv_file = begin
                       file.content.encode(Encoding.find('ASCII'), encoding_options)
                     rescue
