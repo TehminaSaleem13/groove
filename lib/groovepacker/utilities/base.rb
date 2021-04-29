@@ -89,6 +89,8 @@ module Groovepacker
         Apartment::Tenant.switch!(tenant)
         ois = OrderImportSummary.find_by_id(order_import_summary_id)
         if ois
+          track_changes(title: 'Import Started : Order Import Summary ' + ois.id.to_s, tenant: tenant,
+            username: (User.find(ois.user_id).username rescue nil) || 'GP App', object_id: ois.id)
           ois.update_attributes(status: 'in_progress')
           ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
           ois.reload

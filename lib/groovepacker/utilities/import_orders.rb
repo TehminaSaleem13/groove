@@ -42,6 +42,8 @@ class ImportOrders < Groovepacker::Utilities::Base
     track_user(tenant, {store_id: nil, user_id: import_params[:user_id]}, "Import Started", "Order Import Started")
     delete_existing_order_import_summaries
     return if @order_import_summary.nil? || @order_import_summary.id.nil?
+    track_changes(title: 'Import Started : Order Import Summary ' + @order_import_summary.id.to_s, tenant: tenant,
+      username: (User.find(@order_import_summary.user_id).username rescue nil) || 'GP App', object_id: @order_import_summary.id)
     @order_import_summary.import_items.reload.find_each(:batch_size => 100) do |import_item|
       next if import_item.status == "cancelled"
       import_orders_with_import_item(import_item, tenant)
