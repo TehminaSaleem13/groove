@@ -4,18 +4,7 @@ class ScanPackController < ApplicationController
 
   def scan_pack_bug_report
     data = params.to_unsafe_hash
-    if data[:logs].present?
-      begin
-        file_name = Apartment::Tenant.current + '_expo_logs_' + Time.current.to_i.to_s  + '.json'
-        file = GroovS3.create(Apartment::Tenant.current, "expo_bugs/#{file_name}", 'text/json')
-        File.open(file_name, 'w') { |f| f.write(data[:logs].to_json) }
-        file.acl = 'public-read'
-        file.content = File.read(file_name)
-        file.save
-        data[:url] = file.url
-      rescue
-      end
-    end
+    params[:url] = create_log_file_data(params, :logs, 'expo_bugs') if data[:logs].present?
     BugReportMailer.delay(priority: 95).report_bug(data.except(:scan_pack, :logs), current_user.try(:username), Apartment::Tenant.current)
     render json: { status: 'OK' }
   end
@@ -28,14 +17,16 @@ class ScanPackController < ApplicationController
   end
 
   def scan_pack_v2
+    current_timestamp = params[:data].last['time'].in_time_zone rescue nil
     if params[:data].present?
       tenant = Tenant.find_by_name(Apartment::Tenant.current)
       log_scn_obj = Groovepacker::ScanPackV2::LogScanService.new
+      params[:data] = create_log_file_data(params, :data, 'expo_log_data')
       if tenant.expo_logs_delay
         session = session.present? ? session : nil
-        log_scn_obj.delay(run_at: 1.seconds.from_now, priority: 95).process_logs(tenant.name, current_user.try(:id), session, params)
+        log_scn_obj.delay(run_at: 1.seconds.from_now, priority: 95).process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       else
-        log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, params)
+        log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       end
       # params[:data].each do |scn_params|
       #   begin
@@ -124,7 +115,7 @@ class ScanPackController < ApplicationController
     # log = { params: params, time: Time.current, params_json: params[:_json] }
     # on_demand_logger.info(log)
     # on_demand_logger.info('---------------------------------------------')
-    render json: { status: 'OK', timestamp: (params[:data].last['time'].in_time_zone rescue nil) }
+    render json: { status: 'OK', timestamp: current_timestamp }
   end
 
   # takes order_id as input and resets scan status if it is partially scanned.
