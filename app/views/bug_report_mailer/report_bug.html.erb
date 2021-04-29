@@ -1,14 +1,5 @@
-<h3><%= "#{@tenant} - Reported Bug" %></h3>
-
-<b>User: </b><%= @user %>
-</br>
-</br>
-<b>Time: </b><%= Time.current.to_s(:rfc822) %>
-</br>
-</br>
-<b>Feedback: </b><%= @data[:feedback] %>
-</br>
-</br>
-<% if @attachment_data.present? %>
-  Please find the attached file or <a href="<%= @data[:url] %>" target="_blank">Click Here</a> to download the file.
-<% end %>
+<h1><%= "#{@tenant} - Reported Bug" %></h1>
+<h2><b>User: </b><%= @user %></h2>
+<h2><b>Time: </b><%= Time.current.to_s(:rfc822) %></h2>
+<h2><b>Feedback: </b><%= @data[:feedback] %></h2>
+<p><strong>Please find the attached file or <a href="<%= @data[:url] %>" target="_blank">Click Here</a> to download the file.</strong></p>

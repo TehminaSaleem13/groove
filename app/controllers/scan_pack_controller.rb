@@ -4,7 +4,7 @@ class ScanPackController < ApplicationController
 
   def scan_pack_bug_report
     data = params.to_unsafe_hash
-    params[:url] = create_log_file_data(params, :logs, 'expo_bugs') if data[:logs].present?
+    data[:url] = create_log_file_data(data, :logs, 'expo_bugs') if data[:logs].present?
     BugReportMailer.delay(priority: 95).report_bug(data.except(:scan_pack, :logs), current_user.try(:username), Apartment::Tenant.current)
     render json: { status: 'OK' }
   end
