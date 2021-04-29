@@ -112,7 +112,7 @@ GEM
     appsignal (2.10.4)
       rack
     arel (8.0.0)
-    ast (2.4.0)
+    ast (2.4.2)
     aws-eventstream (1.1.0)
     aws-sdk (2.11.486)
       aws-sdk-resources (= 2.11.486)
@@ -730,7 +730,8 @@ GEM
       nokogiri (>= 1.4.0)
       nori (~> 2.4)
       wasabi (~> 3.4)
-    scout_apm (3.0.0.pre28)
+    scout_apm (2.6.10)
+      parser
     sexp_processor (4.14.1)
     shipping_easy (0.7.0)
       faraday (>= 0.8.7)
@@ -898,7 +899,7 @@ DEPENDENCIES
   s3
   sass-rails (~> 5.0.7)
   savon
-  scout_apm (~> 3.0.x)
+  scout_apm (= 2.6.10)
   shipping_easy (= 0.7.0)
   shopify_api (= 5.2.0)
   simple_form (= 4.0.0)
