@@ -3,7 +3,7 @@ module Groovepacker
     class Base
       require 'import_orders'
       attr_accessor :import_params
-
+      include AhoyEvent
       def initialize(params={})
         self.import_params = params
       end
