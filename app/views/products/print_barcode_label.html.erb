@@ -14,7 +14,7 @@
         <% end %>
 
         <% if product.name.length <= 40 %>
-          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:14pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= product.name %></div> 
+          <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:25pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= product.name %></div> 
         <% elsif product.name.length > 40 && product.name.length < 72 %>
           <div style="font-size: 12pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 12pt;text-align:justify;word-break: break-word;padding-bottom: 3pt;"><%= product.name %></div> 
         <% elsif product.name.length >= 72 %>
