@@ -269,7 +269,7 @@ class TenantsController < ApplicationController
   end
 
   def activity_log_v2
-    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_activity_log").send_activity_log_v2(params)
+    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_activity_log", priority: 95).send_activity_log_v2(params)
     render json: {}
   end
 
