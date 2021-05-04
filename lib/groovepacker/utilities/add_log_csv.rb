@@ -46,7 +46,7 @@ class AddLogCsv
     current_tenant = Apartment::Tenant.current
     header = ['Tenant Name', 'Timestamp', 'Event', 'User', 'Orders/Products Involved', 'Elapsed Time', 'Rate (orders or products/sec)', 'Object Id', 'Saved Changes']
     file_data = header
-    params = params.with_indifferent_access
+    params = params.to_unsafe_h.with_indifferent_access
     tenants_list = params[:select_all] ? Tenant.all : Tenant.where(name: params[:tenant_names])
 
     tenants_list.find_each do |tenant|
