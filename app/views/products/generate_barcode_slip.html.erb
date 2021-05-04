@@ -4,7 +4,8 @@
 </head>
 <style>
 </style>
-<body style="margin-top:0pt;font-family:'Poppins'">
+<body style="margin-top:0pt;font-family:'Poppins'"> 
+<% for i in 1..@barcode_qty do %>
   <div id="main_div" style="<%= 'max-width: 288pt;' if request.format.symbol == :html %>width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:80pt;background:white;max-height:80pt">
     <% if !@product.nil? && !@product.product_barcodes.first.nil? && !@product.product_barcodes.first.barcode.nil? %>
       <div style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
@@ -49,5 +50,6 @@
       <div style="font-size: 18pt; margin: 0 auto;">Barcode not available</div>
     <% end %>
   </div>
+<% end %>  
 </body>
 </html>
