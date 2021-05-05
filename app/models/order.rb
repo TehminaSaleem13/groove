@@ -397,7 +397,7 @@ class Order < ActiveRecord::Base
       limited_order_items.includes(
         order_item_kit_products: [
           product_kit_skus: [
-            product: %i(product_skus product_images product_barcodes)
+            product: %i(product_skus product_images product_barcodes product_inventory_warehousess)
           ]
         ],
         product: %i(product_skus product_images product_barcodes product_inventory_warehousess)

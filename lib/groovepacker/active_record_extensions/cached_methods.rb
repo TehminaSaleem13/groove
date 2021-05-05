@@ -70,7 +70,7 @@ module CachedMethods
     keys = Rails.cache.read(multi_key) || []
     keys << key
     keys = keys.class == String ? Marshal.load(keys) : keys
-    Rails.cache.write(multi_key, keys.uniq)
+    Rails.cache.write(multi_key, keys.uniq) rescue nil
   end
 
   def delete_cache

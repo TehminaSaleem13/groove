@@ -284,12 +284,12 @@ module ScanPack
     end
 
     def do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
-      @single_order.should_the_kit_be_split(clean_input) if @single_order.contains_kit && @single_order.contains_splittable_kit
+      @split_kit_order = @single_order.should_the_kit_be_split(clean_input) if @single_order.contains_kit && @single_order.contains_splittable_kit
 
       @single_order.last_suggested_at ||= DateTime.now
       @single_order.save
 
-      unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
+      unscanned_items = @single_order.reload.get_unscanned_items(barcode: clean_input)
       #search if barcode exists
       if check_for_skip_settings(clean_input)
         barcode_found = check_for_skippable_item(unscanned_items.first)
@@ -317,6 +317,10 @@ module ScanPack
         add_log(sku_for_activity,type_in_count)
         do_if_barcode_found
       else
+        if Apartment::Tenant.current == 'gp50'
+          log = { tenant: Apartment::Tenant.current, clean_input: clean_input, unscanned_items: unscanned_items, split_kit_order: @split_kit_order }
+          File.open("#{Rails.root}/kit_scan_3_issue_#{Apartment::Tenant.current}.yaml", 'a') { |f| f.write(log.to_yaml) }
+        end
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
         @result['status'] &= false
 
