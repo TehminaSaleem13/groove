@@ -289,7 +289,7 @@ module ScanPack
       @single_order.last_suggested_at ||= DateTime.now
       @single_order.save
 
-      unscanned_items = @single_order.reload.get_unscanned_items(barcode: clean_input)
+      unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
       #search if barcode exists
       if check_for_skip_settings(clean_input)
         barcode_found = check_for_skippable_item(unscanned_items.first)
