@@ -390,9 +390,9 @@ class Order < ActiveRecord::Base
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
     # key = "order_items_#{id}_was_egar_loaded"
     limited_order_items = partially_load_order_item(order_item_status, limit, offset)
-    if !( %w(lairdsuperfood).include?(Apartment::Tenant.current)) && (limited_order_items.map(&:keys?).include? true)
-      limited_order_items
-    else
+    # if !( %w(lairdsuperfood).include?(Apartment::Tenant.current)) && (limited_order_items.map(&:keys?).include? true)
+    #   limited_order_items
+    # else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
       limited_order_items.includes(
         order_item_kit_products: [
@@ -402,7 +402,7 @@ class Order < ActiveRecord::Base
         ],
         product: %i(product_skus product_images product_barcodes product_inventory_warehousess)
       )
-    end
+    # end
   rescue
     delete_cached_order_items_keys
     retry
