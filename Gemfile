@@ -5,7 +5,7 @@ gem 'rails', '5.1.7'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
-gem 'mysql2', '0.5.2'
+gem 'mysql2'
 
 gem 'json'
 
@@ -88,7 +88,7 @@ gem 'barby'
 gem 'chunky_png'
 gem 'prawn'
 gem 'pdftk'
-gem 'apartment','~>2.2.0'
+gem 'apartment'
 gem 'stripe', '>= 1.57.1'
 gem 'ruby_odata'
 gem 'activerecord-import', '= 0.26.0'
