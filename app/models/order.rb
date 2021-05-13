@@ -21,7 +21,8 @@ class Order < ActiveRecord::Base
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
   after_save :delete_if_order_exist, :if => :check_for_duplicate
-  validates_uniqueness_of :increment_id, :if => :check_for_duplicate
+  validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
+  # validates_uniqueness_of :increment_id, :if => :check_for_duplicate
 
   extend OrderClassMethodsHelper
   include ProductsHelper
