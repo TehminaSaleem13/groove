@@ -193,7 +193,7 @@ module Groovepacker
           update_parent(@tenant)
           if @subscription_data
             @customer_id = @subscription_data.stripe_customer_id
-            @subscription_data.update_attributes(tenant_name: "#{tenant}-deleted")
+            @subscription_data.update_attributes(tenant_name: "#{tenant}-deleted", email: @subscription_data.email + '-deleted')
             destroy_tenant(@customer_id, @tenant, @subscription_data, result)
           else
             Apartment::Tenant.drop(tenant) if Apartment::tenant_names.include? (tenant)
