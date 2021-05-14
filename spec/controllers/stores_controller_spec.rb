@@ -32,7 +32,7 @@ RSpec.describe StoresController, type: :controller do
       doc = eval(doc)
 
       request.accept = 'application/json'
-      post :csv_do_import, params: { id: @store.id, rows: '2', sep: ',', other_sep: '0', delimiter: '"', fix_width: '0', fixed_width: '4', contains_unique_order_items: false, generate_barcode_from_sku: false, use_sku_as_product_name: false, import_action: doc[:map][:import_action], map: doc[:map][:map], controller: 'stores', action: 'csv_do_import', store_id: @store.id, name: doc[:name], type: 'product', flag: 'file_upload' }
+      post :csv_do_import, params: { id: @store.id, rows: '2', sep: ',', other_sep: '0', delimiter: '"', fix_width: '0', fixed_width: '4', contains_unique_order_items: false, generate_barcode_from_sku: false, use_sku_as_product_name: false, import_action: doc[:map][:import_action], map: doc[:map][:map], controller: 'stores', action: 'csv_do_import', store_id: @store.id, name: doc[:name], type: 'product', flag: 'file_upload', encoding_format: 'UTF-8' }
 
       expect(response.status).to eq(200)
       expect(Product.count).to eq(5)
@@ -79,12 +79,30 @@ RSpec.describe StoresController, type: :controller do
       doc = eval(doc)
 
       request.accept = "application/json"
-      post :csv_do_import, params: {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload'}
+      post :csv_do_import, params: {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload', encoding_format: 'UTF-8'}
 
       expect(response.status).to eq(200)
       expect(@product.product_skus.count).to eq(1)
       expect(@product.product_skus.first.sku).not_to eql(existing_product_sku)
     end
+
+    # it 'Import CSV Products Foreign/Chinese Characters Support' do
+    #   request.accept = 'application/json'
+    #   post :create_update_store, params: { store_type: 'CSV', status: @store.status, name: @store.name, inventory_warehouse_id: @store.inventory_warehouse_id, id: @store.id, productfile: fixture_file_upload(Rails.root.join('/files/csv_product_import.csv')) }
+    #   expect(response.status).to eq(200)
+
+    #   doc = IO.read(file_fixture('csv_product_import_map'))
+    #   doc = eval(doc)
+
+    #   request.accept = 'application/json'
+    #   post :csv_do_import, params: { id: @store.id, rows: '2', sep: ',', other_sep: '0', delimiter: '"', fix_width: '0', fixed_width: '4', contains_unique_order_items: false, generate_barcode_from_sku: false, use_sku_as_product_name: false, import_action: doc[:map][:import_action], map: doc[:map][:map], controller: 'stores', action: 'csv_do_import', store_id: @store.id, name: doc[:name], type: 'product', flag: 'file_upload', encoding_format: 'UTF-8' }
+    #   expect(response.status).to eq(200)
+    #   expect(Product.count).to eq(6)
+    #   expect(Product.last.name.length).to eq(11)
+    #   expect(ProductBarcode.count).to eq(15)
+    #   expect(ProductSku.count).to eq(6)
+    # end
+
 
     it "Remove Existing SKU if multiple skus present" do
       product_sku = FactoryBot.create(:product_sku, :sku=>'BEFORE_SKU1', :product_id=>@product.id)
@@ -98,7 +116,7 @@ RSpec.describe StoresController, type: :controller do
       doc = eval(doc)
 
       request.accept = "application/json"
-      post :csv_do_import, params: {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload'}
+      post :csv_do_import, params: {:id => @store.id, :rows=>"2", :sep=>",", :other_sep=>"0", :delimiter=>"\"", :fix_width=>"0", :fixed_width=>"4", :contains_unique_order_items=>false, :generate_barcode_from_sku=>false, :use_sku_as_product_name=>false, :import_action=>doc[:map][:import_action], :map=>doc[:map][:map], :controller=>"stores", :action=>"csv_do_import", :store_id=> @store.id, :name=>doc[:name], :type=>'product', :flag=>'file_upload', encoding_format: 'UTF-8'}
 
       expect(response.status).to eq(200)
       expect(@product.product_skus.count).to eq(1)

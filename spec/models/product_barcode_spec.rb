@@ -12,11 +12,10 @@ RSpec.describe ProductBarcode, type: :model do
   end
 
   describe ProductBarcode do
-    it 'should have a unique barcode' do
+    it 'Permit Duplicate Barcodes' do
       ProductBarcode.create!(barcode: 'apple-1')
       product_barcode = ProductBarcode.new(barcode: 'apple-1')
-      product_barcode.should_not be_valid
-      product_barcode.errors[:barcode].should include('has already been taken')
+      expect(product_barcode).to be_valid
     end
   end
 end
