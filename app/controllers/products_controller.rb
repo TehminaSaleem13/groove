@@ -292,7 +292,7 @@ class ProductsController < ApplicationController
     @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
     @item = OrderItem.find(params[:item_id]) rescue nil
     @product = Product.find(params[:id])
-    @barcode_qty = params[:barcode_qty].to_i
+    @barcode_qty = params[:barcode_qty].to_i || 1
     @barcode = params["barcode"]
     respond_to do |format|
       format.html
