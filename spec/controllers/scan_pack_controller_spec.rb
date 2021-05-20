@@ -542,5 +542,26 @@ RSpec.describe ScanPackController, type: :controller do
 
       expect(skipped_item.skipped_qty + skipped_item.qty).to eq(5)
     end
+
+    it 'Scan Order using SCANNED Barcode' do
+      ScanPackSetting.last.update(scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+
+      product1 = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+
+      order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'awaiting', store: @store, tracking_num: 'ORDER-TRACKING-NUM')
+      FactoryBot.create(:order_item, product_id: product1.id, qty: 5, price: '10', row_total: '10', order: order, name: product1.name)
+
+      get :scan_barcode, params: { input: 'ORDER-TRACKING-NUM', state: 'scanpack.rfo' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['increment_id']).to eq('ORDER')
+
+      get :scan_barcode, params: { input: 'SCANNED', state: 'scanpack.rfp.default', id: order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
+    end
   end
 end
