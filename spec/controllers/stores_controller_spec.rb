@@ -165,5 +165,37 @@ RSpec.describe StoresController, type: :controller do
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
     end
+
+    it 'show error if required field not mapped' do
+      request.accept = 'application/json'
+      post :create_update_store, params: { store_type: 'CSV', status: @store.status, name: @store.name, inventory_warehouse_id: @store.inventory_warehouse_id, id: @store.id, orderfile: fixture_file_upload(Rails.root.join('/files/Order_import_fail.csv')) }
+      expect(response.status).to eq(200)
+
+     binding.pry
+
+      doc = IO.read(file_fixture('Order_check_file_map_1'))
+      doc = eval(doc)
+
+      request.accept = 'application/json'
+
+      post :csv_check_data, params: { id: @store.id, map: doc[:map], controller: 'stores', action: 'csv_check_data', store_id: @store.id, rows: 2, sep: ',', other_sep: 0, delimiter: '"', fix_width: 0, fixed_width: 4, import_action: 'update_order', contains_unique_order_items: false, generate_barcode_from_sku: false, use_sku_as_product_name: false, order_date_time_format: 'Default', day_month_sequence: 'MM/DD', encoding_format: 'ASCII + UTF-8', type: 'order', name: 'Order_check_file_map_1', flag: 'file_upload', order_placed_at: '2020-05-25T11:37:36.352Z' }
+      expect(response.status).to eq(200)
+      expect((eval response.body)[:status]).to eq(false)
+    end
+
+    it 'no error if file check passed' do
+      request.accept = 'application/json'
+      post :create_update_store, params: { store_type: 'CSV', status: @store.status, name: @store.name, inventory_warehouse_id: @store.inventory_warehouse_id, id: @store.id, orderfile: fixture_file_upload(Rails.root.join('/files/Order_import_pass.csv')) }
+      expect(response.status).to eq(200)
+
+      doc = IO.read(file_fixture('Order_check_file_map_1'))
+      doc = eval(doc)
+
+      request.accept = 'application/json'
+
+      post :csv_check_data, params: { id: @store.id, map: doc[:map], controller: 'stores', action: 'csv_check_data', store_id: @store.id, rows: 2, sep: ',', other_sep: 0, delimiter: '"', fix_width: 0, fixed_width: 4, import_action: 'update_order', contains_unique_order_items: false, generate_barcode_from_sku: false, use_sku_as_product_name: false, order_date_time_format: 'Default', day_month_sequence: 'MM/DD', encoding_format: 'ASCII + UTF-8', type: 'order', name: 'Order_check_file_map_1', flag: 'file_upload', order_placed_at: '2020-05-25T11:37:36.352Z' }
+      expect(response.status).to eq(200)
+      expect((eval response.body)[:status]).to eq(true)
+    end
   end
 end
