@@ -237,6 +237,7 @@ Groovepacks::Application.routes.draw do
       get 'update_ebay_user_token'
       post 'csv_import_data'
       post 'csv_do_import'
+      post 'csv_check_data'
       post 'csv_product_import_cancel'
       post 'update_csv_map'
       post 'delete_csv_map'

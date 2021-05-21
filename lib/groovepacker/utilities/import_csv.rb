@@ -15,12 +15,6 @@ class ImportCsv
       file_path = nil
       store = Store.find(params[:store_id])
       credential = store.ftp_credential
-      encoding_options = {
-        invalid: :replace, # Replace invalid byte sequences
-        undef: :replace, # Replace anything not defined in ASCII
-        replace: '', # Use a blank for those replacements
-        universal_newline: true # Always break lines with \n
-      }
       if params[:flag] == 'ftp_download'
         ftp_type = params[:type] == 'product' ? 'product' : nil
         groove_ftp = FTP::FtpConnectionManager.get_instance(store, ftp_type)
@@ -239,12 +233,132 @@ class ImportCsv
     result
   end
 
+  def check_import_file(tenant, params)
+    file = GroovS3.find_csv(tenant, params[:type], params[:store_id])
+    set_file_name(params,file.url.gsub('http:', 'https:'))
+    file_path = download_csv(file,tenant, params)
+    if params[:encoding_format].present?
+      begin
+        if params[:encoding_format] == "ASCII + UTF-8"
+          File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+        elsif params[:encoding_format] == "ISO-8859-1 + UTF-8"
+          File.write(file_path).force_encoding("ISO-8859-1").encode("UTF-8")
+        elsif params[:encoding_format] == "UTF-8"
+          File.write(file_path, file.content.force_encoding("UTF-8"))
+        end
+      rescue Exception => e
+        File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+      end
+    else
+      File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
+    end
+  
+    csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) rescue nil
+  
+    set_file_path(params, file_path)
+  
+  
+    if params[:fix_width] == 1
+      if params[:flag] == 'ftp_download'
+        initial_split = csv_file.split(/\n/).reject(&:empty?)
+      else
+        initial_split = csv_file.content.split(/\n/).reject(&:empty?)
+      end
+      initial_split.each do |single|
+        final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
+      end
+    else
+      require 'csv'
+      params[:sep] = params[:sep] == '\\t' ? "\t" : params[:sep]
+      final_record = begin
+                        CSV.parse(csv_file, col_sep: params[:sep], quote_char: params[:delimiter], encoding: 'windows-1251:utf-8')
+                      rescue
+                        begin
+                          CSV.parse(csv_file, col_sep: params[:sep], quote_char: '|', encoding: 'windows-1251:utf-8')
+                        rescue
+                          []
+                        end
+                      end
+    end
+    if params[:rows].to_i && params[:rows].to_i > 1
+      final_record.shift(params[:rows].to_i - 1)
+    end
+    delete_index = 0
+    params[:map].each_with_object({}) do |map_out|
+      map_single_first_name = map_out[1].present? && map_out[1]['name']
+      params[:map].delete(delete_index.to_s) if map_single_first_name == 'Unmapped'
+      delete_index += 1
+    end
+
+    mapping = {}
+    params[:map].each do |map_single|
+      next unless map_single[1].present? && map_single[1]['value'] != 'none'
+      mapping[map_single[1]['value']] = {}
+      mapping[map_single[1]['value']][:position] = map_single[0].to_i
+      if map_single[1][:action].nil?
+        mapping[map_single[1]['value']][:action] = 'skip'
+      else
+        mapping[map_single[1]['value']][:action] = map_single[1][:action]
+      end
+    end
+
+    set_file_size(params, final_record)
+    file_errors = {}
+    if params[:type] == 'order'
+      order_map_required = {'sku'=>'SKU', 'increment_id'=> 'Order Number', 'qty'=> 'Quantity'}
+      file_errors[:order_file_errors] = []
+      order_map_required.keys.each do |req_field|
+        file_errors[:order_file_errors] << 'Required field [' + order_map_required[req_field] + '] is not mapped.' if mapping[req_field].nil? || mapping[req_field][:position] < 0
+      end
+      return file_errors if file_errors.values.flatten.any?
+      file_errors[:order_error_1] = file_errors[:order_error_3] = file_errors[:order_error_2] = []
+      final_record.each_with_index do |single_row, index|
+        do_skip = true
+        for i in 0..(single_row.length - 1)
+          do_skip = false unless single_row[i].blank?
+          break unless do_skip
+        end
+        next if do_skip
+        file_errors[:order_error_1] << "Line #{index + params[:rows]} Missing or Invalid SKU" if mapping['sku'].nil? || mapping['sku'][:position] < 0 || single_row[mapping['sku'][:position]].blank?
+        file_errors[:order_error_2] << "Line #{index + params[:rows]} Missing or Invalid Order Number" if mapping['increment_id'].nil? || mapping['increment_id'][:position] < 0 || single_row[mapping['increment_id'][:position]].blank?
+        file_errors[:order_error_3] << "Line #{index + params[:rows]} Missing or Invalid Quantity" if mapping['qty'].nil? || mapping['qty'][:position] < 0 || single_row[mapping['qty'][:position]].blank?
+      end
+    elsif params[:type] == 'product'
+      product_map_required = {'sku'=>'SKU'}
+      file_errors[:product_file_errors] = []
+      product_map_required.keys.each do |req_field|
+        file_errors[:product_file_errors] << 'Required field [' + product_map_required[req_field] + '] is not mapped.' if mapping[req_field].nil? || mapping[req_field][:position] < 0
+      end
+      return file_errors if file_errors.values.flatten.any?
+      file_errors[:product_error_1] = []
+      final_record.each_with_index do |single_row, index|
+        do_skip = true
+        for i in 0..(single_row.length - 1)
+          do_skip = false unless single_row[i].blank?
+          break unless do_skip
+        end
+        next if do_skip
+        file_errors[:product_error_1] << "Line #{index + params[:rows]} Missing or Invalid SKU" if mapping['sku'].nil? || mapping['sku'][:position] < 0 || single_row[mapping['sku'][:position]].blank?
+      end
+    end
+    file_errors
+  end
+
   private
 
   def set_file_name(params, file_url)
     params[:file_name] = file_url.split('/').last
   end
-
+ 
+  def encoding_options
+    {
+      invalid: :replace, # Replace invalid byte sequences
+      undef: :replace, # Replace anything not defined in ASCII
+      replace: '', # Use a blank for those replacements
+      universal_newline: true # Always break lines with \n
+    }
+  end
+ 
   def set_file_path(params, file_path)
     params[:file_path] = file_path
   end
