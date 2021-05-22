@@ -1,9 +1,9 @@
 [submodule "nodeserver"]
   path = nodeserver
-  url = ssh@bitbucket.org:groovepacker/nodeserver.git
+  url = git@bitbucket.org:groovepacker/nodeserver.git
 [submodule "vendor/groove-data-processor"]
   path = vendor/groove-data-processor
-  url = ssh@bitbucket.org:groovepacker/groove-data-processor.git
+  url = git@bitbucket.org:groovepacker/groove-data-processor.git
 [submodule "vendor/gopacker"]
   path = vendor/gopacker
-  url = ssh@bitbucket.org:groovepacker/gopacker.git
+  url = git@bitbucket.org:groovepacker/gopacker.git
