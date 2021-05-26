@@ -464,9 +464,11 @@ module ScanPackHelper
   end
 
   def create_log_file_data(data, key, type)
-    file_name = Apartment::Tenant.current + '_' + type + '_' + Time.current.to_i.to_s + '.json'
-    file_path = Rails.root.join('tmp', file_name)
-    file = GroovS3.create(Apartment::Tenant.current, "#{type}/#{file_name}", 'text/json')
+    tenant = Apartment::Tenant.current
+    file_name = tenant + '_' + type + '_' + Time.current.to_i.to_s + '.json'
+    system 'mkdir', '-p', "expo_files/#{tenant}"
+    file_path = Rails.root.join('expo_files', tenant, file_name)
+    file = GroovS3.create(tenant, "#{type}/#{file_name}", 'text/json')
     File.open(file_path, 'w') { |f| f.write(data[key].to_json) }
     file.acl = 'public-read'
     file.content = File.read(file_path)
