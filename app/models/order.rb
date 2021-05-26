@@ -20,9 +20,9 @@ class Order < ActiveRecord::Base
   # before_save :unique_order_items
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
-  after_save :delete_if_order_exist, :if => :check_for_duplicate
-  validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
-  # validates_uniqueness_of :increment_id, :if => :check_for_duplicate
+  after_save :delete_if_order_exist, unless: :check_for_duplicate
+  # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
+  validates_uniqueness_of :increment_id, unless: :check_for_duplicate
 
   extend OrderClassMethodsHelper
   include ProductsHelper
@@ -43,8 +43,7 @@ class Order < ActiveRecord::Base
   end
 
   def check_for_duplicate
-    duplicate_condition  = (self.store.store_type == "ShippingEasy" && self.store.shipping_easy_credential.allow_duplicate_id) || (self.store.store_type == "Shipstation API 2" && self.store.shipstation_rest_credential.allow_duplicate_order)
-    duplicate_condition ? false : true
+    ((self.store.store_type == "ShippingEasy" && self.store.shipping_easy_credential.allow_duplicate_id) || (self.store.store_type == "Shipstation API 2" && self.store.shipstation_rest_credential.allow_duplicate_order))
   end
 
   def customer_name
@@ -156,7 +155,7 @@ class Order < ActiveRecord::Base
     result &= false if self.unacknowledged_activities.length > 0
     status = result ? 'awaiting' : 'onhold'
 
-    if self.id.present? 
+    if self.id.present?
       update_column(:status, status)
       update_column(:scan_start_time, nil)
     else
@@ -283,7 +282,7 @@ class Order < ActiveRecord::Base
         if self.order_items.select { |o| o.product.is_intangible == false }.count ==  self.order_items.where(scanned_status: "scanned").select { |o| o.product.is_intangible == false }.count
           user = User.find_by_id(GroovRealtime.current_user_id)
           self.reset_scanned_status(user)
-        end  
+        end
       end
     end
     self.update_column(:reallocate_inventory, false)
@@ -419,7 +418,7 @@ class Order < ActiveRecord::Base
   end
 
   def unique_order_items
-    self.order_items = self.order_items.uniq_by {|obj| obj.product_id} 
+    self.order_items = self.order_items.uniq_by {|obj| obj.product_id}
   end
 
   def destroy_boxes

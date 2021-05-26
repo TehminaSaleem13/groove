@@ -38,7 +38,7 @@ module Groovepacker
             def import_single_order(order)
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               order_in_gp_present = false
-              order_in_gp = Order.find_by_increment_id(order["name"])
+              order_in_gp = Order.find_by_store_order_id(order["id"].to_s)
               if order_in_gp
                 order_in_gp_present = true
                 is_scanned = order_in_gp && (order_in_gp.status=="scanned" || order_in_gp.status=="cancelled" || order_in_gp.order_items.map(&:scanned_status).include?("partially_scanned") || order_in_gp.order_items.map(&:scanned_status).include?("scanned"))
@@ -202,6 +202,7 @@ module Groovepacker
               else
                 add_order_activities(shopify_order)
               end
+              sleep rand(0.1..0.7)
             end
 
           def check_removed_items_quantity(order)
