@@ -21,7 +21,7 @@ module Groovepacker
             # update_import_item_obj_values
             # uniq_response = response["orders"].uniq rescue []
             # verify_separately = @import_item.store.split_order == "verify_separately" ? true : false
-            # if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together" 
+            # if @import_item.store.split_order == "verify_separately" || @import_item.store.split_order == "verify_together"
             #   @split_order = true
             # else
             #   @split_order = false
@@ -48,7 +48,7 @@ module Groovepacker
             #     order_copy = verify_separately ? orders : orders.first
             #   else
             #     order_copy = orders
-            #   end             
+            #   end
             #   order = order_copy unless order_copy.blank?
             #   @order_to_update = false
             #   import_item_fix
@@ -67,8 +67,8 @@ module Groovepacker
             #       orders = Order.where(increment_id: o.increment_id)
             #       orders.last.destroy if orders.count > 1
             #     end
-            #   end 
-            # end   
+            #   end
+            # end
             @result
           end
 
@@ -152,7 +152,7 @@ module Groovepacker
                   order_copy = verify_separately ? orders : orders.first
                 else
                   order_copy = orders
-                end             
+                end
                 order = order_copy unless order_copy.blank?
                 @order_to_update = false
                 import_item_fix
@@ -161,7 +161,7 @@ module Groovepacker
                 #increase_import_count
                 # sleep 0.5
               end
-  
+
               # @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
               # update_orders_status
               Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
@@ -186,7 +186,7 @@ module Groovepacker
                       shiping_easy_order =  Order.find_by_shipment_id(order["shipments"][0]["id"]) rescue nil
                      else
                       shiping_easy_order
-                     end 
+                     end
                   elsif order["shipments"].count >= 2
                     order["shipments"].each do |shipment|
                       shiping_easy_order = Order.find_by_shipment_id(shipment["id"]) rescue nil
@@ -197,7 +197,7 @@ module Groovepacker
                         break
                       end
                     end
-                  end        
+                  end
                 else
                   shiping_easy_order = find_shipping_easy_order(order)
                   if shiping_easy_order && @group_orders && (@import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately))
@@ -224,7 +224,7 @@ module Groovepacker
                   end
                   shiping_easy_order = Order.new
                 else
-                  # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
+                  # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") ||
                   # shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned"))
                   update_success_import_count && return if not_to_update(shiping_easy_order, order)
                   order['external_order_identifier'] = shiping_easy_order.increment_id
@@ -233,7 +233,7 @@ module Groovepacker
                 update_success_import_count && return if Order.where(store_order_id: order['id'], prime_order_id: order['prime_order_id'], last_modified: order["updated_at"].to_datetime).any?
                 shiping_easy_order = find_shipping_easy_order(order)
                 shiping_easy_order = Order.new if shiping_easy_order.blank?
-                # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || 
+                # return if shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") ||
                 #   shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned"))
                 update_success_import_count && return if not_to_update(shiping_easy_order, order)
               end
@@ -255,6 +255,9 @@ module Groovepacker
               update_multi_shipment_status(shiping_easy_order.prime_order_id)
               add_split_combined_activity(order, shiping_easy_order)
               @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) if @import_item.status != 'cancelled' && @regular_import
+            rescue => e
+              log_import_error(e) rescue nil
+              update_success_import_count
             end
 
             def find_shipping_easy_order(order)
@@ -274,11 +277,11 @@ module Groovepacker
               product = create_product(sku, item["product"], store_product_id)
               create_alias(alias_skus, product) if alias_skus
               (item["product"]["bundled_products"] || []).each do |kit_product|
-                kit_pro = Product.joins(:product_skus).where("sku = ?", kit_product["sku"]) 
+                kit_pro = Product.joins(:product_skus).where("sku = ?", kit_product["sku"])
                 new_kit_product = kit_pro.blank? ? create_product(kit_product["sku"], kit_product, store_product_id) : kit_pro[0]
                 product.product_kit_skuss.create(option_product_id: new_kit_product.id, qty: kit_product["quantity"]) rescue nil if ProductKitSkus.where(product_id: product.id, option_product_id: new_kit_product.id).blank?
                 kit_alias = kit_product["sku_aliases"]
-                create_alias(kit_alias, new_kit_product) if kit_alias 
+                create_alias(kit_alias, new_kit_product) if kit_alias
                 product.update_attribute(:is_kit, 1)
               end
               create_order_item(item, order_item)
@@ -298,7 +301,7 @@ module Groovepacker
 
             def create_order_item(item, order_item)
               order_item_product = Product.joins(:product_skus).where("product_skus.sku = ?", item["sku"]).first rescue nil
-              order_item.product = order_item_product 
+              order_item.product = order_item_product
               order_item.sku = item["sku"]
               order_item.save
               make_product_intangible(order_item.product) if order_item.product.present?
@@ -317,8 +320,8 @@ module Groovepacker
                 product_hash["description"] = "created by #{@credential.store.name}" if product_hash["description"].blank?
                 if check_for_replace_product
                   coupon_product = replace_product(product_hash["description"], sku)
-                  return coupon_product unless coupon_product.nil? 
-                end 
+                  return coupon_product unless coupon_product.nil?
+                end
                 product = Product.create(name: product_hash["description"], store: @credential.store ,store_product_id: store_product_id, weight: product_weight)
                 product.product_skus.create(sku: sku)
                 product.product_cats.create(category: product_hash["product_category_name"])
@@ -374,18 +377,18 @@ module Groovepacker
                   import_item_count
                 end
               end
-             
+
               return unless shiping_easy_order.save
-              if Apartment::Tenant.current == "verdantkitchen"             
+              if Apartment::Tenant.current == "verdantkitchen"
                 on_demand_logger = Logger.new("#{Rails.root}/log/order_dupliacte _#{Apartment::Tenant.current}.log")
                 log = {order_id: shiping_easy_order.increment_id, Time: Time.now}
-                on_demand_logger.info(log) 
-              end  
+                on_demand_logger.info(log)
+              end
               shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
               if check_for_replace_product
                 add_order_activity_for_gp_coupon(shiping_easy_order, order["recipients"][0]["line_items"])
               else
-                add_order_activity(shiping_easy_order)   
+                add_order_activity(shiping_easy_order)
               end
               shiping_easy_order.set_order_status
             end
@@ -457,10 +460,10 @@ module Groovepacker
             end
 
             def update_current_import_item(order)
-              @import_item.update_attributes( 
+              @import_item.update_attributes(
                 current_increment_id: order.try(:[], "external_order_identifier"),
                 current_order_items: -1,
-                current_order_imported_item: -1 
+                current_order_imported_item: -1
               )
             end
 

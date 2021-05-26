@@ -377,7 +377,7 @@ module Groovepacker
             end
 
             def shipstation_order_import_status
-              status_set_in_gp = [] 
+              status_set_in_gp = []
               status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
               status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
               status_set_in_gp << "Shipped" if @credential.shall_import_shipped
@@ -392,6 +392,10 @@ module Groovepacker
               import_order_form_response(shipstation_order, order, shipments_response)
               # @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
               @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
+            rescue => e
+              log_import_error(e) rescue nil
+              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import+1) rescue nil
+              @result[:previous_imported] += 1 rescue nil
             end
 
             def fetch_orders_if_import_type_is_not_tagged(response)

@@ -99,6 +99,9 @@ module Groovepacker
               log = { tenant: Apartment::Tenant.current, order_number: (order_number rescue nil), import_time: sw_end_time, current_time: Time.current.to_formatted_s(:rfc822) }
               on_demand_logger.info(log)
             end
+          rescue => e
+            log_import_error(e) rescue nil
+            import_item.update(success_imported: import_item.success_imported + 1) rescue nil
           end
 
           private

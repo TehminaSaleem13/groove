@@ -45,6 +45,8 @@ module Groovepacker
                 #mark previously imported
                 update_import_count('success_updated') && return if is_scanned || (order_in_gp.last_modified == Time.zone.parse(order['updated_at']))
                 order_in_gp.order_items.destroy_all
+              else
+                order_in_gp = Order.new(increment_id: order['name'], store: @store)
               end
               import_order_and_items(order, order_in_gp)
               # #create order
@@ -64,6 +66,9 @@ module Groovepacker
               #increase successful import with 1 and save
               order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
               @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) rescue nil
+            rescue => e
+              log_import_error(e) rescue nil
+              update_import_count('success_imported')
             end
 
             def import_order(shopify_order, order)
@@ -191,19 +196,20 @@ module Groovepacker
 
             def import_order_and_items(order, order_in_gp)
               #create order
-              shopify_order = order_in_gp ? order_in_gp : Order.new(store: @store)
-              shopify_order = import_order(shopify_order, order)
-              #import items in an order
-              shopify_order = import_order_items(shopify_order, order)
-              #update store
-              shopify_order.set_order_status
-              #add order activities
-              if check_for_replace_product
-                add_order_activities_for_gp_coupon(shopify_order, order)
-              else
-                add_order_activities(shopify_order)
+              shopify_order = order_in_gp
+              shopify_order.transaction do
+                shopify_order = import_order(shopify_order, order)
+                #import items in an order
+                shopify_order = import_order_items(shopify_order, order)
+                #update store
+                shopify_order.set_order_status
+                #add order activities
+                if check_for_replace_product
+                  add_order_activities_for_gp_coupon(shopify_order, order)
+                else
+                  add_order_activities(shopify_order)
+                end
               end
-              sleep rand(0.1..0.7)
             end
 
           def check_removed_items_quantity(order)
