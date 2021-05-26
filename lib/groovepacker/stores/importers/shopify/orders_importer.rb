@@ -63,6 +63,7 @@ module Groovepacker
 
               #increase successful import with 1 and save
               order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
+              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) rescue nil
             end
 
             def import_order(shopify_order, order)
