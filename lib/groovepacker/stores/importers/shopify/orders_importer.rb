@@ -7,6 +7,7 @@ module Groovepacker
 
           def import
             initialize_import_objects
+            @worker_id = 'worker_' + SecureRandom.hex
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
@@ -84,6 +85,7 @@ module Groovepacker
               shopify_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
               shopify_order.last_modified = order['updated_at']
               shopify_order.tracking_num = order['fulfillments'].first['tracking_number'] rescue nil
+              shopify_order.importer_id = @worker_id rescue nil
               return shopify_order
             end
 
