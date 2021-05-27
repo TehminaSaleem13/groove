@@ -86,6 +86,8 @@ module Groovepacks
     config.time_zones = YAML.load(File.open(Rails.root.join('config', 'time_zones.yml')))
     config.time_zone_names = YAML.load(File.open(Rails.root.join('config', 'time_zone_names.yml')))
     config.tz_abbreviations = YAML.load(File.open(Rails.root.join('config', 'tz_abbreviations.yml')))
+
+    config.active_job.queue_adapter = :delayed_job
   end
 end
 #require Rails.root.join('config','initializers','groove_constants.rb')

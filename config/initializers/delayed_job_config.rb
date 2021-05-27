@@ -12,6 +12,4 @@ Delayed::Backend::ActiveRecord::Job.class_eval do
   end
 end
 
-Delayed::Backend::ActiveRecord.configure do |config|
-  config.reserve_sql_strategy = :default_sql
-end
+Delayed::Backend::ActiveRecord.configuration.reserve_sql_strategy = :default_sql
