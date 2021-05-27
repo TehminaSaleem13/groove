@@ -1,0 +1,16 @@
+<p>Tenant: "<%=@tenant%>" have duplicate orders shown as follows:
+ <h5> Enviroment: <%= Rails.env %></h5>
+  <p> Duplicate Increment_ids =>
+   <% @dup_order_increment_ids.each do |increment_id| %>
+     <%= increment_id.to_s + ',' %>
+   <% end %>
+  </p>
+   <p> Duplicate ids =>
+   <% @dup_order_ids.each do |order_id| %>
+    <%= order_id.to_s + ',' %>
+   <% end %>
+  </p>
+  <p> Total Duplicate Orders Count:
+   <%= @dup_order_ids.count %>
+  </p>
+</p>

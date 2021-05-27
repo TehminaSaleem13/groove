@@ -66,6 +66,33 @@ class AddLogCsv
     CsvExportMailer.send_csv(url).deliver
   end
 
+  def get_duplicates_order_info(params)
+    tenants_list = params[:select_all] ? Tenant.all : Tenant.where(name: params[:tenant_names])
+    tenants_list.find_each do |tenant|
+      Apartment::Tenant.switch!(tenant.name)
+
+      dup_order_increment_ids = []
+      dup_order_ids = []
+
+      Order.where('created_at > ?', 5.day.ago).group_by(&:increment_id).each do |key, orders|
+        next if orders.count == 1
+        scanned_true = ((orders.map(&:status).include? ("scanned")) || (orders.map(&:status).include? ("cancelled")))
+        if scanned_true
+          orders.each do |dup_order|
+            dup_order_increment_ids << dup_order.increment_id if !(dup_order.status == "scanned" || dup_order.status == "cancelled")
+            dup_order_ids << dup_order.id if !(dup_order.status == "scanned" || dup_order.status == "cancelled")
+          end
+        else
+          orders.drop(1).each do |dup_order|
+            dup_order_ids << dup_order.id
+            dup_order_increment_ids << dup_order.increment_id
+          end
+        end
+      end
+      CsvExportMailer.send_duplicates_order_info(tenant.name, dup_order_increment_ids, dup_order_ids).deliver
+    end  
+  end
+
   def send_tenant_log
     headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Active Users(in tenant)" , "Number of Products", "Stipe Products Count" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "QTY Scanned in last 30", "Is Delinquent", "Admintools URL","Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|
