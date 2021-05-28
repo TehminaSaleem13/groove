@@ -1,8 +1,8 @@
 class ProductInventoryWarehouses < ActiveRecord::Base
-  belongs_to :product, optional: true
+  belongs_to :product
   # attr_accessible :qty, :alert, :location_primary, :location_secondary, :location_tertiary, :location_quaternary, :location_primary_qty, :location_secondary_qty, :location_tertiary_qty, :location_quaternary_qty, :available_inv, :allocated_inv, :inventory_warehouse_id
 
-  belongs_to :inventory_warehouse, optional: true
+  belongs_to :inventory_warehouse
 
   def quantity_on_hand
     self.available_inv + self.allocated_inv
@@ -84,7 +84,7 @@ class ProductInventoryWarehouses < ActiveRecord::Base
     unless params[:inventory_count].blank?
       product_inv_whs, result = self.update_inventory_count(product_inv_whs, params, result)
     end
-
+    
     [:location_primary, :location_secondary, :location_tertiary].each do |loc|
       unless params[loc].blank?
         product_inv_whs[loc] = params[loc]

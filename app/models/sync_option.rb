@@ -1,7 +1,7 @@
 class SyncOption < ActiveRecord::Base
   # attr_accessible :bc_product_id, :product_id, :bc_product_sku, :sync_with_bc, :mg_rest_product_id, :mg_rest_product_sku, :sync_with_mg_rest,
   #                 :sync_with_shopify, :shopify_product_variant_id, :sync_with_teapplix, :teapplix_product_sku
-  belongs_to :product, optional: true
+  belongs_to :product
 
   def self.create_update_sync_option(params)
     product = Product.find_by_id(params[:id])

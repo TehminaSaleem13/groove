@@ -4,7 +4,7 @@ class MagentoCredentials < ActiveRecord::Base
 
   validates_presence_of :host, :username, :api_key
 
-  belongs_to :store, optional: true
+  belongs_to :store
 
   before_save :check_value_of_status_to_update
 

@@ -1,6 +1,6 @@
 class OrderSerial < ActiveRecord::Base
-  belongs_to :order, optional: true
-  belongs_to :product, optional: true
+  belongs_to :order
+  belongs_to :product
   #attr_accessible :serial, :order_id, :product_id, :second_serial
   has_many :order_item_order_serial_product_lots
   #===========================================================================================

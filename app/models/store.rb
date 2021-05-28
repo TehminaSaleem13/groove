@@ -15,7 +15,7 @@ class Store < ActiveRecord::Base
   has_one :shipping_easy_credential
   has_one :teapplix_credential
 
-  belongs_to :inventory_warehouse, optional: true
+  belongs_to :inventory_warehouse
 
   validates_presence_of :name
   validates_uniqueness_of :name
@@ -30,7 +30,7 @@ class Store < ActiveRecord::Base
   def check_for_new_store
     self.class.can_create_new?
   end
-
+  
   def log_events
     track_changes(title: 'Store Settings Changed', tenant: Apartment::Tenant.current,
                   username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']

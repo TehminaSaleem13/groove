@@ -2,7 +2,7 @@ class Product < ActiveRecord::Base
   extend ProductClassMethodsHelper
   include ProductsHelper
   include ProductMethodsHelper
-  belongs_to :store, optional: true
+  belongs_to :store
 
   # attr_accessible :name,
   #                 :product_type,

@@ -1,17 +1,17 @@
 class Subscription < ActiveRecord::Base
-  # attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors,
+  # attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, 
   #                 :subscription_plan_id, :status, :user_name, :password, :coupon_id,
   #                 :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
   #                 :progress, :customer_subscription_id, :created_at, :updated_at, :interval,
   #                 :app_charge_id, :tenant_charge_id, :shopify_shop_name, :tenant_data, :shopify_payment_token
-  belongs_to :tenant, optional: true
+  belongs_to :tenant
   has_many :transactions
   include PaymentsHelper
 
   after_create :add_subscriber_to_campaignmonitor
   before_save :check_value_of_customer_subscription
 
-
+  
   def check_value_of_customer_subscription
     self.customer_subscription_id = self.changes.values[0][0] if [nil, "", "null", "undefined"].include?(self.customer_subscription_id)
   end
@@ -104,7 +104,7 @@ class Subscription < ActiveRecord::Base
   end
 
   def create_tenant_and_transaction(customer=nil)
-
+    
     if self.shopify_customer
       self.customer_subscription_id = nil
     elsif customer.present? and customer.subscriptions.data.first

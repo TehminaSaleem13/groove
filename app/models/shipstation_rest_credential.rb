@@ -3,7 +3,7 @@ class ShipstationRestCredential < ActiveRecord::Base
   validates_presence_of :regular_import_range
   before_save :check_if_null_or_undefined
   after_create :add_weight_shortcut
-  belongs_to :store, optional: true
+  belongs_to :store
   serialize :label_shortcuts, Hash
   serialize :disabled_carriers, Array
   serialize :disabled_rates, Hash

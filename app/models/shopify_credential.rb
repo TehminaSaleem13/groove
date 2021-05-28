@@ -3,7 +3,7 @@ class ShopifyCredential < ActiveRecord::Base
 
   attr_writer :permission_url
 
-  belongs_to :store, optional: true
+  belongs_to :store
 
   include AhoyEvent
   after_commit :log_events

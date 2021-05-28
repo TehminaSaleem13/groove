@@ -1,6 +1,6 @@
 class ProductBarcode < ActiveRecord::Base
-  belongs_to :product, optional: true
-  belongs_to :order_item, optional: true
+  belongs_to :product
+  belongs_to :order_item
   # attr_accessible :barcode, :product_id, :packing_count, :is_multipack_barcode
   # validates_uniqueness_of :barcode
   after_save :delete_empty
