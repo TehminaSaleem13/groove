@@ -278,6 +278,11 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def remove_duplicates_order
+    OrderService::RemoveDuplicates.new.delay(:run_at => 1.seconds.from_now, :queue => "remove_duplicates_order_list", priority: 95).get_duplicates_order_info(params)
+    render json: {}
+  end
+
   def tenant_log
     AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_tenant_log", priority: 95).send_tenant_log
     render json: {}

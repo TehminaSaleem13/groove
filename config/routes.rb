@@ -69,6 +69,7 @@ Groovepacks::Application.routes.draw do
   post '/tenants/activity_log' => 'tenants#activity_log'
   post '/tenants/activity_log_v2' => 'tenants#activity_log_v2'
   post '/tenants/get_duplicates_order_info' => 'tenants#get_duplicates_order_info'
+  post '/tenants/remove_duplicates_order' => 'tenants#remove_duplicates_order'
   post '/tenants/tenant_log' => 'tenants#tenant_log'
   post '/tenants/clear_redis_method' => 'tenants#clear_redis_method'
   get '/tenants/clear_all_imports' => 'tenants#clear_all_imports'
