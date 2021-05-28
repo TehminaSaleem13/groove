@@ -1,7 +1,7 @@
 class EbayCredentials < ActiveRecord::Base
 
   #attr_accessible :auth_token, :productauth_token, :import_products, :import_images, :ebay_auth_expiration, :shipped_status, :unshipped_status
-  belongs_to :store
+  belongs_to :store, optional: true
 
   def get_signinurl
     require 'eBayAPI'

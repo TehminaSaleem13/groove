@@ -1,9 +1,9 @@
 class OrderImportSummary < ActiveRecord::Base
-  belongs_to :store
+  belongs_to :store, optional: true
   has_many :import_items
   # attr_accessible :user_id, :status, :user, :import_summary_type, :display_summary
   after_save :emit_data_to_user
-  belongs_to :user
+  belongs_to :user, optional: true
 
   def self.top_summary
     summary = nil
@@ -33,7 +33,7 @@ class OrderImportSummary < ActiveRecord::Base
       result['summary'] = lines.log_record.gsub(/[,]/,"<br/>").gsub(/[{,}]/,"").gsub(/[:]/, "=>")
     rescue
       result['summary'] = "nil"
-    end  
+    end
     # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
     import_items = ImportItem.includes(store: [:shipstation_rest_credential]).where('status IS NOT NULL')
     import_items.each do |import_item|
@@ -59,5 +59,5 @@ class OrderImportSummary < ActiveRecord::Base
       false
     end
   end
-  
+
 end

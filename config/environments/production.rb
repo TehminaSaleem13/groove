@@ -1,4 +1,4 @@
-Groovepacks::application.configure do
+Groovepacks::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb.
 
   # Code is not reloaded between requests.
@@ -28,7 +28,7 @@ Groovepacks::application.configure do
   # config.assets.css_compressor = :sass
 
   # Do not fallback to assets pipeline if a precompiled asset is missed.
-  config.assets.compile = false
+  config.assets.compile = true
 
   # `config.assets.precompile` and `config.assets.version` have moved to config/initializers/assets.rb
 
@@ -107,4 +107,6 @@ Groovepacks::application.configure do
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i, password: ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes }
+
+  ENV['SHOPIFY_BILLING_IN_TEST'] = "false"
 end

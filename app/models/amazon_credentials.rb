@@ -4,7 +4,7 @@ class AmazonCredentials < ActiveRecord::Base
   validates_presence_of :marketplace_id, :merchant_id
   before_save :check_mws_auth_token
 
-  belongs_to :store
+  belongs_to :store, optional: true
 
   def check_mws_auth_token
   	self.mws_auth_token = "" if self.mws_auth_token.nil?

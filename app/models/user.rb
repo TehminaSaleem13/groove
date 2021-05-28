@@ -16,8 +16,8 @@ class User < ActiveRecord::Base
   validates :confirmation_code, length: { maximum: 25 }
 
   # attr_accessible :title, :body
-  belongs_to :inventory_warehouse
-  belongs_to :role
+  belongs_to :inventory_warehouse, optional: true
+  belongs_to :role, optional: true
   has_many :user_inventory_permissions, dependent: :destroy
   has_many :order_activities
   has_many :product_activities

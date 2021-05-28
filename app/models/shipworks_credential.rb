@@ -10,7 +10,7 @@ class ShipworksCredential < ActiveRecord::Base
   #                 :shall_import_new_order, :shall_import_not_shipped, :shall_import_shipped,
   #                 :shall_import_no_status, :import_store_order_number, :shall_import_ignore_local, :gen_barcode_from_sku
 
-  belongs_to :store
+  belongs_to :store, optional: true
 
   def can_import_an_order?
     shall_import_in_process || shall_import_new_order || shall_import_not_shipped ||

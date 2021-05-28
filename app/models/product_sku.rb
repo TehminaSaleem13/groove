@@ -1,6 +1,6 @@
 class ProductSku < ActiveRecord::Base
-  belongs_to :product
-  belongs_to :order_item
+  belongs_to :product, optional: true
+  belongs_to :order_item, optional: true
   # attr_accessible :purpose, :sku
   validates_uniqueness_of :sku
 
@@ -13,7 +13,7 @@ class ProductSku < ActiveRecord::Base
     end
   end
 
-  def self.get_temp_sku    
+  def self.get_temp_sku
     temp_skus = ProductSku.where("sku LIKE 'TSKU-%'").order(:sku)
     while(1)
       if temp_skus.length > 0

@@ -171,8 +171,6 @@ RSpec.describe StoresController, type: :controller do
       post :create_update_store, params: { store_type: 'CSV', status: @store.status, name: @store.name, inventory_warehouse_id: @store.inventory_warehouse_id, id: @store.id, orderfile: fixture_file_upload(Rails.root.join('/files/Order_import_fail.csv')) }
       expect(response.status).to eq(200)
 
-     binding.pry
-
       doc = IO.read(file_fixture('Order_check_file_map_1'))
       doc = eval(doc)
 
@@ -218,5 +216,5 @@ RSpec.describe StoresController, type: :controller do
       expect(response.status).to eq(200)
       expect(shipstation.first.gen_barcode_from_sku).to eq(true)
     end
-  end 
+  end
 end
