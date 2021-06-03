@@ -49,7 +49,9 @@ module Groovepacker
               else
                 order_in_gp = Order.new(increment_id: order['name'], store: @store)
               end
-              import_order_and_items(order, order_in_gp)
+              Order.transaction do
+                import_order_and_items(order, order_in_gp)
+              end
               # #create order
               # shopify_order = Order.new(store: @store)
               # shopify_order = import_order(shopify_order, order)

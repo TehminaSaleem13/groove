@@ -22,48 +22,49 @@ module Groovepacker
                     tracking_num = nil
                     tracking_num = order["Shipment"]["TrackingNumber"]  if order["Shipment"].class.to_s.include?("Hash")
                     notes_internal = get_internal_notes(order) unless order["Note"].nil?
+                    
+                    Order.transaction do
+                      order_m = Order.new(
+                        increment_id: order_number,
+                        order_placed_time: order["Date"],
+                        store: store,
+                        email: ship_address["Email"],
+                        lastname: ship_address["LastName"],
+                        firstname: ship_address["FirstName"],
+                        address_1: ship_address["Line1"],
+                        address_2: ship_address["Line2"],
+                        city: ship_address["City"],
+                        state: ship_address["StateName"],
+                        postcode: ship_address["PostalCode"],
+                        country: ship_address["CountryCode"],
+                        order_total: order["Total"],
+                        tracking_num: tracking_num,
+                        notes_internal: notes_internal,
+                        custom_field_one: order['CustomField1'],
+                        custom_field_two: order['CustomField2'])
+                      import_item.current_order_items = order["Item"].length rescue 0
+                      import_item.current_order_imported_item = 0
+                      import_item.save
 
-                    order_m = Order.new(
-                      increment_id: order_number,
-                      order_placed_time: order["Date"],
-                      store: store,
-                      email: ship_address["Email"],
-                      lastname: ship_address["LastName"],
-                      firstname: ship_address["FirstName"],
-                      address_1: ship_address["Line1"],
-                      address_2: ship_address["Line2"],
-                      city: ship_address["City"],
-                      state: ship_address["StateName"],
-                      postcode: ship_address["PostalCode"],
-                      country: ship_address["CountryCode"],
-                      order_total: order["Total"],
-                      tracking_num: tracking_num,
-                      notes_internal: notes_internal,
-                      custom_field_one: order['CustomField1'],
-                      custom_field_two: order['CustomField2'])
-
-                    import_item.current_order_items = order["Item"].length rescue 0
-                    import_item.current_order_imported_item = 0
-                    import_item.save
-
-                    if order_m.save
-                      if order["Item"].is_a? (Array)
-                        order["Item"].each do |item|
-                          import_order_item(item, import_item, order_m, store)
+                      if order_m.save
+                        if order["Item"].is_a? (Array)
+                          order["Item"].each do |item|
+                            import_order_item(item, import_item, order_m, store)
+                          end
+                        else
+                          import_order_item(order["Item"], import_item, order_m, store)
                         end
-                      else
-                        import_order_item(order["Item"], import_item, order_m, store)
                       end
-                    end
 
-                    order_m.set_order_status
-                    import_item.success_imported = 1
-                    import_item.save
+                      order_m.set_order_status
+                      import_item.success_imported = 1
+                      import_item.save
 
-                    order_m.addactivity("Order Import", store.name+" Import")
-                    order_m.order_items.each do |item|
-                      unless item.product.nil? || item.product.primary_sku.nil?
-                        order_m.addactivity("Item with SKU: "+item.product.primary_sku+" Added", store.name+" Import")
+                      order_m.addactivity("Order Import", store.name+" Import")
+                      order_m.order_items.each do |item|
+                        unless item.product.nil? || item.product.primary_sku.nil?
+                          order_m.addactivity("Item with SKU: "+item.product.primary_sku+" Added", store.name+" Import")
+                        end
                       end
                     end
                     import_item.status = 'completed'
