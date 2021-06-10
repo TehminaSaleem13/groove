@@ -43,6 +43,12 @@ module ScanPack
     end
 
     def product_scan(clicked, serial_added)
+    
+      if clicked
+        @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1 
+        @single_order.save
+      end
+
       case
       when @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
         do_if_restart_code_is_enabled_and_and_eql_to_input

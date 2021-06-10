@@ -95,6 +95,7 @@ class ImportDeletedData
     order.note_confirmation = ordo[1]['note_confirmation'].to_b
     order.store_order_id = ordo[1]['store_order_id']
     order.inaccurate_scan_count = ordo[1]['inaccurate_scan_count'].to_i
+    order.clicked_scanned_qty = ordo[1]['clicked_scanned_qty'].to_i
     order.scan_start_time = ordo[1]['scan_start_time'].to_datetime
     order.reallocate_inventory = ordo[1]['reallocate_inventory'].to_b
     order.last_suggested_at = ordo[1]['last_suggested_at'].to_datetime

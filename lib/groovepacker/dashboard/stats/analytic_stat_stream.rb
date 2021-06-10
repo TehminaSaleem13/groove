@@ -86,6 +86,7 @@ module Groovepacker
             packing_user_id: 0,
             packing_user_name: '',
             inaccurate_scan_count: 0,
+            clicked_scanned_qty: 0,
             packing_time: 0,
             scanned_item_count: 0,
             exception_description: nil,
