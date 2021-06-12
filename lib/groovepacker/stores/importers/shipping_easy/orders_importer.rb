@@ -285,7 +285,7 @@ module Groovepacker
                 product.update_attribute(:is_kit, 1)
               end
               create_order_item(item, order_item)
-              product.product_images.create(image: s3_image_url) if s3_image_url.present?
+              product.product_images.create(image: s3_image_url) if s3_image_url.present? && product.product_images.where(image: s3_image_url).blank?
               product.set_product_status
             end
 
