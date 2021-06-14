@@ -563,5 +563,18 @@ RSpec.describe ScanPackController, type: :controller do
       result = JSON.parse(response.body)
       expect(result['data']['next_state']).to eq('scanpack.rfp.recording')
     end
+
+    it 'Order Clicked Scanned Qty' do
+      ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      product1 = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT2')
+      product_barcode = FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT2')
+      order = FactoryBot.create(:order, increment_id: 'ORDER-1', status: 'awaiting', store: @store, tracking_num: 'ORDER-TRACKING-NUM')
+      
+      get :click_scan, params: { :barcode=> product_barcode.barcode, :id=>order.id, :box_id=>nil, :scan_pack=>{:barcode => product_barcode.barcode, :id=>order.id, :box_id=>nil}}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['clicked_scanned_qty']).to eq(1)
+    end
   end
 end
