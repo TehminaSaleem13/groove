@@ -285,7 +285,12 @@ module Groovepacker
                 product.update_attribute(:is_kit, 1)
               end
               create_order_item(item, order_item)
-              product.product_images.create(image: s3_image_url) if s3_image_url.present? && product.product_images.where(image: s3_image_url).blank?
+              if s3_image_url.present? && product.product_images.where(image: s3_image_url).blank?
+                product.product_images.create(image: s3_image_url)
+                on_demand_logger = Logger.new("#{Rails.root}/log/duplicate_image_issue _#{Apartment::Tenant.current}.log")
+                log = {product_id: product.id, s3_image_url: s3_image_url, Time: Time.current}
+                on_demand_logger.info(log)
+              end
               product.set_product_status
             end
 
