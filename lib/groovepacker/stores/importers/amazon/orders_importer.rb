@@ -11,11 +11,11 @@ module Groovepacker
               response = {}
               while 1 do
                 begin
-                  if first_call 
+                  if first_call
                     first_call = false
                     last_imported_at = @credential.last_imported_at
                     if last_imported_at.present? && @import_item.import_type == "regular"
-                      days_count = (DateTime.now.to_date - @credential.last_imported_at.to_date).to_i 
+                      days_count = (DateTime.now.to_date - @credential.last_imported_at.to_date).to_i
                       days_count = days_count == 0 ? 1 : days_count
                     elsif @import_item.import_type == "deep"
                       days_count = @import_item.days
@@ -32,7 +32,7 @@ module Groovepacker
                       response = unshipped_response
                     end
                   else
-                    while 1 do 
+                    while 1 do
                       begin
                         response = @mws.orders.next
                         break
@@ -52,9 +52,9 @@ module Groovepacker
                   response["orders"] = grouped_response["AFN"]
                 elsif @credential.mfn_fulfillment_channel && !@credential.afn_fulfillment_channel
                   response["orders"] = grouped_response["MFN"]
-                end        
+                end
                 response["orders"].kind_of?(Array) && !response["orders"].nil? ? (@orders || []).push(response["orders"]) : @orders = response["orders"]
-                break if orders_count.to_i < 100 
+                break if orders_count.to_i < 100
               end
               @orders = @orders.flatten rescue []
               @result[:total_imported] = @orders.count rescue 0
@@ -83,7 +83,7 @@ module Groovepacker
           def orders_import
             @orders.each do |order|
               import_item_fix
-              break if @import_item.status == 'cancelled'
+              break if @import_item.status == 'cancelled' || @import_item.status.nil?
               @import_item.update_attributes(current_increment_id: order.amazon_order_id, current_order_items: -1, current_order_imported_item: -1 )
               orders_with_increment_id(order)
             end
@@ -112,7 +112,7 @@ module Groovepacker
               create_order_item(item)
               create_productsku_order_item(item)
               @order_item.name = item.title
-              update_import_item(item)   
+              update_import_item(item)
             end
           end
 
@@ -179,15 +179,15 @@ module Groovepacker
                 item.destroy
                 next
               end
-              @order.addactivity("Item with SKU: #{item.sku} Added", "#{@credential.store.name} Import") if item.product.present? || item.product.primary_sku.present? 
+              @order.addactivity("Item with SKU: #{item.sku} Added", "#{@credential.store.name} Import") if item.product.present? || item.product.primary_sku.present?
             end
           end
 
           def import_item_save
             @result[:previous_imported] = @result[:previous_imported] + 1
             @import_item.previous_imported = @result[:previous_imported]
-            @import_item.save 
-          end   
+            @import_item.save
+          end
         end
       end
     end

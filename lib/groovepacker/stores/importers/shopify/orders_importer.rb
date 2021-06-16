@@ -16,7 +16,7 @@ module Groovepacker
             response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
             response["orders"].each do |order|
               import_item_fix
-              break if @import_item.status == 'cancelled'
+              break if @import_item.status == 'cancelled' || @import_item.status.nil?
 
               import_single_order(order) if order.present?
             end

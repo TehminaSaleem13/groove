@@ -68,7 +68,7 @@ module Groovepacker
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
             response["orders"].each do |order|
               import_item_fix
-              break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
+              break if @import_item.blank? || @import_item.try(:status) == 'cancelled'  || @import_item&.status.nil?
               begin
                 @import_item.update_attributes(:current_increment_id => order["orderNumber"], :current_order_items => -1, :current_order_imported_item => -1)
                 shipstation_order = find_or_init_new_order(order)

@@ -156,7 +156,7 @@ module Groovepacker
                 order = order_copy unless order_copy.blank?
                 @order_to_update = false
                 import_item_fix
-                break if @import_item.status == 'cancelled'
+                break if @import_item.status == 'cancelled' || @import_item.status.nil?
                 import_single_order(order)
                 #increase_import_count
                 # sleep 0.5

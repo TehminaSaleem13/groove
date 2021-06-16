@@ -195,7 +195,7 @@ module Groovepacker
             emit_data_for_range_or_quickfix
             response["orders"].each do |order|
               import_item_fix
-              break if @import_item.blank? || @import_item.try(:status) == 'cancelled'
+              break if @import_item.blank? || @import_item.try(:status) == 'cancelled' || @import_item&.status.nil?
               begin
                 update_import_item_and_import_order(order, shipments_response)
               rescue Exception => e

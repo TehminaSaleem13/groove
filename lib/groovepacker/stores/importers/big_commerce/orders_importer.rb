@@ -9,13 +9,13 @@ module Groovepacker
             init_common_objects
             response = @client.orders(@credential, @import_item)
             last_imported_date = Time.now
-            
+
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])
 
             (response["orders"]||[]).each do |order|
               import_item_fix
-              break if @import_item.status == 'cancelled'
+              break if @import_item.status == 'cancelled' || @import_item.status.nil?
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               import_single_order(order)
             end
@@ -94,7 +94,7 @@ module Groovepacker
 
               #second parameter in below method call is to tell weather to import inv or not
               product = bc_context.import_bc_single_product(item, false)
-              
+
               order_item.product = product
               bigcommerce_order.order_items << order_item
             end

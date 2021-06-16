@@ -9,13 +9,13 @@ module Groovepacker
             init_common_objects
             response = @client.orders(@import_item)
             last_imported_date = Time.now
-            
+
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
             (response["orders"]||[]).each do |order|
               @order_to_update = false
               import_item_fix
-              break if @import_item.status == 'cancelled'
+              break if @import_item.status == 'cancelled' || @import_item.status.nil?
               @import_item.update_attributes(:current_increment_id => order["txn_id"], :current_order_items => -1, :current_order_imported_item => -1)
               import_single_order(order)
               sleep 0.5
@@ -64,7 +64,7 @@ module Groovepacker
             teapplix_order = add_customer_info(teapplix_order, order)
             #add order shipping address using separate method
             teapplix_order = add_order_shipping_address(teapplix_order, order)
-            
+
             #teapplix_order.customer_comments = order["customer_message"]
             teapplix_order.qty = order["num_order_lines"]
             return teapplix_order
@@ -72,7 +72,7 @@ module Groovepacker
 
           def import_order_items(teapplix_order, order)
             return teapplix_order if order["items"].nil?
-            
+
             #order["products"] = @client.order_products(order["products"]["url"])
             @import_item.update_attributes(:current_order_items => order["items"].length, :current_order_imported_item => 0 )
             (order["items"]||[]).each do |item|
@@ -107,7 +107,7 @@ module Groovepacker
             teapplix_order.lastname = customer_name[0]
             return teapplix_order
           end
-          
+
           def get_firstname_lastname(customer_name)
 						name_array = customer_name.to_s.split(" ")
 						last_name = name_array.last.to_s
