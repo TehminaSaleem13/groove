@@ -270,7 +270,6 @@ module Groovepacker
             end
 
             def create_alias_and_product(order_item, item)
-              s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present? && ProductSku.find_by_sku(item["product"]["sku"]).try(:product).try(:product_images).blank?
               sku = item['sku'] || item["product"]["sku"]
               alias_skus = item["product"]["sku_aliases"]
               store_product_id =  item["ext_line_item_id"]
@@ -285,7 +284,8 @@ module Groovepacker
                 product.update_attribute(:is_kit, 1)
               end
               create_order_item(item, order_item)
-              if s3_image_url.present? && product.product_images.where(image: s3_image_url).blank?
+              s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present? && product&.product_images&.blank?
+              if s3_image_url&.present? && product.product_images.where(image: s3_image_url).blank?
                 product.product_images.create(image: s3_image_url)
                 on_demand_logger = Logger.new("#{Rails.root}/log/duplicate_image_issue _#{Apartment::Tenant.current}.log")
                 log = {product_id: product.id, s3_image_url: s3_image_url, Time: Time.current}
