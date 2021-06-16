@@ -382,19 +382,24 @@ module Groovepacker
                   import_item_count
                 end
               end
+              begin
+                return unless shiping_easy_order.save
+                if Apartment::Tenant.current == "verdantkitchen"
+                  on_demand_logger = Logger.new("#{Rails.root}/log/order_dupliacte _#{Apartment::Tenant.current}.log")
+                  log = {order_id: shiping_easy_order.increment_id, Time: Time.now}
+                  on_demand_logger.info(log)
+                end
 
-              return unless shiping_easy_order.save
-              if Apartment::Tenant.current == "verdantkitchen"
-                on_demand_logger = Logger.new("#{Rails.root}/log/order_dupliacte _#{Apartment::Tenant.current}.log")
-                log = {order_id: shiping_easy_order.increment_id, Time: Time.now}
+                shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
+                if check_for_replace_product
+                  add_order_activity_for_gp_coupon(shiping_easy_order, order["recipients"][0]["line_items"])
+                else
+                  add_order_activity(shiping_easy_order)
+                end
+              rescue e
+                on_demand_logger = Logger.new("#{Rails.root}/log/import_error_logs.log")
+                log = {error: e.message}
                 on_demand_logger.info(log)
-              end
-              shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
-              if check_for_replace_product
-                add_order_activity_for_gp_coupon(shiping_easy_order, order["recipients"][0]["line_items"])
-              else
-                add_order_activity(shiping_easy_order)
-              end
               shiping_easy_order.set_order_status
             end
 
