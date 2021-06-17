@@ -135,6 +135,17 @@ RSpec.describe OrdersController, type: :controller do
       result = JSON.parse(response.body)
       expect(result['error_messages']).to include('An Import is already in queue or running, please wait for it to complete!')
     end
+
+    it 'Import for single store shows import Cancelled' do
+      se_store = Store.where(store_type: 'ShippingEasy').last
+      ImportItem.create(status: 'in_progress', store: se_store)
+
+      request.accept = 'application/json'
+      get :cancel_import, params: {"store_id"=>se_store.id, "order"=>{"store_id"=>se_store.id}}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include('No imports are in progress')
+    end
   end
 
   describe 'Shopify Imports' do
