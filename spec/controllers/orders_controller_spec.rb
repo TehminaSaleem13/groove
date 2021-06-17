@@ -136,7 +136,7 @@ RSpec.describe OrdersController, type: :controller do
       expect(result['error_messages']).to include('An Import is already in queue or running, please wait for it to complete!')
     end
 
-    it 'Import for single store shows import Cancelled' do
+    it 'SE Import for single store shows import Cancelled' do
       se_store = Store.where(store_type: 'ShippingEasy').last
       ImportItem.create(status: 'in_progress', store: se_store)
 
@@ -208,6 +208,17 @@ RSpec.describe OrdersController, type: :controller do
 
       ss_import_item = ImportItem.find_by_store_id(ss_store.id)
       expect(ss_import_item.status).to eq('completed')
+    end
+
+    it 'SS Import for single store shows import Cancelled' do
+      ss_store = Store.where(store_type: 'ShipStation API 2').last
+      ImportItem.create(status: 'in_progress', store: ss_store)
+
+      request.accept = 'application/json'
+      get :cancel_import, params: {"store_id"=>ss_store.id, "order"=>{"store_id"=>ss_store.id}}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include('No imports are in progress')
     end
   end
 
