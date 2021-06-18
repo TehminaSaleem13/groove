@@ -104,6 +104,7 @@ module Groovepacker
           end
           @import_item = handler[:import_item]
           @result = self.build_result
+          @worker_id = 'worker_' + SecureRandom.hex
         end
 
         def check_or_assign_import_item

@@ -11,6 +11,9 @@ module Groovepacker
             return @result if import_statuses_are_empty
             importing_time = Time.now
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
+            return @result unless @import_item.present?
+
+            @import_item.update_column(:importer_id, @worker_id)
             response = @client.orders(@statuses, importing_time, @import_item)
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)
@@ -157,6 +160,9 @@ module Groovepacker
                 @order_to_update = false
                 import_item_fix
                 break if @import_item.status == 'cancelled' || @import_item.status.nil?
+
+                break if @import_item.importer_id != @worker_id
+
                 import_single_order(order)
                 #increase_import_count
                 # sleep 0.5
@@ -363,7 +369,8 @@ module Groovepacker
                                                     last_modified: order["updated_at"].to_datetime,
                                                     prime_order_id: order["prime_order_id"],
                                                     source_order_ids: order["source_order_ids"].to_a.join(','),
-                                                    split_from_order_id: order["split_from_order_id"]
+                                                    split_from_order_id: order["split_from_order_id"],
+                                                    importer_id: @worker_id
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end

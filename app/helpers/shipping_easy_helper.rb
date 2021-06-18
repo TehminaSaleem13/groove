@@ -95,6 +95,7 @@ module ShippingEasyHelper
     @import_item.update_attributes(updated_orders_import: 0)
     @result = self.build_result
     @statuses = get_statuses
+    @worker_id = 'worker_' + SecureRandom.hex
   end
 
   def import_item_count(order=nil)

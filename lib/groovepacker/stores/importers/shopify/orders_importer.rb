@@ -7,8 +7,10 @@ module Groovepacker
 
           def import
             initialize_import_objects
-            @worker_id = 'worker_' + SecureRandom.hex
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
+            return @result unless @import_item.present?
+
+            @import_item.update_column(:importer_id, @worker_id)
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
@@ -17,6 +19,8 @@ module Groovepacker
             response["orders"].each do |order|
               import_item_fix
               break if @import_item.status == 'cancelled' || @import_item.status.nil?
+
+              break if @import_item.importer_id != @worker_id
 
               import_single_order(order) if order.present?
             end
@@ -34,6 +38,7 @@ module Groovepacker
               @client = handler[:store_handle]
               @import_item = handler[:import_item]
               @result = self.build_result
+              @worker_id = 'worker_' + SecureRandom.hex
             end
 
             def import_single_order(order)
