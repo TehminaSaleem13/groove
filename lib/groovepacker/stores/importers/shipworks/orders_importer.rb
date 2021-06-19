@@ -6,6 +6,7 @@ module Groovepacker
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           def import_order(order)
             sw_start_time = Time.current
+            @worker_id = 'worker_' + SecureRandom.hex
             handler = self.get_handler
             credential = handler[:credential]
             store = handler[:store_handle]
@@ -41,7 +42,8 @@ module Groovepacker
                         tracking_num: tracking_num,
                         notes_internal: notes_internal,
                         custom_field_one: order['CustomField1'],
-                        custom_field_two: order['CustomField2'])
+                        custom_field_two: order['CustomField2'],
+                        importer_id: @worker_id)
                       import_item.current_order_items = order["Item"].length rescue 0
                       import_item.current_order_imported_item = 0
                       import_item.save
