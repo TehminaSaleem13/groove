@@ -200,7 +200,7 @@ module Groovepacker
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled' || @import_item&.status.nil?
 
-              break if @import_item.importer_id != @worker_id
+              break if @import_item.importer_id && @import_item.importer_id != @worker_id
 
               begin
                 update_import_item_and_import_order(order, shipments_response)

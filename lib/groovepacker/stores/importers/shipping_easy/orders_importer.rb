@@ -161,7 +161,7 @@ module Groovepacker
                 import_item_fix
                 break if @import_item.status == 'cancelled' || @import_item.status.nil?
 
-                break if @import_item.importer_id != @worker_id
+                break if @import_item.importer_id && @import_item.importer_id != @worker_id
 
                 import_single_order(order)
                 #increase_import_count
