@@ -9,7 +9,7 @@ module Groovepacker
             initialize_import_objects
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             return @result unless @import_item.present?
-
+            
             @import_item.update_column(:importer_id, @worker_id)
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
@@ -93,6 +93,7 @@ module Groovepacker
               shopify_order.last_modified = order['updated_at']
               shopify_order.tracking_num = order['fulfillments'].first['tracking_number'] rescue nil
               shopify_order.importer_id = @worker_id rescue nil
+              shopify_order.import_item_id = @import_item.id rescue nil
               return shopify_order
             end
 

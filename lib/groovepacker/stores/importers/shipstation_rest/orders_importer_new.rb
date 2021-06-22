@@ -27,7 +27,6 @@ module Groovepacker
             Tenant.save_se_import_data("========Shipstation Regular Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}")
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             return @result unless @import_item.present?
-
             @import_item.update_column(:importer_id, @worker_id)
             response = get_orders_response
             response['orders'] = response['orders'].sort_by { |h| h["modifyDate"].split('-') } rescue response['orders']
@@ -231,6 +230,7 @@ module Groovepacker
               shipstation_order = Order.find_by_id(shipstation_order.id) if shipstation_order.frozen?
               shipstation_order.tracking_num = tracking_info["trackingNumber"] rescue nil
               shipstation_order.importer_id = @worker_id
+              shipstation_order.import_item_id = @import_item.id rescue nil
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
               check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)
