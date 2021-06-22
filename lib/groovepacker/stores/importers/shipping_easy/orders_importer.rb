@@ -371,7 +371,7 @@ module Groovepacker
                                                     source_order_ids: order["source_order_ids"].to_a.join(','),
                                                     split_from_order_id: order["split_from_order_id"],
                                                     importer_id: @worker_id,
-                                                    import_item_id: @import_item
+                                                    import_item_id: @import_item.id
                                                   )
               shiping_easy_order = update_shipping_address(shiping_easy_order, order)
             end
