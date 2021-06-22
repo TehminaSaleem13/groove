@@ -14,8 +14,6 @@ module Groovepacker
             response = @client.orders
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
-            tenant = Apartment::Tenant.current
-            @tenant = Tenant.where(name: "#{tenant}").first
             return @result if response["orders"].nil? || response['orders'].blank? || response['orders'].first.nil?
             response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
             response["orders"].each do |order|
@@ -23,7 +21,6 @@ module Groovepacker
               break if @import_item.status == 'cancelled' || @import_item.status.nil?
 
               break if @import_item.importer_id && @import_item.importer_id != @worker_id
-              break if @tenant.import_job_status == 'locked'
 
               import_single_order(order) if order.present?
             end
@@ -45,7 +42,6 @@ module Groovepacker
             end
 
             def import_single_order(order)
-              @tenant.import_job_status == 'unlocked'
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
               order_in_gp_present = false
               order_in_gp = Order.find_by_store_order_id(order["id"].to_s)

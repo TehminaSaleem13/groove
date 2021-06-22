@@ -38,9 +38,6 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def initiate_import(tenant)
-    tenant = Tenant.where(name: "#{tenant}").first
-    tenant.import_job_status = 'locked'
-    tenant.save
     #delete existing completed and cancelled order import summaries
     track_user(tenant, {store_id: nil, user_id: import_params[:user_id]}, "Import Started", "Order Import Started")
     delete_existing_order_import_summaries
