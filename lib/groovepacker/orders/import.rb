@@ -18,15 +18,19 @@ module Groovepacker
       end
 
       def start_import_for_all
-        order_summary = OrderImportSummary.where(status: 'in_progress')
-        Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) if Tenant.where(name: Apartment::Tenant.current).first.product_ftp_import rescue nil
-        if order_summary.present? || $redis.get("importing_orders_#{Apartment::Tenant.current}")
+        if $redis.get("importing_orders_#{Apartment::Tenant.current}")
           set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
           return @result
         end
+        order_summary = OrderImportSummary.where(status: 'in_progress')
+        if order_summary.present?
+          set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
+          return @result
+        end
+        $redis.set("importing_orders_#{Apartment::Tenant.current}", true)
+        $redis.expire("importing_orders_#{Apartment::Tenant.current}", 8)
+        Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) if Tenant.where(name: Apartment::Tenant.current).first.product_ftp_import rescue nil
         if Store.where("status = '1' AND store_type != 'system'").length > 0
-          $redis.set("importing_orders_#{Apartment::Tenant.current}", true)
-          $redis.expire("importing_orders_#{Apartment::Tenant.current}", 8)
           add_import_to_delayed_job(order_summary)
           st = Store.where(store_type: "Shipstation API 2",status: true)
           data = []
