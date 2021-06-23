@@ -94,6 +94,7 @@ module Groovepacker
               shopify_order.tracking_num = order['fulfillments'].first['tracking_number'] rescue nil
               shopify_order.importer_id = @worker_id rescue nil
               shopify_order.import_item_id = @import_item.id rescue nil
+              shopify_order.job_timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S.%L")
               return shopify_order
             end
 
