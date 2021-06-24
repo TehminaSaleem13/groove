@@ -69,8 +69,8 @@ class TenantsController < ApplicationController
     feature = params["feature"]
     toggle =  params["value"]["toggle"]
     amount =  params["value"]["amount"]
-    db_price =  tenant.price
-    db_price[feature]["toggle"] = toggle
+    db_price =  tenant.price rescue nil
+    db_price[feature]["toggle"] = toggle rescue nil
     db_price[feature]["amount"] = amount
     tenant.price = db_price
     tenant.save

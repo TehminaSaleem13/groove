@@ -44,7 +44,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
 
   def check_tracking_number_validation
     set_tracking_info && return unless @scanpack_setting.tracking_number_validation_enabled
-    @input.starts_with?(*@scanpack_setting.tracking_number_validation_prefixes.split(',').map(&:strip)) ? set_tracking_info : set_error_messages('Doh! The tracking number you have scanned does not appear to be valid. If this scan should be permitted please check your Tracking Number Validation setting in Settings > System > Scan & Pack > Post Scanning Functions')
+    @input.starts_with?(*@scanpack_setting.tracking_number_validation_prefixes.to_s.split(',').map(&:strip)) ? set_tracking_info : set_error_messages('Doh! The tracking number you have scanned does not appear to be valid. If this scan should be permitted please check your Tracking Number Validation setting in Settings > System > Scan & Pack > Post Scanning Functions')
   end
 
   def set_tracking_info

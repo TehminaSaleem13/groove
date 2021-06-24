@@ -4,7 +4,7 @@ module Groovepacker
       def update_intangibleness(tenant, params, intangible_setting_enabled, intangible_string)
         Apartment::Tenant.switch!(tenant)
         intangible_strings = intangible_string.split(",")
-        intangible_param_strings = params[:intangible_string].split(",")
+        intangible_param_strings = params[:intangible_string].to_s.split(",")
         if params[:intangible_setting_enabled]
           if intangible_param_strings != intangible_strings || intangible_setting_enabled == false
             products = Product.all
