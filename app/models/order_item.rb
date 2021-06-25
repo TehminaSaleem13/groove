@@ -407,13 +407,13 @@ class OrderItem < ActiveRecord::Base
       self.clicked_qty = self.clicked_qty + 1
       if box_id.blank?
         if GeneralSetting.last.multi_box_shipments?
-          self.order.addactivity("Item with SKU: " + sku + " has been click scanned in Box 1", username) if !ScanPackSetting.last.order_verification
+          self.order.addactivity("Item with SKU: " + sku.to_s + " has been click scanned in Box 1", username) if !ScanPackSetting.last.order_verification
         else
-          self.order.addactivity("Item with SKU: " + sku + " has been click scanned", username) if !ScanPackSetting.last.order_verification
+          self.order.addactivity("Item with SKU: " + sku.to_s + " has been click scanned", username) if !ScanPackSetting.last.order_verification
         end
       else
         box = Box.where(id: box_id).last
-        self.order.addactivity("Item with SKU: " + sku + " has been click scanned in #{box.try(:name)}", username) if !ScanPackSetting.last.order_verification
+        self.order.addactivity("Item with SKU: " + sku.to_s + " has been click scanned in #{box.try(:name)}", username) if !ScanPackSetting.last.order_verification
       end
     end
   end
