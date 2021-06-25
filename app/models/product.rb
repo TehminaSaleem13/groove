@@ -134,29 +134,31 @@ class Product < ActiveRecord::Base
       # unless self.status == original_status
       # for non kit products, update all kits product statuses where the
       # current product is an item of the kit
-      if is_kit == 0
-        @kit_products =
-          if eager_loaded_obj[:kit_skus_if_kit_zero]
-            eager_loaded_obj[:kit_skus_if_kit_zero]
-              .select{ |pkss| pkss.option_product_id == id }
-          else
-            ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
-          end
+      unless @order_items.blank? 
+        if is_kit == 0
+          @kit_products =
+            if eager_loaded_obj[:kit_skus_if_kit_zero]
+              eager_loaded_obj[:kit_skus_if_kit_zero]
+                .select{ |pkss| pkss.option_product_id == id }
+            else
+              ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
+            end
 
-        # To reduce individual product query fire on order items
-        multi_product_order_items =
-          OrderItem.where(product_id: @kit_products.map{|kp| kp.product.id}, scanned_status: 'notscanned')
-          # .includes(order: [order_items: [:product, :order_item_kit_products]])
+          # To reduce individual product query fire on order items
+          multi_product_order_items =
+            OrderItem.where(product_id: @kit_products.map{|kp| kp.product.id}, scanned_status: 'notscanned')
+            # .includes(order: [order_items: [:product, :order_item_kit_products]])
 
-        #result_kit = true
-        @kit_products.each do |kit_product|
-          if kit_product.product.status != 'inactive'
-            kit_product.product.update_product_status(nil, {
-              multi_product_order_items: multi_product_order_items
-            })
+          #result_kit = true
+          @kit_products.each do |kit_product|
+            if kit_product.product.status != 'inactive'
+              kit_product.product.update_product_status(nil, {
+                multi_product_order_items: multi_product_order_items
+              })
+            end
           end
         end
-      end
+      end  
 
       if result && base_sku.nil?
         products =
