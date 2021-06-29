@@ -62,6 +62,9 @@ module Groovepacker
           set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
           return @result
         end
+
+        Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) if Tenant.where(name: Apartment::Tenant.current).first.product_ftp_import rescue nil
+
         if Store.where("status = '1' AND store_type != 'system'").length > 0
           add_import_to_delayed_job(order_summary)
           st = Store.where(store_type: "Shipstation API 2",status: true)
