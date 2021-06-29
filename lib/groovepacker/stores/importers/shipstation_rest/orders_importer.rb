@@ -119,12 +119,16 @@ module Groovepacker
           end
 
           def import_order(shipstation_order, order)
+            tenant = Apartment::Tenant.current
+            tenant = Tenant.where(name: "#{tenant}").first
+            order["customerEmail"] = nil if tenant.gdpr_shipstation
+
             shipstation_order.attributes = {  increment_id: order["orderNumber"], store_order_id: order["orderId"],
                                               order_placed_time: order["orderDate"], email: order["customerEmail"],
                                               shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
                                             }
             shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
-            shipstation_order = init_shipping_address(shipstation_order, order)
+            shipstation_order = init_shipping_address(shipstation_order, order) unless tenant.gdpr_shipstation
             shipstation_order = import_notes(shipstation_order, order)
             shipstation_order.weight_oz = order["weight"]["value"] rescue nil
             shipstation_order.save

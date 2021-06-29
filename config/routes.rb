@@ -89,6 +89,7 @@ Groovepacks::Application.routes.draw do
   get '/tenants/update_is_cf'=> 'tenants#update_is_cf'
   get '/tenants/update_expo_logs_delay' => 'tenants#update_expo_logs_delay'
   get '/tenants/update_uniq_shopify_import' => 'tenants#update_uniq_shopify_import'
+  get '/tenants/update_gdpr_shipstation' => 'tenants#update_gdpr_shipstation'
   get '/tenants/update_store_order_respose_log'=> 'tenants#update_store_order_respose_log'
   get '/tenants/update_inventory_update_delay'=> 'tenants#update_inventory_update_delay'
   get '/tenants/update_daily_packed_toggle'=> 'tenants#update_daily_packed_toggle'

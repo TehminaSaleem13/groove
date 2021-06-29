@@ -135,20 +135,26 @@ module Groovepacker
           end
 
           def import_order(shipstation_order, order)
+            tenant = Apartment::Tenant.current
+            tenant = Tenant.where(name: "#{tenant}").first
+
+            if !tenant.gdpr_shipstation
+              shipstation_order.lastname = split_name.pop
+              shipstation_order.firstname = split_name.join(' ')
+              shipstation_order.email = order.buyer_email unless order.buyer_email.nil?
+              shipstation_order.address_1 = order.ship_street1
+              shipstation_order.address_2 = order.ship_street2 unless order.ship_street2.nil?
+              shipstation_order.city = order.ship_city
+              shipstation_order.state = order.ship_state
+              shipstation_order.postcode = order.ship_postal_code unless order.ship_postal_code.nil?
+              shipstation_order.country = order.ship_country_code
+            end
+
             shipstation_order.increment_id = order.order_number
             shipstation_order.seller_id = order.seller_id
             shipstation_order.order_status_id = order.order_status_id
             shipstation_order.order_placed_time = order.order_date
             split_name = order.ship_name.split(' ')
-            shipstation_order.lastname = split_name.pop
-            shipstation_order.firstname = split_name.join(' ')
-            shipstation_order.email = order.buyer_email unless order.buyer_email.nil?
-            shipstation_order.address_1 = order.ship_street1
-            shipstation_order.address_2 = order.ship_street2 unless order.ship_street2.nil?
-            shipstation_order.city = order.ship_city
-            shipstation_order.state = order.ship_state
-            shipstation_order.postcode = order.ship_postal_code unless order.ship_postal_code.nil?
-            shipstation_order.country = order.ship_country_code
             shipstation_order.shipping_amount = order.shipping_amount unless order.shipping_amount.nil?
             shipstation_order.order_total = order.order_total
             shipstation_order.notes_from_buyer = order.notes_from_buyer unless order.notes_from_buyer.nil?

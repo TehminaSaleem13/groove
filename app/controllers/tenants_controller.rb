@@ -253,6 +253,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_gdpr_shipstation
+    tenant = Tenant.find(params["tenant_id"])
+    tenant.gdpr_shipstation = !tenant.gdpr_shipstation
+    tenant.save
+    render json: {}
+  end
+  
   def create_duplicate
     result = create_single_duplicate
 
