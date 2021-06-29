@@ -18,6 +18,36 @@ module Groovepacker
       end
 
       def start_import_for_all
+        tenant = Apartment::Tenant.current
+        tenant = Tenant.where(name: "#{tenant}").first
+        if tenant.uniq_shopify_import
+          if Store.where("status = '1' AND store_type != 'system'").where(store_type: "Shopify").length > 0
+            unless uniq_job_detail == nil
+              if ((@job_timestamp.to_time.to_f - Time.now.strftime("%Y-%m-%d %H:%M:%S.%L").to_time.to_f).abs < 3)
+                set_status_and_message(false, 'Import is already in progress', ['push', 'error_messages'])
+                
+                on_demand_logger = Logger.new("#{Rails.root}/log/shopify_import#{Apartment::Tenant.current}.log")
+                log = { message: 'Terminate import because of two worker working on same job' }
+                on_demand_logger.info(log)
+                return @result
+              end
+            end
+                    
+            update_uniq_job_table
+            sleep 1
+            if @job_id.present?
+              if UniqJobTable.where(job_id: "#{@job_id}").group_by(&:created_at).count >= 2
+                set_status_and_message(false, 'Import is already in progress', ['push', 'error_messages'])
+              
+                on_demand_logger = Logger.new("#{Rails.root}/log/shopify_import#{Apartment::Tenant.current}.log")
+                log = { message: 'Terminate import because of two worker working on same job' }
+                on_demand_logger.info(log)
+                return @result 
+              end
+            end
+          end
+        end
+
         if $redis.get("importing_orders_#{Apartment::Tenant.current}")
           set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
           return @result
@@ -32,9 +62,6 @@ module Groovepacker
           set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
           return @result
         end
-
-        Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) if Tenant.where(name: Apartment::Tenant.current).first.product_ftp_import rescue nil
-
         if Store.where("status = '1' AND store_type != 'system'").length > 0
           add_import_to_delayed_job(order_summary)
           st = Store.where(store_type: "Shipstation API 2",status: true)
@@ -138,6 +165,26 @@ module Groovepacker
       end
 
       private
+
+        def update_uniq_job_table
+          tenant = Apartment::Tenant.current
+          Apartment::Tenant.switch!("#{tenant}")
+          # @tenant = Tenant.where(name: "#{tenant}").first
+          if UniqJobTable.last.blank?
+            UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{tenant}_shopify_import-#{UniqJobTable.new.job_count + 1}", job_count: UniqJobTable.new.job_count + 1)
+          else
+            UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{tenant}_shopify_import-#{UniqJobTable.last.job_count + 1}", job_count: UniqJobTable.last.job_count + 1)
+          end
+          # uniq_job_table.update_attributes(job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L", worker_id: @worker_id, job_id: "#{tenant}_se_#{job_count}")        
+        end
+      
+        def uniq_job_detail
+          tenant = Apartment::Tenant.current
+          Apartment::Tenant.switch!("#{tenant}")
+          @job_id = UniqJobTable.last.job_id unless UniqJobTable.last.blank?
+          @job_timestamp = UniqJobTable.last.job_timestamp unless UniqJobTable.last.blank?
+        end
+ 
         def add_import_to_delayed_job(order_summary)
           order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started', display_summary: true)
           # call delayed job

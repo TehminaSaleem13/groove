@@ -244,6 +244,13 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def update_uniq_shopify_import
+    tenant = Tenant.find(params['tenant_id'])
+    tenant.uniq_shopify_import = !tenant.uniq_shopify_import
+    tenant.save
+    render json: {}
+  end
+
   def create_duplicate
     result = create_single_duplicate
 
