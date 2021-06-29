@@ -14,6 +14,13 @@ RSpec.describe OrdersController, type: :controller do
     inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
     @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: inv_wh, status: true)
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: @store.id)
+    tenant = Apartment::Tenant.current
+    Apartment::Tenant.switch!("#{tenant}")
+    @tenant = Tenant.create(name: "#{tenant}")
+  end
+
+  after :each do
+    @tenant.destroy
   end
 
   describe 'CSV Imports' do
