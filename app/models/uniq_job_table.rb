@@ -1,2 +1,0 @@
-class UniqJobTable < ApplicationRecord
-end
