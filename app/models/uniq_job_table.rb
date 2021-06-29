@@ -1,0 +1,2 @@
+class UniqJobTable < ApplicationRecord
+end
