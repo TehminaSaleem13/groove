@@ -38,5 +38,19 @@ RSpec.describe TenantsController, type: :controller do
       expect(OrderImportSummary.last.status).to eq("cancelled")
       tenant.destroy
     end
+
+    it 'Shopify Unique Import' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      tenant = Tenant.create(name: "#{tenant}")
+     
+      request.accept = 'application/json'
+      
+      get :update_uniq_shopify_import, params: {"tenant_id"=>tenant.id}
+     
+      tenant = Tenant.find(tenant.id)
+      expect(tenant.uniq_shopify_import,).to eq(true)
+      tenant.destroy
+    end
   end
 end  

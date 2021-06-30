@@ -175,6 +175,8 @@ RSpec.describe OrdersController, type: :controller do
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      @tenant.uniq_shopify_import = true
+      @tenant.save
 
       get :import_all
       expect(response.status).to eq(200)
