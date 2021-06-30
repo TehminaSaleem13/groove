@@ -70,8 +70,10 @@ class TenantsController < ApplicationController
     toggle =  params["value"]["toggle"]
     amount =  params["value"]["amount"]
     db_price =  tenant.price rescue nil
-    db_price[feature]["toggle"] = toggle rescue nil
-    db_price[feature]["amount"] = amount
+    unless db_price.blank?
+      db_price[feature]["toggle"] = toggle rescue nil
+      db_price[feature]["amount"] = amount rescue nil
+    end
     tenant.price = db_price
     tenant.save
     add_plan_to_subscription(amount, tenant, feature) if toggle == true
