@@ -200,7 +200,26 @@ RSpec.describe OrdersController, type: :controller do
       UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
       @tenant.uniq_shopify_import = true
       @tenant.save
+       sleep 3
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+    end
 
+    it 'Orders Import Job Created Just 3 Second Before.' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:product).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
+
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      @tenant.uniq_shopify_import = true
+      @tenant.save
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(0)
