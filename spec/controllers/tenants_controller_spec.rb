@@ -57,12 +57,14 @@ RSpec.describe TenantsController, type: :controller do
       tenant = Apartment::Tenant.current
       Apartment::Tenant.switch!("#{tenant}")
       tenant = Tenant.create(name: "#{tenant}")
-
+      tenant.price = { "bigCommerce_feature"=>{ "toggle"=>false, "amount"=>30, "stripe_id"=>""}, "shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "high_sku_feature"=>{"toggle"=>false, "amount"=>50, "stripe_id"=>""}, "double_high_sku"=>{"toggle"=>false, "amount"=>100, "stripe_id"=>""}, "cust_maintenance_1"=>{"toggle"=>true, "amount"=>"15", "stripe_id"=>"si_I4i2XgmVjvWmTR"}, "cust_maintenance_2"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "groovelytic_stat_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "product_ftp_import"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>"" } }
+      tenant.save
       request.accept = 'application/json'
 
       get :update_price_field, params: {"feature"=>"high_sku_feature", "value"=>{"toggle"=>true}, "id"=>tenant.id, "tenant"=>{}}
       tenant = Tenant.find(tenant.id)
-      expect(tenant.price,).to eq(nil)
+
+      expect(tenant.price["cust_maintenance_1"]['toggle']).to eq(true)
       tenant.destroy
     end
   end
