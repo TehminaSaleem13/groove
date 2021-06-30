@@ -52,5 +52,18 @@ RSpec.describe TenantsController, type: :controller do
       expect(tenant.uniq_shopify_import,).to eq(true)
       tenant.destroy
     end
+   
+    it 'Update Price Field' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      tenant = Tenant.create(name: "#{tenant}")
+
+      request.accept = 'application/json'
+
+      get :update_price_field, params: {"feature"=>"high_sku_feature", "value"=>{"toggle"=>true}, "id"=>tenant.id, "tenant"=>{}}
+      tenant = Tenant.find(tenant.id)
+      expect(tenant.price,).to eq(nil)
+      tenant.destroy
+    end
   end
 end  
