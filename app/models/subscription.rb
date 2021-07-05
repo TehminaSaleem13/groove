@@ -18,6 +18,11 @@ class Subscription < ActiveRecord::Base
   def save_with_payment(one_time_payment)
     begin
       if valid?
+        on_demand_logger = Logger.new("#{Rails.root}/log/subscription_logs.log")
+        on_demand_logger.info("=========================================")
+        log = { tenant: Apartment::Tenant.current, subscription: self }
+        on_demand_logger.info(log)
+
         if self.coupon_id
           Apartment::Tenant.switch!()
           one_time_payment = calculate_otp(self.coupon_id, one_time_payment.to_i)

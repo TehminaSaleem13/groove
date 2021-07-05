@@ -213,7 +213,7 @@ class ProductsController < ApplicationController
     tenant_name = Apartment::Tenant.current
     if (params["productArray"].count > 20 || params["select_all"] == true)
       export_product = ExportSsProductsCsv.new
-      export_product.delay.generate_numeric_barcode_with_delay(params, data, tenant_name)
+      export_product.delay(priority: 95).generate_numeric_barcode_with_delay(params, data, tenant_name)
     else
       export_product = ExportSsProductsCsv.new
       export_product.generate_numeric_barcode_with_delay(params, data, tenant_name)
