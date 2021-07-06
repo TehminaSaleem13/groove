@@ -18,7 +18,7 @@ module Groovepacker
             response['orders'] = response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) } rescue response['orders']
             response["orders"].each do |order|
               import_item_fix
-              ImportItem.where(store_id: @store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(status: 'cancelled') }
+              ImportItem.where(store_id: @store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
 
               break if !@import_item.persisted? || @import_item.status == 'cancelled' || @import_item.status.nil?
 
