@@ -122,7 +122,7 @@ module Groovepacker
 
         def log_import_error(e)
           on_demand_logger = Logger.new("#{Rails.root}/log/import_error_logs.log")
-          log = { Time: Time.zone.now, e: e, backtrace: e.backtrace.join(',') }
+          log = { time: Time.zone.now, tenant: Apartment::Tenant.current, e: e, backtrace: e.backtrace.join(',') }
           on_demand_logger.info(log)
         rescue
         end
