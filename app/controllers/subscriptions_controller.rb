@@ -11,7 +11,7 @@ class SubscriptionsController < ApplicationController
     unless plan_price>=100 and plan_price%50==0
       @plan_error = 'Please Select A Plan From The List'
       @plans = fetch_plans_info
-      render :select_plan and return  
+      render :select_plan and return
     end
     @monthly_amount = plan_price*100
     @annually_amount = (plan_price-(plan_price*10/100))*12*100
@@ -23,6 +23,11 @@ class SubscriptionsController < ApplicationController
   end
 
   def confirm_payment
+    on_demand_logger = Logger.new("#{Rails.root}/log/subscription_logs.log")
+    on_demand_logger.info("=========================================")
+    log = { time: Time.zone.now, params: params }
+    on_demand_logger.info(log)
+
     params[:tenant_name] = params[:tenant_name].gsub(/[^0-9A-Za-z]/, '')
     @subscription = create_subscription(params)
     if @subscription
@@ -59,7 +64,7 @@ class SubscriptionsController < ApplicationController
     end
   end
 
-  def valid_tenant_name    
+  def valid_tenant_name
     result = {}
     result['valid'] = true
     result['message'] = ''
@@ -85,7 +90,7 @@ class SubscriptionsController < ApplicationController
   end
 
   def show
-    flash[:notice] = params[:notice] 
+    flash[:notice] = params[:notice]
   end
 
   def complete
@@ -127,7 +132,7 @@ class SubscriptionsController < ApplicationController
       currency: 'usd',
       metadata: { integration_check: 'accept_a_payment' }
     )
- 
+
     render json: { client_secret: intent.client_secret, stripe_public_key: ENV['STRIPE_PUBLIC_KEY'] }.to_json
   end
 
@@ -158,7 +163,7 @@ class SubscriptionsController < ApplicationController
     $redis.del(params[:shop_name] + ".myshopify.com_ready_to_be_deployed")
     $redis.del(params[:shop_name] + ".myshopify.com_otf")
     $redis.del(params[:shop_name] + ".myshopify.com_rtc")
-    return {valid: true, 
+    return {valid: true,
             transaction_id: @subscription.stripe_transaction_identifier,
             notice: 'Congratulations! Your GroovePacker is being deployed!',
             email: params[:email],
@@ -180,7 +185,7 @@ class SubscriptionsController < ApplicationController
     cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
     cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
     response = response_for_successful_subscription
-    response["store"] = "BigCommerce" 
+    response["store"] = "BigCommerce"
     return response
   end
 
@@ -204,7 +209,7 @@ class SubscriptionsController < ApplicationController
       params[:amount] = (plan_price-(plan_price*10/100))*12*100
       interval = "year"
     end
-   
+
     subscription = Subscription.new(stripe_user_token: params[:stripe_user_token],
                                     tenant_name: params[:tenant_name],
                                     amount: params[:amount],
