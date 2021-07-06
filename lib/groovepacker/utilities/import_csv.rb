@@ -104,7 +104,7 @@ class ImportCsv
                       nil
                     end if !(store.csv_beta && params[:type] == "order")
         end
-        
+
         if check_mapping_for_tracking_num(params)
           csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options)
           params.merge!(only_for_tracking_num: true)
@@ -136,7 +136,7 @@ class ImportCsv
                initial_split = csv_file.content.split(/\n/).reject(&:empty?)
               else
                 initial_split = file_content.content.split(/\n/).reject(&:empty?)
-              end 
+              end
             end
             initial_split.each do |single|
               final_record.push(single.scan(/.{1,#{params[:fixed_width]}}/m))
@@ -252,12 +252,12 @@ class ImportCsv
     else
       File.write(file_path, file.content.encode(Encoding.find('ASCII'), encoding_options))
     end
-  
+
     csv_file = file.content.encode(Encoding.find('ASCII'), encoding_options) rescue nil
-  
+
     set_file_path(params, file_path)
-  
-  
+
+
     if params[:fix_width] == 1
       if params[:flag] == 'ftp_download'
         initial_split = csv_file.split(/\n/).reject(&:empty?)
@@ -349,7 +349,7 @@ class ImportCsv
   def set_file_name(params, file_url)
     params[:file_name] = file_url.split('/').last
   end
- 
+
   def encoding_options
     {
       invalid: :replace, # Replace invalid byte sequences
@@ -358,7 +358,7 @@ class ImportCsv
       universal_newline: true # Always break lines with \n
     }
   end
- 
+
   def set_file_path(params, file_path)
     params[:file_path] = file_path
   end
@@ -391,8 +391,7 @@ class ImportCsv
       begin
         csv = CSV.parse(csv_text_data, :headers => true)
       rescue Exception => e
-        csv_text_data = csv_text_data.gsub( /["\"]/, '')
-        csv = CSV.parse(csv_text_data, :headers => true)
+        csv = CSV.parse(csv_text_data.gsub( /["\"]/, ''), :headers => true) rescue CSV.parse(csv_text_data.force_encoding("ISO-8859-1").encode("UTF-8"), :headers => true)
       end
       column_number = $redis.get("#{Apartment::Tenant.current}_csv_file_increment_id_index").to_i
 
