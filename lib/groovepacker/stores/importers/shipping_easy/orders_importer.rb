@@ -286,7 +286,15 @@ module Groovepacker
               (item["product"]["bundled_products"] || []).each do |kit_product|
                 kit_pro = Product.joins(:product_skus).where("sku = ?", kit_product["sku"])
                 new_kit_product = kit_pro.blank? ? create_product(kit_product["sku"], kit_product, store_product_id) : kit_pro[0]
-                product.product_kit_skuss.create(option_product_id: new_kit_product.id, qty: kit_product["quantity"]) rescue nil if ProductKitSkus.where(product_id: product.id, option_product_id: new_kit_product.id).blank?
+                if ProductKitSkus.where(product_id: product.id, option_product_id: new_kit_product.id).blank?
+                  if new_kit_product.is_kit
+                    on_demand_logger = Logger.new("#{Rails.root}/log/nested_kit_issue_#{Apartment::Tenant.current}.log")
+                    log = { new_kit_product: new_kit_product, kit_product: kit_product, kit_pro: kit_pro, order_item: order_item, item: item, time: Time.current }
+                    on_demand_logger.info(log)
+                  else
+                    product.product_kit_skuss.create(option_product_id: new_kit_product.id, qty: kit_product["quantity"]) rescue nil
+                  end
+                end
                 kit_alias = kit_product["sku_aliases"]
                 create_alias(kit_alias, new_kit_product) if kit_alias
                 product.update_attribute(:is_kit, 1)
@@ -295,9 +303,9 @@ module Groovepacker
               s3_image_url = create_s3_image(item) if item["product"]["image"].present? && item["product"]["image"]["original"].present? && product&.product_images&.blank?
               if s3_image_url&.present? && product.product_images.where(image: s3_image_url).blank?
                 product.product_images.create(image: s3_image_url)
-                on_demand_logger = Logger.new("#{Rails.root}/log/duplicate_image_issue _#{Apartment::Tenant.current}.log")
-                log = {product_id: product.id, s3_image_url: s3_image_url, Time: Time.current}
-                on_demand_logger.info(log)
+                # on_demand_logger = Logger.new("#{Rails.root}/log/duplicate_image_issue_#{Apartment::Tenant.current}.log")
+                # log = {product_id: product.id, s3_image_url: s3_image_url, Time: Time.current}
+                # on_demand_logger.info(log)
               end
               product.set_product_status
             end
