@@ -4,6 +4,17 @@ module Groovepacker
 
       def update_product_attributes        
         @product = Product.find_by_id(@params[:basicinfo][:id]) rescue nil
+        @product.product_kit_skuss
+        flag =''
+        kit_item_ids = []
+        @product.product_kit_skuss.map{ |item| kit_item_ids << item.option_product_id }
+        kit_item_ids.each do |id|
+          product = Product.find(id)
+          if product.is_kit == 1
+            @product.product_kit_skuss.where(option_product_id: id).destroy_all
+          end
+        end
+
         @result['params'] = @params
         @result["exist_barcode"] = false
         multi_barcode = @params[:basicinfo][:multibarcode] rescue []
