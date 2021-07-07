@@ -1,4 +1,3 @@
-# encoding: UTF-8
 # This file is auto-generated from the current state of the database. Instead
 # of editing this file, please use the migrations feature of Active Record to
 # incrementally modify your database, and then regenerate this schema definition.
@@ -9,1086 +8,1349 @@
 # from scratch. The latter is a flawed and unsustainable approach (the more migrations
 # you'll amass, the slower it'll run and the greater likelihood for issues).
 #
-# It's strongly recommended to check this file into your version control system.
+# It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(:version => 20170318094320) do
+ActiveRecord::Schema.define(version: 20210706032129) do
 
-  create_table "access_restrictions", :force => true do |t|
-    t.integer  "num_users",                           :default => 0,     :null => false
-    t.integer  "num_shipments",                       :default => 0,     :null => false
-    t.integer  "num_import_sources",                  :default => 0,     :null => false
-    t.datetime "created_at",                                             :null => false
-    t.datetime "updated_at",                                             :null => false
-    t.integer  "total_scanned_shipments",             :default => 0,     :null => false
-    t.boolean  "allow_bc_inv_push",                   :default => false
-    t.boolean  "allow_mg_rest_inv_push",              :default => false
-    t.boolean  "allow_shopify_inv_push",              :default => false
-    t.boolean  "allow_teapplix_inv_push",             :default => false
-    t.boolean  "allow_magento_soap_tracking_no_push", :default => false
+  create_table "access_restrictions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "num_users", default: 0, null: false
+    t.integer "num_shipments", default: 0, null: false
+    t.integer "num_import_sources", default: 0, null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "total_scanned_shipments", default: 0, null: false
+    t.boolean "allow_bc_inv_push", default: false
+    t.boolean "allow_mg_rest_inv_push", default: false
+    t.boolean "allow_shopify_inv_push", default: false
+    t.boolean "allow_teapplix_inv_push", default: false
+    t.boolean "allow_magento_soap_tracking_no_push", default: false
+    t.integer "added_through_ui", default: 0
   end
 
-  create_table "ahoy_events", :force => true do |t|
-    t.integer  "visit_id"
-    t.integer  "user_id"
-    t.string   "name"
-    t.text     "properties"
+  create_table "ahoy_events", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "visit_id"
+    t.integer "user_id"
+    t.string "name"
+    t.text "properties"
     t.datetime "time"
+    t.boolean "version_2", default: false
+    t.index ["name", "time"], name: "index_ahoy_events_on_name_and_time"
+    t.index ["user_id", "name"], name: "index_ahoy_events_on_user_id_and_name"
+    t.index ["visit_id", "name"], name: "index_ahoy_events_on_visit_id_and_name"
   end
 
-  add_index "ahoy_events", ["name", "time"], :name => "index_ahoy_events_on_name_and_time"
-  add_index "ahoy_events", ["user_id", "name"], :name => "index_ahoy_events_on_user_id_and_name"
-  add_index "ahoy_events", ["visit_id", "name"], :name => "index_ahoy_events_on_visit_id_and_name"
-
-  create_table "amazon_credentials", :force => true do |t|
-    t.string   "merchant_id",                                     :null => false
-    t.string   "marketplace_id",                                  :null => false
-    t.integer  "store_id"
-    t.datetime "created_at",                                      :null => false
-    t.datetime "updated_at",                                      :null => false
-    t.boolean  "import_products",              :default => false, :null => false
-    t.boolean  "import_images",                :default => false, :null => false
-    t.string   "productreport_id"
-    t.string   "productgenerated_report_id"
+  create_table "amazon_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "merchant_id", null: false
+    t.string "marketplace_id", null: false
+    t.integer "store_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "import_products", default: false, null: false
+    t.boolean "import_images", default: false, null: false
+    t.string "productreport_id"
+    t.string "productgenerated_report_id"
     t.datetime "productgenerated_report_date"
-    t.boolean  "show_shipping_weight_only",    :default => false
-    t.string   "mws_auth_token"
+    t.boolean "show_shipping_weight_only", default: false
+    t.string "mws_auth_token"
+    t.boolean "shipped_status", default: false
+    t.boolean "unshipped_status", default: true
+    t.datetime "last_imported_at"
+    t.boolean "afn_fulfillment_channel", default: false
+    t.boolean "mfn_fulfillment_channel", default: true
   end
 
-  create_table "big_commerce_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "shop_name"
-    t.string   "store_hash"
-    t.string   "access_token"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+  create_table "big_commerce_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "store_id"
+    t.string "shop_name"
+    t.string "store_hash"
+    t.string "access_token"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.datetime "last_imported_at"
   end
 
-  create_table "column_preferences", :force => true do |t|
-    t.integer  "user_id"
-    t.string   "identifier"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
-    t.text     "theads"
+  create_table "boxes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "order_id"
   end
 
-  add_index "column_preferences", ["user_id"], :name => "index_column_preferences_on_user_id"
-
-  create_table "coupons", :force => true do |t|
-    t.string   "coupon_id",                                      :null => false
-    t.integer  "percent_off"
-    t.decimal  "amount_off",      :precision => 10, :scale => 0
-    t.string   "duration"
-    t.date     "redeem_by"
-    t.integer  "max_redemptions"
-    t.integer  "times_redeemed"
-    t.boolean  "is_valid",                                       :null => false
-    t.datetime "created_at",                                     :null => false
-    t.datetime "updated_at",                                     :null => false
+  create_table "column_preferences", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "user_id"
+    t.string "identifier"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "theads"
+    t.index ["user_id"], name: "index_column_preferences_on_user_id"
   end
 
-  create_table "csv_mappings", :force => true do |t|
-    t.integer  "store_id"
-    t.text     "order_map"
-    t.text     "product_map"
-    t.datetime "created_at",         :null => false
-    t.datetime "updated_at",         :null => false
-    t.integer  "product_csv_map_id"
-    t.integer  "order_csv_map_id"
-    t.integer  "kit_csv_map_id"
+  create_table "coupons", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "coupon_id", null: false
+    t.integer "percent_off"
+    t.decimal "amount_off", precision: 10
+    t.string "duration"
+    t.date "redeem_by"
+    t.integer "max_redemptions"
+    t.integer "times_redeemed"
+    t.boolean "is_valid", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "csv_maps", :force => true do |t|
-    t.string   "kind"
-    t.string   "name"
-    t.boolean  "custom",     :default => true
-    t.text     "map"
-    t.datetime "created_at",                   :null => false
-    t.datetime "updated_at",                   :null => false
+  create_table "csv_import_log_entries", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "index"
+    t.integer "csv_import_summary_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "csv_product_imports", :force => true do |t|
-    t.string   "status"
-    t.integer  "success",          :default => 0
-    t.integer  "total",            :default => 0
-    t.integer  "store_id"
-    t.string   "current_sku"
-    t.integer  "delayed_job_id"
-    t.boolean  "cancel",           :default => false
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
-    t.integer  "success_imported", :default => 0
-    t.integer  "duplicate_file",   :default => 0
-    t.integer  "duplicate_db",     :default => 0
-    t.integer  "success_updated",  :default => 0
+  create_table "csv_import_summaries", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "file_name"
+    t.decimal "file_size", precision: 8, scale: 4, default: "0.0"
+    t.string "import_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "log_record"
   end
 
-  create_table "delayed_jobs", :force => true do |t|
-    t.integer  "priority",   :default => 0, :null => false
-    t.integer  "attempts",   :default => 0, :null => false
-    t.text     "handler",                   :null => false
-    t.text     "last_error"
+  create_table "csv_mappings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "store_id"
+    t.text "order_map"
+    t.text "product_map"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "product_csv_map_id"
+    t.integer "order_csv_map_id"
+    t.integer "kit_csv_map_id"
+  end
+
+  create_table "csv_maps", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "kind"
+    t.string "name"
+    t.boolean "custom", default: true
+    t.text "map"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "csv_product_imports", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "status"
+    t.integer "success", default: 0
+    t.integer "total", default: 0
+    t.integer "store_id"
+    t.string "current_sku"
+    t.integer "delayed_job_id"
+    t.boolean "cancel", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "success_imported", default: 0
+    t.integer "duplicate_file", default: 0
+    t.integer "duplicate_db", default: 0
+    t.integer "success_updated", default: 0
+  end
+
+  create_table "delayed_jobs", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "priority", default: 0, null: false
+    t.integer "attempts", default: 0, null: false
+    t.text "handler", null: false
+    t.text "last_error"
     t.datetime "run_at"
     t.datetime "locked_at"
     t.datetime "failed_at"
-    t.string   "locked_by"
-    t.string   "queue"
-    t.datetime "created_at",                :null => false
-    t.datetime "updated_at",                :null => false
+    t.string "locked_by"
+    t.string "queue"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
-  add_index "delayed_jobs", ["priority", "run_at"], :name => "delayed_jobs_priority"
-
-  create_table "ebay_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.boolean  "import_products",      :default => false, :null => false
-    t.boolean  "import_images",        :default => false, :null => false
-    t.date     "ebay_auth_expiration"
-    t.text     "productauth_token"
-    t.text     "auth_token"
+  create_table "ebay_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "store_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "import_products", default: false, null: false
+    t.boolean "import_images", default: false, null: false
+    t.date "ebay_auth_expiration"
+    t.text "productauth_token"
+    t.text "auth_token"
+    t.boolean "shipped_status", default: false
+    t.boolean "unshipped_status", default: true
   end
 
-  create_table "export_settings", :force => true do |t|
-    t.boolean  "auto_email_export",         :default => true
+  create_table "export_settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.boolean "auto_email_export", default: true
     t.datetime "time_to_send_export_email"
-    t.boolean  "send_export_email_on_mon",  :default => false
-    t.boolean  "send_export_email_on_tue",  :default => false
-    t.boolean  "send_export_email_on_wed",  :default => false
-    t.boolean  "send_export_email_on_thu",  :default => false
-    t.boolean  "send_export_email_on_fri",  :default => false
-    t.boolean  "send_export_email_on_sat",  :default => false
-    t.boolean  "send_export_email_on_sun",  :default => false
+    t.boolean "send_export_email_on_mon", default: false
+    t.boolean "send_export_email_on_tue", default: false
+    t.boolean "send_export_email_on_wed", default: false
+    t.boolean "send_export_email_on_thu", default: false
+    t.boolean "send_export_email_on_fri", default: false
+    t.boolean "send_export_email_on_sat", default: false
+    t.boolean "send_export_email_on_sun", default: false
     t.datetime "last_exported"
-    t.string   "export_orders_option",      :default => "on_same_day"
-    t.string   "order_export_type",         :default => "include_all"
-    t.string   "order_export_email"
-    t.datetime "created_at",                                           :null => false
-    t.datetime "updated_at",                                           :null => false
+    t.string "export_orders_option", default: "on_same_day"
+    t.string "order_export_type", default: "include_all"
+    t.string "order_export_email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.datetime "start_time"
     t.datetime "end_time"
-    t.boolean  "manual_export",             :default => false
+    t.boolean "manual_export", default: false
+    t.boolean "auto_stat_email_export", default: true
+    t.datetime "time_to_send_stat_export_email"
+    t.boolean "send_stat_export_email_on_mon", default: false
+    t.boolean "send_stat_export_email_on_tue", default: false
+    t.boolean "send_stat_export_email_on_wed", default: false
+    t.boolean "send_stat_export_email_on_thu", default: false
+    t.boolean "send_stat_export_email_on_fri", default: false
+    t.boolean "send_stat_export_email_on_sat", default: false
+    t.boolean "send_stat_export_email_on_sun", default: false
+    t.string "stat_export_type", default: "1"
+    t.string "stat_export_email"
+    t.integer "processing_time", default: 0
+    t.boolean "daily_packed_email_export", default: false
+    t.datetime "time_to_send_daily_packed_export_email"
+    t.boolean "daily_packed_email_on_mon", default: false
+    t.boolean "daily_packed_email_on_tue", default: false
+    t.boolean "daily_packed_email_on_wed", default: false
+    t.boolean "daily_packed_email_on_thu", default: false
+    t.boolean "daily_packed_email_on_fri", default: false
+    t.boolean "daily_packed_email_on_sat", default: false
+    t.boolean "daily_packed_email_on_sun", default: false
+    t.string "daily_packed_export_type", default: "30"
+    t.string "daily_packed_email"
+    t.boolean "auto_ftp_export", default: false
   end
 
-  create_table "ftp_credentials", :force => true do |t|
-    t.string   "host"
-    t.integer  "port",                   :default => 21
-    t.string   "username",               :default => ""
-    t.string   "password",               :default => ""
-    t.integer  "store_id",                                  :null => false
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
-    t.string   "connection_method",      :default => "ftp"
-    t.boolean  "connection_established", :default => false
-    t.boolean  "use_ftp_import",         :default => false
+  create_table "ftp_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "host"
+    t.integer "port", default: 21
+    t.string "username", default: ""
+    t.string "password", default: ""
+    t.integer "store_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "connection_method", default: "ftp"
+    t.boolean "connection_established", default: false
+    t.boolean "use_ftp_import", default: false
+    t.boolean "use_product_ftp_import", default: false
+    t.string "product_ftp_connection_method", default: "ftp"
+    t.string "product_ftp_host"
+    t.string "product_ftp_username", default: ""
+    t.string "product_ftp_password", default: ""
+    t.boolean "product_ftp_connection_established", default: false
   end
 
-  create_table "general_settings", :force => true do |t|
-    t.boolean  "inventory_tracking",                  :default => false
-    t.boolean  "low_inventory_alert_email",           :default => false
-    t.string   "low_inventory_email_address",         :default => ""
-    t.boolean  "hold_orders_due_to_inventory",        :default => false
-    t.string   "conf_req_on_notes_to_packer",         :default => "optional"
-    t.string   "send_email_for_packer_notes",         :default => "always"
-    t.string   "email_address_for_packer_notes",      :default => ""
-    t.datetime "created_at",                                                             :null => false
-    t.datetime "updated_at",                                                             :null => false
-    t.integer  "default_low_inventory_alert_limit",   :default => 1
-    t.boolean  "send_email_on_mon",                   :default => false
-    t.boolean  "send_email_on_tue",                   :default => false
-    t.boolean  "send_email_on_wed",                   :default => false
-    t.boolean  "send_email_on_thurs",                 :default => false
-    t.boolean  "send_email_on_fri",                   :default => false
-    t.boolean  "send_email_on_sat",                   :default => false
-    t.boolean  "send_email_on_sun",                   :default => false
-    t.datetime "time_to_send_email",                  :default => '2000-01-01 00:00:00'
-    t.string   "product_weight_format"
-    t.string   "packing_slip_size",                   :default => "4 x 6"
-    t.string   "packing_slip_orientation"
-    t.text     "packing_slip_message_to_customer"
-    t.boolean  "import_orders_on_mon",                :default => false
-    t.boolean  "import_orders_on_tue",                :default => false
-    t.boolean  "import_orders_on_wed",                :default => false
-    t.boolean  "import_orders_on_thurs",              :default => false
-    t.boolean  "import_orders_on_fri",                :default => false
-    t.boolean  "import_orders_on_sat",                :default => false
-    t.boolean  "import_orders_on_sun",                :default => false
-    t.datetime "time_to_import_orders",               :default => '2000-01-01 00:00:00'
-    t.boolean  "scheduled_order_import",              :default => true
-    t.text     "tracking_error_order_not_found"
-    t.text     "tracking_error_info_not_found"
-    t.boolean  "strict_cc",                           :default => false
-    t.string   "conf_code_product_instruction",       :default => "optional"
-    t.string   "admin_email"
-    t.string   "export_items",                        :default => "disabled"
-    t.string   "custom_field_one",                    :default => "Custom 1"
-    t.string   "custom_field_two",                    :default => "Custom 2"
-    t.integer  "max_time_per_item",                   :default => 10
-    t.string   "export_csv_email"
-    t.boolean  "show_primary_bin_loc_in_barcodeslip", :default => false
-    t.string   "time_zone"
-    t.boolean  "search_by_product",                   :default => false
-    t.boolean  "auto_detect",                         :default => true
-    t.boolean  "dst",                                 :default => true
-    t.string   "stat_status"
-    t.text     "cost_calculator_url"
-    t.string   "schedule_import_mode"
+  create_table "general_settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.boolean "inventory_tracking", default: false
+    t.boolean "low_inventory_alert_email", default: false
+    t.string "low_inventory_email_address", default: ""
+    t.boolean "hold_orders_due_to_inventory", default: false
+    t.string "conf_req_on_notes_to_packer", default: "optional"
+    t.string "send_email_for_packer_notes", default: "always"
+    t.string "email_address_for_packer_notes", default: ""
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "default_low_inventory_alert_limit", default: 1
+    t.boolean "send_email_on_mon", default: false
+    t.boolean "send_email_on_tue", default: false
+    t.boolean "send_email_on_wed", default: false
+    t.boolean "send_email_on_thurs", default: false
+    t.boolean "send_email_on_fri", default: false
+    t.boolean "send_email_on_sat", default: false
+    t.boolean "send_email_on_sun", default: false
+    t.datetime "time_to_send_email", default: "2000-01-01 00:00:00"
+    t.string "product_weight_format"
+    t.string "packing_slip_size", default: "4 x 6"
+    t.string "packing_slip_orientation"
+    t.text "packing_slip_message_to_customer"
+    t.boolean "import_orders_on_mon", default: false
+    t.boolean "import_orders_on_tue", default: false
+    t.boolean "import_orders_on_wed", default: false
+    t.boolean "import_orders_on_thurs", default: false
+    t.boolean "import_orders_on_fri", default: false
+    t.boolean "import_orders_on_sat", default: false
+    t.boolean "import_orders_on_sun", default: false
+    t.datetime "time_to_import_orders", default: "2000-01-01 00:00:00"
+    t.boolean "scheduled_order_import", default: true
+    t.text "tracking_error_order_not_found"
+    t.text "tracking_error_info_not_found"
+    t.boolean "strict_cc", default: false
+    t.string "conf_code_product_instruction", default: "optional"
+    t.string "admin_email"
+    t.string "export_items", default: "disabled"
+    t.string "custom_field_one", default: "Custom 1"
+    t.string "custom_field_two", default: "Custom 2"
+    t.integer "max_time_per_item", default: 10
+    t.string "export_csv_email"
+    t.boolean "show_primary_bin_loc_in_barcodeslip", default: false
+    t.boolean "search_by_product", default: false
+    t.string "time_zone"
+    t.boolean "auto_detect", default: true
+    t.boolean "dst", default: true
+    t.string "stat_status"
+    t.text "cost_calculator_url"
+    t.string "schedule_import_mode"
+    t.boolean "master_switch", default: false
+    t.boolean "html_print", default: false
+    t.float "idle_timeout", limit: 24
+    t.boolean "hex_barcode", default: false
+    t.datetime "from_import", default: "2000-01-01 00:00:00"
+    t.datetime "to_import", default: "2000-01-01 23:59:00"
+    t.boolean "multi_box_shipments", default: false
+    t.string "per_box_packing_slips", default: "manually"
+    t.string "custom_user_field_one"
+    t.string "custom_user_field_two"
+    t.string "email_address_for_billing_notification"
+    t.boolean "display_kit_parts", default: false
+    t.boolean "remove_order_items", default: false
+    t.boolean "create_barcode_at_import", default: false
+    t.boolean "print_post_scanning_barcodes", default: false
+    t.boolean "print_packing_slips", default: false
+    t.boolean "print_ss_shipping_labels", default: false
+    t.string "per_box_shipping_label_creation", default: "per_box_shipping_label_creation_none"
+    t.integer "barcode_length", default: 8
+    t.string "starting_value", default: "10000000"
+    t.boolean "show_sku_in_barcodeslip", default: true
+    t.boolean "print_product_barcode_labels", default: false
   end
 
-  create_table "generate_barcodes", :force => true do |t|
-    t.string   "status"
-    t.string   "url"
-    t.datetime "created_at",                                 :null => false
-    t.datetime "updated_at",                                 :null => false
-    t.integer  "user_id"
-    t.string   "current_increment_id"
-    t.integer  "current_order_position"
-    t.integer  "total_orders"
-    t.boolean  "cancel",                  :default => false
-    t.string   "next_order_increment_id"
-    t.integer  "delayed_job_id"
-    t.text     "error_message"
+  create_table "generate_barcodes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "status"
+    t.string "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "user_id"
+    t.string "current_increment_id"
+    t.integer "current_order_position"
+    t.integer "total_orders"
+    t.boolean "cancel", default: false
+    t.string "next_order_increment_id"
+    t.integer "delayed_job_id"
+    t.text "error_message"
+    t.string "dimensions"
+    t.string "print_type"
+    t.index ["user_id"], name: "index_generate_barcodes_on_user_id"
   end
 
-  add_index "generate_barcodes", ["user_id"], :name => "index_generate_barcodes_on_user_id"
-
-  create_table "groove_bulk_actions", :force => true do |t|
-    t.string   "identifier",                          :null => false
-    t.string   "activity",                            :null => false
-    t.integer  "total",      :default => 0
-    t.integer  "completed",  :default => 0
-    t.string   "status",     :default => "scheduled"
-    t.string   "current"
-    t.text     "messages"
-    t.boolean  "cancel",     :default => false
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
+  create_table "groove_bulk_actions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "identifier", null: false
+    t.string "activity", null: false
+    t.integer "total", default: 0
+    t.integer "completed", default: 0
+    t.string "status", default: "scheduled"
+    t.string "current"
+    t.text "messages"
+    t.boolean "cancel", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "import_items", :force => true do |t|
-    t.string   "status"
-    t.integer  "store_id"
-    t.integer  "success_imported",            :default => 0
-    t.integer  "previous_imported",           :default => 0
-    t.datetime "created_at",                                         :null => false
-    t.datetime "updated_at",                                         :null => false
-    t.integer  "order_import_summary_id"
-    t.integer  "to_import",                   :default => 0
-    t.string   "current_increment_id",        :default => ""
-    t.integer  "current_order_items",         :default => 0
-    t.integer  "current_order_imported_item", :default => 0
-    t.string   "message",                     :default => ""
-    t.string   "import_type",                 :default => "regular"
-    t.integer  "days"
-    t.integer  "updated_orders_import"
-    t.text     "import_error"
+  create_table "import_items", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "status"
+    t.integer "store_id"
+    t.integer "success_imported", default: 0
+    t.integer "previous_imported", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "order_import_summary_id"
+    t.integer "to_import", default: 0
+    t.string "current_increment_id", default: ""
+    t.integer "current_order_items", default: 0
+    t.integer "current_order_imported_item", default: 0
+    t.string "message", default: ""
+    t.string "import_type", default: "regular"
+    t.integer "days"
+    t.integer "updated_orders_import"
+    t.text "import_error"
+    t.integer "failed_count", default: 0
+    t.string "importer_id"
   end
 
-  create_table "inventory_reports_settings", :force => true do |t|
-    t.boolean  "send_email_on_mon",         :default => false, :null => false
-    t.boolean  "send_email_on_tue",         :default => false, :null => false
-    t.boolean  "send_email_on_wed",         :default => false, :null => false
-    t.boolean  "send_email_on_thurs",       :default => false, :null => false
-    t.boolean  "send_email_on_fri",         :default => false, :null => false
-    t.boolean  "send_email_on_sat",         :default => false, :null => false
-    t.boolean  "send_email_on_sun",         :default => false, :null => false
-    t.boolean  "auto_email_report",         :default => false, :null => false
+  create_table "inventory_reports_settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.boolean "send_email_on_mon", default: false, null: false
+    t.boolean "send_email_on_tue", default: false, null: false
+    t.boolean "send_email_on_wed", default: false, null: false
+    t.boolean "send_email_on_thurs", default: false, null: false
+    t.boolean "send_email_on_fri", default: false, null: false
+    t.boolean "send_email_on_sat", default: false, null: false
+    t.boolean "send_email_on_sun", default: false, null: false
+    t.boolean "auto_email_report", default: false, null: false
     t.datetime "start_time"
     t.datetime "end_time"
     t.datetime "time_to_send_report_email"
-    t.string   "report_email"
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-    t.integer  "report_days_option",        :default => 1
+    t.string "report_email"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "report_days_option", default: 1
   end
 
-  create_table "inventory_warehouses", :force => true do |t|
-    t.string   "name",                               :null => false
-    t.string   "location"
-    t.datetime "created_at",                         :null => false
-    t.datetime "updated_at",                         :null => false
-    t.string   "status",     :default => "inactive"
-    t.boolean  "is_default", :default => false
+  create_table "inventory_warehouses", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.string "location"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "status", default: "inactive"
+    t.boolean "is_default", default: false
   end
 
-  create_table "invoices", :force => true do |t|
+  create_table "invoices", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.datetime "date"
-    t.string   "invoice_id"
-    t.string   "subscription_id"
-    t.decimal  "amount",          :precision => 8, :scale => 2, :default => 0.0
+    t.string "invoice_id"
+    t.string "subscription_id"
+    t.decimal "amount", precision: 8, scale: 2, default: "0.0"
     t.datetime "period_start"
     t.datetime "period_end"
-    t.integer  "quantity"
-    t.string   "plan_id"
-    t.string   "customer_id"
-    t.string   "charge_id"
-    t.boolean  "attempted"
-    t.boolean  "closed"
-    t.boolean  "forgiven"
-    t.boolean  "paid"
-    t.datetime "created_at",                                                     :null => false
-    t.datetime "updated_at",                                                     :null => false
+    t.integer "quantity"
+    t.string "plan_id"
+    t.string "customer_id"
+    t.string "charge_id"
+    t.boolean "attempted"
+    t.boolean "closed"
+    t.boolean "forgiven"
+    t.boolean "paid"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "leader_boards", :force => true do |t|
-    t.integer  "scan_time"
-    t.integer  "order_id"
-    t.integer  "order_item_count"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+  create_table "leader_boards", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "scan_time"
+    t.integer "order_id"
+    t.integer "order_item_count"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "magento_credentials", :force => true do |t|
-    t.string   "host",                                       :null => false
-    t.string   "username",                                   :null => false
-    t.string   "password",                :default => ""
-    t.integer  "store_id",                                   :null => false
-    t.datetime "created_at",                                 :null => false
-    t.datetime "updated_at",                                 :null => false
-    t.string   "api_key",                 :default => "",    :null => false
-    t.boolean  "import_products",         :default => false, :null => false
-    t.boolean  "import_images",           :default => false, :null => false
+  create_table "magento_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "host", null: false
+    t.string "username", null: false
+    t.string "password", default: ""
+    t.integer "store_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "api_key", default: "", null: false
+    t.boolean "import_products", default: false, null: false
+    t.boolean "import_images", default: false, null: false
     t.datetime "last_imported_at"
-    t.boolean  "shall_import_processing", :default => false
-    t.boolean  "shall_import_pending",    :default => false
-    t.boolean  "shall_import_closed",     :default => false
-    t.boolean  "shall_import_complete",   :default => false
-    t.boolean  "shall_import_fraud",      :default => false
-    t.boolean  "enable_status_update",    :default => false
-    t.string   "status_to_update"
-    t.boolean  "push_tracking_number",    :default => false
+    t.boolean "shall_import_processing", default: false
+    t.boolean "shall_import_pending", default: false
+    t.boolean "shall_import_closed", default: false
+    t.boolean "shall_import_complete", default: false
+    t.boolean "shall_import_fraud", default: false
+    t.boolean "enable_status_update", default: false
+    t.string "status_to_update"
+    t.boolean "push_tracking_number", default: false
+    t.boolean "updated_patch", default: false
   end
 
-  create_table "magento_rest_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "host"
-    t.string   "api_key"
-    t.string   "api_secret"
-    t.boolean  "import_images"
-    t.boolean  "import_categories"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.string   "access_token"
-    t.string   "oauth_token_secret"
+  create_table "magento_rest_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "store_id"
+    t.string "host"
+    t.string "api_key"
+    t.string "api_secret"
+    t.boolean "import_images"
+    t.boolean "import_categories"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "access_token"
+    t.string "oauth_token_secret"
     t.datetime "last_imported_at"
-    t.boolean  "gen_barcode_from_sku", :default => false
-    t.string   "store_admin_url"
-    t.string   "store_version"
-    t.string   "store_token"
+    t.boolean "gen_barcode_from_sku", default: false
+    t.string "store_admin_url"
+    t.string "store_version"
+    t.string "store_token"
   end
 
-  create_table "oauth_access_grants", :force => true do |t|
-    t.integer  "resource_owner_id", :null => false
-    t.integer  "application_id",    :null => false
-    t.string   "token",             :null => false
-    t.integer  "expires_in",        :null => false
-    t.text     "redirect_uri",      :null => false
-    t.datetime "created_at",        :null => false
+  create_table "oauth_access_grants", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "resource_owner_id", null: false
+    t.integer "application_id", null: false
+    t.string "token", null: false
+    t.integer "expires_in", null: false
+    t.text "redirect_uri", null: false
+    t.datetime "created_at", null: false
     t.datetime "revoked_at"
-    t.string   "scopes"
+    t.string "scopes"
+    t.index ["token"], name: "index_oauth_access_grants_on_token", unique: true
   end
 
-  add_index "oauth_access_grants", ["token"], :name => "index_oauth_access_grants_on_token", :unique => true
-
-  create_table "oauth_access_tokens", :force => true do |t|
-    t.integer  "resource_owner_id"
-    t.integer  "application_id"
-    t.string   "token",             :null => false
-    t.string   "refresh_token"
-    t.integer  "expires_in"
+  create_table "oauth_access_tokens", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "resource_owner_id"
+    t.integer "application_id"
+    t.string "token", null: false
+    t.string "refresh_token"
+    t.integer "expires_in"
     t.datetime "revoked_at"
-    t.datetime "created_at",        :null => false
-    t.string   "scopes"
+    t.datetime "created_at", null: false
+    t.string "scopes"
+    t.index ["refresh_token"], name: "index_oauth_access_tokens_on_refresh_token", unique: true
+    t.index ["resource_owner_id"], name: "index_oauth_access_tokens_on_resource_owner_id"
+    t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
   end
 
-  add_index "oauth_access_tokens", ["refresh_token"], :name => "index_oauth_access_tokens_on_refresh_token", :unique => true
-  add_index "oauth_access_tokens", ["resource_owner_id"], :name => "index_oauth_access_tokens_on_resource_owner_id"
-  add_index "oauth_access_tokens", ["token"], :name => "index_oauth_access_tokens_on_token", :unique => true
-
-  create_table "oauth_applications", :force => true do |t|
-    t.string   "name",                         :null => false
-    t.string   "uid",                          :null => false
-    t.string   "secret",                       :null => false
-    t.text     "redirect_uri",                 :null => false
-    t.string   "scopes",       :default => "", :null => false
-    t.datetime "created_at",                   :null => false
-    t.datetime "updated_at",                   :null => false
+  create_table "oauth_applications", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.string "uid", null: false
+    t.string "secret", null: false
+    t.text "redirect_uri", null: false
+    t.string "scopes", default: "", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
-  add_index "oauth_applications", ["uid"], :name => "index_oauth_applications_on_uid", :unique => true
-
-  create_table "order_activities", :force => true do |t|
+  create_table "order_activities", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.datetime "activitytime"
-    t.integer  "order_id"
-    t.integer  "user_id"
-    t.string   "action"
-    t.datetime "created_at",                       :null => false
-    t.datetime "updated_at",                       :null => false
-    t.string   "username"
-    t.string   "activity_type"
-    t.boolean  "acknowledged",  :default => false
+    t.integer "order_id"
+    t.integer "user_id"
+    t.string "action"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "username"
+    t.string "activity_type"
+    t.boolean "acknowledged", default: false
+    t.index ["order_id"], name: "index_order_activities_on_order_id"
+    t.index ["user_id"], name: "index_order_activities_on_user_id"
   end
 
-  add_index "order_activities", ["order_id"], :name => "index_order_activities_on_order_id"
-  add_index "order_activities", ["user_id"], :name => "index_order_activities_on_user_id"
-
-  create_table "order_exceptions", :force => true do |t|
-    t.string   "reason"
-    t.string   "description"
-    t.integer  "user_id"
-    t.datetime "created_at",  :null => false
-    t.datetime "updated_at",  :null => false
-    t.integer  "order_id"
+  create_table "order_exceptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "reason"
+    t.string "description"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "order_id"
+    t.index ["order_id"], name: "index_order_exceptions_on_order_id"
+    t.index ["user_id"], name: "index_order_exceptions_on_user_id"
   end
 
-  add_index "order_exceptions", ["order_id"], :name => "index_order_exceptions_on_order_id"
-  add_index "order_exceptions", ["user_id"], :name => "index_order_exceptions_on_user_id"
-
-  create_table "order_import_summaries", :force => true do |t|
-    t.integer  "user_id"
-    t.string   "status"
-    t.datetime "created_at",                                       :null => false
-    t.datetime "updated_at",                                       :null => false
-    t.string   "import_summary_type", :default => "import_orders"
-    t.boolean  "display_summary",     :default => false
+  create_table "order_import_summaries", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "user_id"
+    t.string "status"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "import_summary_type", default: "import_orders"
+    t.boolean "display_summary", default: false
+    t.integer "store_id"
+    t.index ["store_id"], name: "index_order_import_summaries_on_store_id", unique: true
   end
 
-  create_table "order_item_kit_product_scan_times", :force => true do |t|
+  create_table "order_item_boxes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "box_id"
+    t.integer "order_item_id"
+    t.integer "item_qty"
+    t.integer "kit_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "order_item_kit_product_scan_times", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.datetime "scan_start"
     t.datetime "scan_end"
-    t.integer  "order_item_kit_product_id"
-    t.datetime "created_at",                :null => false
-    t.datetime "updated_at",                :null => false
+    t.integer "order_item_kit_product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "order_item_kit_products", :force => true do |t|
-    t.integer  "order_item_id"
-    t.integer  "product_kit_skus_id"
-    t.string   "scanned_status",      :default => "unscanned"
-    t.integer  "scanned_qty",         :default => 0
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-    t.integer  "clicked_qty",         :default => 0
+  create_table "order_item_kit_products", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "order_item_id"
+    t.integer "product_kit_skus_id"
+    t.string "scanned_status", default: "unscanned"
+    t.integer "scanned_qty", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "clicked_qty", default: 0
+    t.index ["order_item_id"], name: "index_order_item_kit_products_on_order_item_id"
+    t.index ["product_kit_skus_id"], name: "index_order_item_kit_products_on_product_kit_skus_id"
   end
 
-  add_index "order_item_kit_products", ["order_item_id"], :name => "index_order_item_kit_products_on_order_item_id"
-  add_index "order_item_kit_products", ["product_kit_skus_id"], :name => "index_order_item_kit_products_on_product_kit_skus_id"
-
-  create_table "order_item_order_serial_product_lots", :force => true do |t|
-    t.integer  "order_item_id"
-    t.integer  "product_lot_id"
-    t.integer  "order_serial_id"
-    t.datetime "created_at",                     :null => false
-    t.datetime "updated_at",                     :null => false
-    t.integer  "qty",             :default => 0
+  create_table "order_item_order_serial_product_lots", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "order_item_id"
+    t.integer "product_lot_id"
+    t.integer "order_serial_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "qty", default: 0
   end
 
-  create_table "order_item_scan_times", :force => true do |t|
+  create_table "order_item_scan_times", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.datetime "scan_start"
     t.datetime "scan_end"
-    t.integer  "order_item_id"
-    t.datetime "created_at",    :null => false
-    t.datetime "updated_at",    :null => false
+    t.integer "order_item_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "order_items", :force => true do |t|
-    t.string   "sku"
-    t.integer  "qty"
-    t.decimal  "price",                 :precision => 10, :scale => 2
-    t.decimal  "row_total",             :precision => 10, :scale => 0
-    t.integer  "order_id"
-    t.datetime "created_at",                                                                      :null => false
-    t.datetime "updated_at",                                                                      :null => false
-    t.string   "name",                                                 :default => "",            :null => false
-    t.integer  "product_id"
-    t.string   "scanned_status",                                       :default => "notscanned"
-    t.integer  "scanned_qty",                                          :default => 0
-    t.boolean  "kit_split",                                            :default => false
-    t.integer  "kit_split_qty",                                        :default => 0
-    t.integer  "kit_split_scanned_qty",                                :default => 0
-    t.integer  "single_scanned_qty",                                   :default => 0
-    t.string   "inv_status",                                           :default => "unprocessed"
-    t.string   "inv_status_reason",                                    :default => ""
-    t.integer  "clicked_qty",                                          :default => 0
-    t.boolean  "is_barcode_printed",                                   :default => false
-    t.boolean  "is_deleted",                                           :default => false
+  create_table "order_items", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "sku"
+    t.integer "qty"
+    t.decimal "price", precision: 10, scale: 2
+    t.decimal "row_total", precision: 10
+    t.integer "order_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "name", default: "", null: false
+    t.integer "product_id"
+    t.string "scanned_status", default: "notscanned"
+    t.integer "scanned_qty", default: 0
+    t.boolean "kit_split", default: false
+    t.integer "kit_split_qty", default: 0
+    t.integer "kit_split_scanned_qty", default: 0
+    t.integer "single_scanned_qty", default: 0
+    t.string "inv_status", default: "unprocessed"
+    t.string "inv_status_reason", default: ""
+    t.integer "clicked_qty", default: 0
+    t.boolean "is_barcode_printed", default: false
+    t.boolean "is_deleted", default: false
+    t.integer "box_id"
+    t.integer "skipped_qty", default: 0
+    t.index ["inv_status", "scanned_status"], name: "index_order_items_on_inv_status_and_scanned_status"
+    t.index ["is_deleted"], name: "index_order_items_on_is_deleted"
+    t.index ["order_id"], name: "index_order_items_on_order_id"
   end
 
-  add_index "order_items", ["inv_status", "scanned_status"], :name => "index_order_items_on_inv_status_and_scanned_status"
-  add_index "order_items", ["is_deleted"], :name => "index_order_items_on_is_deleted"
-  add_index "order_items", ["order_id"], :name => "index_order_items_on_order_id"
-
-  create_table "order_serials", :force => true do |t|
-    t.integer  "order_id"
-    t.integer  "product_id"
-    t.string   "serial"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+  create_table "order_serials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "order_id"
+    t.integer "product_id"
+    t.string "serial"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "second_serial"
+    t.index ["order_id"], name: "index_order_serials_on_order_id"
+    t.index ["product_id"], name: "index_order_serials_on_product_id"
   end
 
-  add_index "order_serials", ["order_id"], :name => "index_order_serials_on_order_id"
-  add_index "order_serials", ["product_id"], :name => "index_order_serials_on_product_id"
-
-  create_table "order_shippings", :force => true do |t|
-    t.string   "firstname"
-    t.string   "lastname"
-    t.string   "email"
-    t.string   "streetaddress1"
-    t.string   "streetaddress2"
-    t.string   "city"
-    t.string   "region"
-    t.string   "postcode"
-    t.string   "country"
-    t.string   "description"
-    t.integer  "order_id"
-    t.datetime "created_at",     :null => false
-    t.datetime "updated_at",     :null => false
+  create_table "order_shippings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "firstname"
+    t.string "lastname"
+    t.string "email"
+    t.string "streetaddress1"
+    t.string "streetaddress2"
+    t.string "city"
+    t.string "region"
+    t.string "postcode"
+    t.string "country"
+    t.string "description"
+    t.integer "order_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "order_tags", :force => true do |t|
-    t.string   "name",                          :null => false
-    t.string   "color",                         :null => false
-    t.string   "mark_place", :default => "0"
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-    t.boolean  "predefined", :default => false
+  create_table "order_tags", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.string "color", null: false
+    t.string "mark_place", default: "0"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "predefined", default: false
   end
 
-  create_table "order_tags_orders", :id => false, :force => true do |t|
+  create_table "order_tags_orders", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
     t.integer "order_id"
     t.integer "order_tag_id"
+    t.index ["order_id", "order_tag_id"], name: "index_order_tags_orders_on_order_id_and_order_tag_id"
   end
 
-  add_index "order_tags_orders", ["order_id", "order_tag_id"], :name => "index_order_tags_orders_on_order_id_and_order_tag_id"
-
-  create_table "orders", :force => true do |t|
-    t.string   "increment_id"
+  create_table "orders", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_bin" do |t|
+    t.string "increment_id"
     t.datetime "order_placed_time"
-    t.string   "sku"
-    t.text     "customer_comments"
-    t.integer  "store_id"
-    t.integer  "qty"
-    t.string   "price"
-    t.string   "firstname"
-    t.string   "lastname"
-    t.string   "email"
-    t.text     "address_1"
-    t.text     "address_2"
-    t.string   "city"
-    t.string   "state"
-    t.string   "postcode"
-    t.string   "country"
-    t.string   "method"
-    t.datetime "created_at",                                                                 :null => false
-    t.datetime "updated_at",                                                                 :null => false
-    t.text     "notes_internal"
-    t.text     "notes_toPacker"
-    t.text     "notes_fromPacker"
-    t.boolean  "tracking_processed"
-    t.string   "status"
+    t.string "sku"
+    t.text "customer_comments"
+    t.integer "store_id"
+    t.integer "qty"
+    t.string "price"
+    t.string "firstname"
+    t.string "lastname"
+    t.string "email"
+    t.text "address_1", limit: 16777215
+    t.text "address_2", limit: 16777215
+    t.string "city"
+    t.string "state"
+    t.string "postcode"
+    t.string "country"
+    t.text "method", limit: 16777215
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "notes_internal", limit: 16777215
+    t.text "notes_toPacker", limit: 16777215
+    t.text "notes_fromPacker", limit: 16777215
+    t.boolean "tracking_processed"
+    t.string "status"
     t.datetime "scanned_on"
-    t.string   "tracking_num"
-    t.string   "company"
-    t.integer  "packing_user_id"
-    t.string   "status_reason"
-    t.string   "order_number"
-    t.integer  "seller_id"
-    t.integer  "order_status_id"
-    t.string   "ship_name"
-    t.decimal  "shipping_amount",          :precision => 9,  :scale => 2, :default => 0.0
-    t.decimal  "order_total",              :precision => 9,  :scale => 2, :default => 0.0
-    t.string   "notes_from_buyer"
-    t.integer  "weight_oz"
-    t.string   "non_hyphen_increment_id"
-    t.boolean  "note_confirmation",                                       :default => false
-    t.string   "store_order_id"
-    t.integer  "inaccurate_scan_count",                                   :default => 0
+    t.string "tracking_num"
+    t.string "company"
+    t.integer "packing_user_id"
+    t.string "status_reason"
+    t.string "order_number"
+    t.integer "seller_id"
+    t.integer "order_status_id"
+    t.string "ship_name"
+    t.decimal "shipping_amount", precision: 9, scale: 2, default: "0.0"
+    t.decimal "order_total", precision: 9, scale: 2, default: "0.0"
+    t.string "notes_from_buyer"
+    t.integer "weight_oz"
+    t.string "non_hyphen_increment_id"
+    t.boolean "note_confirmation", default: false
+    t.string "store_order_id"
+    t.integer "inaccurate_scan_count", default: 0
     t.datetime "scan_start_time"
-    t.boolean  "reallocate_inventory",                                    :default => false
+    t.boolean "reallocate_inventory", default: false
     t.datetime "last_suggested_at"
-    t.integer  "total_scan_time",                                         :default => 0
-    t.integer  "total_scan_count",                                        :default => 0
-    t.decimal  "packing_score",            :precision => 10, :scale => 0, :default => 0
-    t.string   "custom_field_one"
-    t.string   "custom_field_two"
-    t.boolean  "traced_in_dashboard",                                     :default => false
-    t.boolean  "scanned_by_status_change",                                :default => false
-    t.string   "shipment_id"
+    t.integer "total_scan_time", default: 0
+    t.integer "total_scan_count", default: 0
+    t.decimal "packing_score", precision: 10, default: "0"
+    t.string "custom_field_one"
+    t.string "custom_field_two"
+    t.boolean "traced_in_dashboard", default: false
+    t.boolean "scanned_by_status_change", default: false
+    t.string "shipment_id"
+    t.boolean "already_scanned", default: false
+    t.string "import_s3_key"
+    t.datetime "last_modified"
+    t.string "prime_order_id"
+    t.text "split_from_order_id", limit: 16777215
+    t.text "source_order_ids", limit: 16777215
+    t.string "cloned_from_shipment_id", default: ""
+    t.text "ss_label_data", limit: 16777215
+    t.string "importer_id"
+    t.integer "clicked_scanned_qty"
+    t.string "import_item_id"
+    t.string "job_timestamp"
+    t.index ["increment_id"], name: "index_orders_on_increment_id", length: { increment_id: 191 }
+    t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id", length: { non_hyphen_increment_id: 191 }
+    t.index ["scanned_on"], name: "index_orders_on_scanned_on"
+    t.index ["status"], name: "index_orders_on_status", length: { status: 191 }
+    t.index ["store_id"], name: "index_orders_on_store_id"
+    t.index ["tracking_num"], name: "index_orders_on_tracking_num", length: { tracking_num: 191 }
   end
 
-  add_index "orders", ["increment_id"], :name => "index_orders_on_increment_id"
-  add_index "orders", ["non_hyphen_increment_id"], :name => "index_orders_on_non_hyphen_increment_id"
-  add_index "orders", ["scanned_on"], :name => "index_orders_on_scanned_on"
-  add_index "orders", ["status"], :name => "index_orders_on_status"
-  add_index "orders", ["store_id"], :name => "index_orders_on_store_id"
-  add_index "orders", ["tracking_num"], :name => "index_orders_on_tracking_num"
-
-  create_table "product_barcodes", :force => true do |t|
-    t.integer  "product_id"
-    t.string   "barcode"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.integer  "order",                :default => 0
-    t.string   "lot_number"
-    t.string   "packing_count"
-    t.boolean  "is_multipack_barcode", :default => false
+  create_table "product_activities", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.datetime "activitytime"
+    t.integer "product_id"
+    t.integer "user_id"
+    t.string "action"
+    t.string "username"
+    t.string "activity_type"
+    t.boolean "acknowledged", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_activities_on_product_id"
+    t.index ["user_id"], name: "index_product_activities_on_user_id"
   end
 
-  add_index "product_barcodes", ["barcode"], :name => "index_product_barcodes_on_barcode"
-  add_index "product_barcodes", ["product_id"], :name => "index_product_barcodes_on_product_id"
-
-  create_table "product_cats", :force => true do |t|
-    t.string   "category"
-    t.integer  "product_id"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+  create_table "product_barcodes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "product_id"
+    t.string "barcode"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "order", default: 0
+    t.string "lot_number"
+    t.string "packing_count"
+    t.boolean "is_multipack_barcode", default: false
+    t.index ["product_id"], name: "index_product_barcodes_on_product_id"
   end
 
-  add_index "product_cats", ["product_id"], :name => "index_product_cats_on_product_id"
-
-  create_table "product_images", :force => true do |t|
-    t.integer  "product_id"
-    t.string   "image"
-    t.datetime "created_at",                                         :null => false
-    t.datetime "updated_at",                                         :null => false
-    t.string   "caption"
-    t.integer  "order",                           :default => 0
-    t.boolean  "added_to_receiving_instructions", :default => false
-    t.string   "image_note"
+  create_table "product_cats", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "category"
+    t.integer "product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_cats_on_product_id"
   end
 
-  add_index "product_images", ["product_id"], :name => "index_product_images_on_product_id"
-
-  create_table "product_inventory_reports", :force => true do |t|
-    t.string   "name"
-    t.boolean  "scheduled",  :default => false
-    t.boolean  "type",       :default => false
-    t.datetime "created_at",                    :null => false
-    t.datetime "updated_at",                    :null => false
-    t.boolean  "is_locked",  :default => false
+  create_table "product_images", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "product_id"
+    t.string "image"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "caption"
+    t.integer "order", default: 0
+    t.boolean "added_to_receiving_instructions", default: false
+    t.string "image_note"
+    t.boolean "placeholder", default: false
+    t.index ["product_id"], name: "index_product_images_on_product_id"
   end
 
-  create_table "product_inventory_warehouses", :force => true do |t|
-    t.string   "location"
-    t.integer  "qty"
-    t.integer  "product_id"
-    t.datetime "created_at",                                               :null => false
-    t.datetime "updated_at",                                               :null => false
-    t.string   "alert"
-    t.string   "location_primary",        :limit => 50
-    t.string   "location_secondary",      :limit => 50
-    t.string   "name"
-    t.integer  "inventory_warehouse_id"
-    t.integer  "available_inv",                         :default => 0,     :null => false
-    t.integer  "allocated_inv",                         :default => 0,     :null => false
-    t.string   "location_tertiary",       :limit => 50
-    t.integer  "product_inv_alert_level",               :default => 0
-    t.boolean  "product_inv_alert",                     :default => false
-    t.integer  "sold_inv",                              :default => 0
+  create_table "product_inventory_reports", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.boolean "scheduled", default: false
+    t.boolean "type", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "is_locked", default: false
   end
 
-  add_index "product_inventory_warehouses", ["inventory_warehouse_id"], :name => "index_product_inventory_warehouses_on_inventory_warehouse_id"
-  add_index "product_inventory_warehouses", ["product_id"], :name => "index_product_inventory_warehouses_on_product_id"
-
-  create_table "product_kit_activities", :force => true do |t|
-    t.integer  "product_id"
-    t.string   "activity_message"
-    t.string   "username"
-    t.string   "activity_type"
-    t.datetime "created_at",                          :null => false
-    t.datetime "updated_at",                          :null => false
-    t.boolean  "acknowledged",     :default => false
+  create_table "product_inventory_warehouses", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "location"
+    t.integer "qty"
+    t.integer "product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "alert"
+    t.string "location_primary", limit: 50
+    t.string "location_secondary", limit: 50
+    t.string "name"
+    t.integer "inventory_warehouse_id"
+    t.integer "available_inv", default: 0, null: false
+    t.integer "allocated_inv", default: 0, null: false
+    t.string "location_tertiary", limit: 50
+    t.integer "product_inv_alert_level", default: 0
+    t.boolean "product_inv_alert", default: false
+    t.integer "sold_inv", default: 0
+    t.string "location_quaternary", limit: 50
+    t.integer "location_primary_qty"
+    t.integer "location_secondary_qty"
+    t.integer "location_tertiary_qty"
+    t.integer "location_quaternary_qty"
+    t.index ["inventory_warehouse_id"], name: "index_product_inventory_warehouses_on_inventory_warehouse_id"
+    t.index ["product_id"], name: "index_product_inventory_warehouses_on_product_id"
   end
 
-  create_table "product_kit_skus", :force => true do |t|
-    t.integer  "product_id"
-    t.datetime "created_at",                        :null => false
-    t.datetime "updated_at",                        :null => false
-    t.integer  "option_product_id"
-    t.integer  "qty",               :default => 0
-    t.integer  "packing_order",     :default => 50
+  create_table "product_kit_activities", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "product_id"
+    t.string "activity_message"
+    t.string "username"
+    t.string "activity_type"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "acknowledged", default: false
   end
 
-  add_index "product_kit_skus", ["product_id"], :name => "index_product_kit_skus_on_product_id"
-
-  create_table "product_lots", :force => true do |t|
-    t.integer  "product_id"
-    t.string   "lot_number"
-    t.datetime "created_at", :null => false
-    t.datetime "updated_at", :null => false
+  create_table "product_kit_skus", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.integer "product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "option_product_id"
+    t.integer "qty", default: 0
+    t.integer "packing_order", default: 50
+    t.index ["product_id"], name: "index_product_kit_skus_on_product_id"
   end
 
-  add_index "product_lots", ["product_id"], :name => "index_product_lots_on_product_id"
-
-  create_table "product_skus", :force => true do |t|
-    t.string   "sku"
-    t.string   "purpose"
-    t.integer  "product_id"
-    t.datetime "created_at",                :null => false
-    t.datetime "updated_at",                :null => false
-    t.integer  "order",      :default => 0
+  create_table "product_lots", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "product_id"
+    t.string "lot_number"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["product_id"], name: "index_product_lots_on_product_id"
   end
 
-  add_index "product_skus", ["product_id"], :name => "index_product_skus_on_product_id"
-  add_index "product_skus", ["sku"], :name => "index_product_skus_on_sku"
-
-  create_table "products", :force => true do |t|
-    t.string   "store_product_id"
-    t.string   "name",                                                                                    :null => false
-    t.string   "product_type"
-    t.integer  "store_id",                                                                                :null => false
-    t.datetime "created_at",                                                                              :null => false
-    t.datetime "updated_at",                                                                              :null => false
-    t.string   "status",                                                        :default => "new"
-    t.text     "spl_instructions_4_packer"
-    t.boolean  "spl_instructions_4_confirmation",                               :default => false
-    t.boolean  "is_skippable",                                                  :default => false
-    t.integer  "packing_placement",                                             :default => 50
-    t.integer  "pack_time_adj"
-    t.string   "kit_parsing",                                                   :default => "individual"
-    t.integer  "is_kit",                                                        :default => 0
-    t.boolean  "disable_conf_req",                                              :default => false
-    t.integer  "total_avail_ext",                                               :default => 0,            :null => false
-    t.decimal  "weight",                          :precision => 8, :scale => 2, :default => 0.0,          :null => false
-    t.decimal  "shipping_weight",                 :precision => 8, :scale => 2, :default => 0.0
-    t.boolean  "record_serial",                                                 :default => false
-    t.string   "type_scan_enabled",                                             :default => "on"
-    t.string   "click_scan_enabled",                                            :default => "on"
-    t.string   "weight_format"
-    t.boolean  "add_to_any_order",                                              :default => false
-    t.string   "base_sku"
-    t.boolean  "is_intangible",                                                 :default => false
-    t.text     "product_receiving_instructions"
-    t.boolean  "status_updated",                                                :default => false
-    t.boolean  "is_inventory_product",                                          :default => false
+  create_table "product_skus", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "sku"
+    t.string "purpose"
+    t.integer "product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "order", default: 0
+    t.index ["product_id"], name: "index_product_skus_on_product_id"
+    t.index ["sku"], name: "index_product_skus_on_sku"
   end
 
-  add_index "products", ["store_id"], :name => "index_products_on_store_id"
+  create_table "products", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "store_product_id"
+    t.string "name", null: false
+    t.string "product_type"
+    t.integer "store_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "status", default: "new"
+    t.text "packing_instructions"
+    t.boolean "packing_instructions_conf", default: false
+    t.boolean "is_skippable", default: false
+    t.integer "packing_placement", default: 50
+    t.integer "pack_time_adj"
+    t.string "kit_parsing", default: "individual"
+    t.integer "is_kit", default: 0
+    t.boolean "disable_conf_req", default: false
+    t.integer "total_avail_ext", default: 0, null: false
+    t.decimal "weight", precision: 8, scale: 2, default: "0.0", null: false
+    t.decimal "shipping_weight", precision: 8, scale: 2, default: "0.0"
+    t.boolean "record_serial", default: false
+    t.string "type_scan_enabled", default: "on"
+    t.string "click_scan_enabled", default: "on"
+    t.string "weight_format"
+    t.boolean "add_to_any_order", default: false
+    t.string "base_sku"
+    t.boolean "is_intangible", default: false
+    t.text "product_receiving_instructions"
+    t.boolean "status_updated", default: false
+    t.boolean "is_inventory_product", default: false
+    t.boolean "second_record_serial", default: false
+    t.string "custom_product_1"
+    t.string "custom_product_2"
+    t.string "custom_product_3"
+    t.boolean "custom_product_display_1", default: false
+    t.boolean "custom_product_display_2", default: false
+    t.boolean "custom_product_display_3", default: false
+    t.string "fnsku"
+    t.string "asin"
+    t.string "fba_upc"
+    t.string "isbn"
+    t.string "ean"
+    t.string "supplier_sku"
+    t.decimal "avg_cost", precision: 10, scale: 2
+    t.string "count_group", limit: 1
+    t.index ["store_id"], name: "index_products_on_store_id"
+  end
 
-  create_table "products_product_inventory_reports", :id => false, :force => true do |t|
+  create_table "products_product_inventory_reports", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
     t.integer "product_inventory_report_id"
     t.integer "product_id"
   end
 
-  create_table "roles", :force => true do |t|
-    t.string  "name",                                    :null => false
-    t.boolean "display",              :default => false, :null => false
-    t.boolean "custom",               :default => true,  :null => false
-    t.boolean "add_edit_order_items", :default => false, :null => false
-    t.boolean "import_orders",        :default => false, :null => false
-    t.boolean "change_order_status",  :default => false, :null => false
-    t.boolean "create_edit_notes",    :default => false, :null => false
-    t.boolean "view_packing_ex",      :default => false, :null => false
-    t.boolean "create_packing_ex",    :default => false, :null => false
-    t.boolean "edit_packing_ex",      :default => false, :null => false
-    t.boolean "delete_products",      :default => false, :null => false
-    t.boolean "import_products",      :default => false, :null => false
-    t.boolean "add_edit_products",    :default => false, :null => false
-    t.boolean "add_edit_users",       :default => false, :null => false
-    t.boolean "make_super_admin",     :default => false, :null => false
-    t.boolean "access_scanpack",      :default => true,  :null => false
-    t.boolean "access_orders",        :default => false, :null => false
-    t.boolean "access_products",      :default => false, :null => false
-    t.boolean "access_settings",      :default => false, :null => false
-    t.boolean "edit_general_prefs",   :default => false, :null => false
-    t.boolean "edit_scanning_prefs",  :default => false, :null => false
-    t.boolean "add_edit_stores",      :default => false, :null => false
-    t.boolean "create_backups",       :default => false, :null => false
-    t.boolean "restore_backups",      :default => false, :null => false
+  create_table "roles", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name", null: false
+    t.boolean "display", default: false, null: false
+    t.boolean "custom", default: true, null: false
+    t.boolean "add_edit_order_items", default: false, null: false
+    t.boolean "import_orders", default: false, null: false
+    t.boolean "change_order_status", default: false, null: false
+    t.boolean "create_edit_notes", default: false, null: false
+    t.boolean "view_packing_ex", default: false, null: false
+    t.boolean "create_packing_ex", default: false, null: false
+    t.boolean "edit_packing_ex", default: false, null: false
+    t.boolean "delete_products", default: false, null: false
+    t.boolean "import_products", default: false, null: false
+    t.boolean "add_edit_products", default: false, null: false
+    t.boolean "add_edit_users", default: false, null: false
+    t.boolean "make_super_admin", default: false, null: false
+    t.boolean "access_scanpack", default: true, null: false
+    t.boolean "access_orders", default: false, null: false
+    t.boolean "access_products", default: false, null: false
+    t.boolean "access_settings", default: false, null: false
+    t.boolean "edit_general_prefs", default: false, null: false
+    t.boolean "edit_scanning_prefs", default: false, null: false
+    t.boolean "add_edit_stores", default: false, null: false
+    t.boolean "create_backups", default: false, null: false
+    t.boolean "restore_backups", default: false, null: false
   end
 
-  create_table "scan_pack_settings", :force => true do |t|
-    t.boolean  "enable_click_sku",                        :default => true
-    t.boolean  "ask_tracking_number",                     :default => false
-    t.datetime "created_at",                                                                                    :null => false
-    t.datetime "updated_at",                                                                                    :null => false
-    t.boolean  "show_success_image",                      :default => true
-    t.string   "success_image_src",                       :default => "/assets/images/scan_success.png"
-    t.float    "success_image_time",                      :default => 0.5
-    t.boolean  "show_fail_image",                         :default => true
-    t.string   "fail_image_src",                          :default => "/assets/images/scan_fail.png"
-    t.float    "fail_image_time",                         :default => 1.0
-    t.boolean  "play_success_sound",                      :default => true
-    t.string   "success_sound_url",                       :default => "/assets/sounds/scan_success.mp3"
-    t.float    "success_sound_vol",                       :default => 0.75
-    t.boolean  "play_fail_sound",                         :default => true
-    t.string   "fail_sound_url",                          :default => "/assets/sounds/scan_fail.mp3"
-    t.float    "fail_sound_vol",                          :default => 0.75
-    t.boolean  "skip_code_enabled",                       :default => true
-    t.string   "skip_code",                               :default => "SKIP"
-    t.boolean  "note_from_packer_code_enabled",           :default => true
-    t.string   "note_from_packer_code",                   :default => "NOTE"
-    t.boolean  "service_issue_code_enabled",              :default => true
-    t.string   "service_issue_code",                      :default => "ISSUE"
-    t.boolean  "restart_code_enabled",                    :default => true
-    t.string   "restart_code",                            :default => "RESTART"
-    t.boolean  "show_order_complete_image",               :default => true
-    t.string   "order_complete_image_src",                :default => "/assets/images/scan_order_complete.png"
-    t.float    "order_complete_image_time",               :default => 1.0
-    t.boolean  "play_order_complete_sound",               :default => true
-    t.string   "order_complete_sound_url",                :default => "/assets/sounds/scan_order_complete.mp3"
-    t.float    "order_complete_sound_vol",                :default => 0.75
-    t.boolean  "type_scan_code_enabled",                  :default => true
-    t.string   "type_scan_code",                          :default => "*"
-    t.string   "escape_string",                           :default => " - "
-    t.boolean  "escape_string_enabled",                   :default => false
-    t.string   "post_scanning_option",                    :default => "None"
-    t.boolean  "record_lot_number",                       :default => false
-    t.boolean  "show_customer_notes",                     :default => false
-    t.boolean  "show_internal_notes",                     :default => false
-    t.boolean  "scan_by_tracking_number",                 :default => false
-    t.boolean  "intangible_setting_enabled",              :default => false
-    t.string   "intangible_string",                       :default => ""
-    t.boolean  "post_scan_pause_enabled",                 :default => false
-    t.float    "post_scan_pause_time",                    :default => 4.0
-    t.boolean  "intangible_setting_gen_barcode_from_sku", :default => false
-    t.boolean  "display_location",                        :default => false
+  create_table "scan_pack_settings", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.boolean "enable_click_sku", default: true
+    t.boolean "ask_tracking_number", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "show_success_image", default: true
+    t.string "success_image_src", default: "/assets/images/scan_success.png"
+    t.float "success_image_time", limit: 24, default: 0.5
+    t.boolean "show_fail_image", default: true
+    t.string "fail_image_src", default: "/assets/images/scan_fail.png"
+    t.float "fail_image_time", limit: 24, default: 1.0
+    t.boolean "play_success_sound", default: true
+    t.string "success_sound_url", default: "/assets/sounds/scan_success.mp3"
+    t.float "success_sound_vol", limit: 24, default: 0.75
+    t.boolean "play_fail_sound", default: true
+    t.string "fail_sound_url", default: "/assets/sounds/scan_fail.mp3"
+    t.float "fail_sound_vol", limit: 24, default: 0.75
+    t.boolean "skip_code_enabled", default: true
+    t.string "skip_code", default: "SKIP"
+    t.boolean "note_from_packer_code_enabled", default: true
+    t.string "note_from_packer_code", default: "NOTE"
+    t.boolean "service_issue_code_enabled", default: true
+    t.string "service_issue_code", default: "ISSUE"
+    t.boolean "restart_code_enabled", default: true
+    t.string "restart_code", default: "RESTART"
+    t.boolean "show_order_complete_image", default: true
+    t.string "order_complete_image_src", default: "/assets/images/scan_order_complete.png"
+    t.float "order_complete_image_time", limit: 24, default: 1.0
+    t.boolean "play_order_complete_sound", default: true
+    t.string "order_complete_sound_url", default: "/assets/sounds/scan_order_complete.mp3"
+    t.float "order_complete_sound_vol", limit: 24, default: 0.75
+    t.boolean "type_scan_code_enabled", default: true
+    t.string "type_scan_code", default: "*"
+    t.string "escape_string", default: " - "
+    t.boolean "escape_string_enabled", default: false
+    t.string "post_scanning_option", default: "None"
+    t.boolean "record_lot_number", default: false
+    t.boolean "show_customer_notes", default: false
+    t.boolean "show_internal_notes", default: false
+    t.boolean "scan_by_shipping_label", default: false
+    t.boolean "intangible_setting_enabled", default: false
+    t.string "intangible_string", default: ""
+    t.boolean "post_scan_pause_enabled", default: false
+    t.float "post_scan_pause_time", limit: 24, default: 4.0
+    t.boolean "intangible_setting_gen_barcode_from_sku", default: false
+    t.boolean "display_location", default: false
+    t.boolean "string_removal_enabled", default: false
+    t.string "string_removal"
+    t.boolean "first_escape_string_enabled", default: false
+    t.boolean "second_escape_string_enabled", default: false
+    t.string "second_escape_string"
+    t.boolean "order_verification", default: false
+    t.boolean "scan_by_packing_slip", default: true
+    t.boolean "return_to_orders", default: false
+    t.boolean "click_scan", default: false
+    t.string "click_scan_barcode", default: "CLICKSCAN"
+    t.string "scanning_sequence", default: "any_sequence"
+    t.boolean "scanned", default: false
+    t.string "scanned_barcode", default: "SCANNED"
+    t.string "post_scanning_option_second", default: "None"
+    t.boolean "require_serial_lot", default: false
+    t.string "valid_prefixes"
+    t.boolean "replace_gp_code", default: false
+    t.string "single_item_order_complete_msg", default: "Labels Printing!"
+    t.float "single_item_order_complete_msg_time", limit: 24, default: 4.0
+    t.string "multi_item_order_complete_msg", default: "Collect all items from the tote!"
+    t.float "multi_item_order_complete_msg_time", limit: 24, default: 4.0
+    t.string "tote_identifier", default: "Tote"
+    t.boolean "show_expanded_shipments", default: true
+    t.boolean "tracking_number_validation_enabled", default: false
+    t.string "tracking_number_validation_prefixes"
+    t.boolean "partial", default: false
+    t.string "partial_barcode", default: "PARTIAL"
+    t.boolean "scan_by_packing_slip_or_shipping_label", default: false
+    t.boolean "remove_enabled", default: false
+    t.string "remove_barcode", default: "REMOVE"
+    t.boolean "remove_skipped", default: true
+    t.boolean "display_location2", default: false
+    t.boolean "display_location3", default: false
   end
 
-  create_table "shipping_easy_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "api_key"
-    t.string   "api_secret"
-    t.boolean  "import_ready_for_shipment", :default => false
-    t.boolean  "import_shipped",            :default => false
-    t.boolean  "gen_barcode_from_sku"
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
+  create_table "shipping_easy_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "store_id"
+    t.string "api_key"
+    t.string "api_secret"
+    t.boolean "import_ready_for_shipment", default: false
+    t.boolean "import_shipped", default: false
+    t.boolean "gen_barcode_from_sku"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.datetime "last_imported_at"
-    t.boolean  "includes_product",          :default => false
-    t.boolean  "popup_shipping_label",      :default => false
-    t.boolean  "ready_to_ship",             :default => false
+    t.boolean "popup_shipping_label", default: false
+    t.boolean "ready_to_ship", default: false
+    t.string "store_api_key"
+    t.boolean "import_upc", default: false
+    t.boolean "allow_duplicate_id", default: false
+    t.boolean "large_popup", default: true
   end
 
-  create_table "shipstation_credentials", :force => true do |t|
-    t.string   "username",         :null => false
-    t.string   "password",         :null => false
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
-    t.integer  "store_id"
+  create_table "shipstation_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "username", null: false
+    t.string "password", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "store_id"
     t.datetime "last_imported_at"
   end
 
-  create_table "shipstation_rest_credentials", :force => true do |t|
-    t.string   "api_key",                                             :null => false
-    t.string   "api_secret",                                          :null => false
-    t.date     "last_imported_at"
-    t.integer  "store_id",                                            :null => false
-    t.datetime "created_at",                                          :null => false
-    t.datetime "updated_at",                                          :null => false
-    t.boolean  "shall_import_awaiting_shipment",   :default => true
-    t.boolean  "shall_import_shipped",             :default => false
-    t.boolean  "warehouse_location_update",        :default => false
-    t.boolean  "shall_import_customer_notes",      :default => false
-    t.boolean  "shall_import_internal_notes",      :default => false
-    t.integer  "regular_import_range",             :default => 3
-    t.boolean  "gen_barcode_from_sku",             :default => false
-    t.boolean  "shall_import_pending_fulfillment", :default => false
+  create_table "shipstation_rest_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "api_key"
+    t.string "api_secret"
+    t.date "last_imported_at"
+    t.integer "store_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "shall_import_awaiting_shipment", default: true
+    t.boolean "shall_import_shipped", default: false
+    t.boolean "warehouse_location_update", default: false
+    t.boolean "shall_import_customer_notes", default: true
+    t.boolean "shall_import_internal_notes", default: true
+    t.integer "regular_import_range", default: 3
+    t.boolean "gen_barcode_from_sku", default: false
+    t.boolean "shall_import_pending_fulfillment", default: false
     t.datetime "quick_import_last_modified"
-    t.boolean  "use_chrome_extention",             :default => false
-    t.boolean  "switch_back_button",               :default => false
-    t.boolean  "auto_click_create_label",          :default => false
-    t.boolean  "download_ss_image",                :default => false
+    t.boolean "use_chrome_extention", default: false
+    t.boolean "switch_back_button", default: false
+    t.boolean "auto_click_create_label", default: false
+    t.boolean "download_ss_image", default: false
+    t.boolean "return_to_order", default: false
+    t.boolean "import_upc", default: false
+    t.boolean "allow_duplicate_order", default: false
+    t.boolean "tag_import_option", default: false
+    t.boolean "bulk_import", default: false
+    t.datetime "quick_import_last_modified_v2"
+    t.integer "order_import_range_days", default: 30
+    t.boolean "import_tracking_info", default: false
+    t.datetime "last_location_push"
+    t.boolean "use_api_create_label", default: false
+    t.string "postcode", default: ""
+    t.text "disabled_carriers"
+    t.text "label_shortcuts"
+    t.boolean "skip_ss_label_confirmation", default: false
+    t.text "disabled_rates"
   end
 
-  create_table "shipworks_credentials", :force => true do |t|
-    t.string   "auth_token",                                   :null => false
-    t.integer  "store_id",                                     :null => false
-    t.datetime "created_at",                                   :null => false
-    t.datetime "updated_at",                                   :null => false
-    t.boolean  "shall_import_in_process",   :default => false
-    t.boolean  "shall_import_new_order",    :default => false
-    t.boolean  "shall_import_not_shipped",  :default => false
-    t.boolean  "shall_import_shipped",      :default => false
-    t.boolean  "shall_import_no_status",    :default => false
-    t.boolean  "import_store_order_number", :default => false
-    t.boolean  "gen_barcode_from_sku",      :default => false
-    t.boolean  "shall_import_ignore_local", :default => false
+  create_table "shipworks_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "auth_token", null: false
+    t.integer "store_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "shall_import_in_process", default: false
+    t.boolean "shall_import_new_order", default: false
+    t.boolean "shall_import_not_shipped", default: false
+    t.boolean "shall_import_shipped", default: false
+    t.boolean "shall_import_no_status", default: false
+    t.boolean "import_store_order_number", default: false
+    t.boolean "gen_barcode_from_sku", default: false
+    t.boolean "shall_import_ignore_local", default: false
   end
 
-  create_table "shopify_credentials", :force => true do |t|
-    t.string   "shop_name"
-    t.string   "access_token"
-    t.integer  "store_id"
-    t.datetime "created_at",       :null => false
-    t.datetime "updated_at",       :null => false
+  create_table "shopify_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "shop_name"
+    t.string "access_token"
+    t.integer "store_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
     t.datetime "last_imported_at"
+    t.string "shopify_status", default: "open"
+    t.boolean "shipped_status", default: false
+    t.boolean "unshipped_status", default: false
+    t.boolean "partial_status", default: false
+    t.datetime "product_last_import"
+    t.string "modified_barcode_handling", default: "add_to_existing"
+    t.string "generating_barcodes", default: "do_not_generate"
+    t.boolean "import_inventory_qoh", default: false
+    t.boolean "import_updated_sku", default: false
+    t.string "updated_sku_handling", default: "add_to_existing"
+    t.boolean "permit_shared_barcodes", default: false
   end
 
-  create_table "stores", :force => true do |t|
-    t.string   "name",                                             :null => false
-    t.boolean  "status",                        :default => false, :null => false
-    t.string   "store_type",                                       :null => false
-    t.date     "order_date"
-    t.datetime "created_at",                                       :null => false
-    t.datetime "updated_at",                                       :null => false
-    t.integer  "inventory_warehouse_id"
-    t.text     "thank_you_message_to_customer"
-    t.boolean  "auto_update_products",          :default => false
-    t.boolean  "update_inv",                    :default => false
-    t.boolean  "on_demand_import",              :default => false
-    t.boolean  "fba_import",                    :default => false
+  create_table "store_product_imports", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "status"
+    t.integer "success_imported", default: 0
+    t.integer "success_updated", default: 0
+    t.integer "total", default: 0
+    t.integer "store_id"
+    t.string "current_sku"
+    t.integer "delayed_job_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "subscriptions", :force => true do |t|
-    t.string   "email"
-    t.string   "tenant_name"
-    t.decimal  "amount",                        :precision => 8, :scale => 2, :default => 0.0
-    t.string   "stripe_user_token"
-    t.string   "status"
-    t.integer  "tenant_id"
-    t.string   "stripe_transaction_identifier"
-    t.datetime "created_at",                                                                             :null => false
-    t.datetime "updated_at",                                                                             :null => false
-    t.text     "transaction_errors"
-    t.string   "subscription_plan_id"
-    t.string   "customer_subscription_id"
-    t.string   "stripe_customer_id"
-    t.boolean  "is_active"
-    t.string   "password",                                                                               :null => false
-    t.string   "user_name",                                                                              :null => false
-    t.string   "coupon_id"
-    t.string   "progress",                                                    :default => "not_started"
-    t.boolean  "shopify_customer",                                            :default => false
-    t.boolean  "all_charges_paid",                                            :default => false
-    t.string   "interval"
-    t.string   "app_charge_id"
-    t.string   "tenant_charge_id"
-    t.string   "shopify_shop_name"
-    t.text     "tenant_data"
-    t.string   "shopify_payment_token"
+  create_table "stores", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "name", null: false
+    t.boolean "status", default: false, null: false
+    t.string "store_type", null: false
+    t.date "order_date"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "inventory_warehouse_id"
+    t.text "thank_you_message_to_customer"
+    t.boolean "auto_update_products", default: false
+    t.boolean "update_inv", default: false
+    t.boolean "on_demand_import", default: false
+    t.boolean "fba_import", default: false
+    t.boolean "csv_beta", default: true
+    t.boolean "is_verify_separately"
+    t.string "split_order", default: "disabled"
+    t.string "product_add"
+    t.string "product_export"
+    t.boolean "on_demand_import_v2", default: false
+    t.boolean "regular_import_v2", default: false
+    t.boolean "quick_fix", default: false
+    t.boolean "troubleshooter_option", default: true
   end
 
-  create_table "sync_options", :force => true do |t|
-    t.integer  "product_id"
-    t.boolean  "sync_with_bc",               :default => false
-    t.integer  "bc_product_id"
-    t.datetime "created_at",                                    :null => false
-    t.datetime "updated_at",                                    :null => false
-    t.string   "bc_product_sku"
-    t.boolean  "sync_with_mg_rest"
-    t.integer  "mg_rest_product_id"
-    t.boolean  "sync_with_shopify",          :default => false
-    t.string   "shopify_product_variant_id"
-    t.string   "mg_rest_product_sku"
-    t.boolean  "sync_with_teapplix",         :default => false
-    t.string   "teapplix_product_sku"
+  create_table "subscriptions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "email"
+    t.string "tenant_name"
+    t.decimal "amount", precision: 8, scale: 2, default: "0.0"
+    t.string "stripe_user_token"
+    t.string "status"
+    t.integer "tenant_id"
+    t.string "stripe_transaction_identifier"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.text "transaction_errors"
+    t.string "subscription_plan_id"
+    t.string "customer_subscription_id"
+    t.string "stripe_customer_id"
+    t.boolean "is_active"
+    t.string "password", null: false
+    t.string "user_name", null: false
+    t.string "coupon_id"
+    t.string "progress", default: "not_started"
+    t.string "interval"
+    t.boolean "shopify_customer", default: false
+    t.boolean "all_charges_paid", default: false
+    t.string "app_charge_id"
+    t.string "tenant_charge_id"
+    t.string "shopify_shop_name"
+    t.text "tenant_data"
+    t.string "shopify_payment_token"
   end
 
-  create_table "teapplix_credentials", :force => true do |t|
-    t.integer  "store_id"
-    t.string   "account_name"
-    t.string   "username"
-    t.string   "password"
-    t.boolean  "import_shipped",       :default => false
-    t.boolean  "import_open_orders",   :default => false
+  create_table "sync_options", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "product_id"
+    t.boolean "sync_with_bc", default: false
+    t.integer "bc_product_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "bc_product_sku"
+    t.boolean "sync_with_mg_rest"
+    t.integer "mg_rest_product_id"
+    t.boolean "sync_with_shopify", default: false
+    t.string "shopify_product_variant_id"
+    t.string "mg_rest_product_sku"
+    t.boolean "sync_with_teapplix", default: false
+    t.string "teapplix_product_sku"
+  end
+
+  create_table "teapplix_credentials", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "store_id"
+    t.string "account_name"
+    t.string "username"
+    t.string "password"
+    t.boolean "import_shipped", default: false
+    t.boolean "import_open_orders", default: false
     t.datetime "last_imported_at"
-    t.datetime "created_at",                              :null => false
-    t.datetime "updated_at",                              :null => false
-    t.boolean  "gen_barcode_from_sku", :default => false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "gen_barcode_from_sku", default: false
   end
 
-  create_table "tenants", :force => true do |t|
-    t.string   "name"
-    t.datetime "created_at",                                       :null => false
-    t.datetime "updated_at",                                       :null => false
-    t.integer  "duplicate_tenant_id"
-    t.text     "note"
-    t.boolean  "is_modified",                   :default => false
-    t.string   "initial_plan_id"
-    t.text     "addon_notes"
-    t.boolean  "magento_tracking_push_enabled", :default => false
-    t.integer  "orders_delete_days",            :default => 14,    :null => false
-    t.boolean  "scheduled_import_toggle",       :default => false
-    t.boolean  "is_fba",                        :default => false
-    t.boolean  "inventory_report_toggle",       :default => false
+  create_table "tenants", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.integer "duplicate_tenant_id"
+    t.text "note"
+    t.boolean "is_modified", default: false
+    t.string "initial_plan_id"
+    t.text "addon_notes"
+    t.boolean "magento_tracking_push_enabled", default: false
+    t.integer "orders_delete_days", default: 14, null: false
+    t.boolean "scheduled_import_toggle", default: false
+    t.boolean "is_fba", default: false
+    t.boolean "inventory_report_toggle", default: false
+    t.boolean "is_multi_box", default: false
+    t.boolean "api_call", default: false
+    t.boolean "allow_rts", default: false
+    t.text "activity_log"
+    t.boolean "test_tenant_toggle", default: false
+    t.boolean "product_activity_switch", default: false
+    t.datetime "last_charge_in_stripe"
+    t.boolean "custom_product_fields", default: false
+    t.text "price"
+    t.boolean "groovelytic_stat", default: false
+    t.boolean "is_delay", default: false
+    t.boolean "product_ftp_import", default: false
+    t.string "scan_pack_workflow", default: "default"
+    t.string "last_import_store_type"
+    t.boolean "store_order_respose_log", default: false
+    t.boolean "delayed_inventory_update", default: false
+    t.boolean "daily_packed_toggle", default: false
+    t.boolean "is_cf", default: true
+    t.boolean "ss_api_create_label", default: false
+    t.boolean "direct_printing_options", default: false
+    t.boolean "expo_logs_delay", default: true
+    t.string "import_job_status"
+    t.boolean "uniq_shopify_import", default: false
   end
 
-  create_table "transactions", :force => true do |t|
-    t.string   "transaction_id"
-    t.decimal  "amount",            :precision => 8, :scale => 2, :default => 0.0
-    t.string   "card_type"
-    t.integer  "exp_month_of_card"
-    t.integer  "exp_year_of_card"
+  create_table "tote_sets", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "max_totes", default: 40
+    t.string "name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "totes", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "name"
+    t.integer "number"
+    t.integer "order_id"
+    t.integer "tote_set_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.boolean "pending_order", default: false
+  end
+
+  create_table "transactions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "transaction_id"
+    t.decimal "amount", precision: 8, scale: 2, default: "0.0"
+    t.string "card_type"
+    t.integer "exp_month_of_card"
+    t.integer "exp_year_of_card"
     t.datetime "date_of_payment"
-    t.integer  "subscription_id"
-    t.datetime "created_at",                                                       :null => false
-    t.datetime "updated_at",                                                       :null => false
+    t.integer "subscription_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  create_table "user_inventory_permissions", :force => true do |t|
-    t.integer "user_id",                                   :null => false
-    t.integer "inventory_warehouse_id",                    :null => false
-    t.boolean "see",                    :default => false, :null => false
-    t.boolean "edit",                   :default => false, :null => false
+  create_table "uniq_job_tables", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "worker_id"
+    t.string "job_timestamp"
+    t.string "job_id"
+    t.bigint "job_count", default: 0
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
-  add_index "user_inventory_permissions", ["user_id", "inventory_warehouse_id"], :name => "index_user_inventory_permissions_user_inventory", :unique => true
+  create_table "user_inventory_permissions", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.integer "user_id", null: false
+    t.integer "inventory_warehouse_id", null: false
+    t.boolean "see", default: false, null: false
+    t.boolean "edit", default: false, null: false
+    t.index ["user_id", "inventory_warehouse_id"], name: "index_user_inventory_permissions_user_inventory", unique: true
+  end
 
-  create_table "users", :force => true do |t|
-    t.string   "encrypted_password",     :default => "",    :null => false
-    t.string   "reset_password_token"
+  create_table "users", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8" do |t|
+    t.string "encrypted_password", default: "", null: false
+    t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
     t.datetime "remember_created_at"
-    t.integer  "sign_in_count",          :default => 0
+    t.integer "sign_in_count", default: 0
     t.datetime "current_sign_in_at"
     t.datetime "last_sign_in_at"
-    t.string   "current_sign_in_ip"
-    t.string   "last_sign_in_ip"
-    t.datetime "created_at",                                :null => false
-    t.datetime "updated_at",                                :null => false
-    t.string   "username",               :default => "",    :null => false
-    t.boolean  "active",                 :default => false, :null => false
-    t.string   "other"
-    t.string   "name"
-    t.string   "confirmation_code",      :default => "",    :null => false
-    t.integer  "inventory_warehouse_id"
-    t.integer  "role_id"
-    t.boolean  "view_dashboard",         :default => false
-    t.boolean  "is_deleted",             :default => false
+    t.string "current_sign_in_ip"
+    t.string "last_sign_in_ip"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.string "username", default: "", null: false
+    t.boolean "active", default: false, null: false
+    t.string "other"
+    t.string "name"
+    t.string "confirmation_code", default: "", null: false
+    t.integer "inventory_warehouse_id"
+    t.integer "role_id"
+    t.string "view_dashboard", default: "none"
+    t.boolean "is_deleted", default: false
+    t.string "reset_token"
+    t.string "email"
+    t.string "last_name"
+    t.string "custom_field_one"
+    t.string "custom_field_two"
+    t.boolean "dashboard_switch", default: false
+    t.string "warehouse_postcode", default: ""
+    t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
+    t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
+    t.index ["role_id"], name: "index_users_on_role_id"
   end
 
-  add_index "users", ["inventory_warehouse_id"], :name => "index_users_on_inventory_warehouse_id"
-  add_index "users", ["reset_password_token"], :name => "index_users_on_reset_password_token", :unique => true
-  add_index "users", ["role_id"], :name => "index_users_on_role_id"
-
-  create_table "visits", :force => true do |t|
-    t.string   "visit_token"
-    t.string   "visitor_token"
-    t.string   "ip"
-    t.text     "user_agent"
-    t.text     "referrer"
-    t.text     "landing_page"
-    t.integer  "user_id"
-    t.string   "referring_domain"
-    t.string   "search_keyword"
-    t.string   "browser"
-    t.string   "os"
-    t.string   "device_type"
-    t.integer  "screen_height"
-    t.integer  "screen_width"
-    t.string   "country"
-    t.string   "region"
-    t.string   "city"
-    t.string   "postal_code"
-    t.decimal  "latitude",         :precision => 10, :scale => 0
-    t.decimal  "longitude",        :precision => 10, :scale => 0
-    t.string   "utm_source"
-    t.string   "utm_medium"
-    t.string   "utm_term"
-    t.string   "utm_content"
-    t.string   "utm_campaign"
+  create_table "visits", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.string "visit_token"
+    t.string "visitor_token"
+    t.string "ip"
+    t.text "user_agent"
+    t.text "referrer"
+    t.text "landing_page"
+    t.integer "user_id"
+    t.string "referring_domain"
+    t.string "search_keyword"
+    t.string "browser"
+    t.string "os"
+    t.string "device_type"
+    t.integer "screen_height"
+    t.integer "screen_width"
+    t.string "country"
+    t.string "region"
+    t.string "city"
+    t.string "postal_code"
+    t.decimal "latitude", precision: 10
+    t.decimal "longitude", precision: 10
+    t.string "utm_source"
+    t.string "utm_medium"
+    t.string "utm_term"
+    t.string "utm_content"
+    t.string "utm_campaign"
     t.datetime "started_at"
+    t.index ["user_id"], name: "index_visits_on_user_id"
+    t.index ["visit_token"], name: "index_visits_on_visit_token", unique: true
   end
 
-  add_index "visits", ["user_id"], :name => "index_visits_on_user_id"
-  add_index "visits", ["visit_token"], :name => "index_visits_on_visit_token", :unique => true
-
-  create_table "webhooks", :force => true do |t|
-    t.binary   "event",      :limit => 16777215
-    t.datetime "created_at",                     :null => false
-    t.datetime "updated_at",                     :null => false
+  create_table "webhooks", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8 COLLATE=utf8_unicode_ci" do |t|
+    t.binary "event", limit: 16777215
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
 end
