@@ -70,6 +70,12 @@ class SubscriptionsController < ApplicationController
     result['message'] = ''
     tenant_name = params[:tenant_name]
     if Tenant.where(name: tenant_name).empty?
+    
+      if (tenant_name =~ /^[0-9]*[A-Za-z][0-9A-Za-z]*$/).nil?
+        result['valid'] = false
+        result['message'] = "Site name can't be numeric, Site name can be alphanumeric"
+      end
+
       if (tenant_name =~ /^[a-z0-9][a-z0-9_]*[a-z0-9]$/).nil?
         result['valid'] = false
         result['message'] = 'Site name can only contain lower case letters, numbers and underscores. They cannot start or end with an underscore'
