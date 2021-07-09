@@ -73,7 +73,7 @@ class SubscriptionsController < ApplicationController
     
       if (tenant_name =~ /^[0-9]*[A-Za-z][0-9A-Za-z]*$/).nil?
         result['valid'] = false
-        result['message'] = "Site name can't be numeric, Site name can be alphanumeric"
+        result['message'] = "Account name must include at least one letter"
       end
 
       if (tenant_name =~ /^[a-z0-9][a-z0-9_]*[a-z0-9]$/).nil?
