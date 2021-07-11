@@ -15,9 +15,9 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
-        def get_orders_v2(status, ord_placed_after, date_type = 'created_at', order_import_range_days)
+        def get_orders_v2(status, ord_placed_after, order_import_range_days, date_type = 'created_at', import_item = nil)
           start_date = order_date_start(date_type, ord_placed_after.to_datetime.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20'), order_import_range_days) unless ord_placed_after.nil?
-          fetch_orders(status, start_date)
+          fetch_orders(status, start_date, import_item)
         end
 
         def get_shipments(import_from, date_type = 'created_at', import_till = nil)
@@ -46,7 +46,7 @@ module Groovepacker
           tracking_number
         end
 
-        def get_range_import_orders(start_date, end_date, type, order_import_range_days, order_status)
+        def get_range_import_orders(start_date, end_date, type, order_import_range_days, order_status, import_item = nil)
           combined = { 'orders' => [] }
           if type == "modified"
             created_date = (ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S')
@@ -56,6 +56,7 @@ module Groovepacker
           end
           page_index = 1
           loop do
+            import_item&.touch rescue nil
             res = @service.query("/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC&orderStatus=#{order_status}", nil, "get")
             combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
             page_index += 1
@@ -66,7 +67,7 @@ module Groovepacker
 
         def get_order_value(orderno)
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
-          response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno } 
+          response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
           Tenant.save_se_import_data("========Shipstation Order Value UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Order Number', orderno, '==Response', response)
           if response["orders"].present?
             return response["orders"]
@@ -208,11 +209,11 @@ module Groovepacker
           index.nil? ? -1 : tags[index]['tagId']
         end
 
-        def get_orders_by_tag(tagId)
+        def get_orders_by_tag(tagId, import_item = nil)
           response = { 'orders' => [] }
           unless tagId == -1
             %w(awaiting_shipment shipped pending_fulfillment awaiting_payment).each do |status|
-              res = find_orders_by_tag_and_status(tagId, status)
+              res = find_orders_by_tag_and_status(tagId, status, import_item)
               response['orders'] = response['orders'] + res unless res.nil?
             end
           end
@@ -222,10 +223,11 @@ module Groovepacker
 
 
 
-        def find_orders_by_tag_and_status(tag_id, status)
+        def find_orders_by_tag_and_status(tag_id, status, import_item = nil)
           page_index = 1
           orders = []
           loop do
+            import_item&.touch rescue nil
             response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, "get")
             orders += response['orders'] unless response['orders'].nil? rescue nil
             total_pages = response.parsed_response['pages'] rescue nil
@@ -253,10 +255,11 @@ module Groovepacker
 
         private
 
-        def fetch_orders(status, start_date)
+        def fetch_orders(status, start_date, import_item = nil)
           combined = { 'orders' => [] }
           page_index = 1
           loop do
+            import_item&.touch rescue nil
             res = @service.query("/Orders?orderStatus=" \
               "#{status}&page=#{page_index}&pageSize=150#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, "get")
             combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?

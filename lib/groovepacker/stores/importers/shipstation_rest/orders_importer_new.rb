@@ -48,7 +48,7 @@ module Groovepacker
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
             Tenant.save_se_import_data("========Shipstation Range Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==User ID', user_id)
-            response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type)
+            response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type, @import_item)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
@@ -67,7 +67,7 @@ module Groovepacker
             end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
             init_order_import_summary(user_id)
             Tenant.save_se_import_data("========Shipstation QF Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Start Date', start_date, '==End Date', end_date, '==Import Date', import_date, '==Order Id', order_id, '==User ID', user_id)
-            response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified')
+            response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified', @import_item)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
@@ -414,7 +414,7 @@ module Groovepacker
             def fetch_orders_if_import_type_is_not_tagged(response)
               return response unless @import_item.import_type != 'tagged'
               statuses.each do |status|
-                status_response = @client.get_orders_v2(status, import_from, import_date_type, @credential.order_import_range_days)
+                status_response = @client.get_orders_v2(status, import_from, @credential.order_import_range_days, import_date_type, @import_item)
                 response = get_orders_from_union(response, status_response)
               end
               return response
@@ -422,7 +422,7 @@ module Groovepacker
 
             def fetch_tagged_orders(response)
               return response unless gp_ready_tag_id != -1
-              tagged_response = @client.get_orders_by_tag(gp_ready_tag_id)
+              tagged_response = @client.get_orders_by_tag(gp_ready_tag_id, @import_item)
               #perform union of orders
               if Apartment::Tenant.current == "rabbitair" && tagged_response['orders'].present?
                 value_1 = []

@@ -100,7 +100,7 @@ module ProductsHelper
                   (product.primary_sku.try(:downcase).try(:include?, string.downcase))
       product = Product.readonly(false).find(product.id)
       product.is_intangible = true
-      product.save 
+      product.save
       break
     end
   end
@@ -116,13 +116,13 @@ module ProductsHelper
           coupan_product  =  Product.new
           coupan_product.name = "GP Coupon"
           coupan_product.store_id = 1
-        end   
+        end
         coupan_product.is_intangible =  true
         coupan_product.status=  "active"
         coupan_product.save
         coupan_product.product_skus.create(sku: "GP Coupon") if coupan_product.present?
         break
-      end  
+      end
     end
     coupan_product
   end
@@ -142,7 +142,7 @@ module ProductsHelper
 
   # def get_barcode_slip_template
   #   g_setting = GeneralSetting.last
-  #   g_setting.show_primary_bin_loc_in_barcodeslip ? "generate_barcode_slip_with_binloc.html.erb" 
+  #   g_setting.show_primary_bin_loc_in_barcodeslip ? "generate_barcode_slip_with_binloc.html.erb"
   #                                                 : 'generate_barcode_slip.html.erb'
   # end
 
@@ -174,10 +174,10 @@ module ProductsHelper
     @result
   end
 
-  def fetch_order_response_from_ss(start_date, end_date, type)
+  def fetch_order_response_from_ss(start_date, end_date, type, import_item = nil)
     response = {"orders" => []}
     statuses.each do |status|
-      status_response = @client.get_range_import_orders(start_date, end_date, type, @credential.order_import_range_days, status)
+      status_response = @client.get_range_import_orders(start_date, end_date, type, @credential.order_import_range_days, status, import_item)
       response = get_orders_from_union(response, status_response)
     end
     response

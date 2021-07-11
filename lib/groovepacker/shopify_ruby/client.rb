@@ -1,7 +1,7 @@
 module Groovepacker
   module ShopifyRuby
     class Client < Base
-      def orders
+      def orders(import_item = nil)
         # page_index = 1
         combined_response = {}
         combined_response["orders"] = []
@@ -20,6 +20,7 @@ module Groovepacker
         combined_response["orders"] << response["orders"]
 
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
+          import_item&.touch rescue nil
           new_link = response.headers['link'].split(',').last.split(';').first.strip.chop.reverse.chop.reverse
           response = HTTParty.get(new_link, headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
           combined_response["orders"] << response["orders"]
@@ -38,8 +39,8 @@ module Groovepacker
         #   puts "======================Fetching Page #{page_index}======================"
         #   query_opts = {"page" => page_index, "limit" => 100}.as_json
         #   add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? formatted_product_import_date(shopify_credential.product_last_import) : ''
-        #   response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/products#{add_url}", 
-        #                             query: query_opts, 
+        #   response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/products#{add_url}",
+        #                             query: query_opts,
         #                             headers: {
         #                             "X-Shopify-Access-Token" => shopify_credential.access_token,
         #                             "Content-Type" => "application/json",
@@ -56,8 +57,8 @@ module Groovepacker
         add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? "?updated_at_min=#{shopify_credential.product_last_import.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : ''
         add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now - product_import_range_days.to_i).strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : '' unless add_url.present?
 
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/products#{add_url}", 
-                                  query: query_opts, 
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/products#{add_url}",
+                                  query: query_opts,
                                   headers: {
                                   "X-Shopify-Access-Token" => shopify_credential.access_token,
                                   "Content-Type" => "application/json",
@@ -93,11 +94,11 @@ module Groovepacker
       end
 
       def get_variant(product_variant_id)
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}", 
-                                headers: { 
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token, 
-                                  "Content-Type" => "application/json", 
-                                  "Accept" => "application/json" 
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}",
+                                headers: {
+                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
+                                  "Content-Type" => "application/json",
+                                  "Accept" => "application/json"
                                 })
         #unless sku.blank?
         #  response["variants"] = response["variants"].select {|variant| variant["sku"]==sku} rescue {}
@@ -105,18 +106,18 @@ module Groovepacker
         #end
         return response["variant"] || {}
       end
-      
+
       def update_inventory(sync_option, attrs)
-				
-				response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_variant_id}", 
+
+				response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_variant_id}",
                                 body: attrs.to_json,
-                                headers: { 
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token, 
-                                  "Content-Type" => "application/json", 
-                                  "Accept" => "application/json" 
+                                headers: {
+                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
+                                  "Content-Type" => "application/json",
+                                  "Accept" => "application/json"
                                 })
       end
-      
+
     end
   end
 end

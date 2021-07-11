@@ -11,7 +11,7 @@ module Groovepacker
             return @result unless @import_item.present?
 
             @import_item.update_column(:importer_id, @worker_id)
-            response = @client.orders
+            response = @client.orders(@import_item)
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
             return @result if response["orders"].nil? || response['orders'].blank? || response['orders'].first.nil?
