@@ -20,9 +20,7 @@ module Groovepacker
               import_item_fix
               ImportItem.where(store_id: @store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
 
-              break if !@import_item.persisted? || @import_item.status == 'cancelled' || @import_item.status.nil?
-
-              break if @import_item.importer_id && @import_item.importer_id != @worker_id
+              break if import_should_be_cancelled
 
               import_single_order(order) if order.present?
             end
