@@ -68,9 +68,9 @@ every 1.day, :at => '7:50 am' do
   rake "doo:schedule_orders_export_email"
 end
 
-# every 1.day, :at => '12:00 am' do
-#   rake "doo:delete_old_orders"
-# end
+every 1.day, :at => '12:00 am' do
+  rake "doo:delete_old_orders"
+end
 
 every 60.minutes  do
   rake "doo:schedule_hourly_import"
