@@ -11,8 +11,8 @@ RSpec.describe OrdersController, type: :controller do
     user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true)
     @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)
     access_restriction = FactoryBot.create(:access_restriction)
-    inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
-    @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: inv_wh, status: true)
+    @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
+    @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: @inv_wh, status: true)
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: @store.id)
     tenant = Apartment::Tenant.current
     Apartment::Tenant.switch!("#{tenant}")
@@ -277,7 +277,7 @@ RSpec.describe OrdersController, type: :controller do
         store_id = store.id
         Store.find(store_id).destroy
       end
-      ss_store =  Store.create(name: "GrooveShipStationTest", status: true, store_type: "Shipstation API 2", order_date: nil, inventory_warehouse_id: 1, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: "null", on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
+      ss_store =  Store.create!(name: "GrooveShipStationTest", status: true, store_type: "Shipstation API 2", order_date: nil, inventory_warehouse_id: @inv_wh.id, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: "null", on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
       ShipstationRestCredential.create(api_key: "14ccf1296c2043cb9076b90953b7ea9b", api_secret: "e6fc8ff9f7a7411180d2960eb838e2ca", last_imported_at: "2021-07-12", store_id: ss_store.id, created_at: "2021-04-01 16:53:35", updated_at: "2021-07-13 12:52:36", shall_import_awaiting_shipment: true, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: false, shall_import_internal_notes: false, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: true, quick_import_last_modified: "2021-07-12 12:50:44", use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: true, bulk_import: false, quick_import_last_modified_v2: "2021-07-06 14:39:53", order_import_range_days: 30, import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: "27502", disabled_carriers: [], label_shortcuts: {"w"=>"weight", "p"=>"USPS First Class Mail - Letter"}, skip_ss_label_confirmation: false, disabled_rates: {"stamps_com"=>[]})
       ImportItem.create(status: 'completed', store: ss_store)
       tenant = Apartment::Tenant.current
