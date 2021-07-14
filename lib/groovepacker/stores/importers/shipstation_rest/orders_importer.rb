@@ -119,19 +119,19 @@ module Groovepacker
           end
 
           def import_order(shipstation_order, order)
-            tenant = Apartment::Tenant.current
-            tenant = Tenant.where(name: "#{tenant}").first
-            order["customerEmail"] = nil if tenant.gdpr_shipstation
+            # tenant = Apartment::Tenant.current
+            # tenant = Tenant.where(name: "#{tenant}").first
+            # order["customerEmail"] = nil if tenant.gdpr_shipstation
 
-            shipstation_order.attributes = {  increment_id: order["orderNumber"], store_order_id: order["orderId"],
-                                              order_placed_time: order["orderDate"], email: order["customerEmail"],
-                                              shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
-                                            }
-            shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
-            shipstation_order = init_shipping_address(shipstation_order, order) unless tenant.gdpr_shipstation
-            shipstation_order = import_notes(shipstation_order, order)
-            shipstation_order.weight_oz = order["weight"]["value"] rescue nil
-            shipstation_order.save
+            # shipstation_order.attributes = {  increment_id: order["orderNumber"], store_order_id: order["orderId"],
+            #                                   order_placed_time: order["orderDate"], email: order["customerEmail"],
+            #                                   shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
+            #                                 }
+            # shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
+            # shipstation_order = init_shipping_address(shipstation_order, order) unless tenant.gdpr_shipstation
+            # shipstation_order = import_notes(shipstation_order, order)
+            # shipstation_order.weight_oz = order["weight"]["value"] rescue nil
+            # shipstation_order.save
           end
 
           def import_order_items(shipstation_order, order)
@@ -208,17 +208,17 @@ module Groovepacker
               @gp_imported_tag_id ||= ss_tags_list[@credential.gp_imported_tag_name.downcase] || -1
             end
 
-            def init_shipping_address(shipstation_order, order)
-              return shipstation_order if order["shipTo"].blank?
-              address = order["shipTo"]
-              split_name = address["name"].split(' ') rescue ' '
-              shipstation_order.attributes = {
-                      lastname: split_name.pop, firstname: split_name.join(' '),
-                      address_1: address["street1"], address_2: address["street2"],
-                      city: address["city"], state: address["state"],
-                      postcode: address["postalCode"], country: address["country"] }
-              return shipstation_order
-            end
+            # def init_shipping_address(shipstation_order, order)
+            #   return shipstation_order if order["shipTo"].blank?
+            #   address = order["shipTo"]
+            #   split_name = address["name"].split(' ') rescue ' '
+            #   shipstation_order.attributes = {
+            #           lastname: split_name.pop, firstname: split_name.join(' '),
+            #           address_1: address["street1"], address_2: address["street2"],
+            #           city: address["city"], state: address["state"],
+            #           postcode: address["postalCode"], country: address["country"] }
+            #   return shipstation_order
+            # end
 
             def import_notes(shipstation_order, order)
               shipstation_order.notes_internal = order["internalNotes"] if @credential.shall_import_internal_notes
