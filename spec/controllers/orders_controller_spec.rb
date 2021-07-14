@@ -272,23 +272,21 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'SS Quick Import' do
-      ss_store =  Store.create(name: "ShipStation", status: true, store_type: "Shipstation API 2", order_date: nil, inventory_warehouse_id: 1, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: "null", on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
+      ss_store =  Store.create(name: "GrooveShipStationTest", status: true, store_type: "Shipstation API 2", order_date: nil, inventory_warehouse_id: 1, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: "null", on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
       ShipstationRestCredential.create(api_key: "14ccf1296c2043cb9076b90953b7ea9b", api_secret: "e6fc8ff9f7a7411180d2960eb838e2ca", last_imported_at: "2021-07-12", store_id: ss_store.id, created_at: "2021-04-01 16:53:35", updated_at: "2021-07-13 12:52:36", shall_import_awaiting_shipment: true, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: false, shall_import_internal_notes: false, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: true, quick_import_last_modified: "2021-07-12 12:50:44", use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: true, bulk_import: false, quick_import_last_modified_v2: "2021-07-06 14:39:53", order_import_range_days: 30, import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: "27502", disabled_carriers: [], label_shortcuts: {"w"=>"weight", "p"=>"USPS First Class Mail - Letter"}, skip_ss_label_confirmation: false, disabled_rates: {"stamps_com"=>[]})
-      ImportItem.create(status: 'in_progress', store: ss_store)
+      ImportItem.create(status: 'completed', store: ss_store)
       tenant = Apartment::Tenant.current
       tenant = Tenant.where(name: "#{tenant}").first
       Order.create(increment_id: "CSV-100151", order_placed_time: "2021-04-14 23:52:17", sku: nil, customer_comments: nil, store_id: ss_store.id, qty: nil, price: nil, firstname: "Alpha", lastname: "Tester", email: "alphatester@yopmail.com", address_1: "110 COBBLESTONE CIR", address_2: "", city: "NORTH LITTLE ROCK", state: "AR", postcode: "72116-3739", country: "US", method: nil, created_at: "2021-07-14 08:35:37", updated_at: "2021-07-14 08:35:37", notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: "onhold", scanned_on: nil, tracking_num: nil, company: nil, packing_user_id: nil, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: 0.0, notes_from_buyer: nil, weight_oz: 8, non_hyphen_increment_id: "CSV100151", note_confirmation: false, inaccurate_scan_count: 0, scan_start_time: nil, reallocate_inventory: false, last_suggested_at: nil, total_scan_time: 0, total_scan_count: 0, packing_score: 0, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: false, import_s3_key: nil, last_modified: "2021-04-14 23:53:00", prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: "", ss_label_data: {"orderId"=>830373892, "carrierCode"=>"stamps_com", "serviceCode"=>"usps_parcel_select", "packageCode"=>"package", "confirmation"=>"none", "shipDate"=>"2021-05-10", "weight"=>{"value"=>8.0, "units"=>"ounces", "WeightUnits"=>1}, "dimensions"=>nil, "insuranceOptions"=>{"provider"=>nil, "insureShipment"=>false, "insuredValue"=>0.0}, "internationalOptions"=>{"contents"=>nil, "customsItems"=>nil, "nonDelivery"=>nil}, "advancedOptions"=>{"warehouseId"=>82982, "nonMachinable"=>false, "saturdayDelivery"=>false, "containsAlcohol"=>false, "mergedOrSplit"=>false, "mergedIds"=>[], "parentId"=>nil, "storeId"=>203151, "customField1"=>nil, "customField2"=>nil, "customField3"=>nil, "source"=>nil, "billToParty"=>"my_other_account", "billToAccount"=>nil, "billToPostalCode"=>nil, "billToCountryCode"=>nil, "billToMyOtherAccount"=>nil}}, importer_id: "worker_0ebe21f3948d557300cd5f77aeaf5afb", clicked_scanned_qty: nil, import_item_id: "21", job_timestamp: nil)
       tenant.gdpr_shipstation = true
       tenant.save
 
-      order_item = ImportItem.last
-      order_item.status = 'cancelled'
-      order_item.save
 
       request.accept = 'application/json'
       get :import_for_ss, params:  {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"quickfix", "import_date"=>DateTime.now, "start_date"=>"null", "end_date"=>"null", "order_date_type"=>"null", "order_id"=>"CSV-100151"}
 
       expect(response.status).to eq(200)
+      ss_store.destroy
     end
 
     it 'SS Import for single store shows import Cancelled' do
