@@ -53,6 +53,21 @@ RSpec.describe TenantsController, type: :controller do
       tenant.destroy
     end
    
+
+
+    it 'Update GDPR Shipstation' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      tenant = Tenant.create(name: "#{tenant}")
+     
+      request.accept = 'application/json'
+      get :update_gdpr_shipstation, params: {"tenant_id"=>tenant.id}
+
+      tenant = Tenant.find(tenant.id)
+      expect(tenant.gdpr_shipstation).to eq(true)
+      tenant.destroy
+    end
+
     it 'Update Price Field' do
       tenant = Apartment::Tenant.current
       Apartment::Tenant.switch!("#{tenant}")
