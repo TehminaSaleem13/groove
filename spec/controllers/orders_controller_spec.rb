@@ -258,6 +258,19 @@ RSpec.describe OrdersController, type: :controller do
       expect(ss_import_item.status).to eq('completed')
     end
 
+    it 'SS  Range Import' do
+      ss_store = Store.where(store_type: 'ShipStation API 2').last
+      ImportItem.create(status: 'in_progress', store: ss_store)
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.where(name: "#{tenant}").first
+      tenant.gdpr_shipstation = true
+      tenant.save
+      request.accept = 'application/json'
+      get :import_for_ss, params:       {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"range_import", "import_date"=>"null", "start_date"=>DateTime.now - 2.days, "end_date"=>DateTime.now, "order_date_type"=>"modified", "order_id"=>"null"}
+   
+      expect(response.status).to eq(200)
+    end
+      
     it 'SS Import for single store shows import Cancelled' do
       ss_store = Store.where(store_type: 'ShipStation API 2').last
       ImportItem.create(status: 'in_progress', store: ss_store)
