@@ -135,8 +135,8 @@ module Groovepacker
           end
 
           def import_order(shipstation_order, order)
-            tenant = Apartment::Tenant.current
-            tenant = Tenant.where(name: "#{tenant}").first
+            # tenant = Apartment::Tenant.current
+            # tenant = Tenant.where(name: "#{tenant}").first
 
             # if !tenant.gdpr_shipstation
             #   shipstation_order.lastname = split_name.pop
