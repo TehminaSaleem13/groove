@@ -61,6 +61,7 @@ module ScanPackHelper
       @result[:single_item_order_message_time] = @scanpack_setting.single_item_order_complete_msg_time
       @result[:popup_shipping_label] = order.store.shipping_easy_credential.popup_shipping_label rescue nil
       @result[:large_popup] = order.store.shipping_easy_credential.large_popup rescue nil
+      @result[:multiple_lines_per_sku_accepted] = order.store.shipping_easy_credential.multiple_lines_per_sku_accepted rescue nil
       ScanPack::ScanBarcodeService.new(current_user, session, params).generate_order_barcode_slip(order) if @scanpack_setting.post_scanning_option == 'Barcode' && !@result[:popup_shipping_label]
       return @result
     end
