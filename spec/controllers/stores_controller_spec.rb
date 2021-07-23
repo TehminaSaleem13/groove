@@ -209,6 +209,15 @@ RSpec.describe StoresController, type: :controller do
       expect(response.status).to eq(200)
       expect((eval response.body)[:status]).to eq(true)
     end
+
+    it 'Update SE Store Settings' do
+      request.accept = 'application/json'
+      se_store = Store.where(store_type: 'ShippingEasy').last
+
+      post :create_update_store, params: {"file_path"=>"", "inventory_warehouse_id"=>"1", "is_fba"=>"false", "product_ftp_import"=>"false", "id"=>se_store.id, "name"=>"Shipping Easy", "status"=>"false", "store_type"=>"ShippingEasy", "order_date"=>"null", "created_at"=>"2020-04-28T08:52:12.000Z", "updated_at"=>"2021-07-22T11:34:44.000Z", "thank_you_message_to_customer"=>"null", "auto_update_products"=>"true", "update_inv"=>"true", "on_demand_import"=>"true", "fba_import"=>"false", "csv_beta"=>"true", "is_verify_separately"=>"null", "split_order"=>"shipment_handling_v2", "product_add"=>"null", "product_export"=>"null", "on_demand_import_v2"=>"false", "regular_import_v2"=>"false", "quick_fix"=>"false", "troubleshooter_option"=>"true", "allow_bc_inv_push"=>"false", "allow_mg_rest_inv_push"=>"false", "allow_shopify_inv_push"=>"false", "allow_teapplix_inv_push"=>"false", "allow_magento_soap_tracking_no_push"=>"false", "popup_shipping_label"=>"true", "api_key"=>"5c587aaaba338f34c99e0b9837f24ede", "api_secret"=>"699e8f73a53774d36eb687e316b7327dc137f70beabcaa1e00d7ce4e9197fb96", "store_api_key"=>"null", "import_ready_for_shipment"=>"false", "ready_to_ship"=>"true", "import_shipped"=>"true", "gen_barcode_from_sku"=>"true", "import_upc"=>"true", "large_popup"=>"true", "multiple_lines_per_sku_accepted"=>"true", "allow_duplicate_id"=>"true"}
+      expect(response.status).to eq(200)
+      expect( se_store.shipping_easy_credential.multiple_lines_per_sku_accepted).to eq(true)  
+    end
   end
 
   describe 'Shipstation' do
