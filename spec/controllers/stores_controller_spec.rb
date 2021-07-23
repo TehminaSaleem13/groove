@@ -166,6 +166,20 @@ RSpec.describe StoresController, type: :controller do
       expect(Order.count).to eq(1)
     end
 
+    it 'Import SE On Demand Order Import' do
+      allow_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:get_single_order).and_return(YAML.load(IO.read(Rails.root.join("spec/fixtures/files/se_same_sku_test.yaml"))))
+      request.accept = 'application/json'
+
+      se_store = Store.where(store_type: 'ShippingEasy').last
+      se_credentials = se_store.shipping_easy_credential
+      se_credentials.multiple_lines_per_sku_accepted = true
+      se_credentials.save
+ 
+      get :get_order_details, params: {order_no: "105908", store_id: se_store.id }
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+    end
+
     it 'show error if required field not mapped' do
       request.accept = 'application/json'
       post :create_update_store, params: { store_type: 'CSV', status: @store.status, name: @store.name, inventory_warehouse_id: @store.inventory_warehouse_id, id: @store.id, orderfile: fixture_file_upload(Rails.root.join('/files/Order_import_fail.csv')) }

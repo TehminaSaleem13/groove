@@ -1,0 +1,403 @@
+---
+orders:
+- id: 2280956433
+  external_order_identifier: '105908'
+  ext_order_reference_id: '105908'
+  owner_id: 
+  sales_channel: 
+  fulfillment_channel: 
+  ordered_at: '2021-07-19T01:13:22Z'
+  order_status: shipped
+  parent_order_id: 
+  source_order_ids: 
+  total_including_tax: '737.63'
+  total_excluding_tax: '737.63'
+  discount_amount: '0.00'
+  coupon_discount: '0.00'
+  subtotal_including_tax: '640.64'
+  subtotal_excluding_tax: '640.64'
+  subtotal_tax: '0.00'
+  total_tax: '0.00'
+  base_shipping_cost: '96.99'
+  shipping_cost_including_tax: '96.99'
+  shipping_cost_excluding_tax: '96.99'
+  shipping_cost_tax: '0.00'
+  base_handling_cost: '0.00'
+  handling_cost_excluding_tax: '0.00'
+  handling_cost_including_tax: '0.00'
+  handling_cost_tax: '0.00'
+  base_wrapping_cost: '0.00'
+  wrapping_cost_excluding_tax: '0.00'
+  wrapping_cost_including_tax: '0.00'
+  wrapping_cost_tax: '0.00'
+  billing_company: ''
+  billing_first_name: Steven
+  billing_last_name: Halim
+  billing_address: 47 Parkview Drive
+  billing_address2: ''
+  billing_city: Springfield Lakes
+  billing_state: Queensland
+  billing_country: Australia
+  billing_postal_code: '4300'
+  billing_phone_number: "+61410930626"
+  billing_email: sales@xtinction.com.au
+  buyer_email: sales@xtinction.com.au
+  recipients:
+  - company: ''
+    first_name: Steven
+    last_name: Halim
+    address: 47 Parkview Drive
+    address2: ''
+    address3: 
+    city: Springfield Lakes
+    residential: 
+    state: 
+    province: Queensland
+    country: Australia
+    postal_code: '4300'
+    postal_code_plus_4: 
+    phone_number: "+61410930626"
+    email: sales@xtinction.com.au
+    base_cost: '96.99'
+    cost_excluding_tax: '96.99'
+    cost_including_tax: '96.99'
+    cost_tax: '0.00'
+    base_handling_cost: '0.00'
+    handling_cost_excluding_tax: '0.00'
+    handling_cost_including_tax: '0.00'
+    handling_cost_tax: '0.00'
+    shipping_zone_id: 2
+    shipping_zone_name: Rest of the World
+    items_total: 16
+    shipping_method: " (UPS Worldwide Expedited®)"
+    items_shipped: 0
+    ext_shipping_detail_id: 94691
+    line_items:
+    - item_name: PolarStar Micro Regulator GEN 2 | MR Reg GEN 2 Stand Alone
+      sku: '10000069'
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '4.5'
+      quantity: 5
+      total_excluding_tax: '515.60'
+      price_excluding_tax: '103.12'
+      unit_price: '103.12'
+      ext_line_item_id: '261917'
+      ext_product_id: '12108'
+      product_options: 
+      uuid: de37bb54-5446-4a06-9a0e-bac08fdfebc2
+      order_source_id: 5352668983
+      gift_message: ''
+      product:
+        id: 157619973
+        description: PolarStar - Micro Regulator GEN2 (MR) Stand Alone Without Line
+        sku: '10000069'
+        weight_in_ounces: '4.5'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: '4.5'
+        width_as_inches: '3.5'
+        height_as_inches: '2.0'
+        country_of_manufacture: 
+        harmonized_code: '9503000090'
+        declared_value: ''
+        active: true
+        sku_aliases: []
+        properties: {}
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/157/619/973/thumb/polarstar-micro-regulator-gen2-mr-stand-alone__02267.1565022556.178.178.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/157/619/973/medium/polarstar-micro-regulator-gen2-mr-stand-alone__02267.1565022556.178.178.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/157/619/973/original/polarstar-micro-regulator-gen2-mr-stand-alone__02267.1565022556.178.178.png
+        tags: []
+    - item_name: Amped Integral Grip Line Standard Weave | IGL HPA Grip Line
+      sku: IGL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.6'
+      quantity: 2
+      total_excluding_tax: '33.58'
+      price_excluding_tax: '16.79'
+      unit_price: '16.79'
+      ext_line_item_id: '261918'
+      ext_product_id: '5446'
+      product_options:
+        Which HPA Unit would you like your IGL for?: PolarStar F2 ($23.99)
+        Which colorway would you like?: Black & Red Spiral
+        Add Custom Text?: 'No'
+        If "Checked", Please Enter Custom Text.  10 Characters MAX.: Enter Text
+      uuid: 98148361-b71f-4346-ae87-5f13f8caa26e
+      order_source_id: 5352668983
+      gift_message: ''
+      product:
+        id: 44296030
+        description: Amped Integral Grip Line (IGL/SMP/JACK/MKII) (Standard Weave)
+        sku: IGL
+        weight_in_ounces: '1.6'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: '9.0'
+        width_as_inches: '0.5'
+        height_as_inches: '0.5'
+        country_of_manufacture: 
+        harmonized_code: '9503000090'
+        declared_value: ''
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/thumb/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/medium/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/original/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.jpg
+        tags: []
+    - item_name: Amped Airsoft Black 0-160 Gauge 1/8"NPT
+      sku: AC-0160-G
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '0.8'
+      quantity: 5
+      total_excluding_tax: '24.30'
+      price_excluding_tax: '4.86'
+      unit_price: '4.86'
+      ext_line_item_id: '261922'
+      ext_product_id: '10940'
+      product_options: 
+      uuid: 903354f6-f9d0-4c29-8424-635dccea4e2c
+      order_source_id: 5352668983
+      gift_message: ''
+      product:
+        id: 44380160
+        description: Amped Custom - 0-160 Gauge 1/8"NPT (Black)
+        sku: AC-0160-G
+        weight_in_ounces: '0.8'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: '1.0'
+        width_as_inches: '1.0'
+        height_as_inches: '1.0'
+        country_of_manufacture: 
+        harmonized_code: '9503000090'
+        declared_value: ''
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/044/380/160/thumb/amped-custom-hpa-gauge-0-160-psi-black__95991.1489278727.178.178.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/044/380/160/medium/amped-custom-hpa-gauge-0-160-psi-black__95991.1489278727.178.178.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/044/380/160/original/amped-custom-hpa-gauge-0-160-psi-black__95991.1489278727.178.178.jpg
+        tags: []
+    - item_name: Amped Integral Grip Line Standard Weave | IGL HPA Grip Line
+      sku: IGL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.6'
+      quantity: 2
+      total_excluding_tax: '33.58'
+      price_excluding_tax: '16.79'
+      unit_price: '16.79'
+      ext_line_item_id: '261919'
+      ext_product_id: '5446'
+      product_options:
+        Which HPA Unit would you like your IGL for?: PolarStar F2 ($23.99)
+        Which colorway would you like?: Red
+        Add Custom Text?: 'No'
+        If "Checked", Please Enter Custom Text.  10 Characters MAX.: Enter Text
+      uuid: 54e06646-06f4-41a0-b1e7-e0bad53e9b8a
+      order_source_id: 5352668983
+      gift_message: ''
+      product:
+        id: 44296030
+        description: Amped Integral Grip Line (IGL/SMP/JACK/MKII) (Standard Weave)
+        sku: IGL
+        weight_in_ounces: '1.6'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: '9.0'
+        width_as_inches: '0.5'
+        height_as_inches: '0.5'
+        country_of_manufacture: 
+        harmonized_code: '9503000090'
+        declared_value: ''
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/thumb/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/medium/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/original/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.jpg
+        tags: []
+    - item_name: Amped Integral Grip Line Standard Weave | IGL HPA Grip Line
+      sku: IGL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.6'
+      quantity: 1
+      total_excluding_tax: '16.79'
+      price_excluding_tax: '16.79'
+      unit_price: '16.79'
+      ext_line_item_id: '261920'
+      ext_product_id: '5446'
+      product_options:
+        Which HPA Unit would you like your IGL for?: PolarStar F2 ($23.99)
+        Which colorway would you like?: Forest Green
+        Add Custom Text?: 'No'
+        If "Checked", Please Enter Custom Text.  10 Characters MAX.: Enter Text
+      uuid: 45bc1ac4-6a6b-4a45-ae68-7411fcafc7fd
+      order_source_id: 5352668983
+      gift_message: ''
+      product:
+        id: 44296030
+        description: Amped Integral Grip Line (IGL/SMP/JACK/MKII) (Standard Weave)
+        sku: IGL
+        weight_in_ounces: '1.6'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: '9.0'
+        width_as_inches: '0.5'
+        height_as_inches: '0.5'
+        country_of_manufacture: 
+        harmonized_code: '9503000090'
+        declared_value: ''
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/thumb/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/medium/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/original/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.jpg
+        tags: []
+    - item_name: Amped Integral Grip Line Standard Weave | IGL HPA Grip Line
+      sku: IGL
+      bin_picking_number: ''
+      bundled_product: 
+      weight_in_ounces: '1.6'
+      quantity: 1
+      total_excluding_tax: '16.79'
+      price_excluding_tax: '16.79'
+      unit_price: '16.79'
+      ext_line_item_id: '261921'
+      ext_product_id: '5446'
+      product_options:
+        Which HPA Unit would you like your IGL for?: PolarStar F2 ($23.99)
+        Which colorway would you like?: Orange
+        Add Custom Text?: 'No'
+        If "Checked", Please Enter Custom Text.  10 Characters MAX.: Enter Text
+      uuid: 741e229e-0c80-412b-8aca-32a248f48542
+      order_source_id: 5352668983
+      gift_message: ''
+      product:
+        id: 44296030
+        description: Amped Integral Grip Line (IGL/SMP/JACK/MKII) (Standard Weave)
+        sku: IGL
+        weight_in_ounces: '1.6'
+        bin_picking_number: 
+        upc: ''
+        asin: ''
+        isbn: ''
+        length_as_inches: '9.0'
+        width_as_inches: '0.5'
+        height_as_inches: '0.5'
+        country_of_manufacture: 
+        harmonized_code: '9503000090'
+        declared_value: ''
+        active: true
+        sku_aliases: []
+        properties: 
+        product_category_name: 
+        image:
+          thumb: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/thumb/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          medium: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/medium/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.png
+          original: https://se-files-production.s3.amazonaws.com//products/images/044/296/030/original/amped-custom-ampline-colors-subdued__37285.1486239417.178.178.jpg
+        tags: []
+    original_order:
+      id: 2280956433
+      customer_id: 34520
+      store_id: 981850
+      order_detail_id: 2296520193
+      workflow_state: shipped
+      shipment_id: 
+      destination_id: 
+      split_from_order_id: 
+      total_weight_in_ounces: '36.1'
+      total_quantity: 16
+      is_international: true
+      usps_shipping_zone: 
+      created_at: '2021-07-19T01:56:13Z'
+      updated_at: '2021-07-19T20:52:21Z'
+      ext_shipment_confirmation_id: 1
+      store_order_status: awaiting_shipment
+      drop_ship_tracking_number: 
+      category_id: 140009
+      internal_notes: 'Signifyd: Guarantee Approved'
+      line_item_name: 
+      line_item_sku: 
+      address_kind: I
+      recipient_last_name: halim
+      recipient_requested_service: " (ups worldwide expedited®)"
+      gift: 
+      prime_order_id: 2280956433
+      state: 
+      owner_id: 
+      denormalized_ordered_at: '2021-07-19T01:13:22Z'
+      grab_bag: {}
+      line_item_bin_picking_number: 
+      denormalized_ext_order_id: '105908'
+      packing_slip_generated: true
+      denormalized_ext_order_reference_id: '105908'
+      denormalized_alternate_order_id: 
+      denormalized_sales_channel: 
+      custom_1: 
+      custom_2: 
+      custom_3: 
+      hidden: 
+      allocated: 
+      location_id: 7191bcfa-d80a-4169-bee1-eaf1af8995aa
+      origin_override_id: 
+      channel_id: edba0be5-82e4-489d-8359-613cd2539c93
+      redaction_policy_id: 
+      redacted_at: 
+  store_api_key: dbd3db99e422164c2097d8aca356f671
+  shipments:
+  - id: 7404165213
+    tracking_number: 1Z858W7W6798338321
+    carrier_key: UPS
+    carrier_service_key: '08'
+    shipment_cost: 7531
+    ship_date: '2021-07-19'
+    workflow_state: label_printed
+    cloned_from_shipment_id: 
+    weight_in_ounces: '48.8'
+    length_in_inches: '10.0'
+    width_in_inches: '8.0'
+    height_in_inches: '4.0'
+    additional_packages: []
+    ship_from_address_id: 104425
+    shipment_type: outbound
+  updated_at: '2021-07-19T20:52:21Z'
+  internal_notes: 'Signifyd: Guarantee Approved'
+  meta_data: 
+  prime_order_id: 2280956433
+  is_prime: 
+  split_from_order_id: 
+  tags: []
+  notes: ''
+  location_id: 7191bcfa-d80a-4169-bee1-eaf1af8995aa
+  is_redacted: false
+  redacted_at: 
+  redaction_policy_id: 
+  gift_message: 
+  gift: false
