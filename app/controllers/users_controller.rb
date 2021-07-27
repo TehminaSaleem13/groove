@@ -22,7 +22,7 @@ class UsersController < ApplicationController
     access_restriction = AccessRestriction.last
     data = { users: params[:users], amount: params[:amount], is_annual: params[:is_annual] }
     result['request_send'] = tenant.created_at > '2016-09-23 00:00:00' ? remove_user(data, access_restriction, tenant) : check_for_removal(data, access_restriction, tenant)
-    if params[:is_annual] == 'false' && params[:users].to_i > access_restriction.num_users
+    if params[:is_annual] == 'false' && params[:users].to_i > access_restriction.num_users && @subscription['interval'] != 'year'
       ui_user = params[:users].to_i - access_restriction.num_users
       access_restriction.update_attributes(added_through_ui: ui_user)
       tenant.activity_log = "#{Time.now.strftime('%Y-%m-%d  %H:%M')} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + tenant.activity_log.to_s
@@ -34,6 +34,9 @@ class UsersController < ApplicationController
     elsif params[:is_annual] == 'true'
       StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount]).deliver
       result['annual_request'] = true
+    elsif @subscription['interval'] == 'year' && params[:is_annual] == 'false' &&  params[:users].to_i != access_restriction.num_users
+      result['status'] = false
+      result['error_messages'] = "Can't Change Yearly Plan to Monthly"
     end
 
     respond_to do |format|
