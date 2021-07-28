@@ -80,6 +80,7 @@ module Groovepacker
             end
 
             def import_order(shopify_order, order)
+              shopify_order.customer_comments = order['note']
               shopify_order.increment_id = order["name"]
               shopify_order.store_order_id = order["id"].to_s
               shopify_order.order_placed_time = order["created_at"]
