@@ -67,9 +67,9 @@ class ExportSetting < ActiveRecord::Base
     send("daily_packed_email_on_#{day.downcase}")
   end
 
-  def calculate_row_data(single_row, order_item)
+  def calculate_row_data(single_row, order_item, box = nil)
     order = order_item.order
-    update_single_row(single_row, order)
+    update_single_row(single_row, order, box, order_item)
     update_single_row_for_packing_user(single_row, order_item, order)
     update_single_row_for_product_info(single_row, order_item)
     single_row
@@ -141,7 +141,7 @@ class ExportSetting < ActiveRecord::Base
     Delayed::Job.where("queue =? && run_at < ?", "generate_stat_export_#{tenant}", Time.now()).destroy_all
   end
 
-  def update_single_row(single_row, order)
+  def update_single_row(single_row, order, box = nil, order_item = nil)
     single_row[:order_number] = order.increment_id
     single_row[:order_status] = order.status
     single_row[:order_date] = order.order_placed_time
@@ -155,6 +155,10 @@ class ExportSetting < ActiveRecord::Base
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order.clicked_scanned_qty.to_i
+    if box.present?
+     single_row[:order_item_count] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
+     single_row[:box_number] = box.name.split(" ").last
+    end
   end
 
   def update_single_row_for_packing_user(single_row, order_item, order)
@@ -257,7 +261,8 @@ class ExportSetting < ActiveRecord::Base
       click_scanned_qty: '',
       tracking_num: '',
       incorrect_scans: '',
-      clicked_scanned_qty: ''
+      clicked_scanned_qty: '',
+      box_number: ''
     }
   end
 
@@ -271,6 +276,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order.clicked_scanned_qty.to_i
+    single_row[:box_number] = order.box_number.to_i
     single_row
   end
 

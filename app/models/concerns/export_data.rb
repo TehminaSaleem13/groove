@@ -14,7 +14,7 @@ module ExportData
   #   }
   # end
 
-  def export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array)
+  def export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array, box = nil)
     order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
     return if order_item_serial_lots.empty?
     order_item_serial_lots.each do |order_item_serial_lot|
@@ -78,10 +78,10 @@ module ExportData
     end
   end
 
-  def export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array)
+  def export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array, box = nil)
     order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
     if order_item_serial_lots.empty?
-      single_row = do_if_serial_lots_empty(row_map, order_item)
+      single_row = do_if_serial_lots_empty(row_map, order_item, box)
       order_hash_item_array.push(single_row.dup)
     else
       qty_with_lot_serial = 0
@@ -99,10 +99,10 @@ module ExportData
     end
   end
 
-  def do_if_serial_lots_empty(row_map, order_item)
+  def do_if_serial_lots_empty(row_map, order_item, box = nil)
     single_row = row_map.dup
-    single_row = calculate_row_data(single_row, order_item)
     single_row[:order_item_count] = order_item.qty
+    single_row = calculate_row_data(single_row, order_item, box)
     single_row[:lot_number] = ''
     single_row[:barcode_with_lot] = ''
     single_row[:serial_number] = ''
@@ -188,10 +188,20 @@ module ExportData
       next if order_items.reload.empty?
       order_hash_item_array = []
       order_items.each do |order_item|
-        if order_export_type == 'order_with_serial_lot'
-          export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array)
+        if order_item.boxes.present?
+          order_item.boxes.each do |box|
+            if order_export_type == 'order_with_serial_lot'
+              export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array, box)
+            else
+              export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array, box)
+            end
+          end
         else
-          export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array)
+          if order_export_type == 'order_with_serial_lot'
+            export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array, box)
+          else
+            export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array, box)
+          end
         end
       end
       sort_by_scan_order(order_hash_item_array)
