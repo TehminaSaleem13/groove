@@ -28,6 +28,7 @@ Groovepacks::Application.configure do
   # The :test delivery method accumulates sent emails in the
   # ActionMailer::Base.deliveries array.
   # config.action_mailer.delivery_method = :test
+  config.action_mailer.perform_deliveries = false
   config.action_mailer.delivery_method = :smtp
 
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i, driver: :hiredis)
