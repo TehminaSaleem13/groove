@@ -57,6 +57,7 @@ class ImportDeletedData
     order.increment_id = ordo[1]['increment_id']
     order.order_placed_time = ordo[1]['order_placed_time'].to_datetime
     order.sku = ordo[1]['sku']
+    order.tags = ordo[1]['tags']
     order.customer_comments = ordo[1]['customer_comments']
     order.store_id = ordo[1]['store_id'].to_i
     order.qty = ordo[1]['qty'].to_i

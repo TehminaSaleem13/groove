@@ -79,7 +79,8 @@ module Groovepacker
               update_import_count('success_imported')
             end
 
-            def import_order(shopify_order, order)
+            def import_order(shopify_order, order)              
+              shopify_order.tags= order['tags']
               shopify_order.customer_comments = order['note']
               shopify_order.increment_id = order["name"]
               shopify_order.store_order_id = order["id"].to_s
