@@ -276,7 +276,6 @@ class ExportSetting < ActiveRecord::Base
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order.clicked_scanned_qty.to_i
-    single_row[:box_number] = order.box_number.to_i
     single_row
   end
 

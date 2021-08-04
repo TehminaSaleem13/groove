@@ -198,9 +198,9 @@ module ExportData
           end
         else
           if order_export_type == 'order_with_serial_lot'
-            export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array, box)
+            export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array)
           else
-            export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array, box)
+            export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array)
           end
         end
       end
