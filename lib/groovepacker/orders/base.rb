@@ -103,6 +103,7 @@ module Groovepacker
             :country => '',
             :customer_comments => '',
             :internal_notes => '',
+            :tags => '',
             :tracking_num => '',
           }
 

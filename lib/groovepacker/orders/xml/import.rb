@@ -34,7 +34,7 @@ module Groovepacker
               ["store_id", "firstname", "lastname", "email", "address_1", "address_2",
               "city", "state", "country", "postcode", "order_placed_time", "tracking_num",
               "custom_field_one", "custom_field_two", "method", "order_total",
-              "customer_comments", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
+              "customer_comments", "tags", "notes_toPacker", "notes_fromPacker", "notes_internal", "price"].each do |attr|
               order[attr] = @order.send(attr)
                 end
             end

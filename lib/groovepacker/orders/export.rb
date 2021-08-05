@@ -99,6 +99,7 @@ module Groovepacker
               :postal_code => order.postcode,
               :country => order.country,
               :customer_comments => order.customer_comments,
+              :tags => order.tags,
               :internal_notes => order.notes_internal,
               :tracking_num => order.tracking_num,
               }

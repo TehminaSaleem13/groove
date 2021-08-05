@@ -106,6 +106,9 @@ module Groovepacker
           def customer_comments
             text(@doc, "//order/notes/customerComments")
           end
+          def tags
+            text(@doc, "//order/tags")
+          end
 
           def notes_toPacker
             text(@doc, "//order/notes/notesToPacker")
