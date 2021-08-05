@@ -108,13 +108,13 @@ class AddLogCsv
               subscription = customer.subscriptions.retrieve("#{sub.customer_subscription_id}")  rescue nil
               total_product =  Stripe::SubscriptionItem.list(subscription: "#{sub.customer_subscription_id}").count rescue nil
               if customer.present?
-                last_stripe_amount = (customer.charges.first.amount / 100) rescue 0
-                billing_date = DateTime.strptime("#{customer.charges.first.created}",'%s') rescue nil
+                last_stripe_amount = (customer.subscriptions.data.first.plan.amount/ 100) rescue 0
+                billing_date = DateTime.strptime("#{customer.subscriptions.data.first.plan.created}",'%s') rescue nil
                 is_delinquent = customer.delinquent == true ? "delinquent" : "current"
               end
               unless billing_date.nil?
-                charge_in_30_days = ((Time.now - 30.days)..Time.now).cover?(billing_date) ?  1 : 0
-                charge_in_30_days = 0  if customer.charges.first.status == "failed"
+                charge_in_30_days = ((Time.now - 30.days)..Time.now).cover?(billing_date) ?  true : false
+                charge_in_30_days = false  if Subscription.where(tenant_name: "#{sub.tenant_name}").first.status != 'completed'
               end
               sub_amount = (sub.amount.to_f / 100) rescue 0
               val = '*' if sub_amount == 0 || (sub_amount != (access_restriction.try(:num_users) * 50).to_f )
