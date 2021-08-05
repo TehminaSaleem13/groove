@@ -82,5 +82,21 @@ RSpec.describe TenantsController, type: :controller do
       expect(tenant.price["cust_maintenance_1"]['toggle']).to eq(true)
       tenant.destroy
     end
+
+    it 'Email Billing Report' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      @tenant = Tenant.create(name: "#{tenant}")
+      Subscription.create(email: "zzpeaceout@yahoo.com", tenant_name: tenant , amount: 0.162e6, stripe_user_token: "tok_1J5QhF44KQj1OQ8CHwFNXxg6", status: "completed", tenant_id: @tenant.id, stripe_transaction_identifier: "txn_1J5QhM44KQj1OQ8C8gZjbT6E", created_at: "2021-06-23 07:40:31", updated_at: "2021-06-23 07:41:05", transaction_errors: nil, subscription_plan_id: "an-gpproductionupgrade-150", customer_subscription_id: "sub_JisSpfFXcFBc9d", stripe_customer_id: "cus_JisS4jxhKbeuUc", is_active: true, password: "password", user_name: "test", coupon_id: nil, progress: "transaction_complete", shopify_customer: false, all_charges_paid: false, interval: "year", app_charge_id: nil, tenant_charge_id: nil, shopify_shop_name: nil, tenant_data: nil, shopify_payment_token: nil)
+      @tenant.price = { "bigCommerce_feature"=>{ "toggle"=>false, "amount"=>30, "stripe_id"=>""}, "shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "high_sku_feature"=>{"toggle"=>false, "amount"=>50, "stripe_id"=>""}, "double_high_sku"=>{"toggle"=>false, "amount"=>100, "stripe_id"=>""}, "cust_maintenance_1"=>{"toggle"=>true, "amount"=>"15", "stripe_id"=>"si_I4i2XgmVjvWmTR"}, "cust_maintenance_2"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "groovelytic_stat_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "product_ftp_import"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>"" } }
+      @tenant.save
+      request.accept = 'application/json'
+
+      post :tenant_log
+       expect(response.status).to eq(200)
+       expect(response.body).to eq("{}")
+
+      @tenant.destroy
+    end
   end
 end  
