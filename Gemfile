@@ -114,3 +114,4 @@ gem 'whenever', :require => false
 gem 'scout_apm', '2.6.10'
 gem 'ahoy_matey','~> 2.2.0'
 gem "appsignal"
+gem 'lograge'

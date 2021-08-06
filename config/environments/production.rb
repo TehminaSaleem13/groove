@@ -18,7 +18,7 @@ Groovepacks::Application.configure do
   config.assets.compile = true
 
   # Generate digests for assets URLs
-  config.assets.digest = true    
+  config.assets.digest = true
   config.action_mailer.default_url_options = { :host => ENV['HOST_NAME'] }
   config.eager_load = true
   # Defaults to nil and saved in location specified by config.assets.prefix
@@ -81,4 +81,26 @@ Groovepacks::Application.configure do
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes }
 
   ENV['SHOPIFY_BILLING_IN_TEST'] = "false"
+end
+Rails.application.configure do
+  config.lograge.formatter = Lograge::Formatters::Json.new
+  config.lograge.enabled = true
+  config.lograge.base_controller_class = ['ActionController::Base']
+  config.lograge.logger = ActiveSupport::Logger.new "#{Rails.root}/log/sync_#{Rails.env}.log"
+  config.lograge.keep_original_rails_log = true
+  config.lograge.custom_options = lambda do |event|
+    {
+      request_time: Time.now,
+      application: Rails.application.class.parent_name,
+      process_id: Process.pid,
+      host: event.payload[:host],
+      remote_ip: event.payload[:remote_ip],
+      ip: event.payload[:ip],
+      x_forwarded_for: event.payload[:x_forwarded_for],
+      params: event.payload[:params],
+      rails_env: Rails.env,
+      exception: event.payload[:exception]&.first,
+      request_id: event.payload[:headers]['action_dispatch.request_id'],
+    }.compact
+  end
 end
