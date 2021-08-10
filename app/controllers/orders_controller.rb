@@ -54,10 +54,12 @@ class OrdersController < ApplicationController
     #GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
     if params[:app]
-      @result['scan_pack_settings'] = ScanPackSetting.last
-      @result['general_settings'] = GeneralSetting.last
+      @result['scan_pack_settings'] = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings)
+      @result['general_settings'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
+      @result['orders_count'] = get__filtered_orders_count()
+    else
+      @result['orders_count'] = get_orders_count()
     end
-    @result['orders_count'] = get_orders_count()
     render json: @result
   end
 

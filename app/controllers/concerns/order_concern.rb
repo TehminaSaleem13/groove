@@ -84,6 +84,17 @@ module OrderConcern
     count = count.merge('all' => all, 'search' => 0)
   end
 
+  def get__filtered_orders_count
+    count = {}
+    all = 0
+    counts = Order.select('status,count(*) as count').where(status: %w(scanned awaiting)).group(:status)
+    counts.each do |single|
+      count[single.status] = single.count
+      all += single.count
+    end
+    count = count.merge('all' => all, 'search' => 0)
+  end
+  
   def cancel_packing(barcode)
     if barcode.nil?
       @result['error_messages'].push('No barcode found with the id.')
@@ -144,7 +155,6 @@ module OrderConcern
       set_status_and_message(false, 'You do not have the permissions to edit notes', ['push'])
     end
   end
-
   def check_update_permissions(attrs_array = nil)
     attrs_array ||= order_update_attrs
     flag = false
@@ -335,6 +345,78 @@ module OrderConcern
     end
     ElixirApi::Processor::CSV::OrdersToXML.delay(:run_at => 1.seconds.from_now, :queue => "cancel_import_#{Apartment::Tenant.current}", priority: 95).cancel_import(request.subdomain)
   end
+
+  def filter_scan_pack_settings
+   %w( enable_click_sku 
+    created_at 
+    updated_at 
+    show_success_image
+    success_image_src
+    success_image_time
+    show_fail_image
+    fail_image_src
+    fail_image_time
+    play_success_sound
+    success_sound_url
+    success_sound_vol
+    play_fail_sound
+    fail_sound_url
+    fail_sound_vol
+    skip_code_enabled
+    skip_code
+    note_from_packer_code_enabled
+    note_from_packer_code
+    service_issue_code_enabled
+    service_issue_code
+    restart_code_enabled
+    restart_code
+    show_order_complete_image
+    order_complete_image_src
+    order_complete_image_time
+    play_order_complete_sound
+    order_complete_sound_url
+    order_complete_sound_vol
+    type_scan_code_enabled
+    type_scan_code
+    escape_string
+    escape_string_enabled
+    post_scanning_option
+    record_lot_number
+    show_customer_notes
+    show_internal_notes
+    scan_by_shipping_label
+    display_location
+    string_removal_enabled
+    string_removal
+    first_escape_string_enabled
+    second_escape_string_enabled
+    second_escape_string
+    scan_by_packing_slip
+    return_to_orders
+    click_scan
+    click_scan_barcode
+    scanning_sequence
+    scanned
+    scanned_barcode
+    post_scanning_option_second
+    require_serial_lot
+    valid_prefixes
+    show_expanded_shipments
+    tracking_number_validation_enabled
+    tracking_number_validation_prefixes
+    partial
+    partial_barcode
+    scan_by_packing_slip_or_shipping_label
+    remove_enabled
+    remove_barcode
+    remove_skipped
+    display_location2
+    isplay_location3
+   )
+  end
+  def filter_general_settings
+    %w( inventory_tracking strict_cc conf_code_product_instruction search_by_product master_switch hex_barcode multi_box_shipments display_kit_parts print_ss_shipping_labels)
+   end
 
   # def delete_selected_orders(orders)
   #   orders.each do |order|

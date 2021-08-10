@@ -1,6 +1,7 @@
 class SettingsController < ApplicationController
   before_action :groovepacker_authorize!
   include SettingsHelper
+  include OrderConcern
 
   def restore
     data = File.read(params[:file].path)
@@ -114,8 +115,12 @@ class SettingsController < ApplicationController
     @result['ss_api_create_label'] = current_tenant.ss_api_create_label rescue false
 
     if general_setting.present?
-      @result['data']['settings'] = general_setting
-      @result['data']['settings'] = @result['data']['settings'].attributes.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type"))
+      if params[:app]
+        @result['data']['settings'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
+      else
+        @result['data']['settings'] = general_setting
+      end
+      @result['data']['settings'] = @result['data']['settings'].as_json.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type"))
     else
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
@@ -167,6 +172,7 @@ class SettingsController < ApplicationController
     scan_pack_setting = ScanPackSetting.all.first
 
     if scan_pack_setting.present?
+      scan_pack_setting =   ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['settings'] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select("id, name, max_totes"))
     else
       @result['status'] &= false

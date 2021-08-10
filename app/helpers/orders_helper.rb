@@ -306,7 +306,9 @@ module OrdersHelper
     order_data[:scan_hash][:data][:order].merge!({unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {}})
     order_data[:scan_hash][:data][:order][:multi_shipments] = order.get_se_old_shipments(order_data[:scan_hash][:data][:order][:multi_shipments])
     order_data[:scan_hash][:data][:order][:activities] = []
-    @orders_result.push(order_data)
+    generate_agor = Expo::GenerateAgor.new(order_data)
+    formated_data = generate_agor.format_data
+    @orders_result.push(formated_data)
   end
 
   def avg_time_per_item(username)
