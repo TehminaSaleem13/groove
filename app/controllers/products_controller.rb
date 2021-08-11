@@ -440,7 +440,7 @@ class ProductsController < ApplicationController
     setting = InventoryReportsSetting.last
     setting = setting.blank? ? InventoryReportsSetting.create : setting
     @result["setting"] = JSON.parse(setting.to_json)
-    @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
+    @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue nil
     @result["products"] = {}
     reports = ProductInventoryReport.includes([:products]).all
     reports.each_with_index do |report, index|
