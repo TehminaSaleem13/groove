@@ -203,13 +203,30 @@ module ScanPack
         height_per_page = '1in'
         reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
       when 'products'
+       printing_setting = PrintingSetting.all.last
         pdf_template = 'products/print_barcode_label.html.erb'
-        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip }
+        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => printing_setting.product_barcode_label_size}
         height_per_page = '1in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
-      pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-      common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+
+      if printing_setting.present?
+        case
+        when printing_setting.product_barcode_label_size == '2 x 1'
+          pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
+          common(pdf_html, reader_file_path, height_per_page, '2in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+        when printing_setting.product_barcode_label_size == '1.5 x 1'
+          pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
+          common(pdf_html, reader_file_path, height_per_page, '1.5in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+        else
+          pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
+          common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+        end
+      else
+        pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
+        common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+      end
+
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
       base_file_name = File.basename(pdf_path)
       pdf_file = File.open(reader_file_path)

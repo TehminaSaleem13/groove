@@ -125,6 +125,16 @@ class SettingsController < ApplicationController
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
+
+    printing_setting = PrintingSetting.all.last
+    printing_setting = PrintingSetting.create if printing_setting.nil?
+    if printing_setting.present?
+      @result['data']['settings'] =  @result['data']['settings'].as_json.merge('product_barcode_label_size'=> printing_setting.product_barcode_label_size)
+    else
+      @result['status'] &= false
+      @result['error_messages'] = ['No printing settings available for the system. Contact administrator.']
+    end
+
     @result["email_address_for_billing_notification"] = general_setting.email_address_for_billing_notification
     render json: @result
   end
@@ -137,7 +147,9 @@ class SettingsController < ApplicationController
   def update_settings
     @result = {'status' => true, 'error_messages' =>[], 'success_messages'=> [], 'notice_messages' => []}
     general_setting = GeneralSetting.all.first
-    @result = upadate_setting_attributes(general_setting, current_user)
+    printing_setting = PrintingSetting.all.last
+    printing_setting = PrintingSetting.create if printing_setting.nil?
+    @result = upadate_setting_attributes(general_setting, current_user, printing_setting)
     customer = find_stripe_customer
     update_with_stripe_customer(customer) if general_setting.email_address_for_billing_notification != params[:email_address_for_billing_notification] && !general_setting.email_address_for_billing_notification.nil?
     render json: @result

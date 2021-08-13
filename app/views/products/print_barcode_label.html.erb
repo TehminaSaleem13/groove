@@ -5,7 +5,51 @@
 <style>
 </style>
 <body style="margin-top:0pt;font-family:'Poppins'">
+<% if @product_barcode_label_size == '2 x 1' || @product_barcode_label_size == '1.5 x 1'%>
   <% @products.each do |product| %>
+    <div id="main_div" style="width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:80pt;background:white;max-height:80pt">
+    <% if !product.nil? && !product.product_barcodes.first.nil? && !product.product_barcodes.first.barcode.nil? %>
+      <div style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
+        <% if @show_sku_in_barcodeslip && product.primary_sku.present? %>
+          <div style="font-size: 9pt;font-weight: bold;max-height:9pt;width:100%;overflow:hidden;text-overflow:clip;white-space: nowrap;line-height: 9pt;text-align:justify"><%= product.primary_sku %></div>
+        <% end %>
+
+        <% if product.name.length <= 40 %>
+          <div style="font-size: 9pt; width: 100%; overflow: hidden;max-height:25pt;line-height: 9pt;text-align:justify;word-break: break-word;padding-bottom: 2pt;"><%= product.name %></div> 
+        <% elsif product.name.length > 40 && product.name.length < 72 %>
+          <div style="font-size: 9pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 9pt;text-align:justify;word-break: break-word;padding-bottom: 2pt;"><%= product.name %></div> 
+        <% elsif product.name.length >= 72 %>
+          <div style="font-size: 9pt; width: 100%; overflow: hidden;max-height:34pt;line-height: 9pt;text-align:justify;word-break: break-word;padding-bottom: 2pt;"><%= product.name %></div> 
+        <% end %>
+
+        <% if @show_bin_locations && product.primary_warehouse && (product.primary_warehouse.location_primary.present? || product.primary_warehouse.location_secondary.present? || product.primary_warehouse.location_tertiary.present?) %>
+          <div style="font-size: 9pt;font-weight: bold;width: 100%;overflow:hidden;max-height:9pt;line-height: 9pt;padding-bottom: 1pt;">
+            <% locations = [product.primary_warehouse.location_primary, product.primary_warehouse.location_secondary, product.primary_warehouse.location_tertiary, '', nil].select(&:present?) %>
+            <% locations.each_with_index do |loc, index| %>
+              <div style="display:inline-block;float:left;width:<%= 100/locations.count.to_f.round(2) %>%;<%= 'text-align:center;' if index == 1 && locations.count == 3 %><%= 'text-align:right;' if index == 2 && locations.count == 3 %><%= 'text-align:right;' if index == 1 && locations.count == 2 %><%= 'text-align:center;' if locations.count == 1 %>">
+                <%= loc %>
+              </div>
+            <% end %>
+          </div>
+        <% end %>
+      </div>
+
+      <% barcode_string = generate_barcode(product.primary_barcode) %>
+      <div style="height:50pt;overflow:hidden;position: absolute;bottom:-8pt;width:90%;left:5%">
+        <%= wicked_pdf_image_tag('/images/'+ barcode_string+".png", {:width => '100%', height: '100%', class: 'barcode_img'}) %>
+      </div>
+
+      <div style="width: 100%;position:absolute;bottom:-8pt;background:white">
+        <center style="font-size:8pt;line-height:9pt"><%=  product.primary_barcode %></center>
+      </div>
+    <% else %>
+      <br/>
+      <div style="font-size: 13pt; margin: 0 auto;">Barcode not available</div>
+    <% end %>
+    </div>
+  <% end %>
+<% else %>
+ <% @products.each do |product| %>
     <div id="main_div" style="width:100%;margin: 0 auto;page-break-after:always;display:inline-block;page-break-inside:avoid;position:relative;height:80pt;background:white;max-height:80pt">
     <% if !product.nil? && !product.product_barcodes.first.nil? && !product.product_barcodes.first.barcode.nil? %>
       <div style="display:inline-block;background:white;position:relative;z-index:1;width:100%">
@@ -47,5 +91,6 @@
     <% end %>
   </div>
   <% end %>
+<% end %>
 </body>
 </html>

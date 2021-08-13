@@ -76,6 +76,15 @@ module SettingsHelper
     )
   end
 
+  def permit_printing_setting_params
+    # Add params.permit when upgradng to rails 4
+    params.as_json(
+      only: [
+        :product_barcode_label_size
+      ]
+    )
+  end
+
   def permit_general_setting_params
     params.as_json(
       only: [
@@ -178,11 +187,13 @@ module SettingsHelper
     @result
   end
 
-  def upadate_setting_attributes(general_setting,current_user)
+  def upadate_setting_attributes(general_setting,current_user, printing_setting = nil)
     if general_setting.present?
       if current_user.can? 'edit_general_prefs'
         general_setting.attributes = permit_general_setting_params
-        if general_setting.save
+        printing_setting.attributes = permit_printing_setting_params
+
+        if general_setting.save &&  printing_setting.save
           @result['success_messages'] = ['Settings updated successfully.']
         else
           @result['status'] &= false
