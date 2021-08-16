@@ -114,7 +114,7 @@ class AddLogCsv
               end
               unless billing_date.nil?
                 charge_in_30_days = ((Time.now - 30.days)..Time.now).cover?(billing_date) ?  true : false
-                charge_in_30_days = false  if Subscription.where(tenant_name: "#{sub.tenant_name}").first.status != 'completed'
+                # charge_in_30_days = false  if Subscription.where(tenant_name: "#{sub.tenant_name}").first.status != 'completed'
               end
               sub_amount = (sub.amount.to_f / 100) rescue 0
               val = '*' if sub_amount == 0 || (sub_amount != (access_restriction.try(:num_users) * 50).to_f )
