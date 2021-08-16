@@ -44,6 +44,7 @@ module ProductsService
 
     def find_result_rows(result)
       not_in = []
+      result_rows = []
       params[:productArray].each do |product|
         not_in.push(product['id'])
       end
@@ -55,7 +56,7 @@ module ProductsService
     end
 
     def inverted_and_has_products?
-      params[:inverted] && !params[:productArray].blank?
+      params[:inverted].to_b && !params[:productArray].blank?
     end
 
     def select_all_with_inverted?

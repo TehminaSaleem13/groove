@@ -203,9 +203,14 @@ module ScanPack
         height_per_page = '1in'
         reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
       when 'products'
-       printing_setting = PrintingSetting.all.last
+        printing_setting = PrintingSetting.all.last
+        if printing_setting.present?
+          product_barcode_label_size = printing_setting.product_barcode_label_size
+        else
+          product_barcode_label_size = '3 x 1'
+        end
         pdf_template = 'products/print_barcode_label.html.erb'
-        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => printing_setting.product_barcode_label_size}
+        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => product_barcode_label_size}
         height_per_page = '1in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
