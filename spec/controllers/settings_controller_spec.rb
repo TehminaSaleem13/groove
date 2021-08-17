@@ -62,13 +62,30 @@ RSpec.describe SettingsController, type: :controller do
       @user.role.update(edit_general_prefs: true)
       request.accept = 'application/json'
       printing_setting = PrintingSetting.create
-        
+      post :get_settings, params: {"app":true}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+      expect(JSON.parse(response.body)["data"]["settings"]["inventory_tracking"]).to eq(true)
+
       request.accept = 'application/json'
       post :get_settings
 
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)
       expect(JSON.parse(response.body)["data"]["settings"]["product_barcode_label_size"]).to eq('3 x 1')
+
+    end
+
+    it 'get Scan Pack Settings' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      @tenant = Tenant.create(name:"#{tenant}")
+      @user.role.update(edit_scanning_prefs: true)
+      request.accept = 'application/json'
+      post :get_scan_pack_settings, params: {"app":true}
+      scan_pack_setting = ScanPackSetting.create
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
     end
   end
 end
