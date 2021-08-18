@@ -92,7 +92,7 @@ class AddLogCsv
       CsvExportMailer.send_duplicates_order_info(tenant.name, dup_order_increment_ids, dup_order_ids).deliver
     end  
   end
-
+  
   def send_tenant_log
     headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Active Users(in tenant)" , "Number of Products", "Stipe Products Count" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "QTY Scanned in last 30", "Is Delinquent", "Admintools URL","Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|
@@ -107,14 +107,15 @@ class AddLogCsv
               customer = Stripe::Customer.retrieve("#{sub.stripe_customer_id}") rescue nil
               subscription = customer.subscriptions.retrieve("#{sub.customer_subscription_id}")  rescue nil
               total_product =  Stripe::SubscriptionItem.list(subscription: "#{sub.customer_subscription_id}").count rescue nil
+              invoice = Stripe::Invoice.retrieve("#{customer.subscriptions.data.first.latest_invoice}") rescue nil
               if customer.present?
                 last_stripe_amount = (customer.subscriptions.data.first.plan.amount/ 100) rescue 0
-                billing_date = DateTime.strptime("#{customer.subscriptions.data.first.plan.created}",'%s') rescue nil
+                billing_date = DateTime.strptime("#{invoice.created}",'%s') rescue nil
                 is_delinquent = customer.delinquent == true ? "delinquent" : "current"
               end
               unless billing_date.nil?
                 charge_in_30_days = ((Time.now - 30.days)..Time.now).cover?(billing_date) ?  true : false
-                # charge_in_30_days = false  if Subscription.where(tenant_name: "#{sub.tenant_name}").first.status != 'completed'
+                charge_in_30_days = false  if invoice.status != 'paid'
               end
               sub_amount = (sub.amount.to_f / 100) rescue 0
               val = '*' if sub_amount == 0 || (sub_amount != (access_restriction.try(:num_users) * 50).to_f )
