@@ -43,6 +43,11 @@ module Groovepacker
         general_setting.save
       end
 
+      if PrintingSetting.all.length == 0
+        printing_setting = PrintingSetting.new
+        printing_setting.save
+      end
+
       if ExportSetting.all.length == 0
         ExportSetting.create(:auto_email_export => 1,
                              :export_orders_option => 'on_same_day',
