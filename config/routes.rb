@@ -199,6 +199,7 @@ Groovepacks::Application.routes.draw do
   resources :settings do
     collection do
       get 'get_settings'
+      get 'get_setting'
       get 'get_columns_state'
       put 'update_settings'
       put 'update_email_address_for_packer_notes'

@@ -139,6 +139,24 @@ class SettingsController < ApplicationController
     render json: @result
   end
 
+  def get_setting
+    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'data'=> {}}
+    scan_pack_setting = ScanPackSetting.all.first
+    general_setting = GeneralSetting.all.first
+
+    if general_setting.present? && scan_pack_setting.present?
+      @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
+      @result['data']['general_setting'] = @result['data']['general_setting'].as_json.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type"))
+      scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
+      @result['data']["scanpack_setting"] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select("id, name, max_totes"))
+    else
+      @result['status'] &= false
+      @result['error_messages'] = ['No general settings Or Scan Pack settings  available for the system. Contact administrator.']
+    end
+
+    render json: @result
+  end
+  
   def find_stripe_customer
     tenant = Apartment::Tenant.current
     customer = Subscription.find_by_tenant_name(tenant) rescue nil
