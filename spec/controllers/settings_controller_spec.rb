@@ -87,5 +87,18 @@ RSpec.describe SettingsController, type: :controller do
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)
     end
+
+    it 'get Scan Pack  & General Settings for Expo' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      @tenant = Tenant.create(name:"#{tenant}")
+      @user.role.update(edit_general_prefs: true)
+      @user.role.update(edit_scanning_prefs: true)
+      request.accept = 'application/json'
+      get :get_setting, params: {"app":true}
+      scan_pack_setting = ScanPackSetting.create
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+    end
   end
 end
