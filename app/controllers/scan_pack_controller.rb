@@ -20,7 +20,7 @@ class ScanPackController < ApplicationController
     current_timestamp = params[:data].last['time'].in_time_zone rescue nil
     if params[:data].present?
       tenant = Tenant.find_by_name(Apartment::Tenant.current)
-      log_scn_obj = Groovepacker::ScanPackV2::LogScanService.new
+      log_scn_obj = Expo::NewLogScanService.new
       params[:data] = create_log_file_data(params, :data, 'expo_log_data')
       if tenant.expo_logs_delay
         session = session.present? ? session : nil

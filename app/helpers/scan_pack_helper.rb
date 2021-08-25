@@ -194,7 +194,7 @@ module ScanPackHelper
   end
 
   def product_scan_v2(input, state, id, box_id, options={})
-    product_scan_object = ScanPack::ProductScanServiceV2.new(
+    product_scan_object = Expo::NewProductScanServiceV2.new(
       [
         options[:current_user], options[:session],
         input, state, id, box_id, options[:typein_count] || 1
