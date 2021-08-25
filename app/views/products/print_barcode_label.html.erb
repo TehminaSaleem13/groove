@@ -35,7 +35,7 @@
       </div>
 
       <% barcode_string = generate_barcode(product.primary_barcode) %>
-      <div style="height:35pt;overflow:hidden;position: absolute;bottom:-4pt;width:90%;left:5%">
+      <div style="height:25pt;overflow:hidden;position: absolute;bottom:10pt;width:90%;left:5%">
         <%= wicked_pdf_image_tag('/images/'+ barcode_string+".png", {:width => '100%', height: '100%', class: 'barcode_img'}) %>
       </div>
 
