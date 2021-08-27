@@ -594,21 +594,28 @@ RSpec.describe ScanPackController, type: :controller do
       ProductSku.create(sku: "PRODUCT2", purpose: nil, product_id: @product1.id, order: 0)
 
       @order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: @order.id, name: "TRIGGER SS JERSEY-BLACK-M", product_id: @product1.id, scanned_status: "notscanned", scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: "unprocessed", inv_status_reason: "", clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
-      @order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: @order.id, name: "TRIGGER SS JERSEY-BLACK-M", product_id: @product2.id, scanned_status: "notscanned", scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: "unprocessed", inv_status_reason: "", clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      @order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: @order.id, name: "TRIGGER SS JERSEY-BLACK-M", product_id: @product2.id, scanned_status: "notscanned", scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: "unprocessed", inv_status_reason: "", clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
     end
 
 
     it 'Order Scanned Using Click' do
       ScanPackSetting.last.update(partial: true, remove_enabled: true, enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
-      post :scan_pack_v2, params: { data: [ { Log_count: "1", SKU: "PRODUCT2", actionBarcode: false, event: "click_scan", id: @order.id, increment_id: @order.increment_id, input: "PRODUCT2", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: Time.current ,updated_at: Time.current } ] }
+      post :new_scan_pack_v2, params: { data: [ { Log_count: "1", SKU: "PRODUCT2", actionBarcode: false, event: "click_scan", id: @order.id, increment_id: @order.increment_id, input: "PRODUCT2", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", qty_rem: 0, time: Time.current ,updated_at: Time.current } ] }
       expect(response.status).to eq(200) 
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
 
 
-    it 'Order Scanned Using Scanned' do
+    it 'Action Barcode RESTART' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
-      post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.default" , Log_count: "", SKU: "PRODUCT2", actionBarcode: true, event: "scanned", id: @order.id, increment_id: @order.increment_id, input: "SCANNED", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: Time.current ,updated_at: Time.current } ] }
+      post :new_scan_pack_v2, params: { data: [ { state: "scanpack.rfp.default" , Log_count: "", SKU: "PRODUCT2", actionBarcode: true, event: "regular", id: @order.id, increment_id: @order.increment_id, input: "RESTART", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: Time.current ,updated_at: Time.current } ] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)["status"]).to eq("OK")
+    end
+
+    it 'Action Barcode REMOVE' do
+      ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      post :new_scan_pack_v2, params: { data: [ { state: "scanpack.rfp.default" , Log_count: "", SKU: "PRODUCT2", actionBarcode: true, event: "regular", id: @order.id, increment_id: @order.increment_id, input: "REMOVE", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: Time.current ,updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
@@ -631,7 +638,7 @@ RSpec.describe ScanPackController, type: :controller do
     it 'Order Scanned Using Note' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
 
-      post :scan_pack_v2, params: { data: [ { state: "" , Log_count: "1", SKU: "", event: "note", id: @order.id, increment_id: @order.increment_id, input: "*", message: 'test note', name: Apartment::Tenant.current, order_item_id: "", time: DateTime.now ,updated_at: Time.current } ] }
+      post :new_scan_pack_v2, params: { data: [ { state: "" , Log_count: "1", SKU: "", event: "note", id: @order.id, increment_id: @order.increment_id, input: "*", message: 'test note', name: Apartment::Tenant.current, order_item_id: "", time: DateTime.now ,updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
