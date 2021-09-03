@@ -309,7 +309,7 @@ module OrdersHelper
       count = 10
       remaining_count = order.get_unscanned_items(limit: nil).count - 10
     else
-      count = params_data[:count].to_i
+      count = params_data[:count].to_i + 10
       remaining_count = order.get_unscanned_items(limit: nil).count - params_data[:count].to_i
     end
 
