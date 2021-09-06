@@ -96,7 +96,6 @@ class OrderItem < ActiveRecord::Base
         collection
       end
     end
-    result['order_item_id'] = item.id
     result['instruction'] = item.packing_instructions
     result['confirmation'] = item.packing_instructions_conf
     result['images'] = sort_by_order[item.cached_product_images]

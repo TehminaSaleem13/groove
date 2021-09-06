@@ -233,9 +233,8 @@ module OrdersHelper
 
     orders.each do |order|
       itemslength = orders_scanning_count[order.id].values.sum rescue 0
-      order.scan_pack_v2 = (params[:app].present? rescue @params[:app].present?)    
-      params_data = (params rescue @params)
-      (params[:app] rescue @params[:app]) ? generate_order_hash_v2(order, itemslength, params_data) : generate_order_hash(order, itemslength)
+      order.scan_pack_v2 = (params[:app].present? rescue @params[:app].present?)
+      (params[:app] rescue @params[:app]) ? generate_order_hash_v2(order, itemslength) : generate_order_hash(order, itemslength)
     end
     return @orders_result
   end
@@ -271,7 +270,7 @@ module OrdersHelper
     @orders_result.push(order_data)
   end
 
-  def generate_order_hash_v2(order, itemslength, params_data)
+  def generate_order_hash_v2(order, itemslength)
   	store_name = order.store != nil ? order.store.name : ''
     order_data = { 'id' => order.id,
       'ordernum' => order.increment_id,
@@ -304,22 +303,7 @@ module OrdersHelper
         order: order.as_json
       }
     }
-
-    if params_data[:count].to_i == 0
-      count = 10
-      remaining_count = order.get_unscanned_items(limit: nil).count - 10
-    else
-      count = params_data[:count].to_i
-      remaining_count = order.get_unscanned_items(limit: nil).count - params_data[:count].to_i
-    end
-
-    if params_data[:count].present?
-      unscanned_items = order.get_unscanned_items(limit: nil).drop params_data[:count].to_i
-    else
-      unscanned_items = order.get_unscanned_items(limit: 10)
-    end
-
-    order_data[:scan_hash][:data][:order].merge!({unscanned_items: unscanned_items.first(10), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {}, remaining_items_count: remaining_count, count: count })
+    order_data[:scan_hash][:data][:order].merge!({unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {}})
     order_data[:scan_hash][:data][:order][:multi_shipments] = order.get_se_old_shipments(order_data[:scan_hash][:data][:order][:multi_shipments])
     order_data[:scan_hash][:data][:order][:activities] = []
     generate_agor = Expo::GenerateAgor.new(order_data)
