@@ -35,13 +35,13 @@ module ProductMethodsHelper
   def create_image_from_req(params, current_tenant)
     unless params[:base_64_img_upload]
       file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image].original_filename
-      GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
+      GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type) rescue nil
       # return file_name
     else
       image_content = Base64.decode64(params[:product_image][:image].to_s)
       content_type = params[:product_image][:content_type]
       file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image][:original_filename]
-      GroovS3.create_image(current_tenant, file_name, image_content, content_type)
+      GroovS3.create_image(current_tenant, file_name, image_content, content_type) rescue nil
       # return file_name
     end
     file_name
@@ -109,7 +109,7 @@ module ProductMethodsHelper
     product_item.purpose = item['purpose'] if item_type == 'SKU'
     product_item.product_id = id unless product_item.persisted?
     product_item.order = order
-    product_item.packing_count = item['packing_count'] if item_type.downcase == 'barcode' 
+    product_item.packing_count = item['packing_count'] if item_type.downcase == 'barcode'
     product_item.product.add_product_activity( "The #{item_type} #{product_item.send(item_type.downcase.to_sym)} was added to this item",current_user.username) if status == 'new'
     item[:permit_same_barcode] ? product_item.save(validate: false) : product_item.save
   end
