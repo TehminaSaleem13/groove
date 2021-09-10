@@ -5,9 +5,9 @@ module ShippingEasyHelper
     # image_data = IO.read(open(item["product"]["image"]["original"]))
     file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}"
     tenant = Apartment::Tenant.current
-    image_created = GroovS3.create_image(tenant, file_name, image_data, 'public_read') rescue nil
+    GroovS3.create_image(tenant, file_name, image_data, 'public_read')
     s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
-    image_created ? s3_image_url : nil
+    return s3_image_url
   end
 
   def not_to_update(shiping_easy_order, se_order)
