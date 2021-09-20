@@ -17,7 +17,7 @@ module ScanPack
       id = @params[:id]
       code = @params[:code]
 
-      if id.blank? || code.blank? || @params[:next_item].blank?
+      if id.blank? || (code.blank? && @general_setting.strict_cc) || @params[:next_item].blank?
         set_error_messages('Order id, Item id and confirmation code required')
       elsif @order.blank?
         set_error_messages("Could not find order with id: #{id}")
