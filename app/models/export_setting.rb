@@ -81,7 +81,7 @@ class ExportSetting < ActiveRecord::Base
     # result = set_result_hash
     start_time, end_time = set_start_and_end_time
     return with_error_filename if start_time.blank?
-    
+
     orders = Order.where(scanned_on: start_time..end_time)
 
     ExportSetting.update_all(:last_exported => Time.zone.now)
@@ -165,7 +165,7 @@ class ExportSetting < ActiveRecord::Base
     packing_user = User.where(id: order.packing_user_id).first
     return if packing_user.blank?
     single_row[:packing_user] = "#{packing_user.name} (#{packing_user.username})"
-    single_row[:warehouse_name] = order_item.product.primary_warehouse
+    single_row[:warehouse_name] = order_item.product.try(:primary_warehouse)
                                   .try(:inventory_warehouse).try(:name)
   end
   def update_single_row_for_product_info(single_row, order_item)
