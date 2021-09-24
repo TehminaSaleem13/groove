@@ -52,7 +52,7 @@ every 10.minutes do # 1.minute 1.day 1.week 1.month 1.year is also supported
   if environment=='staging'
     command "/home/ubuntu/groove/scripts-staging/meganto_status_update.sh"
   else
-    command "/home/ubuntu/groove/meganto_status_update.sh" 
+    command "/home/ubuntu/groove/meganto_status_update.sh"
   end
 end
 
@@ -127,7 +127,7 @@ end
 # every 1.month do
 #   if environment=='production'
 #     rake "doo:scheduled_tenant_details"
-#   end  
+#   end
 # end
 
 every 1.day, :at => '12:00 am' do
@@ -143,10 +143,9 @@ end
 # end
 
 
-
-
-
-
+every 20.minutes do
+  rake 'doo:truncate_logs'
+end
 
 ###############################
 
@@ -213,7 +212,7 @@ end
     if environment=='staging'
       command "/home/ubuntu/groove/scripts-staging/meganto_status_update.sh"
     else
-      command "/home/ubuntu/groove/meganto_status_update.sh" 
+      command "/home/ubuntu/groove/meganto_status_update.sh"
     end
   end
 
@@ -284,7 +283,7 @@ end
   every 1.month do
     if environment=='production'
       rake "doo:scheduled_tenant_details"
-    end  
+    end
   end
 
   every 1.day, :at => '12:00 am' do
