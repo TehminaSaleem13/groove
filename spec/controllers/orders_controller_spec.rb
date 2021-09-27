@@ -8,7 +8,7 @@ RSpec.describe OrdersController, type: :controller do
     generalsetting = GeneralSetting.all.first
     generalsetting.update_column(:inventory_tracking, true)
     generalsetting.update_column(:hold_orders_due_to_inventory, true)
-    user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true)
+    user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true, add_edit_order_items: true)
     @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)
     access_restriction = FactoryBot.create(:access_restriction)
     @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
@@ -48,6 +48,31 @@ RSpec.describe OrdersController, type: :controller do
       import_item = ImportItem.find_by_store_id(@store.id)
       expect(Order.all.count).to eq(4)
       expect(Product.all.count).to eq(5)
+    end
+  end
+
+  describe 'Bulk Order Operations' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it  'Delete Bulk Order' do
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCT1')
+
+      order1 = FactoryBot.create(:order, increment_id: 'ORDER1', status: 'awaiting', store: @store, prime_order_id: '1660160213', store_order_id: '1660160213')
+      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order1, name: product.name)
+
+      request.accept = 'application/json'
+
+      post :delete_orders, params: { select_all: true, status: 'all', user_id: @user.id }
+
+      expect(response.status).to eq(200)
     end
   end
 
