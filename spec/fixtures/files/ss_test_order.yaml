@@ -7,30 +7,30 @@ orders:
   createDate: '2020-09-11T04:42:37.3930000'
   modifyDate: '2020-09-11T04:43:35.7370000'
   paymentDate: '2020-09-11T04:42:37.0000000'
-  shipByDate: 
+  shipByDate:
   orderStatus: shipped
   customerId: 418264273
   customerUsername: alphatester@yopmail.com
   customerEmail: alphatester@yopmail.com
   billTo:
     name: Alpha Tester
-    company: 
+    company:
     street1: ''
-    street2: 
-    street3: 
+    street2:
+    street3:
     city: ''
-    state: 
+    state:
     postalCode: ''
     country: '  '
     phone: 111-111-1111
-    residential: 
-    addressVerified: 
+    residential:
+    addressVerified:
   shipTo:
     name: Alpha Tester
     company: GROOVEPACKER
     street1: 110 COBBLESTONE CIR
     street2: ''
-    street3: 
+    street3:
     city: NORTH LITTLE ROCK
     state: AR
     postalCode: 72116-3739
@@ -40,21 +40,39 @@ orders:
     addressVerified: Address validated successfully
   items:
   - orderItemId: 1148846567
-    lineItemKey: 
+    lineItemKey:
     sku: P-WAXX-OFF
     name: Waxx-Off
-    imageUrl: 
-    weight: 
+    imageUrl:
+    weight:
     quantity: 1
     unitPrice: 1.0
-    taxAmount: 
-    shippingAmount: 
-    warehouseLocation: 
+    taxAmount:
+    shippingAmount:
+    warehouseLocation:
     options: []
     productId: 25108976
-    fulfillmentSku: 
+    fulfillmentSku:
     adjustment: false
-    upc: 
+    upc:
+    createDate: '2020-09-11T04:42:37.517'
+    modifyDate: '2020-09-11T04:42:37.517'
+  - orderItemId: 1148987456
+    lineItemKey:
+    sku: Coupon
+    name: 'Coupon: Coupon'
+    imageUrl:
+    weight:
+    quantity: 1
+    unitPrice: 1.0
+    taxAmount:
+    shippingAmount:
+    warehouseLocation:
+    options: []
+    productId: 25108986
+    fulfillmentSku:
+    adjustment: false
+    upc:
     createDate: '2020-09-11T04:42:37.517'
     modifyDate: '2020-09-11T04:42:37.517'
   orderTotal: 1.0
@@ -65,27 +83,27 @@ orders:
   internalNotes: Internal Note
   gift: false
   giftMessage: Gift Note
-  paymentMethod: 
-  requestedShippingService: 
+  paymentMethod:
+  requestedShippingService:
   carrierCode: stamps_com
   serviceCode: usps_first_class_mail
   packageCode: package
   confirmation: none
   shipDate: '2020-09-11'
-  holdUntilDate: 
+  holdUntilDate:
   weight:
     value: 12.0
     units: ounces
     WeightUnits: 1
-  dimensions: 
+  dimensions:
   insuranceOptions:
-    provider: 
+    provider:
     insureShipment: false
     insuredValue: 0.0
   internationalOptions:
-    contents: 
-    customsItems: 
-    nonDelivery: 
+    contents:
+    customsItems:
+    nonDelivery:
   advancedOptions:
     warehouseId: 82982
     nonMachinable: false
@@ -93,22 +111,22 @@ orders:
     containsAlcohol: false
     mergedOrSplit: false
     mergedIds: []
-    parentId: 
+    parentId:
     storeId: 203151
-    customField1: 
-    customField2: 
-    customField3: 
-    source: 
+    customField1:
+    customField2:
+    customField3:
+    source:
     billToParty: my_account
-    billToAccount: 
-    billToPostalCode: 
-    billToCountryCode: 
+    billToAccount:
+    billToPostalCode:
+    billToCountryCode:
     billToMyOtherAccount: 84615
-  tagIds: 
-  userId: 
+  tagIds:
+  userId:
   externallyFulfilled: false
-  externallyFulfilledBy: 
-  labelMessages: 
+  externallyFulfilledBy:
+  labelMessages:
 - orderId: 727657875
   orderNumber: SSTestTaggedOrder
   orderKey: 8d43bab3-833e-9cdf-2437-f8562f91241c
@@ -116,30 +134,30 @@ orders:
   createDate: '2020-09-11T04:44:24.0000000'
   modifyDate: '2020-09-11T04:44:24.6770000'
   paymentDate: '2020-09-11T04:44:24.0000000'
-  shipByDate: 
+  shipByDate:
   orderStatus: awaiting_shipment
   customerId: 418264273
   customerUsername: alphatester@yopmail.com
   customerEmail: alphatester@yopmail.com
   billTo:
     name: Alpha Tester
-    company: 
+    company:
     street1: ''
-    street2: 
-    street3: 
+    street2:
+    street3:
     city: ''
-    state: 
+    state:
     postalCode: ''
     country: '  '
     phone: 111-111-1111
-    residential: 
-    addressVerified: 
+    residential:
+    addressVerified:
   shipTo:
     name: Alpha Tester
     company: GROOVEPACKER
     street1: 110 COBBLESTONE CIR
     street2: ''
-    street3: 
+    street3:
     city: NORTH LITTLE ROCK
     state: AR
     postalCode: 72116-3739
@@ -149,52 +167,52 @@ orders:
     addressVerified: Address validated successfully
   items:
   - orderItemId: 1148847302
-    lineItemKey: 
+    lineItemKey:
     sku: T-COMB
     name: Dreadlocks Comb
-    imageUrl: 
-    weight: 
+    imageUrl:
+    weight:
     quantity: 1
     unitPrice: 0.0
-    taxAmount: 
-    shippingAmount: 
-    warehouseLocation: 
+    taxAmount:
+    shippingAmount:
+    warehouseLocation:
     options: []
     productId: 25104961
-    fulfillmentSku: 
+    fulfillmentSku:
     adjustment: false
-    upc: 
+    upc:
     createDate: '2020-09-11T04:44:24.09'
     modifyDate: '2020-09-11T04:44:24.09'
   orderTotal: 0.0
   amountPaid: 0.0
   taxAmount: 0.0
   shippingAmount: 0.0
-  customerNotes: 
-  internalNotes: 
+  customerNotes:
+  internalNotes:
   gift: false
-  giftMessage: 
-  paymentMethod: 
-  requestedShippingService: 
-  carrierCode: 
-  serviceCode: 
-  packageCode: 
+  giftMessage:
+  paymentMethod:
+  requestedShippingService:
+  carrierCode:
+  serviceCode:
+  packageCode:
   confirmation: none
-  shipDate: 
-  holdUntilDate: 
+  shipDate:
+  holdUntilDate:
   weight:
     value: 0.0
     units: ounces
     WeightUnits: 1
-  dimensions: 
+  dimensions:
   insuranceOptions:
-    provider: 
+    provider:
     insureShipment: false
     insuredValue: 0.0
   internationalOptions:
-    contents: 
-    customsItems: 
-    nonDelivery: 
+    contents:
+    customsItems:
+    nonDelivery:
   advancedOptions:
     warehouseId: 82982
     nonMachinable: false
@@ -202,20 +220,20 @@ orders:
     containsAlcohol: false
     mergedOrSplit: false
     mergedIds: []
-    parentId: 
+    parentId:
     storeId: 203151
-    customField1: 
-    customField2: 
-    customField3: 
-    source: 
-    billToParty: 
-    billToAccount: 
-    billToPostalCode: 
-    billToCountryCode: 
-    billToMyOtherAccount: 
+    customField1:
+    customField2:
+    customField3:
+    source:
+    billToParty:
+    billToAccount:
+    billToPostalCode:
+    billToCountryCode:
+    billToMyOtherAccount:
   tagIds:
   - 48826
-  userId: 
+  userId:
   externallyFulfilled: false
-  externallyFulfilledBy: 
-  labelMessages: 
+  externallyFulfilledBy:
+  labelMessages:

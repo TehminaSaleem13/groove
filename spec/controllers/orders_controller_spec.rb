@@ -277,7 +277,7 @@ RSpec.describe OrdersController, type: :controller do
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(2)
-      expect(Product.count).to eq(2)
+      expect(Product.count).to eq(3)
 
       ss_import_item = ImportItem.find_by_store_id(ss_store.id)
       expect(ss_import_item.status).to eq('completed')
@@ -298,9 +298,9 @@ RSpec.describe OrdersController, type: :controller do
       tenant.gdpr_shipstation = true
       tenant.save
       request.accept = 'application/json'
-      get :import_for_ss, params: {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"range_import", "import_date"=>"null", "start_date"=>DateTime.now - 2.days, "end_date"=>DateTime.now, "order_date_type"=>"modified", "order_id"=>"null"}    
+      get :import_for_ss, params: {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"range_import", "import_date"=>"null", "start_date"=>DateTime.now - 2.days, "end_date"=>DateTime.now, "order_date_type"=>"modified", "order_id"=>"null"}
       expect(response.status).to eq(200)
-  
+
       ss_store.destroy
     end
 
@@ -401,13 +401,13 @@ RSpec.describe OrdersController, type: :controller do
 
       post :index, params:{"filter"=>"all", "sort"=>"", "order"=>"DESC", "limit"=>"20", "offset"=>"0", "product_search_toggle"=>"undefined", "app"=>true}
       expect(response.status).to eq(200)
-  
+
       expect(JSON.parse(response.body)["orders_count"]["scanned"]).to eq(1)
       expect(JSON.parse(response.body)["orders_count"]["all"]).to eq(1)
 
       post :index, params:{"filter"=>"all", "sort"=>"", "order"=>"DESC", "limit"=>"20", "offset"=>"0", "product_search_toggle"=>"undefined", "app"=>true, "count"=> "1"}
       expect(response.status).to eq(200)
-  
+
       expect(JSON.parse(response.body)["orders_count"]["scanned"]).to eq(1)
       expect(JSON.parse(response.body)["orders_count"]["all"]).to eq(1)
     end
