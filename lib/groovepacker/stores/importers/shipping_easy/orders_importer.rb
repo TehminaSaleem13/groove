@@ -393,7 +393,7 @@ module Groovepacker
                     order_item = shiping_easy_order.order_items.where(sku: item["sku"]).first
                     new_qty = shiping_easy_order.order_items.where(sku: item["sku"]).first.qty + item["quantity"]
                     new_price = shiping_easy_order.order_items.where(sku: item["sku"]).first.price + item["unit_price"].to_f
-              
+
                     order_item.assign_attributes( qty: new_qty,
                       price: new_price,
                       row_total: new_price.to_f*new_qty.to_f)
@@ -416,7 +416,9 @@ module Groovepacker
                 log = {order_id: shiping_easy_order.increment_id, Time: Time.now}
                 on_demand_logger.info(log)
               end
-              shiping_easy_order = Order.find_by_increment_id_and_store_order_id(shiping_easy_order.increment_id, shiping_easy_order.store_order_id)
+
+              shiping_easy_order.reload
+
               if check_for_replace_product
                 add_order_activity_for_gp_coupon(shiping_easy_order, order["recipients"][0]["line_items"])
               else
