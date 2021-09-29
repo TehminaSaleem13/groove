@@ -52,4 +52,6 @@ Groovepacks::Application.configure do
   config.active_support.deprecation = :stderr
 
   ENV['SHOPIFY_BILLING_IN_TEST'] = "true"
+
+  config.action_mailer.perform_deliveries = false
 end
