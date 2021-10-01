@@ -10,6 +10,10 @@ module ScanPack
 
     def run
       serial_scan if data_is_valid
+      begin
+        @result['data']['serial']['quantity'] = @params[:count].to_i rescue nil
+      rescue => e
+      end
       @result
     end
 
@@ -47,14 +51,14 @@ module ScanPack
             if (serial.downcase.start_with?(string.downcase))
               value = true
               @params[:serial] = @params[:serial].downcase.sub(string.downcase, '')
-              break  
-            end  
+              break
+            end
           end
-          if value == false 
+          if value == false
             set_error_messages("The value scanned does not appear to be a valid serial or lot number. Please check the \'Require Serial/Lot Prefix\' setting in your scan and pack options.")
-          end  
+          end
         end
-      end 
+      end
     end
 
     def serial_scan
@@ -71,7 +75,7 @@ module ScanPack
       if should_scan_serial
         @order.addactivity("Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"", @current_user.name)
       else
-        do_product_scan(serial_added) 
+        do_product_scan(serial_added)
       end
     end
 
@@ -147,7 +151,8 @@ module ScanPack
     end
 
     def do_product_scan(serial_added)
-      count = ProductBarcode.find_by_barcode(@params["barcode"]).packing_count rescue 1 if !@params["clicked"]
+      packing_count = ProductBarcode.find_by_barcode(@params["barcode"]).packing_count.to_i rescue 1
+      count = packing_count == 1 ? (@params[:count].to_i > 0 ? @params[:count].to_i : 1) : packing_count
       @order.addactivity(
         "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
         @current_user.name

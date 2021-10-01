@@ -24,17 +24,20 @@ module ScanPack
     def type_scan
       next_item = @params[:next_item]
       return unless do_check_valid_order_item_or_valid_kit_product(next_item)
-
       barcodes = next_item[:barcodes]
       first_barcode = barcodes[0]
       unless barcodes.blank? || first_barcode.blank? || first_barcode[:barcode].blank?
         @result['data'] = product_scan(
-            first_barcode[:barcode], 'scanpack.rfp.default', @params[:id], @params[:box_id], 
+            first_barcode[:barcode], 'scanpack.rfp.default', @params[:id], @params[:box_id],
             {
               clicked: false, serial_added: false, typein_count: @params[:count].to_i,
               current_user: @current_user, session: @session
             }
           )
+          begin
+            @result['data']['data']['serial']['count'] = @params[:count].to_i rescue nil
+          rescue => e
+          end
         # @order.addactivity("Type-In count Scanned for product #{next_item[:sku].to_s}", @current_user.username)
       end
 

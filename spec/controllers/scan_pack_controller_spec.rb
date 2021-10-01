@@ -423,6 +423,34 @@ RSpec.describe ScanPackController, type: :controller do
       ScanPackSetting.last.update(partial: true, remove_enabled: true)
     end
 
+    it 'Serial Scan with Type Scan' do
+      ScanPackSetting.last.update(scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'awaiting', store: @store)
+      product1 = FactoryBot.create(:product, record_serial: true, is_skippable: true)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+      order_item1 = FactoryBot.create(:order_item, product_id: product1.id, qty: 5, price: 10, row_total: 10, order: order, name: product1.name)
+
+      request.accept = 'application/json'
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default', rem_qty: 1 }
+      expect(response.status).to eq(200)
+
+      # Serial Scan
+      post :serial_scan, params: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true,  serial: 'PRODUCT1SERIAL', scan_pack: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true,  serial: 'PRODUCT1SERIAL' } }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['next_item']['qty_remaining']).to eq(4)
+
+      # Type Scan
+      post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT1', next_item: result['data']['order']['next_item'] }
+      result = JSON.parse(response.body)
+
+      post :serial_scan, params: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true,  serial: 'PRODUCT1SERIAL', count: result['data']['data']['serial']['count'], scan_pack: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true,  serial: 'PRODUCT1SERIAL', count: result['data']['data']['serial']['count'] } }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['next_item']['qty_remaining']).to eq(2)
+    end
+
     it 'Scan Order using Partial Barcode' do
       product1 = FactoryBot.create(:product, is_skippable: true)
       FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
@@ -570,7 +598,7 @@ RSpec.describe ScanPackController, type: :controller do
       FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT2')
       product_barcode = FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT2')
       order = FactoryBot.create(:order, increment_id: 'ORDER-1', status: 'awaiting', store: @store, tracking_num: 'ORDER-TRACKING-NUM')
-      
+
       get :click_scan, params: { :barcode=> product_barcode.barcode, :id=>order.id, :box_id=>nil, :scan_pack=>{:barcode => product_barcode.barcode, :id=>order.id, :box_id=>nil}}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
