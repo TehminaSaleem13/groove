@@ -31,13 +31,9 @@ module ScanPack
             first_barcode[:barcode], 'scanpack.rfp.default', @params[:id], @params[:box_id],
             {
               clicked: false, serial_added: false, typein_count: @params[:count].to_i,
-              current_user: @current_user, session: @session
+              current_user: @current_user, session: @session, type_scan: true
             }
           )
-          begin
-            @result['data']['data']['serial']['count'] = @params[:count].to_i rescue nil
-          rescue => e
-          end
         # @order.addactivity("Type-In count Scanned for product #{next_item[:sku].to_s}", @current_user.username)
       end
 

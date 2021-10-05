@@ -23,10 +23,10 @@ module ElixirApi
          delete_index = 0
           map.each_with_object({}) do |map_out, map_now|
             map_single_first_name = map_out[1].present? && map_out[1]['name']
-            map.delete(delete_index.to_s) if map_single_first_name == 'Unmapped'  
+            map.delete(delete_index.to_s) if map_single_first_name == 'Unmapped'
             delete_index += 1
           end
-          
+
           map.each_with_object({}) do |map_single, mapping|
             map_single_first_value = map_single[1].present? &&
                                      map_single[1]['value']

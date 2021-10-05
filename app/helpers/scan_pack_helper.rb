@@ -187,7 +187,7 @@ module ScanPackHelper
     product_scan_object = ScanPack::ProductScanService.new(
       [
         options[:current_user], options[:session],
-        input, state, id, box_id, options[:typein_count] || 1
+        input, state, id, box_id, options[:typein_count] || 1, options[:type_scan]
       ]
     )
     product_scan_object.run(options[:clicked], options[:serial_added])
@@ -197,7 +197,7 @@ module ScanPackHelper
     product_scan_object = Expo::NewProductScanServiceV2.new(
       [
         options[:current_user], options[:session],
-        input, state, id, box_id, options[:typein_count] || 1
+        input, state, id, box_id, options[:typein_count] || 1, options[:type_scan]
       ]
     )
     product_scan_object.run(options[:clicked], options[:serial_added])

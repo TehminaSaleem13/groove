@@ -69,21 +69,21 @@ module ScanPack::Utilities::ProductScan::Barcode
     when "Record"
       @result['data']['next_state'] = 'scanpack.rfp.recording'
     when "PackingSlip"
-      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "PackingSlip" 
+      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "PackingSlip"
         do_set_order_scanned_state_and_result_data
         generate_packing_slip(@single_order)
       else
         generate_packing_slip(@single_order)
         apply_second_action
-      end  
+      end
     else
-      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Barcode" 
+      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Barcode"
         do_set_order_scanned_state_and_result_data
         generate_order_barcode_slip(@single_order)
       else
         generate_order_barcode_slip(@single_order)
         apply_second_action
-      end  
+      end
     end
   end
 

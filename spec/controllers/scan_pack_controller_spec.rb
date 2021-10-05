@@ -423,16 +423,15 @@ RSpec.describe ScanPackController, type: :controller do
       ScanPackSetting.last.update(partial: true, remove_enabled: true)
     end
 
-    it 'Serial Scan with Type Scan' do
-      ScanPackSetting.last.update(scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
-      order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'awaiting', store: @store)
-      product1 = FactoryBot.create(:product, record_serial: true, is_skippable: true)
+    it 'Serial Scan with Type Scan (Non-Kit)' do
+      product1 = FactoryBot.create(:product, record_serial: true)
       FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
       FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+      order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'awaiting', store: @store)
       order_item1 = FactoryBot.create(:order_item, product_id: product1.id, qty: 5, price: 10, row_total: 10, order: order, name: product1.name)
 
       request.accept = 'application/json'
-      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default', rem_qty: 1 }
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
 
       # Serial Scan
@@ -443,12 +442,41 @@ RSpec.describe ScanPackController, type: :controller do
 
       # Type Scan
       post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT1', next_item: result['data']['order']['next_item'] }
-      result = JSON.parse(response.body)
-
-      post :serial_scan, params: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true,  serial: 'PRODUCT1SERIAL', count: result['data']['data']['serial']['count'], scan_pack: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true,  serial: 'PRODUCT1SERIAL', count: result['data']['data']['serial']['count'] } }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
-      expect(result['data']['order']['next_item']['qty_remaining']).to eq(2)
+
+      post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT1', next_item: result['data']['data']['order']['next_item'] }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['data']['next_state']).to eq('scanpack.rfo')
+    end
+
+    it 'Serial Scan with Type Scan (Kit)' do
+      product = FactoryBot.create(:product, is_kit: 0, record_serial: true)
+      kit = FactoryBot.create(:product, is_kit: 1, kit_parsing: 'individual')
+      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT-SKU')
+      FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCT-BARCODE')
+      FactoryBot.create(:product_sku, product: kit, sku: 'KIT-SKU')
+      FactoryBot.create(:product_barcode, product: kit, barcode: 'KIT-BARCODE')
+      FactoryBot.create(:product_kit_sku, product: kit, option_product_id: product.id, qty: 5)
+      order = FactoryBot.create(:order, increment_id: 'ORDER-1', store: @store)
+      order_item1 = order.order_items.create(product: kit, qty: 1)
+
+      request.accept = 'application/json'
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT-BARCODE', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      # Serial Scan
+      post :serial_scan, params: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT-BARCODE', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product.id, is_scan: true,  serial: 'PRODUCTSERIAL', scan_pack: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT-BARCODE', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product.id, is_scan: true,  serial: 'PRODUCTSERIAL' } }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['next_item']['qty_remaining']).to eq(4)
+
+      # Type Scan
+      post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT-BARCODE', next_item: result['data']['order']['next_item'] }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['data']['order']['next_item']['qty_remaining']).to eq(2)
     end
 
     it 'Scan Order using Partial Barcode' do
@@ -613,7 +641,7 @@ RSpec.describe ScanPackController, type: :controller do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
-      
+
       ScanPackSetting.last.update(partial: true, remove_enabled: true)
       @order = Order.create(increment_id: "C000209814-B(Duplicate-2)", order_placed_time: Time.current, sku: nil, customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: "BIKE", lastname: "ACTIONGmbH", email: "east@raceface.com", address_1: "WEISKIRCHER STR. 102", address_2: nil, city: "RODGAU", state: nil, postcode: "63110", country: "GERMANY", method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: "awaiting", scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: "C000209814B(Duplicate2)", note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: "orders/2021-07-29-162759275061.xml", last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: "", ss_label_data: nil, importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
       @product1 = Product.create(store_product_id: "0", name: "TRIGGER SS JERSEY-BLACK-M", product_type: "", store_id: @store.id, status: "active", packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: "individual", is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: "on", click_scan_enabled: "on", weight_format: "oz", add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: "", custom_product_2: "", custom_product_3: "", custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: "821973374048", isbn: nil, ean: "0821973374048", supplier_sku: nil, avg_cost: 0.0, count_group: nil)
@@ -629,7 +657,7 @@ RSpec.describe ScanPackController, type: :controller do
     it 'Order Scanned Using Click' do
       ScanPackSetting.last.update(partial: true, remove_enabled: true, enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
       post :new_scan_pack_v2, params: { data: [ { Log_count: "1", SKU: "PRODUCT2", actionBarcode: false, event: "click_scan", id: @order.id, increment_id: @order.increment_id, input: "PRODUCT2", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", qty_rem: 0, time: Time.current ,updated_at: Time.current } ] }
-      expect(response.status).to eq(200) 
+      expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
 
@@ -657,7 +685,7 @@ RSpec.describe ScanPackController, type: :controller do
 
     it 'Order Scanned Using Bulk Scan' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
-      
+
       post :scan_pack_v2, params: { data: [ { state: "undefined" , Log_count: "1", SKU: "PRODUCT2", event: "bulk_scan", id: @order.id, increment_id: @order.increment_id, input: "*", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: DateTime.now ,updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")

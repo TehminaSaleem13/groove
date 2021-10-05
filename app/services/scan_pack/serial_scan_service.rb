@@ -10,10 +10,6 @@ module ScanPack
 
     def run
       serial_scan if data_is_valid
-      begin
-        @result['data']['serial']['quantity'] = @params[:count].to_i rescue nil
-      rescue => e
-      end
       @result
     end
 
@@ -151,8 +147,7 @@ module ScanPack
     end
 
     def do_product_scan(serial_added)
-      packing_count = ProductBarcode.find_by_barcode(@params["barcode"]).packing_count.to_i rescue 1
-      count = packing_count == 1 ? (@params[:count].to_i > 0 ? @params[:count].to_i : 1) : packing_count
+      count = ProductBarcode.find_by_barcode(@params["barcode"]).packing_count rescue 1 if !@params["clicked"]
       @order.addactivity(
         "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
         @current_user.name

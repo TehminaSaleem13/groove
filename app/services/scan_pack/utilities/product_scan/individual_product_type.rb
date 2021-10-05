@@ -1,9 +1,9 @@
 module ScanPack::Utilities::ProductScan::IndividualProductType
   def do_if_product_type_is_individual(params)
-    item, clean_input, serial_added, clicked, barcode_found = params
+    item, clean_input, serial_added, clicked, barcode_found, type_scan = params
     item['child_items'].each do |child_item|
       item = OrderItem.find_by_id(child_item["order_item_id"])
-      if child_item["qty_remaining"] == 1 && clicked && item.product.is_kit == 1 
+      if child_item["qty_remaining"] == 1 && clicked && item.product.is_kit == 1
         item.clicked_qty = item.clicked_qty + 1
         item.save
       end
@@ -16,7 +16,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   end
 
   def do_if_child_item_has_barcodes(params, child_item)
-    item, clean_input, serial_added, clicked, barcode_found = params
+    item, clean_input, serial_added, clicked, barcode_found, type_scan = params
     child_item['barcodes'].each do |barcode|
       if barcode.barcode.strip.downcase == clean_input.strip.downcase || (
         @scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && child_item['skippable']
@@ -34,7 +34,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
         if order_item_kit_product.present?
           do_if_order_item_kit_product_present(
-            [item, child_item, serial_added, clicked, order_item_kit_product]
+            [item, child_item, serial_added, clicked, order_item_kit_product, type_scan]
             )
           insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments? && !child_item['record_serial'] && !should_remove_kit_item?(clean_input, child_item['skippable'])
           if child_item['record_serial'] && serial_added && GeneralSetting.last.multi_box_shipments?
@@ -71,7 +71,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   # end
 
   def do_if_order_item_kit_product_present(params)
-    item, child_item, _serial_added, clicked, order_item_kit_product = params
+    item, child_item, _serial_added, clicked, order_item_kit_product, type_scan = params
     child_item_product_id = child_item['product_id']
     if child_item['record_serial']
       do_if_child_item_record_serial(params.push(child_item_product_id))
@@ -81,8 +81,9 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   end
 
   def do_if_child_item_record_serial(params)
-    item, child_item, serial_added, clicked, order_item_kit_product, child_item_product_id = params
-    if serial_added
+    item, child_item, serial_added, clicked, order_item_kit_product, type_scan, child_item_product_id = params
+    if serial_added || type_scan
+      set_serials_if_type_scan(order_item_kit_product.order_item, child_item_product_id, @typein_count) if type_scan
       do_process_item(clicked, child_item_product_id, order_item_kit_product, item)
     else
       @result['data']['serial']['ask'] = true
@@ -98,14 +99,14 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
 
   def insert_in_box(item, kit_id)
     if @box_id.blank?
-      box = Box.find_or_create_by(:name => "Box 1", :order_id => item.order.id)  
+      box = Box.find_or_create_by(:name => "Box 1", :order_id => item.order.id)
       @box_id = box.id
       order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
       if order_item_box.nil?
         OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id)
       else
         if_order_item_present(item, kit_id)
-      end  
+      end
     else
       if_order_item_present(item, kit_id)
     end
@@ -120,7 +121,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
       else
         OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id)
       end
-    end 
+    end
   end
 
   def remove_kit_item_from_order(child_item)
@@ -134,5 +135,4 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
   def should_remove_kit_item?(clean_input, child_item_skippable)
     check_for_skip_settings(clean_input) && child_item_skippable
   end
-
-end #module
+end

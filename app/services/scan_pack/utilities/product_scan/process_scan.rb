@@ -1,6 +1,6 @@
 module ScanPack::Utilities::ProductScan::ProcessScan
-  def process_scan(clicked, order_item, serial_added)
-    @clicked, @order_item, @serial_added = clicked, order_item, serial_added
+  def process_scan(clicked, order_item, serial_added, type_scan = false)
+    @clicked, @order_item, @serial_added, @type_scan = clicked, order_item, serial_added, type_scan
     do_if_order_item_present if @order_item.present?
     @result
   end
@@ -17,7 +17,8 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   end
 
   def do_if_record_serial_is_set
-    if @serial_added
+    if @serial_added || @type_scan
+      set_serials_if_type_scan(@order_item, @order_item.product.id, @typein_count) if @type_scan
       @order_item.process_item(@clicked, @current_user.username, @typein_count, @box_id)
       insert_order_item_in_box if GeneralSetting.last.multi_box_shipments?
       @session[:most_recent_scanned_product] = @order_item.product_id
@@ -25,7 +26,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
       if @order_item.product.is_kit == 1
         @session[:parent_order_item] = @order_item.id
       end
-    else 
+    else
       @result['data']['serial']['ask'] = @order_item.product.record_serial
       @result['data']['serial']['ask_2'] = @order_item.product.second_record_serial
       @result['data']['serial']['product_id'] = @order_item.product_id
@@ -41,7 +42,7 @@ module ScanPack::Utilities::ProductScan::ProcessScan
         OrderItemBox.create(order_item_id: @order_item.id, box_id: box.id, item_qty: @typein_count)
       else
         if_order_item
-      end  
+      end
     else
      if_order_item
     end
@@ -56,6 +57,27 @@ module ScanPack::Utilities::ProductScan::ProcessScan
       else
         OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
       end
-    end  
+    end
   end
-end # module end
+
+  def set_serials_if_type_scan(order_item, product_id, count)
+    order_serial = OrderSerial.where(order_id: order_item.order.id, product_id: product_id).first
+    order_item_serial_lots = OrderItemOrderSerialProductLot.where(
+      order_item_id: order_item.id,
+      order_serial_id: order_serial.id
+    )
+
+    if order_item_serial_lots.empty?
+      OrderItemOrderSerialProductLot.create!(
+        order_item_id: order_item.id,
+        order_serial_id: order_serial.id, qty: count
+      )
+    else
+      existing_serial = order_item_serial_lots.last
+      existing_serial.qty += count
+      existing_serial.save
+    end
+  rescue => e
+    puts "==Serial Scan Error\n#{e.message}\n"
+  end
+end

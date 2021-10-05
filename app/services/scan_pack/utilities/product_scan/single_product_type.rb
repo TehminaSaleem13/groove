@@ -1,6 +1,6 @@
 module ScanPack::Utilities::ProductScan::SingleProductType
   def do_if_product_type_is_single(params)
-    item, clean_input, serial_added, clicked, barcode_found = params
+    item, clean_input, serial_added, clicked, barcode_found, type_scan = params
     item['barcodes'].each do |barcode|
       if GeneralSetting.all.first.master_switch == false
         if barcode.barcode.strip.downcase == clean_input.strip.downcase || (@scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && item['skippable'])
@@ -42,7 +42,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
             @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was skipped using the SKIP barcode", @current_user.try(:username))
           else
             store_lot_number(order_item, serial_added)
-            process_scan(clicked, order_item, serial_added)
+            process_scan(clicked, order_item, serial_added, type_scan)
           end
           break
         end
@@ -50,7 +50,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
         if barcode.barcode == clean_input
           barcode_found = true
           order_item = OrderItem.find(item['order_item_id'])
-          process_scan(clicked, order_item, serial_added)
+          process_scan(clicked, order_item, serial_added, type_scan)
         end
       end
     end

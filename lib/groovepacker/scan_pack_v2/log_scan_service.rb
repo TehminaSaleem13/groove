@@ -29,7 +29,7 @@ module Groovepacker
                 scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id],
                 {
                   clicked: false, serial_added: false, typein_count: scn_params[:count].to_i,
-                  current_user: current_user, session: session
+                  current_user: current_user, session: session, type_scan: true
                 }
               )
             elsif (scn_params[:event] == 'scanned')

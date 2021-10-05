@@ -7,7 +7,7 @@ module ScanPack
     include ScanPack::Utilities::ProductScan::SingleProductType
 
     def initialize(args)
-      @current_user, @session, @input, @state, @id, @box_id, @typein_count = args
+      @current_user, @session, @input, @state, @id, @box_id, @typein_count, @type_scan = args
       @result = {
         "status"=>true, "matched"=>true, "error_messages"=>[],
         "success_messages"=>[], "notice_messages"=>[],
@@ -35,7 +35,7 @@ module ScanPack
         product_scan(clicked, serial_added)
       end
       begin
-        order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"]) 
+        order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"])
         do_set_result_for_boxes(order)
       rescue
       end
@@ -43,9 +43,9 @@ module ScanPack
     end
 
     def product_scan(clicked, serial_added)
-    
+
       if clicked
-        @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1 
+        @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1
         @single_order.save
       end
 
@@ -96,18 +96,18 @@ module ScanPack
         second_escape_string = @scanpack_settings.second_escape_string
         first_escape = @scanpack_settings.first_escape_string_enabled && first_escape_string.present? && !@input.index(first_escape_string || "").nil?
         second_escape = @scanpack_settings.second_escape_string_enabled && second_escape_string.present? && !@input.index(second_escape_string || "").nil?
-        case 
+        case
         when first_escape && second_escape
           clean_input = @input.split(first_escape_string)[0].split(second_escape_string)[0]
         when first_escape
           clean_input = @input.slice(0..(@input.index(first_escape_string || "")-1))
         when second_escape
-          clean_input = @input.slice(0..(@input.index(second_escape_string || "")-1)) 
+          clean_input = @input.slice(0..(@input.index(second_escape_string || "")-1))
         else
-          clean_input = @input   
+          clean_input = @input
         end
       else
-        clean_input = @input 
+        clean_input = @input
       end
 
       @result['data'].merge!({
@@ -118,7 +118,7 @@ module ScanPack
         },
         'order_num' => @single_order.increment_id
       })
-      
+
       if @single_order.has_unscanned_items
         case @scanpack_settings.scanning_sequence
         when "any_sequence"
@@ -146,7 +146,7 @@ module ScanPack
             @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
             @result['status'] &= false
             @result['error_messages'].push("Please scan items in the suggested order")
-          end  
+          end
         end
       else
         @result['status'] &= false
@@ -156,16 +156,16 @@ module ScanPack
 
 
     def check_scanning_item(unscanned_items, clean_input)
-      list = [] 
+      list = []
       list << unscanned_items.first["barcodes"].map(&:barcode)
       if !unscanned_items.first["child_items"].nil?
         # data = []
         # unscanned_items.first["child_items"].each do |child_item|
         #   data << child_item["barcodes"].map(&:barcode)
-        # end 
+        # end
         # list << data
         list << unscanned_items.first["child_items"].first["barcodes"].map(&:barcode)
-      end 
+      end
       value = list.flatten.include?("#{clean_input}")
       value = check_for_skippable_item(unscanned_items.first) if !value && check_for_skip_settings(clean_input)
       return value
@@ -189,7 +189,7 @@ module ScanPack
           item["child_items"].each do |i|
             list << i["barcodes"].map(&:barcode) if ((item["qty_remaining"] * i["product_qty_in_kit"] - i["product_qty_in_kit"]) < i["qty_remaining"] )
           end
-        end  
+        end
       end
       return list.flatten
     end
@@ -268,9 +268,9 @@ module ScanPack
       barcode_found = false
       unscanned_items.each do |item|
         if item['product_type'] == 'individual'
-          barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found])
+          barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
         elsif item['product_type'] == 'single'
-          barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found])
+          barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
         end
         break if barcode_found
       end
@@ -293,18 +293,18 @@ module ScanPack
         else
           box = Box.find_by_id(@box_id)
           @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username)
-        end  
+        end
       else
         if @box_id.nil?
           if general_setting.multi_box_shipments?
             @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
           else
             @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
-          end  
+          end
         else
           box = Box.find_by_id(@box_id)
           @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
-        end  
+        end
       end
     end
 
