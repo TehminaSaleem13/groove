@@ -21,6 +21,7 @@ group :assets do
   gem 'angular-ui-bootstrap-rails'
   gem 'momentjs-rails'
   gem 'fingerprintjs-rails'
+  gem 'mini_racer'
 end
 
 group :development do

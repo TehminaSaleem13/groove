@@ -14,9 +14,8 @@ development:
   reconnect: false
   database: groovepacks_development
   pool: 5
-  host: <%= ENV['DB_HOST'] %>
-  username: <%= ENV['DB_USERNAME'] %>
-  password: <%= ENV['DB_PASSWORD'] %>
+  username: root
+  password:
   socket: /private/tmp/mysql.sock
 
 # Warning: The database defined as "test" will be erased and
@@ -28,8 +27,8 @@ test:
   reconnect: false
   database: pipelines
   pool: 5
-  username: test_user
-  password: test_user_password
+  username: root
+  password:
   host: 127.0.0.1
   #socket: /private/tmp/mysql.sock
   socket: /var/run/mysqld/mysqld.sock
