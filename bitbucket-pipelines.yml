@@ -168,31 +168,23 @@ pipelines:
           variables:
             ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
             ROLLBAR_ENVIRONMENT: 'production'
-
-    - step:
-        name: Deploy with CodeDeploy on Production Import
-        deployment: production-import
-        trigger: manual
-        services:
-        - docker
-        script:
-        - pipe: atlassian/aws-code-deploy:0.2.10
-          variables:
-            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-            AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-            COMMAND: 'deploy'
-            APPLICATION_NAME: groovepacker
-            DEPLOYMENT_GROUP: gp-new-production-import
-            S3_BUCKET: groove-deployments-imports-cf
-            IGNORE_APPLICATION_STOP_FAILURES: 'true'
-            FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
-            WAIT: 'true'
-            DEBUG: 'true'
-        - pipe: rollbar/rollbar-notify:0.2.8
-          variables:
-            ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
-            ROLLBAR_ENVIRONMENT: 'production'
+        # - pipe: atlassian/aws-code-deploy:0.2.10
+        #   variables:
+        #     AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+        #     AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+        #     AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+        #     COMMAND: 'deploy'
+        #     APPLICATION_NAME: groovepacker
+        #     DEPLOYMENT_GROUP: gp-new-production-import
+        #     S3_BUCKET: groove-deployments-imports-cf
+        #     IGNORE_APPLICATION_STOP_FAILURES: 'true'
+        #     FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
+        #     WAIT: 'true'
+        #     DEBUG: 'true'
+        # - pipe: rollbar/rollbar-notify:0.2.8
+        #   variables:
+        #     ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
+        #     ROLLBAR_ENVIRONMENT: 'production'
 
 definitions:
   caches:
