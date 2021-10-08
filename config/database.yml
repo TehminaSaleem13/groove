@@ -28,8 +28,8 @@ test:
   reconnect: false
   database: pipelines
   pool: 5
-  username: root
-  password:
+  username: test_user
+  password: test_user_password
   host: 127.0.0.1
   #socket: /private/tmp/mysql.sock
   socket: /var/run/mysqld/mysqld.sock
