@@ -863,7 +863,7 @@ DEPENDENCIES
   launchy (>= 2.1.2)
   listen
   lograge
-  mini_racer
+  mini_racer (~> 0.2)
   mocha
   momentjs-rails
   multi_xml

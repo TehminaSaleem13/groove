@@ -21,7 +21,7 @@ group :assets do
   gem 'angular-ui-bootstrap-rails'
   gem 'momentjs-rails'
   gem 'fingerprintjs-rails'
-  gem 'mini_racer'
+  gem 'mini_racer', '~> 0.2'
 end
 
 group :development do
