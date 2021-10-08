@@ -31,7 +31,8 @@ Groovepacks::Application.configure do
   config.action_mailer.perform_deliveries = false
   config.action_mailer.delivery_method = :smtp
 
-  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i, driver: :hiredis)
+  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i, driver: :hiredis,
+                     :password => ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 

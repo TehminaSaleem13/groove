@@ -39,6 +39,8 @@ group :development,:test do
   gem "rubycritic",'~> 2.0.0', :require => false
   gem 'pry'
   gem 'parallel_tests', '~> 2.29.1'
+  # This will automatically load the .env files
+  gem 'dotenv-rails'
 end
 
 group :test do
