@@ -435,6 +435,11 @@ Groovepacks::Application.routes.draw do
       put 'delete_box'
     end
   end
+
+  namespace :internal, path: '__' do
+    get 'health', to: 'health_check#index'
+  end
+
   get "*path" => redirect("/")
   post "*path" => redirect("/")
 end
