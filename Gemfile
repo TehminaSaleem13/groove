@@ -7,9 +7,7 @@ gem 'rails', '5.1.7'
 
 gem 'mysql2'
 
-gem 'json'
-
-# Gems used only for assets and not required
+  # Gems used only for assets and not required
 # in production environments by default.
 group :assets do
   gem 'sass-rails',   '~> 5.0.7'
@@ -17,12 +15,11 @@ group :assets do
   gem 'uglifier', '>= 1.0.3'
   gem 'jquery-fileupload-rails'
   gem 'jquery-ui-rails'
-  gem 'therubyracer','~> 0.12.3', :platform => :ruby
   gem 'angularjs-rails','>= 1.2.18'
-  gem 'less-rails-bootstrap'
   gem 'angular-ui-bootstrap-rails'
   gem 'momentjs-rails'
   gem 'fingerprintjs-rails'
+  gem 'mini_racer', '~> 0.2'
 end
 
 group :development do
@@ -58,7 +55,7 @@ gem 'redis-session-store'
 gem 'devise'
 gem 'simple_form', '4.0.0'
 gem 'figaro', '>= 0.5.0'
-gem 'fog', '~> 1.41.0'
+gem 'fog', '~> 1.42.0'
 gem 'carrierwave_direct'
 gem 'client_side_validations'
 gem 'client_side_validations-simple_form', '~> 6.8.0'
@@ -70,7 +67,6 @@ gem 'country_select', '~> 1.2.0'
 gem 'clamp'
 gem 'savon'
 gem 'ebay', '1.1', git: 'https://github.com/kcpatel006/ebay4r.git'
-gem 'xmlparser'
 gem 'soap2r', :git=> 'https://github.com/navaratan-tech/soap4r.git'
 gem 'ruby-mws', git: 'https://github.com/kcpatel006/ruby-mws.git'
 gem 'multi_xml'
@@ -99,7 +95,7 @@ gem 'ng-rails-csrf'
 gem 'doorkeeper', '~> 5.0.0'
 gem 'oauth'
 gem 'rubocop','~> 0.51.0', require: false
-gem 'shipping_easy', '0.7.0'
+gem 'shipping_easy', '0.7.1'
 # gem 'delayed_job_recurring'
 gem 'aws_cf_signer'
 gem 'aws-sdk', '~> 2'

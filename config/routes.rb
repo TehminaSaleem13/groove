@@ -1,5 +1,9 @@
 Groovepacks::Application.routes.draw do
 
+  namespace :internal do
+    get 'health_check/index'
+  end
+
   use_doorkeeper
   get 'subscriptions', :to => 'subscriptions#new'
   get 'subscriptions_login', :to => 'subscriptions#login'
@@ -436,6 +440,7 @@ Groovepacks::Application.routes.draw do
     end
   end
 
+  # Put things in this 'internal' namespace that isn't really part of the public product
   namespace :internal, path: '__' do
     get 'health', to: 'health_check#index'
   end
