@@ -134,7 +134,7 @@ class Product < ActiveRecord::Base
       # unless self.status == original_status
       # for non kit products, update all kits product statuses where the
       # current product is an item of the kit
-      unless @order_items.blank? 
+      unless @order_items.blank?
         if is_kit == 0
           @kit_products =
             if eager_loaded_obj[:kit_skus_if_kit_zero]
@@ -158,7 +158,7 @@ class Product < ActiveRecord::Base
             end
           end
         end
-      end  
+      end
 
       if result && base_sku.nil?
         products =
@@ -208,6 +208,7 @@ class Product < ActiveRecord::Base
 
   def check_and_update_status_updated_column
     process_order_item if self.saved_changes["status"].present?
+    order_items.where.not(scanned_status: 'scanned').map(&:delete_cache_for_associated_obj)
   end
 
   def update_due_to_inactive_product
