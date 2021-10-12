@@ -111,3 +111,5 @@ gem 'scout_apm', '2.6.10'
 gem 'ahoy_matey','~> 2.2.0'
 gem "appsignal"
 gem 'lograge'
+# This obscure dependency is locked here because of our older Ubuntu servers. If you get a modern operating system, (post 2019) then you can remove this
+gem 'unf_ext', "0.0.7.7"
