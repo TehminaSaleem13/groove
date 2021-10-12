@@ -114,7 +114,7 @@ class GeneralSetting < ActiveRecord::Base
 
   def scheduled_import
     result = Hash.new
-    changed_hash = self.changes
+    changed_hash = self.saved_changes
     if self.scheduled_order_import && !changed_hash[:time_to_import_orders].nil? && (changed_hash[:time_to_import_orders].map{ |time| time.strftime('%H:%M:%S')}.uniq.many? rescue nil)
       job_scheduled = false
       date = DateTime.now

@@ -84,7 +84,7 @@ gem 'barby'
 gem 'chunky_png'
 gem 'prawn'
 gem 'pdftk'
-gem 'apartment'
+gem 'apartment', git: "https://github.com/hcatlin/apartment"
 gem 'stripe', '>= 1.57.1'
 gem 'ruby_odata'
 gem 'activerecord-import', '= 0.26.0'
