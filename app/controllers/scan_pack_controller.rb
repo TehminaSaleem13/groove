@@ -318,102 +318,17 @@ class ScanPackController < ApplicationController
   end
 
   def product_first_scan
-    @scanpack_setting = ScanPackSetting.last
-    @result = product_first_scan_to_wall(params[:input])
-    render json: @result
+    product_first_scan = ScanPack::ProductFirstScan::OrderScanService.new(
+      current_user, session, params
+    )
+    render json: product_first_scan.run
   end
 
   def scan_to_tote
-    @scanpack_setting = ScanPackSetting.last
-    case params[:type]
-    when 'assigned_to_tote'
-      begin
-        tote = params[:tote][:id].present? ? Tote.find(params[:tote][:id]) : Tote.create(params[:tote].permit!)
-        order_item = OrderItem.find(params[:order_item_id])
-        order = order_item.order
-        if tote.order != order
-          @result[:status] = false
-          @result[:error_messages] = "Whoops! The #{@scanpack_setting.tote_identifier} is already assigned. Please clear the #{@scanpack_setting.tote_identifier} for the order from Orders List and try again."
-        elsif tote.name.downcase == params[:tote_barcode].downcase
-          if tote.save
-            barcode = ProductBarcode.find_by_barcode(params[:barcode_input])
-            order.update_attributes(last_suggested_at: DateTime.now)
-            order_item.process_item(nil, @current_user.username, 1, nil)
-            order.order_activities.last.destroy if order.order_activities.last.present? && (order.order_activities.last.action.include? 'setting the order PENDING')
-            order.addactivity("#{@scanpack_setting.tote_identifier} #{tote.name} assignment confirmed with #{@scanpack_setting.tote_identifier} scan.", @current_user.name)
-            order.addactivity("Product with barcode: #{barcode.barcode} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
-            tote.update_attributes(pending_order: false)
-            @result[:success_messages] = "#{order.increment_id} is successfully assigned to #{@scanpack_setting.tote_identifier}: #{tote.name}"
-          end
-        else
-          @result[:status] = false
-          @result[:error_messages] = "Whoops! That’s the wrong #{@scanpack_setting.tote_identifier}. Please scan the correct #{@scanpack_setting.tote_identifier} and then add the item to it."
-        end
-      rescue => e
-        @result[:status] = false
-        @result[:error_messages] = e.to_s
-      end
-    when 'put_in_tote'
-      begin
-        tote = Tote.find(params[:tote][:id])
-        if params[:tote_barcode].downcase == tote.name.downcase
-          barcode = ProductBarcode.find_by_barcode(params[:barcode_input])
-          order_item = OrderItem.find(params[:order_item_id])
-          order = order_item.order
-          order.update_attributes(last_suggested_at: DateTime.now)
-          order_item.process_item(nil, @current_user.username, 1, nil)
-          order.order_activities.last.destroy if order.order_activities.last.present? && (order.order_activities.last.action.include? 'setting the order PENDING')
-          order.addactivity("Product with barcode: #{barcode.barcode} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
-          tote.update_attributes(pending_order: false)
-          @result[:success_messages] = "#{order_item.product.name} is successfully scanned to #{@scanpack_setting.tote_identifier}: #{tote.name}"
-        else
-          @result[:status] = false
-          @result[:error_messages] = "Whoops! That’s the wrong #{@scanpack_setting.tote_identifier}. Please scan the correct #{@scanpack_setting.tote_identifier} and then add the item to it."
-        end
-      rescue => e
-        @result[:status] = false
-        @result[:error_messages] = e.to_s
-      end
-    when 'scan_tote_to_complete'
-      begin
-        tote = Tote.find(params[:tote][:id])
-        order_item = OrderItem.find(params[:order_item_id])
-        order = order_item.order
-        if order.status == 'scanned'
-          @result[:status] = false
-          @result[:error_messages] = "Order ##{order.increment_id} is already scanned"
-        elsif params[:tote_barcode].downcase == tote.name.downcase
-          barcode = ProductBarcode.find_by_barcode(params[:barcode_input])
-          order_item.process_item(nil, @current_user.username, 1, nil)
-          order.order_activities.last.destroy if order.order_activities.last.present? && (order.order_activities.last.action.include? 'setting the order PENDING')
-          order.addactivity("Product with barcode: #{barcode.barcode} and sku: #{order_item.product.primary_sku} scanned", @current_user.name)
-          order.set_order_to_scanned_state(@current_user.username)
-          order.update_attributes(last_suggested_at: DateTime.now)
-          @result[:success_messages] = "#{order.increment_id} is successfully scanned"
-          @result[:scan_tote_to_completed] = true
-          @result[:multi_item_order_message] = @scanpack_setting.multi_item_order_complete_msg
-          @result[:multi_item_order_message_time] = @scanpack_setting.multi_item_order_complete_msg_time
-          @result[:store_type] = order.store.store_type
-          @result[:popup_shipping_label] = order.store.shipping_easy_credential.popup_shipping_label rescue nil
-          @result[:large_popup] = order.store.shipping_easy_credential.large_popup rescue nil
-          @result[:multiple_lines_per_sku_accepted] = order.store.shipping_easy_credential.multiple_lines_per_sku_accepted rescue nil
-          ScanPack::ScanBarcodeService.new(current_user, session, params).generate_order_barcode_slip(order) if @scanpack_setting.post_scanning_option == 'Barcode' && !@result[:popup_shipping_label]
-          @result[:order_items_scanned] = order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
-          @result[:order_items_unscanned] = []
-          @result[:order_items_partial_scanned] = []
-          @result[:tote_name_identifier] = @scanpack_setting.tote_identifier + ' ' + tote.name
-          @result[:order] = order
-          tote.update_attributes(order_id: nil, pending_order: false)
-        else
-          @result[:status] = false
-          @result[:error_messages] = "Whoops! That’s the wrong #{@scanpack_setting.tote_identifier}. Please scan the correct #{@scanpack_setting.tote_identifier} and then add the item to it."
-        end
-      rescue => e
-        @result[:status] = false
-        @result[:error_messages] = e.to_s
-      end
-    end
-    render json: @result
+    product_first_scan = ScanPack::ProductFirstScan::ProductScanService.new(
+      current_user, session, params
+    )
+    render json: product_first_scan.run
   end
 
   def confirmation_code

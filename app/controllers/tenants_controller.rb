@@ -2,6 +2,7 @@ class TenantsController < ApplicationController
   include PaymentsHelper
   include TenantsHelper
 
+  before_action :set_tenant_object, only: :update_setting
   before_action :groovepacker_authorize!
 
   def index
@@ -105,39 +106,8 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
-  def update_fba
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.is_fba = !tenant.is_fba
-    tenant.save
-    render json: {}
-  end
-
-  def update_api_call
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.api_call = !tenant.api_call
-    tenant.save
-    render json: {}
-  end
-
-  def update_allow_rts
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.allow_rts = !tenant.allow_rts
-    tenant.save
-    render json: {}
-  end
-
-  def update_product_ftp_import
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.product_ftp_import = !tenant.product_ftp_import
-    tenant.save
-    render json: {}
-  end
-
-  def update_product_activity_switch
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.product_activity_switch = !tenant.product_activity_switch
-    tenant.save
-    render json: {}
+  def update_setting
+    render json: { status: update_tenant_attributes(params) }
   end
 
   def update_scan_workflow
@@ -150,25 +120,11 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
-  def update_is_cf
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.is_cf = !tenant.is_cf
-    tenant.save
-    render json: {}
-  end
-
   def update_store_order_respose_log
     tenant = Tenant.find(params["tenant_id"])
     tenant.store_order_respose_log = !tenant.store_order_respose_log
     tenant.save
     GroovS3.bucket.objects({prefix: "#{tenant.name}/se_import_log"}).each { |obj| obj.destroy }
-    render json: {}
-  end
-
-  def update_inventory_update_delay
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.delayed_inventory_update = !tenant.delayed_inventory_update
-    tenant.save
     render json: {}
   end
 
@@ -184,13 +140,6 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
-  def update_is_delay
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.is_delay = !tenant.is_delay
-    tenant.save
-    render json: {}
-  end
-
   def update_scheduled_import_toggle
     setting = GeneralSetting.last
     tenant = Tenant.find(params["tenant_id"])
@@ -203,63 +152,6 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
-
-  def update_inventory_report_toggle
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.inventory_report_toggle = !tenant.inventory_report_toggle
-    tenant.save
-    render json: {}
-  end
-
-  def update_daily_packed_toggle
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.daily_packed_toggle = !tenant.daily_packed_toggle
-    tenant.save
-    render json: {}
-  end
-
-  def update_direct_printing_options
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.direct_printing_options = !tenant.direct_printing_options
-    tenant.save
-    render json: {}
-  end
-
-  def update_ss_api_create_label
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.ss_api_create_label = !tenant.ss_api_create_label
-    tenant.save
-    render json: {}
-  end
-
-  def update_custom_fields
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.custom_product_fields = !tenant.custom_product_fields
-    tenant.save
-    render json: {}
-  end
-
-  def update_expo_logs_delay
-    tenant = Tenant.find(params['tenant_id'])
-    tenant.expo_logs_delay = !tenant.expo_logs_delay
-    tenant.save
-    render json: {}
-  end
-
-  def update_uniq_shopify_import
-    tenant = Tenant.find(params['tenant_id'])
-    tenant.uniq_shopify_import = !tenant.uniq_shopify_import
-    tenant.save
-    render json: {}
-  end
-
-  def update_gdpr_shipstation
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.gdpr_shipstation = !tenant.gdpr_shipstation
-    tenant.save
-    render json: {}
-  end
-  
   def create_duplicate
     result = create_single_duplicate
 
@@ -327,5 +219,17 @@ class TenantsController < ApplicationController
     end
 
     render json: { status: 'Cleared all import jobs' }
+  end
+
+  private
+
+  def set_tenant_object
+    @tenant = Tenant.find(params[:tenant_id])
+  end
+
+  def update_tenant_attributes(params)
+    return false unless params[:setting] && params[:setting].in?(Tenant.column_names)
+
+    @tenant.update(params[:setting].to_sym => !@tenant.send(params[:setting]))
   end
 end

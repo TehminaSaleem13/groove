@@ -26,7 +26,7 @@ RSpec.describe TenantsController, type: :controller do
       tenant = Apartment::Tenant.current
       Apartment::Tenant.switch!("#{tenant}")
       tenant = Tenant.create(name: "#{tenant}")
-      
+
       import_summary = OrderImportSummary.create(user_id: @user.id, status: "in_progress", import_summary_type: "import_orders", display_summary: false)
       order_item =   ImportItem.create(status: "in_progress", store_id: @store.id , success_imported: 4, previous_imported: 0, order_import_summary_id:  import_summary.id, to_import: 226, current_increment_id: "5004716159", current_order_items: 5, current_order_imported_item: 5, message: nil, import_type: "quick", days: nil, updated_orders_import: 0)
       request.accept = 'application/json'
@@ -43,27 +43,25 @@ RSpec.describe TenantsController, type: :controller do
       tenant = Apartment::Tenant.current
       Apartment::Tenant.switch!("#{tenant}")
       tenant = Tenant.create(name: "#{tenant}")
-     
+
       request.accept = 'application/json'
-      
-      get :update_uniq_shopify_import, params: {"tenant_id"=>tenant.id}
-     
-      tenant = Tenant.find(tenant.id)
-      expect(tenant.uniq_shopify_import,).to eq(true)
+
+      get :update_setting, params: { tenant_id: tenant.id, setting: 'uniq_shopify_import' }
+
+      tenant.reload
+      expect(tenant.uniq_shopify_import).to eq(true)
       tenant.destroy
     end
-   
-
 
     it 'Update GDPR Shipstation' do
       tenant = Apartment::Tenant.current
-      Apartment::Tenant.switch!("#{tenant}")
-      tenant = Tenant.create(name: "#{tenant}")
-     
-      request.accept = 'application/json'
-      get :update_gdpr_shipstation, params: {"tenant_id"=>tenant.id}
+      Apartment::Tenant.switch!(tenant)
+      tenant = Tenant.create(name: tenant)
 
-      tenant = Tenant.find(tenant.id)
+      request.accept = 'application/json'
+      get :update_setting, params: { tenant_id: tenant.id, setting: 'gdpr_shipstation' }
+
+      tenant.reload
       expect(tenant.gdpr_shipstation).to eq(true)
       tenant.destroy
     end
@@ -99,4 +97,4 @@ RSpec.describe TenantsController, type: :controller do
       @tenant.destroy
     end
   end
-end  
+end
