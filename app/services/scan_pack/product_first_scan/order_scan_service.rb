@@ -2,8 +2,12 @@
 
 module ScanPack
   module ProductFirstScan
-    class OrderScanService < Base
+    class OrderScanService < ScanPack::ProductFirstScan::Base
       include ScanPack::ProductFirstScan::OrderScanHelper
+
+      def initialize(*args)
+        super
+      end
 
       def run
         @result[:status] = false

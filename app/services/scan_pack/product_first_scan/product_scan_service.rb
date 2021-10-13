@@ -2,8 +2,12 @@
 
 module ScanPack
   module ProductFirstScan
-    class ProductScanService < Base
+    class ProductScanService < ScanPack::ProductFirstScan::Base
       include ScanPack::ProductFirstScan::ToteScanHelper
+
+      def initialize(*args)
+        super
+      end
 
       def run
         begin
@@ -22,7 +26,7 @@ module ScanPack
         @result
       end
 
-            private
+      private
 
       def tote
         @tote ||= if params[:tote][:id].present?
