@@ -2,9 +2,9 @@ module Groovepacker
   module Products
     class Products < Groovepacker::Products::Base
 
-      def update_product_attributes        
+      def update_product_attributes
         @product = Product.find_by_id(@params[:basicinfo][:id]) rescue nil
-      
+
         # @product.product_kit_skuss
         # flag =''
 
@@ -34,6 +34,7 @@ module Groovepacker
         @product.reload
         @product = update_product_and_associated_info
         @product.update_product_status
+        reset_recent_order_items_cache
         return @result
       end
 
@@ -46,11 +47,11 @@ module Groovepacker
               if ProductBarcode.find_by_barcode(multi[:barcode]).present?
                 @result["exist_barcode"] = true
               else
-                ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount], is_multipack_barcode: true) 
+                ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount], is_multipack_barcode: true)
               end
             elsif barcode.is_multipack_barcode #multi[:packcount].present?
               barcode.barcode = multi[:barcode]
-              barcode.packing_count = multi[:packcount] 
+              barcode.packing_count = multi[:packcount]
               barcode.save
             end
           end
@@ -106,6 +107,11 @@ module Groovepacker
       end
 
       private
+
+        def reset_recent_order_items_cache
+          @product.order_items.not_scanned.joins(:order).where('orders.last_suggested_at > ?', 2.minutes.ago).map(&:delete_cache_for_associated_obj)
+        end
+
         def general_setting
           @general_settings ||= GeneralSetting.all.first
         end
@@ -241,7 +247,7 @@ module Groovepacker
           db_sku =
             product_skus.find{|_sku| _sku.sku == sku["sku"]} ||
             ProductSku.find_by_sku(sku["sku"])
-          
+
           if sku["id"].present?
             db_sku = product_skus.find{|_sku| _sku.id == sku["id"]}
             # status = @product.create_or_update_productsku(sku, index, nil, db_sku, @current_user)
@@ -268,7 +274,7 @@ module Groovepacker
         end
 
         def create_or_update_single_barcode(barcode, index, status, product_barcodes)
-          db_barcode = 
+          db_barcode =
             product_barcodes.find{|_bar| _bar.barcode == barcode["barcode"]} ||
             ProductBarcode.find_by_barcode(barcode["barcode"])
 
@@ -359,7 +365,7 @@ module Groovepacker
               object.product.add_product_activity("The #{type} #{object.sku} was deleted from this item", @current_user.name)
             elsif found_obj == false && type == "barcode"
               object.product.add_product_activity("The #{type} #{object.barcode}  was deleted from this item", @current_user.name)
-            end   
+            end
 
             @result['status'] &= false if found_obj == false && !object.destroy
           end
@@ -371,7 +377,7 @@ module Groovepacker
           @product.add_product_activity("The Product Name of this item was changed from #{@product.name} to #{basic_info["name"]} ",@current_user.username)  if @product.name != basic_info["name"]
           unless @product.is_kit == basic_info["is_kit"]
             type = basic_info["is_kit"] == 0 ? "product" : "kit"
-            @product.add_product_activity("This item was changed to a #{type}", @current_user.name)  
+            @product.add_product_activity("This item was changed to a #{type}", @current_user.name)
           end
           attrs_to_update.each {|attr| @product[attr] = basic_info[attr] }
           @product.packing_placement = basic_info[:packing_placement] if basic_info[:packing_placement].is_a?(Integer)

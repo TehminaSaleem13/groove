@@ -39,6 +39,7 @@ class OrderItem < ActiveRecord::Base
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
+  scope :not_scanned, -> { where.not(scanned_status: SCANNED_STATUS) }
 
   def has_unscanned_kit_items
     result = false

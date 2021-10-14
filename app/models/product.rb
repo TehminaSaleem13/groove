@@ -208,7 +208,6 @@ class Product < ActiveRecord::Base
 
   def check_and_update_status_updated_column
     process_order_item if self.saved_changes["status"].present?
-    order_items.joins(:order).where.not(scanned_status: 'scanned').where('orders.last_suggested_at > ?', 2.minutes.ago).map(&:delete_cache_for_associated_obj)
   end
 
   def update_due_to_inactive_product
