@@ -68,7 +68,7 @@ class Product < ActiveRecord::Base
   INDIVIDUAL_SCAN_STATUSES = [INDIVIDUAL_KIT_PARSING].freeze
 
   def check_inventory_warehouses
-    if Product.find(self.id).product_inventory_warehousess.empty?
+    if product_inventory_warehousess.empty?
       inventory = ProductInventoryWarehouses.new
       inventory.product_id = id
       inventory.inventory_warehouse = InventoryWarehouse.where(is_default: true).first

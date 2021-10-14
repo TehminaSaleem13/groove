@@ -304,7 +304,7 @@ module OrderMethodsHelper
   end
 
   def get_boxes_data
-    boxes = Box.where(order_id: self.id)
+    boxes = Box.where(order_id: id)
     order_item_boxes = []
     boxes.each do |box|
       order_item_boxes << box.order_item_boxes
@@ -373,7 +373,7 @@ module OrderMethodsHelper
         carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
         if order_ss_label_data['carrierCode'].present? && carrier['code'] == order_ss_label_data['carrierCode']
           order_ss_label_data['carrier'] = carrier
-          order_ss_label_data['service'] = carrier['services'].select { |c| c['code'] == order_ss_label_data['serviceCode'] }.first if order_ss_label_data['serviceCode'].present? && carrier['code'] == 'stamps_com' 
+          order_ss_label_data['service'] = carrier['services'].select { |c| c['code'] == order_ss_label_data['serviceCode'] }.first if order_ss_label_data['serviceCode'].present? && carrier['code'] == 'stamps_com'
           order_ss_label_data['package'] = carrier['packages'].select { |c| c['code'] == order_ss_label_data['packageCode'] }.first if order_ss_label_data['packageCode'].present? && carrier['code'] == 'stamps_com'
         end
         carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
@@ -408,7 +408,7 @@ module OrderMethodsHelper
   def check_valid_label_data
     ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present? && ss_label_data['weight']['WeightUnits'].present?
   end
-  
+
   def create_label(credential_id, post_data)
     begin
       result = { status: true}

@@ -1,22 +1,22 @@
 module ProductMethodsHelper
   def add_product_activity(product_activity_message, username='', activity_type ='regular')
     @activity = ProductActivity.new
-    @activity.product_id = self.id
+    @activity.product_id = id
     @activity.action = product_activity_message
     @activity.username = username
     @activity.activitytime = current_time_from_proper_timezone
     @activity.activity_type = activity_type
-    @activity.user_id = User.find_by_username(username).try(:id)
-    @activity.user_id = User.find_by_name(username).try(:id) if @activity.user_id.nil?
+    user_id = User.find_by_username(username)&.id || User.find_by_name(username)&.id
+    @activity.user_id = user_id
     @activity.save
   end
 
   def gen_barcode_from_sku_if_intangible
     return unless is_intangible
     sku_for_barcode = product_skus.find_by_purpose('primary')
-    sku_for_barcode = product_skus.first unless sku_for_barcode
+    sku_for_barcode ||= product_skus.first
     # method will not generate barcode if already exists
-    sku_for_barcode.gen_barcode_from_sku_if_intangible_product if sku_for_barcode.present?
+    sku_for_barcode.gen_barcode_from_sku_if_intangible_product if sku_for_barcode
   end
 
   def add_new_image(params)
@@ -25,23 +25,23 @@ module ProductMethodsHelper
     current_tenant = Apartment::Tenant.current
     file_name = create_image_from_req(params, current_tenant)
 
-    #path = File.join(image_directory, file_name )
-    #File.open(path, "wb") { |f| f.write(params[:product_image].read) }
-    image.image = ENV['S3_BASE_URL']+'/'+current_tenant+'/image/'+file_name
-    image.caption = params[:caption]  unless params[:caption].blank?
+    # path = File.join(image_directory, file_name )
+    # File.open(path, "wb") { |f| f.write(params[:product_image].read) }
+    image.image = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
+    image.caption = params[:caption] unless params[:caption].blank?
     image.save
   end
 
   def create_image_from_req(params, current_tenant)
-    unless params[:base_64_img_upload]
-      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image].original_filename.gsub('#', '')
-      GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
-      # return file_name
-    else
+    if params[:base_64_img_upload]
       image_content = Base64.decode64(params[:product_image][:image].to_s)
       content_type = params[:product_image][:content_type]
-      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+self.id.to_s+params[:product_image][:original_filename].gsub('#', '')
+      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+ id.to_s + params[:product_image][:original_filename].gsub('#', '')
       GroovS3.create_image(current_tenant, file_name, image_content, content_type)
+      # return file_name
+    else
+      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image].original_filename.gsub('#', '')
+      GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
       # return file_name
     end
     file_name
@@ -82,9 +82,10 @@ module ProductMethodsHelper
         new_barcode = starting_value.to_i + 1
         temp_barcode = ProductBarcode.where(barcode: new_barcode).blank?
       end
-      GeneralSetting.last.update(starting_value: new_barcode)
+      starting_value = new_barcode
+      GeneralSetting.last.update_columns(starting_value: starting_value)
     end
-    barcode = GeneralSetting.last.starting_value
+    starting_value
   end
 
   def create_or_update_productkitsku(kit_product, products=[])
@@ -241,10 +242,10 @@ module ProductMethodsHelper
       result['matching_barcode'] = params[:value]
       result['show_alias_popup'] = true
       result['status'] = false
-    elsif (product_barcodes.pluck(:barcode).include? params[:value]) && Product.find(id).primary_barcode != params[:value]
+    elsif (product_barcodes.pluck(:barcode).include? params[:value]) && primary_barcode != params[:value]
       result['status'] = false
       result['error_msg'] = "The Barcode \"#{params[:value]}\" is already associated with: <br> #{db_barcode.product.name} <br> #{primary_sku}"
-    elsif (product_barcodes.pluck(:barcode).include? params[:value]) && Product.find(id).primary_barcode == params[:value]
+    elsif (product_barcodes.pluck(:barcode).include? params[:value]) && primary_barcode == params[:value]
       result['status'] = true
     elsif (params[:permit_same_barcode] && (product_barcodes.pluck(:barcode).exclude? params[:value])) || db_barcode.blank?
       response = updatelist(self, params[:var], params[:value], params[:current_user], params[:permit_same_barcode])
