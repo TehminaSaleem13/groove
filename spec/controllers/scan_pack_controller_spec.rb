@@ -632,6 +632,30 @@ RSpec.describe ScanPackController, type: :controller do
       result = JSON.parse(response.body)
       expect(result['data']['order']['clicked_scanned_qty']).to eq(1)
     end
+
+    it 'Shared barcode for KIT' do
+      product1 = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+
+      product2 = FactoryBot.create(:product)
+      product2.product_skus.create(sku: 'PRODUCT2')
+      product2.product_barcodes.new(barcode: 'PRODUCT1').save(validate: false)
+
+      kit = FactoryBot.create(:product, is_kit: 1, kit_parsing: 'depends')
+      kit.product_skus.create(sku: 'KIT-SKU')
+      kit.product_barcodes.create(barcode: 'KIT-BARCODE')
+      kit.product_kit_skuss.create(option_product_id: product2.id, qty: 5)
+
+      order = FactoryBot.create(:order, increment_id: 'ORDER-1', store: @store)
+      order.order_items.create(product_id: kit.id, qty: 1)
+
+      request.accept = 'application/json'
+      post :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['next_item']['qty_remaining']).to eq(4)
+    end
   end
 
   describe 'Expo Logs Process' do

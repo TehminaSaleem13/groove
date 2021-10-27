@@ -105,17 +105,15 @@ module OrderMethodsHelper
     product_available_as_single_item = false
     matched_product_id = 0
     matched_order_item_id = 0
-    product_barcode = ProductBarcode.where(:barcode => barcode)
-
-    product_barcode = product_barcode.length > 0 ? product_barcode.first : nil
+    product_barcodes = ProductBarcode.where(barcode: barcode)
 
     #check if barcode is present in a kit which has kitparsing of depends
-    if !product_barcode.nil?
+    if product_barcodes.any?
       self.order_items.includes(:product).each do |order_item|
         if order_item.product.is_kit == 1 && order_item.product.kit_parsing == 'depends' &&
           order_item.scanned_status != 'scanned'
           order_item.product.product_kit_skuss.each do |kit_product|
-            if kit_product.option_product_id == product_barcode.product_id
+            if kit_product.option_product_id.in? product_barcodes.pluck(:product_id)
               product_inside_splittable_kit = true
               matched_product_id = kit_product.option_product_id
               matched_order_item_id = order_item.id
