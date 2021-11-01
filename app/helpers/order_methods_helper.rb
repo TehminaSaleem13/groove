@@ -334,6 +334,7 @@ module OrderMethodsHelper
       if direct_print_data[:status]
         order_ss_label_data['direct_printed'] = true
         order_ss_label_data['direct_printed_url'] = direct_print_data[:url]
+        order_ss_label_data[:dimensions] = '4x6'
         return order_ss_label_data
       end
 
