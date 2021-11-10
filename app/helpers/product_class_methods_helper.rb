@@ -113,6 +113,7 @@ module ProductClassMethodsHelper
     if params[:var] == 'barcode'
       result = product.check_barcode_add_update(params, result)
     else
+      product.create_sku = true if params[:app]
       response = product.updatelist(product, params[:var], params[:value], params[:current_user])
       errors = response.errors.full_messages rescue nil
       result = result.merge('status' => false, 'error_msg' => errors) if errors

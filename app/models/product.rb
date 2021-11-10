@@ -4,6 +4,8 @@ class Product < ActiveRecord::Base
   include ProductMethodsHelper
   belongs_to :store
 
+  attr_accessor :create_sku
+
   # attr_accessible :name,
   #                 :product_type,
   #                 :store_product_id,
@@ -353,7 +355,7 @@ class Product < ActiveRecord::Base
 
   def primary_sku=(value)
     primary = primary_sku_obj
-    primary = product_skus.new if primary.nil?
+    primary = product_skus.new if primary.nil? || create_sku
     primary.order = 0
     primary.sku = value
     errors.add(:base, "Sku #{primary.sku} already exists") unless primary.save
