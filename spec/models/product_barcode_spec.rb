@@ -14,7 +14,7 @@ RSpec.describe ProductBarcode, type: :model do
   describe ProductBarcode do
     it 'Permit Duplicate Barcodes' do
       ProductBarcode.create!(barcode: 'apple-1')
-      product_barcode = ProductBarcode.new(barcode: 'apple-1')
+      product_barcode = ProductBarcode.new(barcode: 'apple-1', permit_shared_barcodes: true)
       expect(product_barcode).to be_valid
     end
   end

@@ -2,10 +2,12 @@ class ProductBarcode < ActiveRecord::Base
   belongs_to :product
   belongs_to :order_item
   # attr_accessible :barcode, :product_id, :packing_count, :is_multipack_barcode
-  # validates_uniqueness_of :barcode
+  validates_uniqueness_of :barcode, unless: :permit_shared_barcodes
   after_save :delete_empty
   before_save :update_packing_count
   # after_save :update_multibarcode
+
+  attr_accessor :permit_shared_barcodes
 
   def delete_empty
     destroy if barcode.blank?

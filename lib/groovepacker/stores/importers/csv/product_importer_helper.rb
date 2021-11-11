@@ -342,6 +342,7 @@ module Groovepacker
                           product_barcode.is_multipack_barcode = true
                           product_barcode.order = new_order
                           product_barcode.product_id = product_id
+                          product_barcode.permit_shared_barcodes = params['permit_duplicate_barcodes']
                           product_barcode.save
                           #@import_product_barcodes << product_barcode
                           new_order = new_order + 1
