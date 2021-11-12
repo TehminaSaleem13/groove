@@ -112,7 +112,8 @@ module ProductMethodsHelper
     product_item.order = order
     product_item.packing_count = item['packing_count'] if item_type.downcase == 'barcode'
     product_item.product.add_product_activity( "The #{item_type} #{product_item.send(item_type.downcase.to_sym)} was added to this item",current_user.username) if status == 'new'
-    item[:permit_same_barcode] ? product_item.save(validate: false) : product_item.save
+    product_item.permit_shared_barcodes = true if item[:permit_same_barcode]
+    product_item.save
   end
 
   def create_or_update_productimage(image, order, images=[])
@@ -248,6 +249,7 @@ module ProductMethodsHelper
     elsif (product_barcodes.pluck(:barcode).include? params[:value]) && primary_barcode == params[:value]
       result['status'] = true
     elsif (params[:permit_same_barcode] && (product_barcodes.pluck(:barcode).exclude? params[:value])) || db_barcode.blank?
+      self.create_barcode = true if params[:create_barcode]
       response = updatelist(self, params[:var], params[:value], params[:current_user], params[:permit_same_barcode])
       errors = response.errors.full_messages rescue nil
       result = result.merge('status' => false, 'error_msg' => errors) if errors

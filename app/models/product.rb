@@ -4,7 +4,7 @@ class Product < ActiveRecord::Base
   include ProductMethodsHelper
   belongs_to :store
 
-  attr_accessor :create_sku
+  attr_accessor :create_sku, :create_barcode
 
   # attr_accessible :name,
   #                 :product_type,
@@ -379,7 +379,7 @@ class Product < ActiveRecord::Base
 
   def primary_barcode=(value, permit_same_barcode = nil)
     primary = primary_barcode_obj
-    primary = product_barcodes.new if primary.nil?
+    primary = product_barcodes.new if primary.nil? || create_barcode
     primary.order = 0
     primary.barcode = value
     errors.add(:base, "Barcode #{primary.barcode} already exists") unless permit_same_barcode ? primary.save(validate: false) : primary.save

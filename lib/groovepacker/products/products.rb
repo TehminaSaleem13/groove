@@ -35,6 +35,7 @@ module Groovepacker
         @product = update_product_and_associated_info
         @product.update_product_status
         reset_recent_order_items_cache
+
         return @result
       end
 
@@ -44,14 +45,16 @@ module Groovepacker
           barcode = ProductBarcode.find_by_id(multi[:id]) rescue nil
           if multi.present?
             if barcode.blank?
-              if ProductBarcode.find_by_barcode(multi[:barcode]).present?
-                @result["exist_barcode"] = true
-              else
-                ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount], is_multipack_barcode: true)
-              end
+              create_or_update_single_barcode( { barcode: multi[:barcode] }.with_indifferent_access, 0, 'new', @product.product_barcodes)
+              # if ProductBarcode.find_by_barcode(multi[:barcode]).present?
+              #   @result["exist_barcode"] = true
+              # else
+              #   ProductBarcode.create(barcode: multi[:barcode], product_id: @params[:basicinfo][:id], packing_count: multi[:packcount], is_multipack_barcode: true)
+              # end
             elsif barcode.is_multipack_barcode #multi[:packcount].present?
               barcode.barcode = multi[:barcode]
               barcode.packing_count = multi[:packcount]
+              barcode.permit_shared_barcodes = barcode.changes.exclude?'barcode'
               barcode.save
             end
           end
@@ -226,8 +229,8 @@ module Groovepacker
           #check if a product category is defined.
           product_cats = ProductCat.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_cats, @params[:cats], 'category')
-          (@params[:cats]||[]).each do |category|
-            status = @product.create_or_update_productcat(category, product_cats)
+          (@params[:cats]||[]).each_with_index do |category, index|
+            status = create_or_update_single_cat(category, index, true, @product.product_cats)
             @result['status'] &= status
           end
         end
@@ -243,12 +246,31 @@ module Groovepacker
           end
         end
 
+        def create_or_update_single_cat(cat, index, status, product_cats)
+          db_cat =
+            product_cats.find{|_cat| _cat.category == cat["cat"]} ||
+            ProductCat.find_by_category(cat["cat"])
+          return if cat["skip_check"] == true
+
+          return status if db_cat
+
+          if cat["id"].present? && cat["id"] != 'TEMP'
+            db_cat = product_cats.find{|_cat| _cat.id == cat["id"]}
+            db_cat.category = cat['category']
+            db_cat.save
+          elsif db_cat.blank?
+            product_cats.create(category: cat['category'])
+          end
+          return status
+        end
+
         def create_or_update_single_sku(sku, index, status, product_skus)
           db_sku =
             product_skus.find{|_sku| _sku.sku == sku["sku"]} ||
             ProductSku.find_by_sku(sku["sku"])
-
-          if sku["id"].present?
+          if sku["skip_check"] == true
+            return status
+          elsif sku["id"].present? && sku["id"] != 'TEMP'
             db_sku = product_skus.find{|_sku| _sku.id == sku["id"]}
             # status = @product.create_or_update_productsku(sku, index, nil, db_sku, @current_user)
             status = @product.create_or_update_product_sku_or_barcode(sku, index, nil, db_sku, @current_user, 'SKU')
@@ -279,9 +301,11 @@ module Groovepacker
             ProductBarcode.find_by_barcode(barcode["barcode"])
 
           case true
-          when barcode["id"].present?
+          when barcode["skip_check"] == true
+            return status
+          when barcode["id"].present? && barcode["id"] != 'TEMP'
             db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"]}
-            if barcode["barcode"].present? && (@product.product_barcodes.where('id != ?', db_barcode.id).pluck(:barcode).include? barcode["barcode"])
+            if barcode["barcode"].present? && db_barcode && (@product.product_barcodes.where('id != ?', db_barcode.id).pluck(:barcode).include? barcode["barcode"])
               @result['status'] = false
               @result['message'] = "The Barcode \"#{barcode['barcode']}\" is already associated with this product"
               status = false
@@ -361,6 +385,7 @@ module Groovepacker
           objects_array.each do |object|
             found_obj = false
             found_obj = true if ids.include?(object.id)
+            found_obj = true if !found_obj && (ids.include?'TEMP') && obj_params.select { |o| o[type] == object.send(type) }.any?
             if found_obj == false && type == "sku"
               object.product.add_product_activity("The #{type} #{object.sku} was deleted from this item", @current_user.name)
             elsif found_obj == false && type == "barcode"
