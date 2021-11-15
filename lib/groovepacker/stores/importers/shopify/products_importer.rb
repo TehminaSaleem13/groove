@@ -39,8 +39,11 @@ module Groovepacker
             if @shopify_product.present?
               variant = @shopify_product["variants"].select {|variant| variant["id"]==item["variant_id"]}.first
 
+              # If variant not found by id find by sku
+              variant = @shopify_product["variants"].select {|variant| variant["sku"]==item["sku"]}.first if variant.blank? && item['sku'].present?
+
               if variant.blank?
-                on_demand_logger = Logger.new("#{Rails.root}/log/shopify_missing_product_import_#{Apartment::Tenant.current}.log")
+                on_demand_logger = Logger.new("#{Rails.root}/log/shopify_missing_product_variant_import_#{Apartment::Tenant.current}.log")
                 log = { item: item, Time: Time.zone.now, shopify_product: @shopify_product }
                 on_demand_logger.info(log)
               end
