@@ -126,7 +126,7 @@ module ProductMethodsHelper
   end
 
   def create_or_update_productcat(category, categories=[])
-    product_cat = categories.find{|cat| cat.id == category['id']} || ProductCat.new
+    product_cat = categories.find{|cat| cat.id == category['id']} ||categories.find{|cat| cat.id == category['category']} || ProductCat.new
     product_cat.category = category['category']
     product_cat.product_id = id unless product_cat.persisted?
     product_cat.save

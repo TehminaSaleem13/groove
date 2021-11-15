@@ -229,8 +229,8 @@ module Groovepacker
           #check if a product category is defined.
           product_cats = ProductCat.where(:product_id => @product.id)
           @result = destroy_object_if_not_defined(product_cats, @params[:cats], 'category')
-          (@params[:cats]||[]).each_with_index do |category, index|
-            status = create_or_update_single_cat(category, index, true, @product.product_cats)
+          (@params[:cats]||[]).each do |category|
+            status = @product.create_or_update_productcat(category, product_cats)
             @result['status'] &= status
           end
         end
@@ -246,24 +246,6 @@ module Groovepacker
           end
         end
 
-        def create_or_update_single_cat(cat, index, status, product_cats)
-          db_cat =
-            product_cats.find{|_cat| _cat.category == cat["cat"]} ||
-            ProductCat.find_by_category(cat["cat"])
-          return if cat["skip_check"] == true
-
-          return status if db_cat
-
-          if cat["id"].present? && cat["id"] != 'TEMP'
-            db_cat = product_cats.find{|_cat| _cat.id == cat["id"]}
-            db_cat.category = cat['category']
-            db_cat.save
-          elsif db_cat.blank?
-            product_cats.create(category: cat['category'])
-          end
-          return status
-        end
-
         def create_or_update_single_sku(sku, index, status, product_skus)
           db_sku =
             product_skus.find{|_sku| _sku.sku == sku["sku"]} ||
@@ -271,7 +253,7 @@ module Groovepacker
           if sku["skip_check"] == true
             return status
           elsif sku["id"].present? && sku["id"] != 'TEMP'
-            db_sku = product_skus.find{|_sku| _sku.id == sku["id"]}
+            db_sku = product_skus.find{|_sku| _sku.id == sku["id"].to_i}
             # status = @product.create_or_update_productsku(sku, index, nil, db_sku, @current_user)
             status = @product.create_or_update_product_sku_or_barcode(sku, index, nil, db_sku, @current_user, 'SKU')
           elsif sku["sku"].present? && db_sku.blank?
@@ -304,7 +286,7 @@ module Groovepacker
           when barcode["skip_check"] == true
             return status
           when barcode["id"].present? && barcode["id"] != 'TEMP'
-            db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"]}
+            db_barcode = product_barcodes.find{|_bar| _bar.id == barcode["id"].to_i}
             if barcode["barcode"].present? && db_barcode && (@product.product_barcodes.where('id != ?', db_barcode.id).pluck(:barcode).include? barcode["barcode"])
               @result['status'] = false
               @result['message'] = "The Barcode \"#{barcode['barcode']}\" is already associated with this product"
@@ -381,7 +363,7 @@ module Groovepacker
 
         def destroy_object_if_not_defined(objects_array, obj_params, type)
           return @result if objects_array.blank?
-          ids = obj_params.map {|obj| obj["id"]}.compact rescue []
+          ids = obj_params.map {|obj| obj["id"]}.compact.map(&:to_i) rescue []
           objects_array.each do |object|
             found_obj = false
             found_obj = true if ids.include?(object.id)
