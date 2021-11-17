@@ -60,6 +60,7 @@ pipelines:
           - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/nginx.conf .
           - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/deploy.sh .
           - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/filebeat.yml .
+          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/cloudwatch_logs.conf .
           - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/.env.upgrade .env.production
           - ls -al
           - zip -r ../myapp.zip ./ -x '.git' -x 'tmp' -x 'log' -x 'groovepacker.tgz'
