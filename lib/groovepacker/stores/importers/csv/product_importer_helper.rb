@@ -143,6 +143,10 @@ module Groovepacker
               usable_record[:count_group] = single_row[self.mapping['count_group'][:position]].chars.first
             end
 
+            if !self.mapping['restock_lead_time'].nil? && self.mapping['restock_lead_time'][:position] >= 0 && !single_row[self.mapping['restock_lead_time'][:position]].blank?
+              usable_record[:restock_lead_time] = single_row[self.mapping['restock_lead_time'][:position]].to_i
+            end
+
             additional_skus = %i(fnsku asin fba_upc isbn ean supplier_sku)
             additional_skus.each do |add_sku|
               if !self.mapping[add_sku.to_s].nil? && self.mapping[add_sku.to_s][:position] >= 0 && !single_row[self.mapping[add_sku.to_s][:position]].blank?

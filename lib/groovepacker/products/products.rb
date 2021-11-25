@@ -400,6 +400,7 @@ module Groovepacker
           @product.supplier_sku = basic_info[:supplier_sku]
           @product.avg_cost = basic_info[:avg_cost].to_f
           @product.count_group = basic_info[:count_group].chars.first if basic_info[:count_group]
+          @product.restock_lead_time = basic_info[:restock_lead_time].to_i
           @result['status'] &= false unless @product.save
         end
 

@@ -149,6 +149,8 @@ module ProductsHelper
   def generate_report(ids)
     tenant = Apartment::Tenant.current
     InventoryReportMailer.delay(priority: 95).manual_inventory_report(ids, tenant)
+    inv_type_report_ids = ProductInventoryReport.where(id: ids, type: true).pluck(:id)
+    InventoryReportMailer.delay(priority: 95).auto_inventory_report(true, nil, inv_type_report_ids, tenant) if inv_type_report_ids.any?
     # InventoryReportMailer.manual_inventory_report(ids).deliver
   end
 

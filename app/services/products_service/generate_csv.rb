@@ -51,7 +51,7 @@ module ProductsService
       #   @csv
       # else
       #   csv << headers.join(",")
-      #   csv << "\n" 
+      #   csv << "\n"
       #   products.each do |item|
       #     if @bulk_action
       #       @bulk_action.reload
@@ -59,7 +59,7 @@ module ProductsService
       #     end
       #     arr = process_data(item)
       #     new_arr = []
-      #     arr.each do |val| 
+      #     arr.each do |val|
       #       new_arr << (val.class==String ? "\"#{val}\"" : val)
       #     end
       #     csv << new_arr.join(",")
@@ -80,7 +80,7 @@ module ProductsService
       #   @csv
       # else
       #   csv << headers.join(",")
-      #   csv << "\n" 
+      #   csv << "\n"
       #   products.each do |item|
       #     if @bulk_action
       #       @bulk_action.reload
@@ -88,7 +88,7 @@ module ProductsService
       #     end
       #     arr = process_data(item)
       #     new_arr = []
-      #     arr.each do |val| 
+      #     arr.each do |val|
       #       new_arr << (val.class==String ? "\"#{val}\"" : val)
       #     end
       #     csv << new_arr.join(",")
@@ -107,7 +107,7 @@ module ProductsService
 
     def set_header
       @headers = [
-        'ID', 'Product Name', 'SKU 1', 'SKU 2', 'SKU 3', 'SKU 4', 'SKU 5', 'SKU 6', 'Barcode 1','Barcode 1 Qty', 'Barcode 2', 'Barcode 2 Qty', 'Barcode 3', 'Barcode 3 Qty', 'Barcode 4', 'Barcode 4 Qty', 'Barcode 5', 'Barcode 5 Qty', 'Barcode 6', 'Barcode 6 Qty', 'Location 1', 'Location 1 Qty', 'Location 2', 'Location 2 Qty', 'Location 3', 'Location 3 Qty', 'Location 4', 'Location 4 Qty', 'Qty On Hand','Absolute Image URL', 'Packing Instructions', 'Packing Instructions Conf', 'Product Receiving Instructions', 'Categories', 'FNSKU', 'ASIN', 'FBA-UPC', 'ISBN', 'EAN', 'Supplier SKU', 'AVG Cost', 'Count Group', 'Product Scanning Sequence', 'Custom Product 1', 'Custom Product Display 1', 'Custom Product 2', 'Custom Product Display 2', 'Custom Product 3', 'Custom Product Display 3', 'Opt. Click Scan', 'Opt. Type-in Count', 'Opt. Intangible', 'Opt. Add to Any Order', 'Opt. Skippable', 'Opt. Record Serial 1', 'Opt. Record Serial 2', 'Store ID', 'Status', 'Created At', 'Updated At'
+        'ID', 'Product Name', 'SKU 1', 'SKU 2', 'SKU 3', 'SKU 4', 'SKU 5', 'SKU 6', 'Barcode 1','Barcode 1 Qty', 'Barcode 2', 'Barcode 2 Qty', 'Barcode 3', 'Barcode 3 Qty', 'Barcode 4', 'Barcode 4 Qty', 'Barcode 5', 'Barcode 5 Qty', 'Barcode 6', 'Barcode 6 Qty', 'Location 1', 'Location 1 Qty', 'Location 2', 'Location 2 Qty', 'Location 3', 'Location 3 Qty', 'Location 4', 'Location 4 Qty', 'Qty On Hand','Absolute Image URL', 'Packing Instructions', 'Packing Instructions Conf', 'Product Receiving Instructions', 'Categories', 'FNSKU', 'ASIN', 'FBA-UPC', 'ISBN', 'EAN', 'Supplier SKU', 'AVG Cost', 'Count Group', 'Restock Lead Time', 'Product Scanning Sequence', 'Custom Product 1', 'Custom Product Display 1', 'Custom Product 2', 'Custom Product Display 2', 'Custom Product 3', 'Custom Product Display 3', 'Opt. Click Scan', 'Opt. Type-in Count', 'Opt. Intangible', 'Opt. Add to Any Order', 'Opt. Skippable', 'Opt. Record Serial 1', 'Opt. Record Serial 2', 'Store ID', 'Status', 'Created At', 'Updated At'
       ]
     end
 
@@ -176,6 +176,7 @@ module ProductsService
           'Opt. Skippable' => 'is_skippable',
           'Opt. Record Serial 1' => 'record_serial',
           'Opt. Record Serial 2' => 'second_record_serial',
+          'Restock Lead Time' => 'restock_lead_time',
           'Store ID' => 'store_id',
           'Status' => 'status',
           'Created At' => 'created_at',

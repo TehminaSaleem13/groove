@@ -30,6 +30,7 @@ products:
     Supplier SKU: supplier_sku
     AVG Cost: avg_cost
     Count Group: count_group
+    Restock Lead Time: restock_lead_time
     Opt. Click Scan: click_scan_enabled
     Opt. Type-in Count: type_scan_enabled
     Opt. Intangible: is_intangible

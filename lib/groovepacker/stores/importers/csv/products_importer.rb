@@ -127,7 +127,7 @@ module Groovepacker
             record[:product_record_serial] = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_record_serial]) ? true : false
             record[:product_second_record_serial] = ["ON","on","TRUE",true,"YES","yes","1" ].include?(record[:product_second_record_serial]) ? true : false
 
-            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :packing_instructions => record[:packing_instructions], :packing_instructions_conf => record[:packing_instructions_conf], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3], :custom_product_display_1 =>  record[:custom_product_display_1], :custom_product_display_2 => record[:custom_product_display_2], :custom_product_display_3 => record[:custom_product_display_3], :fnsku => record[:fnsku], :asin => record[:asin], :fba_upc => record[:fba_upc], :isbn => record[:isbn], :ean => record[:ean], :supplier_sku => record[:supplier_sku], :avg_cost => record[:avg_cost], :count_group => record[:count_group])
+            single_import = Product.new(:name => record[:name], :product_type => record[:product_type], :packing_instructions => record[:packing_instructions], :packing_instructions_conf => record[:packing_instructions_conf], :product_receiving_instructions => record[:product_receiving_instructions], :is_intangible => record[:is_intangible], :weight => record[:weight], :record_serial => record[:product_record_serial], :second_record_serial => record[:product_second_record_serial], :click_scan_enabled => record[:click_scan_enabled], :is_skippable => record[:is_skippable], :add_to_any_order => record[:add_to_any_order], :type_scan_enabled => record[:type_scan_enabled], :custom_product_1 => record[:custom_product_1], :custom_product_2 => record[:custom_product_2], :custom_product_3 => record[:custom_product_3], :custom_product_display_1 =>  record[:custom_product_display_1], :custom_product_display_2 => record[:custom_product_display_2], :custom_product_display_3 => record[:custom_product_display_3], :fnsku => record[:fnsku], :asin => record[:asin], :fba_upc => record[:fba_upc], :isbn => record[:isbn], :ean => record[:ean], :supplier_sku => record[:supplier_sku], :avg_cost => record[:avg_cost], :count_group => record[:count_group], :restock_lead_time => record[:restock_lead_time])
 
             single_import.packing_placement = record[:packing_placement] if record[:packing_placement].present?
             single_import.store_id = self.params[:store_id]
@@ -591,6 +591,10 @@ module Groovepacker
 
             if !self.mapping['count_group'].nil? && record[:count_group] != "[DELETE]" && record[:count_group].present?
               duplicate_product.count_group = record[:count_group].chars.first
+            end
+
+            if !self.mapping['restock_lead_time'].nil? && record[:restock_lead_time] != "[DELETE]" && record[:restock_lead_time].present?
+              duplicate_product.restock_lead_time = record[:restock_lead_time].to_i
             end
 
             if !self.mapping['avg_cost'].nil? && record[:avg_cost] != "[DELETE]" && record[:avg_cost].present?
