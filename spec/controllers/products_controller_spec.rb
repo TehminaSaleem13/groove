@@ -10,7 +10,7 @@ RSpec.describe ProductsController, :type => :controller do
     @store = FactoryBot.create(:store, :inventory_warehouse_id => inv_wh.id)
     tenant = Apartment::Tenant.current
     Apartment::Tenant.switch!("#{tenant}")
-    @tenant = Tenant.create(name: "#{tenant}")
+    @tenant = Tenant.create(name: "#{tenant}", inventory_report_toggle: true)
   end
 
   after :each do
@@ -113,6 +113,28 @@ RSpec.describe ProductsController, :type => :controller do
       result = JSON.parse(response.body)
       expect(result["status"]).to eq(true)
       expect(ProductKitSkus.count).to eq(0)
+    end
+  end
+
+  describe 'Product Inventory Report' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Generates Report' do
+      product = FactoryBot.create(:product, store_id: @store.id)
+      FactoryBot.create(:product_sku, sku: 'TESTSKU', product_id: product.id)
+      FactoryBot.create(:product_barcode, barcode: 'TESTBARCODE', product_id: product.id)
+
+      ProductInventoryReport.first.update(type: true)
+      InventoryReportsSetting.first_or_create(report_email: 'kcpatel006@gmail.com', start_time: 7.day.ago, end_time: Time.current)
+
+      get :generate_product_inventory_report, params: { report_ids: ProductInventoryReport.ids }
+      expect(response.status).to eq(200)
     end
   end
 
