@@ -6,7 +6,6 @@ class InventoryReportMailer < ActionMailer::Base
   def manual_inventory_report(id, tenant)
     Apartment::Tenant.switch! tenant
     @product_inv_setting = InventoryReportsSetting.last
-
     @product_inv_setting.start_time ||= 7.days.ago
     @product_inv_setting.end_time ||= Time.current
     selected_reports = ProductInventoryReport.where(id: id, type: [false, nil])
@@ -26,7 +25,7 @@ class InventoryReportMailer < ActionMailer::Base
         csv << headers
         products.each do |pro|
 
-          pro_orders = pro.order_items.map(&:order)
+          pro_orders = pro.order_items.map(&:order).reject(&:blank?)
           inv = pro.product_inventory_warehousess
           restock_lead_time = pro.restock_lead_time || 0
 
