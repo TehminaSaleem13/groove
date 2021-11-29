@@ -27,7 +27,7 @@ module ScanPack
         @result[:scan_tote_to_complete] = true
         tote = can_complete_orders.map(&:tote).sort_by(&:number).first
         order = tote.order
-        order_item = OrderItem.find(order.get_unscanned_items.first['order_item_id'])
+        order_item = OrderItem.find(order.get_unscanned_items(limit: nil).first['order_item_id'])
         @result[:tote] = tote
         @result[:tote_identifier] = tote_identifier
         @result[:product] = product
@@ -37,7 +37,7 @@ module ScanPack
         @result[:order_items_scanned] = order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
         @result[:order_items_unscanned] = []
         @result[:order_items_partial_scanned] = []
-        current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
+        current_item = order.get_unscanned_items(limit: nil).select { |item| item['order_item_id'] == order_item.id }.first
         tote.update_attributes(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = begin
                                         (current_item['scanned_qty'] + 1)
@@ -67,9 +67,9 @@ module ScanPack
         @result[:order] = order
         @result[:order_item] = order_item
         @result[:order_items_scanned] = order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
-        @result[:order_items_unscanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
-        @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
-        current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
+        @result[:order_items_unscanned] = order.get_unscanned_items(limit: nil).select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
+        @result[:order_items_partial_scanned] = order.get_unscanned_items(limit: nil).select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
+        current_item = order.get_unscanned_items(limit: nil).select { |item| item['order_item_id'] == order_item.id }.first
         tote.update_attributes(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = begin
                                         current_item['scanned_qty'] + 1
@@ -87,7 +87,7 @@ module ScanPack
         order_item = order.order_items.where(product_id: product.id).first
         @result[:assigned_to_tote] = true
         product_first_scan_order_hash(product, order, order_item, available_tote)
-        current_item = order.get_unscanned_items.select { |item| item['order_item_id'] == order_item.id }.first
+        current_item = order.get_unscanned_items(limit: nil).select { |item| item['order_item_id'] == order_item.id }.first
         current_item['scanned_qty'] = begin
                                         current_item['scanned_qty'] + 1
                                       rescue
@@ -105,7 +105,7 @@ module ScanPack
         @result[:no_order] = false
         @result[:pending_order] = true
         product_first_scan_order_hash(product, pending_order, pending_order.order_items.where(product_id: product.id).first, pending_order.tote)
-        @result[:can_complete_order] = pending_order.get_unscanned_items.count == 1 && pending_order.get_unscanned_items[0]['qty_remaining']
+        @result[:can_complete_order] = pending_order.get_unscanned_items(limit: nil).count == 1 && pending_order.get_unscanned_items[0]['qty_remaining']
         @result[:tote_identifier] = tote_identifier + ' ' + @result[:tote].name
         @result[:barcode_input] = input
       end
@@ -120,8 +120,8 @@ module ScanPack
         @result[:order] = order
         @result[:order_item] = order_item
         @result[:order_items_scanned] = order.get_scanned_items.select { |item| item['qty_remaining'] == 0 }
-        @result[:order_items_unscanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
-        @result[:order_items_partial_scanned] = order.get_unscanned_items.select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
+        @result[:order_items_unscanned] = order.get_unscanned_items(limit: nil).select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
+        @result[:order_items_partial_scanned] = order.get_unscanned_items(limit: nil).select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
       end
     end
   end

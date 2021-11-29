@@ -27,7 +27,7 @@ module ScanPack
         # If no single item orders are found with that item then all orders that have been assigned to a tote are searched to see if the item is required. If any toted orders require that item a check is done to see if that item completes any of the orders.
         orders = Order.includes([:tote]).where("orders.id IN (?) AND status = 'awaiting'", Tote.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }
         if orders.any?
-          can_complete_orders = orders.select { |o| o.get_unscanned_items.count == 1 && o.get_unscanned_items[0]['qty_remaining'] == 1 }
+          can_complete_orders = orders.select { |o| o.get_unscanned_items(limit: nil).count == 1 && o.get_unscanned_items[0]['qty_remaining'] == 1 }
           if can_complete_orders.any?
             # If so, the user is prompted to scan the tote number that was assigned to the completed order. The user is notified that the order is Done. The order is marked Scanned and the webhook will be called to print the labels.
             run_if_can_complete_any_order(can_complete_orders, product)
