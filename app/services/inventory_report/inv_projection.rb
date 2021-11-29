@@ -25,7 +25,7 @@ module InventoryReport
 
           row = ["#{start_time} to #{end_time}", pro.primary_sku.to_s, pro.name.tr(',', ' ').to_s, orders_count]
           row << get_orders_count(pro_orders)
-          row << get_projected_days_remaining(quantity_on_hand, restock_lead_time(pro), pro_orders)
+          row << get_projected_days_remaining(available_inv, restock_lead_time(pro), pro_orders)
           row << [available_inv, quantity_on_hand, pro.product_cats[0]&.category, inv[0]&.location_primary, inv[0]&.location_secondary, inv[0]&.location_tertiary, restock_lead_time(pro)]
 
           csv << row.flatten
@@ -40,11 +40,11 @@ module InventoryReport
       @product_inv_setting.end_time ||= Time.current
     end
 
-    def get_projected_days_remaining(qoh, rlt, pro_orders)
+    def get_projected_days_remaining(available_inv, rlt, pro_orders)
       orders_count = get_orders_count(pro_orders)
-      projected_days_remaining = [pro_orders.count.zero? ? 0 : ((qoh.to_f / (pro_orders.count.to_f / days)) - rlt.to_f)]
+      projected_days_remaining = [pro_orders.count.zero? ? 0 : (((available_inv.to_f / (pro_orders.count.to_f / days)) - rlt.to_f)).round()]
       [14, 30, 60, 90].each_with_index do |day_count, i|
-        projected_days_remaining << (orders_count[i].zero? ? 0 : ((qoh.to_f / (orders_count[i].to_f / day_count)) - rlt.to_f))
+        projected_days_remaining << (orders_count[i].zero? ? 0 : ((available_inv.to_f / (orders_count[i].to_f / day_count)) - rlt.to_f)).round()
       end
       projected_days_remaining
     end
@@ -70,11 +70,11 @@ module InventoryReport
     end
 
     def headers
-      ['DATE RANGE', 'SKU', 'PRODUCT NAME', 'SELECTED RANGE QTY SCANNED', 'PAST 14D QTY SCANNED', 'PAST 30D QTY SCANNED', 'PAST 60D QTY SCANNED', 'PAST 90D QTY SCANNED', 'PROJ DAYS REMAINING BASED ON SELECTED RANGE', 'PROJ DAYS REMAINING BASED ON 14D', 'PROJ DAYS REMAINING BASED ON 30D', 'PROJ DAYS REMAINING BASED ON 60D', 'PROJ DAYS REMAINING BASED ON 90D', 'CURRENT AVAILABLE', 'CURRENT QOH', 'CATEGORY', 'LOCATION1', 'LOCATION2', 'LOCATION3', 'RESTOCK LEAD TIME']
+      ['DATE RANGE', 'SKU', 'PRODUCT NAME', 'SELECTED RANGE QTY SCANNED', 'PAST 14D QTY SCANNED', 'PAST 30D QTY SCANNED', 'PAST 60D QTY SCANNED', 'PAST 90D QTY SCANNED', 'SELECTED RANGE PROJ DAYS REMAINING', '14D RANGE PROJ DAYS REMAINING', '30D RANGE PROJ DAYS REMAINING', '60D RANGE PROJ DAYS REMAINING', '90D RANGE PROJ DAYS REMAINING', 'CURRENT AVAILABLE', 'CURRENT QOH', 'CATEGORY', 'LOCATION1', 'LOCATION2', 'LOCATION3', 'RESTOCK LEAD TIME']
     end
 
     def days
-      (@product_inv_setting&.end_time&.end_of_day - @product_inv_setting&.start_time&.beginning_of_day).to_i
+      ((@product_inv_setting&.end_time&.end_of_day - @product_inv_setting&.start_time&.beginning_of_day).to_f  / (24 * 60 * 60)).ceil
     rescue StandardError
       7
     end
