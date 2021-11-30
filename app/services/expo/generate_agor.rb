@@ -24,11 +24,11 @@ module Expo
     end
 
     def filter_order_data
-      @order.slice("id", "increment_id", "order_placed_time", "created_at", "updated_at", "customer_comments", "notes_internal", "notes_toPacker", "notes_fromPacker", "status", "tracking_num", "packing_user_id", "notes_from_buyer", "note_confirmation", "custom_field_one", "custom_field_two", :unscanned_items, :scanned_items, :multi_shipments, :activities)
+      @order.slice("id", "increment_id", "order_placed_time", "created_at", "updated_at", "customer_comments", "notes_internal", "notes_toPacker", "notes_fromPacker", "status", "tracking_num", "packing_user_id", "notes_from_buyer", "note_confirmation", "custom_field_one", "custom_field_two", "tags", :unscanned_items, :scanned_items, :multi_shipments, :activities)
     end
 
     def filter_order_info
-      @order_info.slice("id",'store_name', "notes", "ordernum", "order_date", "itemslength", "status", "tracking_num", "custom_field_one", "custom_field_two")
+      @order_info.slice("id",'store_name', "notes", "ordernum", "order_date", "itemslength", "status", "tracking_num", "custom_field_one", "custom_field_two", "tags")
     end
 
     def filter_scanned_items
