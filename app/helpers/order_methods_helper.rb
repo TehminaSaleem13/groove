@@ -310,9 +310,7 @@ module OrderMethodsHelper
 
     list = []
     order_item_boxes.flatten.each do |o|
-      data1 = {}
-      if !o.kit_id.nil?
-        order_item_kit_product = OrderItemKitProduct.find(o.kit_id)
+      if !o.kit_id.nil? && (order_item_kit_product = OrderItemKitProduct.find_by_id(o.kit_id))
         product_kit_sku = order_item_kit_product.product_kit_skus
         product = Product.find(product_kit_sku.option_product_id)
         data1 = { product_name: product.name ,qty:  o.item_qty, box: o.box.id  }
