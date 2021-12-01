@@ -184,15 +184,19 @@ module OrderMethodsHelper
     update_unscanned_list(limited_order_items, unscanned_list, scan_pack_v2)
 
     unscanned_list = unscanned_list.sort do |a, b|
-      o = (a['packing_placement'] <=> b['packing_placement']);
-      o == 0 ? (a['name'] <=> b['name']) : o
+      a['packing_placement'] <=> b['packing_placement']
     end
 
     list = unscanned_list
     begin
-      list = list.sort do |a,b|
-        a["next_item"] <=> b["next_item"]
+      grouped_by_packing_placement = list.group_by { |x| x['packing_placement']}
+
+      sorted_array = []
+
+      grouped_by_packing_placement.each_value do |array|
+        sorted_array << array.natural_sort_by { |x| x['location'] }
       end
+      list = sorted_array.flatten
       unscanned_list = list
     rescue
       unscanned_list
