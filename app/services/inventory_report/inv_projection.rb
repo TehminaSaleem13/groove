@@ -43,7 +43,7 @@ module InventoryReport
     def get_projected_days_remaining(available_inv, rlt, pro_orders)
       orders_count = get_orders_count(pro_orders)
       projected_days_remaining = [pro_orders.count.zero? ? 0 : (((available_inv.to_f / (pro_orders.count.to_f / days)) - rlt.to_f)).round()]
-      [14, 30, 60, 90].each_with_index do |day_count, i|
+      [14, 30, 45, 60, 90].each_with_index do |day_count, i|
         projected_days_remaining << (orders_count[i].zero? ? 0 : ((available_inv.to_f / (orders_count[i].to_f / day_count)) - rlt.to_f)).round()
       end
       projected_days_remaining
@@ -51,7 +51,7 @@ module InventoryReport
 
     def get_orders_count(pro_orders)
       counts = []
-      [14, 30, 60, 90].each do |day_count|
+      [14, 30, 45, 60, 90].each do |day_count|
         counts << pro_orders.where('scanned_on >= ?', Time.now - day_count.days).count
       end
       counts
@@ -70,7 +70,7 @@ module InventoryReport
     end
 
     def headers
-      ['DATE RANGE', 'SKU', 'PRODUCT NAME', 'SELECTED RANGE QTY SCANNED', 'PAST 14D QTY SCANNED', 'PAST 30D QTY SCANNED', 'PAST 60D QTY SCANNED', 'PAST 90D QTY SCANNED', 'SELECTED RANGE PROJ DAYS REMAINING', '14D RANGE PROJ DAYS REMAINING', '30D RANGE PROJ DAYS REMAINING', '60D RANGE PROJ DAYS REMAINING', '90D RANGE PROJ DAYS REMAINING', 'CURRENT AVAILABLE', 'CURRENT QOH', 'CATEGORY', 'LOCATION1', 'LOCATION2', 'LOCATION3', 'RESTOCK LEAD TIME']
+      ['DATE RANGE', 'SKU', 'PRODUCT NAME', 'SELECTED RANGE QTY SCANNED', 'PAST 14D QTY SCANNED', 'PAST 30D QTY SCANNED', 'PAST 45D QTY SCANNED', 'PAST 60D QTY SCANNED', 'PAST 90D QTY SCANNED', 'SELECTED RANGE PROJ DAYS REMAINING', '14D RANGE PROJ DAYS REMAINING', '30D RANGE PROJ DAYS REMAINING', '45D RANGE PROJ DAYS REMAINING', '60D RANGE PROJ DAYS REMAINING', '90D RANGE PROJ DAYS REMAINING', 'CURRENT AVAILABLE', 'CURRENT QOH', 'CATEGORY', 'LOCATION1', 'LOCATION2', 'LOCATION3', 'RESTOCK LEAD TIME']
     end
 
     def days
