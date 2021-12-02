@@ -95,6 +95,7 @@ module Groovepacker
                 variant["title"] = shopify_product["title"] + variant_title
                 product = create_product_from_variant(variant, shopify_product)
                 product = product.reload rescue product
+                product.update_columns(store_product_id: variant['id']) if variant['id'].present?
                 product.product_inventory_warehousess.first.update_attributes(available_inv: variant['inventory_quantity']) if @credential.import_inventory_qoh
                 product.set_product_status
               end

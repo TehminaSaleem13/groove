@@ -80,50 +80,7 @@ class ExportSsProductsCsv
   end
 
   def fix_shopify_product_images(tenant, params)
-    Apartment::Tenant.switch! tenant
-    store = Store.find(params[:store_id])
-    shopify_credential = store.shopify_credential
-    result = {}
-    if shopify_credential
-      products = Product.where(store_id: params[:store_id])
-      filter_products = []
-      products.each do |product|
-        filter_products << product if (check_broken_image(product.product_images, result) rescue true)
-      end
-      get_and_store_product_images(filter_products, shopify_credential)
-      CsvExportMailer.send_fix_shopify_product_images(tenant).deliver
-    end
-  end
-
-  def get_and_store_product_images(products, cred)
-    products.each do |product|
-      response = HTTParty.get("https://#{cred.shop_name}.myshopify.com/admin/products/#{product.store_product_id.to_i}/images.json",
-                                headers: {
-                                "X-Shopify-Access-Token" => cred.access_token,
-                                "Content-Type" => "application/json",
-                                "Accept" => "application/json"
-                              })
-      product.product_images.destroy_all
-      if response['images'].present?
-        response['images'].each do |image|
-          product.product_images.create(image: image['src'])
-        end
-      end
-    end
-  end
-
-  def check_broken_image(images, result)
-    result["broken_image"] = true
-    images.each do |image|
-      response = Net::HTTP.get_response(URI.parse(image.image))
-      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
-      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == "301"
-      if response.code == "200" && !image.placeholder
-        result["broken_image"] = false
-        return result["broken_image"]
-      end
-    end
-    result["broken_image"]
+    ProductsService::FixBrokenImages.call(tenant, params)
   end
 
   def generate_csv(result, data, filename, products)
