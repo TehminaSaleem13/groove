@@ -47,10 +47,10 @@ module ProductsService
         next if shopify_product['images'].blank?
 
         shopify_product['variants'].each do |s_variant|
-          next unless s_variant['sku'].present?
+          # Checking existing Product with that id or sku
+          product = filter_products.where(store_product_id: s_variant['id']).first
+          product = filter_products.where(product_skus: { sku: s_variant['sku'] }).first if product.blank? && s_variant['sku'].present?
 
-          # Checking existing Product with that sku
-          product = filter_products.where(product_skus: { sku: s_variant['sku'] }).first
           next unless product
 
           save_product_images(product, shopify_product['images'])
