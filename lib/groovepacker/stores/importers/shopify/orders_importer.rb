@@ -12,6 +12,7 @@ module Groovepacker
 
             @import_item.update_column(:importer_id, @worker_id)
             response = @client.orders(@import_item)
+            @import_fulfilled_having_tracking = @credential.import_fulfilled_having_tracking
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             initialize_import_item
             return @result if response["orders"].nil? || response['orders'].blank? || response['orders'].first.nil?
@@ -44,7 +45,7 @@ module Groovepacker
             def import_single_order(order)
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
 
-              update_import_count('success_updated') && return if @credential.import_fulfilled_having_tracking && order['fulfillment_status'] == 'fulfilled' && !get_tracking_number(order).present?
+              update_import_count('success_updated') && return if @import_fulfilled_having_tracking && order['fulfillment_status'] == 'fulfilled' && !get_tracking_number(order).present?
 
               order_in_gp_present = false
               order_in_gp = Order.find_by_store_order_id(order["id"].to_s)
