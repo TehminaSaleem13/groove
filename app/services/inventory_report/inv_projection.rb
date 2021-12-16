@@ -14,7 +14,7 @@ module InventoryReport
 
       CSV.generate(headers: true) do |csv|
         csv << headers
-        joined_orders = Order.joins(order_items: [{ order_item_kit_products: [:product_kit_skus] }, :product])
+        joined_orders = Order.includes(order_items: [{ order_item_kit_products: [:product_kit_skus] }, :product])
         products.each do |pro|
           pro_orders = joined_orders.where(order_items: { product: pro }).or(joined_orders.where(order_items: { order_item_kit_products:  { product_kit_skus: { option_product_id: pro.id }}})).distinct
           inv = pro.product_inventory_warehousess
