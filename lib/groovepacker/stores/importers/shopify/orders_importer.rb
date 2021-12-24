@@ -30,6 +30,15 @@ module Groovepacker
             @result
           end
 
+          def ondemand_import_single_order(order_number)
+            @on_demand_import = true
+            init_common_objects
+            response = @client.get_single_order(order_number)
+            order_response = response['orders']&.any? ? response['orders'].first : nil
+            import_single_order(order_response) if order_response
+            @import_item.destroy rescue nil
+          end
+
           private
             def initialize_import_objects
               handler = self.get_handler
@@ -44,7 +53,7 @@ module Groovepacker
             def import_single_order(order)
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
 
-              update_import_count('success_updated') && return if import_fulfilled_having_tracking && order['fulfillment_status'] == 'fulfilled' && !get_tracking_number(order).present?
+              update_import_count('success_updated') && return if skip_the_order?(order)
 
               order_in_gp_present = false
               order_in_gp = Order.find_by_store_order_id(order["id"].to_s)
@@ -248,6 +257,12 @@ module Groovepacker
             order['line_items']
           rescue
             order['line_items']
+          end
+
+          def skip_the_order?(order)
+            return false if @on_demand_import
+
+            import_fulfilled_having_tracking && order['fulfillment_status'] == 'fulfilled' && !get_tracking_number(order).present?
           end
         end
       end

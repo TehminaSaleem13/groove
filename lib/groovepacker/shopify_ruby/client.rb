@@ -9,26 +9,33 @@ module Groovepacker
         fulfillment_status = shopify_credential.get_status
         # while page_index
         #   query = {"page" => page_index, "updated_at_min" => last_import, "limit" => 250}.as_json
-        #   response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}",query: query,headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
+        #   response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
         #   page_index = page_index + 1
         #   combined_response["orders"] << response["orders"]
         #   break if (response["orders"].blank? || response["orders"].count < 250)
         # end
 
         query = {"updated_at_min" => last_import, "limit" => 250}.as_json
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}",query: query,headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
         combined_response["orders"] << response["orders"]
 
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
           import_item&.touch rescue nil
           new_link = response.headers['link'].split(',').last.split(';').first.strip.chop.reverse.chop.reverse
-          response = HTTParty.get(new_link, headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
+          response = HTTParty.get(new_link, headers: headers)
           combined_response["orders"] << response["orders"]
         end
 
         combined_response["orders"] = combined_response["orders"].flatten
         Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
         combined_response
+      end
+
+      def get_single_order(order_number)
+        query = { limit: 5 }.as_json
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?name=#{order_number}", query: query, headers: headers)
+        Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Number', order_number, '==Response', response)
+        response
       end
 
       def products(product_import_type, product_import_range_days)
@@ -59,11 +66,7 @@ module Groovepacker
 
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/products#{add_url}",
                                   query: query_opts,
-                                  headers: {
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
-                                  "Content-Type" => "application/json",
-                                  "Accept" => "application/json"
-                                })
+                                  headers: headers)
         combined_response["products"] << response["products"]
         combined_response["products"] = combined_response["products"].flatten
 
@@ -71,7 +74,7 @@ module Groovepacker
           page_index = page_index + 1
           puts "======================Fetching Page #{page_index}======================"
           new_link = response.headers['link'].split(',').last.split(';').first.strip.chop.reverse.chop.reverse
-          response = HTTParty.get(new_link, headers: {"X-Shopify-Access-Token" => shopify_credential.access_token,"Content-Type" => "application/json","Accept" => "application/json"})
+          response = HTTParty.get(new_link, headers: headers )
           combined_response["products"] << response["products"]
           combined_response["products"] = combined_response["products"].flatten
         end
@@ -85,21 +88,13 @@ module Groovepacker
       def product(product_id)
         response = HTTParty.get('https://'+ shopify_credential.shop_name +
                                   '.myshopify.com/admin/products/' + product_id.to_s,
-                                headers: {
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
-                                  "Content-Type" => "application/json",
-                                  "Accept" => "application/json"
-                                })
+                                headers: headers)
         response
       end
 
       def get_variant(product_variant_id)
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}",
-                                headers: {
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
-                                  "Content-Type" => "application/json",
-                                  "Accept" => "application/json"
-                                })
+                                headers: headers)
         #unless sku.blank?
         #  response["variants"] = response["variants"].select {|variant| variant["sku"]==sku} rescue {}
         #  response = response["variants"].first || {}
@@ -108,16 +103,18 @@ module Groovepacker
       end
 
       def update_inventory(sync_option, attrs)
-
-				response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_variant_id}",
+        response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_variant_id}",
                                 body: attrs.to_json,
-                                headers: {
-                                  "X-Shopify-Access-Token" => shopify_credential.access_token,
-                                  "Content-Type" => "application/json",
-                                  "Accept" => "application/json"
-                                })
+                                headers: headers)
       end
 
+      def headers
+        {
+          'X-Shopify-Access-Token' => shopify_credential.access_token,
+          'Content-Type' => 'application/json',
+          'Accept' => 'application/json'
+        }
+      end
     end
   end
 end

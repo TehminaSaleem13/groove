@@ -1,0 +1,514 @@
+---
+orders:
+- id: 42864286
+  admin_graphql_api_id: gid://shopify/Order/42864286
+  app_id: 4545
+  browser_ip: 76.208.62.9
+  buyer_accepts_marketing: false
+  cancel_reason:
+  cancelled_at:
+  cart_token: a1c16590454545
+  checkout_id: 23022263435454
+  checkout_token: 1a067c70145454
+  client_details:
+    accept_language: en-us
+    browser_height:
+    browser_ip: 76.208.62.9
+    browser_width:
+    session_hash:
+    user_agent: Mozilla/5.0 (iPhone; CPU iPhone OS 14_2 like Mac OS X) AppleWebKit/605.1.15
+      (KHTML, like Gecko) Version/14.0.1 Mobile/15E148 Safari/604.1
+  closed_at:
+  confirmed: true
+  contact_email: rjtest@yopmail.com
+  created_at: '2021-12-15T19:17:38-05:00'
+  currency: USD
+  current_subtotal_price: '21.97'
+  current_subtotal_price_set:
+    shop_money:
+      amount: '21.97'
+      currency_code: USD
+    presentment_money:
+      amount: '21.97'
+      currency_code: USD
+  current_total_discounts: '2.99'
+  current_total_discounts_set:
+    shop_money:
+      amount: '2.99'
+      currency_code: USD
+    presentment_money:
+      amount: '2.99'
+      currency_code: USD
+  current_total_duties_set:
+  current_total_price: '26.96'
+  current_total_price_set:
+    shop_money:
+      amount: '26.96'
+      currency_code: USD
+    presentment_money:
+      amount: '26.96'
+      currency_code: USD
+  current_total_tax: '0.00'
+  current_total_tax_set:
+    shop_money:
+      amount: '0.00'
+      currency_code: USD
+    presentment_money:
+      amount: '0.00'
+      currency_code: USD
+  customer_locale: en
+  device_id:
+  discount_codes:
+  - code: WELCOMEBACK
+    amount: '2.99'
+    type: percentage
+  email: rjtest@yopmail.com
+  financial_status: paid
+  fulfillment_status: fulfilled
+  gateway: shopify_payments
+  landing_site: "/collections/shop?_kx=yTarcGIzo6-=.KjYTj4"
+  landing_site_ref:
+  location_id:
+  name: '410382'
+  note:
+  note_attributes:
+  - name: __quote_id
+    value: initialized
+  number: 409382
+  order_number: 410382
+  order_status_url: https://www.fsafss.com/45454/orders/4545/authenticate?key=455
+  original_total_duties_set:
+  payment_gateway_names:
+  - shopify_payments
+  phone:
+  presentment_currency: USD
+  processed_at: '2021-12-15T19:17:37-05:00'
+  processing_method: direct
+  reference:
+  referring_site: ''
+  source_identifier:
+  source_name: web
+  source_url:
+  subtotal_price: '21.97'
+  subtotal_price_set:
+    shop_money:
+      amount: '21.97'
+      currency_code: USD
+    presentment_money:
+      amount: '21.97'
+      currency_code: USD
+  tags: ''
+  tax_lines: []
+  taxes_included: false
+  test: false
+  token: 9ec49a58dd6cde45455
+  total_discounts: '2.99'
+  total_discounts_set:
+    shop_money:
+      amount: '2.99'
+      currency_code: USD
+    presentment_money:
+      amount: '2.99'
+      currency_code: USD
+  total_line_items_price: '24.96'
+  total_line_items_price_set:
+    shop_money:
+      amount: '24.96'
+      currency_code: USD
+    presentment_money:
+      amount: '24.96'
+      currency_code: USD
+  total_outstanding: '0.00'
+  total_price: '26.96'
+  total_price_set:
+    shop_money:
+      amount: '26.96'
+      currency_code: USD
+    presentment_money:
+      amount: '26.96'
+      currency_code: USD
+  total_price_usd: '26.96'
+  total_shipping_price_set:
+    shop_money:
+      amount: '4.99'
+      currency_code: USD
+    presentment_money:
+      amount: '4.99'
+      currency_code: USD
+  total_tax: '0.00'
+  total_tax_set:
+    shop_money:
+      amount: '0.00'
+      currency_code: USD
+    presentment_money:
+      amount: '0.00'
+      currency_code: USD
+  total_tip_received: '0.00'
+  total_weight: 907
+  updated_at: '2021-12-22T19:00:59-05:00'
+  user_id:
+  billing_address:
+    first_name: Kapil
+    address1: Test
+    phone: "+19844444444"
+    city: IN
+    zip: '70457'
+    province: Louisiana
+    country: United States
+    last_name: Test
+    address2: ''
+    company: ''
+    latitude: 29.6006497
+    longitude: -90.7750884
+    name: Kapil Test
+    country_code: US
+    province_code: LA
+  customer:
+    id: 5192060731582
+    email: rjtest@yopmail.com
+    accepts_marketing: false
+    created_at: '2021-05-10T21:19:20-04:00'
+    updated_at: '2021-12-15T19:17:39-05:00'
+    first_name: Kapil
+    last_name: Test
+    orders_count: 6
+    state: enabled
+    total_spent: '177.74'
+    last_order_id: 545
+    note:
+    verified_email: false
+    multipass_identifier:
+    tax_exempt: false
+    phone:
+    tags: ''
+    last_order_name: '410382'
+    currency: USD
+    accepts_marketing_updated_at: '2021-05-10T21:19:20-04:00'
+    marketing_opt_in_level:
+    tax_exemptions: []
+    admin_graphql_api_id: gid://shopify/Customer/5192060731582
+    default_address:
+      id: 6378470113470
+      customer_id: 5192060731582
+      first_name: Kapil
+      last_name: Test
+      company: ''
+      address1: IN
+      address2: ''
+      city: IN
+      province: Louisiana
+      country: United States
+      zip: '70360'
+      phone: "+19878600000"
+      name: Kapil Test
+      province_code: LA
+      country_code: US
+      country_name: United States
+      default: true
+  discount_applications:
+  - target_type: line_item
+    type: discount_code
+    value: '12.0'
+    value_type: percentage
+    allocation_method: across
+    target_selection: all
+    code: WELCOMEBACK
+  fulfillments:
+  - id: 4578787
+    admin_graphql_api_id: gid://shopify/Fulfillment/4578787
+    created_at: '2021-12-21T08:52:07-05:00'
+    location_id: 47878
+    name: '410382.1'
+    order_id: 45787
+    receipt: {}
+    service: manual
+    shipment_status: in_transit
+    status: success
+    tracking_company: UPS
+    tracking_number: TESTZ
+    tracking_numbers:
+    - TESTZ
+    tracking_url: https://www.ups.com/WebTracking?loc=en_US&requester=ST&trackNums=TESTZ
+    tracking_urls:
+    - https://www.ups.com/WebTracking?loc=en_US&requester=ST&trackNums=TESTZ
+    updated_at: '2021-12-22T19:00:59-05:00'
+    line_items:
+    - id: 4857878788
+      admin_graphql_api_id: gid://shopify/LineItem/4857878788
+      fulfillable_quantity: 0
+      fulfillment_service: manual
+      fulfillment_status: fulfilled
+      gift_card: false
+      grams: 454
+      name: Chipwrecked Peanut Butter
+      origin_location:
+        id: 7878787878
+        country_code: US
+        province_code: IN
+        name: American Dream Nut Butter
+        address1: 4202 North EMS Boulevard
+        address2: Suite 120
+        city: Greenfield
+        zip: '46140'
+      price: '11.99'
+      price_set:
+        shop_money:
+          amount: '11.99'
+          currency_code: USD
+        presentment_money:
+          amount: '11.99'
+          currency_code: USD
+      product_exists: true
+      product_id: 4688092397656
+      properties: []
+      quantity: 2
+      requires_shipping: true
+      sku: PB-CHIPW
+      taxable: true
+      title: Chipwrecked Peanut Butter
+      total_discount: '0.00'
+      total_discount_set:
+        shop_money:
+          amount: '0.00'
+          currency_code: USD
+        presentment_money:
+          amount: '0.00'
+          currency_code: USD
+      variant_id: 33149459955800
+      variant_inventory_management: shopify
+      variant_title: ''
+      vendor: American Dream Nut Butter
+      tax_lines: []
+      duties: []
+      discount_allocations:
+      - amount: '2.88'
+        amount_set:
+          shop_money:
+            amount: '2.88'
+            currency_code: USD
+          presentment_money:
+            amount: '2.88'
+            currency_code: USD
+        discount_application_index: 0
+    - id: 10923336859838
+      admin_graphql_api_id: gid://shopify/LineItem/10923336859838
+      fulfillable_quantity: 0
+      fulfillment_service: manual
+      fulfillment_status: fulfilled
+      gift_card: false
+      grams: 0
+      name: Route Package Protection - $0.98
+      origin_location:
+        id: 7878787878
+        country_code: US
+        province_code: IN
+        name: American Dream Nut Butter
+        address1: 4202 North EMS Boulevard
+        address2: Suite 120
+        city: Greenfield
+        zip: '46140'
+      price: '0.98'
+      price_set:
+        shop_money:
+          amount: '0.98'
+          currency_code: USD
+        presentment_money:
+          amount: '0.98'
+          currency_code: USD
+      product_exists: true
+      product_id: 6577004052670
+      properties: []
+      quantity: 1
+      requires_shipping: false
+      sku: ROUTEINS10
+      taxable: false
+      title: Route Package Protection
+      total_discount: '0.00'
+      total_discount_set:
+        shop_money:
+          amount: '0.00'
+          currency_code: USD
+        presentment_money:
+          amount: '0.00'
+          currency_code: USD
+      variant_id: 39391280267454
+      variant_inventory_management:
+      variant_title: "$0.98"
+      vendor: Route
+      tax_lines: []
+      duties: []
+      discount_allocations:
+      - amount: '0.11'
+        amount_set:
+          shop_money:
+            amount: '0.11'
+            currency_code: USD
+          presentment_money:
+            amount: '0.11'
+            currency_code: USD
+        discount_application_index: 0
+  line_items:
+  - id: 4857878788
+    admin_graphql_api_id: gid://shopify/LineItem/4857878788
+    fulfillable_quantity: 0
+    fulfillment_service: manual
+    fulfillment_status: fulfilled
+    gift_card: false
+    grams: 454
+    name: Chipwrecked Peanut Butter
+    origin_location:
+      id: 7878787878
+      country_code: US
+      province_code: IN
+      name: American Dream Nut Butter
+      address1: 4202 North EMS Boulevard
+      address2: Suite 120
+      city: Greenfield
+      zip: '46140'
+    price: '11.99'
+    price_set:
+      shop_money:
+        amount: '11.99'
+        currency_code: USD
+      presentment_money:
+        amount: '11.99'
+        currency_code: USD
+    product_exists: true
+    product_id: 4688092397656
+    properties: []
+    quantity: 2
+    requires_shipping: true
+    sku: PB-CHIPW
+    taxable: true
+    title: Chipwrecked Peanut Butter
+    total_discount: '0.00'
+    total_discount_set:
+      shop_money:
+        amount: '0.00'
+        currency_code: USD
+      presentment_money:
+        amount: '0.00'
+        currency_code: USD
+    variant_id: 33149459955800
+    variant_inventory_management: shopify
+    variant_title: ''
+    vendor: American Dream Nut Butter
+    tax_lines: []
+    duties: []
+    discount_allocations:
+    - amount: '2.88'
+      amount_set:
+        shop_money:
+          amount: '2.88'
+          currency_code: USD
+        presentment_money:
+          amount: '2.88'
+          currency_code: USD
+      discount_application_index: 0
+  - id: 10923336859838
+    admin_graphql_api_id: gid://shopify/LineItem/10923336859838
+    fulfillable_quantity: 0
+    fulfillment_service: manual
+    fulfillment_status: fulfilled
+    gift_card: false
+    grams: 0
+    name: Route Package Protection - $0.98
+    origin_location:
+      id: 7878787878
+      country_code: US
+      province_code: IN
+      name: American Dream Nut Butter
+      address1: 4202 North EMS Boulevard
+      address2: Suite 120
+      city: Greenfield
+      zip: '46140'
+    price: '0.98'
+    price_set:
+      shop_money:
+        amount: '0.98'
+        currency_code: USD
+      presentment_money:
+        amount: '0.98'
+        currency_code: USD
+    product_exists: true
+    product_id: 6577004052670
+    properties: []
+    quantity: 1
+    requires_shipping: false
+    sku: ROUTEINS10
+    taxable: false
+    title: Route Package Protection
+    total_discount: '0.00'
+    total_discount_set:
+      shop_money:
+        amount: '0.00'
+        currency_code: USD
+      presentment_money:
+        amount: '0.00'
+        currency_code: USD
+    variant_id: 39391280267454
+    variant_inventory_management:
+    variant_title: "$0.98"
+    vendor: Route
+    tax_lines: []
+    duties: []
+    discount_allocations:
+    - amount: '0.11'
+      amount_set:
+        shop_money:
+          amount: '0.11'
+          currency_code: USD
+        presentment_money:
+          amount: '0.11'
+          currency_code: USD
+      discount_application_index: 0
+  payment_details:
+    credit_card_bin: '111111'
+    avs_result_code: Y
+    cvv_result_code:
+    credit_card_number: "•••• •••• •••• 3499"
+    credit_card_company: Visa
+  refunds: []
+  shipping_address:
+    first_name: Kapil
+    address1: IN
+    phone: "+19878600000"
+    city: IN
+    zip: '5478'
+    province: Louisiana
+    country: United States
+    last_name: Test
+    address2: ''
+    company: ''
+    latitude: 29.6006497
+    longitude: -90.7750884
+    name: Kapil Test
+    country_code: US
+    province_code: LA
+  shipping_lines:
+  - id: 3605392883902
+    carrier_identifier:
+    code: Priority Shipping
+    delivery_category:
+    discounted_price: '4.99'
+    discounted_price_set:
+      shop_money:
+        amount: '4.99'
+        currency_code: USD
+      presentment_money:
+        amount: '4.99'
+        currency_code: USD
+    phone:
+    price: '4.99'
+    price_set:
+      shop_money:
+        amount: '4.99'
+        currency_code: USD
+      presentment_money:
+        amount: '4.99'
+        currency_code: USD
+    requested_fulfillment_service_id:
+    source: shopify
+    title: Priority Shipping
+    tax_lines: []
+    discount_allocations: []

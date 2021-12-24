@@ -367,9 +367,23 @@ module StoresHelper
           orderStatus: response['orders'].last["order_status"].titleize)
 
         result.merge!(return_range_dates_hash(store, response['orders'].last["external_order_identifier"], result_modifyDate, result_createDate))
-      end
+      elsif store.store_type == 'Shopify'
+        credential = store.shopify_credential
+        client = Groovepacker::ShopifyRuby::Client.new(credential)
+        response = client.get_single_order(params[:order_no])
 
-      if store.store_type == 'Shipstation API 2'
+        return result[:status] = false if response['orders'].nil? || response['orders'].blank?
+
+        result[:status] = true
+        result_modifyDate = Time.zone.parse(response['orders'].first["updated_at"]) + Time.zone.utc_offset
+        result_createDate = Time.zone.parse(response['orders'].last["created_at"]) + Time.zone.utc_offset
+
+        time_zone = GeneralSetting.last.time_zone.to_i
+        result_createDate_tz = Time.zone.parse(response['orders'].last["created_at"]) + time_zone
+
+        result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
+          orderStatus: response['orders'].last["fulfillment_status"].titleize)
+      elsif store.store_type == 'Shipstation API 2'
         credential = store.shipstation_rest_credential
         client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
         response = client.get_order_value(params[:order_no])
