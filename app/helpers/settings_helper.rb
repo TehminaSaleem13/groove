@@ -71,7 +71,15 @@ module SettingsHelper
         :post_scan_pause_enabled, :post_scan_pause_time,
         :display_location, :string_removal_enabled, :string_removal,
         :first_escape_string_enabled, :second_escape_string_enabled,
-        :second_escape_string, :order_verification, :scan_by_packing_slip, :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode, :scanned, :scanned_barcode, :partial, :partial_barcode , :post_scanning_option_second, :require_serial_lot, :valid_prefixes, :replace_gp_code, :single_item_order_complete_msg, :single_item_order_complete_msg_time, :multi_item_order_complete_msg, :multi_item_order_complete_msg_time, :tote_identifier, :show_expanded_shipments, :tracking_number_validation_enabled, :tracking_number_validation_prefixes, :scan_by_packing_slip_or_shipping_label, :remove_enabled, :remove_barcode, :remove_skipped, :display_location2, :display_location3
+        :second_escape_string, :order_verification, :scan_by_packing_slip,
+        :return_to_orders, :scanning_sequence, :click_scan, :click_scan_barcode,
+        :scanned, :scanned_barcode, :partial, :partial_barcode , :post_scanning_option_second,
+        :require_serial_lot, :valid_prefixes, :replace_gp_code, :single_item_order_complete_msg,
+        :single_item_order_complete_msg_time, :multi_item_order_complete_msg, :multi_item_order_complete_msg_time,
+        :tote_identifier, :show_expanded_shipments, :tracking_number_validation_enabled,
+        :tracking_number_validation_prefixes, :scan_by_packing_slip_or_shipping_label, :remove_enabled,
+        :remove_barcode, :remove_skipped, :display_location2, :display_location3, :camera_option,
+        :packing_option, :resolution
       ]
     )
   end
@@ -165,7 +173,7 @@ module SettingsHelper
   def update_with_stripe_customer customer
     if customer.try(:stripe_customer_id).present?
       stripe_customer = Stripe::Customer.retrieve(customer.stripe_customer_id)
-      stripe_customer.email = params["email_address_for_billing_notification"] 
+      stripe_customer.email = params["email_address_for_billing_notification"]
       if (params["email_address_for_billing_notification"].include?("@") rescue false)
         begin
           stripe_customer.save
@@ -207,6 +215,6 @@ module SettingsHelper
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
-   @result 
+   @result
   end
 end

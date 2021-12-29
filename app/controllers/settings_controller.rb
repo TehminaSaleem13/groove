@@ -98,6 +98,7 @@ class SettingsController < ApplicationController
     @result['groovelytic_stat'] = current_tenant.groovelytic_stat rescue true
     @result['is_active'] = current_user.active
     @result['custom_product_fields'] = current_tenant.custom_product_fields rescue false
+    @result['packing_cam'] = current_tenant.packing_cam rescue false
     @result['product_activity'] = current_tenant.product_activity_switch rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
@@ -156,7 +157,7 @@ class SettingsController < ApplicationController
 
     render json: @result
   end
-  
+
   def find_stripe_customer
     tenant = Apartment::Tenant.current
     customer = Subscription.find_by_tenant_name(tenant) rescue nil
