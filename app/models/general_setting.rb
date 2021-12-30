@@ -68,6 +68,11 @@ class GeneralSetting < ActiveRecord::Base
     ).try(:values).try(:compact)
   end
 
+  def self.time_zone
+    time_zone = GeneralSetting.last.time_zone.to_i
+    ApplicationController.new.check_for_dst(time_zone) ? time_zone + 3600 : time_zone
+  end
+
   def self.setting
     if @@all_tenants_settings.nil?
       @@all_tenants_settings = {}
@@ -215,7 +220,7 @@ class GeneralSetting < ActiveRecord::Base
     time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
     time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
     gn_setting = GeneralSetting.first
-    time_diff = time_diff - 3600 if !gn_setting.dst 
+    time_diff = time_diff - 3600 if !gn_setting.dst
     time = time_diff.seconds.from_now - gn_setting.time_zone.to_i.seconds
     time = time - 1.day if Time.now().utc + 1.day < time
     if time_diff > 0

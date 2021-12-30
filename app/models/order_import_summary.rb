@@ -1,63 +1,59 @@
+# frozen_string_literal: true
+
 class OrderImportSummary < ActiveRecord::Base
-  belongs_to :store
   has_many :import_items
-  # attr_accessible :user_id, :status, :user, :import_summary_type, :display_summary
-  after_save :emit_data_to_user
+
+  belongs_to :store
   belongs_to :user
 
+  after_save :emit_data_to_user
+
   def self.top_summary
-    summary = nil
-    summaries = self.order('updated_at desc')
-    unless summaries.empty?
-      summary = summaries.first
-    end
-    summary
+    order('updated_at desc').first
   end
 
-  def emit_data_to_user(send_data=false)
+  def emit_data_to_user(send_data = false)
     require 'open-uri'
-    return true unless (self.saved_changes["status"].present? || send_data)
-    result = Hash.new
-    import_summary = self.reload
-    time_zone = GeneralSetting.last.time_zone.to_i
-    # time_zone = GeneralSetting.last.dst ? time_zone : time_zone+3600
-    time_zone = ApplicationController.new.check_for_dst(time_zone) ? time_zone + 3600 : time_zone
+    return true unless saved_changes['status'].present? || send_data
+
+    GroovRealtime.emit('import_status_update', import_data, :tenant)
+  end
+
+  def import_data
+    result = {}
+    import_summary = reload
+    time_zone = GeneralSetting.time_zone
     import_summary.updated_at += time_zone
     result['import_info'] = import_summary
     result['import_items'] = []
     begin
-      #url = ENV['S3_BASE_URL']+'/'+"#{Apartment::Tenant.current}"+'/log/'+"import_order_info_#{Apartment::Tenant.current}.log"
-      #lines = open(url).read
-      #summary = lines.split("\n").last
-      lines = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days).last
-      result['summary'] = lines.log_record.gsub(/[,]/,"<br/>").gsub(/[{,}]/,"").gsub(/[:]/, "=>")
-    rescue
-      result['summary'] = "nil"
-    end  
-    # import_items = ImportItem.where('order_import_summary_id = '+self.id.to_s+' OR order_import_summary_id is null')
+      lines = CsvImportSummary.where('log_record IS NOT NULL and created_at > ?', Time.now - 30.days).last
+      result['summary'] = lines.log_record.gsub(/[,]/, '<br/>').gsub(/[{,}]/, '').gsub(/[:]/, '=>')
+    rescue StandardError
+      result['summary'] = 'nil'
+    end
     import_items = ImportItem.includes(store: [:shipstation_rest_credential]).where('status IS NOT NULL')
     import_items.each do |import_item|
       if import_item.store.nil?
         import_item.destroy
       else
         import_item.updated_at += time_zone
-        result['import_items'].push({store_info: import_item.store, import_info: import_item,
-                                     show_update: show_update(import_item.store)})
+        result['import_items'].push(store_info: import_item.store, import_info: import_item,
+                                    show_update: show_update(import_item.store))
       end
     end
-    GroovRealtime::emit('import_status_update', result, :tenant)
+    result
   end
 
   private
 
   def show_update(store)
     if store.store_type == 'Shipstation API 2' &&
-      !store.shipstation_rest_credential.nil? &&
-      store.shipstation_rest_credential.warehouse_location_update
+       !store.shipstation_rest_credential.nil? &&
+       store.shipstation_rest_credential.warehouse_location_update
       true
     else
       false
     end
   end
-  
 end

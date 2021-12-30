@@ -88,6 +88,7 @@ Groovepacks::Application.routes.draw do
       get 'userinfo'
       get 'request_socket_notifs'
       get 'check_tenant'
+      get 'import_status'
     end
   end
 

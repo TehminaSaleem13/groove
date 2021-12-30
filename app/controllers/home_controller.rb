@@ -10,7 +10,7 @@ class HomeController < ApplicationController
     else
       @groovepacks_admin = (Apartment::Tenant.current == 'admintools') || (Apartment::Tenant.current == 'scadmintools')
     end
-    @current_tenant = Apartment::Tenant.current 
+    @current_tenant = Apartment::Tenant.current
   end
 
   def userinfo
@@ -45,6 +45,10 @@ class HomeController < ApplicationController
       import_summary.emit_data_to_user(true)
     end
     render json: {status: true}
+  end
+
+  def import_status
+    render json: { status: true, summary: OrderImportSummary.top_summary&.import_data }
   end
 
   def check_tenant
