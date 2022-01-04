@@ -43,13 +43,13 @@ class SendStatStream
   def update_missing_data(tenant)
     path = "/dashboard/process_missing_data"
     HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}#{path}",
-          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant }) 
+          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
   end
 
   def update_stats(tenant)
     path = "/dashboard/run_stat_stream"
     HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",
-          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant }) 
+          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
   end
 
   def generate_export(tenant, params)
@@ -60,12 +60,13 @@ class SendStatStream
   end
 
   def generate_stat_report(tenant, params)
-    days = params["duration"]
-    email = params["email"]
-    path = "/dashboard/generate_stats"
-    HTTParty.get("#{ENV["GROOV_ANALYTIC_URL"]}/#{path}",
-          query: {tenant_name: tenant, days: days, email: email},
-          headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
+    days = params['duration']
+    email = params['email']
+    path = '/dashboard/generate_stats'
+    Apartment::Tenant.switch! tenant
+    HTTParty.get("#{ENV['GROOV_ANALYTIC_URL']}/#{path}",
+          query: { tenant_name: tenant, days: days, email: email, time_zone: GeneralSetting.last&.new_time_zone },
+          headers: { 'Content-Type' => 'application/json', tenant: tenant })
   end
 
   def update_restriction(tenant)
