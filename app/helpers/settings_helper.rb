@@ -119,7 +119,7 @@ module SettingsHelper
         :idle_timeout, :hex_barcode, :from_import, :to_import, :multi_box_shipments, :per_box_packing_slips,
         :custom_user_field_one, :custom_user_field_two, :display_kit_parts, :remove_order_items, :create_barcode_at_import,
         :print_post_scanning_barcodes, :print_packing_slips, :print_ss_shipping_labels, :per_box_shipping_label_creation,
-        :barcode_length, :starting_value, :show_sku_in_barcodeslip, :print_product_barcode_labels
+        :barcode_length, :starting_value, :show_sku_in_barcodeslip, :print_product_barcode_labels, :new_time_zone
       ]
     )
   end

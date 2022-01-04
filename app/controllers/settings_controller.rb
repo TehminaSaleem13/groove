@@ -101,6 +101,9 @@ class SettingsController < ApplicationController
     @result['packing_cam'] = current_tenant.packing_cam rescue false
     @result['product_activity'] = current_tenant.product_activity_switch rescue false
     @result['time_zone'] = Groovepacks::Application.config.time_zones
+    all_zones = {}
+    ActiveSupport::TimeZone.all.map { |e| all_zones["(GMT#{e.now.formatted_offset}) #{e.name} (#{e.tzinfo.identifier})"] = e.name }
+    @result['new_time_zones'] = all_zones
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_setting = GeneralSetting.all.first
     offset = general_setting.try(:time_zone).to_i
@@ -109,6 +112,7 @@ class SettingsController < ApplicationController
     @result['pst_tz_dst'] = check_for_dst(-28799) # PST offset as per YML file
     offset = check_for_dst(offset) ? offset + 3600 : offset
     @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
+    @result['new_current_time'] = Time.current.in_time_zone(GeneralSetting.last.new_time_zone).strftime('%I:%M %p') rescue Time.current.strftime('%I:%M %p')
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
     @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
     @result['daily_packed_toggle'] = current_tenant.daily_packed_toggle rescue false
@@ -314,6 +318,7 @@ class SettingsController < ApplicationController
   def fetch_and_update_time_zone
     setting = GeneralSetting.first
     setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
+    setting.update_columns(new_time_zone: params[:new_time_zone])
     if params["add_time_zone"].present?
       if params["auto_detect"] == "true" || params["auto_detect"] == "false" && (params["add_time_zone"].include? ":")
         params["add_time_zone"] = convert_offset_in_second(params["add_time_zone"])
@@ -326,6 +331,7 @@ class SettingsController < ApplicationController
       # offset = setting.dst ? offset : offset+3600
       offset = check_for_dst(offset) ? offset + 3600 : offset
       @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
+      @result['new_current_time'] = Time.current.in_time_zone(GeneralSetting.last.new_time_zone).strftime('%I:%M %p') rescue Time.current.strftime('%I:%M %p')
       #@result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
     end
 
