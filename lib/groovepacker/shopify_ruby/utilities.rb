@@ -1,28 +1,19 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module ShopifyRuby
     class Utilities < Base
-      def permission_url(tenant_name, is_admin = false)
-        unless shopify_credential.shop_name.nil?
-          session = ShopifyAPI::Session.new(
-            shopify_credential.shop_name + ".myshopify.com"
-          )
-          scope = [
-            "read_orders",
-            "write_orders",
-            "read_products",
-            "write_products"
-          ]
-          permission_url = session.create_permission_url(scope, redirect_url)
-          permission_url
-        end
+      def permission_url(_tenant_name, _is_admin = false)
+        return if shopify_credential.shop_name.blank?
+
+        session = ShopifyAPI::Session.new(shopify_credential.shop_name + '.myshopify.com')
+        scope = %w[read_products write_products read_orders write_orders read_all_orders read_fulfillments write_fulfillments]
+        session.create_permission_url(scope, redirect_url)
       end
 
       def redirect_url
-        if Rails.env=="development"
-          return "http://admin.#{ENV["HOST_NAME"]}/shopify/auth"
-        else
-          return "https://admin.#{ENV["SITE_HOST"]}/shopify/auth"
-        end
+        protocol = Rails.env.development? ? 'http://' : 'https://'
+        "#{protocol}admin.#{ENV['SITE_HOST']}/shopify/auth"
       end
     end
   end

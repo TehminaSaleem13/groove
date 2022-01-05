@@ -363,7 +363,7 @@ class StoresController < ApplicationController
   def show
     @store = Store.find_by_id(params[:id])
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
-    @result = { 'is_fba' => tenant.try(:is_fba), 'ss_api_create_label' => tenant.try(:ss_api_create_label), 'product_ftp_import' => tenant.try(:product_ftp_import) }
+    @result = { 'is_fba' => tenant&.is_fba, 'ss_api_create_label' => tenant&.ss_api_create_label, 'product_ftp_import' => tenant&.product_ftp_import }
     show_store
     render json: @result
   end

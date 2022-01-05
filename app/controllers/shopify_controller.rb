@@ -2,16 +2,16 @@ class ShopifyController < ApplicationController
   before_action :groovepacker_authorize!, :except => [:auth, :callback, :preferences, :help, :complete, :get_auth, :recurring_application_fee, :recurring_tenant_charges, :finalize_payment, :payment_failed, :invalid_request, :store_subscription_data, :get_store_data, :update_customer_plan]
   skip_before_action  :verify_authenticity_token
   # {
-  #  "code"=>"58a883f4bb36e4e953431549abff383c", 
-  #  "hmac"=>"0542bc2a50645289f1af07d4f85f3ebe9883af6ab402ea24f2c1c1bbac57f8c8", 
-  #  "shop"=>"groovepacker-dev-shop.myshopify.com", 
-  #  "signature"=>"1a90fbf68c06ba55d8d7f6a7740e4a79", 
-  #  "timestamp"=>"1428928120", 
-  #  "id"=>"1" 
+  #  "code"=>"58a883f4bb36e4e953431549abff383c",
+  #  "hmac"=>"0542bc2a50645289f1af07d4f85f3ebe9883af6ab402ea24f2c1c1bbac57f8c8",
+  #  "shop"=>"groovepacker-dev-shop.myshopify.com",
+  #  "signature"=>"1a90fbf68c06ba55d8d7f6a7740e4a79",
+  #  "timestamp"=>"1428928120",
+  #  "id"=>"1"
   # }
   def auth
     # if cookies[:tenant_name].blank?
-    if $redis.get("tenant_name").blank?  
+    if $redis.get("tenant_name").blank?
       ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
       session = ShopifyAPI::Session.new(params["shop"])
       token = session.request_token(params.except(:id))
@@ -21,10 +21,10 @@ class ShopifyController < ApplicationController
 
       if $redis.get("#{params['shop']}_existing_store").present?
         update_plan(token, params["shop"])
-      else  
+      else
         one_time_fee(token, params["shop"])
       end
-    else 
+    else
       #@tenant_name, @is_admin = params[:tenant_name].split('&')
       # @tenant_name = cookies[:tenant_name]
       # @store_id = cookies[:store_id]
@@ -59,8 +59,8 @@ class ShopifyController < ApplicationController
     recurring_application_charge.attributes = {
             "name" =>  "Tenant plan charges",
             "price" => price + 10,
-            "return_url" => "#{ENV['PROTOCOL']}#{tenant_name}.#{ENV['HOST_NAME']}/shopify/finalize_payment?shop_name=#{shop_name}", 
-            # "return_url" => "https://#{tenant_name}.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{shop_name}", 
+            "return_url" => "#{ENV['PROTOCOL']}#{tenant_name}.#{ENV['HOST_NAME']}/shopify/finalize_payment?shop_name=#{shop_name}",
+            # "return_url" => "https://#{tenant_name}.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{shop_name}",
             "trial_days" => 0,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
@@ -93,7 +93,7 @@ class ShopifyController < ApplicationController
       if true #@result
         redirect_to app_charges.attributes["confirmation_url"] and return
       else
-        redirect_to finalize_payment_shopify_index_path 
+        redirect_to finalize_payment_shopify_index_path
       end
     end
   end
@@ -108,7 +108,7 @@ class ShopifyController < ApplicationController
         @result = true
         break
       end
-      sleep 1     
+      sleep 1
     end
   end
 
@@ -131,15 +131,15 @@ class ShopifyController < ApplicationController
     recurring_application_charge.attributes = {
             "name" =>  "Tenant and App charges",
             "price" => price + 10,
-            # "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
-            "return_url" => "#{ENV['PROTOCOL']}admin.#{ENV['HOST_NAME']}/shopify/finalize_payment?shop_name=#{params['shop_name']}", 
+            # "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/finalize_payment?shop_name=#{params['shop_name']}",
+            "return_url" => "#{ENV['PROTOCOL']}admin.#{ENV['HOST_NAME']}/shopify/finalize_payment?shop_name=#{params['shop_name']}",
             "trial_days" => 30,
             "terms" => "10 out of 2"}
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST']=="true"
     if recurring_application_charge.save
       # check_acitve_url(recurring_application_charge.confirmation_url)
       if true  #@result
-        redirect_to recurring_application_charge.confirmation_url 
+        redirect_to recurring_application_charge.confirmation_url
       else
         redirect_to finalize_payment_shopify_index_path
       end
@@ -160,7 +160,7 @@ class ShopifyController < ApplicationController
       session = ShopifyAPI::Session.new(params["shop_name"], token)
       ShopifyAPI::Base.activate_session(session)
       @tenant_fee = ShopifyAPI::RecurringApplicationCharge.find(params["charge_id"])
-      @tenant_fee.activate if @tenant_fee.status == "accepted" 
+      @tenant_fee.activate if @tenant_fee.status == "accepted"
       existing_store = $redis.get("#{params['shop_name']}_existing_store")
       plan = $redis.get("#{params['shop_name']}_plan_id").split(".")[0] rescue nil
       redis_data_delete(params['shop_name'])
@@ -180,7 +180,7 @@ class ShopifyController < ApplicationController
           redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/shopify/updated_plan"
           # render "updated_plan" and return
         end
-      else         
+      else
         response_status = check_if_paid_all_the_charges
         if response_status
           redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/shopify/finalize_payment?charge_id=#{params["charge_id"]}&create_tenant=true"
@@ -242,7 +242,7 @@ class ShopifyController < ApplicationController
     $redis.set("#{shop_name}.myshopify.com_existing_store", true)
     $redis.set("#{shop_name}.myshopify.com_plan_id", "GROOV-#{subsc.tenant_data.split("-")[0]}") rescue nil
     params["shop_name"] = shop_name
-    if subsc.shopify_payment_token == params["one_time_token"] && subsc.tenant_data.present? 
+    if subsc.shopify_payment_token == params["one_time_token"] && subsc.tenant_data.present?
       redirect_to get_auth and return
     else
       redirect_to invalid_request_shopify_index_path and return
@@ -258,7 +258,7 @@ class ShopifyController < ApplicationController
     destroy_cookies rescue nil
     ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
     session = ShopifyAPI::Session.new("#{params['shop_name']}.myshopify.com")
-    scope = [ "read_orders", "write_orders", "read_products", "write_products"]
+    scope = %w[read_products write_products read_orders write_orders read_all_orders read_fulfillments write_fulfillments]
     # result[:permission_url] = session.create_permission_url(scope, "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/auth")
     result[:permission_url] = session.create_permission_url(scope, "#{ENV['PROTOCOL']}admin.#{ENV['SITE_HOST']}/shopify/auth")
     if @tenant.present?

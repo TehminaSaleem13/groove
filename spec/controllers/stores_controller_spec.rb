@@ -241,7 +241,7 @@ RSpec.describe StoresController, type: :controller do
     end
   end
 
-  describe 'ShippingEasy Imports' do
+  describe 'Shopify Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
     before do
@@ -263,6 +263,27 @@ RSpec.describe StoresController, type: :controller do
       get :get_order_details, params: { order_no: '410382', store_id: shopify_store.id }
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
+    end
+  end
+
+  describe 'Show Store' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last, on_demand_import: true)
+      shopify_store_credentials = ShopifyCredential.create(store_id: shopify_store.id, shop_name: 'test_shop')
+    end
+
+    it 'Show Shopify Store' do
+      request.accept = 'application/json'
+      shopify_store = Store.where(store_type: 'Shopify').last
+
+      get :show, params: { id: shopify_store.id }
+      expect(response.status).to eq(200)
     end
   end
 end
