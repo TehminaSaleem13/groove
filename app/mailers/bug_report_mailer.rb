@@ -12,7 +12,7 @@ class BugReportMailer < ActionMailer::Base
 
     attachments[file_name] = @attachment_data if @attachment_data.present?
 
-    subject = "Groovepacker [#{Rails.env}] - Expo Bug Report [#{tenant}]"
+    subject = "Groovepacker [#{Rails.env}] - Expo #{@data[:identifier] == 'feedback' ? 'Feedback' : 'Bug Report' } [#{tenant}]"
     mail to: 'kcpatel006@gmail.com,groovepacker@gmail.com,gyanig72@gmail.com', subject: subject
   end
 end
