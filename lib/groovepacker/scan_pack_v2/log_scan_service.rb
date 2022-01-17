@@ -10,7 +10,7 @@ module Groovepacker
         current_user = User.find_by_id current_user_id
         @params[:data] = JSON.parse(Net::HTTP.get(URI.parse(params[:data]))).map(&:with_indifferent_access)
         @params[:data].each do |scn_params|
-          sleep 0.5
+          # sleep 0.5
           begin
             if (scn_params[:event] == 'regular')
               scan_barcode_obj = ScanPack::ScanBarcodeService.new(
