@@ -21,8 +21,9 @@ class ScanPackController < ApplicationController
     if params[:data].present?
       tenant = Tenant.find_by_name(Apartment::Tenant.current)
       log_scn_obj = Groovepacker::ScanPackV2::LogScanService.new
-      params[:data] = create_log_file_data(params, :data, 'expo_log_data')
       if tenant.expo_logs_delay
+        params[:data] = create_log_file_data(params, :data, 'expo_log_data')
+        params[:delayed_log_process] = true
         session = session.present? ? session : nil
         log_scn_obj.delay(run_at: 1.seconds.from_now, priority: 95).process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       else

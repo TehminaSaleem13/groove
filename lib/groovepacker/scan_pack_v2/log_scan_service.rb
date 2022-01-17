@@ -8,8 +8,8 @@ module Groovepacker
         @params = params
         session = session.present? ? session : {}
         current_user = User.find_by_id current_user_id
-        @params[:data] = JSON.parse(Net::HTTP.get(URI.parse(params[:data]))).map(&:with_indifferent_access)
-        @params[:data].each do |scn_params|
+        @params[:data] = JSON.parse(Net::HTTP.get(URI.parse(params[:data]))).map(&:with_indifferent_access) if params[:delayed_log_process]
+        (@params[:data] || []).each do |scn_params|
           # sleep 0.5
           begin
             if (scn_params[:event] == 'regular')
