@@ -48,7 +48,7 @@ class HomeController < ApplicationController
   end
 
   def import_status
-    render json: { status: true, summary: OrderImportSummary.top_summary&.import_data }
+    render json: { status: true, summary: OrderImportSummary.top_summary&.import_data(true) }
   end
 
   def check_tenant
