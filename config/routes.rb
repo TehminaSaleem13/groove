@@ -55,6 +55,7 @@ Groovepacks::Application.routes.draw do
   put '/shipstation_rest_credentials/:store_id/update_product_image' => 'shipstation_rest_credentials#update_product_image'
   post 'settings/search_by_product' => 'settings#search_by_product'
   post '/settings/fetch_and_update_time_zone'  => "settings#fetch_and_update_time_zone"
+  post '/settings/update_auto_time_zone'  => "settings#update_auto_time_zone"
   get 'settings/update_stat_status' => 'settings#update_stat_status'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'

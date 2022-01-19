@@ -315,6 +315,13 @@ class SettingsController < ApplicationController
     render json: @result
   end
 
+  def update_auto_time_zone
+    zone = ActiveSupport::TimeZone.all.select { |x| x.utc_offset == params[:offset].to_i*60 }.first
+    setting = GeneralSetting.last
+    zone && setting && setting.update(new_time_zone: zone.name)
+    render json: { status: zone.present?, zone: zone }
+  end
+
   def fetch_and_update_time_zone
     setting = GeneralSetting.first
     setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]

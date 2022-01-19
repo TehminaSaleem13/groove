@@ -108,5 +108,14 @@ RSpec.describe SettingsController, type: :controller do
       post :fetch_and_update_time_zone, params: { add_time_zone: 2, dst: false, new_time_zone: 'UTC' }
       expect(response.status).to eq(200)
     end
+
+    it 'update auto time zone' do
+      @user.role.update(edit_general_prefs: true)
+      @tenant = Tenant.create(name: Apartment::Tenant.current)
+      request.accept = 'application/json'
+      post :update_auto_time_zone, params: { offset: 330 }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+    end
   end
 end
