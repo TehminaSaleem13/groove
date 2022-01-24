@@ -217,6 +217,7 @@ class Order < ActiveRecord::Base
     end
     self.addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
     self.order_serials.destroy_all
+    destroy_boxes
     self.set_order_status
   end
 
