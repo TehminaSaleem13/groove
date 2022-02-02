@@ -84,7 +84,7 @@ class ExportSetting < ActiveRecord::Base
 
     orders = Order.where(scanned_on: start_time..end_time)
 
-    ExportSetting.update_all(:last_exported => Time.zone.now)
+    ExportSetting.update_all(:last_exported => Time.current)
     filename = generate_file_name
     if order_export_type == 'do_not_include'
       do_export_if_orders_not_included(orders, filename)
@@ -112,7 +112,7 @@ class ExportSetting < ActiveRecord::Base
 
   def schedule_job(type, time)
     job_scheduled = false
-    date = DateTime.now
+    date = DateTime.now.in_time_zone
     general_settings = GeneralSetting.all.first
     7.times do
       job_scheduled = general_settings.schedule_job(
@@ -145,7 +145,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_number] = order.increment_id
     single_row[:order_status] = order.status
     single_row[:order_date] = order.order_placed_time
-    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M:%S %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M:%S %p")
+    single_row[:scanned_date] = order.scanned_on&.strftime('%Y-%m-%d %I:%M:%S %p')
     single_row[:address1] = order.address_1
     single_row[:address2] = order.address_2
     single_row[:city] = order.city
@@ -183,9 +183,10 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def set_start_and_end_time
-    start_time = self.start_time.beginning_of_day - GeneralSetting.last.time_zone.to_i rescue (DateTime.now-1.days)
-    end_time = self.end_time.end_of_day - GeneralSetting.last.time_zone.to_i rescue DateTime.now
+    start_time = self.start_time.beginning_of_day rescue (DateTime.now.in_time_zone - 1.days)
+    end_time = self.end_time.end_of_day rescue DateTime.now.in_time_zone
     return [start_time, end_time] if manual_export
+
     if export_orders_option.eql? 'on_same_day'
       begin
         job_time = Delayed::Job.where(queue: "order_export_email_scheduled_#{Apartment::Tenant.current}").map(&:locked_at).compact[0]
@@ -195,13 +196,12 @@ class ExportSetting < ActiveRecord::Base
       rescue
         time = time_to_send_export_email.strftime("%H:%M")
         seconds = Time.parse(time).seconds_since_midnight
-        start_time = ((Time.now.utc.beginning_of_day - 1.day) + seconds).end_of_day - GeneralSetting.last.time_zone.to_i
-        start_time = Time.now+GeneralSetting.last.time_zone.to_i
-        end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
+        start_time = Time.current
+        end_time = Time.current.utc.beginning_of_day + seconds
       end
     else
       last_exported || '2000-01-01 00:00:00'
-      end_time = Time.zone.now
+      end_time = Time.current
     end
     # end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
     # start_time = same_day_or_last_exported(start_time)
@@ -210,7 +210,7 @@ class ExportSetting < ActiveRecord::Base
 
   def same_day_or_last_exported(start_time)
     if export_orders_option.eql? 'on_same_day'
-      Time.zone.now.beginning_of_day
+      Time.current.beginning_of_day
     else
       last_exported || '2000-01-01 00:00:00'
     end
@@ -272,7 +272,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_status] = order.status
     single_row[:scanned_qty] = order.scanned_items_count
     single_row[:order_date] = order.order_placed_time
-    single_row[:scanned_date] = (order.scanned_on + GeneralSetting.last.time_zone.to_i).strftime("%Y-%m-%d %I:%M:%S %p") rescue order.scanned_on.strftime("%Y-%m-%d %I:%M:%S %p")
+    single_row[:scanned_date] = order.scanned_on&.strftime('%Y-%m-%d %I:%M:%S %p')
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order.clicked_scanned_qty.to_i

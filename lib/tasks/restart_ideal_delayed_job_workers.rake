@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :delayed_job do
   desc 'restart delayed jobs with no jobs and memory more than 500MB'
 
@@ -19,9 +21,8 @@ namespace :delayed_job do
 
         p "Restarting #{worker_name} with memory usage #{memory}"
 
-        `sudo monit restart #{worker_name.gsub('.','_')}`
+        `sudo monit restart #{worker_name.tr('.', '_')}`
       end
-
     rescue StandardError => e
       puts e.message
       exit

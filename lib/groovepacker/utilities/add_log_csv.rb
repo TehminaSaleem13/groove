@@ -5,11 +5,11 @@ class AddLogCsv
     @file_name = file_name
     n = Order.where('created_at > ?',$redis.get("last_order_#{tenant}")).count rescue 0
     @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
-    time_zone = GeneralSetting.last.time_zone.to_i
-    time_of_import_tz =  @time_of_import + time_zone
+    # time_zone = GeneralSetting.last.time_zone.to_i
+    # time_of_import_tz =  @time_of_import + time_zone
     orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
 
-    log = {"Time_Stamp_Tenant_TZ" => "#{time_of_import_tz}","Time_Stamp_UTC" => "#{@time_of_import}" , "Tenant" => "#{Apartment::Tenant.current}","Name_of_imported_file" => "#{@file_name}","Orders_in_file" => "#{orders.count}".to_i, "New_orders_imported" => "#{$redis.get("new_order_#{tenant}")}".to_i, "Existing_orders_updated" =>"#{$redis.get("update_order_#{tenant}")}".to_i , "Existing_orders_skipped" => "#{$redis.get("skip_order_#{tenant}")}".to_i, "Orders_in_GroovePacker_before_import" => "#{$redis.get("total_orders_#{tenant}")}".to_i, "Orders_in_GroovePacker_after_import" =>"#{@after_import_count}".to_i }
+    log = {"Time_Stamp_Tenant_TZ" => "#{@time_of_import}","Time_Stamp_UTC" => "#{@time_of_import.utc}" , "Tenant" => "#{Apartment::Tenant.current}","Name_of_imported_file" => "#{@file_name}","Orders_in_file" => "#{orders.count}".to_i, "New_orders_imported" => "#{$redis.get("new_order_#{tenant}")}".to_i, "Existing_orders_updated" =>"#{$redis.get("update_order_#{tenant}")}".to_i , "Existing_orders_skipped" => "#{$redis.get("skip_order_#{tenant}")}".to_i, "Orders_in_GroovePacker_before_import" => "#{$redis.get("total_orders_#{tenant}")}".to_i, "Orders_in_GroovePacker_after_import" =>"#{@after_import_count}".to_i }
     summary = CsvImportSummary.find_or_create_by(log_record: log.to_json)
     summary.file_name =  @file_name
     summary.import_type = "Order"
@@ -90,9 +90,9 @@ class AddLogCsv
         end
       end
       CsvExportMailer.send_duplicates_order_info(tenant.name, dup_order_increment_ids, dup_order_ids).deliver
-    end  
+    end
   end
-  
+
   def send_tenant_log
     headers = [ "Tenant Name", "Tenant Notes","Number of Users", "Number of Active Users(in tenant)" , "Number of Products", "Stipe Products Count" ," GP Plan Price","Stripe Plan Price", "Last Stripe Charge","Stripe Charge in last 30 days", "QTY Scanned in last 30", "Is Delinquent", "Admintools URL","Stripe URL", "Start Date", "Billing date" ]
     data = CSV.generate do |csv|

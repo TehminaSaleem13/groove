@@ -7,7 +7,7 @@ module Groovepacker
         credential = get_credential
         method = 'GET'
         uri = "#{api_base_url}/orders"
-        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now.in_time_zone - 4.days)
         orders = []
         page_index = 1
         previous_response = []
@@ -26,7 +26,7 @@ module Groovepacker
                       "searchCriteria%5Bcurrent_page%5D" => page_index,
                       "searchCriteria%5Bpage_size%5D" => 100
                     }
-          
+
           mg_response = fetch(method, uri, parameters, filters)
           if mg_response["message"].present? || mg_response["messages"].present?
             orders = mg_response.as_json
@@ -61,7 +61,7 @@ module Groovepacker
       def products(filters={})
         method = 'GET'
         uri = "#{api_base_url}/products"
-        
+
         products = {}
         page_index = 1
         while page_index
@@ -117,7 +117,7 @@ module Groovepacker
         response = fetch(method, uri, parameters, filters)
         return response
       end
-			
+
       private
         def api_base_url
           credential = get_credential

@@ -24,7 +24,7 @@ module Groovepacker
           end
 
           def initialize_orders_import
-            Tenant.save_se_import_data("========Shipstation Regular Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}")
+            Tenant.save_se_import_data("========Shipstation Regular Import Started UTC: #{Time.now.utc} TZ: #{Time.current}")
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             return @result unless @import_item.present?
             @import_item.update_column(:importer_id, @worker_id)
@@ -38,7 +38,7 @@ module Groovepacker
             @regular_import_triggered = true if @result[:status] && @import_item.import_type == 'quick'
             import_orders_from_response(response, shipments_response)
             destroy_nil_import_items
-            Tenant.save_se_import_data("========Shipstation Regular Import Finished UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Import Item', @import_item)
+            Tenant.save_se_import_data("========Shipstation Regular Import Finished UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
 
           def range_import(start_date, end_date, type, user_id)
@@ -47,13 +47,13 @@ module Groovepacker
             start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
-            Tenant.save_se_import_data("========Shipstation Range Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==User ID', user_id)
+            Tenant.save_se_import_data("========Shipstation Range Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==User ID', user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type, @import_item)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
-            Tenant.save_se_import_data("========Shipstation Range Import Finished UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Import Item', @import_item)
+            Tenant.save_se_import_data("========Shipstation Range Import Finished UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
 
           def quick_fix_import(import_date, order_id, user_id)
@@ -66,13 +66,13 @@ module Groovepacker
             start_date = quick_fix_range[:start_date].strftime('%Y-%m-%d %H:%M:%S')
             end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
             init_order_import_summary(user_id)
-            Tenant.save_se_import_data("========Shipstation QF Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Start Date', start_date, '==End Date', end_date, '==Import Date', import_date, '==Order Id', order_id, '==User ID', user_id)
+            Tenant.save_se_import_data("========Shipstation QF Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Import Date', import_date, '==Order Id', order_id, '==User ID', user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified', @import_item)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
-            Tenant.save_se_import_data("========Shipstation QF Import Finished UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Import Item', @import_item)
+            Tenant.save_se_import_data("========Shipstation QF Import Finished UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
 
           def init_order_import_summary(user_id)
@@ -172,8 +172,9 @@ module Groovepacker
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response["orders"].blank? and (@scan_settings.scan_by_shipping_label || @scan_settings.scan_by_packing_slip_or_shipping_label)
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import_v2(response, order_no, user_id) if controller != 'stores'
-            od_tz = @import_item.created_at + GeneralSetting.last.time_zone.to_i
-            od_utc = @import_item.created_at
+            # od_tz = @import_item.created_at + GeneralSetting.last.time_zone.to_i
+            od_tz = @import_item.created_at
+            od_utc = @import_item.created_at.utc
             status_set_in_gp = shipstation_order_import_status
             if response["orders"].blank?
               log = { "Tenant" => "#{Apartment::Tenant.current}","Order number"  => "#{order_no}", "Order Status Settings" => "#{status_set_in_gp}", "Order Date Settings" => "#{@credential.regular_import_range} days", "Timestamp of the OD import (in tenants TZ)" => "#{od_tz}", "Timestamp of the OD import (UTC)" => "#{od_utc}" , "Type" => "import failure" }
@@ -245,13 +246,12 @@ module Groovepacker
             tenant = Apartment::Tenant.current
             tenant = Tenant.where(name: "#{tenant}").first
             order["customerEmail"] = nil if tenant.gdpr_shipstation
-
             shipstation_order.attributes = {  increment_id: order["orderNumber"], store_order_id: order["orderId"],
-                                              order_placed_time: order["orderDate"], email: order["customerEmail"],
+                                              order_placed_time: ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(order["orderDate"]).to_time, email: order["customerEmail"],
                                               shipping_amount: order["shippingAmount"], order_total: order["amountPaid"]
                                             }
             shipstation_order.ss_label_data = order.slice('orderId', 'carrierCode', 'serviceCode', 'packageCode', 'confirmation', 'shipDate', 'weight', 'dimensions', 'insuranceOptions', 'internationalOptions', 'advancedOptions')
-            shipstation_order.last_modified  = Time.zone.parse(order['modifyDate']) + Time.zone.utc_offset
+            shipstation_order.last_modified = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(order["modifyDate"]).to_time
             shipstation_order = init_shipping_address(shipstation_order, order) unless tenant.gdpr_shipstation
             shipstation_order = import_notes(shipstation_order, order)
             shipstation_order.weight_oz = order["weight"]["value"] rescue nil
@@ -298,12 +298,12 @@ module Groovepacker
             def set_import_date_and_type
               case @import_item.import_type
               when 'deep'
-                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
+                self.import_from = DateTime.now.in_time_zone - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
                 set_regular_quick_import_date
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
-                self.import_from = DateTime.now-1.weeks
+                self.import_from = DateTime.now.in_time_zone - 1.weeks
               else
                 set_import_date_from_store_cred
               end
@@ -314,8 +314,8 @@ module Groovepacker
               @import_item.update_attribute(:import_type, "quick")
               quick_import_date = @credential.quick_import_last_modified_v2
               quick_import_date += 1.second if @credential.bulk_import && quick_import_date
-              if quick_import_date.blank? || (quick_import_date <= DateTime.now - 15.days)
-                self.import_from = DateTime.now-1.days
+              if quick_import_date.blank? || (quick_import_date <= DateTime.now.in_time_zone - 15.days)
+                self.import_from = DateTime.now.in_time_zone - 1.days
               else
                 self.import_from = quick_import_date
               end
@@ -324,7 +324,7 @@ module Groovepacker
             def set_import_date_from_store_cred
               @import_item.update_attribute(:import_type, "regular")
               last_imported_at = @credential.last_imported_at
-              self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
+              self.import_from = last_imported_at.blank? ? DateTime.now.in_time_zone - 1.weeks : last_imported_at-@credential.regular_import_range.days
             end
 
             def set_import_date_type

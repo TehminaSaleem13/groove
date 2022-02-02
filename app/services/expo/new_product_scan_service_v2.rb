@@ -156,7 +156,7 @@ module Expo
       def do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
         @single_order.should_the_kit_be_split(clean_input) if @single_order.contains_kit && @single_order.contains_splittable_kit
 
-        @single_order.last_suggested_at ||= DateTime.now
+        @single_order.last_suggested_at ||= DateTime.now.in_time_zone
         @single_order.save
 
         unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)

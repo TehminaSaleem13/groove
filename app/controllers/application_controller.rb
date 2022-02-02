@@ -2,6 +2,7 @@
 
 class ApplicationController < ActionController::Base
   before_action :set_current_user_id
+  around_action :set_time_zone
   protect_from_forgery with: :null_session
 
   respond_to :html, :json
@@ -31,11 +32,15 @@ class ApplicationController < ActionController::Base
     GroovRealtime.current_user_id = current_user ? current_user.id : 0
   end
 
+  def set_time_zone
+    Time.use_zone(GeneralSetting.new_time_zone) { yield }
+  end
+
   def after_sign_in_path_for(resource_or_scope)
     # store session to redis
     if current_user
       user = current_user
-      user.last_sign_in_at = DateTime.now
+      user.last_sign_in_at = DateTime.now.in_time_zone
       user.save
       save_bc_auth_if_present
       # an unique MD5 key

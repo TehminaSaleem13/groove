@@ -416,8 +416,8 @@ module ScanPack
         do_for_awaiting_unless_single_order_has_unscanned_items
       else
         @single_order_result['next_state'] = 'scanpack.rfp.default'
-        @single_order.last_suggested_at = DateTime.now
-        @single_order.scan_start_time ||= DateTime.now
+        @single_order.last_suggested_at = DateTime.now.in_time_zone
+        @single_order.scan_start_time ||= DateTime.now.in_time_zone
       end
     end
 

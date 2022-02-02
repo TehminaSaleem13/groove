@@ -4,11 +4,11 @@ namespace :doo do
   task :unscanned_csv, [:tenant, :from, :upto] => [:environment] do |t, args|
     begin
     	Apartment::Tenant.switch!(args[:tenant])
-      activities = OrderActivity.where("created_at>=? and created_at<=? and action Like ?" ,DateTime.now-args[:from].to_i, DateTime.now-args[:upto].to_i,  '%INVALID SCAN%')
+      activities = OrderActivity.where("created_at>=? and created_at<=? and action Like ?" ,DateTime.now.in_time_zone - args[:from].to_i, DateTime.now.in_time_zone - args[:upto].to_i,  '%INVALID SCAN%')
       file_name = "#{activities.count}_unscanned_#{DateTime.now}.csv"
       headers = "Order Id,Activity,User,Activity Time\n"
     	File.open("public/#{file_name}", 'a+', {force_quotes: true}) do |csv|
-        csv << headers if csv.count.eql? 0 
+        csv << headers if csv.count.eql? 0
         activities.each do |activity|
           row = ""
           row << "#{activity.order_id}, #{activity.action}, #{activity.username}, #{activity.activitytime}\n"

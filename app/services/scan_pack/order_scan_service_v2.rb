@@ -311,7 +311,7 @@ module ScanPack
     end
 
     def check_removal_zero_qty_item
-      if GeneralSetting.last.remove_order_items 
+      if GeneralSetting.last.remove_order_items
         data = []
         @single_order.reload.order_items.each do |order_item|
           data << order_item if order_item.qty.eql?(0) && order_item.skipped_qty.eql?(0)
@@ -322,7 +322,7 @@ module ScanPack
             sku = product.product_skus.first.sku rescue nil
             item.order.addactivity('Item with sku ' + sku.to_s + ' having 0 qty removed', 'GroovePacker Automaticaly')
             item.delete
-          end 
+          end
           @single_order.reload.order_items
           @single_order.update_order_status
           message = 'An item with quantity of 0 has been removed from this order'
@@ -407,8 +407,8 @@ module ScanPack
         do_for_awaiting_unless_single_order_has_unscanned_items
       else
         @single_order_result['next_state'] = 'scanpack.rfp.default'
-        @single_order.last_suggested_at = DateTime.now
-        @single_order.scan_start_time ||= DateTime.now
+        @single_order.last_suggested_at = DateTime.now.in_time_zone
+        @single_order.scan_start_time ||= DateTime.now.in_time_zone
       end
     end
 

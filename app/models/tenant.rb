@@ -16,7 +16,7 @@ class Tenant < ActiveRecord::Base
 
   def self.save_se_import_data(*data)
     return unless Tenant.find_by_name(Apartment::Tenant.current).try(:store_order_respose_log)
-    file_name = "#{(Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)).strftime('%F')}_#{Apartment::Tenant.current}_se_import.json"
+    file_name = "#{Time.current.strftime('%F')}_#{Apartment::Tenant.current}_se_import.json"
     file = GroovS3.get_file("#{Apartment::Tenant.current}/se_import_log/#{file_name}")
     if file.nil?
       file = GroovS3.create(Apartment::Tenant.current, "se_import_log/#{file_name}", 'text/json')

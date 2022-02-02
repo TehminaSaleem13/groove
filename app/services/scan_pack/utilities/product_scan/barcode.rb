@@ -52,7 +52,7 @@ module ScanPack::Utilities::ProductScan::Barcode
         @result['data']['next_state'] = 'scanpack.rfo'
       end
     end
-    @single_order.last_suggested_at = DateTime.now
+    @single_order.last_suggested_at = DateTime.now.in_time_zone
   end
 
   def do_if_post_scanning_option_is_not_none

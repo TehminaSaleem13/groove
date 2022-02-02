@@ -111,8 +111,8 @@ class SettingsController < ApplicationController
     @result['gp_tz_dst'] = check_for_dst(offset)
     @result['pst_tz_dst'] = check_for_dst(-28799) # PST offset as per YML file
     offset = check_for_dst(offset) ? offset + 3600 : offset
-    @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
-    @result['new_current_time'] = Time.current.in_time_zone(GeneralSetting.last.new_time_zone).strftime('%I:%M %p') rescue Time.current.strftime('%I:%M %p')
+    # @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
+    @result['current_time'] = Time.current.strftime('%I:%M %p')
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
     @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
     @result['daily_packed_toggle'] = current_tenant.daily_packed_toggle rescue false
@@ -319,28 +319,13 @@ class SettingsController < ApplicationController
     zone = ActiveSupport::TimeZone.all.select { |x| x.utc_offset == params[:offset].to_i*60 }.first
     setting = GeneralSetting.last
     zone && setting && setting.update(new_time_zone: zone.name)
-    render json: { status: zone.present?, zone: zone }
+    render json: { status: zone.present?, zone: zone, time: Time.use_zone(GeneralSetting.new_time_zone) { Time.current.strftime('%I:%M %p') } }
   end
 
   def fetch_and_update_time_zone
-    setting = GeneralSetting.first
-    setting.update_attribute(:dst, params["dst"].to_b ) if params["dst"]
-    setting.update_columns(new_time_zone: params[:new_time_zone])
-    if params["add_time_zone"].present?
-      if params["auto_detect"] == "true" || params["auto_detect"] == "false" && (params["add_time_zone"].include? ":")
-        params["add_time_zone"] = convert_offset_in_second(params["add_time_zone"])
-        setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: true)
-      elsif (!params["add_time_zone"].include? ":") && params["auto_detect"] != "true" && params["auto_detect"] != "false"
-        setting.update_attributes(time_zone: params["add_time_zone"], auto_detect: false)
-      end
-      @result = {};
-      offset = params["add_time_zone"].to_i
-      # offset = setting.dst ? offset : offset+3600
-      offset = check_for_dst(offset) ? offset + 3600 : offset
-      @result['current_time'] = (Time.current + offset ).strftime('%I:%M %p')
-      @result['new_current_time'] = Time.current.in_time_zone(GeneralSetting.last.new_time_zone).strftime('%I:%M %p') rescue Time.current.strftime('%I:%M %p')
-      #@result['current_time'] = (Time.current + params["add_time_zone"].to_i).strftime('%I:%M %p')
-    end
+    GeneralSetting.first&.update_columns(new_time_zone: params[:new_time_zone])
+    @result = {}
+    @result['current_time'] = Time.use_zone(GeneralSetting.new_time_zone) { Time.current.strftime('%I:%M %p') }
 
     render json: @result
   end

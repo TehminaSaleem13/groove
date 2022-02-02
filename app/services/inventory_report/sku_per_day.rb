@@ -25,7 +25,7 @@ module InventoryReport
               date = (@product_inv_setting.start_time + i.to_s.to_i.days).strftime('%m/%d/%y')
             else
               orders = begin
-                          pro_orders.where('scanned_on >= ? and scanned_on <= ?', (DateTime.now - i.to_s.to_i.days).beginning_of_day, (DateTime.now - i.to_s.to_i.days).end_of_day)
+                          pro_orders.where('scanned_on >= ? and scanned_on <= ?', (DateTime.now.in_time_zone - i.to_s.to_i.days).beginning_of_day, (DateTime.now.in_time_zone - i.to_s.to_i.days).end_of_day)
                         rescue
                           []
                         end

@@ -167,12 +167,12 @@ module Groovepacker
             def set_import_date_and_type
               case @import_item.import_type
               when 'deep'
-                self.import_from = DateTime.now - (@import_item.days.to_i.days rescue 1.days)
+                self.import_from = DateTime.now.in_time_zone - (@import_item.days.to_i.days rescue 1.days)
               when 'regular', 'quick'
                 set_regular_quick_import_date
               when 'tagged'
                 @import_item.update_attribute(:import_type, "tagged")
-                self.import_from = DateTime.now-1.weeks
+                self.import_from = DateTime.now.in_time_zone - 1.weeks
               else
                 set_import_date_from_store_cred
               end
@@ -182,13 +182,13 @@ module Groovepacker
             def set_regular_quick_import_date
               @import_item.update_attribute(:import_type, "quick")
               quick_import_date = @credential.quick_import_last_modified
-              self.import_from = quick_import_date.blank? ? DateTime.now-5.days : quick_import_date
+              self.import_from = quick_import_date.blank? ? DateTime.now.in_time_zone - 5.days : quick_import_date
             end
 
             def set_import_date_from_store_cred
               @import_item.update_attribute(:import_type, "regular")
               last_imported_at = @credential.last_imported_at
-              self.import_from = last_imported_at.blank? ? DateTime.now-1.weeks : last_imported_at-@credential.regular_import_range.days
+              self.import_from = last_imported_at.blank? ? DateTime.now.in_time_zone - 1.weeks : last_imported_at-@credential.regular_import_range.days
             end
 
             def set_import_date_type
@@ -240,8 +240,8 @@ module Groovepacker
                 status_response = @client.get_orders(status, import_from, import_date_type)
                 response = get_orders_from_union(response, status_response)
               end
-              self.importing_time = DateTime.now
-              self.quick_importing_time = DateTime.now
+              self.importing_time = DateTime.now.in_time_zone
+              self.quick_importing_time = DateTime.now.in_time_zone
               return response
             end
 

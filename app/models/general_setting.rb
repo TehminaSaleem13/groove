@@ -73,6 +73,12 @@ class GeneralSetting < ActiveRecord::Base
     ApplicationController.new.check_for_dst(time_zone) ? time_zone + 3600 : time_zone
   end
 
+  def self.new_time_zone
+    time_zone = GeneralSetting.last&.new_time_zone
+    time_zone = Time.find_zone(time_zone) ? time_zone : 'UTC'
+    time_zone == 'UTC' ? 'Edinburgh' : time_zone # UTC Causes issues with Frontend
+  end
+
   def self.setting
     if @@all_tenants_settings.nil?
       @@all_tenants_settings = {}
@@ -122,7 +128,7 @@ class GeneralSetting < ActiveRecord::Base
     changed_hash = self.saved_changes
     if self.scheduled_order_import && !changed_hash[:time_to_import_orders].nil? && (changed_hash[:time_to_import_orders].map{ |time| time.strftime('%H:%M:%S')}.uniq.many? rescue nil)
       job_scheduled = false
-      date = DateTime.now
+      date = DateTime.now.in_time_zone
       for i in 0..6
         job_scheduled = self.schedule_job(date, self.time_to_import_orders, 'import_orders')
         date = date + 1.day
@@ -136,7 +142,7 @@ class GeneralSetting < ActiveRecord::Base
   end
 
   def should_import_orders_today
-    day = DateTime.now.strftime("%A")
+    day = DateTime.now.in_time_zone.strftime("%A")
     result = false
     if day=='Sunday' && self.import_orders_on_sun
       result = true
@@ -197,7 +203,7 @@ class GeneralSetting < ActiveRecord::Base
     changed_hash = self.saved_changes
     if (self.inventory_tracking || self.low_inventory_alert_email) && !changed_hash['time_to_send_email'].nil? && !self.low_inventory_email_address.blank?
       job_scheduled = false
-      date = DateTime.now
+      date = DateTime.now.in_time_zone
       for i in 0..6
         job_scheduled = self.schedule_job(date,
                                           self.time_to_send_email, 'low_inventory_email')
@@ -213,16 +219,13 @@ class GeneralSetting < ActiveRecord::Base
 
   def schedule_job (date, time, job_type)
     job_scheduled = false
-    run_at_date = date.getutc
+    run_at_date = date
     run_at_date = run_at_date.change({:hour => time.hour, :min => time.min, :sec => time.sec})
-    # time_diff = ((run_at_date - DateTime.now.getutc) * 24 * 60 * 60).to_i + Random.rand(120)
     time_diff = ((run_at_date.to_time - Time.current)).to_i + Random.rand(120)
     time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
     time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
-    gn_setting = GeneralSetting.first
-    time_diff = time_diff - 3600 if !gn_setting.dst
-    time = time_diff.seconds.from_now - gn_setting.time_zone.to_i.seconds
-    time = time - 1.day if Time.now().utc + 1.day < time
+    time = time_diff.seconds.from_now
+    time = time - 1.day if Time.current + 1.day < time
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
@@ -273,7 +276,7 @@ class GeneralSetting < ActiveRecord::Base
   end
 
   def should_send_email_today
-    day = DateTime.now.strftime("%A")
+    day = DateTime.now.in_time_zone.strftime("%A")
     result = false
 
     if day == 'Monday' && self.send_email_on_mon

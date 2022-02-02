@@ -375,13 +375,14 @@ module StoresHelper
         return result[:status] = false if response['orders'].nil? || response['orders'].blank?
 
         result[:status] = true
-        result_modifyDate = Time.zone.parse(response['orders'].first["updated_at"]) + Time.zone.utc_offset
-        result_createDate = Time.zone.parse(response['orders'].first["created_at"]) + Time.zone.utc_offset
+        result_modifyDate = Time.zone.parse(response['orders'].first["updated_at"])
+        result_createDate = Time.zone.parse(response['orders'].first["created_at"])
 
-        time_zone = GeneralSetting.last.time_zone.to_i
-        result_createDate_tz = Time.zone.parse(response['orders'].first["created_at"]) + time_zone
+        # time_zone = GeneralSetting.last.time_zone.to_i
+        # result_createDate_tz = Time.zone.parse(response['orders'].first["created_at"]) + time_zone
+        # result_createDate_tz = Time.zone.parse(response['orders'].first["created_at"])
 
-        result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
           orderStatus: response['orders'].first["fulfillment_status"]&.titleize)
       elsif store.store_type == 'Shipstation API 2'
         credential = store.shipstation_rest_credential
@@ -390,13 +391,13 @@ module StoresHelper
         return result[:status] = false if response.nil?
 
         result[:status] = true
-        result_modifyDate = Time.zone.parse(response.last["modifyDate"]) + Time.zone.utc_offset
-        result_createDate = Time.zone.parse(response.last["orderDate"]) + Time.zone.utc_offset
+        result_modifyDate = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["modifyDate"]).to_time
+        result_createDate = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).to_time
 
-        time_zone = GeneralSetting.last.time_zone.to_i
-        result_createDate_tz = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).utc + time_zone
+        # time_zone = GeneralSetting.last.time_zone.to_i
+        # result_createDate_tz = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).to_time
 
-        result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
           orderStatus: response.last["orderStatus"].titleize,
           gp_ready_status: response.last["tagIds"].nil? ? 'No' : (response.last["tagIds"].include?(48826) ?  'Yes' : 'No'))
 

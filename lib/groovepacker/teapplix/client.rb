@@ -18,11 +18,11 @@ module Groovepacker
         combined_response["orders"] = response
         combined_response
       end
-      
+
       def products
         combined_response = {}
         return combined_response if @account_name.blank? || @username.blank? || @password.blank?
-        
+
 				response = get("https://www.teapplix.com/h/#{@account_name}/ea/admin.php?User=#{@username}&Passwd=#{@password}&Action=Export&Subaction=inventory_products", false)
         combined_response["products"] = response
         combined_response
@@ -42,7 +42,7 @@ module Groovepacker
         url = "https://www.teapplix.com/h/#{@account_name}/ea/admin.php?User=#{@username}&Passwd=#{@password}&Action=Upload&Subaction=Inventory&upload=#{csv_url}"
         response = post(url, false)
       end
-      
+
       private
         def get(url, get_formatted)
           parsed_url = URI.parse(url)
@@ -76,14 +76,14 @@ module Groovepacker
         def get_import_start_date(credential, import_item)
           if import_item.import_type=='deep'
             days_back_to_import = import_item.days.to_i.days rescue 4.days
-            last_import =  DateTime.now - days_back_to_import
+            last_import =  DateTime.now.in_time_zone - days_back_to_import
           else
-            last_import = credential.last_imported_at.to_datetime-1.day rescue (DateTime.now - 4.days)
+            last_import = credential.last_imported_at.to_datetime - 1.day rescue (DateTime.now.in_time_zone- 4.days)
           end
           last_import = last_import.to_date.strftime("%Y/%m/%d")
           return last_import
         end
-        
+
         def csv_to_json(response_body, get_formatted=true)
           begin
             csv = CSV.new(response_body, :headers => true)
@@ -97,7 +97,7 @@ module Groovepacker
             puts e.backtrace
           end
         end
-        
+
         def get_formatted_orders(json_response)
           response_orders = []
           txn_ids = json_response.each.map {|order| order["txn_id"]}.compact.uniq

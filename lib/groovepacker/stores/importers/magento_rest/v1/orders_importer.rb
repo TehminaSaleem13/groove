@@ -11,8 +11,7 @@ module Groovepacker
               client = handler[:store_handle][:handle]
               import_item = handler[:import_item]
               result = self.build_result
-              import_time = DateTime.now
-
+              import_time = DateTime.now.in_time_zone
               begin
                 orders = client.orders
                 if orders.present? && orders["messages"].blank?

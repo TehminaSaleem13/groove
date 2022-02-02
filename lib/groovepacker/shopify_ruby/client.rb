@@ -27,14 +27,14 @@ module Groovepacker
         end
 
         combined_response["orders"] = combined_response["orders"].flatten
-        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
+        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
         combined_response
       end
 
       def get_single_order(order_number)
         query = { limit: 5 }.as_json
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?name=#{order_number}", query: query, headers: headers)
-        Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Number', order_number, '==Response', response)
+        Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
         response
       end
 
@@ -62,7 +62,7 @@ module Groovepacker
         query_opts = { "limit" => 100 }.as_json
 
         add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? "?updated_at_min=#{shopify_credential.product_last_import.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : ''
-        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now - product_import_range_days.to_i).strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : '' unless add_url.present?
+        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i).strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : '' unless add_url.present?
 
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/products#{add_url}",
                                   query: query_opts,

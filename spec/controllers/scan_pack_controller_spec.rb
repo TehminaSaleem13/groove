@@ -710,7 +710,7 @@ RSpec.describe ScanPackController, type: :controller do
     it 'Order Scanned Using Bulk Scan' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
 
-      post :scan_pack_v2, params: { data: [ { state: "undefined" , Log_count: "1", SKU: "PRODUCT2", event: "bulk_scan", id: @order.id, increment_id: @order.increment_id, input: "*", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: DateTime.now ,updated_at: Time.current } ] }
+      post :scan_pack_v2, params: { data: [ { state: "undefined" , Log_count: "1", SKU: "PRODUCT2", event: "bulk_scan", id: @order.id, increment_id: @order.increment_id, input: "*", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: DateTime.now.in_time_zone, updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
@@ -718,7 +718,7 @@ RSpec.describe ScanPackController, type: :controller do
     it 'Order Scanned Using Note' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
 
-      post :new_scan_pack_v2, params: { data: [ { state: "" , Log_count: "1", SKU: "", event: "note", id: @order.id, increment_id: @order.increment_id, input: "*", message: 'test note', name: Apartment::Tenant.current, order_item_id: "", time: DateTime.now ,updated_at: Time.current } ] }
+      post :new_scan_pack_v2, params: { data: [ { state: "" , Log_count: "1", SKU: "", event: "note", id: @order.id, increment_id: @order.increment_id, input: "*", message: 'test note', name: Apartment::Tenant.current, order_item_id: "", time: DateTime.now.in_time_zone ,updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
@@ -727,10 +727,10 @@ RSpec.describe ScanPackController, type: :controller do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
       GeneralSetting.last.update(email_address_for_packer_notes: 'test@yomail.com')
 
-      post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.no_tracking_info" , event: "verify", id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code , name: Apartment::Tenant.current, time: DateTime.now ,updated_at: Time.current } ] }
+      post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.no_tracking_info" , event: "verify", id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code , name: Apartment::Tenant.current, time: DateTime.now.in_time_zone,updated_at: Time.current } ] }
       expect(response.status).to eq(200)
 
-      post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.no_match" , event: "verify", id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code , name: Apartment::Tenant.current, time: DateTime.now ,updated_at: Time.current } ] }
+      post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.no_match" , event: "verify", id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code , name: Apartment::Tenant.current, time: DateTime.now.in_time_zone,updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
@@ -738,7 +738,7 @@ RSpec.describe ScanPackController, type: :controller do
     it 'Order Scanned Using Serial Scan' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
       GeneralSetting.last.update(email_address_for_packer_notes: 'test@yomail.com')
-      post :scan_pack_v2, params: { data: [ { ask: true, ask_2: false, barcode: 'PRODUCT1', box_id: "null", clicked: false, event: "serial_scan", is_scan: true, order_id: @order.id, order_item_id: @order_item.id, product_id: @product1.id, product_lot_id: "null", second_serial: false, serial: '445', id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code, state: "scanpack.rfp.default", name: Apartment::Tenant.current, time: DateTime.now, updated_at: Time.current } ] }
+      post :scan_pack_v2, params: { data: [ { ask: true, ask_2: false, barcode: 'PRODUCT1', box_id: "null", clicked: false, event: "serial_scan", is_scan: true, order_id: @order.id, order_item_id: @order_item.id, product_id: @product1.id, product_lot_id: "null", second_serial: false, serial: '445', id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code, state: "scanpack.rfp.default", name: Apartment::Tenant.current, time: DateTime.now.in_time_zone, updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
@@ -747,7 +747,7 @@ RSpec.describe ScanPackController, type: :controller do
       ScanPackSetting.last.update(tracking_number_validation_enabled: true, enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
       GeneralSetting.last.update(email_address_for_packer_notes: 'test@yomail.com')
 
-      post :scan_pack_v2, params: { data: [ { ask: true, ask_2: false, barcode: 'PRODUCT1', box_id: "null", clicked: false, event: "record", is_scan: true, order_id: @order.id, order_item_id: @order_item.id, product_id: @product1.id, product_lot_id: "null", second_serial: false, serial: '445', id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code, state: "scanpack.rfp.default", name: Apartment::Tenant.current, time: DateTime.now, updated_at: Time.current } ] }
+      post :scan_pack_v2, params: { data: [ { ask: true, ask_2: false, barcode: 'PRODUCT1', box_id: "null", clicked: false, event: "record", is_scan: true, order_id: @order.id, order_item_id: @order_item.id, product_id: @product1.id, product_lot_id: "null", second_serial: false, serial: '445', id: @order.id, increment_id: @order.increment_id, input:  @user.confirmation_code, state: "scanpack.rfp.default", name: Apartment::Tenant.current, time: DateTime.now.in_time_zone, updated_at: Time.current } ] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end

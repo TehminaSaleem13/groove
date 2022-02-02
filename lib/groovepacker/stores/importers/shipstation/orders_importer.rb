@@ -18,7 +18,7 @@ module Groovepacker
               else
                 orders = client.order.where('CreateDate' => credential.last_imported_at, 'OrderStatusID' => 2)
               end
-              importing_time = DateTime.now
+              importing_time = DateTime.now.in_time_zone
               # result[:total_imported] = orders.length
               unless orders.nil?
                 result[:total_imported] = orders.length
@@ -129,7 +129,7 @@ module Groovepacker
               credential.save
             end
             # ids = OrderItemKitProduct.select("MIN(id) as id").group('product_kit_skus_id, order_item_id').collect(&:id) rescue nil
-            # OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all 
+            # OrderItemKitProduct.where("id NOT IN (?)",ids).destroy_all
             update_orders_status
             result
           end

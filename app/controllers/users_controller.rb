@@ -310,8 +310,8 @@ class UsersController < ApplicationController
   def update_login_date
     user = User.find_by(username: params['username'])
     if user.present?
-      user.current_sign_in_at = DateTime.now
-      user.last_sign_in_at = DateTime.now
+      user.current_sign_in_at = DateTime.now.in_time_zone
+      user.last_sign_in_at = DateTime.now.in_time_zone
       user.save
     end
     render json: {}

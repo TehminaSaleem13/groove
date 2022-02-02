@@ -7,9 +7,9 @@ module Groovepacker
         credential = get_credential
         method = 'GET'
         uri = "#{host_url}/api/rest/orders"
-        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+        last_import = credential.last_imported_at.to_datetime rescue (DateTime.now.in_time_zone - 4.days)
         #filters = {}
-        #from_date = (DateTime.now - 4.days).strftime("%Y-%m-%d %H:%M:%S")
+        #from_date = (DateTime.now.in_time_zone - 4.days).strftime("%Y-%m-%d %H:%M:%S")
         #to_date = DateTime.now.strftime("%Y-%m-%d %H:%M:%S")
         #filters = {"filter[1][attribute]" => "created_at", "filter[1][from]" => from_date, "filter[1][to]" => to_date}
         #filters = {"order" => "created_at", "dir" => "dsc"}
@@ -20,7 +20,7 @@ module Groovepacker
           filters = {"page" => "#{page_index}", "limit" => "10", "order" => "created_at", "dir" => "dsc"}
           response = fetch(method, uri, parameters, filters)
           response = filter_resp_orders_for_last_imported_at(response, last_import, credential)
-          
+
           orders = orders.merge(response)
           response_length = response.length rescue 0
           break if response_length<10
@@ -47,7 +47,7 @@ module Groovepacker
       def products(filters={})
         method = 'GET'
         uri = "#{host_url}/api/rest/products"
-        
+
         products = {}
         page_index = 1
         while page_index
@@ -110,7 +110,7 @@ module Groovepacker
         response = fetch(method, uri, parameters, filters)
         return response
       end
-			
+
       private
         def host_url
           credential = get_credential

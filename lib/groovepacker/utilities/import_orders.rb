@@ -4,17 +4,19 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   def import_orders(tenant)
     Apartment::Tenant.switch!(tenant)
-    # we will remove all the jobs pertaining to import which are not started
-    # we will also remove all the import summary which are not started.
-    @order_import_summary = get_order_import_summary
-    return if @order_import_summary.nil?
-    # add import item for each store
-    stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
-    stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
-    order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
-    initiate_import(tenant)
-    last_status = GrooveBulkActions.last.try(:status)
-    Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending")
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      # we will remove all the jobs pertaining to import which are not started
+      # we will also remove all the import summary which are not started.
+      @order_import_summary = get_order_import_summary
+      return if @order_import_summary.nil?
+      # add import item for each store
+      stores = Store.where("status = '1' AND store_type != 'system' AND store_type != 'Shipworks'")
+      stores.each { |store| add_import_item_for_active_stores(store) } unless stores.blank?
+      order_import_summaries.where("status!='in_progress' and id!=?", @order_import_summary.id).destroy_all
+      initiate_import(tenant)
+      last_status = GrooveBulkActions.last.try(:status)
+      Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(nil, nil, Apartment::Tenant.current) if (last_status == "in_progress" || last_status == "pending")
+    end
   end
 
   def add_import_item_for_active_stores(store)
@@ -60,65 +62,75 @@ class ImportOrders < Groovepacker::Utilities::Base
   # params should have hash of tenant, store, import_type = 'regular', user
   def import_order_by_store(params, result = {})
     Apartment::Tenant.switch!(params[:tenant])
-    if OrderImportSummary.where(status: 'in_progress').empty?
-      run_import_for_single_store(params)
-    else
-      #import is already running. back off from importing
-      result.merge({:status => false, :messages => "An import is already running."})
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      if OrderImportSummary.where(status: 'in_progress').empty?
+        run_import_for_single_store(params)
+      else
+        #import is already running. back off from importing
+        result.merge({:status => false, :messages => "An import is already running."})
+      end
     end
     result
   end
 
   def import_range_import(params)
     Apartment::Tenant.switch! params[:tenant]
-    import_item = ImportItem.create(store_id: params[:store_id], import_type: params[:import_type])
-    store = Store.find(params[:store_id])
-    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
-    context = Groovepacker::Stores::Context.new(handler)
-    if params[:import_type] == 'range_import'
-      context.range_import(params[:start_date], params[:end_date], params[:order_date_type], params[:current_user_id])
-    else
-      fetched_order = Order.find_by_increment_id(params[:order_id])
-      context.quick_fix_import(params[:import_date], fetched_order.id, params[:current_user_id]) if fetched_order.present?
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      import_item = ImportItem.create(store_id: params[:store_id], import_type: params[:import_type])
+      store = Store.find(params[:store_id])
+      handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+      context = Groovepacker::Stores::Context.new(handler)
+      if params[:import_type] == 'range_import'
+        context.range_import(params[:start_date], params[:end_date], params[:order_date_type], params[:current_user_id])
+      else
+        fetched_order = Order.find_by_increment_id(params[:order_id])
+        context.quick_fix_import(params[:import_date], fetched_order.id, params[:current_user_id]) if fetched_order.present?
+      end
     end
   end
 
   def import_missing_order(params)
     Apartment::Tenant.switch! params[:tenant]
-    store = Store.find(params[:store_id])
-    import_item = ImportItem.create(store_id: store.id)
-    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
-    context = Groovepacker::Stores::Context.new(handler)
-    if store.store_type.in? %w[ShippingEasy Shopify]
-      context.import_single_order_from(params[:order_no])
-    else
-      context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      store = Store.find(params[:store_id])
+      import_item = ImportItem.create(store_id: store.id)
+      handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+      context = Groovepacker::Stores::Context.new(handler)
+      if store.store_type.in? %w[ShippingEasy Shopify]
+        context.import_single_order_from(params[:order_no])
+      else
+        context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
+      end
     end
   end
 
   def run_import_for_single_store(params)
     Apartment::Tenant.switch!(params[:tenant])
-    #delete existing completed and cancelled order import summaries
-    delete_existing_order_import_summaries
-    #add a new import summary
-    import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
-    #add import item for the store
-    ImportItem.where(store_id: params[:store].id).update_all(status: 'cancelled')
-    ImportItem.where(store_id: params[:store].id).destroy_all
-    import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
-    #start importing using delayed job (ImportJob is defined in base class)
-    track_user(params[:tenant], params, "Import Started", "Order Import Started")
-    # Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant], priority: 95
-    Groovepacker::Utilities::Base.new.delay(queue: "importing_orders_#{Apartment::Tenant.current}", priority: 95).order_import_job(params[:tenant], import_summary.id)
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      #delete existing completed and cancelled order import summaries
+      delete_existing_order_import_summaries
+      #add a new import summary
+      import_summary = OrderImportSummary.create( user: params[:user], status: 'not_started' )
+      #add import item for the store
+      ImportItem.where(store_id: params[:store].id).update_all(status: 'cancelled')
+      ImportItem.where(store_id: params[:store].id).destroy_all
+      import_summary.import_items.create(status: 'not_started', store: params[:store], import_type: params[:import_type], days: params[:days])
+      #start importing using delayed job (ImportJob is defined in base class)
+      track_user(params[:tenant], params, "Import Started", "Order Import Started")
+      # Delayed::Job.enqueue ImportJob.new(params[:tenant], import_summary.id), :queue => 'importing_orders_'+ params[:tenant], priority: 95
+      Groovepacker::Utilities::Base.new.delay(queue: "importing_orders_#{Apartment::Tenant.current}", priority: 95).order_import_job(params[:tenant], import_summary.id)
+    end
   end
 
   def reschedule_job(type, tenant)
     Apartment::Tenant.switch!(tenant)
-    date = DateTime.now + 1.day
-    job_scheduled = false
-    general_settings = GeneralSetting.all.first
-    export_settings = ExportSetting.all.first
-    schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      date = DateTime.now.in_time_zone + 1.day
+      job_scheduled = false
+      general_settings = GeneralSetting.all.first
+      export_settings = ExportSetting.all.first
+      schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
+    end
   end
 
   def schedule_a_job(type, date, job_scheduled, general_settings, export_settings)
@@ -271,19 +283,23 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   def start_shipwork_import(cred, status, value, tenant)
     Apartment::Tenant.switch! tenant
-    credential = ShipworksCredential.find(cred[:id])
-    import_item = ImportItem.find_by_store_id(credential.store.id)
-    shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)
-    context = Groovepacker::Stores::Context.new(shipwork_handler)
-    context.import_order(value["ShipWorks"]["Customer"]["Order"])
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      credential = ShipworksCredential.find(cred[:id])
+      import_item = ImportItem.find_by_store_id(credential.store.id)
+      shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)
+      context = Groovepacker::Stores::Context.new(shipwork_handler)
+      context.import_order(value["ShipWorks"]["Customer"]["Order"])
+    end
   end
 
   def import_product_from_store(tenant, store_id, product_import_type, product_import_range_days)
     Apartment::Tenant.switch! tenant
-    store = Store.find store_id
-    handler = get_handler_for_products(store)
-    context = Groovepacker::Stores::Context.new(handler)
-    store.store_type == 'Shopify' ? context.import_shopify_products(product_import_type, product_import_range_days) : context.import_products
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      store = Store.find store_id
+      handler = get_handler_for_products(store)
+      context = Groovepacker::Stores::Context.new(handler)
+      store.store_type == 'Shopify' ? context.import_shopify_products(product_import_type, product_import_range_days) : context.import_products
+    end
   end
 
   def get_handler_for_products(store)

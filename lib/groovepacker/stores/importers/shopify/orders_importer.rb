@@ -96,7 +96,7 @@ module Groovepacker
               shopify_order.customer_comments = order['note']
               shopify_order.increment_id = order["name"]
               shopify_order.store_order_id = order["id"].to_s
-              shopify_order.order_placed_time = order["created_at"]
+              shopify_order.order_placed_time = Time.zone.parse(order["created_at"])
               #add order shipping address using separate method
               shopify_order = add_customer_info(shopify_order, order)
               #add order shipping address using separate method
@@ -104,11 +104,11 @@ module Groovepacker
               #update shipping_amount and order weight
               shopify_order = update_shipping_amount_and_weight(shopify_order, order)
               shopify_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
-              shopify_order.last_modified = order['updated_at']
+              shopify_order.last_modified = Time.zone.parse(order['updated_at'])
               shopify_order.tracking_num = get_tracking_number(order)
               shopify_order.importer_id = @worker_id rescue nil
               shopify_order.import_item_id = @import_item.id rescue nil
-              shopify_order.job_timestamp = Time.now.strftime("%Y-%m-%d %H:%M:%S.%L")
+              shopify_order.job_timestamp = Time.current.strftime("%Y-%m-%d %H:%M:%S.%L")
               return shopify_order
             end
 

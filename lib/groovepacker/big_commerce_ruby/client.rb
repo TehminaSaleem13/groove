@@ -8,7 +8,7 @@ module Groovepacker
         combined_response["orders"] = []
         options[:min_date_modified] = get_min_date_modified(credential, import_item)
         options[:status_id]=11 #11 is status id of 'Awaiting Fulfillment' in BigCommerce
-        
+
         return combined_response if @store_hash.blank?
         while page_index
           options[:page] = page_index
@@ -17,7 +17,7 @@ module Groovepacker
           page_index += 1
           combined_response["orders"] << response
         end
-        
+
         combined_response["orders"] = combined_response["orders"].flatten
         combined_response
       end
@@ -27,7 +27,7 @@ module Groovepacker
         options = {}
         combined_response = {}
         combined_response["products"] = []
-        
+
         while page_index
           puts = "======================Fetching Page #{page_index}======================"
           options[:page] = page_index
@@ -36,7 +36,7 @@ module Groovepacker
           page_index += 1
           combined_response["products"] << response
         end
-        
+
         combined_response["products"] = combined_response["products"].flatten
         combined_response
       end
@@ -66,7 +66,7 @@ module Groovepacker
       def customer(customer_url)
         get(customer_url)
       end
-      
+
       def shipping_addresses(shipping_addresses_url)
         get(shipping_addresses_url)
       end
@@ -116,9 +116,9 @@ module Groovepacker
         def get_min_date_modified(credential, import_item)
           if import_item.import_type=='deep'
             days_back_to_import = import_item.days.to_i.days rescue 4.days
-            last_import =  DateTime.now - days_back_to_import
+            last_import =  DateTime.now.in_time_zone - days_back_to_import
           else
-            last_import = credential.last_imported_at.to_datetime rescue (DateTime.now - 4.days)
+            last_import = credential.last_imported_at.to_datetime rescue (DateTime.now.in_time_zone - 4.days)
           end
           return last_import
         end

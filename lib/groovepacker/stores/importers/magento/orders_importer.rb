@@ -10,7 +10,7 @@
             session = handler[:store_handle][:session]
             import_item = handler[:import_item]
             result = self.build_result
-            import_time = DateTime.now
+            import_time = DateTime.now.in_time_zone
             begin
               orders_response = get_orders(client, credential, session, import_item)
               unless orders_response.blank?

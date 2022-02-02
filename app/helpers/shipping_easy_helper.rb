@@ -45,7 +45,7 @@ module ShippingEasyHelper
       # Rule #1 - If there are no orders in our DB (other than the order provided to the troubleshooter, ie. the QF Order which gets automatically imported) when the QF import is run, then delete the LRO timestamp and run a regular import. - A 24 hour import range will be run rather than the usual QF range.
 
       # Rule #2- If the OSLMT of the QF order is newer/more recent than that of any OSLMT in DB, then run a regular import
-      quick_fix_range[:start_date] = @credential.last_imported_at || (DateTime.now - 4.days)
+      quick_fix_range[:start_date] = @credential.last_imported_at || (DateTime.now.in_time_zone - 4.days)
       quick_fix_range[:end_date] = Time.zone.now
     elsif store_orders.where('last_modified < ?', last_imported_order.last_modified).blank?
       # Rule #3- If the OSLMT of the QF order is Older than any OSLMT saved in our DB , and a more recent order does exist, then start the import range 6 hours before the OSLMT of the QF order and end the range 6 hours after the OSLMT of the QF order. (12 hours with the OSLMT in the middle)

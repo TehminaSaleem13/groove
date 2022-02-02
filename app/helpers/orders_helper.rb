@@ -314,7 +314,7 @@ module OrdersHelper
   def avg_time_per_item(username)
     user = User.where('username = ?', username).first
 
-    orders = Order.where('status = ? AND packing_user_id = ? AND scanned_on > ?', 'scanned', user.id, DateTime.now - 30.days)
+    orders = Order.where('status = ? AND packing_user_id = ? AND scanned_on > ?', 'scanned', user.id, DateTime.now.in_time_zone - 30.days)
     tscan_time = 0
     tscan_count = 0
     orders.each do |order|

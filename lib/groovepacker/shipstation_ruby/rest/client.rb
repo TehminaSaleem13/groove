@@ -30,7 +30,7 @@ module Groovepacker
             break if (response["shipments"].count rescue 0)<200
             page_index +=1
           end
-          Tenant.save_se_import_data("========Shipstation Shipments UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Import_From', import_from, '==Date_Type', date_type, '==Import Till', import_till, '==Shipments Date', shipments_date, '==Shipments After Last Import', shipments_after_last_import)
+          Tenant.save_se_import_data("========Shipstation Shipments UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import_From', import_from, '==Date_Type', date_type, '==Import Till', import_till, '==Shipments Date', shipments_date, '==Shipments After Last Import', shipments_after_last_import)
           return shipments_after_last_import
         end
 
@@ -60,7 +60,7 @@ module Groovepacker
             res = @service.query("/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC&orderStatus=#{order_status}", nil, "get")
             combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
             page_index += 1
-            Tenant.save_se_import_data("========Shipstation Range Import UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==Order Import Range Days', order_import_range_days, '==Order Status', order_status, '==Page Index', page_index, '==Date Value', date_val, '==Response', res)
+            Tenant.save_se_import_data("========Shipstation Range Import UTC: #{Time.now.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==Order Import Range Days', order_import_range_days, '==Order Status', order_status, '==Page Index', page_index, '==Date Value', date_val, '==Response', res)
             return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150
           end
         end
@@ -68,7 +68,7 @@ module Groovepacker
         def get_order_value(orderno)
           response = @service.query("/orders?orderNumber=#{orderno}", nil, "get")
           response["orders"] = (response["orders"] || []).select {|ordr| ordr["orderNumber"]==orderno }
-          Tenant.save_se_import_data("========Shipstation Order Value UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Order Number', orderno, '==Response', response)
+          Tenant.save_se_import_data("========Shipstation Order Value UTC: #{Time.now.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response)
           if response["orders"].present?
             return response["orders"]
           else
@@ -94,7 +94,7 @@ module Groovepacker
           end
           log_on_demand_order_import(orderno, response, using_tracking_number)
           import_item.update_attributes(:status => "completed",:current_increment_id => orderno, :updated_orders_import => response["orders"].count) rescue nil
-          Tenant.save_se_import_data("========Shipstation Order On Demand UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Order Number', orderno, '==ImportItem', import_item, '==Using Tracking Number', using_tracking_number, '==Response', response)
+          Tenant.save_se_import_data("========Shipstation Order On Demand UTC: #{Time.now.utc} TZ: #{Time.current}", '==Order Number', orderno, '==ImportItem', import_item, '==Using Tracking Number', using_tracking_number, '==Response', response)
           if using_tracking_number
             return response
           else
@@ -171,7 +171,7 @@ module Groovepacker
         def get_order_by_tracking_number(tracking_number)
           on_demand_logger.info("********")
           response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, "get")
-          Tenant.save_se_import_data("========Shipstation Order By Tracking Number UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Tracking Number', tracking_number, '==Response', response)
+          Tenant.save_se_import_data("========Shipstation Order By Tracking Number UTC: #{Time.now.utc} TZ: #{Time.current}", '==Tracking Number', tracking_number, '==Response', response)
           return {"orders" => []} if response["shipments"].blank?
           shipment = response["shipments"].first
           return get_order_on_demand(shipment["orderNumber"], nil, true), response["shipments"]
@@ -184,7 +184,7 @@ module Groovepacker
         def get_shipments_by_orderno(orderno)
           response = @service.query("/shipments?orderNumber=#{URI.encode(orderno)}", nil, "get")
           response["shipments"].select {|shipment| shipment["orderNumber"] == orderno} if response["shipments"].present?
-          Tenant.save_se_import_data("========Shipstation Shipments By Order Number UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Order Number', orderno, '==Response', response)
+          Tenant.save_se_import_data("========Shipstation Shipments By Order Number UTC: #{Time.now.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response)
           response["shipments"]
         end
 
@@ -232,7 +232,7 @@ module Groovepacker
             orders += response['orders'] unless response['orders'].nil? rescue nil
             total_pages = response.parsed_response['pages'] rescue nil
             page_index += 1
-            Tenant.save_se_import_data("========Shipstation Tag Import UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Status', status, '==Tag ID', tag_id, '==Response', response, '==Page_index', page_index)
+            Tenant.save_se_import_data("========Shipstation Tag Import UTC: #{Time.now.utc} TZ: #{Time.current}", '==Status', status, '==Tag ID', tag_id, '==Response', response, '==Page_index', page_index)
             return orders if page_index > total_pages.to_i
           end
         end
@@ -264,7 +264,7 @@ module Groovepacker
               "#{status}&page=#{page_index}&pageSize=150#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, "get")
             combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
             page_index += 1
-            Tenant.save_se_import_data("========Shipstation Order Import UTC: #{Time.now.utc} TZ: #{Time.now.utc + (GeneralSetting.last.time_zone.to_i || 0)}", '==Status', status, '==Start Date', start_date, '==Res', res, '==Page_index', page_index)
+            Tenant.save_se_import_data("========Shipstation Order Import UTC: #{Time.now.utc} TZ: #{Time.current}", '==Status', status, '==Start Date', start_date, '==Res', res, '==Page_index', page_index)
             return combined if ((res.parsed_response['orders'].length rescue nil) || 0)<150
           end
         end

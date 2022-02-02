@@ -298,7 +298,7 @@ RSpec.describe OrdersController, type: :controller do
       tenant.gdpr_shipstation = true
       tenant.save
       request.accept = 'application/json'
-      get :import_for_ss, params: {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"range_import", "import_date"=>"null", "start_date"=>DateTime.now - 2.days, "end_date"=>DateTime.now, "order_date_type"=>"modified", "order_id"=>"null"}
+      get :import_for_ss, params: {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"range_import", "import_date"=>"null", "start_date"=>DateTime.now.in_time_zone - 2.days, "end_date"=>DateTime.now.in_time_zone, "order_date_type"=>"modified", "order_id"=>"null"}
       expect(response.status).to eq(200)
 
       ss_store.destroy
@@ -321,7 +321,7 @@ RSpec.describe OrdersController, type: :controller do
 
 
       request.accept = 'application/json'
-      get :import_for_ss, params:  {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"quickfix", "import_date"=>DateTime.now, "start_date"=>"null", "end_date"=>"null", "order_date_type"=>"null", "order_id"=>"CSV-100151"}
+      get :import_for_ss, params:  {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"quickfix", "import_date"=>DateTime.now.in_time_zone, "start_date"=>"null", "end_date"=>"null", "order_date_type"=>"null", "order_id"=>"CSV-100151"}
 
       expect(response.status).to eq(200)
       ss_store.destroy
