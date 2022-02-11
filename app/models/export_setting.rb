@@ -168,17 +168,18 @@ class ExportSetting < ActiveRecord::Base
     single_row[:warehouse_name] = order_item.product.try(:primary_warehouse)
                                   .try(:inventory_warehouse).try(:name)
   end
+
   def update_single_row_for_product_info(single_row, order_item)
     product = order_item.product
-    single_row[:barcode] = product.primary_barcode
+    single_row[:barcode] = product&.primary_barcode
 
-    if product.is_kit == 1
-      single_row[:kit_name] = product.name
+    if product&.is_kit == 1
+      single_row[:kit_name] = product&.name
     else
-      single_row[:product_name] = product.name
+      single_row[:product_name] = product&.name
     end
 
-    single_row[:primary_sku] = product.primary_sku
+    single_row[:primary_sku] = product&.primary_sku
     single_row[:item_sale_price] = order_item.price
   end
 
