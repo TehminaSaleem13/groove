@@ -79,19 +79,21 @@ class ExportSetting < ActiveRecord::Base
     require 'csv'
     Apartment::Tenant.switch! (tenant)
     # result = set_result_hash
-    start_time, end_time = set_start_and_end_time
-    return with_error_filename if start_time.blank?
+    Time.use_zone(GeneralSetting.new_time_zone) do
+      start_time, end_time = set_start_and_end_time
+      return with_error_filename if start_time.blank?
 
-    orders = Order.where(scanned_on: start_time..end_time)
+      orders = Order.where(scanned_on: start_time..end_time)
 
-    ExportSetting.update_all(:last_exported => Time.current)
-    filename = generate_file_name
-    if order_export_type == 'do_not_include'
-      do_export_if_orders_not_included(orders, filename)
-    else
-      do_export_with_orders(orders, filename, tenant)
+      ExportSetting.update_all(:last_exported => Time.current)
+      filename = generate_file_name
+      if order_export_type == 'do_not_include'
+        do_export_if_orders_not_included(orders, filename)
+      else
+        do_export_with_orders(orders, filename, tenant)
+      end
+      filename
     end
-    filename
   end
 
   private
