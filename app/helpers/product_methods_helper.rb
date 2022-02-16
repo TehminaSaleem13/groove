@@ -34,7 +34,7 @@ module ProductMethodsHelper
 
   def create_image_from_req(params, current_tenant)
     if params[:base_64_img_upload]
-      image_content = Base64.decode64(params[:product_image][:image].to_s)
+      image_content = Base64.decode64(params[:product_image][:image].gsub('data:image/png;base64,', '').to_s)
       content_type = params[:product_image][:content_type]
       file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p')+ id.to_s + params[:product_image][:original_filename].gsub('#', '')
       GroovS3.create_image(current_tenant, file_name, image_content, content_type)
