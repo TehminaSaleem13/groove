@@ -149,7 +149,6 @@ module FTP
     end
 
     def update(ftp_file_name)
-      return
       result = self.build_result
       begin
         response = connect
@@ -256,8 +255,6 @@ module FTP
     end
 
     def update_verified_status(ftp_file_name, verified = true)
-      return
-
       result = self.build_result
       begin
         response = connect
