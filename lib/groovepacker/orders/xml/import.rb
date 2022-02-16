@@ -324,7 +324,7 @@ module Groovepacker
                   end
 
                   if check_for_update
-                    order_item.qty = order_item_XML[:qty] || 0
+                    order_item.qty = (order_item.qty + order_item_XML[:qty].to_i) rescue order_item_XML[:qty].to_i
                     order_item.price = order_item_XML[:price]
                     order_item.save
                   end
