@@ -16,7 +16,7 @@ namespace :doo do
           Time.use_zone(GeneralSetting.new_time_zone) do
             export_settings = ExportSetting.all.first
             setting = export_settings.present? && export_settings.auto_email_export? && export_settings.order_export_email.present? && export_settings.should_export_orders(DateTime.now.in_time_zone + 1.day)
-            job = Delayed::Job.where('queue LIKE ? and created_at >= ?', "%order_export_email_scheduled_#{tenant.name}%", DateTime.now.strftime('%F'))
+            job = Delayed::Job.where('queue LIKE ? and created_at >= ?', "%order_export_email_scheduled_#{tenant.name}%", DateTime.now.in_time_zone.strftime('%F'))
             failed_tenant << tenant.name if job.blank? && setting
             scheduled_tenants << "#{tenant.name} - #{job[0].id}" if scheduled[0]
             if failed_tenant.present?

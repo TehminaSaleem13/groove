@@ -204,7 +204,7 @@ module Groovepacker
           end
 
           def import_order_time(single_row, result)
-            params[:order_placed_at] = "#{DateTime.now()}" if params[:order_date_time_format] == 'Default'
+            params[:order_placed_at] = "#{DateTime.now.in_time_zone}" if params[:order_date_time_format] == 'Default'
             if @helper.order_placed_time_mapped?(single_row)
               begin
                 @order['order_placed_time'] = @helper.calculate_order_placed_time(single_row)
@@ -369,9 +369,9 @@ module Groovepacker
 
           def find_or_create_csvimportsummary
             summary_params = {file_name: params[:file_name].strip, import_type: "Order"}
-            CsvImportLogEntry.where("created_at<?", DateTime.now.beginning_of_day).delete_all
-            summary = CsvImportSummary.where("created_at<?", DateTime.now.beginning_of_day).destroy_all
-            summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=? and file_size=?", params[:file_name].strip, "Order", DateTime.now.beginning_of_day, DateTime.now.end_of_day, params[:file_size]).last
+            CsvImportLogEntry.where("created_at<?", DateTime.now.in_time_zone.beginning_of_day).delete_all
+            summary = CsvImportSummary.where("created_at<?", DateTime.now.in_time_zone.beginning_of_day).destroy_all
+            summary = CsvImportSummary.where("file_name=? and import_type=? and created_at>=? and created_at<=? and file_size=?", params[:file_name].strip, "Order", DateTime.now.in_time_zone.beginning_of_day, DateTime.now.in_time_zone.end_of_day, params[:file_size]).last
             @csv_import_summary_exists = true
             if summary.blank?
               summary_params[:file_size] = params[:file_size]

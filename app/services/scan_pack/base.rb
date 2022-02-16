@@ -56,7 +56,7 @@ module ScanPack
 
       do_setup_page_properties
 
-      @file_name = Apartment::Tenant.current + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      @file_name = Apartment::Tenant.current + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
       orders = []
 
       @single_order = Order.find(order.id)
@@ -130,7 +130,7 @@ module ScanPack
       action_view = do_get_action_view_object_for_html_rendering
       reader_file_path = do_get_pdf_file_path(order)
       @tenant_name = Apartment::Tenant.current
-      file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      file_name = @tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}_order_number_#{order.increment_id}.pdf")
       pdf_html = action_view.render template: 'orders/generate_order_barcode_slip.html.erb', layout: nil, locals: { :@order => order }
       doc_pdf = WickedPdf.new.pdf_from_string(
@@ -192,7 +192,7 @@ module ScanPack
 
     def generate_barcodes_pdf_and_url(type, items, action_view)
       general_settings = GeneralSetting.last
-      file_name = Apartment::Tenant.current + Time.now.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_bulk_barcode_generation_#{type}"
+      file_name = Apartment::Tenant.current + Time.current.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_bulk_barcode_generation_#{type}"
       show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
       show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
       case type
@@ -247,7 +247,7 @@ module ScanPack
       action_view = do_get_action_view_object_for_html_rendering
       reader_file_path = do_get_pdf_file_path(@products.count.to_s)
       @tenant_name = Apartment::Tenant.current
-      file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+      file_name = @tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
       pdf_html = action_view.render template: 'products/print_receiving_label.html.erb', layout: nil, locals: { :@products => @products }
       common(pdf_html, reader_file_path, '6in', '4in', top: '1', bottom: '0', left: '2', right: '2')
@@ -297,9 +297,9 @@ module ScanPack
 
     def find_products(products, val)
       if val == :product_inventory_warehousess
-        new_products = Product.where(id: products).joins(val).where('product_inventory_warehouses.updated_at > ?', Time.now - 90.days).pluck(:id)
+        new_products = Product.where(id: products).joins(val).where('product_inventory_warehouses.updated_at > ?', Time.current - 90.days).pluck(:id)
       else
-        new_products = Product.where(id: products).joins(val).where("#{val}.updated_at > ?", Time.now - 90.days).pluck(:id)
+        new_products = Product.where(id: products).joins(val).where("#{val}.updated_at > ?", Time.current - 90.days).pluck(:id)
       end
       products -= new_products
       products

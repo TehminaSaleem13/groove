@@ -36,11 +36,11 @@ module ProductMethodsHelper
     if params[:base_64_img_upload]
       image_content = Base64.decode64(params[:product_image][:image].to_s)
       content_type = params[:product_image][:content_type]
-      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')+ id.to_s + params[:product_image][:original_filename].gsub('#', '')
+      file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p')+ id.to_s + params[:product_image][:original_filename].gsub('#', '')
       GroovS3.create_image(current_tenant, file_name, image_content, content_type)
       # return file_name
     else
-      file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image].original_filename.gsub('#', '')
+      file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image].original_filename.gsub('#', '')
       GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
       # return file_name
     end

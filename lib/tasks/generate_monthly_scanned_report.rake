@@ -13,8 +13,8 @@ namespace :mr do
         @subscription = Subscription.where(tenant_name: tenant.name, is_active: 1).first
         next unless @subscription
         created_at = @subscription.created_at
-        if created_at < Time.now - 1.month
-          while created_at < Time.now - 1.month
+        if created_at < Time.current - 1.month
+          while created_at < Time.current - 1.month
             created_at += 1.month
           end
         end

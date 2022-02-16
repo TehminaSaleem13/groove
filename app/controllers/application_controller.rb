@@ -89,7 +89,7 @@ class ApplicationController < ActionController::Base
       @store = @store.create_store_with_defaults('BigCommerce')
       BigCommerceCredential.create(store_id: @store.id, access_token: access_token, store_hash: store_hash)
       # cookies.delete(:bc_auth)
-      cookies[:bc_auth] = { value: nil, domain: :all, expires: Time.now + 2.seconds }
+      cookies[:bc_auth] = { value: nil, domain: :all, expires: Time.current + 2.seconds }
     end
   end
 

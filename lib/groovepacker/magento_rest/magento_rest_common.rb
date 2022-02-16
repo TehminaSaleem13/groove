@@ -23,7 +23,7 @@ module Groovepacker
       		  'oauth_consumer_key' => @consumer_key,
       		  'oauth_nonce' => generate_nonce,
       		  'oauth_signature_method' => 'HMAC-SHA1',
-      		  'oauth_timestamp' => Time.now.getutc.to_i.to_s,
+      		  'oauth_timestamp' => Time.current.getutc.to_i.to_s,
       		  'oauth_version' => '1.0'
       		}
 	      params['oauth_token'] = @oauth_token unless @oauth_token.blank?

@@ -73,9 +73,9 @@ end
 # to run so that our master loop doesn't get compromised by
 # a bad script, segfault, etc.
 #
-STDERR.puts "#{Time.now}: Starting rubber-collectd execution loop"
+STDERR.puts "#{Time.current}: Starting rubber-collectd execution loop"
 loop do
-  start_time = Time.now.to_i
+  start_time = Time.current.to_i
 
   scripts.each do |script|
     fork do
@@ -88,11 +88,11 @@ loop do
   end
   Process.waitall
 
-  run_time = Time.now.to_i - start_time
+  run_time = Time.current.to_i - start_time
   begin
     puts "PUTVAL #{HOSTNAME}/rubber/gauge-collectd_runner interval=#{INTERVAL} N:#{run_time}"
   rescue Errno::EPIPE
-    STDERR.puts "#{Time.now}: Exiting rubber-collectd execution loop"
+    STDERR.puts "#{Time.current}: Exiting rubber-collectd execution loop"
     exit
   end
 
@@ -103,5 +103,5 @@ loop do
   end
 
   sleep sleep_time
-  
+
 end

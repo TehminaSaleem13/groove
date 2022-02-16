@@ -27,7 +27,7 @@ class OrderImportSummary < ActiveRecord::Base
     result['import_info'] = import_summary
     result['import_items'] = []
     begin
-      lines = CsvImportSummary.where('log_record IS NOT NULL and created_at > ?', Time.now - 30.days).last
+      lines = CsvImportSummary.where('log_record IS NOT NULL and created_at > ?', Time.current - 30.days).last
       result['summary'] = lines.log_record.gsub(/[,]/, '<br/>').gsub(/[{,}]/, '').gsub(/[:]/, '=>')
     rescue StandardError
       result['summary'] = 'nil'

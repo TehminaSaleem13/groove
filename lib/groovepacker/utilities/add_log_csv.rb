@@ -26,7 +26,7 @@ class AddLogCsv
     Apartment::Tenant.switch!(tenant.name)
     file_data +=
       Ahoy::Event
-      .where('time > ?', Time.now.ago(7.days))
+      .where('time > ?', Time.current.ago(7.days))
       .reduce('') do |data, record|
         properties = record.properties
         data += "#{properties['tenant']},#{properties['title']},"
@@ -53,7 +53,7 @@ class AddLogCsv
       Apartment::Tenant.switch!(tenant.name)
       file_data = CSV.generate do |csv|
         csv << header if csv.count.eql? 0
-        ahoy_events = Ahoy::Event.version_2.where('time > ?', Time.now.ago(7.days))
+        ahoy_events = Ahoy::Event.version_2.where('time > ?', Time.current.ago(7.days))
         ahoy_events.each do |record|
           properties = record.properties
           csv << [properties['tenant'], record.time.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p'), properties['title'], properties['username'], (properties['objects_involved_count'] ? properties['objects_involved_count'].to_s + ' = [' + properties['objects_involved'].to_s.gsub(/\"/, '\'').gsub(/[\[\]]/, '') + ']' : '' rescue nil), properties['elapsed_time'] ? Time.at(properties['elapsed_time']).utc.strftime("%H:%M:%S") : '', properties['object_per_sec'], properties['object_id'], properties['changes']]
@@ -114,7 +114,7 @@ class AddLogCsv
                 is_delinquent = customer.delinquent == true ? "delinquent" : "current"
               end
               unless billing_date.nil?
-                charge_in_30_days = ((Time.now - 30.days)..Time.now).cover?(billing_date) ?  true : false
+                charge_in_30_days = ((Time.current - 30.days)..Time.current).cover?(billing_date) ?  true : false
                 charge_in_30_days = false  if invoice.status != 'paid'
               end
               sub_amount = (sub.amount.to_f / 100) rescue 0
@@ -132,7 +132,7 @@ class AddLogCsv
           end
       end
     end
-    url = GroovS3.create_public_csv("admintools", 'subscription',Time.now.to_i, data).url.gsub('http:', 'https:')
+    url = GroovS3.create_public_csv("admintools", 'subscription',Time.current.to_i, data).url.gsub('http:', 'https:')
     StripeInvoiceEmail.send_tenant_details(url).deliver
   end
 
@@ -148,7 +148,7 @@ class AddLogCsv
     elsif product_sku_count > 100000
       product_count = "Double High SKU"
     end
-    scanned_orders = Order.where("status = ?  AND scanned_on > ?", "scanned", Time.now() - 30.days ).count
+    scanned_orders = Order.where("status = ?  AND scanned_on > ?", "scanned", Time.current - 30.days ).count
     return access_restriction, tenant_user, product_count, scanned_orders
   end
 end

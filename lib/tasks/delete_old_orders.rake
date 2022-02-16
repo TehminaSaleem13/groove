@@ -5,14 +5,14 @@ namespace :doo do
     #for single tenant run it like this -
     #DeleteOrders.new(tenant: "demo").schedule!
     #DeleteOrders.new.perform
-    # t1 = Time.now
+    # t1 = Time.current
     if $redis.get("delete_old_orders").blank?
-      $redis.set("delete_old_orders", true) 
-      $redis.expire("delete_old_orders", 5400) 
+      $redis.set("delete_old_orders", true)
+      $redis.expire("delete_old_orders", 5400)
       DeleteOrders.new.delay(run_at: 1.seconds.from_now, queue: 'delete_old_orders', priority: 95).perform
     end
     # DeleteOrders.new.perform
-    # p Time.now - t1
+    # p Time.current - t1
 
     exit(1)
   end

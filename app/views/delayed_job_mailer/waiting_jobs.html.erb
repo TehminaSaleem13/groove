@@ -4,7 +4,7 @@
 </style>
 <h3>Here is the list of jobs waiting for worker to be assigned:</h3>
 ----
-<% current_time = Time.now %>
+<% current_time = Time.current %>
 <% @jobs.each_with_index do |job, index| %>
   <h3>Job-<%=index+1%></h3>
   <table class="delayed_job" style="padding: 5px;">

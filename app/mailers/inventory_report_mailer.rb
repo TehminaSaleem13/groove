@@ -11,7 +11,7 @@ class InventoryReportMailer < ActionMailer::Base
 
     selected_reports.each do |report|
       products = get_products(report)
-      file_name = "inventory_report_#{Time.now.strftime('%y%m%d_%H%M%S')}.csv"
+      file_name = "inventory_report_#{Time.current.strftime('%y%m%d_%H%M%S')}.csv"
       data = InventoryReport::InvProjection.new(@product_inv_setting, products).get_data
       attachments[file_name] = { mime_type: 'text/csv', content: data }
     end
@@ -30,7 +30,7 @@ class InventoryReportMailer < ActionMailer::Base
     end
     @product_inv_setting = InventoryReportsSetting.last
     reports.each do |report|
-      file_name = "sku_per_day_report_#{Time.now.strftime('%y%m%d_%H%M%S')}.csv"
+      file_name = "sku_per_day_report_#{Time.current.strftime('%y%m%d_%H%M%S')}.csv"
       products = get_products(report)
       data = InventoryReport::SkuPerDay.new(@product_inv_setting, products, flag).get_data
       attachments[file_name] = { mime_type: 'text/csv', content: data }

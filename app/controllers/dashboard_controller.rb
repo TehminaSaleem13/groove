@@ -54,7 +54,7 @@ class DashboardController < ApplicationController
   end
 
   def daily_packed_percentage
-    orders = Order.select("order_placed_time, scanned_on").where("order_placed_time >= ?", Time.now.beginning_of_day - 60.days).order('order_placed_time desc').group_by{ |o| o.order_placed_time.to_date }    
+    orders = Order.select("order_placed_time, scanned_on").where("order_placed_time >= ?", Time.current.beginning_of_day - 60.days).order('order_placed_time desc').group_by{ |o| o.order_placed_time.to_date }
     results = []
     processing = ExportSetting.first.processing_time
     orders.values.each_with_index do |order, index|
@@ -62,7 +62,7 @@ class DashboardController < ApplicationController
       scanned = 0
       unscanned = 0
       order.each do |ord|
-        ord.scanned_on.blank? ? unscanned = unscanned + 1 : scanned = scanned + 1  
+        ord.scanned_on.blank? ? unscanned = unscanned + 1 : scanned = scanned + 1
       end
       scanned = number_with_precision((scanned*100)/imported.to_f, precision: 2)
       day = (orders.keys[index] + processing).strftime("%A")

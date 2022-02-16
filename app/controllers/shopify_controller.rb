@@ -288,8 +288,8 @@ class ShopifyController < ApplicationController
   def destroy_cookies
     $redis.expire("tenant_name", 20)
     $redis.expire("store_id", 20)
-    # cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
-    # cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+    # cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.current+2.seconds}
+    # cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.current+2.seconds}
   end
 
   def check_if_paid_all_the_charges

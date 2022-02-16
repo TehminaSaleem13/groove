@@ -23,7 +23,7 @@ class OrderImportSummariesController < ApplicationController
     store = Store.find_by_id(params["store_id"])
     begin
       @tenant_name = Apartment::Tenant.current
-      summary = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.now() - 30.days).reverse
+      summary = CsvImportSummary.where("log_record IS NOT NULL and created_at > ?", Time.current - 30.days).reverse
       lines = summary.map(&:log_record).uniq
       if store.store_type == "CSV"
         data = prepare_csv_data(lines)
@@ -39,7 +39,7 @@ class OrderImportSummariesController < ApplicationController
           end
         end
       end
-      url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.now.to_i, data).url.gsub('http:', 'https:')
+      url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary',Time.current.to_i, data).url.gsub('http:', 'https:')
       render json: {url: url}
     rescue Exception => e
       Rollbar.error(e, e.message, Apartment::Tenant.current)

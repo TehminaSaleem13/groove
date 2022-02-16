@@ -6,7 +6,7 @@ class ExportSsProductsCsv
     result = {'status' => true, 'messages' => []}
     products = Product.where(status: 'active')
     unless products.empty?
-      filename = 'groove-products-'+Time.now.to_s+'.csv'
+      filename = 'groove-products-'+Time.current.to_s+'.csv'
       row_map = { :SKU => '', :Name => '', :WarehouseLocation => '', :WeightOz => '', :Category => '', :Tag1 => '', :Tag2 => '', :Tag3 => '', :Tag4 => '', :Tag5 => '', :CustomsDescription => '', :CustomsValue => '', :CustomsTariffNo => '', :CustomsCountry => '', :ThumbnailUrl => '', :UPC => '', :FillSKU => '', :Length => '', :Width => '', :Height => '', :UseProductName => '', :Active => '' }
       data = CSV.generate do |csv|
         csv << row_map.keys
@@ -70,7 +70,7 @@ class ExportSsProductsCsv
       filter_products << product if (check_broken_image(product.product_images, result) rescue true)
     end
     products = filter_products + nil_images_products
-    result['filename'] = 'products-'+Time.now.to_s+'.csv'
+    result['filename'] = 'products-'+Time.current.to_s+'.csv'
     CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
       data = ProductsHelper.products_csv(products, csv)
       result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url.gsub('http:', 'https:')

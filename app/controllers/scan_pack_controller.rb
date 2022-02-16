@@ -100,7 +100,7 @@ class ScanPackController < ApplicationController
       #     end
       #   rescue => e
       #     on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-      #     log = { tenant: Apartment::Tenant.current, params: params, scn_params: scn_params, error: e, time: Time.now.utc, backtrace: e.backtrace.join(",") }
+      #     log = { tenant: Apartment::Tenant.current, params: params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(",") }
       #     on_demand_logger.info(log)
       #   end
       # end
@@ -204,7 +204,7 @@ class ScanPackController < ApplicationController
       #     end
       #   rescue => e
       #     on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-      #     log = { tenant: Apartment::Tenant.current, params: params, scn_params: scn_params, error: e, time: Time.now.utc, backtrace: e.backtrace.join(",") }
+      #     log = { tenant: Apartment::Tenant.current, params: params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(",") }
       #     on_demand_logger.info(log)
       #   end
       # end
@@ -369,6 +369,24 @@ class ScanPackController < ApplicationController
       @result["notice_messages"] = "Order not found"
     end
     render json: @result
+  end
+
+  def upload_image_on_s3
+    if params[:data].present?
+      current_tenant = Apartment::Tenant.current
+      image_content = Base64.decode64(params[:data].split(',')[1].to_s)
+      file_name = "#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{params[:order_no]}.png"
+      file_path = "#{Rails.root}/images/#{current_tenant}/#{file_name}"
+      binding.pry
+      # File.open(file_path, 'wb') do |f|
+      #   f.write(image_content)
+      # end
+      # require "google_drive"
+      # session = GoogleDrive::Session.from_config("config.json")
+      # session.upload_from_file(file_path, file_name, convert: false)
+      #GroovS3.create_image(current_tenant, file_name, image_content, 'public_read')
+    end
+    render json: {}
   end
 
   private

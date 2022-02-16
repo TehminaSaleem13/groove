@@ -1,4 +1,4 @@
-<%= I18n.t('annual', tenant: @tenant, time: Time.now.utc) %>
+<%= I18n.t('annual', tenant: @tenant, time: Time.current.utc) %>
 <ul>
   <li>User:<%= @users%></li>
   <li>Amount: <%= @amount%></li>

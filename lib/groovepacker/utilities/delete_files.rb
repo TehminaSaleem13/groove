@@ -28,7 +28,7 @@ class DeleteFiles
       if f !='.' && f != '..' && f != '.gitignore'
         full_filename = File.join(Dir.pwd, f)
         stat = File::Stat.new(full_filename)
-        seconds_diff = (Time.now - stat.ctime).to_i.abs
+        seconds_diff = (Time.current - stat.ctime).to_i.abs
         minutes = seconds_diff / 60
         if minutes > 1
           files << full_filename

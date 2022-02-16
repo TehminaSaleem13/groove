@@ -9,7 +9,7 @@ module Groovepacker
           def import
             init_common_objects
             return @result if import_statuses_are_empty
-            importing_time = Time.now
+            importing_time = Time.current
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             return @result unless @import_item.present?
 
@@ -311,7 +311,7 @@ module Groovepacker
             # def create_s3_image(item)
             #   image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
             #   # image_data = IO.read(open(item["product"]["image"]["original"]))
-            #   file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}"
+            #   file_name = "#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}"
             #   tenant = Apartment::Tenant.current
             #   GroovS3.create_image(tenant, file_name, image_data, 'public_read')
             #   s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
@@ -413,7 +413,7 @@ module Groovepacker
               return unless shiping_easy_order.save
               if Apartment::Tenant.current == "verdantkitchen"
                 on_demand_logger = Logger.new("#{Rails.root}/log/order_dupliacte _#{Apartment::Tenant.current}.log")
-                log = {order_id: shiping_easy_order.increment_id, Time: Time.now}
+                log = {order_id: shiping_easy_order.increment_id, Time: Time.current}
                 on_demand_logger.info(log)
               end
 

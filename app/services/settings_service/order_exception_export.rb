@@ -11,7 +11,7 @@ module SettingsService
         'status' => true,
         'messages' => [],
         'data' => nil,
-        'filename' => "groove-order-exceptions-#{Time.now}.csv"
+        'filename' => "groove-order-exceptions-#{Time.current}.csv"
       }
       @row_map = {
         order_number: '', order_date: '', scanned_date: '',
@@ -23,7 +23,7 @@ module SettingsService
       start_time = params[:start].gsub(/GMT/,'+00:00')
       end_time = params[:end].gsub(/GMT/,'+00:00')
       @exceptions = OrderException.where(updated_at: Time.parse(start_time).getutc..Time.parse(end_time).getutc)
-      
+
     end
 
     def call
@@ -47,7 +47,7 @@ module SettingsService
       #   csv << row_map.keys
       #   exceptions.each do |exception|
       #     single_row = row_map.dup
-      #     generate_single_record(exception, single_row) 
+      #     generate_single_record(exception, single_row)
       #     csv << single_row.values
       #   end
       # end
@@ -56,12 +56,12 @@ module SettingsService
         csv << row_map.keys
         exceptions.each do |exception|
           single_row = row_map.dup
-          generate_single_record(exception, single_row) 
+          generate_single_record(exception, single_row)
           csv << single_row.values
         end
       end
 
-      public_url =  GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-exceptions","#{Time.now}", data).url.gsub('http:', 'https:')
+      public_url =  GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-exceptions","#{Time.current}", data).url.gsub('http:', 'https:')
       @result['filename'] = {'url' => public_url, 'filename' => @result['filename']}
     end
 

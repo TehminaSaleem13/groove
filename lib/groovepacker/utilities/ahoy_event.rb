@@ -1,5 +1,5 @@
 module AhoyEvent
-  
+
   def track_user(tenant, params, name, title)
     ahoy = Ahoy::Event.new
     ahoy.name = name
@@ -9,7 +9,7 @@ module AhoyEvent
       store_id: ((params[:store_id] || params[:store].id) rescue nil),
       user_id: ((params[:user_id] || params[:user].id) rescue nil)
     }
-    ahoy.time = Time.now
+    ahoy.time = Time.current
     ahoy.save!
   end
 
@@ -24,7 +24,7 @@ module AhoyEvent
       object_id: params[:object_id],
       changes: params[:changes]
     }
-    ahoy.time = Time.now
+    ahoy.time = Time.current
     ahoy.save!
   end
 end

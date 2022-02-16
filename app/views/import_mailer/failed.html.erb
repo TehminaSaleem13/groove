@@ -9,11 +9,10 @@
       <strong>Store type: </strong><%=@import_exception[:import_item].store.store_type %>
     </p>
   <% end %>
-  <p><strong>Import Date/Time: </strong><%=(Time.now + GeneralSetting.first.time_zone.to_i).strftime("%e %b %Y %H:%M")%></p>
+  <p><strong>Import Date/Time: </strong><%= Time.current.strftime("%e %b %Y %H:%M")%></p>
   <% unless @import_exception[:exception].nil? %>
   <p><strong>Exception message: </strong><%=@import_exception[:exception].message%></p>
   <p><strong>Exception backtrace: </strong></p>
   <p><%= raw(@import_exception[:exception].backtrace.join("<br/>")) %></p>
   <% end %>
 <%end%>
-

@@ -221,8 +221,8 @@ RSpec.describe OrdersController, type: :controller do
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
       @tenant.uniq_shopify_import = true
       @tenant.save
        sleep 3
@@ -241,8 +241,8 @@ RSpec.describe OrdersController, type: :controller do
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.now.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
       @tenant.uniq_shopify_import = true
       @tenant.save
       get :import_all

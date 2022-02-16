@@ -17,7 +17,7 @@ class BigCommerceController < ApplicationController
     app_session = $redis.get(key)
     app_session = JSON.parse(app_session) rescue {}
     unless app_session["tenant"].blank?
-      @store_id = app_session["store_id"] 
+      @store_id = app_session["store_id"]
       Apartment::Tenant.switch!(app_session["tenant"])
       update_bc_credentials
       $redis.del(key)
@@ -47,7 +47,7 @@ class BigCommerceController < ApplicationController
 
   def login
   end
-  
+
   def remove
     render json: {:status => 200}
   end
@@ -86,7 +86,7 @@ class BigCommerceController < ApplicationController
         response = HTTParty.post('https://login.bigcommerce.com/oauth2/token', body: body_attrs.to_json, headers: { "X-Auth-Client" => ENV['BC_CLIENT_ID'], "Content-Type" => "application/json", "Accept" => "application/json" })
         return response
       rescue Exception => ex
-        
+
         return false
       end
     end
@@ -100,23 +100,23 @@ class BigCommerceController < ApplicationController
       #cookies.delete(:store_id)
 
 
-      # cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
-      # cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.now+2.seconds}
+      # cookies[:tenant_name] = {:value => nil , :domain => :all, :expires => Time.current+2.seconds}
+      # cookies[:store_id] = {:value => nil , :domain => :all, :expires => Time.current+2.seconds}
     end
 
     def store_auth_values_in_cookies
-      store_user_email = @auth_hash['user']['email'] rescue ""  
+      store_user_email = @auth_hash['user']['email'] rescue ""
       store_access_token = @auth_hash["access_token"] rescue ""
       store_context = @auth_hash["context"] rescue ""
       session_key = "groovehacks:bigcommerce:session"
-      stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'store_user_email' => store_user_email, 
+      stored_session = JSON.generate({'tenant' => Apartment::Tenant.current, 'store_user_email' => store_user_email,
         'store_access_token' => store_access_token, 'store_context' => store_context})
       $redis.set(session_key, stored_session.to_s)
       $redis.expire(session_key, 300)
 
-      # cookies[:store_user_email] = {:value => store_user_email , :domain => :all, :expires => Time.now+15.minutes}
-      # cookies[:store_access_token] = {:value => store_access_token , :domain => :all, :expires => Time.now+15.minutes}
-      # cookies[:store_context] = {:value => store_context , :domain => :all, :expires => Time.now+15.minutes}
+      # cookies[:store_user_email] = {:value => store_user_email , :domain => :all, :expires => Time.current+15.minutes}
+      # cookies[:store_access_token] = {:value => store_access_token , :domain => :all, :expires => Time.current+15.minutes}
+      # cookies[:store_context] = {:value => store_context , :domain => :all, :expires => Time.current+15.minutes}
     end
 
     def find_store

@@ -81,7 +81,7 @@ module Expo
           end
         rescue => e
           on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-          log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.now.utc, backtrace: e.backtrace.join(",") }
+          log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(",") }
           on_demand_logger.info(log)
         end
       end

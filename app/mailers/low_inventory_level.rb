@@ -8,7 +8,7 @@ class LowInventoryLevel < ActionMailer::Base
       @products_list = get_entire_list(tenant)
       @products_list.each_slice(4000).with_index  do |products_list, page_no|
         LowInventoryLevel.send_mail(products_list, page_no, tenant, general_setting).deliver
-      end 
+      end
       #import_orders_obj = ImportOrders.new
       #import_orders_obj.reschedule_job('low_inventory_email', tenant)
     rescue Exception => ex
@@ -22,7 +22,7 @@ class LowInventoryLevel < ActionMailer::Base
     @general_setting = general_setting
     generate_low_inv_export_data
     if @products.present?
-      @filename = "groovepacker-#{tenant}_low_inventory_alert-#{Time.now}.csv"
+      @filename = "groovepacker-#{tenant}_low_inventory_alert-#{Time.current}.csv"
       generate_low_inv_export_csv
       attachments[@filename] = File.read("public/#{@filename}")
     end
@@ -165,7 +165,7 @@ class LowInventoryLevel < ActionMailer::Base
         " OR product_inv_alert = 1 AND available_inv <= product_inv_alert_level"\
         " AND product_inv_alert_level != 0"
       )
-    
+
     return products.to_a.uniq
   end
 end

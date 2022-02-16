@@ -5,7 +5,7 @@ module Groovepacker
       include SettingsHelper
 
       def update_ordere_item_kit_product(tenant, product_id, product_kit_sku_id)
-        Apartment::Tenant.switch! tenant 
+        Apartment::Tenant.switch! tenant
         order_items = OrderItem.where(:product_id => product_id)
         order_items.each do |order_item|
           order_item_kit_product = OrderItemKitProduct.where(:order_item_id => order_item.id).map(&:product_kit_skus_id)
@@ -89,7 +89,7 @@ module Groovepacker
         result['messages'] =[]
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
-        Ahoy::Event.create(version_2: true, time: Time.now, properties: { title: 'Product Removal Start', tenant: tenant, username: username })
+        Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal Start', tenant: tenant, username: username })
         time_started = Time.current
         begin
           products =
@@ -136,7 +136,7 @@ module Groovepacker
             products_kit_skus
               .select{ |pkss| pkss.option_product_id == product.id }
               .each do |product_kit_sku|
-                begin  
+                begin
                   product_kit_sku.product.status = 'new'
                   product_kit_sku.product.save
                   product_kit_sku.product.product_kit_activities.create(
@@ -146,8 +146,8 @@ module Groovepacker
                     activity_type: 'deleted_item'
                   )
                   product_kit_sku.destroy
-                rescue 
-                end  
+                rescue
+                end
               end
 
             if product.destroy
@@ -159,7 +159,7 @@ module Groovepacker
             bulk_action.completed = bulk_action.completed + 1
             bulk_action.save
           end
-          
+
           unless bulk_action.cancel?
             bulk_action.status = result['status'] ? 'completed' : 'failed'
             bulk_action.messages = result['messages']
@@ -170,7 +170,7 @@ module Groovepacker
           total_elapsed_time = (Time.current - time_started).round(2)
           object_per_sec = total_elapsed_time * 60 / products_count
 
-          Ahoy::Event.create(version_2: true, time: Time.now, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: product_names, elapsed_time:  total_elapsed_time, object_per_sec: object_per_sec})
+          Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: product_names, elapsed_time:  total_elapsed_time, object_per_sec: object_per_sec})
 
         rescue Exception => e
           bulk_action.status = 'failed'
@@ -286,7 +286,7 @@ module Groovepacker
             bulk_action.completed = bulk_action.completed + 1
             bulk_action.save
           end
-          
+
           unless bulk_action.cancel?
             bulk_action.status = result['status'] ? 'completed' : 'failed'
             bulk_action.messages = result['messages']
@@ -389,4 +389,3 @@ module Groovepacker
     end
   end
 end
-

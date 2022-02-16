@@ -559,7 +559,7 @@ class StoresController < ApplicationController
 
     products = Product.where(status: 'active')
     unless products.empty?
-      filename = 'groove-products-'+Time.now.to_s+'.csv'
+      filename = 'groove-products-'+Time.current.to_s+'.csv'
       row_map = {
         :SKU => '',
         :Name => '',

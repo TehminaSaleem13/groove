@@ -3,14 +3,14 @@ module Groovepacker
     module Stats
       class ShipmentStats
         include ApplicationHelper
-        
+
         def get_shipment_stats(name, avg_data = false, tenants = [], access_restrictions = nil)
           shipping_result = default_result
-          
+
           @tenant =
             tenants.find{ |tenant| tenant.name.eql?(name) } ||
             Tenant.where(name: name).first
-          
+
           current_tenant = Apartment::Tenant.current
           if @tenant
             return shipping_result unless !access_restrictions && switch_tenant(@tenant.name)
@@ -43,7 +43,7 @@ module Groovepacker
           date_diff = 0
           last_created = @access_restrictions.last.created_at
           if month == 'current'
-            date_diff = Time.now - last_created
+            date_diff = Time.current - last_created
           elsif @access_record_count > 1 && month == 'last'
             date_diff = last_created - @access_restrictions[-2].created_at
           end

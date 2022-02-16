@@ -99,12 +99,12 @@ module ScanPack
       #   \) or \
       #   non_hyphen_increment_id IN \(\
       #     '#{input_without_special_char}', '\##{input_without_special_char}'\
-      #   \)) and status IN #{status} and updated_at >= #{(Time.now-14.days).strftime("%Y-%m-%d")}
+      #   \)) and status IN #{status} and updated_at >= #{(Time.current-14.days).strftime("%Y-%m-%d")}
       # )
       if @se_shipment_handling_v2_present
         # %(\
         #   (#{@scan_by_id} LIKE '#{input_with_special_char}%' and \(\
-        #     orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
+        #     orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
         #   \))
         # )
         %(\
@@ -122,7 +122,7 @@ module ScanPack
           \) or \
           non_hyphen_increment_id IN \(\
             '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
-          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
+          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
         )
       else
         %(\
@@ -137,7 +137,7 @@ module ScanPack
           \) or \
           non_hyphen_increment_id IN \(\
             '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
-          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.now - 14.days).strftime('%Y-%m-%d')}
+          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
         )
       end
     end

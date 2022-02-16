@@ -7,19 +7,19 @@ class DelayedJobsController < ApplicationController
 		@result["total_count"] = delayed_jobs.count
 		@result['delayed_jobs'] = delayed_jobs.order(params["sort"] + " " + params["order"]).limit(params["limit"]).offset(params["offset"]).as_json
 		@result['delayed_jobs'].each_with_index do |delayed_job, index|
-			get_delayed_time(delayed_job, index)	
-		end 
-	render json: @result 
+			get_delayed_time(delayed_job, index)
+		end
+	render json: @result
 	end
 
 	def get_delayed_time(delayed_job, index)
 		if delayed_job["locked_at"].present? && delayed_job["failed_at"].blank? && delayed_job["attempts"] != 5
 			time_count = {}
-			delayed_time = Time.now.utc - delayed_job["locked_at"]
-			time_count["delayed_job_time"] = Time.at(delayed_time).utc.strftime('%Hh %Mm %Ss')
+			delayed_time = Time.current.utc - delayed_job["locked_at"]
+			time_count["delayed_job_time"] = Time.zone.at(delayed_time).utc.strftime('%Hh %Mm %Ss')
 			delayed_job = delayed_job.merge(time_count)
 			@result['delayed_jobs'][index] = delayed_job
-		end	
+		end
 	end
 
 	def destroy
@@ -28,7 +28,7 @@ class DelayedJobsController < ApplicationController
 			Delayed::Job.destroy(delayed_job_id)
 			@result['messages'] = "Delayed Job deleted"
 	end
-		render json: @result 
+		render json: @result
 	end
 
 	def update
@@ -48,7 +48,7 @@ class DelayedJobsController < ApplicationController
 			job = Delayed::Job.find(params["id"])
 			job.attempts = 0
 			job.last_error = nil
-			job.run_at = Time.now - 1.day
+			job.run_at = Time.current - 1.day
 			job.locked_at = nil
 			job.locked_by = nil
 			job.failed_at = nil
@@ -58,7 +58,7 @@ class DelayedJobsController < ApplicationController
 		else
 			@result['status'] = false
 			@result['messages'] = "Delayed Job can not restart"
-		end 
+		end
 		render json: @result
 	end
 

@@ -68,13 +68,13 @@ module TenantsHelper
         subsc = @tenant.subscription
         new_plan = "#{@tenant.name}-zero-plan"
         if !subsc.subscription_plan_id.include?("-zero-plan")
-          time_diff = DateTime.now.mjd - DateTime.parse(subsc.created_at.strftime("%d-%m-%Y")).mjd rescue 30
+          time_diff = Time.current.to_datetime.mjd - DateTime.parse(subsc.created_at.strftime("%d-%m-%Y")).in_time_zone.to_datetime.mjd rescue 30
           trial_period_days = time_diff >= 30 ? 0 : (30 - time_diff)
           stripe_subsc = Stripe::Customer.retrieve(subsc.stripe_customer_id).subscriptions
           if stripe_subsc.data.present?
             subsc_data = stripe_subsc["data"][0]
             trial_end = subsc_data.trial_end
-            trial_period_days = Time.at(trial_end).to_datetime < Time.now ? 0 : DateTime.parse(Time.at(trial_end).strftime("%d-%m-%Y")).mjd - DateTime.now.mjd rescue 0
+            trial_period_days = Time.zone.at(trial_end).to_datetime < Time.current ? 0 : DateTime.parse(Time.at(trial_end).strftime("%d-%m-%Y")).in_time_zone.to_datetime.mjd - Time.current.to_datetime.mjd rescue 0
             subsc_data.delete
           end
           Stripe::Plan.create(amount: 0, interval: "month", name: new_plan.gsub("-", " ").capitalize, currency: "usd", id: new_plan) rescue nil
@@ -213,7 +213,7 @@ module TenantsHelper
   end
 
   def new_plan_info_for_feature(tenant, feature)
-    time_now = Time.now.strftime('%y-%m-%d-%H-%M')
+    time_now = Time.current.strftime('%y-%m-%d-%H-%M')
     feature = feature.gsub("_", "-")
     return {
       'plan_id' => time_now + '-' + tenant.name + '-' + feature,

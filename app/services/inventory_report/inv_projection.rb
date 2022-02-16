@@ -53,7 +53,7 @@ module InventoryReport
     def get_orders_count(pro_orders)
       counts = []
       [14, 30, 45, 60, 90].each do |day_count|
-        counts << pro_orders.where('scanned_on >= ?', Time.now - day_count.days).count
+        counts << pro_orders.where('scanned_on >= ?', Time.current - day_count.days).count
       end
       counts
     end

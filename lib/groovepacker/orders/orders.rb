@@ -11,7 +11,7 @@ module Groovepacker
           order_status = order.status
           check = order.order_items.map(&:qty).include? (0)
           if check
-           set_status_and_message(false, 'Only orders containing Active items can be Awaiting', ['&', 'error_msg'])  
+           set_status_and_message(false, 'Only orders containing Active items can be Awaiting', ['&', 'error_msg'])
           else
             order.status = @params[:value]
           end
@@ -48,7 +48,7 @@ module Groovepacker
       end
 
       def add_activity(order, username)
-        order.scanned_on = Time.now
+        order.scanned_on = Time.current
         order.scanned_by_status_change = true
         order.packing_user_id = User.find_by_username(username).try(:id)
         order.addactivity('Order Manually Moved To Scanned Status', username)
@@ -140,6 +140,7 @@ module Groovepacker
             preloader(orders)
           else
             orders = Order.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
+            # orders = @params[:app] ? orders.not_locked_or_recent(@current_user.id) : orders
             orders = orders.where(:status => status_filter) unless status_filter == "all"
             orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
           end
@@ -176,16 +177,16 @@ module Groovepacker
             else
               value = (@orderitem.qty + @orderitem.skipped_qty) - @params[:qty]
               @orderitem.order.addactivity("Item with sku " + sku.to_s + " QTY decreased by #{value} ", @current_user.name)
-            end 
+            end
             @orderitem.skipped_qty = 0
-            if @orderitem.scanned_status == "scanned" &&  @params[:qty] > @orderitem.qty 
+            if @orderitem.scanned_status == "scanned" &&  @params[:qty] > @orderitem.qty
               @orderitem.scanned_status = 'partially_scanned'
               if @orderitem.order_item_kit_products.count > 0
                 @orderitem.order_item_kit_products.each do |o|
                   o.scanned_status = 'partially_scanned'
                   o.save
                 end
-              end   
+              end
             end
 
             @orderitem.qty = @params[:qty]

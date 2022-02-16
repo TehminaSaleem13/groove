@@ -25,7 +25,7 @@ class UsersController < ApplicationController
     if params[:is_annual] == 'false' && params[:users].to_i > access_restriction.num_users && @subscription['interval'] != 'year'
       ui_user = params[:users].to_i - access_restriction.num_users
       access_restriction.update_attributes(added_through_ui: ui_user)
-      tenant.activity_log = "#{Time.now.strftime('%Y-%m-%d  %H:%M')} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + tenant.activity_log.to_s
+      tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + tenant.activity_log.to_s
       tenant.save!
       StripeInvoiceEmail.add_user_notification(tenant, params[:users].to_i, access_restriction).deliver
       access_restriction.update_attributes(num_users: params[:users])

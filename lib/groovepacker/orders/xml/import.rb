@@ -48,7 +48,7 @@ module Groovepacker
           begin
             if order.save!
               if @current_tenant.in? %w[living unitedmedco toririchard]
-                order_item_dup = OrderItem.where("created_at >= ?", Time.now.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
+                order_item_dup = OrderItem.where("created_at >= ?", Time.current.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
                 unless order_item_dup.empty?
                   order_item_dup.each do |i|
                     item = OrderItem.where(order_id: i[0][0], product_id: i[0][1])
@@ -170,7 +170,7 @@ module Groovepacker
 
                       if @ftp_flag == "true"
                         orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
-                        order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.now.beginning_of_day, Time.now.end_of_day).pluck(:id)
+                        order_ids = Order.where("increment_id in (?) and created_at >= ? and created_at <= ?", orders, Time.current.beginning_of_day, Time.current.end_of_day).pluck(:id)
                         item_hash = OrderItem.where("order_id in (?)", order_ids).group([:order_id, :product_id]).having("count(*) > 1").count
                         ImportMailer.order_information(@file_name,item_hash).deliver if item_hash.present?
                         groove_ftp = FTP::FtpConnectionManager.get_instance(@store)

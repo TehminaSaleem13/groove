@@ -29,7 +29,7 @@ module InventoryReport
                         rescue
                           []
                         end
-              date = (DateTime.now.beginning_of_day - i.to_s.to_i.days).strftime('%m/%d/%y')
+              date = (DateTime.now.in_time_zone.beginning_of_day - i.to_s.to_i.days).strftime('%m/%d/%y')
             end
             csv << [date, pro.primary_sku, pro.name.tr(',', ' '), orders.count]
           end

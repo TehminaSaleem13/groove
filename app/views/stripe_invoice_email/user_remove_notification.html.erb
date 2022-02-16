@@ -1,1 +1,1 @@
-<%= I18n.t('remove_notify', tenant: @tenant, qty: (@previous_users - @users), time: Time.now.utc) %>
+<%= I18n.t('remove_notify', tenant: @tenant, qty: (@previous_users - @users), time: Time.current.utc) %>

@@ -90,7 +90,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   def calc_scan_time_for_first_item
     scan_time = self.order_item_kit_product_scan_times.create(
       scan_start: self.order_item.order.last_suggested_at,
-      scan_end: DateTime.now)
+      scan_end: DateTime.now.in_time_zone)
     scan_time.scan_end.to_i - scan_time.scan_start.to_i
   end
 

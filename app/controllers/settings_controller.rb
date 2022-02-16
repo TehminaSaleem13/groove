@@ -27,8 +27,8 @@ class SettingsController < ApplicationController
       @result['messages'] = ['You do not have enough permissions to backup and restore']
     end
     # if current_user.can? 'create_backups'
-    #   dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.now.to_s])
-    #   filename = 'groove-export-'+Time.now.to_s+'.zip'
+    #   dir = Dir.mktmpdir([current_user.username+'groov-export-', Time.current.to_s])
+    #   filename = 'groove-export-'+Time.current.to_s+'.zip'
     #   begin
     #     data = zip_to_files(filename, Product.to_csv(dir))
 
@@ -223,7 +223,7 @@ class SettingsController < ApplicationController
     tote_set = ToteSet.find(params[:id])
     if tote_set.totes.any?
       action_view = ScanPack::Base.new.do_get_action_view_object_for_html_rendering
-      file_name = Apartment::Tenant.current + Time.now.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_tote_barcodes"
+      file_name = Apartment::Tenant.current + Time.current.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_tote_barcodes"
       reader_file_path = Rails.root.join('public', 'pdfs', "tote_barcodes.pdf")
       pdf_html = action_view.render :template => 'settings/tote_barcodes.html.erb', :layout => nil, :locals => {:@totes => tote_set.totes, :@tote_identifier => ScanPackSetting.last.tote_identifier.upcase}
       doc_pdf = WickedPdf.new.pdf_from_string(
@@ -263,7 +263,7 @@ class SettingsController < ApplicationController
     action_view = scan_pack_object.do_get_action_view_object_for_html_rendering
     reader_file_path = scan_pack_object.do_get_pdf_file_path(@action_code)
     @tenant_name = Apartment::Tenant.current
-    file_name = @tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    file_name = @tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
     pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
     pdf_html = action_view.render :template => "settings/action_barcodes.html.erb", :layout => nil, :locals => {:@action_code => @action_code}
     doc_pdf = WickedPdf.new.pdf_from_string(

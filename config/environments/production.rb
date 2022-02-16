@@ -90,7 +90,7 @@ Rails.application.configure do
   config.lograge.keep_original_rails_log = true
   config.lograge.custom_options = lambda do |event|
     {
-      request_time: Time.now,
+      request_time: Time.current,
       application: Rails.application.class.parent_name,
       process_id: Process.pid,
       host: event.payload[:host],

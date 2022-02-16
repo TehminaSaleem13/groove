@@ -35,12 +35,12 @@ class DeleteOrders
       .includes(:order)
       .find_in_batches(batch_size: 1000) do |order_items|
         order_items_ids = order_items.map(&:id)
-        
+
         # Already deleted in go code
         # OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
         # OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
         # OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
-        
+
         # Update inventory
         order_items.map(&:delete_inventory)
         #  Removed destroy, for avioding the callbacks
@@ -55,7 +55,7 @@ class DeleteOrders
   #     orders_ninety_days_ago_ids = []
   #     orders_custom_days_id = []
   #     delete_orders_days = tenant.orders_delete_days
-  #     #@orders = Order.where('updated_at < ?', (Time.now.utc - 90.days).beginning_of_day )
+  #     #@orders = Order.where('updated_at < ?', (Time.current.utc - 90.days).beginning_of_day )
   #     #@orders = Order.find(:all, :conditions => ["updated_at < ?", 91.days.ago.beginning_of_day])
   #     orders_ninety_days_ago_ids = Order.where("updated_at < ?", 91.days.ago.beginning_of_day).pluck(:id)
   #     orders_custom_days_id = Order.where("updated_at < ? && (status = ? || status = ?)", delete_orders_days.days.ago.beginning_of_day, "awaiting", "onhold").pluck(:id) if delete_orders_days > 0
@@ -87,7 +87,7 @@ class DeleteOrders
   #   #  back_hash.push(build_hash(order.id))
   #   #end
   #   #puts back_hash.inspect
-  #   #file_name = Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+  #   #file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p')
   #   #GroovS3.create_order_backup(tenant, file_name, back_hash.to_s)
   # end
 

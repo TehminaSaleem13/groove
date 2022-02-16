@@ -2,7 +2,7 @@ module Groovepacker
     module ScanPackV2
       class NewLogScanService
         include ScanPackHelper
-  
+
         def process_logs(tenant, current_user_id, session = {}, params)
           Apartment::Tenant.switch! tenant
           @params = params
@@ -23,7 +23,7 @@ module Groovepacker
                     scn_params[:input], scn_params[:state], scn_params[:id], scn_params[:box_id], 1
                   ]
                 )
-                @result = product_scan_object.run(false, false, true)  
+                @result = product_scan_object.run(false, false, true)
               else
                 order = Order.find(scn_params[:id])
                 order_item = OrderItem.find_by(id: scn_params[:order_item_id])
@@ -34,7 +34,7 @@ module Groovepacker
                   order.update(status: "scanned")
                   order.order_items.update_all(scanned_status: 'scanned', scanned_qty: scanned_qty )
                 end
-              end  
+              end
             #   elsif (scn_params[:event] == 'scanned')
             #     order = Order.find(scn_params[:id])
             #     if !order.nil?
@@ -53,7 +53,7 @@ module Groovepacker
             #   end
             rescue => e
               on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-              log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.now.utc, backtrace: e.backtrace.join(",") }
+              log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(",") }
               on_demand_logger.info(log)
             end
           end

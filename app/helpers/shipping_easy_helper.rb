@@ -3,7 +3,7 @@ module ShippingEasyHelper
   def create_s3_image(item)
     image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
     # image_data = IO.read(open(item["product"]["image"]["original"]))
-    file_name = "#{Time.now.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}".gsub('#', '')
+    file_name = "#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}".gsub('#', '')
     tenant = Apartment::Tenant.current
     GroovS3.create_image(tenant, file_name, image_data, 'public_read')
     s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
@@ -124,7 +124,7 @@ module ShippingEasyHelper
   end
 
   def remove_duplicate_order_items
-    order_item_dup = OrderItem.where("created_at >= ?", Time.now.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
+    order_item_dup = OrderItem.where("created_at >= ?", Time.current.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
     unless order_item_dup.empty?
       order_item_dup.each do |i|
         item = OrderItem.where(order_id: i[0][0], product_id: i[0][1])

@@ -32,7 +32,7 @@ class GrooveBulkActions < ActiveRecord::Base
 
   def self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
     bulk_actions = params["controller"] == "orders" ? Groovepacker::Orders::BulkActions.new : Groovepacker::Products::BulkActions.new
-    case true 
+    case true
     when activity=='status_update'
       bulk_actions.status_update(current_tenant, params, bulkaction_id, username)
     when activity=='delete' && params["controller"]=="orders"
@@ -62,7 +62,7 @@ class GrooveBulkActions < ActiveRecord::Base
       store_id: nil,
       user_id: params[:user_id]
     }
-    ahoy.time = Time.now
+    ahoy.time = Time.current
     ahoy.save!
   end
 

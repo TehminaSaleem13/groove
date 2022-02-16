@@ -8,7 +8,7 @@ module Groovepacker
           def import
             init_common_objects
             response = @client.orders(@credential, @import_item)
-            last_imported_date = Time.now
+            last_imported_date = Time.current
 
             @result[:total_imported] = response["orders"].nil? ? 0 : response["orders"].length
             @import_item.update_attributes(:current_increment_id => '', :success_imported => 0, :previous_imported => 0, :current_order_items => -1, :current_order_imported_item => -1, :to_import => @result[:total_imported])

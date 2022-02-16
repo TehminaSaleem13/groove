@@ -24,7 +24,7 @@ module Groovepacker
           end
 
           def initialize_orders_import
-            Tenant.save_se_import_data("========Shipstation Regular Import Started UTC: #{Time.now.utc} TZ: #{Time.current}")
+            Tenant.save_se_import_data("========Shipstation Regular Import Started UTC: #{Time.current.utc} TZ: #{Time.current}")
             OrderImportSummary.top_summary.emit_data_to_user(true) rescue nil
             return @result unless @import_item.present?
             @import_item.update_column(:importer_id, @worker_id)
@@ -38,7 +38,7 @@ module Groovepacker
             @regular_import_triggered = true if @result[:status] && @import_item.import_type == 'quick'
             import_orders_from_response(response, shipments_response)
             destroy_nil_import_items
-            Tenant.save_se_import_data("========Shipstation Regular Import Finished UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import Item', @import_item)
+            Tenant.save_se_import_data("========Shipstation Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
 
           def range_import(start_date, end_date, type, user_id)
@@ -47,13 +47,13 @@ module Groovepacker
             start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
             end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
-            Tenant.save_se_import_data("========Shipstation Range Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==User ID', user_id)
+            Tenant.save_se_import_data("========Shipstation Range Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==User ID', user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type, @import_item)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
-            Tenant.save_se_import_data("========Shipstation Range Import Finished UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import Item', @import_item)
+            Tenant.save_se_import_data("========Shipstation Range Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
 
           def quick_fix_import(import_date, order_id, user_id)
@@ -66,13 +66,13 @@ module Groovepacker
             start_date = quick_fix_range[:start_date].strftime('%Y-%m-%d %H:%M:%S')
             end_date = quick_fix_range[:end_date].strftime('%Y-%m-%d %H:%M:%S')
             init_order_import_summary(user_id)
-            Tenant.save_se_import_data("========Shipstation QF Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Import Date', import_date, '==Order Id', order_id, '==User ID', user_id)
+            Tenant.save_se_import_data("========Shipstation QF Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Import Date', import_date, '==Order Id', order_id, '==User ID', user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified', @import_item)
             @import_item.update_attributes(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
-            Tenant.save_se_import_data("========Shipstation QF Import Finished UTC: #{Time.now.utc} TZ: #{Time.current}", '==Import Item', @import_item)
+            Tenant.save_se_import_data("========Shipstation QF Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
 
           def init_order_import_summary(user_id)

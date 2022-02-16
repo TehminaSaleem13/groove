@@ -5,7 +5,7 @@ module ScanPack
     module OrderScanHelper
       def run_if_single_item_order_found(order, product)
         order_item = order.order_items.where(product_id: product.id).first
-        order.update_attributes(last_suggested_at: DateTime.now)
+        order.update_attributes(last_suggested_at: DateTime.now.in_time_zone)
         order_item.process_item(nil, current_user.username, 1, nil)
         order.addactivity("Product with barcode: #{input} and sku: #{order_item.product.primary_sku} scanned", current_user.name)
         order.set_order_to_scanned_state(current_user.username)

@@ -214,7 +214,7 @@ module ScanPackHelper
   #   end
   #   @header = ''
 
-  #   @file_name = Apartment::Tenant.current+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+  #   @file_name = Apartment::Tenant.current+Time.current.strftime('%d_%b_%Y_%I__%M_%p')
   #   @orders = []
 
   #   single_order = Order.find(order.id)
@@ -262,7 +262,7 @@ module ScanPackHelper
   #   end
   #   @order = order
   #   tenant_name = Apartment::Tenant.current
-  #   file_name = tenant_name + Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+  #   file_name = tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
   #   pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}_order_number.pdf")
   #   pdf_html = av.render :template => 'orders/generate_order_barcode_slip.html.erb', :layout => nil, :locals => {:@order => @order}
   #   doc_pdf = WickedPdf.new.pdf_from_string(

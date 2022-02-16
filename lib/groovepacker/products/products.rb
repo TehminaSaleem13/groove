@@ -65,7 +65,7 @@ module Groovepacker
         Apartment::Tenant.switch! tenant
         products = ProductsService::ListSelectedProducts.call(params, include_association = true)
         export_type = (params[:product][:is_kit] == 1 rescue nil) ? 'kits' : 'products'
-        result['filename'] = export_type + '-'+Time.now.to_s+'.csv'
+        result['filename'] = export_type + '-'+Time.current.to_s+'.csv'
         CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
           data = export_type == 'kits' ? ProductsHelper.kit_csv(products, csv) : ProductsHelper.products_csv(products, csv)
           result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url.gsub('http:', 'https:')

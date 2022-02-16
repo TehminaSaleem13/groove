@@ -265,7 +265,7 @@ class OrderItem < ActiveRecord::Base
         total_qty = self.qty - self.kit_split_qty
       end
       scan_time = self.order_item_scan_times.build(
-        scan_start: self.order.last_suggested_at, scan_end: DateTime.now)
+        scan_start: self.order.last_suggested_at, scan_end: DateTime.now.in_time_zone)
       scan_time.save
       if typein_count > 1
         avg_time = avg_time_per_item(username)

@@ -381,7 +381,7 @@ module Groovepacker
 
       def new_plan_info(tenant)
         rand_value = Random.new.rand(999).to_s
-        time_now = Time.now.strftime('%y-%m-%d')
+        time_now = Time.current.strftime('%y-%m-%d')
         return {
           'plan_id' => time_now + '-' + tenant.name + '-' + rand_value,
           'plan_name' => time_now + ' ' + tenant.name + ' ' + rand_value
@@ -524,7 +524,7 @@ module Groovepacker
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
           @trial_end_time = subscription.trial_end
           customer_subscription = @customer.subscriptions.first
-          if @trial_end_time && (@trial_end_time > Time.now.to_i)
+          if @trial_end_time && (@trial_end_time > Time.current.to_i)
             begin
               Stripe::Subscription.update(customer_subscription.id, plan: plan, trial_end: @trial_end_time, prorate: false)
               @updated_in_stripe = true
@@ -552,7 +552,7 @@ module Groovepacker
             @trial_end_time = subscription.trial_end
             subscription.items.data.each do |item|
               if item.plan["id"] ==  existing_plan.id
-                prorate =  (@trial_end_time && (@trial_end_time > Time.now.to_i)) ? false : true
+                prorate =  (@trial_end_time && (@trial_end_time > Time.current.to_i)) ? false : true
                 begin
                   Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
                   @updated_in_stripe = true
@@ -570,7 +570,7 @@ module Groovepacker
         if @customer
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
           if @customer.subscriptions.count >= 2 && subscription.plan.interval == "year"
-            if @trial_end_time && (@trial_end_time > Time.now.to_i)
+            if @trial_end_time && (@trial_end_time > Time.current.to_i)
               begin
                 Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
                 @updated_in_stripe = true

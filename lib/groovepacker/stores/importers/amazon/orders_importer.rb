@@ -15,7 +15,7 @@ module Groovepacker
                     first_call = false
                     last_imported_at = @credential.last_imported_at
                     if last_imported_at.present? && @import_item.import_type == "regular"
-                      days_count = (DateTime.now.to_date - @credential.last_imported_at.to_date).to_i
+                      days_count = (DateTime.now.in_time_zone.to_date - @credential.last_imported_at.to_date).to_i
                       days_count = days_count == 0 ? 1 : days_count
                     elsif @import_item.import_type == "deep"
                       days_count = @import_item.days
@@ -66,7 +66,7 @@ module Groovepacker
               @import_item.save
             end
             if @result[:status]
-              @credential.last_imported_at = DateTime.now()
+              @credential.last_imported_at = DateTime.now.in_time_zone
               @credential.save
             end
             update_orders_status

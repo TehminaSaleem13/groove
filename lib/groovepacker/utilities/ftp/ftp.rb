@@ -57,7 +57,7 @@ module FTP
             File.open(filename, 'wb') {|f| f.write(data) }
             connection_obj.putbinaryfile(File.open(filename))
           rescue => e
-            log = { tenant: Apartment::Tenant.current, data: self.as_json, error: e, time: Time.now.utc }
+            log = { tenant: Apartment::Tenant.current, data: self.as_json, error: e, time: Time.current.utc }
             on_demand_logger.info(log)
           end
         else
@@ -65,7 +65,7 @@ module FTP
           response[:error_messages].each do |message|
             result[:error_messages].push(message)
           end
-          log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+          log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
           on_demand_logger.info(log)
           return result
         end
@@ -75,17 +75,17 @@ module FTP
         split_message.shift
         result[:status] = false
         result[:error_messages].push(split_message.join(' '))
-        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
         on_demand_logger.info(log)
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
-        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
         on_demand_logger.info(log)
       end
       result
     end
-    
+
     def download_imported(current_tenant)
       result = self.build_result
       result[:file_info] = {}
@@ -96,16 +96,16 @@ module FTP
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           system 'mkdir', '-p', "ftp_files/#{current_tenant}/verification"
-          
+
           file_name = nil
           file_path = nil
           found_file = find_file(connection_obj)
-          
+
           unless found_file.nil?
-            file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            file_name = "#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             # connection_obj.chdir("~/#{self.directory}")
             connection_obj.getbinaryfile("#{found_file}", "ftp_files/#{current_tenant}/verification/#{file_name}")
-            
+
             file_path = "#{Rails.root}/ftp_files/#{current_tenant}/verification#{file_name}"
             result[:file_info][:file_path] = file_path
             result[:file_info][:ftp_file_name] = found_file
@@ -135,6 +135,8 @@ module FTP
     end
 
     def update_verified_status(ftp_file_name, verified = true)
+      return
+
       result = self.build_result
       begin
         response = connect
@@ -145,8 +147,8 @@ module FTP
             connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
           else
             new_file = ftp_file_name.gsub('-imported', '')
-            connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")         
-          end 
+            connection_obj.rename("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
+          end
           connection_obj.close()
         else
           result[:status] = false
@@ -164,7 +166,7 @@ module FTP
         result[:error_messages].push('Error in updating file name in the ftp server')
         result[:error_messages].push(e.message)
       end
-      result       
+      result
     end
 
     def retrieve
@@ -251,7 +253,7 @@ module FTP
           found_file = find_file(connection_obj)
 
           unless found_file.nil?
-            file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            file_name = "#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             # connection_obj.chdir("~/#{self.directory}")
             connection_obj.getbinaryfile("#{found_file}", "ftp_files/#{current_tenant}/#{file_name}")
 
@@ -284,6 +286,8 @@ module FTP
     end
 
     def update(ftp_file_name)
+      return
+
       result = self.build_result
       begin
         response = connect

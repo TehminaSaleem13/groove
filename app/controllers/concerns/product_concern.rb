@@ -54,7 +54,7 @@ module ProductConcern
     end
 
     def generate_csv(result)
-      result['filename'] = 'products-'+Time.now.to_s+'.csv'
+      result['filename'] = 'products-'+Time.current.to_s+'.csv'
       tenant = Apartment::Tenant.current
       product = Groovepacker::Products::Products.new
       product.delay(priority: 95).create_product_export(params, result, tenant)

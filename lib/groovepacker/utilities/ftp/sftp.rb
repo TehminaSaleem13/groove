@@ -119,7 +119,7 @@ module FTP
           file = find_file(connection_obj)
 
           unless file.nil?
-            file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            file_name = "#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             handle = connection_obj.open!("#{self.directory}/#{file}")
             connection_obj.download!("#{self.directory}/#{file}", "ftp_files/#{current_tenant}/#{file_name}")
             connection_obj.close!(handle)
@@ -149,6 +149,7 @@ module FTP
     end
 
     def update(ftp_file_name)
+      return
       result = self.build_result
       begin
         response = connect
@@ -187,7 +188,7 @@ module FTP
             File.open(filename, 'wb') {|f| f.write(data) }
             connection_obj.upload!(File.open(filename), "#{self.directory}/#{filename}")
           rescue => e
-            log = { tenant: Apartment::Tenant.current, data: self.as_json, error: e, time: Time.now.utc }
+            log = { tenant: Apartment::Tenant.current, data: self.as_json, error: e, time: Time.current.utc }
             on_demand_logger.info(log)
           end
         else
@@ -195,14 +196,14 @@ module FTP
           response[:error_messages].each do |message|
             result[:error_messages].push(message)
           end
-          log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+          log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
           on_demand_logger.info(log)
           return result
         end
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
-        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.now.utc }
+        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
         on_demand_logger.info(log)
       end
       result
@@ -225,7 +226,7 @@ module FTP
           file = find_imported_file(connection_obj)
 
           unless file.nil?
-            file_name = "#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+            file_name = "#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
             handle = connection_obj.open!("#{self.directory}/imported/#{file}")
             connection_obj.download!("#{self.directory}/imported/#{file}", "ftp_files/#{current_tenant}/verification/#{file_name}")
             connection_obj.close!(handle)
@@ -255,6 +256,8 @@ module FTP
     end
 
     def update_verified_status(ftp_file_name, verified = true)
+      return
+
       result = self.build_result
       begin
         response = connect

@@ -5,7 +5,7 @@ namespace :schedule do
     tenants = Tenant.all
     tenants.each do |tenant|
       begin
-        @subscription = Subscription.where(tenant_name: tenant.name, is_active: true).first          
+        @subscription = Subscription.where(tenant_name: tenant.name, is_active: true).first
         if @subscription && !@subscription.tenant.nil?
           tenant_name = tenant.name
           plan_id = @subscription.subscription_plan_id
@@ -14,10 +14,10 @@ namespace :schedule do
           if @access_restriction
             Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
             last_created = @access_restriction.created_at
-            if last_created > Time.now - 1.month
+            if last_created > Time.current - 1.month
               ApplyAccessRestrictions.new.delay(:run_at => (last_created + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}", priority: 95).apply_access_restrictions(tenant_name)
             else
-              while last_created < Time.now - 1.month
+              while last_created < Time.current - 1.month
                 last_created += 1.month
               end
               ApplyAccessRestrictions.new.delay(:run_at => (last_created + 1.month).beginning_of_day, :queue => "reset_access_restrictions_#{tenant_name}", priority: 95).apply_access_restrictions(tenant_name)

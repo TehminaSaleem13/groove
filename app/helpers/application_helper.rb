@@ -89,7 +89,7 @@ module ApplicationHelper
     @result['data'] = { 'packing_slip_file_paths' => [] }
     @page_height = (@page_height.to_f/2).to_s if @orientation == 'landscape'
     @header = ''
-    @file_name = current_tenant+Time.now.strftime('%d_%b_%Y_%I__%M_%p')
+    @file_name = current_tenant+Time.current.strftime('%d_%b_%Y_%I__%M_%p')
     @boxes = params[:box_ids]
     $redis.set("#{current_tenant}_packing_type", params[:packing_type]) unless params[:packing_type].blank?
   end

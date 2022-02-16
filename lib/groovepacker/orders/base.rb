@@ -142,7 +142,7 @@ module Groovepacker
         end
 
         def get_filename
-          return 'groove-order-items-'+Apartment::Tenant.current+'-'+Time.now.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
+          return 'groove-order-items-'+Apartment::Tenant.current+'-'+Time.current.strftime('%d_%b_%Y_%H_%M_%S_%Z')+'.csv'
         end
 
         def accepted_data

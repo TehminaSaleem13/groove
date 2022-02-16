@@ -70,7 +70,7 @@ class SubscriptionsController < ApplicationController
     result['message'] = ''
     tenant_name = params[:tenant_name]
     if Tenant.where(name: tenant_name).empty?
-    
+
       if (tenant_name =~ /^[0-9]*[A-Za-z][0-9A-Za-z]*$/).nil?
         result['valid'] = false
         result['message'] = "Account name must include at least one letter"
@@ -173,7 +173,7 @@ class SubscriptionsController < ApplicationController
             transaction_id: @subscription.stripe_transaction_identifier,
             notice: 'Congratulations! Your GroovePacker is being deployed!',
             email: params[:email],
-            next_date: (Time.now + 30.days).strftime("%B %d %Y"),
+            next_date: (Time.current + 30.days).strftime("%B %d %Y"),
             store: "Shopify"
           }
   end
@@ -188,8 +188,8 @@ class SubscriptionsController < ApplicationController
       store_hash: store_hash
     )
     # cookies.delete(:bc_auth)
-    cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
-    cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.now + 2.seconds }
+    cookies[:store_access_token] = { :value => nil, :domain => :all, :expires => Time.current + 2.seconds }
+    cookies[:store_context] = { :value => nil, :domain => :all, :expires => Time.current + 2.seconds }
     response = response_for_successful_subscription
     response["store"] = "BigCommerce"
     return response

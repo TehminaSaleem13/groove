@@ -18,7 +18,7 @@ module UsersHelper
 
       if role['add_edit_order_items'].nil?
         role['add_edit_order_items'] = false
-      end 
+      end
 
       #Scanpack is hard coded to be true
       role['access_scanpack'] = true
@@ -76,7 +76,7 @@ module UsersHelper
 
   def set_subscription_info amount
     @subscription_info = { }
-    @subscription_info[:subscription_info] = { 
+    @subscription_info[:subscription_info] = {
       amount: amount,
       plan_id: @subscription.subscription_plan_id,
       interval: @subscription.interval,
@@ -93,17 +93,17 @@ module UsersHelper
   def check_for_removal params, access_restriction,tenant
     if params[:users].to_i < access_restriction.num_users && params[:is_annual] == "false"
       users = access_restriction.num_users -  params[:users].to_i
-      if access_restriction.added_through_ui == 0 
+      if access_restriction.added_through_ui == 0
         StripeInvoiceEmail.remove_user_request_email(tenant, users).deliver
-        tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} Request for User Remove: #{users} user wants to remove from plan. \n" + "#{tenant.activity_log}" 
+        tenant.activity_log = "#{Time.current.strftime("%Y-%m-%d  %H:%M")} Request for User Remove: #{users} user wants to remove from plan. \n" + "#{tenant.activity_log}"
         tenant.save!
         return true
       else
         if access_restriction.added_through_ui < users
           rm_user = users - access_restriction.added_through_ui
           params[:users] = params[:users].to_i + rm_user
-          params[:amount] = params[:users].to_i * 50  
-          tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} Request for User Remove: #{rm_user} user wants to remove from plan. \n" + "#{tenant.activity_log}" 
+          params[:amount] = params[:users].to_i * 50
+          tenant.activity_log = "#{Time.current.strftime("%Y-%m-%d  %H:%M")} Request for User Remove: #{rm_user} user wants to remove from plan. \n" + "#{tenant.activity_log}"
           tenant.save!
           StripeInvoiceEmail.remove_user_request_email(tenant, rm_user).deliver
           access_restriction.update_attributes(added_through_ui: 0)
@@ -111,7 +111,7 @@ module UsersHelper
         ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
         access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
         StripeInvoiceEmail.user_remove_notification(tenant, access_restriction, params[:users]).deliver
-        tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + "#{tenant.activity_log}" 
+        tenant.activity_log = "#{Time.current.strftime("%Y-%m-%d  %H:%M")} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + "#{tenant.activity_log}"
         tenant.save!
         access_restriction.update_attributes(num_users: params[:users])
         set_subscription_info(params[:amount])
@@ -127,13 +127,13 @@ module UsersHelper
       ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
       access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
       StripeInvoiceEmail.user_remove_notification(tenant, access_restriction, params[:users]).deliver
-      tenant.activity_log = "#{Time.now.strftime("%Y-%m-%d  %H:%M")} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + "#{tenant.activity_log}"  
+      tenant.activity_log = "#{Time.current.strftime("%Y-%m-%d  %H:%M")} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + "#{tenant.activity_log}"
       tenant.save!
       access_restriction.update_attributes(num_users: params[:users])
       set_subscription_info(params[:amount])
       create_stripe_plan(tenant)
       return false
-    end  
+    end
   end
 
   def assign_user_attributes(params)

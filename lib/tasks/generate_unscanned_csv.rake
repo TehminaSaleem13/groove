@@ -5,7 +5,7 @@ namespace :doo do
     begin
     	Apartment::Tenant.switch!(args[:tenant])
       activities = OrderActivity.where("created_at>=? and created_at<=? and action Like ?" ,DateTime.now.in_time_zone - args[:from].to_i, DateTime.now.in_time_zone - args[:upto].to_i,  '%INVALID SCAN%')
-      file_name = "#{activities.count}_unscanned_#{DateTime.now}.csv"
+      file_name = "#{activities.count}_unscanned_#{DateTime.now.in_time_zone}.csv"
       headers = "Order Id,Activity,User,Activity Time\n"
     	File.open("public/#{file_name}", 'a+', {force_quotes: true}) do |csv|
         csv << headers if csv.count.eql? 0

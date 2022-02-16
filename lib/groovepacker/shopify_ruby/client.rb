@@ -27,14 +27,14 @@ module Groovepacker
         end
 
         combined_response["orders"] = combined_response["orders"].flatten
-        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
+        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
         combined_response
       end
 
       def get_single_order(order_number)
         query = { limit: 5 }.as_json
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/orders?name=#{order_number}", query: query, headers: headers)
-        Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.now.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
+        Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
         response
       end
 

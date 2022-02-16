@@ -22,9 +22,9 @@ class CsvExportMailer < ActionMailer::Base
     #recipients = [general_setting.email_address_for_packer_notes]
     recipients = [ ExportSetting.first.daily_packed_email]
     subject = "Daily Packed % Report for #{tenant}"
-    file_name = "#{tenant}_#{Time.now.to_i}.csv"
+    file_name = "#{tenant}_#{Time.current.to_i}.csv"
     attachments[file_name] = Net::HTTP.get(URI.parse(object_url)) rescue nil
-    mail to: recipients , subject: subject 
+    mail to: recipients , subject: subject
   end
 
   def send_s3_product_object_url(filename, object_url, tenant, no_product)
@@ -53,35 +53,35 @@ class CsvExportMailer < ActionMailer::Base
   def send_s3_broken_image_url(url, tenant)
     recipients = GeneralSetting.all.first.email_address_for_packer_notes.split(',') rescue []
     @url = url
-    mail to: recipients, subject: "[#{tenant}] Product Broken Images CSV" if recipients.present? 
+    mail to: recipients, subject: "[#{tenant}] Product Broken Images CSV" if recipients.present?
   end
 
   def send_fix_shopify_product_images(tenant)
     recipients = GeneralSetting.all.first.email_address_for_packer_notes.split(',') rescue []
-    mail to: recipients, subject: "[#{tenant}] Fix Broken Images" if recipients.present? 
+    mail to: recipients, subject: "[#{tenant}] Fix Broken Images" if recipients.present?
   end
 
   def send_s3_export_product_url(url, tenant)
     recipients = GeneralSetting.all.first.email_address_for_packer_notes.split(',') rescue []
     @url = url
-    mail to: recipients, subject: "[#{tenant}] Product Export CSV" if recipients.present? 
+    mail to: recipients, subject: "[#{tenant}] Product Export CSV" if recipients.present?
   end
 
-  def import_log(url, tenant, order) 
+  def import_log(url, tenant, order)
     @url = url
     mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "[#{tenant}] #{order} CSV Log"
   end
 
   def export_scanned_time_log(url)
     @url = url
-    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "Export log with fetching time" 
+    mail to: ENV["PRODUCTS_IMPORT_EMAILS"], subject: "Export log with fetching time"
   end
 
   def send_csv(url)
     @url = url
     mail to: ['groovepacker@gmail.com', 'groovepackerservice@gmail.com','kcpatel006@gmail.com'], subject: "[#{ENV["RAILS_ENV"]}] Activity Log"
   end
- 
+
   def send_duplicates_order_info(tenant, dup_order_increment_ids, dup_order_ids)
     @tenant = tenant
     @dup_order_increment_ids = dup_order_increment_ids

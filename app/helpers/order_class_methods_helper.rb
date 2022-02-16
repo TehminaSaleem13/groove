@@ -1,6 +1,6 @@
 module OrderClassMethodsHelper
   def create_new_order(result, current_user)
-    order = Order.new(store_id: Store.where(store_type: 'system').first.id, status: "onhold", order_placed_time: Time.now.utc)
+    order = Order.new(store_id: Store.where(store_type: 'system').first.id, status: "onhold", order_placed_time: Time.current.utc)
     order.save
     result['order'] = order
     result

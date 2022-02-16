@@ -83,13 +83,13 @@
               item1 = {}
               if import_item.import_type == "deep"
                 item1['key'] = 'created_at'
-                item1['value'] = [{'key' => 'from', 'value' => (Time.now - (import_item.days.days rescue 1.days)).utc.to_s}]
+                item1['value'] = [{'key' => 'from', 'value' => (Time.current - (import_item.days.days rescue 1.days)).utc.to_s}]
               elsif credential.last_imported_at.to_s != ""
                 item1['key'] = 'created_at'
                 item1['value'] = [{'key' => 'from', 'value' => credential.last_imported_at.to_s}]
               else
                 item1['key'] = 'created_at'
-                item1['value'] = [{'key' => 'from', 'value' => (Time.now - 4.days).utc.to_s}]
+                item1['value'] = [{'key' => 'from', 'value' => (Time.current - 4.days).utc.to_s}]
               end
               if item1.present?
                 @filter1['item'] = item1

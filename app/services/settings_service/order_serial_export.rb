@@ -12,7 +12,7 @@ module SettingsService
         'status' => true,
         'messages' => [],
         'data' => nil,
-        'filename' => "groove-order-serials-#{Time.now}.csv"
+        'filename' => "groove-order-serials-#{Time.current}.csv"
       }
       @row_map = {
         order_date: '', order_number: '', serial: '', primary_sku: '',

@@ -10,7 +10,7 @@ module Groovepacker
         last_import = credential.last_imported_at.to_datetime rescue (DateTime.now.in_time_zone - 4.days)
         #filters = {}
         #from_date = (DateTime.now.in_time_zone - 4.days).strftime("%Y-%m-%d %H:%M:%S")
-        #to_date = DateTime.now.strftime("%Y-%m-%d %H:%M:%S")
+        #to_date = DateTime.now.in_time_zone.strftime("%Y-%m-%d %H:%M:%S")
         #filters = {"filter[1][attribute]" => "created_at", "filter[1][from]" => from_date, "filter[1][to]" => to_date}
         #filters = {"order" => "created_at", "dir" => "dsc"}
         orders = {}

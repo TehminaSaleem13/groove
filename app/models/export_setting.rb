@@ -45,7 +45,7 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def should_export_orders_today
-    day = DateTime.now.strftime('%a')
+    day = DateTime.now.in_time_zone.strftime('%a')
     # Returns True/False
     send("send_export_email_on_#{day.downcase}")
   end
@@ -127,7 +127,7 @@ class ExportSetting < ActiveRecord::Base
 
   def destroy_order_export_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "order_export_email_scheduled_#{tenant}", Time.now()).destroy_all
+    Delayed::Job.where("queue =? && run_at < ?", "order_export_email_scheduled_#{tenant}", Time.current).destroy_all
     # Delayed::Job.where(
     #   queue: "order_export_email_scheduled_#{tenant}"
     # ).destroy_all
@@ -135,12 +135,12 @@ class ExportSetting < ActiveRecord::Base
 
   def destroy_daily_packed_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "generate_daily_packed_export_#{tenant}", Time.now()).destroy_all
+    Delayed::Job.where("queue =? && run_at < ?", "generate_daily_packed_export_#{tenant}", Time.current).destroy_all
   end
 
   def destroy_stat_export_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "generate_stat_export_#{tenant}", Time.now()).destroy_all
+    Delayed::Job.where("queue =? && run_at < ?", "generate_stat_export_#{tenant}", Time.current).destroy_all
   end
 
   def update_single_row(single_row, order, box = nil, order_item = nil)
@@ -193,12 +193,12 @@ class ExportSetting < ActiveRecord::Base
     if export_orders_option.eql? 'on_same_day'
       begin
         job_time = Delayed::Job.where(queue: "order_export_email_scheduled_#{Apartment::Tenant.current}").map(&:locked_at).compact[0]
-        job_time = DateTime.now.utc if job_time.blank?
+        job_time = DateTime.now.in_time_zone if job_time.blank?
         start_time = job_time - time_to_send_export_email.strftime("%H").to_i.hours - time_to_send_export_email.strftime("%M").to_i.minutes
         end_time = job_time
       rescue
         time = time_to_send_export_email.strftime("%H:%M")
-        seconds = Time.parse(time).seconds_since_midnight
+        seconds = Time.zone.parse(time).seconds_since_midnight
         start_time = Time.current
         end_time = Time.current.utc.beginning_of_day + seconds
       end
@@ -206,7 +206,7 @@ class ExportSetting < ActiveRecord::Base
       last_exported || '2000-01-01 00:00:00'
       end_time = Time.current
     end
-    # end_time = Time.now.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
+    # end_time = Time.current.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
     # start_time = same_day_or_last_exported(start_time)
     [start_time, end_time]
   end
@@ -229,7 +229,7 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def generate_file_name
-    "groove-order-export-#{Time.now.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
+    "groove-order-export-#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
   end
 
   def file_path(filename)

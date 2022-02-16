@@ -10,10 +10,10 @@ class DailyPacked
     headers = ["OrderNumber", "ShipDate", "WeekDay","Status", " Tracking Number" ]
     data = CSV.generate do |csv|
       csv << headers if csv.count.eql? 0
-      orders = Order.where('order_placed_time >= ? AND status != ?', Time.now.beginning_of_day - duration.days, "scanned")
+      orders = Order.where('order_placed_time >= ? AND status != ?', Time.current.beginning_of_day - duration.days, "scanned")
       begin
         get_data_into_csv(csv,orders,processing)
-      rescue 
+      rescue
       end
     end
     create_csv_and_send_email(tenant, data)
@@ -46,12 +46,12 @@ class DailyPacked
         csv << ["#{order.increment_id}","#{order_date}","#{order_day}","Action Required","#{order.tracking_num}\f"]
       else
         csv << ["#{order.increment_id}","#{order_date}","#{order_day}","#{order.status}","#{order.tracking_num}\f"]
-      end 
+      end
     end
   end
 
   def create_csv_and_send_email(tenant, data)
-    url = GroovS3.create_public_csv(tenant, 'order',Time.now.to_i, data).url.gsub('http:', 'https:')
+    url = GroovS3.create_public_csv(tenant, 'order',Time.current.to_i, data).url.gsub('http:', 'https:')
     CsvExportMailer.send_daily_packed(url,tenant).deliver
   end
 end

@@ -23,4 +23,4 @@
 		<strong>New/Updated products: </strong><%= @result[:success_imported] rescue 0 %>
 	<% end %>
 </p>
-<strong>Import Date/Time: </strong><%=Time.now.utc.strftime("%b %dth %Y %I:%M%p %Z")%></p>
+<strong>Import Date/Time: </strong><%=Time.current.utc.strftime("%b %dth %Y %I:%M%p %Z")%></p>

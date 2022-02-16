@@ -84,7 +84,7 @@ class GroovS3
     end
 
     def create_order_xml(tenant, name, data, privacy = :private)
-      date = Time.now.strftime("%Y-%m-%d")
+      date = Time.current.strftime("%Y-%m-%d")
       object = self.create(tenant, "orders/#{date}-#{name}", 'text/xml', privacy)
       if self.save(object, data)
         "orders/#{date}-#{name}"
@@ -101,7 +101,7 @@ class GroovS3
         return nil
       end
     end
-    
+
     def get_bucket
       creds = Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET'])
       s3 = Aws::S3::Resource.new(region:ENV['S3_BUCKET_REGION'], credentials: creds)
