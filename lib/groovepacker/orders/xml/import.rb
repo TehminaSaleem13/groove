@@ -318,13 +318,14 @@ module Groovepacker
                   order_item.sku = first_sku
                   tenant = Apartment::Tenant.current
                   if !(order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price])
+                    # order_item_XML[:qty] = order_item.qty + order_item_XML[:qty].to_i if order_item.price != order_item_XML[:price] && (order_item.name.present? && order_item.name != order_item_XML[:product][:name])
                     if check_for_update
                       @update_count = @update_count + 1
                     end
                   end
 
                   if check_for_update
-                    order_item.qty = (order_item.qty + order_item_XML[:qty].to_i) rescue order_item_XML[:qty].to_i
+                    order_item.qty = order_item_XML[:qty] || 0
                     order_item.price = order_item_XML[:price]
                     order_item.save
                   end
