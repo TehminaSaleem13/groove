@@ -259,19 +259,26 @@ module Groovepacker
         end
 
         def delete_existing_order_items(order, orderXML)
+          # If an order contains aliased item & original one then destroy all existing items.
+          check_if_contains_aliased_products(orderXML.order_items)
+
           order.order_items.includes([product: [:product_skus]]).each do |order_item|
-            found = false
-            first_sku = order_item.product.product_skus.first
-            unless first_sku.nil?
-              first_sku = first_sku.sku
-              orderXML.order_items.each do |order_item_XML|
-                unless order_item_XML[:product][:skus].index(first_sku).nil?
-                  found = true
+            if @destroy_all_existing
+              order_item.destroy
+            else
+              found = false
+              first_sku = order_item.product.product_skus.first
+              unless first_sku.nil?
+                first_sku = first_sku.sku
+                orderXML.order_items.each do |order_item_XML|
+                  unless order_item_XML[:product][:skus].index(first_sku).nil?
+                    found = true
+                  end
                 end
               end
-            end
-            unless found
-              order_item.destroy
+              unless found
+                order_item.destroy
+              end
             end
           end
         end
@@ -318,13 +325,14 @@ module Groovepacker
                   order_item.sku = first_sku
                   tenant = Apartment::Tenant.current
                   if !(order_item_XML[:qty].to_i == order_item.qty && order_item.price ==  order_item_XML[:price])
-                    # order_item_XML[:qty] = order_item.qty + order_item_XML[:qty].to_i if order_item.price != order_item_XML[:price] && (order_item.name.present? && order_item.name != order_item_XML[:product][:name])
                     if check_for_update
                       @update_count = @update_count + 1
                     end
                   end
 
                   if check_for_update
+                    # Add qty if existing aliased item is found
+                    order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty if @destroy_all_existing
                     order_item.qty = order_item_XML[:qty] || 0
                     order_item.price = order_item_XML[:price]
                     order_item.save
@@ -333,6 +341,15 @@ module Groovepacker
               end
             end
           end
+        end
+
+        def check_if_contains_aliased_products(order_items)
+          existing_products = []
+          order_items.map { |i| i[:product][:skus].first }.each do |sku|
+            existing_products << Product.joins(:product_skus).find_by(product_skus: { sku: sku })&.id
+          end
+          # Check if an order contains same item more than once.
+          @destroy_all_existing = existing_products.compact.uniq.size != existing_products.compact.size
         end
 
         def check_for_update
