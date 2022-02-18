@@ -93,7 +93,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     Apartment::Tenant.switch! params[:tenant]
     Time.use_zone(GeneralSetting.new_time_zone) do
       store = Store.find(params[:store_id])
-      import_item = ImportItem.create(store_id: store.id)
+      import_item = ImportItem.create(store_id: store.id, status: 'on_demand')
       handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
       context = Groovepacker::Stores::Context.new(handler)
       if store.store_type.in? %w[ShippingEasy Shopify]
