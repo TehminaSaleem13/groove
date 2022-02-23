@@ -442,4 +442,8 @@ module OrderMethodsHelper
     tote.update_attributes(order_id: nil, pending_order: false) if tote
     reset_scanned_status(User.find_by_id(user_id))
   end
+
+  def order_cup_direct_shipping
+    store&.store_type == 'CSV' && store&.order_cup_direct_shipping && Tenant.find_by_name(Apartment::Tenant.current)&.order_cup_direct_shipping
+  end
 end

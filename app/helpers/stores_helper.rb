@@ -49,6 +49,7 @@ module StoresHelper
       @store.regular_import_v2 = params[:regular_import_v2].to_boolean
       @store.quick_fix = params[:quick_fix].to_boolean
       @store.troubleshooter_option = params[:troubleshooter_option].to_boolean
+      @store.order_cup_direct_shipping = params[:order_cup_direct_shipping].to_boolean
       @store.save
     end
   end

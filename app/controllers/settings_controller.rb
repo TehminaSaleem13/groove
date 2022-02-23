@@ -114,10 +114,11 @@ class SettingsController < ApplicationController
     # @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
     @result['current_time'] = Time.current.strftime('%I:%M %p')
     @result['time_zone_name'] = Groovepacks::Application.config.tz_abbreviations['tz_abbreviations'].key(general_setting.try(:time_zone).to_i)
-    @result['scan_pack_workflow'] = current_tenant.scan_pack_workflow rescue 'default'
-    @result['daily_packed_toggle'] = current_tenant.daily_packed_toggle rescue false
-    @result['direct_printing_options'] = current_tenant.direct_printing_options rescue false
-    @result['ss_api_create_label'] = current_tenant.ss_api_create_label rescue false
+    @result['scan_pack_workflow'] = current_tenant&.scan_pack_workflow || 'default'
+    @result['daily_packed_toggle'] = current_tenant&.daily_packed_toggle
+    @result['direct_printing_options'] = current_tenant&.direct_printing_options
+    @result['order_cup_direct_shipping'] = current_tenant&.order_cup_direct_shipping
+    @result['ss_api_create_label'] = current_tenant&.ss_api_create_label
 
     if general_setting.present?
       if params[:app]

@@ -51,6 +51,7 @@ module ScanPack
           @result[:multi_item_order_message_time] = scanpack_setting.multi_item_order_complete_msg_time
           @result[:store_type] = order.store.store_type
           @result[:popup_shipping_label] = order.store&.shipping_easy_credential&.popup_shipping_label
+          @result[:order_cup_direct_shipping] = order.order_cup_direct_shipping
           @result[:large_popup] = order.store&.shipping_easy_credential&.large_popup
           @result[:multiple_lines_per_sku_accepted] = order.store&.shipping_easy_credential&.multiple_lines_per_sku_accepted
           ScanPack::ScanBarcodeService.new(current_user, {}, params).generate_order_barcode_slip(order) if scanpack_setting.post_scanning_option == 'Barcode' && !@result[:popup_shipping_label]
