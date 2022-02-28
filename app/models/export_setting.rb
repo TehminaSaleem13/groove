@@ -44,11 +44,11 @@ class ExportSetting < ActiveRecord::Base
     end
   end
 
-  def should_export_orders_today
-    day = DateTime.now.in_time_zone.strftime('%a')
-    # Returns True/False
-    send("send_export_email_on_#{day.downcase}")
-  end
+  # def should_export_orders_today
+  #   day = DateTime.now.in_time_zone.strftime('%a')
+  #   # Returns True/False
+  #   send("send_export_email_on_#{day.downcase}")
+  # end
 
   def should_export_orders(date)
     day = date.strftime('%a')
@@ -197,10 +197,12 @@ class ExportSetting < ActiveRecord::Base
         start_time = job_time - time_to_send_export_email.strftime("%H").to_i.hours - time_to_send_export_email.strftime("%M").to_i.minutes
         end_time = job_time
       rescue
+        # If time_to_send_export_email is not present
+        time_to_send_export_email ||= 12.hour.from_now
         time = time_to_send_export_email.strftime("%H:%M")
         seconds = Time.zone.parse(time).seconds_since_midnight
         start_time = Time.current
-        end_time = Time.current.utc.beginning_of_day + seconds
+        end_time = Time.current.beginning_of_day + seconds
       end
     else
       last_exported || '2000-01-01 00:00:00'
@@ -211,13 +213,13 @@ class ExportSetting < ActiveRecord::Base
     [start_time, end_time]
   end
 
-  def same_day_or_last_exported(start_time)
-    if export_orders_option.eql? 'on_same_day'
-      Time.current.beginning_of_day
-    else
-      last_exported || '2000-01-01 00:00:00'
-    end
-  end
+  # def same_day_or_last_exported(start_time)
+  #   if export_orders_option.eql? 'on_same_day'
+  #     Time.current.beginning_of_day
+  #   else
+  #     last_exported || '2000-01-01 00:00:00'
+  #   end
+  # end
 
   def with_error_filename
     # result['status'] = false

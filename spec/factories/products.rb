@@ -9,5 +9,12 @@ FactoryBot.define do
     status {"active"}
     is_kit {0}
     kit_parsing {nil}
+
+    trait :with_sku_barcode do
+      after :create do |product|
+        create_list :product_sku, 1, product: product, sku: product.name.gsub(/[[:space:]]/, '')
+        create_list :product_barcode, 1, product: product, barcode: product.name.gsub(/[[:space:]]/, '')
+      end
+    end
   end
 end

@@ -41,13 +41,45 @@ RSpec.describe OrdersController, type: :controller do
       expect_any_instance_of(Groovepacker::Orders::Xml::Import).to receive(:check_count_is_equle?).and_return(true)
 
       (1..4).to_a.each do |order_num|
-        post :import_xml, params: { xml: IO.read(Rails.root.join("spec/fixtures/files/order_import_xml#{order_num}.xml")), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
+        post :import_xml, params: { xml: IO.read(Rails.root.join("spec/fixtures/files/order_import_xml#{order_num}.xml")).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
         expect(response.status).to eq(200)
       end
 
-      import_item = ImportItem.find_by_store_id(@store.id)
       expect(Order.all.count).to eq(4)
       expect(Product.all.count).to eq(5)
+    end
+
+    it 'Import CSV Order with Aliased Item' do
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCT1')
+
+      product2 = FactoryBot.create(:product, name: 'PRODUCT2')
+      FactoryBot.create(:product_sku, product: product2, sku: 'PRODUCT2')
+      FactoryBot.create(:product_barcode, product: product2, barcode: 'PRODUCT2')
+
+      order_import_summary = OrderImportSummary.create(user: User.first, status: 'completed', import_summary_type: 'import_orders', display_summary: false)
+      ImportItem.create(status: 'not_started', store_id: @store.id, order_import_summary_id: order_import_summary.id, import_type: 'regular')
+
+      request.accept = 'application/json'
+      allow_any_instance_of(Groovepacker::Orders::Xml::Import).to receive(:check_count_is_equle?).and_return(true)
+
+      post :import_xml, params: { xml: IO.read(Rails.root.join("spec/fixtures/files/order_import_aliased_xml.xml")).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
+      expect(response.status).to eq(200)
+
+      # Alias Product
+      Groovepacker::Products::Aliasing.new(result: { "status" => true }, params_attrs: { id: product.id, product_alias_ids: [product2.id]}, current_user: @user).set_alias
+
+      # Update Order CSV Import
+      $redis.set("import_action_#{Apartment::Tenant.current}", 'update_order')
+
+      ImportItem.create(status: 'not_started', store_id: @store.id, order_import_summary_id: order_import_summary.id, import_type: 'regular')
+      post :import_xml, params: { xml: IO.read(Rails.root.join("spec/fixtures/files/order_import_aliased_xml.xml")).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
+      expect(response.status).to eq(200)
+
+      expect(Order.all.count).to eq(1)
+      expect(OrderItem.last.qty).to eq(12)
+      expect(Product.all.count).to eq(1)
     end
   end
 

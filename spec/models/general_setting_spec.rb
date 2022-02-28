@@ -66,4 +66,10 @@ RSpec.describe GeneralSetting, type: :model do
     expect(generalsetting.should_send_email(DateTime.now.in_time_zone)).to eq(false)
   end
 
+  it 'should run scheduled_export callback' do
+    general_setting = GeneralSetting.first_or_create
+
+    general_setting.attributes = { low_inventory_alert_email: true, low_inventory_email_address: 'kcpatel006@gmail.com', time_to_send_email: Time.current }
+    general_setting.save
+  end
 end

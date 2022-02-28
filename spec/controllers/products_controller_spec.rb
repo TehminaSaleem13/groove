@@ -335,4 +335,23 @@ RSpec.describe ProductsController, :type => :controller do
       expect(product.product_skus.count).to eq(2)
     end
   end
+
+  describe 'Print' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Receiving Label' do
+      request.accept = 'application/json'
+
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'PRODUCT1')
+      post :print_receiving_label, params: { tenant: Apartment::Tenant.current, productArray: [id: product.id] }
+      res = JSON.parse(response.body)
+      expect(res['url']).should_not be nil
+    end
+  end
 end

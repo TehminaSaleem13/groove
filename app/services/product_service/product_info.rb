@@ -60,11 +60,11 @@ module ProductService
         barcodes = @result['product']['basicinfo']['multibarcode']
         # @product.product_barcodes.where("packing_count IS NOT NULL")
         @product.product_barcodes.where(:is_multipack_barcode => true).each_with_index do |barcode, index|
-          # packcount = barcode.packing_count 
+          # packcount = barcode.packing_count
           if barcode.is_multipack_barcode
             barcodes["#{index + 1}"] = {}
-            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['barcode'] = barcode.barcode    
-            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['packcount'] = barcode.packing_count.to_i 
+            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['barcode'] = barcode.barcode
+            @result['product']['basicinfo']['multibarcode']["#{index+1}"]['packcount'] = barcode.packing_count.to_i
             @result['product']['basicinfo']['multibarcode']["#{index+1}"]['id'] = barcode.id
           end
         end
@@ -114,7 +114,7 @@ module ProductService
         inv_wh_result = {}
         inv_wh_result['info'] = inv_wh.attributes
         inv_wh_result['info']['quantity_on_hand'] = inv_wh.quantity_on_hand
-        
+
         unless general_setting.low_inventory_alert_email
           inv_wh_result['info']['product_inv_alert'] = false
           inv_wh_result['info']['product_inv_alert_level'] = general_setting.default_low_inventory_alert_limit
@@ -145,15 +145,20 @@ module ProductService
                     'available_inv' => 0,
                     'qty_on_hand' => 0,
                     'packing_order' => kit.packing_order,
-                    'option_product_id' => option_product.id
+                    'option_product_id' => option_product.id,
+                    'images' => option_product.product_images.order('product_images.order ASC')
                   }
 
         kit_sku['sku'] = option_product.primary_sku rescue nil
-          
+
         option_product.product_inventory_warehousess.each do |inventory|
+          kit_sku['primary_location'] = inventory.location_primary
+          kit_sku['secondary_location'] = inventory.location_secondary
+          kit_sku['tertiary_location'] = inventory.location_tertiary
           kit_sku['available_inv'] += inventory.available_inv.to_i
           kit_sku['qty_on_hand'] += inventory.quantity_on_hand.to_i
         end
+
         return kit_sku
       end
 

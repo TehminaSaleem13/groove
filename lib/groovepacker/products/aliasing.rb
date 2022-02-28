@@ -24,9 +24,9 @@ module Groovepacker
       end
 
       def map_product_sku_and_unique_kit
-        product = Product.where(id: @params["id"]).first
+        product = Product.where(id: @params[:id]).first
         return unless product
-        product_skus_ids = product.product_kit_skuss.map(&:option_product_id) 
+        product_skus_ids = product.product_kit_skuss.map(&:option_product_id)
         return if (product_skus_ids & @params[:product_alias_ids]).blank?
         @result['status'] = false
         @result["messages"].push('Can not add kit to itself')
@@ -42,11 +42,11 @@ module Groovepacker
           update_order_items_of_aliased_products(product_alias)
           #update kit. Replace the alias product with original product
           update_productkitsku_to_orig_product(product_alias)
-          
+
           #Ensure all inventory data is copied over
           #The code has been modified keeping in mind that we use only one warehouse per product as of now.
           ProductInventoryWarehouses.copy_inventory_data_for_aliasing(product_alias, @product_orig)
-          
+
           #destroy the aliased object
           return if product_alias.destroy
           #status will be updated to false if not able to destroy the product alias
