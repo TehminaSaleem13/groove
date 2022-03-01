@@ -28,7 +28,7 @@ module Groovepacker
 
         def build_stream(order)
           result = build_result
-          @user = User.where(id: order.packing_user_id).first
+          @user = order.packing_user
           # uncomment the following line when is_deleted field is added to users table.
           # return result if @user && @user.is_deleted
           if @user && !@user.is_deleted

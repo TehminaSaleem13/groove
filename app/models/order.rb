@@ -14,6 +14,8 @@ class Order < ActiveRecord::Base
   has_many :order_activities, :dependent => :destroy
   has_many :order_serials, :dependent => :destroy
   has_and_belongs_to_many :order_tags
+  belongs_to :packing_user, class_name: 'User'
+
   before_save :assign_increment_id
   after_update :update_inventory_levels_for_items
   before_save :perform_pre_save_checks

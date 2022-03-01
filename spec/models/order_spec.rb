@@ -58,4 +58,11 @@ RSpec.describe Order, type: :model do
       expect(t.macro).to eq(:has_and_belongs_to_many)
     end
   end
+
+  describe Order do
+    it 'should belongs to packing user' do
+      t = Order.reflect_on_association(:packing_user)
+      expect(t.macro).to eq(:belongs_to)
+    end
+  end
 end

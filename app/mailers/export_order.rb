@@ -61,18 +61,17 @@ class ExportOrder < ActionMailer::Base
     result = {}
     day_begin, end_time = export_settings.send(:set_start_and_end_time)
     ExportSetting.update_all(manual_export: false)
-    scanned_orders = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time)
     result['imported'] = Order.where("created_at >= ? and created_at <= ?", day_begin, end_time).size
-    result['scanned'] = scanned_orders.size
-    result['clicked_scanned_items'] = scanned_orders.map(&:order_items).flatten.map(&:clicked_qty).sum
-    result['unscanned'] = result['imported'] - Order.where("created_at >= ? and created_at <= ? and scanned_on >= ? and scanned_on <= ?", day_begin, end_time, day_begin, end_time).count
-    result['item_scanned'] = scanned_orders.joins(:order_items).count
+    result['scanned'] = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).size
+    result['clicked_scanned_items'] = Order.includes(:order_items).where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).map(&:order_items).flatten.map(&:clicked_qty).sum
+    result['unscanned'] = result['imported'] - Order.where("created_at >= ? and created_at <= ? and scanned_on >= ? and scanned_on <= ?", day_begin, end_time, day_begin, end_time).size
+    result['item_scanned'] = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).size
     result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_on <= ? and scanned_by_status_change = ?", day_begin, end_time, true).size
     result['awaiting'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'awaiting').size
     result['onhold'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'onhold').size
     result['cancelled'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'cancelled').size
     result['service_issue'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'serviceissue').size
-    result['incorrect_scans'] = scanned_orders.pluck(:inaccurate_scan_count).sum
+    result['incorrect_scans'] = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).pluck(:inaccurate_scan_count).sum
     # result['total'] = result['imported'] + result['scanned']
     result
   end

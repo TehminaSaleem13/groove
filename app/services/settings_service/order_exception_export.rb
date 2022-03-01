@@ -93,7 +93,7 @@ module SettingsService
 
     def push_user_data(single_row, user, order)
       single_row[:associated_user] = user && "#{user.name} (#{user.username})"
-      packing_user = User.where(id: order.packing_user_id).first
+      packing_user = order.packing_user
       single_row[:packing_user] = packing_user &&
                                   "#{packing_user.name} (#{packing_user.username})"
     end

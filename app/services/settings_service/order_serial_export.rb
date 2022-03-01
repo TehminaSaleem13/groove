@@ -105,7 +105,7 @@ module SettingsService
     end
 
     def push_user_data(single_row, order, product)
-      packing_user = User.where(id: order.packing_user_id).first
+      packing_user = order.packing_user
       return unless packing_user
       single_row[:packing_user] = "#{packing_user.name} (#{packing_user.username})"
       single_row[:warehouse_name] = product.primary_warehouse
