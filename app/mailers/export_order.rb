@@ -31,7 +31,7 @@ class ExportOrder < ActionMailer::Base
             @scanned_by_status_change = index
           end
         end
-        # FTP::FtpConnectionManager.get_instance(Store.find_by(store_type: 'system')).upload_file(url, filename) rescue nil if export_settings.auto_ftp_export
+        FTP::FtpConnectionManager.get_instance(Store.find_by(store_type: 'system')).upload_file(url, filename) rescue nil if export_settings.auto_ftp_export
         attachments["#{filename}"] = Net::HTTP.get(URI.parse(url)) rescue nil
         mail to: export_settings.order_export_email,
             subject: "GroovePacker #{tenant} Order Export Report"
