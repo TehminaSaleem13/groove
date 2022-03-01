@@ -2,7 +2,7 @@ class ExportOrder < ActionMailer::Base
   default from: "app@groovepacker.com"
 
   def export(tenant)
-    Apartment::Tenant.switch!(tenant)
+    Apartment::Tenant.switch! tenant
     Time.use_zone(GeneralSetting.new_time_zone) do
       export_settings = ExportSetting.first
       begin
@@ -14,6 +14,10 @@ class ExportOrder < ActionMailer::Base
           @day_begin, @end_time = export_settings.send(:set_start_and_end_time)
           @status = true
         end
+        on_demand_logger = Logger.new("#{Rails.root}/log/export_order.log")
+        on_demand_logger.info('=========================================')
+        log = { tenant: Apartment::Tenant.current, manual_export: export_settings.manual_export, time: export_settings.send(:set_start_and_end_time) }
+        on_demand_logger.info(log)
         filename = export_settings.export_data(tenant)
         @tenant_name = tenant
         url = GroovS3.find_export_csv(tenant, filename)

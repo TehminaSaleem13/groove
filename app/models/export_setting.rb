@@ -77,9 +77,9 @@ class ExportSetting < ActiveRecord::Base
 
   def export_data(tenant=nil)
     require 'csv'
-    Apartment::Tenant.switch! (tenant)
+    # Apartment::Tenant.switch! (tenant)
     # result = set_result_hash
-    Time.use_zone(GeneralSetting.new_time_zone) do
+    # Time.use_zone(GeneralSetting.new_time_zone) do
       start_time, end_time = set_start_and_end_time
       return with_error_filename if start_time.blank?
 
@@ -93,7 +93,7 @@ class ExportSetting < ActiveRecord::Base
         do_export_with_orders(orders, filename, tenant)
       end
       filename
-    end
+    # end
   end
 
   private
