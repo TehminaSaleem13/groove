@@ -17,6 +17,26 @@ RSpec.describe ProductsController, :type => :controller do
     @tenant.destroy
   end
 
+  describe 'Product' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Show Kit Product' do
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'PRODUCT1')
+      kit = FactoryBot.create(:product, :with_sku_barcode, is_kit: 1, kit_parsing: 'individual', name: 'KIT1')
+      productkitsku = ProductKitSkus.create(product_id: kit.id, option_product_id: product.id, qty: 1)
+      kit.product_kit_skuss << productkitsku
+
+      get :show, params: { id: kit.id }
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'Permit Shared Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
