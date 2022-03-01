@@ -164,7 +164,7 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def update_single_row_for_packing_user(single_row, order_item, order)
-    packing_user = User.where(id: order.packing_user_id).first
+    packing_user = order.packing_user
     return if packing_user.blank?
     single_row[:packing_user] = "#{packing_user.name} (#{packing_user.username})"
     single_row[:warehouse_name] = order_item.product.try(:primary_warehouse)
@@ -285,7 +285,7 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def assign_packing_user(single_row, order)
-    packing_user = User.where(id: order.packing_user_id).first
+    packing_user = order.packing_user
     return unless packing_user
     single_row[:packing_user] = "#{packing_user.name} ( #{packing_user.username} )"
   end
