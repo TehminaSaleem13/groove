@@ -7,7 +7,9 @@ class ExportOrder < ActionMailer::Base
       export_settings = ExportSetting.first
       begin
         @status = false
+        manual_export = export_settings.manual_export
         @counts = get_order_counts(export_settings) if export_settings.export_orders_option == 'on_same_day'
+        export_settings.manual_export = manual_export
         if !export_settings.manual_export
           @day_begin, @end_time = export_settings.send(:set_start_and_end_time)
           @status = true
