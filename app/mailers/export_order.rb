@@ -8,17 +8,14 @@ class ExportOrder < ActionMailer::Base
       begin
         @status = false
 
-        manual_export = export_settings.manual_export
+        @manual_export = export_settings.manual_export
         @counts = get_order_counts(export_settings) if export_settings.export_orders_option == 'on_same_day'
-        export_settings.manual_export = manual_export
+        export_settings.manual_export = @manual_export
 
         @day_begin, @end_time = export_settings.send(:set_start_and_end_time)
         @status = true if !export_settings.manual_export
 
-        on_demand_logger = Logger.new("#{Rails.root}/log/export_order.log")
-        on_demand_logger.info('====INITIATED=====================================')
-        log = { current_time: Time.current ,tenant: Apartment::Tenant.current, manual_export: manual_export, duration: [@day_begin, @end_time] }
-        on_demand_logger.info(log)
+        log_export_data_to_file(:initiated)
         filename = export_settings.export_data(tenant)
         @tenant_name = tenant
         url = GroovS3.find_export_csv(tenant, filename)
@@ -38,9 +35,7 @@ class ExportOrder < ActionMailer::Base
             @scanned_by_status_change = index
           end
         end
-        on_demand_logger.info('====COMPLETED=====================================')
-        log = { current_time: Time.current, tenant: Apartment::Tenant.current, manual_export: manual_export, duration: [@day_begin, @end_time], url: url }
-        on_demand_logger.info(log)
+        log_export_data_to_file(:completed, { url: url })
         FTP::FtpConnectionManager.get_instance(Store.find_by(store_type: 'system')).upload_file(url, filename) rescue nil if export_settings.auto_ftp_export
         attachments["#{filename}"] = Net::HTTP.get(URI.parse(url)) rescue nil
         mail to: export_settings.order_export_email,
@@ -62,12 +57,10 @@ class ExportOrder < ActionMailer::Base
 
   def failed_export(exception)
     export_settings = ExportSetting.first
-    maunual_or_auto = export_settings.manual_export ? "Manual" : "Auto"
+    @manual_export = export_settings.manual_export ? "Manual" : "Auto"
     @exception = exception
-    on_demand_logger.info('====FAILED=====================================')
-    log = { current_time: Time.current, tenant: Apartment::Tenant.current, manual_export: maunual_or_auto, duration: [@day_begin, @end_time], exception: exception }
-    on_demand_logger.info(log)
-    mail to: export_settings.order_export_email, subject: "[#{Apartment::Tenant.current}] [#{Rails.env}] #{maunual_or_auto} Order Export Failed"
+    log_export_data_to_file(:failed, { exception: exception })
+    mail to: export_settings.order_export_email, subject: "[#{Apartment::Tenant.current}] [#{Rails.env}] #{@manual_export} Order Export Failed"
   end
 
   def get_order_counts(export_settings)
@@ -87,5 +80,14 @@ class ExportOrder < ActionMailer::Base
     result['incorrect_scans'] = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).pluck(:inaccurate_scan_count).sum
     # result['total'] = result['imported'] + result['scanned']
     result
+  end
+
+  private
+
+  def log_export_data_to_file(status, args = {})
+    on_demand_logger = Logger.new("#{Rails.root}/log/export_order.log")
+    on_demand_logger.info("====#{status.to_s.upcase}=====================================")
+    log = { current_time: Time.current, tenant: Apartment::Tenant.current, manual_export: @manual_export, duration: [@day_begin, @end_time] }.merge(args)
+    on_demand_logger.info(log)
   end
 end
