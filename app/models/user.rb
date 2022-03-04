@@ -21,6 +21,7 @@ class User < ActiveRecord::Base
   has_many :user_inventory_permissions, dependent: :destroy
   has_many :order_activities
   has_many :product_activities
+  has_many :doorkeeper_tokens, class_name: 'Doorkeeper::AccessToken', foreign_key: :resource_owner_id
 
   has_one :last_order_activity, -> { order('id DESC').limit(1) }, class_name: 'OrderActivity'
   has_one :last_product_activity, -> { order('id DESC').limit(1) }, class_name: 'ProductActivity'

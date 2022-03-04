@@ -13,6 +13,7 @@ class ApplicationController < ActionController::Base
       doorkeeper_authorize!
       @current_user = User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
       User.current = @current_user
+      check_for_existing_logins(doorkeeper_token)
       stored_session = JSON.generate('tenant' => Apartment::Tenant.current, 'user_id' => @current_user.try(:id), 'username' => @current_user.try(:username))
       $redis.hset('groovehacks:session', auth_header.gsub('Bearer ', ''), stored_session)
     else
@@ -91,6 +92,14 @@ class ApplicationController < ActionController::Base
       # cookies.delete(:bc_auth)
       cookies[:bc_auth] = { value: nil, domain: :all, expires: Time.current + 2.seconds }
     end
+  end
+
+  def check_for_existing_logins(doorkeeper_token)
+    return unless doorkeeper_token
+    return if request.headers['HTTP_EX_APP'].blank? || @current_user.username == 'gpadmin'
+
+    GroovRealtime.emit('force_logout', { username: @current_user.username }, :tenant)
+    @current_user.doorkeeper_tokens.where.not(id: doorkeeper_token.id).delete_all
   end
 
   def get_host_url
