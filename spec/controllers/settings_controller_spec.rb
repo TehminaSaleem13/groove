@@ -17,6 +17,31 @@ RSpec.describe SettingsController, type: :controller do
   after :each do
     @tenant.destroy
   end
+
+  describe 'Get Scan Pack Settings' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      allow(token1).to receive(:id).and_return(nil)
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Destroy all existing tokes if logged in from EX App' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      @tenant = Tenant.create(name:"#{tenant}")
+      @user.role.update(edit_general_prefs: true)
+
+      request.headers.merge!(EXAPP: true)
+      request.accept = 'application/json'
+      printing_setting = PrintingSetting.create
+      post :get_settings, params: { app: true}
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'Update Scan Pack Settings' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
@@ -73,7 +98,6 @@ RSpec.describe SettingsController, type: :controller do
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)
       expect(JSON.parse(response.body)["data"]["settings"]["product_barcode_label_size"]).to eq('3 x 1')
-
     end
 
     it 'get Scan Pack Settings' do
