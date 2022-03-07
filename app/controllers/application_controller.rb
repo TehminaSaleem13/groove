@@ -96,7 +96,8 @@ class ApplicationController < ActionController::Base
 
   def check_for_existing_logins(doorkeeper_token)
     return unless doorkeeper_token
-    return if request.headers['HTTP_EX_APP'].blank? || @current_user.username == 'gpadmin'
+    # Check if request is from Expo React Native App
+    return if request.headers['HTTP_EXAPP'].blank? || @current_user.username == 'gpadmin'
 
     GroovRealtime.emit('force_logout', { username: @current_user.username }, :tenant)
     @current_user.doorkeeper_tokens.where.not(id: doorkeeper_token.id).delete_all
