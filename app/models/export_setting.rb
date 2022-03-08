@@ -205,7 +205,7 @@ class ExportSetting < ActiveRecord::Base
         end_time = Time.current.beginning_of_day + seconds
       end
     else
-      last_exported || '2000-01-01 00:00:00'
+      start_time = last_exported || '2000-01-01 00:00:00'
       end_time = Time.current
     end
     # end_time = Time.current.utc.beginning_of_day + seconds - GeneralSetting.last.time_zone.to_i
