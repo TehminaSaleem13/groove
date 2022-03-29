@@ -89,7 +89,7 @@ module ProductService
       end
 
       def get_base_product_images
-      	@product.base_product.product_images.order("product_images.order ASC")
+      	@product.base_product.product_images.order("product_images.created_at ASC")
       end
 
       def get_product_barcodes
