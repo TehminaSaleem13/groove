@@ -85,7 +85,7 @@ module Expo
               do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
             else
               @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
-              @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
+              @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
               @result['status'] &= false
               message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : 'Please scan items in the suggested order'
               @result['error_messages'].push(message)
@@ -98,7 +98,7 @@ module Expo
               do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
             else
               @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
-              @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", "gpadmin")
+              @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
               @result['status'] &= false
               @result['error_messages'].push("Please scan items in the suggested order")
             end
