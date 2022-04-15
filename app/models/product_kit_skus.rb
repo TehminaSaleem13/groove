@@ -12,7 +12,7 @@ class ProductKitSkus < ActiveRecord::Base
 
   def add_product_in_order_items
     tenant = Apartment::Tenant.current
-    @order_items = OrderItem.where(:product_id => self.product_id, scanned_status: 'notscanned')
+    @order_items = OrderItem.where(:product_id => self.product_id, scanned_status: %w[notscanned unscanned])
     # if @order_items.count > 50 
     #   kit_sku = Groovepacker::Products::BulkActions.new
     #   latest_job = Delayed::Job.where(queue: "order_item_kit_product").last

@@ -1,5 +1,5 @@
 class OrderItemKitProduct < ActiveRecord::Base
-  belongs_to :order_item
+  belongs_to :order_item, touch: true
   belongs_to :product_kit_skus
   has_many :order_item_kit_product_scan_times
   # attr_accessible :scanned_qty, :scanned_status
