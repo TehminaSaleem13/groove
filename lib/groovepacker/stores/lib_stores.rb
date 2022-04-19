@@ -136,6 +136,7 @@ module Groovepacker
 		    @shipstation.import_upc = params[:import_upc].to_boolean
 		    @shipstation.allow_duplicate_order = params[:allow_duplicate_order].to_boolean
 		    @shipstation.tag_import_option = params[:tag_import_option].to_boolean
+		    @shipstation.add_gpscanned_tag = params[:add_gpscanned_tag].to_boolean
 				@shipstation.import_tracking_info = params[:import_tracking_info].to_boolean
 				@shipstation.postcode = params[:postcode] || ''
 		    @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'

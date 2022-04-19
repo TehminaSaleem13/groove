@@ -23,6 +23,7 @@ class Order < ActiveRecord::Base
   after_save :process_unprocessed_orders
   after_save :update_tracking_num_value
   after_save :delete_if_order_exist, unless: :check_for_duplicate
+  after_save :perform_after_scanning_tasks
   # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
   validates_uniqueness_of :increment_id, unless: :check_for_duplicate
 
@@ -428,5 +429,13 @@ class Order < ActiveRecord::Base
 
   def destroy_boxes
     Box.where(order_id: self.id).destroy_all
+  end
+
+  private
+
+  def perform_after_scanning_tasks
+    return unless saved_changes['status'].present? && status == 'scanned'
+
+    add_gp_scanned_tag if store&.store_type == 'Shipstation API 2' && store&.shipstation_rest_credential&.add_gpscanned_tag
   end
 end

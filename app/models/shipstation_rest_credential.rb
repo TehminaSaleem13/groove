@@ -29,7 +29,7 @@ class ShipstationRestCredential < ActiveRecord::Base
   def verify_tags
     context = Groovepacker::Stores::Context.new(
       Groovepacker::Stores::Handlers::ShipstationRestHandler.new(store))
-    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name, "GP READY", "GP IMPORTED"])
+    context.verify_tags([gp_ready_tag_name, gp_imported_tag_name, gp_scanned_tag_name, "GP READY", "GP IMPORTED", 'GPSCANNED'])
   end
 
   def verify_awaits_tag
@@ -44,6 +44,10 @@ class ShipstationRestCredential < ActiveRecord::Base
 
   def gp_imported_tag_name
     "GP Imported"
+  end
+
+  def gp_scanned_tag_name
+    'GPSCANNED'
   end
 
   def update_all_locations(tenant, user)

@@ -11,4 +11,8 @@ RSpec.describe ShipstationCredential, type: :model do
     shipstation_rest_credential = ShipstationRestCredential.reflect_on_association(:store)
     expect(shipstation_rest_credential.macro).to eq(:belongs_to)
   end
+
+  it 'return GPSCANNED tag name' do
+    expect(ShipstationRestCredential.new.gp_scanned_tag_name).to eq('GPSCANNED')
+  end
 end

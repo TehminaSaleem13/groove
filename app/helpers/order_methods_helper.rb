@@ -1,6 +1,14 @@
 module OrderMethodsHelper
   include ActionView::Helpers::NumberHelper
 
+  def add_gp_scanned_tag
+    ss_credential = store&.shipstation_rest_credential
+    return unless ss_credential
+    
+    ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+    ss_client.delay(run_at: 1.seconds.from_now, priority: 95).add_gp_scanned_tag(store_order_id)
+  end
+
   def get_se_old_shipments(result_order)
     return result_order unless store.store_type == 'ShippingEasy'
 

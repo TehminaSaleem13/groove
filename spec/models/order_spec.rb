@@ -65,4 +65,15 @@ RSpec.describe Order, type: :model do
       expect(t.macro).to eq(:belongs_to)
     end
   end
+
+  it 'should add GPSCANNED tag in Shipstation' do
+    allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_tags_list).and_return({ 'gpscanned' => 123 })
+    expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:add_gp_scanned_tag)
+
+    inv_wh = FactoryBot.create(:inventory_warehouse, name: 'inventory_warehouse')
+    store = FactoryBot.create(:store, store_type: 'Shipstation API 2', name: 'Shipstation API 2', inventory_warehouse: inv_wh, status: true)
+    FactoryBot.create(:shipstation_rest_credential, store: store, add_gpscanned_tag: true)
+    order = FactoryBot.create(:order, status: 'awaiting', store_order_id: 512412, store: store)
+    order.update(status: 'scanned')
+  end
 end
