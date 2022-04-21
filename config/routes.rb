@@ -131,6 +131,7 @@ Groovepacks::Application.routes.draw do
       post 'clear_exception'
       get 'importorders'
       get 'clear_order_tote'
+      get 'print_activity_log'
     end
   end
 

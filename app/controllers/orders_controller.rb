@@ -75,6 +75,31 @@ class OrdersController < ApplicationController
     # render json: @result
   end
 
+  def print_activity_log
+    result = { status: true }
+    begin
+      order = Order.find(params[:id])
+      file = Tempfile.new("Order_Activity_Log#{order.id}.txt")
+      begin
+        order.order_activities.each do |activity|
+          file.puts "Username: #{activity.username}"
+          file.puts "Time: #{activity.activitytime}"
+          file.puts "Activity: #{activity.action}"
+          file.puts ''
+        end
+        file.close
+
+        result[:logs] = IO.read(file.path)
+      ensure
+        file.delete
+      end
+    rescue => e
+      result[:status] = false
+      result[:error] = e
+    end
+    render plain: result[:logs]    
+  end
+
   def delete_orders
     execute_groove_bulk_action("delete")
     render json: @result

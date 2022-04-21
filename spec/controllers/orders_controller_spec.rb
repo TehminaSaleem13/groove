@@ -421,6 +421,23 @@ RSpec.describe OrdersController, type: :controller do
       @request.headers.merge! header
     end
 
+    it 'prints activity log' do
+      order = FactoryBot.create(:order, store_id: @store.id)
+      order.addactivity('TEST ACTIVITY', @user.username)
+
+      request.accept = 'application/json'
+
+      get :print_activity_log, params:{ id: order.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Does not prints activity log if id is wrong' do
+      request.accept = 'application/json'
+
+      get :print_activity_log, params:{ id: SecureRandom.random_number(50000) }
+      expect(response.status).to eq(200)
+    end
+
     it 'App Orders params' do
       order = Order.create(increment_id: "C000209814-B(Duplicate-2)", order_placed_time: Time.current, sku: nil, customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: "BIKE", lastname: "ACTIONGmbH", email: "east@raceface.com", address_1: "WEISKIRCHER STR. 102", address_2: nil, city: "RODGAU", state: nil, postcode: "63110", country: "GERMANY", method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: "scanned", scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: "C000209814B(Duplicate2)", note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: "orders/2021-07-29-162759275061.xml", last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: "", ss_label_data: nil, importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
       product1 = Product.create(store_product_id: "0", name: "TRIGGER SS JERSEY-BLACK-M", product_type: "", store_id: @store.id, status: "active", packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: "individual", is_kit: 1, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: "on", click_scan_enabled: "on", weight_format: "oz", add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: "", custom_product_2: "", custom_product_3: "", custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: "821973374048", isbn: nil, ean: "0821973374048", supplier_sku: nil, avg_cost: 0.0, count_group: nil)
