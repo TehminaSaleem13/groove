@@ -371,6 +371,28 @@ class ScanPackController < ApplicationController
     render json: @result
   end
 
+  def upload_image_on_s3
+    result = { status: true, data: {} }
+    begin
+      order = Order.find(params[:order_id])
+      if params[:base_64_img_upload].present?
+        current_tenant = Apartment::Tenant.current
+        image_content = Base64.decode64(params[:image][:image].to_s)
+        content_type = params[:image][:content_type]
+        file_name = "packing_cams/#{SecureRandom.random_number(20000)}_#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{current_tenant}_#{order.id}_" + params[:image][:original_filename].gsub('#', '')
+        GroovS3.create_image(current_tenant, file_name, image_content, content_type)
+
+        url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
+        order.packing_cams.create(url: url, user: current_user, username: current_user&.username)
+        result[:data][:url] = url
+      end
+    rescue => e
+      result[:error] = e.message
+      result[:status] = false
+    end
+    render json: result
+  end
+
   private
 
   def get_cred(store_id)

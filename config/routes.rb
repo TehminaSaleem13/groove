@@ -293,6 +293,7 @@ Groovepacks::Application.routes.draw do
       post 'scan_pack_v2'
       post 'new_scan_pack_v2'
       post 'scan_pack_bug_report'
+      post 'upload_image_on_s3'
     end
     member do
     end

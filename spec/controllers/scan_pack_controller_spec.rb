@@ -752,4 +752,23 @@ RSpec.describe ScanPackController, type: :controller do
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
   end
+
+  describe 'Image Upload' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+      
+      @order = FactoryBot.create(:order, store_id: @store.id)
+    end
+
+    it 'For Packing Cam on S3' do
+      post :upload_image_on_s3, params: { base_64_img_upload: true, order_id: @order.id, image: { image: 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII', content_type: 'image/png', original_filename: 'sample_image.png' } }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+      expect(JSON.parse(response.body)['data']['url']).not_to be_nil
+    end
+  end
 end
