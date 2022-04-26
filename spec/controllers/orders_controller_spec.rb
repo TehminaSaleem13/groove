@@ -421,6 +421,30 @@ RSpec.describe OrdersController, type: :controller do
       @request.headers.merge! header
     end
 
+    describe 'Delete Packing Cam image' do
+      it 'Successfully destroy packing cam image' do
+        order = FactoryBot.create :order, store_id: @store.id
+        current_tenant = Apartment::Tenant.current
+        image = { image: 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII', content_type: 'image/png', original_filename: 'sample_image.png' }
+        file_name = "packing_cams/#{SecureRandom.random_number(20000)}_#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{current_tenant}_#{order.id}_" + image[:original_filename].gsub('#', '')
+        GroovS3.create_image(current_tenant, file_name, image[:image], image[:content_type])
+        url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
+        packing_cam = order.packing_cams.create(url: url, user: @user, username: @user&.username)
+        
+        post :remove_packing_cam_image, params: { id: order.id, packing_cam_id: packing_cam.id }
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['status']).to be_truthy
+      end
+
+      it 'does not destroy Packing cam with invalid id' do
+        post :remove_packing_cam_image, params: { id: 123, packing_cam_id: nil }
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['status']).to be_falsy
+      end
+    end
+
     it 'prints activity log' do
       order = FactoryBot.create(:order, store_id: @store.id)
       order.addactivity('TEST ACTIVITY', @user.username)

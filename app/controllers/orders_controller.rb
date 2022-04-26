@@ -540,6 +540,20 @@ class OrdersController < ApplicationController
     render json: result
   end
 
+  def remove_packing_cam_image
+    result = { status: true }
+    begin
+      packing_cam = PackingCam.joins(:order).where(orders: { id: params[:id] }).find(params[:packing_cam_id])
+      result[:status] = GroovS3.delete_object(packing_cam.url.gsub("#{ENV['S3_BASE_URL']}/", ''))
+      result[:error] = 'No Such Key' unless result[:status]
+      packing_cam.destroy
+    rescue => e
+      result[:status] = false
+      result[:error] = e
+    end
+    render json: result
+  end
+
   private
   def execute_groove_bulk_action(activity)
     params[:user_id] = current_user.id

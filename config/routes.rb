@@ -132,6 +132,7 @@ Groovepacks::Application.routes.draw do
       get 'importorders'
       get 'clear_order_tote'
       get 'print_activity_log'
+      post 'remove_packing_cam_image'
     end
   end
 

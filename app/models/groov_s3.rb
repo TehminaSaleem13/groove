@@ -40,6 +40,15 @@ class GroovS3
       self.save(object, data)
     end
 
+    def delete_object(key)
+      begin
+        object = self.bucket.objects.find(key)
+        return object.destroy
+      rescue S3::Error::NoSuchKey => e
+        return false
+      end
+    end
+
     def find_teapplix_csv(dir, name)
       begin
         object = self.bucket.objects.find(dir+"/#{name}.csv")
