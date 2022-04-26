@@ -440,15 +440,47 @@ module ScanPack
         @single_order_result['next_state'] = 'scanpack.rfp.recording'
       when scanpack_settings_post_scanning_option == 'PackingSlip'
         # generate packingslip for the order
-        @single_order.set_order_to_scanned_state(current_user_name)
-        @single_order_result['next_state'] = 'scanpack.rfo'
+        # @single_order.set_order_to_scanned_state(current_user_name)
+        # @single_order_result['next_state'] = 'scanpack.rfo'
+        apply_second_action
         generate_packing_slip(@single_order)
       else
         # generate barcode for the order
-        @single_order.set_order_to_scanned_state(current_user_name)
-        @single_order_result['next_state'] = 'scanpack.rfo'
+        # @single_order.set_order_to_scanned_state(current_user_name)
+        # @single_order_result['next_state'] = 'scanpack.rfo'
+        apply_second_action
         generate_order_barcode_slip(@single_order)
       end
+    end
+    
+    def apply_second_action
+      case @scanpack_settings.post_scanning_option_second
+      when 'Verify'
+        unless @single_order.tracking_num.present?
+          @single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
+          @single_order.addactivity(
+            'Tracking information was not imported with this order so the shipping label could not be verified ',
+            @current_user.username
+          )
+        else
+          @single_order_result['next_state'] = 'scanpack.rfp.verifying'
+        end
+      when 'PackingSlip'
+        @single_order_result['next_state'] = 'scanpack.rfo'
+        generate_packing_slip(@single_order)
+      when 'Barcode'
+        set_order_scanned_state_and_result_data
+        generate_order_barcode_slip(@single_order)
+      when 'Record'
+        @single_order_result['next_state'] = 'scanpack.rfp.recording'
+      else
+        set_order_scanned_state_and_result_data
+      end
+    end
+  
+    def set_order_scanned_state_and_result_data
+      @single_order.set_order_to_scanned_state(@current_user.username)
+      @single_order_result['next_state'] = 'scanpack.rfo'
     end
   end
 end
