@@ -372,7 +372,7 @@ class ScanPackController < ApplicationController
   end
 
   def upload_image_on_s3
-    result = { status: true, data: {} }
+    result = { status: true }
     begin
       order = Order.find(params[:order_id])
       if params[:base_64_img_upload].present?
@@ -383,8 +383,8 @@ class ScanPackController < ApplicationController
         GroovS3.create_image(current_tenant, file_name, image_content, content_type)
 
         url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
-        order.packing_cams.create(url: url, user: current_user, username: current_user&.username)
-        result[:data][:url] = url
+        packing_cam = order.packing_cams.create(url: url, user: current_user, username: current_user&.username)
+        result[:image] = packing_cam
       end
     rescue => e
       result[:error] = e.message

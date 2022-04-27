@@ -768,7 +768,7 @@ RSpec.describe ScanPackController, type: :controller do
       post :upload_image_on_s3, params: { base_64_img_upload: true, order_id: @order.id, image: { image: 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII', content_type: 'image/png', original_filename: 'sample_image.png' } }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)
-      expect(JSON.parse(response.body)['data']['url']).not_to be_nil
+      expect(JSON.parse(response.body)['image']['url']).not_to be_nil
     end
   end
 end
