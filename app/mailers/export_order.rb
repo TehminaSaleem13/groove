@@ -71,7 +71,7 @@ class ExportOrder < ActionMailer::Base
     result['scanned'] = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).size
     result['clicked_scanned_items'] = Order.includes(:order_items).where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).map(&:order_items).flatten.map(&:clicked_qty).sum
     result['unscanned'] = result['imported'] - Order.where("created_at >= ? and created_at <= ? and scanned_on >= ? and scanned_on <= ?", day_begin, end_time, day_begin, end_time).size
-    result['item_scanned'] = Order.where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).size
+    result['item_scanned'] = Order.includes(:order_items).where("scanned_on >= ? and scanned_on <= ?", day_begin, end_time).map(&:order_items).flatten.map(&:scanned_qty).sum
     result['scanned_manually'] = Order.where("scanned_on >= ? and scanned_on <= ? and scanned_by_status_change = ?", day_begin, end_time, true).size
     result['awaiting'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'awaiting').size
     result['onhold'] = Order.where("created_at >= ? and created_at <= ? and status = ?", day_begin, end_time, 'onhold').size
