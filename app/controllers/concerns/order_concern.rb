@@ -236,8 +236,8 @@ module OrderConcern
   def set_unacknowledged_activities
     @result['order']['unacknowledged_activities'] = @order.unacknowledged_activities
     @result['order']['exception'] = @order.order_exception if current_user.can?('view_packing_ex')
-    if current_user.can?('view_packing_ex') && !@order.order_exception.nil? && @order.order_exception.user_id != 0
-      @result['order']['exception'] = @result['order']['exception'].attributes.merge('assoc'=> User.find(@order.order_exception.user_id))
+    if current_user.can?('view_packing_ex') && !@order.order_exception.nil? && !@order.order_exception.user_id.in?([0, nil])
+      @result['order']['exception'] = @result['order']['exception'].attributes.merge('assoc'=> User.where(id: @order.order_exception.user_id).first)
     end
   end
 
