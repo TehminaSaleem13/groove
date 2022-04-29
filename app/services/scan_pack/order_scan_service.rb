@@ -434,31 +434,37 @@ module ScanPack
     end
 
     def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, current_user_name)
-      case true
-      when scanpack_settings_post_scanning_option == 'Verify'
-        if @single_order.tracking_num.present?
-          @single_order_result['next_state'] = 'scanpack.rfp.verifying'
+      if @single_order.post_scanning_flag.nil?
+        case true
+        when scanpack_settings_post_scanning_option == 'Verify'
+          if @single_order.tracking_num.present?
+            @single_order_result['next_state'] = 'scanpack.rfp.verifying'
+          else
+            @single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
+            @single_order.addactivity(
+              'Tracking information was not imported with this order so the shipping label could not be verified ',
+              @current_user.username
+            )
+          end
+        when scanpack_settings_post_scanning_option == 'Record'
+          @single_order_result['next_state'] = 'scanpack.rfp.recording'
+        when scanpack_settings_post_scanning_option == 'PackingSlip'
+          # generate packingslip for the order
+          # @single_order.set_order_to_scanned_state(current_user_name)
+          # @single_order_result['next_state'] = 'scanpack.rfo'
+          apply_second_action
+          generate_packing_slip(@single_order)
+          @single_order.update_columns(post_scanning_flag: 'PackingSlip')
         else
-          @single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
-          @single_order.addactivity(
-            'Tracking information was not imported with this order so the shipping label could not be verified ',
-            @current_user.username
-          )
+          # generate barcode for the order
+          # @single_order.set_order_to_scanned_state(current_user_name)
+          # @single_order_result['next_state'] = 'scanpack.rfo'
+          apply_second_action
+          @single_order.update_columns(post_scanning_flag: 'Barcode')
+          generate_order_barcode_slip(@single_order)
         end
-      when scanpack_settings_post_scanning_option == 'Record'
-        @single_order_result['next_state'] = 'scanpack.rfp.recording'
-      when scanpack_settings_post_scanning_option == 'PackingSlip'
-        # generate packingslip for the order
-        # @single_order.set_order_to_scanned_state(current_user_name)
-        # @single_order_result['next_state'] = 'scanpack.rfo'
-        apply_second_action
-        generate_packing_slip(@single_order)
       else
-        # generate barcode for the order
-        # @single_order.set_order_to_scanned_state(current_user_name)
-        # @single_order_result['next_state'] = 'scanpack.rfo'
         apply_second_action
-        generate_order_barcode_slip(@single_order)
       end
     end
 

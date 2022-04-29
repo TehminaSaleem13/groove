@@ -116,6 +116,7 @@ class Order < ActiveRecord::Base
     self.scanned_on = current_time_from_proper_timezone
     self.addactivity('Order Scanning Complete', username) if !ScanPackSetting.last.order_verification
     self.packing_score = self.compute_packing_score
+    self.post_scanning_flag = nil
     self.save
     update_access_restriction
     tenant = Apartment::Tenant.current
@@ -223,6 +224,7 @@ class Order < ActiveRecord::Base
     self.order_serials.destroy_all
     destroy_boxes
     self.set_order_status
+    self.update_columns(post_scanning_flag: nil)
   end
 
   def addtag(tag_id)

@@ -25,8 +25,10 @@ class Expo::NewScanVerifyingService < ScanPack::Base
       tracking_num = @order.tracking_num.try(:gsub, /^(\#*)/, '').try{|a| a.gsub(/(\W)/){|c| "\\#{c}"}}
       case true
       when @input.present? && tracking_num && @input.match(/#{tracking_num}/).present?
+        @order.update_columns(post_scanning_flag: 'Verify')
         do_if_tracking_number_eql_input
       when @input.present? && (@input == @current_user.confirmation_code)
+        @order.update_columns(post_scanning_flag: 'Verify')
         do_if_input_eql_confirmation_code
       end
     end

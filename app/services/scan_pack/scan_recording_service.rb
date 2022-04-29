@@ -34,6 +34,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
         check_tracking_number_validation
       else
         @order.tracking_num = @input
+        @order.post_scanning_flag = 'Record'
         @order.save
         apply_second_action
       end  

@@ -771,4 +771,29 @@ RSpec.describe ScanPackController, type: :controller do
       expect(JSON.parse(response.body)['image']['url']).not_to be_nil
     end
   end
+
+  context 'Post Scanning Options' do
+    describe 'Option 1 as Barcode and 2 as Record' do
+      let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+      before do
+        allow(controller).to receive(:doorkeeper_token) { token1 }
+        header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+        @request.headers.merge! header
+        Tenant.find_by_name(Apartment::Tenant.current).update_attributes(scan_pack_workflow: 'default')
+        ScanPackSetting.last.update_attributes(post_scanning_option: 'Barcode', post_scanning_option_second: 'Record')
+
+        product = FactoryBot.create(:product, :with_sku_barcode)
+
+        @order = FactoryBot.create(:order, status: 'awaiting', store: @store)
+        FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: @order, name: product.name, scanned_status: 'scanned')
+      end
+
+      it 'Prompts for Recording' do
+        post :scan_barcode, params: { input: @order.increment_id, state: 'scanpack.rfo', id: @order.id }
+        expect(response.status).to eq(200)
+        expect(@order.reload.post_scanning_flag).to eq('Barcode')
+      end
+    end
+  end
 end

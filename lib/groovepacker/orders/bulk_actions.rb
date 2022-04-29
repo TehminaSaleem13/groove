@@ -69,6 +69,7 @@ module Groovepacker
         order.scanned_on = nil if params[:status] != 'scanned'
         order.reallocate_inventory = params[:reallocate_inventory]
         order.scanned_by_status_change = false
+        order.post_scanning_flag = nil
         if params[:status] == 'scanned'
           update_status_and_add_activity(order, username)
           order.order_items.each do |order_item|

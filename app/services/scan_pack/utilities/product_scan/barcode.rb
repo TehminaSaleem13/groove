@@ -73,6 +73,7 @@ module ScanPack::Utilities::ProductScan::Barcode
         do_set_order_scanned_state_and_result_data
         generate_packing_slip(@single_order)
       else
+        @single_order.update_columns(post_scanning_flag: 'PackingSlip')
         generate_packing_slip(@single_order)
         apply_second_action
       end
@@ -81,6 +82,7 @@ module ScanPack::Utilities::ProductScan::Barcode
         do_set_order_scanned_state_and_result_data
         generate_order_barcode_slip(@single_order)
       else
+        @single_order.update_columns(post_scanning_flag: 'Barcode')
         generate_order_barcode_slip(@single_order)
         apply_second_action
       end

@@ -30,6 +30,7 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
         @result['data']['next_state'] = 'scanpack.rfo'
         order.save
       else
+        order.update_columns(post_scanning_flag: 'Verify')
         apply_second_action
       end  
     else
