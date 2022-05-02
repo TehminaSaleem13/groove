@@ -69,7 +69,7 @@ module ScanPack
       rem_qty = @params["rem_qty"] || @params["scan_pack"]["rem_qty"] rescue nil
       barcode = ProductBarcode.where(barcode: @params[:input]).last
       packing_count = barcode.packing_count rescue 1
-      if packing_count.present? && packing_count.to_i > 1
+      if packing_count.present? && packing_count.to_i > 1 && barcode.product_id.present?
         do_if_packing_count_present(rem_qty, barcode, packing_count)
       else
         do_if_packing_count_not_present
