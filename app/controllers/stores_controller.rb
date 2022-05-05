@@ -73,12 +73,21 @@ class StoresController < ApplicationController
     result = { status: true }
     begin
       store = Store.find(params['store_id'])
-      cred = store.store_type == 'Shipstation API 2' ? store.shipstation_rest_credential : store.shipping_easy_credential
+      cred = case store.store_type
+             when 'ShippingEasy'
+               store.shipping_easy_credential
+             when 'Shopify'
+               store.shopify_credential
+             else
+               store.shipstation_rest_credential
+             end
       if cred
         new_lro = Time.zone.parse(DateTime.parse(params['lro_date']).strftime('%Y-%m-%d %H:%M:%S'))
-        # store.regular_import_v2 ? cred.update_attributes(quick_import_last_modified_v2: new_lro) : cred.update_attributes(quick_import_last_modified: new_lro + 8.hours) if store.store_type == 'Shipstation API 2'
-        cred.update_attributes(quick_import_last_modified_v2: new_lro) if store.store_type == 'Shipstation API 2'
-        cred.update_attributes(last_imported_at: new_lro) if store.store_type == 'ShippingEasy'
+        if store.store_type == 'Shipstation API 2'
+          cred.update_attributes(quick_import_last_modified_v2: new_lro)
+        else
+          cred.update_attributes(last_imported_at: new_lro)
+        end
       end
     rescue => e
       result[:error] = e

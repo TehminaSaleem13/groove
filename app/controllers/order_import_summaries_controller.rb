@@ -107,32 +107,29 @@ class OrderImportSummariesController < ApplicationController
   def get_last_modified
     result = {}
     store = Store.find(params["store_id"])
-    cred = store.store_type == 'ShippingEasy' ? store.shipping_easy_credential : store.shipstation_rest_credential
-    # time_zone = GeneralSetting.last.time_zone.to_i
-    if cred.present?
-      get_stores_last_import(result, store.store_type, cred, store)
-      # if store.regular_import_v2
-      #   result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
-      # else
-      #   result[:last_imported_at] = cred.quick_import_last_modified.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : (cred.quick_import_last_modified - 8.hours).strftime('%Y-%m-%d %H:%M:%S')
-      # end
-    end
+    cred =  case store.store_type
+            when 'ShippingEasy'
+              store.shipping_easy_credential
+            when 'Shopify'
+              store.shopify_credential
+            else
+              store.shipstation_rest_credential
+            end
+
+    get_stores_last_import(result, store.store_type, cred, store) if cred.present?
+
     render json: result
   end
 
   def get_stores_last_import(result, store_type, cred, store)
-    if store_type =='ShippingEasy'
+    if store_type == 'ShippingEasy'
       result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue 4.day.ago.strftime('%Y-%m-%d %H:%M:%S')
-      result[:current_time] = Time.current.strftime('%Y-%m-%d %H:%M:%S')
+    elsif store_type == 'Shopify'
+      result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue 1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
     else
-      # if store.regular_import_v2
-      #   result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
-      # else
-      #   result[:last_imported_at] = cred.quick_import_last_modified.nil? ? ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse((Time.zone.now - 1.day).to_s).strftime('%Y-%m-%d %H:%M:%S') : (cred.quick_import_last_modified - 8.hours).strftime('%Y-%m-%d %H:%M:%S')
-      # end
       result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? 1.day.ago.strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
-      result[:current_time] = Time.current.strftime('%Y-%m-%d %H:%M:%S')
     end
+    result[:current_time] = Time.current.strftime('%Y-%m-%d %H:%M:%S')
   end
 
   def get_import_details
