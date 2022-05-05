@@ -306,4 +306,15 @@ class Store < ActiveRecord::Base
     end while includes_plus_sign
     return random_token
   end
+
+  def store_credential
+    cred = case store_type
+           when 'ShippingEasy'
+             shipping_easy_credential
+           when 'Shopify'
+             shopify_credential
+           when 'Shipstation API 2'
+             shipstation_rest_credential
+           end
+  end
 end

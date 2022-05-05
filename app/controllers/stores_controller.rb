@@ -73,14 +73,7 @@ class StoresController < ApplicationController
     result = { status: true }
     begin
       store = Store.find(params['store_id'])
-      cred = case store.store_type
-             when 'ShippingEasy'
-               store.shipping_easy_credential
-             when 'Shopify'
-               store.shopify_credential
-             else
-               store.shipstation_rest_credential
-             end
+      cred =  store.store_credential
       if cred
         new_lro = Time.zone.parse(DateTime.parse(params['lro_date']).strftime('%Y-%m-%d %H:%M:%S'))
         if store.store_type == 'Shipstation API 2'

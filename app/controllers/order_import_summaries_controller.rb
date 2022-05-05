@@ -107,15 +107,8 @@ class OrderImportSummariesController < ApplicationController
   def get_last_modified
     result = {}
     store = Store.find(params["store_id"])
-    cred =  case store.store_type
-            when 'ShippingEasy'
-              store.shipping_easy_credential
-            when 'Shopify'
-              store.shopify_credential
-            else
-              store.shipstation_rest_credential
-            end
-
+    cred =  store.store_credential
+    
     get_stores_last_import(result, store.store_type, cred, store) if cred.present?
 
     render json: result
