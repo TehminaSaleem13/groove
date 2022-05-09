@@ -320,4 +320,21 @@ class GeneralSetting < ActiveRecord::Base
     end
     result
   end
+
+  def per_tenant_settings
+    current_tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    return {} unless current_tenant
+    result = {}
+    result[:scheduled_import_toggle] = current_tenant&.scheduled_import_toggle
+    result[:inventory_report_toggle] = current_tenant&.inventory_report_toggle
+    result[:is_multi_box] = current_tenant&.is_multi_box
+    result[:api_call] = current_tenant&.api_call
+    result[:allow_rts] = current_tenant&.allow_rts
+    result[:product_ftp_import] = current_tenant&.product_ftp_import
+    result[:groovelytic_stat] = current_tenant.groovelytic_stat rescue true
+    result[:custom_product_fields] = current_tenant&.custom_product_fields
+    result[:packing_cam] = current_tenant&.packing_cam
+    result[:product_activity] = current_tenant&.product_activity_switch
+    result
+  end
 end

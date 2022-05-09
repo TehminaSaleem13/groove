@@ -152,7 +152,7 @@ class SettingsController < ApplicationController
 
     if general_setting.present? && scan_pack_setting.present?
       @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
-      @result['data']['general_setting'] = @result['data']['general_setting'].as_json.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type"))
+      @result['data']['general_setting'] = @result['data']['general_setting'].as_json.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type")).merge(GeneralSetting.last.per_tenant_settings)
       scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']["scanpack_setting"] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select("id, name, max_totes"))
     else
