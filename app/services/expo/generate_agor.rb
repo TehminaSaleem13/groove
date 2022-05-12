@@ -24,6 +24,7 @@ module Expo
       @order_data[:order_info] = filter_order_info
       @order_data[:scan_hash][:data][:order] = new_order
       # Additional Settings
+      @order_data[:shipment_id] = @db_order.shipment_id
       @order_data[:store_type] = @db_order.store.store_type
       @order_data[:popup_shipping_label] = @db_order.store.shipping_easy_credential.popup_shipping_label if @order_data[:store_type] == 'ShippingEasy'
       @order_data[:large_popup] = @db_order.store.shipping_easy_credential.large_popup if @order_data[:store_type] == 'ShippingEasy'
