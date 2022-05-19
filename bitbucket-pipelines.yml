@@ -26,10 +26,10 @@ pipelines:
             variables:
               EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
               SONAR_TOKEN: ${SONAR_TOKEN}
-          # - pipe: sonarsource/sonarcloud-quality-gate:0.1.3
-          #   variables:
-          #     EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
-          #     SONAR_TOKEN: ${SONAR_TOKEN}
+          - pipe: sonarsource/sonarcloud-quality-gate:0.1.3
+            variables:
+              EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
+              SONAR_TOKEN: ${SONAR_TOKEN}
 
     - step:
         name: Build (Backend & CSV)
