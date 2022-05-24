@@ -181,6 +181,12 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def fix_product_data
+    # FixProductData.new(params).delay(run_at: 1.seconds.from_now, queue: 'fix_products', priority: 95).call
+    FixProductData.new(params).call
+    render json: {}
+  end
+
   def get_duplicates_order_info
     AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_duplicates_order_list", priority: 95).get_duplicates_order_info(params)
     render json: {}

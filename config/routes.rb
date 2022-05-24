@@ -358,9 +358,10 @@ Groovepacks::Application.routes.draw do
   resources :tenants do
     collection do
       post 'delete_tenant'
+      post 'fix_product_data'
     end
     member do
-      post   'create_duplicate'
+      post 'create_duplicate'
       post 'update_tenant_list'
       post 'update_access_restrictions'
       post 'update_zero_subscription'

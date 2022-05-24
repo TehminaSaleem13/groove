@@ -13,7 +13,7 @@ RSpec.describe TenantsController, type: :controller do
     access_restriction = FactoryBot.create(:access_restriction)
   end
 
-  describe 'Tenant Import Summary' do
+  describe 'Tenant' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
     before do
@@ -95,6 +95,19 @@ RSpec.describe TenantsController, type: :controller do
        expect(response.body).to eq("{}")
 
       @tenant.destroy
+    end
+
+    context 'Admintools' do
+      it 'fixes corrupt product data' do
+        tenant = Apartment::Tenant.current
+        Apartment::Tenant.switch! tenant
+        tenant = Tenant.create(name: tenant)
+
+        get :fix_product_data, params: { select_all: true }
+        expect(response.status).to eq(200)
+
+        tenant.destroy
+      end
     end
   end
 end
