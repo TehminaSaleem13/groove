@@ -185,7 +185,7 @@ module Groovepacker
             def import_single_order(order)
               update_current_import_item(order)
               @org_ext_identifier = order['external_order_identifier']
-              @ext_identifier = @credential.use_alternate_id_as_order_num ? order['alternate_order_id'] : order['external_order_identifier']
+              @ext_identifier = get_ext_identifier(order)
               if (@split_order ||= @import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately verify_together))
                 if order["shipments"].any?
                   if order["shipments"].count == 1
@@ -562,6 +562,14 @@ module Groovepacker
               @result[:messages].push(response["error"]["message"])
               @import_item.message = response["error"]["message"]
               @import_item.save
+            end
+
+            def get_ext_identifier(order)
+              if @credential.use_alternate_id_as_order_num && order['alternate_order_id'].present?
+                order['alternate_order_id']
+              else
+                order['external_order_identifier']
+              end
             end
         end
       end
