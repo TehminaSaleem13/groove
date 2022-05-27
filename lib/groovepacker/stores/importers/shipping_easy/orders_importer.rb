@@ -184,6 +184,8 @@ module Groovepacker
 
             def import_single_order(order)
               update_current_import_item(order)
+              @org_ext_identifier = order['external_order_identifier']
+              @ext_identifier = @credential.use_alternate_id_as_order_num ? order['alternate_order_id'] : order['external_order_identifier']
               if (@split_order ||= @import_item.store.split_order.in? %w(shipment_handling_v2 verify_separately verify_together))
                 if order["shipments"].any?
                   if order["shipments"].count == 1
@@ -223,9 +225,9 @@ module Groovepacker
                   if @import_item.store.split_order == 'shipment_handling_v2'
                     order = check_prev_splitted_order(order)
                   else
-                    shiping_easy_order = Order.where("increment_id LIKE ?","#{order['external_order_identifier'].strip}%")
+                    shiping_easy_order = Order.where("increment_id LIKE ?","#{@ext_identifier.strip}%")
                     #unless @credential.allow_duplicate_id
-                      order['external_order_identifier'] = "#{order['external_order_identifier']}-#{shiping_easy_order.count}" if shiping_easy_order.count > 0
+                      order['external_order_identifier'] = "#{@ext_identifier}-#{shiping_easy_order.count}" if shiping_easy_order.count > 0
                     #end
                   end
                   shiping_easy_order = Order.new
@@ -268,7 +270,7 @@ module Groovepacker
 
             def find_shipping_easy_order(order)
               if !@credential.allow_duplicate_id && !@credential.store.split_order == 'shipment_handling_v2'
-                shiping_easy_order = Order.find_by_increment_id(order['external_order_identifier'])
+                shiping_easy_order = Order.find_by_increment_id(@ext_identifier)
               else
                 shiping_easy_order = Order.find_by_store_order_id(order['id'])
               end
@@ -362,8 +364,8 @@ module Groovepacker
               total_weight = order["recipients"][0]["original_order"]["total_weight_in_ounces"] rescue 0
               custom_1 = order["recipients"][0]["original_order"]["custom_1"] rescue nil
               custom_2 = order["recipients"][0]["original_order"]["custom_2"] rescue nil
-
-              shiping_easy_order.assign_attributes( increment_id: order["external_order_identifier"],
+              custom_1 = @org_ext_identifier if custom_1.blank? && @credential.use_alternate_id_as_order_num
+              shiping_easy_order.assign_attributes( increment_id: @ext_identifier,
                                                     store_order_id: order["id"],
                                                     order_placed_time: order["ordered_at"].to_datetime,
                                                     email: order["billing_email"],
