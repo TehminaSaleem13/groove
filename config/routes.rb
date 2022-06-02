@@ -1,18 +1,21 @@
+# frozen_string_literal: true
+
 Groovepacks::Application.routes.draw do
+  mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
+
   use_doorkeeper
-  get 'subscriptions', :to => 'subscriptions#new'
-  get 'subscriptions_login', :to => 'subscriptions#login'
-  post 'subscriptions', :to => 'subscriptions#new'
-  post 'subscriptions_login', :to => 'subscriptions#login'
+  get 'subscriptions', to: 'subscriptions#new'
+  get 'subscriptions_login', to: 'subscriptions#login'
+  post 'subscriptions', to: 'subscriptions#new'
+  post 'subscriptions_login', to: 'subscriptions#login'
 
+  match '/delayed_job' => DelayedJobWeb, :anchor => false, via: %i[get post]
 
-  match "/delayed_job" => DelayedJobWeb, :anchor => false, via: [:get, :post]
+  get '/404', to: 'specials#error_404'
 
-  get "/404", :to => "specials#error_404"
+  get '/422', to: 'specials#error_422'
 
-  get "/422", :to => "specials#error_422"
-
-  get "/500", :to => "specials#error_500"
+  get '/500', to: 'specials#error_500'
 
   devise_for :users
 
@@ -30,8 +33,8 @@ Groovepacks::Application.routes.draw do
   get '/magento_rest/:store_id/get_access_token' => 'magento_rest#get_access_token'
   get '/magento_rest/:store_id/check_connection' => 'magento_rest#check_connection'
   put '/magento_rest/:store_id/disconnect' => 'magento_rest#disconnect'
-  post "magento_rest/callback" => "magento_rest#callback"
-  get "magento_rest/redirect" => "magento_rest#redirect"
+  post 'magento_rest/callback' => 'magento_rest#callback'
+  get 'magento_rest/redirect' => 'magento_rest#redirect'
   get 'stores/export_active_products' => 'stores#export_active_products'
   get 'stores/bin_location_api_push' => 'stores#bin_location_api_push'
   get 'stores/popup_shipping_label' => 'stores#popup_shipping_label'
@@ -54,8 +57,8 @@ Groovepacks::Application.routes.draw do
   put '/shipstation_rest_credentials/:store_id/fix_import_dates' => 'shipstation_rest_credentials#fix_import_dates'
   put '/shipstation_rest_credentials/:store_id/update_product_image' => 'shipstation_rest_credentials#update_product_image'
   post 'settings/search_by_product' => 'settings#search_by_product'
-  post '/settings/fetch_and_update_time_zone'  => "settings#fetch_and_update_time_zone"
-  post '/settings/update_auto_time_zone'  => "settings#update_auto_time_zone"
+  post '/settings/fetch_and_update_time_zone' => 'settings#fetch_and_update_time_zone'
+  post '/settings/update_auto_time_zone' => 'settings#update_auto_time_zone'
   get 'settings/update_stat_status' => 'settings#update_stat_status'
 
   get '/store_settings/handle_ebay_redirect' => 'stores#handle_ebay_redirect'
@@ -74,15 +77,15 @@ Groovepacks::Application.routes.draw do
   get '/tenants/delete_summary' => 'tenants#delete_summary'
   get '/tenants/update_import_mode' => 'tenants#update_import_mode'
   get '/tenants/update_scheduled_import_toggle' => 'tenants#update_scheduled_import_toggle'
-  get '/tenants/update_groovelytic_stat'=> 'tenants#update_groovelytic_stat'
-  get '/tenants/update_scan_workflow'=> 'tenants#update_scan_workflow'
-  get '/tenants/update_store_order_respose_log'=> 'tenants#update_store_order_respose_log'
-  get '/tenants/update_setting'=> 'tenants#update_setting'
+  get '/tenants/update_groovelytic_stat' => 'tenants#update_groovelytic_stat'
+  get '/tenants/update_scan_workflow' => 'tenants#update_scan_workflow'
+  get '/tenants/update_store_order_respose_log' => 'tenants#update_store_order_respose_log'
+  get '/tenants/update_setting' => 'tenants#update_setting'
   post 'shipstation_rest_credentials/set_label_shortcut' => 'shipstation_rest_credentials#set_label_shortcut'
   post '/shipstation_rest_credentials/set_ss_label_advanced' => 'shipstation_rest_credentials#set_ss_label_advanced'
   post 'shipstation_rest_credentials/set_carrier_visibility' => 'shipstation_rest_credentials#set_carrier_visibility'
   post 'shipstation_rest_credentials/set_rate_visibility' => 'shipstation_rest_credentials#set_rate_visibility'
-  root :to => "home#index"
+  root to: 'home#index'
 
   resources :home do
     collection do
@@ -429,6 +432,6 @@ Groovepacks::Application.routes.draw do
     get 'health', to: 'health_check#index'
   end
 
-  get "*path" => redirect("/")
-  post "*path" => redirect("/")
+  get '*path' => redirect('/')
+  post '*path' => redirect('/')
 end

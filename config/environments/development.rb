@@ -1,4 +1,12 @@
 Groovepacks::Application.configure do
+  config.after_initialize do
+    Bullet.enable = false
+    Bullet.alert = true
+    Bullet.bullet_logger = true
+    Bullet.console = true
+    Bullet.rails_logger = true
+  end
+
   # Settings specified here will take precedence over those in config/application.rb
 
   # In the development environment your application's code is reloaded on
@@ -63,4 +71,9 @@ Groovepacks::Application.configure do
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 
   ENV['SHOPIFY_BILLING_IN_TEST'] = "true"
+
+  config.action_mailer.delivery_method = :letter_opener_web
+  config.action_mailer.perform_deliveries = true
 end
+
+ActiveRecord::Base.logger = Logger.new(STDOUT)

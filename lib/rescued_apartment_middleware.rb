@@ -1,5 +1,11 @@
 module RescuedApartmentMiddleware
   def call(env)
+    if (env['SERVER_NAME'].include? 'ngrok')
+      env['SERVER_NAME'] = 'gp55.localpackerapi.com'
+      env['REQUEST_URI'] = 'http://gp55.localpackerapi.com'
+      env['HTTP_HOST'] = 'gp55.localpackerapi.com'
+    end
+
     request = Rack::Request.new(env)
 
     database = @processor.call(request)
