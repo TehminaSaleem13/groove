@@ -23,7 +23,7 @@ module Groovepacker
                     tracking_num = nil
                     tracking_num = order["Shipment"]["TrackingNumber"]  if order["Shipment"].class.to_s.include?("Hash")
                     notes_internal = get_internal_notes(order) unless order["Note"].nil?
-                    
+
                     Order.transaction do
                       order_m = Order.new(
                         increment_id: order_number,
@@ -89,10 +89,16 @@ module Groovepacker
             end
             updated_products = Product.where(status_updated: true)
             if updated_products.any?
-              orders = Order.joins(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
-              (orders||[]).find_each(:batch_size => 100) do |order|
-                order.update_order_status
+              orders_count = Order.joins(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id)).count
+              if orders_count.positive?
+                action = GrooveBulkActions.where(identifier: "order", activity: "status_update", status: "pending").first
+                action = GrooveBulkActions.new(identifier: "order", activity: "status_update", status: "pending") if action.blank?
+                action.total = orders_count
+                action.save
               end
+              # (orders||[]).find_each(:batch_size => 100) do |order|
+              #   order.update_order_status
+              # end
             end
             #update_orders_status
             sw_end_time = "#{(Time.current - sw_start_time).round(2)} Seconds"
