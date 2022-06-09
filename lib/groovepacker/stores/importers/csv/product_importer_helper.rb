@@ -263,6 +263,13 @@ module Groovepacker
               end
             end
 
+            alert_levels = %i(product_inv_alert_level product_inv_target_level)
+            alert_levels.each do |alert_level|
+              if !self.mapping[alert_level.to_s].nil? && self.mapping[alert_level.to_s][:position] >= 0
+                product_inventory[alert_level] = single_row[self.mapping[alert_level.to_s][:position]].to_i
+              end
+            end
+
             product_inventory
           end
 
@@ -397,6 +404,9 @@ module Groovepacker
                       product_inv_wh.location_tertiary_qty = warehouse[:location_tertiary_qty] if warehouse[:location_tertiary_qty] != "[DELETE]"
                       product_inv_wh.location_quaternary_qty = warehouse[:location_quaternary_qty] if warehouse[:location_quaternary_qty] != "[DELETE]"
                       product_inv_wh.quantity_on_hand  = warehouse[:quantity_on_hand] if warehouse[:quantity_on_hand] != "[DELETE]"
+                      product_inv_wh.product_inv_alert_level  = warehouse[:product_inv_alert_level] if warehouse[:product_inv_alert_level] != "[DELETE]"
+                      product_inv_wh.product_inv_target_level  = warehouse[:product_inv_target_level] if warehouse[:product_inv_target_level] != "[DELETE]"
+
                       product_inv_wh.product_id = product_id
                       @import_product_inventory_warehouses << product_inv_wh
                     end

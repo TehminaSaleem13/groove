@@ -218,6 +218,11 @@ module Groovepacker
                 default_inventory.send(location_qty + '=', updatable_record[location_qty.to_sym]) if !self.mapping[location_qty].nil? && updatable_record[location_qty.to_sym] != "[DELETE]"
               end
 
+              attributes_alert_levels = %w(product_inv_alert_level product_inv_target_level)
+              attributes_alert_levels.each do |alert_level|
+                default_inventory.send(alert_level + '=', updatable_record[alert_level.to_sym]) if !self.mapping[alert_level].nil? && updatable_record[alert_level.to_sym] != "[DELETE]"
+              end
+
               # if !self.mapping['location_primary'].nil? && updatable_record[:location_primary] != "[DELETE]" #&& self.mapping['location_primary'][:action] =='overwrite'
               #   default_inventory.location_primary = updatable_record[:location_primary]
               # end

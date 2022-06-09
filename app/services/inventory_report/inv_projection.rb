@@ -23,11 +23,14 @@ module InventoryReport
 
           available_inv = inv.map(&:available_inv).sum
           quantity_on_hand = inv.map(&:quantity_on_hand).sum
+          product_inv_alert_level = inv.first&.product_inv_alert_level
+          product_inv_target_level = inv.first&.product_inv_target_level
+          inv_required = product_inv_target_level.to_i - quantity_on_hand.to_i
 
           row = ["#{start_time} to #{end_time}", pro.primary_sku.to_s, pro.name.tr(',', ' ').to_s, orders_count]
           row << get_orders_count(pro_orders)
           row << get_projected_days_remaining(available_inv, restock_lead_time(pro), pro_orders)
-          row << [available_inv, quantity_on_hand, pro.product_cats[0]&.category, inv[0]&.location_primary, inv[0]&.location_secondary, inv[0]&.location_tertiary, restock_lead_time(pro)]
+          row << [available_inv, quantity_on_hand, product_inv_alert_level, product_inv_target_level, inv_required, pro.product_cats[0]&.category, inv[0]&.location_primary, inv[0]&.location_secondary, inv[0]&.location_tertiary, restock_lead_time(pro)]
 
           csv << row.flatten
         end
@@ -71,7 +74,7 @@ module InventoryReport
     end
 
     def headers
-      ['DATE RANGE', 'SKU', 'PRODUCT NAME', 'SELECTED RANGE QTY SCANNED', 'PAST 14D QTY SCANNED', 'PAST 30D QTY SCANNED', 'PAST 45D QTY SCANNED', 'PAST 60D QTY SCANNED', 'PAST 90D QTY SCANNED', 'SELECTED RANGE PROJ DAYS REMAINING', '14D RANGE PROJ DAYS REMAINING', '30D RANGE PROJ DAYS REMAINING', '45D RANGE PROJ DAYS REMAINING', '60D RANGE PROJ DAYS REMAINING', '90D RANGE PROJ DAYS REMAINING', 'CURRENT AVAILABLE', 'CURRENT QOH', 'CATEGORY', 'LOCATION1', 'LOCATION2', 'LOCATION3', 'RESTOCK LEAD TIME']
+      ['DATE RANGE', 'SKU', 'PRODUCT NAME', 'SELECTED RANGE QTY SCANNED', 'PAST 14D QTY SCANNED', 'PAST 30D QTY SCANNED', 'PAST 45D QTY SCANNED', 'PAST 60D QTY SCANNED', 'PAST 90D QTY SCANNED', 'SELECTED RANGE PROJ DAYS REMAINING', '14D RANGE PROJ DAYS REMAINING', '30D RANGE PROJ DAYS REMAINING', '45D RANGE PROJ DAYS REMAINING', '60D RANGE PROJ DAYS REMAINING', '90D RANGE PROJ DAYS REMAINING', 'CURRENT AVAILABLE', 'CURRENT QOH', 'Inv. Alert Level', 'Inventory Target Level', 'Inv. Required', 'CATEGORY', 'LOCATION1', 'LOCATION2', 'LOCATION3', 'RESTOCK LEAD TIME']
     end
 
     def days

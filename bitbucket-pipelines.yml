@@ -33,6 +33,7 @@ pipelines:
 
     - step:
         name: Build (Backend & CSV)
+        trigger: manual
         script:
           - rm -rf *
           - mkdir -p groove
@@ -69,6 +70,7 @@ pipelines:
 
     - step:
         name: Build (Import)
+        trigger: manual
         script:
           - rm -rf *
           - mkdir -p groove
@@ -102,6 +104,7 @@ pipelines:
 
     - step:
         name: Upload to S3 (Backend & CSV)
+        trigger: manual
         services:
           - docker
         script:
@@ -118,6 +121,7 @@ pipelines:
 
     - step:
         name: Upload to S3 (Import)
+        trigger: manual
         services:
           - docker
         script:

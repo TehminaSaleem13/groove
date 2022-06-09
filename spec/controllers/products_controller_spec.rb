@@ -136,7 +136,7 @@ RSpec.describe ProductsController, :type => :controller do
     end
   end
 
-  describe 'Product Inventory Report' do
+  describe 'Exports & Reports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
     before do
@@ -145,7 +145,7 @@ RSpec.describe ProductsController, :type => :controller do
       @request.headers.merge! header
     end
 
-    it 'Generates Report' do
+    it 'Generates Product Inventory Report' do
       product = FactoryBot.create(:product, store_id: @store.id)
       FactoryBot.create(:product_sku, sku: 'TESTSKU', product_id: product.id)
       FactoryBot.create(:product_barcode, barcode: 'TESTBARCODE', product_id: product.id)
@@ -155,6 +155,14 @@ RSpec.describe ProductsController, :type => :controller do
 
       get :generate_product_inventory_report, params: { report_ids: ProductInventoryReport.ids }
       expect(response.status).to eq(200)
+    end
+
+    it 'Generates Product Export CSV' do
+      FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id)
+
+      get :generate_products_csv, params: { select_all: true }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['filename']).not_to be_nil
     end
   end
 
