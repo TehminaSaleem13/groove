@@ -8,7 +8,7 @@ class GeneratePackingSlipPdf
       unless boxes.blank?
         boxes = Box.where(id: boxes)
       end
-      
+
       unless generate_barcode.nil?
         generate_barcode.status = 'in_progress'
         generate_barcode.current_order_position = 0
@@ -28,7 +28,7 @@ class GeneratePackingSlipPdf
           generate_barcode.next_order_increment_id = orders[(index.to_i+1)][:increment_id] unless index == (orders.length - 1)
           generate_barcode.current_order_position = (generate_barcode.current_order_position.to_i + 1)
           generate_barcode.save
-          file_name_order = Digest::MD5.hexdigest(order.increment_id)
+          file_name_order = Digest::MD5.hexdigest("#{order.increment_id}_#{order.id}")
           reader_file_path = Rails.root.join('public', 'pdfs', "#{Apartment::Tenant.current}.#{file_name_order}.pdf")
           GeneratePackingSlipPdf.generate_pdf(order, page_height, page_width, orientation, reader_file_path, header, boxes)
           reader = PDF::Reader.new(reader_file_path)
