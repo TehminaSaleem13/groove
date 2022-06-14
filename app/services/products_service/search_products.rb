@@ -27,6 +27,7 @@ module ProductsService
       set_limit
       set_offset
       set_search_query
+      set_search_query_exact
       @supported_kit_params = ['0', '1', '-1']
 
       set_is_kit
@@ -72,6 +73,10 @@ module ProductsService
 
     def set_search_query
       @search = ActiveRecord::Base.connection.quote("%#{params[:search]}%")
+    end
+
+    def set_search_query_exact
+      @search_exact = ActiveRecord::Base.connection.quote("#{params[:search]}")
     end
 
     def set_is_kit
@@ -133,6 +138,10 @@ module ProductsService
           \
           WHERE\
           \(\
+            IF\
+            \(\
+              \(\ SELECT COUNT(product_barcodes.barcode) from product_barcodes
+                 WHERE product_barcodes.barcode=#{@search_exact} \) \ > 0 , product_barcodes.barcode=#{@search_exact},\
               products.name \
                 like #{@search} OR product_barcodes.barcode \
                 like #{@search} OR products.custom_product_1 \
@@ -151,6 +160,7 @@ module ProductsService
                     product_inventory_warehouses.location_tertiary like \
                       #{@search} \
                 \) \
+              \) \
             \) \
             #{@kit_query}\
           GROUP BY products.id ORDER BY #{@sort_key} #{@sort_order}
