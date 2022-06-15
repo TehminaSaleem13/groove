@@ -356,8 +356,8 @@ module Groovepacker
         end
 
         def get_inv_update_attributes
-          attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary', 'location_quaternary', 'location_primary_qty', 'location_secondary_qty', 'location_tertiary_qty', 'location_quaternary_qty', 'product_inv_target_level']
-          attr_array = attr_array + ['product_inv_alert', 'product_inv_alert_level'] if general_setting.low_inventory_alert_email
+          attr_array = ['quantity_on_hand', 'location_primary', 'location_secondary', 'location_tertiary', 'location_quaternary', 'location_primary_qty', 'location_secondary_qty', 'location_tertiary_qty', 'location_quaternary_qty', 'product_inv_alert_level', 'product_inv_target_level']
+          attr_array = attr_array + ['product_inv_alert'] if general_setting.low_inventory_alert_email
           attr_array
         end
 
