@@ -42,7 +42,7 @@ module SettingsService
     private
 
     def generate_csv
-      result['data'] = CSV.generate do |csv|
+      data = CSV.generate do |csv|
         csv << row_map.keys
         order_number = ''
         scan_order = 0
@@ -56,6 +56,9 @@ module SettingsService
           csv << single_row.values
         end
       end
+
+      public_url = GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-serials","#{Time.current}", data).url.gsub('http:', 'https:')
+      @result[:filename] = { url: public_url, filename: @result['filename']}
     end
 
     def update_scan_order_and_order_number(serial, order_number, scan_order)

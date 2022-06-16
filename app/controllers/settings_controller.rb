@@ -56,7 +56,8 @@ class SettingsController < ApplicationController
     result = SettingsService::OrderSerialExport.call(
       current_user: current_user, params: params
     ).result
-    send_csv_data(result)
+    # send_csv_data(result)
+    render json: result
   end
 
   def get_columns_state
