@@ -64,7 +64,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
     order_item = OrderItem.find(item['order_item_id'])
     # qty = 0
     # if order_item.scanned_status == 'partially_scanned'
-      qty = order_item.qty - order_item.scanned_qty
+      order_item.removed_qty = order_item.qty - order_item.scanned_qty
       order_item.qty = order_item.scanned_qty
       order_item.scanned_status = 'scanned'
       order_item.save
@@ -74,7 +74,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
     #   order.order_items.delete(order_item)
     #   order.save
     # end
-    qty
+    order_item.removed_qty
   end
 
   def remove_kit_product_item_from_order(item)

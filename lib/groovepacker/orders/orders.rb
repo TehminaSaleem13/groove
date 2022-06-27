@@ -9,7 +9,7 @@ module Groovepacker
         end
         if @params[:var] == 'status'
           order_status = order.status
-          check = order.order_items.map(&:qty).include? (0)
+          check = order.order_items.map(&:qty).include?(0) && order.order_items.sum(&:removed_qty).zero?
           if check
            set_status_and_message(false, 'Only orders containing Active items can be Awaiting', ['&', 'error_msg'])
           else

@@ -183,6 +183,9 @@ class ExportSetting < ActiveRecord::Base
 
     single_row[:primary_sku] = product&.primary_sku
     single_row[:item_sale_price] = order_item.price
+    single_row[:scanned_count] = order_item.scanned_qty
+    single_row[:unscanned_count] = order_item.qty - order_item.scanned_qty
+    single_row[:removed_count] = order_item.removed_qty
   end
 
   def set_start_and_end_time
@@ -245,7 +248,6 @@ class ExportSetting < ActiveRecord::Base
       orders.each do |order|
         single_row = update_single_row_with_order_data(row_map, order)
         assign_packing_user(single_row, order)
-        single_row[:click_scanned_qty] = calculate_clicked_qty(order)
         csv << single_row.values
       end
     end
@@ -267,7 +269,10 @@ class ExportSetting < ActiveRecord::Base
       tracking_num: '',
       incorrect_scans: '',
       clicked_scanned_qty: '',
-      box_number: ''
+      box_number: '',
+      scanned_count: '',
+      unscanned_count: '',
+      removed_count: ''
     }
   end
 
@@ -281,6 +286,10 @@ class ExportSetting < ActiveRecord::Base
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order.clicked_scanned_qty.to_i
+    single_row[:click_scanned_qty] = calculate_clicked_qty(order)
+    single_row[:scanned_count] = order.order_items.sum(:scanned_qty)
+    single_row[:unscanned_count] = order.order_items.sum(:qty) - order.order_items.sum(:scanned_qty)
+    single_row[:removed_count] = order.order_items.sum(:removed_qty)
     single_row
   end
 

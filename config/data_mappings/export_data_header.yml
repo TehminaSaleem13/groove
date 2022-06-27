@@ -24,6 +24,9 @@
 :state: state
 :zip: zip
 :tracking_num: tracking_num
-:incorrect_scans: incorrect_scans 
+:incorrect_scans: incorrect_scans
 :clicked_scanned_qty: clicked_scanned_qty
 :box_number: box_number
+:scanned_count: scanned_count
+:unscanned_count: unscanned_count
+:removed_count: removed_count
