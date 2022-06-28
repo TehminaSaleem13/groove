@@ -30,9 +30,9 @@ module Expo
     end
 
     def product_scan(clicked, serial_added)
-      
+
       if clicked
-        @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1 
+        @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1
         @single_order.save
       end
       case
@@ -56,11 +56,17 @@ module Expo
     end
 
     def do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input(code_type)
-      if code_type == 'REMOVE'
+      if code_type == 'PARTIAL'
+        @single_order.get_unscanned_items(limit: nil).each do |item|
+          qty = remove_skippable_product(item)
+          @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username))
+        end
+      elsif code_type == 'REMOVE'
         item = @single_order.get_unscanned_items(limit: nil).first
         qty = item['product_type'] == 'individual' ? remove_kit_product_item_from_order(item['child_items'].first) : remove_skippable_product(item)
         @single_order.addactivity("QTY #{qty} of SKU #{item['product_type'] == 'individual' ? item['child_items'].first['sku'] : item['sku']} was removed using the REMOVE barcode", @current_user.try(:username))
       end
+      # do_if_barcode_found
     end
 
     # def check_scanning_kit(clean_input)
@@ -68,7 +74,7 @@ module Expo
     #   data = []
     #   list = []
     #   unscanned_items.each do |item|
-    #     data << item if item["partially_scanned"] == true 
+    #     data << item if item["partially_scanned"] == true
     #   end
     #   if data.any?
     #     if data.first["child_items"].present?
@@ -76,7 +82,7 @@ module Expo
     #         list << i["barcodes"].map(&:barcode)
     #       end
     #     end
-    #   end  
+    #   end
     #   return list.flatten
     # end
 

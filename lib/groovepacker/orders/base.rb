@@ -80,7 +80,7 @@ module Groovepacker
                   :image_url => '',
                   :available_inventory => '',
                   :product_status => '',
-                  :order_number => '',
+                  :order_number => ''
                 }
         end
 
@@ -105,6 +105,9 @@ module Groovepacker
             :internal_notes => '',
             :tags => '',
             :tracking_num => '',
+            :scanned_count => '',
+            :unscanned_count => '',
+            :removed_count => ''
           }
 
           export_row_map = export_row_map.merge(
@@ -114,7 +117,7 @@ module Groovepacker
               :qty_remaining => '',
               :qty_in_tote => '',
               :qty_ordered => '',
-              }
+            }
           ) if @current_workflow == 'product_first_scan_to_put_wall'
           export_row_map = export_row_map.merge({ @general_settings.custom_field_one.parameterize.underscore.to_sym => ''}) if @general_settings.custom_field_one
           export_row_map = export_row_map.merge({ @general_settings.custom_field_two.parameterize.underscore.to_sym => ''}) if @general_settings.custom_field_two

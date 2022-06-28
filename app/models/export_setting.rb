@@ -85,6 +85,16 @@ class ExportSetting < ActiveRecord::Base
 
       orders = Order.where(scanned_on: start_time..end_time)
 
+      orders = case order_export_type
+               when 'removed_only'
+                orders.joins(:order_items).where('order_items.removed_qty > 0').distinct
+               when 'partially_scanned_only'
+                #TODO: Implemented when GROOV-2630 completes
+                orders
+               else
+                 orders
+               end
+
       ExportSetting.update_all(:last_exported => Time.current)
       filename = generate_file_name
       if order_export_type == 'do_not_include'

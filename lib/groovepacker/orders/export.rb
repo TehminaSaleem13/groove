@@ -15,7 +15,7 @@ module Groovepacker
 
         add_order_items_in_items_list
         generate_csv_file
-        
+
         return @result
       end
 
@@ -26,7 +26,7 @@ module Groovepacker
             unless order.store.nil? || order.store.inventory_warehouse.nil?
               @inv_warehouse_id = order.store.inventory_warehouse_id
             end
-            
+
             order.order_items.each do |single_item|
               add_single_item_in_items_list(order, single_item) unless single_item.product.nil?
             end
@@ -72,7 +72,7 @@ module Groovepacker
                                                     :primary_sku => product_sku.sku,
                                                     :product_status => @product.status,
                                                     :order_number => order.increment_id })
-          
+
           single_row_list = add_barcode_info(single_row_list, product_barcodes)
           single_row_list = add_inv_warehouse_info(single_row_list)
           single_row_list[:image_url] = @product.primary_image rescue nil
@@ -102,6 +102,9 @@ module Groovepacker
               :tags => order.tags,
               :internal_notes => order.notes_internal,
               :tracking_num => order.tracking_num,
+              :scanned_count => single_item.scanned_qty,
+              :unscanned_count => single_item.qty - single_item.scanned_qty,
+              :removed_count => single_item.removed_qty
               }
             )
 

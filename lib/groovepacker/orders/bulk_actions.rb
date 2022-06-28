@@ -84,6 +84,7 @@ module Groovepacker
             order.order_items.where('skipped_qty != 0').each do |order_item|
               order_item.update_attributes(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
             end
+            order.order_items.where('removed_qty != 0').update_all(removed_qty: 0)
           end
           order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
         end
