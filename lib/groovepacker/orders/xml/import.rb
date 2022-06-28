@@ -101,7 +101,7 @@ module Groovepacker
           end
 
           setting = ScanPackSetting.all.first
-          order.order_items.map(&:product).each do |product|
+          order.order_items.map(&:product).reject(&:blank?).each do |product|
             #product.set_product_status
             intangible_strings = setting.intangible_string.split(",")
             intangible_setting_enabled = setting.intangible_setting_enabled
