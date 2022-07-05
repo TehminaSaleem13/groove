@@ -304,6 +304,29 @@ class SettingsController < ApplicationController
     render json: @result
   end
 
+  def update_packing_cam_image
+    result = { status: true }
+    begin
+      current_tenant = Apartment::Tenant.current
+      scan_pack_setting = ScanPackSetting.first
+      if params[:image] && params[:type].in?(%w[email_logo customer_page_logo])
+        current_object = scan_pack_setting.send(params[:type])
+        GroovS3.delete_object(current_object.gsub("#{ENV['S3_BASE_URL']}/", '')) rescue nil
+        file_name = "packing_cam/#{params[:type]}/#{params[:image].original_filename}"
+        GroovS3.create_image(current_tenant, file_name, params[:image].read, params[:image].content_type)
+        url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
+        scan_pack_setting.update_attributes(params[:type] => url)
+      else
+        result[:status] = false
+        result[:error_message] = 'No Image/Type Provided'
+      end
+    rescue StandardError => e
+      result[:status] = false
+      result[:error_message] = e.to_s
+    end
+    render json: result
+  end
+
   def send_test_mail
     LowInventoryLevel.notify(GeneralSetting.all.first, Apartment::Tenant.current).deliver
     render json: 'ok'

@@ -15,6 +15,7 @@ class OrderItem < ActiveRecord::Base
   #please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
   #===========================================================================================
+  before_save :update_product_name
   after_create :add_kit_products
   before_destroy :delete_inventory
   after_create :create_inventory
@@ -424,4 +425,7 @@ class OrderItem < ActiveRecord::Base
       .find { |op| op.id == kit_product.cached_product_kit_skus.option_product_id }
   end
 
+  def update_product_name
+    self.name = product&.name unless name.present?
+  end
 end

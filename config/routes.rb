@@ -85,6 +85,10 @@ Groovepacks::Application.routes.draw do
   post '/shipstation_rest_credentials/set_ss_label_advanced' => 'shipstation_rest_credentials#set_ss_label_advanced'
   post 'shipstation_rest_credentials/set_carrier_visibility' => 'shipstation_rest_credentials#set_carrier_visibility'
   post 'shipstation_rest_credentials/set_rate_visibility' => 'shipstation_rest_credentials#set_rate_visibility'
+
+  # Packing Cam routes
+  post 'package-details' => 'packing_cam#show'
+
   root to: 'home#index'
 
   resources :home do
@@ -201,6 +205,7 @@ Groovepacks::Application.routes.draw do
       post 'save_columns_state'
       post 'cancel_bulk_action'
       post 'update_scan_pack_settings'
+      post 'update_packing_cam_image'
     end
   end
 

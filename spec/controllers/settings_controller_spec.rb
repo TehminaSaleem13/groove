@@ -142,4 +142,33 @@ RSpec.describe SettingsController, type: :controller do
       expect(JSON.parse(response.body)['status']).to eq(true)
     end
   end
+
+  describe 'Basic Functions' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      @tenant = Tenant.create(name:"#{tenant}")
+
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      allow(token1).to receive(:id).and_return(nil)
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    context 'POST #update_packing_cam_image' do
+      it 'success' do
+        post :update_packing_cam_image, params: { image: fixture_file_upload('logo.png'), type: 'email_logo'}
+        expect(response.status).to eq(200)
+        expect(JSON.parse(response.body)['status']).to be_truthy
+      end
+
+      it 'fails' do
+        post :update_packing_cam_image, params: { image: fixture_file_upload('logo.png'), type: 'semail_logo'}
+        expect(response.status).to eq(200)
+        expect(JSON.parse(response.body)['status']).to be_falsy
+      end
+    end
+  end
 end

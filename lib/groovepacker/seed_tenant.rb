@@ -15,7 +15,7 @@ module Groovepacker
             )
           end
       end
-      
+
       if OrderTag.where(:name => 'Contains New').length == 0
         contains_new_tag = OrderTag.create(:name => 'Contains New', :color => '#FF0000', :predefined => true)
       end
@@ -60,7 +60,7 @@ module Groovepacker
       end
 
       if ScanPackSetting.all.length == 0
-        ScanPackSetting.create(:enable_click_sku => true, :ask_tracking_number => false, :intangible_setting_enabled => true, :intangible_setting_gen_barcode_from_sku => true, :intangible_string => "Coupon:", replace_gp_code: true)
+        ScanPackSetting.create(enable_click_sku: true, ask_tracking_number: false, intangible_setting_enabled: true, intangible_setting_gen_barcode_from_sku: true, intangible_string: "Coupon:", replace_gp_code: true, email_subject: 'YourCompany Order - [[ORDER-NUMBER]] - Packing Details', email_message: "<h4 style=\"color: rgb(85, 85, 85);background-color: rgb(255, 255, 255);\"><span>This email was sent on behalf of </span><b><b><b><i>http://YourCompany.com </i></b></b></b><span>to let you know your order number [[ORDER-NUMBER]] has been scanned by the fulfillment team. You can review an image of your order items and a scanning log here: [[CUSTOMER-PAGE-URL]]</span><br/></h4>", customer_page_message: '<h4>To ensure the accuracy of your order <i>YourCompany</i> scans every item as your package is packed. The image below was taken immediately after the items were scanned. The scanning log shows each scan.</h4><h4>If you see any issues, or if you need assistance, please contact support regarding your order here: <b><i>http://YourCompany.com/Support</i></b><br/></h4>')
       end
 
       [

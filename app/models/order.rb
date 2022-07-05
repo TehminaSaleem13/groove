@@ -434,6 +434,10 @@ class Order < ActiveRecord::Base
     Box.where(order_id: self.id).destroy_all
   end
 
+  def scanned?
+    status == 'scanned'
+  end
+
   private
 
   def perform_after_scanning_tasks

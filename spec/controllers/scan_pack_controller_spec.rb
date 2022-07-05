@@ -760,8 +760,11 @@ RSpec.describe ScanPackController, type: :controller do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
-      
-      @order = FactoryBot.create(:order, store_id: @store.id)
+
+      @order = FactoryBot.create(:order, store_id: @store.id, status: 'scanned', email: 'testemail@yopmail.com')
+
+      Tenant.last.update(packing_cam: true)
+      ScanPackSetting.last.update(packing_cam_enabled: true, email_customer_option: true)
     end
 
     it 'For Packing Cam on S3' do
