@@ -237,7 +237,7 @@ module ProductsService
     end
 
     def value_for(obj, method)
-      obj.send(method)
+      obj&.send(method)
     end
 
     def this_in_that(title, mapping)
