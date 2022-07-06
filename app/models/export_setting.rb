@@ -167,8 +167,9 @@ class ExportSetting < ActiveRecord::Base
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order.clicked_scanned_qty.to_i
+    single_row[:original_order_item_count] = order_item.qty + order_item.removed_qty
     if box.present?
-     single_row[:order_item_count] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
+     single_row[:final_order_item_count] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
      single_row[:box_number] = box.name.split(" ").last
     end
   end
