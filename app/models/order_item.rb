@@ -427,5 +427,6 @@ class OrderItem < ActiveRecord::Base
 
   def update_product_name
     self.name = product&.name unless name.present?
+    self.sku = product&.primary_sku unless sku.present?
   end
 end
