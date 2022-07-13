@@ -224,7 +224,7 @@ class Order < ActiveRecord::Base
     self.order_serials.destroy_all
     destroy_boxes
     self.set_order_status
-    self.update_columns(post_scanning_flag: nil)
+    self.update_columns(post_scanning_flag: nil, clicked_scanned_qty: 0)
   end
 
   def addtag(tag_id)
