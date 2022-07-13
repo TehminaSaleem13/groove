@@ -14,9 +14,7 @@ class PackingCam < ApplicationRecord
 
     return unless scan_pack_setting&.packing_cam_enabled? && scan_pack_setting&.email_customer_option?
 
-    return unless order&.scanned? && order&.email.present?
-
-    # OrderMailer.notify_packing_cam(order.id, tenant&.name)
-    OrderMailer.delay(priority: 95).notify_packing_cam(order.id, tenant&.name)
+    # OrderMailer.notify_packing_cam(order.id, tenant&.name) if order&.email.present?
+    OrderMailer.delay(priority: 95).notify_packing_cam(order.id, tenant&.name) if order&.email.present?
   end
 end
