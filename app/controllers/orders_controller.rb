@@ -97,7 +97,7 @@ class OrdersController < ApplicationController
       result[:status] = false
       result[:error] = e
     end
-    render plain: result[:logs]    
+    render plain: result[:logs]
   end
 
   def delete_orders
@@ -552,6 +552,14 @@ class OrdersController < ApplicationController
       result[:error] = e
     end
     render json: result
+  end
+
+  def send_packing_cam_email
+    order = Order.find(params[:id])
+    packing_cam = order.packing_cams.last || order.packing_cams.build
+    packing_cam.notify_user
+
+    render json: { status: true }
   end
 
   private
