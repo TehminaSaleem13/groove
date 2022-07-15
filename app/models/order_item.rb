@@ -426,7 +426,7 @@ class OrderItem < ActiveRecord::Base
   end
 
   def update_product_name
-    self.name = product&.name unless name.present?
-    self.sku = product&.primary_sku unless sku.present?
+    self.name = product&.name.to_s unless name.present?
+    self.sku = product&.primary_sku.to_s unless sku.present?
   end
 end
