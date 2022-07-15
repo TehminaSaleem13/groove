@@ -1,5 +1,5 @@
 namespace :system do
-  desc "Set default scanpack setting attributes"
+  desc "Update Order Items names"
   task :update_order_item_names => :environment do
 
     tenants = Tenant.pluck(:name)
