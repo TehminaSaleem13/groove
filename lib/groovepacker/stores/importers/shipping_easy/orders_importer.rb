@@ -391,10 +391,10 @@ module Groovepacker
                merge_similar_sku = order["recipients"][0]["line_items"].map{|item| item["sku"] }.count - order["recipients"][0]["line_items"].map{|item| item["sku"] }.uniq.count
                import_item_count(order)
                 order["recipients"][0]["line_items"].each do |item|
-                  if merge_similar_sku > 0 && shiping_easy_order.order_items.present? && shiping_easy_order.order_items.where(sku: item["sku"]).present? &&  Store.find(shiping_easy_order.store_id).shipping_easy_credential.multiple_lines_per_sku_accepted
-                    order_item = shiping_easy_order.order_items.where(sku: item["sku"]).first
-                    new_qty = shiping_easy_order.order_items.where(sku: item["sku"]).first.qty + item["quantity"]
-                    new_price = shiping_easy_order.order_items.where(sku: item["sku"]).first.price + item["unit_price"].to_f
+                  order_item = shiping_easy_order.order_items.where(sku: item['sku']).first || shiping_easy_order.order_items.find_by(product_id: Product.joins(:product_skus).find_by(product_skus: { sku: item['sku'] })&.id)
+                  if (merge_similar_sku > 0 && shiping_easy_order.order_items.present? && order_item.present? &&  Store.find(shiping_easy_order.store_id).shipping_easy_credential.multiple_lines_per_sku_accepted) || order_item.present?
+                    new_qty = order_item.qty + item["quantity"]
+                    new_price = order_item.price + item["unit_price"].to_f
 
                     order_item.assign_attributes( qty: new_qty,
                       price: new_price,
