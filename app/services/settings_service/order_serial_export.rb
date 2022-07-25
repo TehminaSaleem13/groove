@@ -19,7 +19,7 @@ module SettingsService
         primary_barcode: '', product_name: '', item_sale_price: '',
         kit_name: '', scan_order: 0, customer_name: '', address1: '',
         address2: '', city: '', state: '', zip: '', packing_user: '',
-        final_order_item_count: '', scanned_date: '', warehouse_name: ''
+        ordered_qty: '', scanned_date: '', warehouse_name: ''
       }
       @serials = OrderSerial.where(updated_at:
         Time.parse(params[:start])..Time.parse(params[:end])
@@ -98,7 +98,7 @@ module SettingsService
       single_row[:city],
       single_row[:state],
       single_row[:zip],
-      single_row[:final_order_item_count] = order.as_json(
+      single_row[:ordered_qty] = order.as_json(
         only: [
           :scan_order, :increment_id, :order_placed_time, :scanned_on,
           :address_1, :address_2, :city, :state, :postcode

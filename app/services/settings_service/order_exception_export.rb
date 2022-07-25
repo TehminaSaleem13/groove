@@ -82,7 +82,7 @@ module SettingsService
       single_row[:order_number],
       single_row[:order_date],
       single_row[:scanned_date],
-      single_row[:final_order_item_count],
+      single_row[:ordered_qty],
       single_row[:click_scanned_items] = order.as_json(
         only: [
           :increment_id, :order_placed_time, :scanned_on,

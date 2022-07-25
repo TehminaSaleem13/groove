@@ -12,8 +12,7 @@
 :serial_number_2: serial_number_2
 :product_name: product_name
 :packing_user: packing_user
-:original_order_item_count: original_order_item_count
-:final_order_item_count: final_order_item_count
+:ordered_qty: ordered_qty
 :scanned_date: scanned_date
 :warehouse_name: warehouse_name
 :item_sale_price: item_sale_price
@@ -31,3 +30,4 @@
 :scanned_count: scanned_count
 :unscanned_count: unscanned_count
 :removed_count: removed_count
+:added_count: added_count

@@ -34,7 +34,7 @@ module ExportData
     (1..order_item_serial_lot.qty).each do
       single_row = row_map.dup
       single_row = calculate_row_data(single_row, order_item)
-      single_row[:final_order_item_count] = 1
+      single_row[:ordered_qty] = 1
       set_lot_number_and_barcode_with_lot(single_row, order_item, product_lot)
       process_order_serial(single_row, order_serial, order_item)
       order_hash_item_array.push(single_row.dup)
@@ -101,7 +101,7 @@ module ExportData
 
   def do_if_serial_lots_empty(row_map, order_item, box = nil)
     single_row = row_map.dup
-    single_row[:final_order_item_count] = order_item.qty
+    single_row[:ordered_qty] = order_item.qty
     single_row = calculate_row_data(single_row, order_item, box)
     single_row[:lot_number] = ''
     single_row[:barcode_with_lot] = ''
@@ -113,7 +113,7 @@ module ExportData
   def do_if_qty_greater_than_qty_with_lot_setial(row_map, order_item, qty_with_lot_serial)
     single_row = row_map.dup
     single_row = calculate_row_data(single_row, order_item)
-    single_row[:final_order_item_count] = order_item.qty - qty_with_lot_serial
+    single_row[:ordered_qty] = order_item.qty - qty_with_lot_serial
     single_row[:lot_number] = ''
     single_row[:barcode_with_lot] = ''
     single_row[:serial_number] = ''
@@ -126,7 +126,7 @@ module ExportData
     order_serial = order_item_serial_lot.order_serial unless order_item_serial_lot.order_serial.nil?
     single_row = row_map.dup
     single_row = calculate_row_data(single_row, order_item)
-    single_row[:final_order_item_count] = order_item_serial_lot.qty
+    single_row[:ordered_qty] = order_item_serial_lot.qty
     qty_with_lot_serial += order_item_serial_lot.qty
 
     set_lot_number_and_barcode_with_lot(single_row, order_item, product_lot)
