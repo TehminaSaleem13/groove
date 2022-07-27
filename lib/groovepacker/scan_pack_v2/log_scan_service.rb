@@ -18,12 +18,14 @@ module Groovepacker
               )
               res = scan_barcode_obj.run
             elsif (scn_params[:event] == 'click_scan')
+              scn_params = attach_temporary_barcode(scn_params)
               res = product_scan_v2(
                 scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id],
                 {
                   clicked: true, current_user: current_user, session: session
                 }
               )
+              remove_temporary_barcode(params)
             elsif (scn_params[:event] == 'type_scan')
               res = product_scan_v2(
                 scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id],
@@ -85,6 +87,25 @@ module Groovepacker
             on_demand_logger.info(log)
           end
         end
+      end
+
+      private
+
+      def attach_temporary_barcode(params)
+        if params[:event] == 'click_scan' && params[:input].blank?
+          product = OrderItem.find_by_id(params[:order_item_id])&.product
+          return params unless product
+
+          temp_barcode = "#{product.id}_#{Time.current.to_i}"
+          params[:barcode_id] = product.product_barcodes.create(barcode: temp_barcode)&.id
+          product.delete_cache
+          params[:input] = temp_barcode
+        end
+        params
+      end
+
+      def remove_temporary_barcode(params)
+        ProductBarcode.find_by_id(params["data"][0]["barcode_id"])&.destroy
       end
     end
   end

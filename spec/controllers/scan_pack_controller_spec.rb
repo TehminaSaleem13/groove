@@ -700,6 +700,13 @@ RSpec.describe ScanPackController, type: :controller do
       expect(JSON.parse(response.body)["status"]).to eq("OK")
     end
 
+    it 'Order Scanned Without Barcode' do
+      ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.default" , Log_count: "1", SKU: "PRODUCT2", actionBarcode: false, event: "click_scan", id: @order.id, increment_id: @order.increment_id, input: "", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: Time.current ,updated_at: Time.current } ] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)["status"]).to eq("OK")
+    end
+
     it 'Order Scanned Using Type scan' do
       ScanPackSetting.last.update(enable_click_sku: true,scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
       post :scan_pack_v2, params: { data: [ { state: "scanpack.rfp.default" , Log_count: "1", SKU: "PRODUCT2", actionBarcode: false, event: "type_scan", id: @order.id, increment_id: @order.increment_id, input: "PRODUCT2", name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: "PRODUCT2", rem_qty: 1, time: Time.current ,updated_at: Time.current } ] }
