@@ -6332,9 +6332,14 @@
           <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count %></span>
         </div>
         <div class="span8" style="margin-top: -60px;">
-          <% barcode_string = generate_order_barcode(@order.increment_id) %>
-          <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
-            <div style="position:absolute; top:0; left:0;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+          <div style="width: 750px; margin-left: -70px; text-align: center;"> 
+            <% barcode_string = generate_order_barcode(@order.increment_id) %>
+            <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+            </div><br>
+            <div style= "text-align:center; white-space:nowrap; width: 730px; overflow:hidden; text-overflow: ellipsis;">
+              <p style= "font-size: 60px; text-align:center; width: 100%;"> <%= @order.increment_id %></p>
+            </div>
           </div>
           <br>
         </div>
@@ -6353,7 +6358,7 @@
         <% order_placed_time = @order.order_placed_time %>
         <% date = order_placed_time.to_s.split(" ")[0] %>
         <div class="span6">
-          <div class="row">
+          <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis;">
             <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
             <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
           </div>
@@ -6485,12 +6490,17 @@
             <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= box.order_item_boxes.map(&:item_qty).sum rescue order_count %></span>
           </div>
           <div class="span8" style="margin-top: -60px;">
+          <div style="width: 750px; margin-left: -70px; text-align: center;"> 
             <% barcode_string = generate_order_barcode(@order.increment_id) %>
-            <div style="margin-top: 30px;margin-bottom: 0px; margin-left: 10px; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
-              <div style="position:absolute; top:0; left:0;"><%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+            <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
+              <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto; width: 550px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
+            </div><br>
+            <div style= "text-align:center; white-space:nowrap; width: 730px; overflow:hidden; text-overflow:ellipsis; ">
+              <p style= "font-size: 60px; text-align:center; width: 100%;"> <%= @order.increment_id %></p>
             </div>
-            <br>
           </div>
+          <br>
+        </div>
         </div>
         <br>
 
@@ -6506,7 +6516,7 @@
           <% order_placed_time = @order.order_placed_time %>
           <% date = order_placed_time.to_s.split(" ")[0] %>
           <div class="span6">
-            <div class="row">
+            <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis;">
               <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
               <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
             </div>
