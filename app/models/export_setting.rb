@@ -83,14 +83,15 @@ class ExportSetting < ActiveRecord::Base
       start_time, end_time = set_start_and_end_time
       return with_error_filename if start_time.blank?
 
-      orders = Order.where(scanned_on: start_time..end_time)
+      orders = Order.where(scanned_on: start_time..end_time) unless order_export_type == 'partially_scanned_only'
 
       orders = case order_export_type
                when 'removed_only'
                 orders.joins(:order_items).where('order_items.removed_qty > 0').distinct
                when 'partially_scanned_only'
+                orders = Order.where(updated_at: start_time..end_time)
+                orders.joins(:order_items).where("order_items.scanned_status=?", "partially_scanned").distinct
                 #TODO: Implemented when GROOV-2630 completes
-                orders
                else
                  orders
                end
