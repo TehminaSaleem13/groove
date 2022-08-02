@@ -93,19 +93,28 @@ module Groovepacker
 
       def attach_temporary_barcode(params)
         if params[:event] == 'click_scan' && params[:input].blank?
-          product = OrderItem.find_by_id(params[:order_item_id])&.product
+          order_item = OrderItem.find_by_id(params[:order_item_id])   
+          product = if params[:is_kit] == true
+                      Product.find_by_id(params[:product_id])
+                    else
+                      order_item&.product
+                    end
           return params unless product
+
+          return params if product.product_barcodes.any?
 
           temp_barcode = "#{product.id}_#{Time.current.to_i}"
           params[:barcode_id] = product.product_barcodes.create(barcode: temp_barcode)&.id
-          product.delete_cache
+          order_item&.product&.delete_cache
           params[:input] = temp_barcode
         end
         params
       end
 
       def remove_temporary_barcode(params)
+        order_item = OrderItem.find_by_id(params[:order_item_id])     
         ProductBarcode.find_by_id(params["data"][0]["barcode_id"])&.destroy
+        order_item&.product&.delete_cache
       end
     end
   end
