@@ -90,7 +90,7 @@ class ExportSetting < ActiveRecord::Base
                 orders.joins(:order_items).where('order_items.removed_qty > 0').distinct
                when 'partially_scanned_only'
                 orders = Order.where(updated_at: start_time..end_time)
-                orders.joins(:order_items).where("order_items.scanned_status=?", "partially_scanned").distinct
+                orders.joins(:order_items).where.not(status: 'scanned').where(order_items: {scanned_status: ['partially_scanned', 'scanned']}).distinct
                 #TODO: Implemented when GROOV-2630 completes
                else
                  orders
