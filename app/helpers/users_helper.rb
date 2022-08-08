@@ -40,6 +40,8 @@ module UsersHelper
 
       #product details
       user_role.add_edit_products = (role['make_super_admin'] || (!role['add_edit_products'].nil? && role['add_edit_products']))
+      user_role.edit_product_location= (role['make_super_admin'] || (!role['edit_product_location'].nil? && role['edit_product_location']))
+      user_role.edit_product_quantity= (role['make_super_admin'] || (!role['edit_product_quantity'].nil? && role['edit_product_quantity']))
       user_role.delete_products = (role['make_super_admin'] || (!role['delete_products'].nil? && role['delete_products']))
       user_role.import_products = (role['make_super_admin'] || (!role['import_products'].nil? && role['import_products']))
 
