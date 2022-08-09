@@ -46,7 +46,6 @@ module ScanPack
           all_valid_prefixes.each do |string|
             if (serial.downcase.start_with?(string.downcase))
               value = true
-              @params[:serial] = @params[:serial].downcase.sub(string.downcase, '')
               break
             end
           end
