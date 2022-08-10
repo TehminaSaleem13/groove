@@ -65,8 +65,7 @@ module Expo
       def do_check_state_and_status_to_add_activity
         return unless @order
         if @params[:state] == "scanpack.rfp.default" && @result['status'] == true
-          current_product_id = ProductBarcode.where(barcode: @params["input"])[0].try(:product_id)
-          item_sku = ProductSku.where(product_id: current_product_id)[0].try(:sku)
+          item_sku = Product.includes(:order_items, :product_barcodes, :product_skus).where.not(order_items: { scanned_status: 'scanned'}).where(product_barcodes: { barcode: @params[:input]}, order_items: { order_id: @order.id }).first&.primary_sku
           add_activity_for_barcode(item_sku)
         end
       end
