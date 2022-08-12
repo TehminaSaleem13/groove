@@ -111,8 +111,7 @@ class Product < ActiveRecord::Base
         result &= false if product_kit_skuss.empty?
         option_products =
           if eager_loaded_obj[:option_products_if_kit_one]
-            eager_loaded_obj[:option_products_if_kit_one]
-              .select{ |p| (p.product_kit_skuss - product_kit_skuss).empty? }
+            eager_loaded_obj[:option_products_if_kit_one].where(id: product_kit_skuss.pluck(:option_product_id))
           else
             Product.where(
               id: product_kit_skuss.collect(&:option_product_id)
