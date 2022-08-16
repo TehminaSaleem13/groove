@@ -243,6 +243,7 @@ module Groovepacker
           end
 
           @order.update_order_status
+          @order.touch
           return if @order.save
           set_status_and_message(false, "Adding item to order failed", ['&', 'push'])
         end
@@ -265,6 +266,7 @@ module Groovepacker
           orderitem.name = product.name
           orderitem.price = @params[:price]
           orderitem.qty = qty.to_i
+          orderitem.added_count = qty.to_i
           orderitem.row_total = @params[:price].to_f * @params[:qty].to_f
           orderitem.product_id = product.id
           return orderitem

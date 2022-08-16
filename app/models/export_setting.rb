@@ -83,18 +83,28 @@ class ExportSetting < ActiveRecord::Base
       start_time, end_time = set_start_and_end_time
       return with_error_filename if start_time.blank?
 
-      orders = Order.where(scanned_on: start_time..end_time) unless order_export_type == 'partially_scanned_only'
+      scanned_orders = Order.where(scanned_on: start_time..end_time)
+      partially_orders = Order.where(updated_at: start_time..end_time).joins(:order_items).where.not(status: 'scanned').where("order_items.scanned_status =? OR order_items.scanned_status =? OR order_items.removed_qty > 0 OR order_items.added_count > 0", "partially_scanned","scanned").distinct
 
-      orders = case order_export_type
-               when 'removed_only'
-                orders.joins(:order_items).where('order_items.removed_qty > 0').distinct
-               when 'partially_scanned_only'
-                orders = Order.where(updated_at: start_time..end_time)
-                orders.joins(:order_items).where.not(status: 'scanned').where(order_items: {scanned_status: ['partially_scanned', 'scanned']}).distinct
-                #TODO: Implemented when GROOV-2630 completes
-               else
-                 orders
-               end
+      if include_partially_scanned_orders == true
+        if order_export_type == 'partially_scanned_only'
+          orders = partially_orders
+        elsif order_export_type == 'removed_only'
+          partical_orders = partially_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
+          scan_orders = scanned_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
+          orders = partical_orders + scan_orders
+        else
+          orders = partially_orders + scanned_orders
+        end
+      else
+        if order_export_type == 'partially_scanned_only'
+          orders = partially_orders
+        elsif order_export_type == 'removed_only'
+          orders = scanned_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
+        else
+          orders = scanned_orders
+        end
+      end
 
       ExportSetting.update_all(:last_exported => Time.current)
       filename = generate_file_name
@@ -168,7 +178,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:tracking_num] = order.tracking_num
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order_item.clicked_qty
-    single_row[:added_count] = order.get_items_count
+    single_row[:added_count] = order_item.added_count
     if box.present?
      single_row[:ordered_qty] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
      single_row[:box_number] = box.name.split(" ").last
