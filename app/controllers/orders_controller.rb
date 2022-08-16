@@ -528,6 +528,7 @@ class OrdersController < ApplicationController
       order = Order.includes(:store).find(params[:id])
       if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
         result = order.try_creating_label
+        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true)
         result[:error] = 'Insufficient data to create label' if !result[:status] && !result[:error_messages].present?
       else
         result[:status] = false

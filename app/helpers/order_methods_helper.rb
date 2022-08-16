@@ -333,14 +333,14 @@ module OrderMethodsHelper
     result = { box: boxes.as_json(only: [:id, :name]), order_item_boxes: order_item_boxes.flatten, list: list   }
   end
 
-  def ss_label_order_data
+  def ss_label_order_data(skip_trying: false)
     begin
       ss_rest_credential = store.shipstation_rest_credential
       order_ss_label_data = ss_label_data || {}
       direct_print_data = {}
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_rest_credential.api_key, ss_rest_credential.api_secret)
       general_settings = GeneralSetting.last
-      direct_print_data = try_creating_label if ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
+      direct_print_data = try_creating_label if !skip_trying && ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
       if direct_print_data[:status]
         order_ss_label_data['direct_printed'] = true
         order_ss_label_data['direct_printed_url'] = direct_print_data[:url]
