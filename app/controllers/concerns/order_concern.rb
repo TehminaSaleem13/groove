@@ -228,9 +228,10 @@ module OrderConcern
   end
 
   def set_user_permissions
+    #TODO: Limiting Order activities to 100 as on now. (yanjanusa Issue) https://groovepacker.slack.com/archives/C07BB0MEW/p1660154633053269
     @result['order'] = @result['order'].merge('add_items_permitted' => current_user.can?('add_edit_order_items'),
                                               'remove_items_permitted' => current_user.can?('add_edit_order_items'),
-                                              'activities' => @order.order_activities)
+                                              'activities' => @order.order_activities.limit(1000))
   end
 
   def set_unacknowledged_activities

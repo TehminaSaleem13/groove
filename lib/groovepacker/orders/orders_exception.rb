@@ -17,6 +17,7 @@ module Groovepacker
       end
 
       def add_edit_order_items(order)
+        #TODO: Limiting Order activities to 100 as on now. (yanjanusa Issue) https://groovepacker.slack.com/archives/C07BB0MEW/p1660154633053269
         unless @current_user.can? 'add_edit_order_items'
           set_status_and_message(false, 'Couldn\'t rollback because you can not add or edit order items', ['push'])
           return @result
@@ -30,8 +31,10 @@ module Groovepacker
         #activity
         #As activities only get added, no updating or adding required
         activities = OrderActivity.where(:order_id => @params[:single]['basicinfo']['id'])
-        destroy_object_if_not_defined(activities, @params[:single]['activities'], 'activities')
-        return @result
+        if @params[:single]['activities'].count == activities.count
+          destroy_object_if_not_defined(activities, @params[:single]['activities'], 'activities')
+        end
+          return @result
       end
 
       def edit_packing_execptions(order, tenant)
