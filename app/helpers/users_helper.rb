@@ -39,9 +39,19 @@ module UsersHelper
       user_role.edit_packing_ex = (role['make_super_admin'] || (!role['edit_packing_ex'].nil? && role['edit_packing_ex']))
 
       #product details
-      user_role.add_edit_products = (role['make_super_admin'] || (!role['add_edit_products'].nil? && role['add_edit_products']))
-      user_role.edit_product_location= (role['make_super_admin'] || (!role['edit_product_location'].nil? && role['edit_product_location']))
-      user_role.edit_product_quantity= (role['make_super_admin'] || (!role['edit_product_quantity'].nil? && role['edit_product_quantity']))
+      if role['add_edit_products']
+        user_role.add_edit_products = (role['make_super_admin'] || (!role['add_edit_products'].nil? && role['add_edit_products']))
+        if !role['edit_product_location']
+           user_role.edit_product_location= (role['make_super_admin'] || (!role['edit_product_location'].nil? && !role['edit_product_location']))
+        end
+        if !role['edit_product_quantity']
+           user_role.edit_product_quantity= (role['make_super_admin'] || (!role['edit_product_quantity'].nil? && !role['edit_product_quantity']))
+        end
+      else
+        user_role.add_edit_products = (role['make_super_admin'] || (!role['add_edit_products'].nil? && role['add_edit_products']))
+        user_role.edit_product_location= (role['make_super_admin'] || (!role['edit_product_location'].nil? && role['edit_product_location']))
+        user_role.edit_product_quantity= (role['make_super_admin'] || (!role['edit_product_quantity'].nil? && role['edit_product_quantity']))
+      end
       user_role.delete_products = (role['make_super_admin'] || (!role['delete_products'].nil? && role['delete_products']))
       user_role.import_products = (role['make_super_admin'] || (!role['import_products'].nil? && role['import_products']))
 
