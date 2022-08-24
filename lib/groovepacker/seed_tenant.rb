@@ -261,7 +261,7 @@ module Groovepacker
 
       if User.where(:username => 'gpadmin').length == 0
         created_super_user = User.create({:username => 'gpadmin', :name => 'gpadmin', :password => '098poi)(*POI', :email => 'groovepacker@gmail.com',
-                                           :password_confirmation => '098poi)(*POI', :role_id => role_super_super_admin.id, :confirmation_code => '1234', :active => true, :view_dashboard => "admin_dashboard_with_packer_stats"})
+                                           :password_confirmation => '098poi)(*POI', :role_id => role_super_super_admin.id, :confirmation_code => '123123', :active => true, :view_dashboard => "admin_dashboard_with_packer_stats"})
       end
 
       User.all.each do |user|

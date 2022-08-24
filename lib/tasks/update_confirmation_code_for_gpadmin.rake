@@ -7,7 +7,7 @@ namespace :system do
       tenants.each do |tenant|
         begin
           Apartment::Tenant.switch! tenant
-          User.find_by_name('gpadmin').update_attribute(:confirmation_code, 1234)
+          User.find_by_name('gpadmin').update_attribute(:confirmation_code, 123123)
         end
       end
     end    
