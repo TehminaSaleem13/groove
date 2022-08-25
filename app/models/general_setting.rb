@@ -222,8 +222,8 @@ class GeneralSetting < ActiveRecord::Base
     run_at_date = date
     run_at_date = run_at_date.change({:hour => time.hour, :min => time.min, :sec => time.sec})
     time_diff = ((run_at_date.to_time - Time.current)).to_i + Random.rand(120)
-    time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
-    time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
+    # time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
+    # time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
     time = time_diff.seconds.from_now
     time = time - 1.day if Time.current + 1.day < time
     if time_diff > 0
