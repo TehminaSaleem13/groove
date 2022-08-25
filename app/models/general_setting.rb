@@ -244,7 +244,17 @@ class GeneralSetting < ActiveRecord::Base
       elsif job_type == 'export_order'
         export_setting = ExportSetting.all.first
         if export_setting.should_export_orders(time)
-          Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time.beginning_of_day , time.end_of_day).destroy_all
+          existing_jobs = Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%order_export_email_scheduled_#{tenant}%", time.beginning_of_day , time.end_of_day)
+
+          if existing_jobs.any?
+            existing_jobs.destroy_all
+
+            on_demand_logger = Logger.new("#{Rails.root}/log/order_export_reports.log")
+            on_demand_logger.info('=========================================')
+            log = { tenant: Apartment::Tenant.current, date: date, time: time, existing_jobs: existing_jobs.collect { |j| j.attributes.except('handler')}.to_json }
+            on_demand_logger.info(log)
+          end
+
           ExportSetting.update_all(manual_export: false)
           ExportOrder.delay(:run_at => time, :queue => "order_export_email_scheduled_#{tenant}", priority: 95).export(tenant)
           # ExportOrder.export(tenant).deliver
