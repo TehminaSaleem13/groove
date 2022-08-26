@@ -231,7 +231,6 @@ module Groovepacker
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") || order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if order.order_items.empty?
               # create order items
-              @add_qty_if_aliased = true
               orderXML.order_items.each do |order_item_XML|
                 create_update_order_item(order, order_item_XML)
               end
@@ -333,12 +332,7 @@ module Groovepacker
 
                   if check_for_update
                     # Add qty if existing aliased item is found
-                    if @destroy_all_existing || @add_qty_if_aliased
-                      order.addactivity("QTY #{order_item.qty} of item with SKU: #{product.primary_sku} Added (Aliased)",
-                      "#{@store.name} Import")
-                    end
-
-                    order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty
+                    order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty if @destroy_all_existing
                     order_item.qty = order_item_XML[:qty] || 0
                     order_item.price = order_item_XML[:price]
                     order_item.save

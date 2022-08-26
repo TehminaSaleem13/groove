@@ -44,16 +44,6 @@ class ImportCsv
             new_file_data =  File.read(file_path).encode(Encoding.find('ASCII'), encoding_options).encode("UTF-8")
           end
 
-          new_file_data =  begin
-                              if params[:type] == 'order' && params[:rows].to_i <=1
-                                CSV.parse(new_file_data).unshift(params[:map].values.map { |m| m['name'] }).map(&:to_csv).join
-                              else
-                                new_file_data
-                              end
-                          rescue
-                            new_file_data
-                          end
-
           File.write(file_path,new_file_data)
           if Apartment::Tenant.current == "unitedmedco"
             first_remove = new_file_data.gsub(/\"\"/,"\"")
@@ -87,16 +77,6 @@ class ImportCsv
             rescue
               nil
             end
-
-            file_content =  begin
-                              if params[:type] == 'order' && params[:rows].to_i <=1
-                                CSV.parse(file_content).unshift(params[:map].values.map { |m| m['name'] }).map(&:to_csv).join
-                              else
-                                file_content
-                              end
-                            rescue
-                              file_content
-                            end
 
             if params[:encoding_format] == "ASCII + UTF-8"
               File.write(file_path, file_content.encode(Encoding.find('ASCII'), encoding_options))
