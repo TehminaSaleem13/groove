@@ -1,5 +1,8 @@
 module ProductsService
   class UpdateList < ProductsService::Base
+  
+    include ProductMethodsHelper
+
     def initialize(*args)
       @product, @var, @value, @current_user, @permit_same_barcode = args
     end
@@ -40,7 +43,11 @@ module ProductsService
     end
 
     def update_product_for_unmatched_var
+      existing_value = @product.send("primary_#{@var}") || 'NONE'
       @permit_same_barcode ? @product.send("primary_#{@var}=", @value, @permit_same_barcode) : @product.send("primary_#{@var}=", @value)
+      unless @product.errors.any?
+        @product.add_product_activity("The #{@var} of this item was changed from #{existing_value} to #{@value} by #{@current_user}")
+      end
       @product.errors.any?
     end
 
