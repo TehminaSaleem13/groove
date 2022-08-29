@@ -228,6 +228,9 @@ module Groovepacker
         def process_order_items(order, orderXML)
           result = { status: true, errors: [] }
 
+          # If an order contains aliased item.
+          check_if_contains_aliased_products(orderXML.order_items)
+
           unless (order.try(:status) == "scanned" ||  order.try(:order_items).map(&:scanned_status).include?("partially_scanned") || order.try(:order_items).map(&:scanned_status).include?("scanned"))
             if order.order_items.empty?
               # create order items
@@ -259,11 +262,8 @@ module Groovepacker
         end
 
         def delete_existing_order_items(order, orderXML)
-          # If an order contains aliased item & original one then destroy all existing items.
-          check_if_contains_aliased_products(orderXML.order_items)
-
           order.order_items.includes([product: [:product_skus]]).each do |order_item|
-            if @destroy_all_existing
+            if @contains_aliased_items
               order_item.destroy
             else
               found = false
@@ -332,7 +332,11 @@ module Groovepacker
 
                   if check_for_update
                     # Add qty if existing aliased item is found
-                    order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty if @destroy_all_existing
+                    if @contains_aliased_items
+                      order.addactivity("Item with sku " + product.primary_sku + " QTY increased by #{order_item_XML[:qty].to_i} (Aliased)", "#{@store.name} Import")
+                      order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty 
+                    end
+
                     order_item.qty = order_item_XML[:qty] || 0
                     order_item.price = order_item_XML[:price]
                     order_item.save
@@ -349,7 +353,7 @@ module Groovepacker
             existing_products << Product.joins(:product_skus).find_by(product_skus: { sku: sku })&.id
           end
           # Check if an order contains same item more than once.
-          @destroy_all_existing = existing_products.compact.uniq.size != existing_products.compact.size
+          @contains_aliased_items = existing_products.compact.uniq.size != existing_products.compact.size
         end
 
         def check_for_update
