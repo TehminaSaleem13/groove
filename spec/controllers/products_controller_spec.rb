@@ -261,6 +261,23 @@ RSpec.describe ProductsController, :type => :controller do
       expect(res['status']).to be true
       expect(order.reload.status).to eq('awaiting')
     end
+
+    it 'Update Products activity logs' do
+      product = FactoryBot.create(:product, store_id: @store.id)
+      product_barcode = FactoryBot.create(:product_barcode, barcode: 'TESTBARCODE', product_id: product.id)
+      
+      request.accept = 'application/json'
+      
+      post :update_product_list, params: {id: product.id, var: 'barcode', value: 'TESTBARCODE'}
+      expect(response.status).to eq(200)
+      
+      res = JSON.parse(response.body)
+      res['var'] = 'barcode'
+      res['value'] = 'TESTBARCODE'
+      res['id'] = product.id
+      expect(response.status).to eq(200)
+      expect(product.product_barcodes.pluck(:barcode)).to include('TESTBARCODE') 
+    end
   end
 
   describe 'Import Shopify Products' do
