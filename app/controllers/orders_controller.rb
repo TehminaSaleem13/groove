@@ -563,6 +563,22 @@ class OrdersController < ApplicationController
     render json: { status: true }
   end
 
+  def get_ss_label_data
+    result = { status: true }
+    begin
+      order = Order.includes(:store).find(params[:id])
+      if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
+        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true)
+      else
+        result[:status] = false
+      end
+    rescue => e
+      result[:status] = false
+      result[:error] = e
+    end
+    render json: result    
+  end
+
   private
   def execute_groove_bulk_action(activity)
     params[:user_id] = current_user.id
