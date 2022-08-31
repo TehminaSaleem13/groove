@@ -141,6 +141,7 @@ Groovepacks::Application.routes.draw do
       get 'print_activity_log'
       post 'remove_packing_cam_image'
       post 'send_packing_cam_email'
+      get 'get_ss_label_data'
     end
   end
 
