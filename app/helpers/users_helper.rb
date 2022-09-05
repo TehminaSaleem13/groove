@@ -4,9 +4,8 @@ module UsersHelper
   def update_role(user_role, role)
 
     if current_user.can? 'add_edit_users'
-      if role.nil?
-        role = Hash.new
-      end
+      role ||= {}
+
       if role['make_super_admin'].nil? ||
         (role['make_super_admin'] && !current_user.can?('make_super_admin'))
         role['make_super_admin'] = false
