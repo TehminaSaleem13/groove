@@ -100,12 +100,11 @@ module Groovepacker
             order_items: [:order]
             )
             
-            products.reload
             product_names = products.first(25).map(&:name)
             products_count = products.count
-            product_skus = ProductSku.find(products.ids).pluck(:sku)
+            product_skus = products.map(&:primary_sku)
             EventLog.create(data: {product_skus: product_skus}, message: "The List of Deleted Products", user_id: User.find_by(username:username).id)
-                        
+                                    
             products_kit_skus =
             ProductKitSkus.where(option_product_id: products.map(&:id))
             .includes(product: :product_kit_skuss)
