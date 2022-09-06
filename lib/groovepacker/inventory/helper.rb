@@ -45,6 +45,17 @@ module Groovepacker
         end
         warehouse
       end
+
+      def add_delete_log(tenant, order_increment_ids, name, params)
+        current_user = User.find(params[:user_id]).username
+        logs = EventLog.new
+        logs.user_id = params[:user_id]
+        logs.data = {
+          order_increment_ids: order_increment_ids
+        }
+        logs.message = ("The #{name}")
+        logs.save!
+      end
     end
   end
 end

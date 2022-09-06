@@ -36,7 +36,7 @@ class GrooveBulkActions < ActiveRecord::Base
     when activity=='status_update'
       bulk_actions.status_update(current_tenant, params, bulkaction_id, username)
     when activity=='delete' && params["controller"]=="orders"
-      bulk_actions.delete(current_tenant, bulkaction_id)
+      bulk_actions.delete(current_tenant, bulkaction_id, params)
       track_user(current_tenant, params, "Order Delete", "#{params["controller"].capitalize} Delete")
     when activity=='delete' && params["controller"]=="products"
       bulk_actions.delete(current_tenant, params, bulkaction_id, username)
