@@ -93,24 +93,28 @@ module Groovepacker
         time_started = Time.current
         begin
           products =
-            list_selected_products(params)
-            .includes(
-              :product_barcodes, :product_skus, :product_cats, :product_images,
-              :store, :product_kit_skuss, :product_inventory_warehousess,
-              order_items: [:order]
+          list_selected_products(params)
+          .includes(
+            :product_barcodes, :product_skus, :product_cats, :product_images,
+            :store, :product_kit_skuss, :product_inventory_warehousess,
+            order_items: [:order]
             )
-
-          product_names = products.first(25).map(&:name)
-          products_count = products.count
-
-          products_kit_skus =
+            
+            products.reload
+            product_names = products.first(25).map(&:name)
+            products_count = products.count
+            product_skus = ProductSku.find(products.ids).pluck(:sku)
+            EventLog.create(data: {product_skus: product_skus}, message: "The List of Deleted Products", user_id: User.find_by(username:username).id)
+                        
+            products_kit_skus =
             ProductKitSkus.where(option_product_id: products.map(&:id))
             .includes(product: :product_kit_skuss)
-
-          bulk_action.total = products.length
-          bulk_action.completed = 0
-          bulk_action.status = 'in_progress'
-          bulk_action.save
+            
+            bulk_action.total = products.length
+            bulk_action.completed = 0
+            bulk_action.status = 'in_progress'
+            bulk_action.save
+            
           products.each do |product|
             bulk_action.reload
             if bulk_action.cancel?
@@ -171,7 +175,6 @@ module Groovepacker
           object_per_sec = total_elapsed_time * 60 / products_count
 
           Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: product_names, elapsed_time:  total_elapsed_time, object_per_sec: object_per_sec})
-
         rescue Exception => e
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']

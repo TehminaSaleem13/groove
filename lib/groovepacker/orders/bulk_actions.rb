@@ -143,11 +143,13 @@ module Groovepacker
         $redis.del("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}")
       end
 
-      def delete(current_tenant, bulkaction_id)
+      def delete(current_tenant, bulkaction_id, params)
         Apartment::Tenant.switch!(current_tenant)
         bulk_action = GrooveBulkActions.find(bulkaction_id)
         orders = $redis.get("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
         orders = Marshal.load(orders)
+        order_increment_ids = orders.pluck(:increment_id)
+        add_delete_log(current_tenant, order_increment_ids, "List of deleted orders", params)
         order_ids = orders.pluck(:id)
         init_results
         bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
