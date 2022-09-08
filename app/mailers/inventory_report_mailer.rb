@@ -36,7 +36,7 @@ class InventoryReportMailer < ActionMailer::Base
       attachments[file_name] = { mime_type: 'text/csv', content: data }
       # attachments[file_name] = File.read("public/#{file_name}")
     end
-    subject = 'Sku Per Day Report [' + tenant || Apartment::Tenant.current + ']'
+    subject = "Inventory Projection Report [ #{tenant || Apartment::Tenant.current} ]"
     email = @product_inv_setting.report_email
     # mail to: email, subject: subject
     mail(to: email, subject: subject)

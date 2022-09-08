@@ -158,7 +158,7 @@ class ProductsController < ApplicationController
 
     render json: @result
   end
-  
+
   def get_report_products
     @products = do_get_report_products(params)
     @result = @result.merge({ 'products' => make_products_list(@products),
@@ -203,11 +203,11 @@ class ProductsController < ApplicationController
       export_product.delay(priority: 95).generate_barcode_with_delay(params, data, tenant_name)
     else
       export_product.generate_barcode_with_delay(params, data, tenant_name)
-    end  
+    end
     render json: @result
   end
 
-  def generate_numeric_barcode  
+  def generate_numeric_barcode
     data = {}
     data[:result] = @result
     tenant_name = Apartment::Tenant.current
@@ -218,7 +218,7 @@ class ProductsController < ApplicationController
       export_product = ExportSsProductsCsv.new
       export_product.generate_numeric_barcode_with_delay(params, data, tenant_name)
     end
-    render json: @result 
+    render json: @result
   end
 
   def search
@@ -439,7 +439,7 @@ class ProductsController < ApplicationController
   def get_inventory_setting
     setting = InventoryReportsSetting.last
     setting = setting.blank? ? InventoryReportsSetting.create : setting
-    @result["setting"] = JSON.parse(setting.to_json)
+    @result["setting"] = JSON.parse(setting.to_json).merge(current_time: Time.current.strftime('%I:%M %p'))
     @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue nil
     @result["products"] = {}
     reports = ProductInventoryReport.includes([:products]).all
@@ -449,7 +449,7 @@ class ProductsController < ApplicationController
                                   "scheduled" => report.scheduled, "type" => report.type,
                                   "selected_id" => report.products.map(&:id),
                                   "is_locked" => report.is_locked }
-    end 
+    end
     render json: @result
   end
 
@@ -486,7 +486,7 @@ class ProductsController < ApplicationController
     inventory_reports = ProductInventoryReport.where("id in (?)", ids)
     if inventory_reports.present?
       inventory_reports.each { |report| report.products.destroy_all}
-      inventory_reports.destroy_all 
+      inventory_reports.destroy_all
     end
     @result["status"] = true
     render json: @result
@@ -497,7 +497,7 @@ class ProductsController < ApplicationController
     begin
       product_inv_setting.report_days_option = params["option"]
       product_inv_setting.save
-    rescue 
+    rescue
     end
     render json: @result
   end
