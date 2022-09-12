@@ -468,7 +468,7 @@ class ProductsController < ApplicationController
     @result= {}
     setting = InventoryReportsSetting.last
     setting = setting.blank? ? InventoryReportsSetting.new : InventoryReportsSetting.last
-    atrs = params["setting"].except("updated_at", "created_at", "id")
+    atrs = params["setting"].except("updated_at", "created_at", "id", "current_time")
     setting.assign_attributes(atrs.permit!)
     setting.save
     @result["status"] = true

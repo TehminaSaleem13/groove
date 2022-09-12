@@ -66,6 +66,30 @@ class AddLogCsv
     CsvExportMailer.send_csv(url).deliver
   end
 
+  def send_bulk_event_logs(params)
+    store_id = 'complete'
+    current_tenant = Apartment::Tenant.current
+    header = ['Tenant Name', 'Timestamp', 'Event', 'User', 'Data']
+    file_data = header
+    params = params.to_unsafe_h.with_indifferent_access
+    tenants_list = params[:select_all] ? Tenant.all : Tenant.where(name: params[:tenant_names])
+
+    tenants_list.find_each do |tenant|
+      Apartment::Tenant.switch!(tenant.name)
+      file_data = CSV.generate do |csv|
+        csv << header if csv.count.eql? 0
+        events = EventLog.where('created_at > ?', 90.days.ago)
+        events.each do |record|
+          csv << [tenant.name, record.created_at.in_time_zone('EST').strftime('%e %b %Y %H:%M:%S %p'), record.message, record.user&.username, record.data]
+        end
+      end
+    end
+
+    GroovS3.create_csv(current_tenant, 'send_bulk_event_logs', store_id, file_data, :public_read)
+    url = GroovS3.find_csv(current_tenant, 'send_bulk_event_logs', store_id).url.gsub('http:', 'https:')
+    CsvExportMailer.send_bulk_record_csv(url).deliver
+  end
+
   def get_duplicates_order_info(params)
     tenants_list = params[:select_all] ? Tenant.all : Tenant.where(name: params[:tenant_names])
     tenants_list.find_each do |tenant|

@@ -97,6 +97,19 @@ RSpec.describe TenantsController, type: :controller do
       @tenant.destroy
     end
 
+    it 'Send Bulk Csv' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+      Apartment::Tenant.switch! tenant.name
+
+      request.accept = 'application/json'
+
+      post :bulk_event_logs, params: { tenant_names: [tenant.name] }
+      expect(response.status).to eq(200)
+
+      tenant.destroy
+    end
+
     context 'Admintools' do
       it 'fixes corrupt product data' do
         tenant = Apartment::Tenant.current

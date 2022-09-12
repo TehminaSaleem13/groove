@@ -82,6 +82,11 @@ class CsvExportMailer < ActionMailer::Base
     mail to: ['groovepacker@gmail.com', 'groovepackerservice@gmail.com','kcpatel006@gmail.com'], subject: "[#{ENV["RAILS_ENV"]}] Activity Log"
   end
 
+  def send_bulk_record_csv(url)
+    @url = url
+    mail to: ['groovepacker@gmail.com', 'groovepackerservice@gmail.com','kcpatel006@gmail.com'], subject: "Bulk Record Log"
+  end
+
   def send_duplicates_order_info(tenant, dup_order_increment_ids, dup_order_ids)
     @tenant = tenant
     @dup_order_increment_ids = dup_order_increment_ids

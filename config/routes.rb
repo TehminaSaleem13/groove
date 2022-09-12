@@ -369,6 +369,7 @@ Groovepacks::Application.routes.draw do
     collection do
       post 'delete_tenant'
       post 'fix_product_data'
+      post 'bulk_event_logs'
     end
     member do
       post 'create_duplicate'

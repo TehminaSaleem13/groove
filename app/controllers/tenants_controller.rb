@@ -181,6 +181,11 @@ class TenantsController < ApplicationController
     render json: {}
   end
 
+  def bulk_event_logs
+    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_bulk_event_logs", priority: 95).send_bulk_event_logs(params)
+    render json: {}
+  end
+
   def fix_product_data
     # FixProductData.new(params).delay(run_at: 1.seconds.from_now, queue: 'fix_products', priority: 95).call
     FixProductData.new(params).call
