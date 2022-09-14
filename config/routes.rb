@@ -440,6 +440,14 @@ Groovepacks::Application.routes.draw do
     get 'health', to: 'health_check#index'
   end
 
+  resources :webhooks, only: [] do
+    collection do
+      post '/shop/redact' => 'webhooks#delete_shop'
+      post '/customers/redact' => 'webhooks#delete_customer'
+      post '/customers/data_request' => 'webhooks#show_customer'
+    end
+  end
+
   get '*path' => redirect('/')
   post '*path' => redirect('/')
 end
