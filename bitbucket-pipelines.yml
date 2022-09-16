@@ -11,7 +11,7 @@ pipelines:
   default:
     - step:
         name: Master Rails 5 Rspec
-        image: ruby:2.4.10
+        image: ruby:2.6.2
         caches:
           - bundler
         services:

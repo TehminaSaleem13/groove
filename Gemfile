@@ -37,14 +37,18 @@ group :development, :test do
   gem 'parallel_tests', '~> 2.29.1'
   gem 'protractor-rails'
   gem 'pry'
+  gem 'rubocop', require: false
+  gem 'rubocop-performance', require: false
+  # gem 'rubocop-rails', require: false
+  gem 'rubocop-rspec', require: false
   gem 'rspec-rails', '~> 3.5.0'
   gem 'rspec_junit_formatter', '~> 0.4.0.pre2'
-  gem 'rubycritic', '~> 2.0.0', require: false
+  gem 'rubycritic', require: false
 end
 
 group :test do
   gem 'capybara', '>= 2.0.1'
-  gem 'codeclimate-test-reporter', require: nil
+  gem 'codeclimate-test-reporter', require: false
   gem 'cucumber-rails', '>= 1.3.0', require: false
   gem 'database_cleaner', '>= 0.9.1'
   gem 'email_spec', '>= 1.4.0'
@@ -100,13 +104,12 @@ gem 'redis-rails', '5.0.1'
 gem 'redis-session-store'
 gem 'rollbar'
 gem 'rubber'
-gem 'rubocop', '~> 0.51.0', require: false
 gem 'ruby-mws', git: 'https://github.com/kcpatel006/ruby-mws.git'
 gem 'ruby_odata'
 gem 'rubyzip'
 gem 's3'
 gem 'savon'
-gem 'scout_apm', '2.6.10'
+gem 'scout_apm'
 gem 'shipping_easy', '0.7.1'
 gem 'shopify_api', '5.2.0'
 gem 'simple_form', '4.0.0'
