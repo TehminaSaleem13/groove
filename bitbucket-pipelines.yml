@@ -19,8 +19,7 @@ pipelines:
           - redis
         script:
           - bundle install
-          - bundle exec rake db:create RAILS_ENV=test
-          - bundle exec rake db:migrate RAILS_ENV=test
+          - RAILS_ENV=test bundle exec rails db:create db:migrate
           - RAILS_ENV=test rspec
           - pipe: sonarsource/sonarcloud-scan:1.2.1
             variables:
@@ -193,9 +192,9 @@ definitions:
     mysql:
       image: mysql:5.7
       environment:
-        MYSQL_DATABASE: pipelines
+        MYSQL_DATABASE: groovepacks_test
         MYSQL_ROOT_PASSWORD: root_user_password
-        MYSQL_USER: test_user
-        MYSQL_PASSWORD: test_user_password
+        MYSQL_USER: groovepacker
+        MYSQL_PASSWORD: password
     docker:
       memory: 4096
