@@ -346,6 +346,8 @@ Groovepacks::Application.routes.draw do
       get 'preferences'
       get 'help'
       post 'get_auth'
+      get 'connection_auth'
+      get 'connection_callback'
       get 'recurring_tenant_charges'
       get 'update_customer_plan'
       get 'finalize_payment'

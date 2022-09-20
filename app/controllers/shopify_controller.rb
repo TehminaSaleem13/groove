@@ -1,5 +1,5 @@
 class ShopifyController < ApplicationController
-  before_action :groovepacker_authorize!, :except => [:auth, :callback, :preferences, :help, :complete, :get_auth, :recurring_application_fee, :recurring_tenant_charges, :finalize_payment, :payment_failed, :invalid_request, :store_subscription_data, :get_store_data, :update_customer_plan]
+  before_action :groovepacker_authorize!, :except => [:auth, :connection_auth, :callback, :connection_callback, :preferences, :help, :complete, :get_auth, :recurring_application_fee, :recurring_tenant_charges, :finalize_payment, :payment_failed, :invalid_request, :store_subscription_data, :get_store_data, :update_customer_plan]
   skip_before_action  :verify_authenticity_token
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c",
@@ -210,14 +210,57 @@ class ShopifyController < ApplicationController
     #redirect_to subscriptions_path(plan_id: 'groove-solo', shopify: shop_name )
   end
 
+  # New Auth & Callback endpoints for Shopify Connection "GroovePacker Barcode Packing" 
+  def connection_auth
+    if params[:tenant]
+      Apartment::Tenant.switch!(params[:tenant])
+      store = Store.find(params[:store])
+      @shopify_credential = store.shopify_credential
+    end
+
+    auth_response = ShopifyAPI::Auth::Oauth.begin_auth(shop: params[:shop], redirect_path: '/shopify/connection_callback')
+
+    cookies[auth_response[:cookie].name] = {
+      expires: auth_response[:cookie].expires,
+      secure: true,
+      http_only: true,
+      value: auth_response[:cookie].value
+    }
+
+    @shopify_credential&.update_attributes(temp_cookies: cookies.to_h)
+
+    redirect_to auth_response[:auth_route]
+  end
+
+  def connection_callback
+    begin
+      tenant_name = $redis.get("tenant_name")
+      store_id = $redis.get("store_id")
+      Apartment::Tenant.switch!(tenant_name)
+      store = Store.find(store_id) rescue nil
+      shopify_credential = store.shopify_credential
+
+      auth_result = ShopifyAPI::Auth::Oauth.validate_auth_callback(
+        cookies: shopify_credential.temp_cookies,
+        auth_query: ShopifyAPI::Auth::Oauth::AuthQuery.new(request.parameters.symbolize_keys.except(:controller, :action))
+      )
+
+      shopify_credential.update_attributes(access_token: auth_result[:session].access_token, temp_cookies: {})
+
+      redirect_to "#{ENV["PROTOCOL"]}admin.#{ENV["FRONTEND_HOST"]}/#/shopify/complete"
+    rescue Exception => ex
+      on_demand_logger = Logger.new("#{Rails.root}/log/shopify_connection.log")
+      on_demand_logger.info("=========================================")
+      log = { tenant: Apartment::Tenant.current, params: request.parameters.symbolize_keys, error: ex, tenant_name: tenant_name, store_id: store_id }
+      on_demand_logger.info(log)
+      redirect_to "#{ENV["PROTOCOL"]}admin.#{ENV["FRONTEND_HOST"]}/#/shopify/failed"
+    end
+  end
+
   def disconnect
     store = Store.find(params[:id])
     @shopify_credential = store.shopify_credential
-    ShopifyAPI::Session.setup({:api_key => ENV['SHOPIFY_API_KEY'],:secret => ENV['SHOPIFY_SHARED_SECRET']})
-    session = ShopifyAPI::Session.new(@shopify_credential.shop_name + ".myshopify.com")
-    if @shopify_credential.update_attributes({
-                                               access_token: nil
-                                             })
+    if @shopify_credential.update_attributes(access_token: nil)
       render status: 200, json: 'disconnected'
     else
       render status: 304, json: 'not disconnected'
