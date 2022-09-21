@@ -216,7 +216,7 @@ module Groovepacker
           end
 
           def import_order_form_response(shipstation_order, order, shipments_response)
-            if shipstation_order.present? && !shipstation_order.persisted?
+            if shipstation_order.present? && !shipstation_order.persisted? && order['orderStatus'] != 'cancelled'
               import_order(shipstation_order, order)
               tracking_info = (shipments_response || []).find {|shipment| shipment["orderId"]==order["orderId"] && shipment["voided"]==false} || {} rescue {} if order['orderStatus'] == 'shipped'
               if tracking_info.blank? && order['orderStatus'] == 'shipped' && should_fetch_shipments?
@@ -237,6 +237,7 @@ module Groovepacker
               check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)
               remove_gp_tags_from_ss(order)
             else
+              delete_order_and_log_event(shipstation_order) if shipstation_order.persisted? && order['orderStatus'] == 'cancelled'
               @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import+1)
               @result[:previous_imported] = @result[:previous_imported] + 1
             end
@@ -396,6 +397,7 @@ module Groovepacker
               status_set_in_gp << "Awaiting Shipment"  if @credential.shall_import_awaiting_shipment
               status_set_in_gp <<  "Pending Fulfillment" if @credential.shall_import_pending_fulfillment
               status_set_in_gp << "Shipped" if @credential.shall_import_shipped
+              status_set_in_gp << 'Cancelled' if @credential.remove_cancelled_orders
               status_set_in_gp
             end
 
@@ -568,6 +570,11 @@ module Groovepacker
 
             def should_fetch_shipments?
               @credential.import_tracking_info && ((@credential.get_active_statuses.include? 'shipped') || @credential.tag_import_option || @import_item.import_type =="tagged")
+            end
+
+            def delete_order_and_log_event(order)
+              order.destroy
+              EventLog.create(data: { increment_id: order.increment_id, store_order_id: order.store_order_id }, message: 'Deleted Cancelled SS Order')
             end
         end
       end
