@@ -6,12 +6,14 @@ module Groovepacker
       def permission_url(_tenant_name, _is_admin = false)
         return if shopify_credential.shop_name.blank?
 
-        redirect_url + "?shop=#{shopify_credential.shop_name}.myshopify.com&tenant=#{Apartment::Tenant.current}&store=#{shopify_credential.store.id}"
+        session = ShopifyAPI::Session.new(shopify_credential.shop_name + '.myshopify.com')
+        scope = %w[read_products write_products read_orders write_orders read_all_orders read_fulfillments write_fulfillments]
+        session.create_permission_url(scope, redirect_url)
       end
 
       def redirect_url
         protocol = Rails.env.development? ? 'http://' : 'https://'
-        "#{protocol}admin.#{ENV['SITE_HOST']}/shopify/connection_auth"
+        "#{protocol}admin.#{ENV['SITE_HOST']}/shopify/auth"
       end
     end
   end

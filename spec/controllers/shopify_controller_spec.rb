@@ -18,11 +18,10 @@ RSpec.describe ShopifyController, type: :controller do
       @request.headers.merge! header
     end
 
-    # Not needed now 
-    # it 'Get Auth' do
-    #   request.accept = 'application/json'
-    #   post :get_auth, params: { shop_name: 'test_shop' }
-    #   expect(response.status).to eq(200)
-    # end
+    it 'Get Auth' do
+      request.accept = 'application/json'
+      post :get_auth, params: { shop_name: 'test_shop' }
+      expect(response.status).to eq(200)
+    end
   end
 end
