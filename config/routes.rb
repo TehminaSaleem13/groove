@@ -115,6 +115,7 @@ Groovepacks::Application.routes.draw do
       post 'change_orders_status'
       post 'clear_assigned_tote'
       post 'update_order_list'
+      post 'save_by_passed_log'
       post 'rollback'
       post 'remove_item_from_order'
       post 'update_item_in_order'

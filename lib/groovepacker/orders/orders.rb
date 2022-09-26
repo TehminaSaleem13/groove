@@ -54,6 +54,10 @@ module Groovepacker
         order.addactivity('Order Manually Moved To Scanned Status', username)
       end
 
+      def add_by_passed_activity(order,sku)
+        order.addactivity('Product instructions confirmation for SKU: '+sku.to_s+' bypassed ',@current_user.name,'by_passed')
+      end
+
       def generate_pick_list(orders)
         @orders, @pick_list, @depends_pick_list = orders, [], []
 

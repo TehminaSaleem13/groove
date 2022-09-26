@@ -210,6 +210,16 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def save_by_passed_log
+    #Finiding order in concern
+    if @order.nil?
+      set_status_and_message(false, "Cannot find Order", ['error_msg'])
+    else
+      @result = gp_orders_module.add_by_passed_activity(@order,params[:sku])
+    end
+    render json: @result
+  end
+
   def update_order_list
     #Finiding order in concern
     if @order.nil?
