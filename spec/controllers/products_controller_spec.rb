@@ -151,7 +151,7 @@ RSpec.describe ProductsController, :type => :controller do
       FactoryBot.create(:product_barcode, barcode: 'TESTBARCODE', product_id: product.id)
 
       ProductInventoryReport.first.update(type: true)
-      InventoryReportsSetting.first_or_create(report_email: 'kcpatel006@gmail.com', start_time: 7.day.ago, end_time: Time.current)
+      InventoryReportsSetting.first_or_create(report_email: 'kcpatel006@gmail.com', start_time: 7.day.ago, end_time: Time.current, time_to_send_report_email: Time.current)
 
       get :generate_product_inventory_report, params: { report_ids: ProductInventoryReport.ids }
       expect(response.status).to eq(200)
