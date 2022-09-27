@@ -1,4 +1,4 @@
 <h3>Inventory Report CSV</h3>
 <p><strong>Export Date/Time: </strong>
-  <%= @product_inv_setting.time_to_send_report_email.in_time_zone(GeneralSetting.new_time_zone).strftime("%a, %e %b %Y %H:%M:%S") %>
+  <%= Time.current.in_time_zone(GeneralSetting.new_time_zone).strftime("%a, %e %b %Y %H:%M:%S") %>
 </p>
