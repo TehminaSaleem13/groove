@@ -224,7 +224,7 @@ module Groovepacker
         def add_gp_scanned_tag(orderId)
           ss_tags_list = get_tags_list
 
-          gp_scanned_tag_id = ss_tags_list['gpscanned'] || -1
+          gp_scanned_tag_id = ss_tags_list['gp scanned'] || -1
           add_tag_to_order(orderId, gp_scanned_tag_id)
         end
 
