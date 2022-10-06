@@ -13,6 +13,6 @@ RSpec.describe ShipstationCredential, type: :model do
   end
 
   it 'return GPSCANNED tag name' do
-    expect(ShipstationRestCredential.new.gp_scanned_tag_name).to eq('GPSCANNED')
+    expect(ShipstationRestCredential.new.gp_scanned_tag_name).to eq('GP SCANNED')
   end
 end
