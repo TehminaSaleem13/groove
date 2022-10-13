@@ -225,7 +225,7 @@ module Groovepacker
           ss_tags_list = get_tags_list
 
           gp_scanned_tag_id = ss_tags_list['gp scanned'] || -1
-          add_tag_to_order(orderId, gp_scanned_tag_id)
+          add_tag_to_order(orderId, gp_scanned_tag_id) if gp_scanned_tag_id != -1
         end
 
         def find_orders_by_tag_and_status(tag_id, status, import_item = nil)
