@@ -3,10 +3,10 @@ module OrderMethodsHelper
 
   def add_gp_scanned_tag
     ss_credential = store&.shipstation_rest_credential
-    return unless ss_credential
-    
+    return unless ss_credential&.add_gpscanned_tag
+
     ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
-    ss_client.delay(run_at: 1.seconds.from_now, priority: 95).add_gp_scanned_tag(store_order_id)
+    ss_client.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_#{Apartment::Tenant.current}", priority: 95).add_gp_scanned_tag(store_order_id)
   end
 
   def get_se_old_shipments(result_order)
