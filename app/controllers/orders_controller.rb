@@ -504,13 +504,13 @@ class OrdersController < ApplicationController
     render json: result
   end
 
-  def update_order_address
+  def update_ss_label_order_data
     result = { status: true }
 
     begin
       order = Order.find_by(increment_id: params[:order_number])
 
-      name = params[:shipping_address][:name].split(' ')
+      name = params[:ss_label_data][:shipping_address][:name].split(' ')
       if name.present?
         order.firstname = name.first
         order.lastname = name[1..name.length].join(' ')
@@ -518,12 +518,13 @@ class OrdersController < ApplicationController
         order.firstname = ''
         order.lastname = ''
       end
-      order.address_1 = params[:shipping_address][:address1] || ''
-      order.address_2 = params[:shipping_address][:address2] || ''
-      order.state = params[:shipping_address][:state] || ''
-      order.city = params[:shipping_address][:city] || ''
-      order.postcode = params[:shipping_address][:postal_code] || ''
-      order.country = params[:shipping_address][:country] || ''
+      order.address_1 = params[:ss_label_data][:shipping_address][:address1] || ''
+      order.address_2 = params[:ss_label_data][:shipping_address][:address2] || ''
+      order.state = params[:ss_label_data][:shipping_address][:state] || ''
+      order.city = params[:ss_label_data][:shipping_address][:city] || ''
+      order.postcode = params[:ss_label_data][:shipping_address][:postal_code] || ''
+      order.country = params[:ss_label_data][:shipping_address][:country] || ''
+      order.ss_label_data = (order.ss_label_data || {}).merge({ weight: params[:ss_label_data][:weight].to_unsafe_h, dimensions: params[:ss_label_data][:dimensions].to_unsafe_h })
       order.save
     rescue
       result = { status: false }

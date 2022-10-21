@@ -130,7 +130,7 @@ Groovepacks::Application.routes.draw do
       get 'cancel_all'
       post 'create_ss_label'
       post 'get_realtime_rates'
-      post 'update_order_address'
+      post 'update_ss_label_order_data'
     end
     member do
       get 'print_shipping_label'

@@ -443,6 +443,16 @@ RSpec.describe OrdersController, type: :controller do
         result = JSON.parse(response.body)
         expect(result['status']).to be_falsy
       end
+
+      it 'update ss label data' do
+        order = FactoryBot.create :order, store_id: @store.id
+        
+        params = { order_number: order.increment_id, ss_label_data: { shipping_address: { name: 'sigma tester', address1: '781 WARWICK AVE', address2: nil, state: 'RI', postal_code: '02888-2601', city: 'WARWICKs', country: 'US'}, dimensions: { units: 'centimeters', length: 14, width: 65, height: 43 }, weight: { value: 13, units: 'pounds'} } }
+
+        post :update_ss_label_order_data, params: params
+        expect(response.status).to eq(200)
+        expect(order.reload.ss_label_data['weight']['value']).to eq '13'
+      end
     end
 
     it 'prints activity log' do
