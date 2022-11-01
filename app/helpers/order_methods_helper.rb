@@ -362,8 +362,8 @@ module OrderMethodsHelper
       order_ss_label_data['toAddress2'] = address_2
       order_ss_label_data['toCity'] = city
       order_ss_label_data['label_shortcuts'] = ss_rest_credential.label_shortcuts
-      order_ss_label_data['weight'] = {"value"=>10, "units"=>"ounces", "WeightUnits"=>1} if order_ss_label_data['weight'].values[0] == 0
-      order_ss_label_data['dimensions'] = {"length"=>15, "width"=>10, "height"=>5, "units"=>'cm'} if order_ss_label_data['dimensions'].nil?
+      order_ss_label_data['weight'] = { "value"=>nil, "units"=>"ounces", "WeightUnits"=>1} if order_ss_label_data['weight'].nil?
+      order_ss_label_data['dimensions'] = { "length"=>nil, "width"=>nil, "height"=>nil, "units"=>'cm'} if order_ss_label_data['dimensions'].nil?
       order_ss_label_data['available_carriers'].each do |carrier|
         carrier['visible'] = !(ss_rest_credential.disabled_carriers.include? carrier['code'])
         next unless carrier['visible']
