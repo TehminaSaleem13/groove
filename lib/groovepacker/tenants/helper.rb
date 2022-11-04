@@ -540,7 +540,11 @@ module Groovepacker
             end
           else
             begin
-              Stripe::Subscription.update(customer_subscription.id, plan: plan, prorate: true)
+              if customer_subscription.items.count > 1
+                Stripe::SubscriptionItem.create(subscription: customer_subscription.id, plan: plan, prorate: true)
+              else
+                Stripe::Subscription.update(customer_subscription.id, plan: plan, prorate: true)
+              end
               @updated_in_stripe = true
             rescue Exception => e
                Rollbar.error(e, e.message, Apartment::Tenant.current)
