@@ -77,12 +77,14 @@ module ShippingEasyHelper
     init_common_objects
     response = @client.get_single_order(order)
     res = response['orders'][0] rescue nil
-    if res && res['split_from_order_id']
-      response['orders'] = response['orders'].reject { |o| o['split_from_order_id'] != res['split_from_order_id'] }
-      import_orders_from_response(response, nil)
-    elsif res
-      import_single_order(res)
-    end
+    # if res && res['split_from_order_id']
+    #   response['orders'] = response['orders'].reject { |o| o['split_from_order_id'] != res['split_from_order_id'] }
+    #   import_orders_from_response(response, nil)
+    # elsif res
+    #   import_single_order(res)
+    # end
+    # TODO GROOV-2752 multiple order not import in ondemand FD(https://groovepacker.freshdesk.com/a/tickets/34000)
+    import_orders_from_response(response, nil)
     remove_duplicate_order_items
     @import_item.destroy rescue nil
   end
