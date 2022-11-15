@@ -7,6 +7,8 @@ class ShipstationRestCredential < ActiveRecord::Base
   serialize :label_shortcuts, Hash
   serialize :disabled_carriers, Array
   serialize :disabled_rates, Hash
+  serialize :presets, Hash
+  serialize :contracted_carriers, Array
 
   include AhoyEvent
   after_commit :log_events

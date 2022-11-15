@@ -470,6 +470,7 @@ class OrdersController < ApplicationController
       ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
       ss_label_data['available_carriers'].each do |carrier|
         carrier['visible'] = !(ss_credential.disabled_carriers.include? carrier['code'])
+        carrier['expanded'] = !(ss_rest_credential.contracted_carriers.include? carrier['code'])
         next unless carrier['visible']
         data = {
           carrierCode: carrier['code'],
