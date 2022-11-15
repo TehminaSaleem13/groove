@@ -69,7 +69,7 @@ class ExportSsProductsCsv
     check_broken_images_products.each do |product|
       filter_products << product if (check_broken_image(product.product_images) rescue true)
     end
-    products = filter_products + nil_images_products
+    products = filter_products
     result['filename'] = 'products-'+Time.current.to_s+'.csv'
     CSV.open("#{Rails.root}/public/csv/#{result['filename']}", "w") do |csv|
       data = ProductsHelper.products_csv(products, csv)
