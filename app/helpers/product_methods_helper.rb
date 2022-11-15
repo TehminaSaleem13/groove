@@ -256,4 +256,24 @@ module ProductMethodsHelper
     end
     result
   end
+
+  def broken_image?
+    broken_image = true
+    product_images.each do |image|
+      response = Net::HTTP.get_response(URI.parse(image.image))
+      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == '301'
+      response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == '301'
+      if response.code == '200' && !image.placeholder
+        broken_image = false
+        return broken_image
+      end
+    end
+    broken_image
+  rescue StandardError => e
+    on_demand_logger = Logger.new("#{Rails.root}/log/broken_images.log")
+    on_demand_logger.info("=========================================")
+    log = { tenant: Apartment::Tenant.current, product: self, error: e }
+    on_demand_logger.info(log)
+    true
+  end
 end
