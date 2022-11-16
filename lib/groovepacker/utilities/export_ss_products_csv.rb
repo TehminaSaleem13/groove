@@ -67,7 +67,7 @@ class ExportSsProductsCsv
     nil_images_products = Product.joins("LEFT OUTER JOIN product_images ON product_images.product_id = products.id").where("product_images.id IS NULL and products.id IN (?)", products.map(&:id))
     check_broken_images_products = products - nil_images_products
     check_broken_images_products.each do |product|
-      filter_products << product if (check_broken_image(product.product_images, result) rescue true)
+      filter_products << product if product.broken_image?
     end
     products = filter_products + nil_images_products
     result['filename'] = 'products-'+Time.current.to_s+'.csv'

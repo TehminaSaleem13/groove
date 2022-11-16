@@ -18,11 +18,7 @@ module ProductsService
       products = shopify_credential.fix_all_product_images ? Product.includes(:product_images).all : Product.includes(:product_images).where(store_id: params[:store_id])
       filter_product_ids = []
       products.each do |product|
-        filter_product_ids << product.id if begin
-                                               check_broken_image(product.product_images)
-                                             rescue
-                                               true
-                                             end
+        filter_product_ids << product.id if product.broken_image?
       end
 
       # Getting Products List
@@ -69,20 +65,6 @@ module ProductsService
       images.each do |image|
         product.product_images.create(image: image['src'])
       end
-    end
-
-    def check_broken_image(images)
-      broken_image = true
-      images.each do |image|
-        response = Net::HTTP.get_response(URI.parse(image.image))
-        response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == '301'
-        response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == '301'
-        if response.code == '200' && !image.placeholder
-          broken_image = false
-          return broken_image
-        end
-      end
-      broken_image
     end
   end
 end
