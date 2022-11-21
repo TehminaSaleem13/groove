@@ -260,7 +260,8 @@ module ProductMethodsHelper
   def broken_image?
     broken_image = true
     product_images.each do |image|
-      response = Net::HTTP.get_response(URI.parse(image.image))
+      encoded_url = URI.encode(image.image)
+      response = Net::HTTP.get_response(URI.parse(encoded_url))
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == '301'
       response = Net::HTTP.get_response(URI.parse(response.header['location'])) if response.code == '301'
       if response.code == '200' && !image.placeholder
