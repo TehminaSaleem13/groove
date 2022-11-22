@@ -468,10 +468,13 @@ class OrdersController < ApplicationController
       ss_credential = ShipstationRestCredential.find(params[:credential_id])
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
       ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
+      ss_label_data['available_carriers'] = ss_label_data['available_carriers'].select { |carrier| carrier['code'] == params[:carrier_code] } if params[:carrier_code]
       ss_label_data['available_carriers'].each do |carrier|
         carrier['visible'] = !(ss_credential.disabled_carriers.include? carrier['code'])
-        carrier['expanded'] = !(ss_rest_credential.contracted_carriers.include? carrier['code'])
+        carrier['expanded'] = !(ss_credential.contracted_carriers.include? carrier['code'])
+        next if params[:app] && !carrier['expanded']
         next unless carrier['visible']
+
         data = {
           carrierCode: carrier['code'],
           weight: params[:post_data][:weight].try(:permit!).try(:to_h),
@@ -540,7 +543,7 @@ class OrdersController < ApplicationController
       order = Order.includes(:store).find(params[:id])
       if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
         result = order.try_creating_label
-        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true)
+        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
         result[:error] = 'Insufficient data to create label' if !result[:status] && !result[:error_messages].present?
       else
         result[:status] = false
@@ -580,7 +583,7 @@ class OrdersController < ApplicationController
     begin
       order = Order.includes(:store).find(params[:id])
       if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
-        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true)
+        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
       else
         result[:status] = false
       end
@@ -588,7 +591,7 @@ class OrdersController < ApplicationController
       result[:status] = false
       result[:error] = e
     end
-    render json: result    
+    render json: result
   end
 
   private

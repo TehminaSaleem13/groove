@@ -2,12 +2,12 @@ class BoxController < ApplicationController
   before_action :groovepacker_authorize!
 
   def create
-    box = Box.find_or_create_by(:name => params[:name], :order_id => params[:order_id])  
+    box = Box.find_or_create_by(:name => params[:name], :order_id => params[:order_id])
     if box.save
       result = { box: box.as_json(only: [:id, :name]), ss_label_data: fetch_ss_label_data(params[:order_id])}
       return render json: result
     end
-    render json:  { status: false } 
+    render json:  { status: false }
   end
 
   def remove_from_box
@@ -19,7 +19,7 @@ class BoxController < ApplicationController
       else
         reset_single_order_item(order_item)
       end
-      @result = Hash.new 
+      @result = Hash.new
       @result[:unscanned_items] = @order.get_unscanned_items
       @result[:scanned_items] = @order.get_scanned_items
       @result[:scanning_count] = @order.scanning_count
@@ -47,8 +47,8 @@ class BoxController < ApplicationController
       order_id = box.order_id
       order = Order.where(id: order_id).last
       change_box_name =  check_sequence(box)
-      
-      if box.order_items.empty? && box.order_item_boxes.empty? 
+
+      if box.order_items.empty? && box.order_item_boxes.empty?
         add_activity_for_delete(order,box)
         box.destroy
       else
@@ -56,16 +56,16 @@ class BoxController < ApplicationController
           order_item = OrderItem.where(id: order_item_box.order_item_id).last
           order.addactivity("order item having sku #{order_item.product.primary_sku} with qty #{order_item_box.item_qty} is removed from #{box.try(:name)} due to box delete", current_user.username )
           order_item.reset_scanned
-        end  
-        add_activity_for_delete(order,box) 
+        end
+        add_activity_for_delete(order,box)
         box.destroy
       end
       change_sequence(change_box_name)
-    end  
+    end
 
-    if order.present? && order.status == "scanned" 
-      order.update_attributes(status: "awaiting") 
-    end 
+    if order.present? && order.status == "scanned"
+      order.update_attributes(status: "awaiting")
+    end
     render json:  { }
   end
 
@@ -79,18 +79,18 @@ class BoxController < ApplicationController
     order_item_box.item_qty = order_item_box.item_qty - 1
     order_item_box.save
     order_item.scanned_qty = order_item.scanned_qty - 1
-    
+
     if order_item.scanned_qty == 0
       order_item.reset_scanned
     else
       order_item.scanned_status = "partially_scanned"
       if order_item.clicked_qty > 0
-        order_item.clicked_qty = order_item.clicked_qty - 1 
+        order_item.clicked_qty = order_item.clicked_qty - 1
       end
     end
     if order_item.save
       addactivity(order_item, order_item_box.box)
-      order_item_box.destroy if order_item_box.item_qty == 0 
+      order_item_box.destroy if order_item_box.item_qty == 0
     end
   end
 
@@ -119,7 +119,7 @@ class BoxController < ApplicationController
     end
   end
 
-  def reset_kit kit, order_item_box 
+  def reset_kit kit, order_item_box
     kit.scanned_qty = kit.scanned_qty - 1
     if kit.scanned_qty == 0
       kit.clicked_qty = 0
@@ -145,17 +145,17 @@ class BoxController < ApplicationController
       if all_box > box.name
         change_box_name  << Box.where(order_id: order_id, name: all_box ).last.id
       end
-    end 
-    return  change_box_name 
+    end
+    return  change_box_name
   end
 
   def change_sequence(change_box_name)
     change_box_name.each do |id|
       box = Box.where(id: id).last
-      box_name = box.name   
-      new_name = box_name.gsub(box_name[4] ,(box_name[4].to_i - 1).to_s) 
+      box_name = box.name
+      new_name = box_name.gsub(box_name[4] ,(box_name[4].to_i - 1).to_s)
       save_new_name(new_name, box)
-    end   
+    end
   end
 
 
@@ -163,9 +163,9 @@ class BoxController < ApplicationController
     boxes = Box.where(order_id: order_id)
     boxes_name = boxes.pluck(:name)
     boxes.each do |box|
-      box_name = box.name 
+      box_name = box.name
       i = boxes_name.index(box_name) + 1
-      new_name = box_name.gsub(box_name[4] ,i.to_s) 
+      new_name = box_name.gsub(box_name[4] ,i.to_s)
       save_new_name(new_name, box)
     end
   end
@@ -181,12 +181,12 @@ class BoxController < ApplicationController
 
   def fetch_ss_label_data(order_id)
     ss_label_data = {}
-    return ss_label_data unless GeneralSetting.last.per_box_shipping_label_creation == 'per_box_shipping_label_creation_after_box' 
+    return ss_label_data unless GeneralSetting.last.per_box_shipping_label_creation == 'per_box_shipping_label_creation_after_box'
     ss_api_create_label = Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label)
     return ss_label_data unless ss_api_create_label
     order = Order.find(order_id)
     return ss_label_data if order.store.store_type != 'Shipstation API 2' || !order.store.shipstation_rest_credential.use_api_create_label
-    ss_label_data = order.ss_label_order_data
+    ss_label_data = order.ss_label_order_data(skip_trying: false, params: params)
     return ss_label_data
   rescue
     {}

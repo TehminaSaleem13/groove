@@ -33,6 +33,7 @@ module Expo
       @order_data[:multiple_lines_per_sku_accepted] = @db_order.store.shipping_easy_credential.multiple_lines_per_sku_accepted if @order_data[:store_type] == 'ShippingEasy'
       @order_data[:use_api_create_label] = @db_order.store.shipstation_rest_credential.use_api_create_label if @order_data[:store_type] == 'Shipstation API 2' && @db_order.store.shipstation_rest_credential.present?
       @order_data[:auto_click_create_label] = @db_order.store.shipstation_rest_credential.auto_click_create_label if @order_data[:store_type] == 'Shipstation API 2' && @db_order.store.shipstation_rest_credential.present?
+      @order_data[:print_ss_label] = @db_order.print_ss_label?
       @order_data
     end
 

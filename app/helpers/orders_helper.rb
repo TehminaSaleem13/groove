@@ -276,6 +276,7 @@ module OrdersHelper
       'ordernum' => order.increment_id,
       'itemslength' => itemslength,
       }
+    order_data[:print_ss_label] = order.print_ss_label?
     order_data[:order_info] = { 'id' => order.id,
       'store_name' => store_name,
       'notes' => order.notes_internal,

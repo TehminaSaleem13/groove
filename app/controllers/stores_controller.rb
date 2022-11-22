@@ -711,7 +711,7 @@ class StoresController < ApplicationController
     result = { status: true }
     begin
       order = Order.find(params[:id])
-      ss_label_data = order.ss_label_order_data
+      ss_label_data = order.ss_label_order_data(skip_trying: false, params: params)
       result[:ss_label_data] = ss_label_data
     rescue => e
       result[:status] = false

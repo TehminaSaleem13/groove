@@ -333,7 +333,7 @@ module OrderMethodsHelper
     result = { box: boxes.as_json(only: [:id, :name]), order_item_boxes: order_item_boxes.flatten, list: list   }
   end
 
-  def ss_label_order_data(skip_trying: false)
+  def ss_label_order_data(skip_trying: false, params: {})
     begin
       ss_rest_credential = store.shipstation_rest_credential
       order_ss_label_data = ss_label_data || {}
@@ -368,7 +368,9 @@ module OrderMethodsHelper
       order_ss_label_data['available_carriers'].each do |carrier|
         carrier['visible'] = !(ss_rest_credential.disabled_carriers.include? carrier['code'])
         carrier['expanded'] = !(ss_rest_credential.contracted_carriers.include? carrier['code'])
+        next if params[:app] && !carrier['expanded']
         next unless carrier['visible']
+
         data = {
           carrierCode: carrier['code'],
           fromPostalCode: order_ss_label_data['fromPostalCode'],
@@ -457,5 +459,11 @@ module OrderMethodsHelper
 
   def order_cup_direct_shipping
     store&.store_type == 'CSV' && store&.order_cup_direct_shipping && Tenant.find_by_name(Apartment::Tenant.current)&.order_cup_direct_shipping
+  end
+
+  def print_ss_label?
+    return false unless Tenant.find_by_name(Apartment::Tenant.current)&.ss_api_create_label
+
+    store&.store_type === 'Shipstation API 2' && store&.shipstation_rest_credential&.use_api_create_label
   end
 end
