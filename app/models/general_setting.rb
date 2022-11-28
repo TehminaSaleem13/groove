@@ -236,6 +236,17 @@ class GeneralSetting < ActiveRecord::Base
           LowInventoryLevel.delay(:run_at => time, :queue => "low_inventory_email_scheduled_#{tenant}", priority: 95).notify(self, tenant)
           job_scheduled = true
         end
+      elsif job_type == 'inv_report'
+        inv_report_setting = InventoryReportsSetting.all.first
+        if inv_report_setting.should_inv_report(time)
+          existing_jobs = Delayed::Job.where("queue LIKE ? and run_at >= ? and run_at <= ?", "%schedule_inventory_report_#{tenant}%", time.beginning_of_day , time.end_of_day)
+
+          if existing_jobs.any?
+            existing_jobs.destroy_all
+          end
+          InventoryReportMailer.delay(run_at: time.strftime('%H:%M:%S'), queue: "schedule_inventory_report_#{tenant}", priority: 95).auto_inventory_report(false, nil, nil, tenant)
+          job_scheduled = true
+        end
       elsif job_type == 'import_orders'
         if self.should_import_orders(date)
           Delayed::Job.where(queue: "import_orders_scheduled_#{tenant}").destroy_all
