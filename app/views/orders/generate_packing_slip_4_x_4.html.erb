@@ -6334,19 +6334,17 @@
             <% barcode_string = generate_order_barcode(@order.increment_id) %>
             <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:150px; width:480px; overflow:hidden;">
               <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto;width: 480px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 480}) %></div>
-            </div><br>
+            </div>
             <div style= "text-align:right; white-space:nowrap; width: 630px; text-overflow: ellipsis;">
               <p style= "font-size: 30px; text-align:right; width: 78%;"> Order # :<%= @order.increment_id %></p>
             </div>
           </div>
-          <br>
         </div>
       </div>
-      <br>
 
       <div class="span12">
           <span>
-            <span class="span2" style="font-weight: 700; font-size: 30px; margin-top: -20px; text-align: left;"><strong>Ship To:</strong></span>
+            <span class="span2" style="font-weight: 700; font-size: 30px; margin-top: -10px; text-align: left;"><strong>Ship To:</strong></span>
             <span class="span6" style="font-weight: 700; font-size: 40px; line-height: 36px; text-align: center;"><b><%= @order.firstname %> <%= @order.lastname %></b></span>
           </span>
       </div>
@@ -6417,7 +6415,7 @@
               <% product_kit_sku = order_item_kit_product.product_kit_skus%>
               <% order_count = order_count + order_item.qty * product_kit_sku.qty  %>
             <%end%>
-        <%end%>
+          <%end%>
         <% end %>
 
         <div class="row">
@@ -6444,7 +6442,7 @@
 
         <div class="span12">
             <span>
-              <span class="span2" style="font-weight: 700; font-size: 30px; margin-top: -20px; text-align: left;"><strong>Ship To:</strong></span>
+              <span class="span2" style="font-weight: 700; font-size: 30px; margin-top: -10px; text-align: left;"><strong>Ship To:</strong></span>
               <span class="span6" style="font-weight: 700; font-size: 40px; line-height: 36px; text-align: center;"><b> <%= @order.firstname %> <%= @order.lastname %></b></span>
             </span>
         </div>
