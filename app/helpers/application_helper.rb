@@ -83,6 +83,8 @@ module ApplicationHelper
     @page_height, @page_width = '11', '8.5'
 
     @page_height, @page_width = '6', '4' if GeneralSetting.get_packing_slip_size == '4 x 6'
+    @page_height, @page_width = '4', '4' if GeneralSetting.get_packing_slip_size == '4 x 4'
+    @page_height, @page_width = '2', '4' if GeneralSetting.get_packing_slip_size == '4 x 2'
 
     @size = GeneralSetting.get_packing_slip_size
     @orientation = GeneralSetting.get_packing_slip_orientation

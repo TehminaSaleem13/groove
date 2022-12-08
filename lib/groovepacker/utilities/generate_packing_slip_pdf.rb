@@ -73,28 +73,44 @@ class GeneratePackingSlipPdf
       include ApplicationHelper
     end
     @order = order
-    pdf_html = av.render :template => 'orders/generate_packing_slip.html', :layout => nil, :locals => {:@order => @order, :@boxes => boxes}
-    doc_pdf = WickedPdf.new.pdf_from_string(
-      pdf_html,
-      :orientation => orientation,
-      :page_height => page_height+'in',
-      :page_width => page_width+'in',
-      :save_only => true,
-      :no_background => false,
-      :zoom => 0.5,
-      :margin => {:top => '8',
-                  :bottom => '5',
-                  :left => '2',
-                  :right => '2'},
-      :header => {
-        :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),
-        :spacing => 3
-      },
-      :footer => {
-        :content => av.render(:template => 'orders/generate_packing_slip_header', :formats => [:pdf], :locals => {:@header => header}),
-        :spacing => 0
+    template = if page_width == '4' && page_height == '2'
+      'orders/generate_packing_slip_4_x_2.html'
+    elsif page_width == '4' && page_height == '4'
+      'orders/generate_packing_slip_4_x_4.html'
+    else
+      'orders/generate_packing_slip.html'
+    end
+    custom_template = template != 'orders/generate_packing_slip.html'
+    pdf_html = av.render :template => template, :layout => nil, :locals => {:@order => @order, :@boxes => boxes}
+    pdf_options = {
+      orientation: orientation,
+      page_height: page_height+'in',
+      page_width: page_width+'in',
+      save_only: true,
+      no_background: false,
+      margin: {
+        top: '0.5',
+        bottom: '0.5',
+        left: '0.5',
+        right: '0.5'
       }
-    )
+    }
+    pdf_options.merge!({
+      zoom: 0.5,
+      margin: { top: '8',
+                   bottom: '5',
+                   left: '2',
+                   right: '2'},
+      header: {
+        content: av.render(template: 'orders/generate_packing_slip_header', formats: [:pdf], locals: {header: header}),
+        spacing: 3
+      },
+      footer: {
+        content: av.render(template: 'orders/generate_packing_slip_header', formats: [:pdf], locals: {header: header}),
+        spacing: 0
+      }
+    }) unless custom_template
+    doc_pdf = WickedPdf.new.pdf_from_string(pdf_html, pdf_options)
     File.open(pdf_path, 'wb') do |file|
       file << doc_pdf
     end

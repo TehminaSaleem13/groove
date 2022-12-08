@@ -455,6 +455,13 @@ RSpec.describe OrdersController, type: :controller do
       end
     end
 
+    it 'Print Packing Slip' do
+      order = FactoryBot.create :order, store_id: @store.id
+
+      post :generate_packing_slip, params: {orderArray: [{id: order.id}]} 
+      expect(response.status).to eq(200)
+    end
+
     it 'prints activity log' do
       order = FactoryBot.create(:order, store_id: @store.id)
       order.addactivity('TEST ACTIVITY', @user.username)
