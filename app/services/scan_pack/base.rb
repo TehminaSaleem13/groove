@@ -144,7 +144,7 @@ module ScanPack
       File.open(reader_file_path, 'wb') do |file|
         file << doc_pdf
       end
-      base_file_name = File.basename(pdf_path)
+      base_file_name = File.basename(pdf_path).gsub('#', '')
       pdf_file = File.open(reader_file_path)
       GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
       pdf_file.close
