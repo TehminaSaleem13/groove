@@ -468,7 +468,10 @@ class OrdersController < ApplicationController
       ss_credential = ShipstationRestCredential.find(params[:credential_id])
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
       ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
-      ss_label_data['available_carriers'] = ss_label_data['available_carriers'].select { |carrier| carrier['code'] == params[:carrier_code] } if params[:carrier_code]
+      requested_carriers = params[:carrier_code].to_s.split(',').map(&:strip)
+      if requested_carriers.any?
+        ss_label_data['available_carriers'] = ss_label_data['available_carriers'].select { |carrier| requested_carriers.include? carrier['code'] }
+      end
       ss_label_data['available_carriers'].each do |carrier|
         carrier['visible'] = !(ss_credential.disabled_carriers.include? carrier['code'])
         carrier['expanded'] = !(ss_credential.contracted_carriers.include? carrier['code'])
