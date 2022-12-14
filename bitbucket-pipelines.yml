@@ -18,7 +18,9 @@ pipelines:
           - mysql
           - redis
         script:
+          - bundle config set path 'vendor/bundle'
           - bundle install
+          - bundle binstubs --all
           - RAILS_ENV=test bundle exec rails db:create db:migrate
           - RAILS_ENV=test rspec
           - pipe: sonarsource/sonarcloud-scan:1.2.1
