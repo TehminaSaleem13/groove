@@ -689,6 +689,17 @@ class StoresController < ApplicationController
     render json: @result
   end
 
+  def toggle_shopify_sync
+    @store = Store.find(params[:id])
+    if @store
+      sync_options = SyncOption.joins(product: :store).where(product: { stores: { id: @store.id }})
+      sync_options.update_all(sync_with_shopify: params[:type] == 'enable')
+    end
+
+    render json: { status: true }
+  end
+
+
   def update_store_list
     @result = {"status"=>true}
     store_list_update

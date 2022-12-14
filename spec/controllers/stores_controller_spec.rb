@@ -262,7 +262,27 @@ RSpec.describe StoresController, type: :controller do
 
       get :get_order_details, params: { order_no: '410382', store_id: shopify_store.id }
       expect(response.status).to eq(200)
-      expect(Order.count).to eq(1)
+      res = JSON.parse(response.body)
+      expect(res['status']).to be true
+    end
+
+    it 'Push Inventory' do
+      request.accept = 'application/json'
+
+      shopify_store = Store.where(store_type: 'Shopify').last
+
+      get :push_store_inventory, params: { id: shopify_store.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Toggle Sync Option' do
+      
+      request.accept = 'application/json'
+
+      shopify_store = Store.where(store_type: 'Shopify').last
+
+      get :toggle_shopify_sync, params: { id: shopify_store.id, type: "enable" }
+      expect(response.status).to eq(200)
     end
   end
 

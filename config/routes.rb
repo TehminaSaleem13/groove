@@ -249,6 +249,7 @@ Groovepacks::Application.routes.draw do
       get 'pull_store_inventory'
       get 'push_store_inventory'
       get 'check_imported_folder'
+      post 'toggle_shopify_sync'
     end
   end
 

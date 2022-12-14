@@ -62,7 +62,7 @@ module Groovepacker
         query_opts = { "limit" => 100 }.as_json
 
         add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? "?updated_at_min=#{shopify_credential.product_last_import.strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : ''
-        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i).strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : '' unless add_url.present?
+        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime("%Y-%m-%d %H:%M:%S").gsub(' ', '%20')}" : '' unless add_url.present?
 
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2019-10/products#{add_url}",
                                   query: query_opts,
@@ -89,7 +89,7 @@ module Groovepacker
         response = HTTParty.get('https://'+ shopify_credential.shop_name +
                                   '.myshopify.com/admin/products/' + product_id.to_s,
                                 headers: headers)
-        response
+        response['product']['variants']
       end
 
       def get_variant(product_variant_id)
@@ -102,10 +102,15 @@ module Groovepacker
         return response["variant"] || {}
       end
 
-      def update_inventory(sync_option, attrs)
-        response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{sync_option.shopify_product_variant_id}",
-                                body: attrs.to_json,
+      def update_inventory(attrs)
+        response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
+                                body: attrs.to_json, headers: headers)
+      end
+
+      def locations
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/locations.json",
                                 headers: headers)
+        response['locations'] || []
       end
 
       def headers
