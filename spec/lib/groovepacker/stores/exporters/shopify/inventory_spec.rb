@@ -7,15 +7,14 @@ describe Groovepacker::Stores::Exporters::Shopify::Inventory do
   describe '#inventory' do
     let(:params) { { select_all: true } }
     let(:credential) { create(:shopify_credential, store: store) }
-    let(:client) { Groovepacker::ShopifyRuby::Client.new(credential) }
-    let(:result) { Groovepacker::Stores::Exporters::Shopify::Inventory.new(credential: credential, store_handle: client).push_inventories }
+    let(:result) { Groovepacker::Stores::Exporters::Shopify::Inventory.new(Apartment::Tenant.current, credential.store_id).push_inventories }
     let(:shopify_product_variant_id) { '123123' }
 
     before do
       product = create(:product, :with_sku_barcode, store_id: store.id)
       create(:sync_option, product_id: product.id, sync_with_shopify: true, shopify_product_variant_id: shopify_product_variant_id)
-      allow(client).to receive(:get_variant).with(shopify_product_variant_id).and_return(inventory_item_id: shopify_product_variant_id)
-      allow(client).to receive(:locations).and_return([id: shopify_product_variant_id])
+      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:get_variant).with(shopify_product_variant_id).and_return(inventory_item_id: shopify_product_variant_id)
+      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:locations).and_return([id: shopify_product_variant_id])
     end
 
     it 'Push Inventory' do
