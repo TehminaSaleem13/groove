@@ -6,11 +6,12 @@ module Groovepacker
           include ProductsHelper
 
           def pull_inventories
+            Apartment::Tenant.switch! handler[:current_tenant] if handler[:store_handle]
             init_credential_and_client(handler)
 
             #products = Product.where(store_id: credential.store_id)
             products = Product.joins(:sync_option).where("sync_with_shopify=true and (shopify_product_variant_id IS NOT NULL or store_product_id IS NOT NULL)")
-            
+
             (products||[]).each do |product|
               begin
                 inv_wh = product.product_inventory_warehousess.first
@@ -22,7 +23,8 @@ module Groovepacker
                   update_product_inv_for_sync_option(product, shopify_product_inv, inv_wh)
                 end
               rescue Exception => ex
-                return ex
+                puts ex
+                next
               end
             end
           end
@@ -39,7 +41,7 @@ module Groovepacker
                 inv_wh.save!
               end
             end
-            
+
         end
       end
     end
