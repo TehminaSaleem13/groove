@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ElixirApi
   module Processor
     module CSV
@@ -20,8 +22,8 @@ module ElixirApi
         end
 
         def generate_mapping(map)
-         delete_index = 0
-          map.each_with_object({}) do |map_out, map_now|
+          delete_index = 0
+          map.each_with_object({}) do |map_out, _map_now|
             map_single_first_name = map_out[1].present? && map_out[1]['name']
             map.delete(delete_index.to_s) if map_single_first_name == 'Unmapped'
             delete_index += 1
@@ -32,9 +34,10 @@ module ElixirApi
                                      map_single[1]['value']
             next mapping unless map_single_first_value &&
                                 map_single_first_value != 'none'
+
             mapping[map_single_first_value] = {
               position: map_single[0].to_i,
-              action:  map_single[1][:action] || 'skip'
+              action: map_single[1][:action] || 'skip'
             }
           end
         end
