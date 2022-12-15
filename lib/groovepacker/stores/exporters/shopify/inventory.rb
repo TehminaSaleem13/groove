@@ -34,6 +34,8 @@ module Groovepacker
                 inventory_item_id: shopify_product_inv['inventory_item_id']
               }
 
+              sleep 0.5
+
               update_inv_on_shopify_for_sync_option(product, attrs)
             rescue Exception => e
               puts e

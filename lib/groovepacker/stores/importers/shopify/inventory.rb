@@ -27,6 +27,9 @@ module Groovepacker
               next if shopify_product_variant_id.blank?
 
               shopify_product_inv = @client.get_variant(shopify_product_variant_id)
+
+              sleep 0.5
+
               update_product_inv_for_sync_option(product, shopify_product_inv, inv_wh) unless shopify_product_inv.blank?
             rescue Exception => e
               puts e
