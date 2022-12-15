@@ -8,7 +8,7 @@ module ElixirApi
         }.freeze
 
         def host_url(tenant)
-          "https://#{tenant}.#{ENV['IMPORT_SITE_HOST']}"
+          "#{protocol}://#{tenant}.#{ENV['IMPORT_SITE_HOST']}"
         end
 
         def auth_params
@@ -37,6 +37,12 @@ module ElixirApi
               action:  map_single[1][:action] || 'skip'
             }
           end
+        end
+
+        private
+
+        def protocol
+          Rails.env.development? ? 'http' : 'https'
         end
       end
     end
