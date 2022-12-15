@@ -89,7 +89,7 @@ module Groovepacker
         response = HTTParty.get('https://'+ shopify_credential.shop_name +
                                   '.myshopify.com/admin/products/' + product_id.to_s,
                                 headers: headers)
-        response['product']['variants']
+        response
       end
 
       def get_variant(product_variant_id)
