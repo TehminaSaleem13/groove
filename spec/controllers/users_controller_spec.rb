@@ -36,5 +36,18 @@ RSpec.describe UsersController, type: :controller do
       expect(JSON.parse(response.body)['error_messages']).to eq("Can't Change Yearly Plan to Monthly")
       @tenant.destroy
     end
+
+    it 'Create Update User' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!("#{tenant}")
+      @tenant = Tenant.create(name: "#{tenant}")
+      user_role = FactoryBot.create(:role, name: 'spec_tester_role', add_edit_users: true)
+      @user = FactoryBot.create(:user, name: 'Scan Pack User', username: 'spec_tester', role: user_role)
+      request.accept = 'application/json'
+
+      post :createUpdateUser, params: {user: @user, role: user_role}, as: :json
+      expect(response.status).to eq(200)
+      @tenant.destroy
+    end
   end 
 end    
