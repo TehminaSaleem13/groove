@@ -96,11 +96,7 @@ module Groovepacker
           :create_backups => true,
           :restore_backups => true,
           edit_product_location: true,
-          edit_product_quantity: true,
-          edit_shipping_settings: true,
-          edit_visible_services: true,
-          add_edit_shortcuts: true,
-          add_edit_dimension_presets: true
+          edit_product_quantity: true
         },
         {
           :name => 'Super Admin',
@@ -134,11 +130,7 @@ module Groovepacker
           :create_backups => true,
           :restore_backups => true,
           edit_product_location: true,
-          edit_product_quantity: true,
-          edit_shipping_settings: true,
-          edit_visible_services: true,
-          add_edit_shortcuts: true,
-          add_edit_dimension_presets: true
+          edit_product_quantity: true
         },
         {
           :name => 'Admin',
@@ -172,11 +164,7 @@ module Groovepacker
           :create_backups => true,
           :restore_backups => false,
           edit_product_location: true,
-          edit_product_quantity: true,
-          edit_shipping_settings: true,
-          edit_visible_services: true,
-          add_edit_shortcuts: true,
-          add_edit_dimension_presets: true
+          edit_product_quantity: true
         },
         {
           :name => 'Manager',
@@ -210,11 +198,7 @@ module Groovepacker
           :create_backups => true,
           :restore_backups => false,
           edit_product_location: true,
-          edit_product_quantity: true,
-          edit_shipping_settings: true,
-          edit_visible_services: true,
-          add_edit_shortcuts: true,
-          add_edit_dimension_presets: true
+          edit_product_quantity: true
         },
         {
           :name => 'Scan & Pack User',
@@ -248,11 +232,7 @@ module Groovepacker
           :create_backups => false,
           :restore_backups => false,
           edit_product_location: false,
-          edit_product_quantity: false,
-          edit_shipping_settings: false,
-          edit_visible_services: false,
-          add_edit_shortcuts: false,
-          add_edit_dimension_presets: false
+          edit_product_quantity: false
         }
       ].each do |role|
         cur_role = Role.find_or_create_by(name: role[:name])
