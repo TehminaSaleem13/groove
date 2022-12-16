@@ -136,7 +136,7 @@ class SettingsController < ApplicationController
     printing_setting = PrintingSetting.all.last
     printing_setting = PrintingSetting.create if printing_setting.nil?
     if printing_setting.present?
-      @result['data']['settings'] =  @result['data']['settings'].as_json.merge('product_barcode_label_size'=> printing_setting.product_barcode_label_size)
+      @result['data']['settings'] =  @result['data']['settings'].as_json.merge('product_barcode_label_size'=> printing_setting.product_barcode_label_size, 'packing_slip_print_size'=> printing_setting.packing_slip_print_size)
     else
       @result['status'] &= false
       @result['error_messages'] = ['No printing settings available for the system. Contact administrator.']

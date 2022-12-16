@@ -89,7 +89,8 @@ module SettingsHelper
     # Add params.permit when upgradng to rails 4
     params.as_json(
       only: [
-        :product_barcode_label_size
+        :product_barcode_label_size,
+        :packing_slip_print_size
       ]
     )
   end
