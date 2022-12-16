@@ -199,7 +199,7 @@ module UsersHelper
       result['messages'].push('You can not grant or revoke super admin privileges.')
     else
       user_role = update_role(user_role, params[:role]) if user_role.custom && !user_role.display
-      update_user_settings(user_role, params[:role])
+      update_label_related_settings(user_role, params[:role])
       if user_role.name != @user.role.try(:name) && @new_user != true
         case user_role.name
         when "Scan & Pack User"
@@ -218,7 +218,7 @@ module UsersHelper
     end
   end
 
-  def update_user_settings(user_role, role)
+  def update_label_related_settings(user_role, role)
     user_role.edit_shipping_settings = (role['make_super_admin'] || (!role['edit_shipping_settings'].nil? && role['edit_shipping_settings']))
     user_role.edit_visible_services = (role['make_super_admin'] || (!role['edit_visible_services'].nil? && role['edit_visible_services']))
     user_role.add_edit_shortcuts = (role['make_super_admin'] || (!role['add_edit_shortcuts'].nil? && role['add_edit_shortcuts']))
