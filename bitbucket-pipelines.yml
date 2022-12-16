@@ -21,7 +21,7 @@ pipelines:
           - bundle install --path vendor/bundle
           - bundle binstubs --all
           - RAILS_ENV=test bundle exec rails db:create db:migrate
-          - RAILS_ENV=test rspec
+          - RAILS_ENV=test bundle exec rspec
           - pipe: sonarsource/sonarcloud-scan:1.2.1
             variables:
               EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
