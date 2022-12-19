@@ -1,7 +1,9 @@
-namespace :store do
-  desc "import orders from each and every store at the scheduled time"
+# frozen_string_literal: true
 
-  task :import_ordrs => :environment do
-    ImportOrders.delay(:run_at => 10.seconds.from_now, priority: 95).import_ordrs
+namespace :store do
+  desc 'import orders from each and every store at the scheduled time'
+
+  task import_ordrs: :environment do
+    ImportOrders.delay(run_at: 10.seconds.from_now, priority: 95).import_ordrs
   end
 end

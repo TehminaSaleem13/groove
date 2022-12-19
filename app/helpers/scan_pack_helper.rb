@@ -1,16 +1,17 @@
-module ScanPackHelper
+# frozen_string_literal: true
 
+module ScanPackHelper
   include OrdersHelper
   include ScanPack
 
-  def order_scan(input, state, id,store_order_id,options={})
+  def order_scan(input, state, id, store_order_id, options = {})
     order_scan_object = ScanPack::OrderScanService.new(
       options[:current_user], options[:session], input, state, id, store_order_id, options[:order_by_number]
     )
     order_scan_object.run
   end
 
-  def order_scan_v2(input, state, id,store_order_id,options={}, params)
+  def order_scan_v2(input, state, id, store_order_id, options = {}, params)
     order_scan_object = ScanPack::OrderScanServiceV2.new(
       options[:current_user], options[:session], input, state, id, store_order_id, params, options[:order_by_number]
     )
@@ -30,8 +31,7 @@ module ScanPackHelper
   #   true
   # end
 
-
-  def product_scan(input, state, id, box_id, options={})
+  def product_scan(input, state, id, box_id, options = {})
     product_scan_object = ScanPack::ProductScanService.new(
       [
         options[:current_user], options[:session],
@@ -41,7 +41,7 @@ module ScanPackHelper
     product_scan_object.run(options[:clicked], options[:serial_added])
   end
 
-  def product_scan_v2(input, state, id, box_id, options={})
+  def product_scan_v2(input, state, id, box_id, options = {})
     product_scan_object = Expo::NewProductScanServiceV2.new(
       [
         options[:current_user], options[:session],
@@ -83,52 +83,52 @@ module ScanPackHelper
   #   end
   # end
 
-  def scan_recording(input, state, id, options={})
+  def scan_recording(input, _state, id, options = {})
     scan_recording_object = ScanPack::ScanRecordingService.new(
       [options[:current_user], input, id]
-      )
+    )
     scan_recording_object.run
   end
 
-  def scan_verifying(input, state, id, options={})
+  def scan_verifying(input, _state, id, options = {})
     scan_verifying_object = ScanPack::ScanVerifyingService.new(
       [options[:current_user], input, id]
-      )
+    )
     scan_verifying_object.run
   end
 
-  def render_order_scan(input, state, id, options={})
+  def render_order_scan(input, state, id, options = {})
     render_order_scan_object = ScanPack::RenderOrderScanService.new(
       [options[:current_user], input, state, id]
-      )
+    )
     render_order_scan_object.run
   end
 
-  def scan_again_or_render_order_scan(input, state, id, options={})
+  def scan_again_or_render_order_scan(input, state, id, options = {})
     scan_again_or_render_order_scan_object = ScanPack::ScanAginOrRenderOrderScanService.new(
       [options[:current_user], input, state, id]
-      )
+    )
     scan_again_or_render_order_scan_object.run
   end
 
-  def order_edit_conf(input, state, id, options={})
+  def order_edit_conf(input, state, id, options = {})
     order_edit_conf_object = ScanPack::OrderEditConfService.new(
       [options[:session], input, state, id]
-      )
+    )
     order_edit_conf_object.run('order_edit_conf')
   end
 
-  def cos_conf(input, state, id, options={})
+  def cos_conf(input, state, id, options = {})
     cos_conf_object = ScanPack::CosConfService.new(
       [options[:session], input, state, id]
-      )
+    )
     cos_conf_object.run('cos_conf')
   end
 
-  def product_edit_conf(input, state, id, options={})
+  def product_edit_conf(input, state, id, options = {})
     product_edit_conf_object = ScanPack::ProductEditConfService.new(
       [options[:session], input, state, id]
-      )
+    )
     product_edit_conf_object.run('product_edit_conf')
   end
 
@@ -180,14 +180,11 @@ module ScanPackHelper
 
   def barcode_found_or_special_code(barcode)
     confirmation_code = User.find_by_confirmation_code(barcode)
-    unless confirmation_code.nil?
-      return true
-    end
-    if ScanPackSetting.is_action_code(barcode)
-      return true
-    end
+    return true unless confirmation_code.nil?
+    return true if ScanPackSetting.is_action_code(barcode)
+
     barcode_data = ProductBarcode.find_by_barcode(barcode)
-    return !barcode_data.nil?
+    !barcode_data.nil?
   end
 
   # def generate_packing_slip(order)
@@ -302,12 +299,12 @@ module ScanPackHelper
       @result['notice_messages'] = 'The order you have scanned is not available in GroovePacker. An import is already in progress so we are not able to request it directly. Please try scanning it again after the import completes.'
     else
       order_importer = Groovepacker::Stores::Importers::OrdersImporter.new(nil)
-      order_importer.delay(:run_at => 1.seconds.from_now, :queue => "on_demand_scan_#{Apartment::Tenant.current}_#{order_no_input}", priority: 95).search_and_import_single_order(tenant: Apartment::Tenant.current, order_no: order_no_input, user_id: @current_user.id)
-      #order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
-      if  store.present? && (store.on_demand_import == true || store.store_type == 'Shipstation API 2')
+      order_importer.delay(run_at: 1.seconds.from_now, queue: "on_demand_scan_#{Apartment::Tenant.current}_#{order_no_input}", priority: 95).search_and_import_single_order(tenant: Apartment::Tenant.current, order_no: order_no_input, user_id: @current_user.id)
+      # order_importer.search_and_import_single_order(tenant: current_tenant, order_no: order_no_input)
+      if store.present? && (store.on_demand_import == true || store.store_type == 'Shipstation API 2')
         @result['notice_messages'] = "It does not look like that order has been imported into GroovePacker. We'll attempt to import it in the background and you can continue scanning other orders while it imports."
       elsif store.present? && store.on_demand_import_v2 == true
-        @result["on_demand"] = true
+        @result['on_demand'] = true
       end
     end
   end
@@ -323,8 +320,8 @@ module ScanPackHelper
     file.content = File.read(file_path)
     file.save
     file.url
-  rescue => e
+  rescue StandardError => e
     puts e.backtrace.join(', ')
-    return ''
+    ''
   end
 end

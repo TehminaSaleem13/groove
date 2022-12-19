@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Groovepacks::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
@@ -29,7 +31,7 @@ Groovepacks::Application.configure do
 
   # Force all access to the app over SSL, use Strict-Transport-Security, and use secure cookies.
   # config.force_ssl = true
-  config.action_mailer.default_url_options = { :host => ENV['HOST_NAME'] }
+  config.action_mailer.default_url_options = { host: ENV['HOST_NAME'] }
 
   # See everything in the log (default is :info)
   # config.log_level = :debug
@@ -65,20 +67,20 @@ Groovepacks::Application.configure do
   config.action_mailer.delivery_method = :smtp
 
   config.action_mailer.smtp_settings = {
-    :address => "email-smtp.us-east-1.amazonaws.com",
-    :port => 587,
-    :authentication => "login",
-    :enable_starttls_auto => true,
-    :domain => 'groovepacker.com',
-    :user_name => 'AKIAIB6EZSOUF5ZOMOKQ',
-    :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
-    :openssl_verify_mode  => 'none'
+    address: 'email-smtp.us-east-1.amazonaws.com',
+    port: 587,
+    authentication: 'login',
+    enable_starttls_auto: true,
+    domain: 'groovepacker.com',
+    user_name: 'AKIAIB6EZSOUF5ZOMOKQ',
+    password: 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
+    openssl_verify_mode: 'none'
   }
 
   $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
-    password: ENV['REDIS_PASSWORD'])
+                     password: ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes }
 
-  ENV['SHOPIFY_BILLING_IN_TEST'] = "true"
+  ENV['SHOPIFY_BILLING_IN_TEST'] = 'true'
 end

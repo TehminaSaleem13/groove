@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProductBarcode < ActiveRecord::Base
   belongs_to :product
   belongs_to :order_item
@@ -16,6 +18,7 @@ class ProductBarcode < ActiveRecord::Base
   def self.generate_barcode_from_sku(sku)
     product = sku.product
     return if product.try(:product_barcodes).present?
+
     if product.try :is_intangible
       product_barcode = product.product_barcodes.new
       product_barcode.barcode = product.primary_sku
@@ -34,10 +37,10 @@ class ProductBarcode < ActiveRecord::Base
 
   def update_packing_count
     self.is_multipack_barcode = true
-    self.packing_count = 1 if self.packing_count.blank? && self.barcode.present?
+    self.packing_count = 1 if packing_count.blank? && barcode.present?
   end
 
   def update_multibarcode
-    self.update_column(:is_multipack_barcode, true)
+    update_column(:is_multipack_barcode, true)
   end
 end

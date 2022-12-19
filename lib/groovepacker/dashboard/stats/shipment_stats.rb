@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Dashboard
     module Stats
@@ -8,7 +10,7 @@ module Groovepacker
           shipping_result = default_result
 
           @tenant =
-            tenants.find{ |tenant| tenant.name.eql?(name) } ||
+            tenants.find { |tenant| tenant.name.eql?(name) } ||
             Tenant.where(name: name).first
 
           current_tenant = Apartment::Tenant.current
@@ -35,11 +37,12 @@ module Groovepacker
         def get_avg_shipped(month)
           days = get_days(month)
           shipments = get_total_shipped(month)
-          return (shipments == 0 || days == 0) ? 0 : (shipments / days).to_i
+          shipments == 0 || days == 0 ? 0 : (shipments / days).to_i
         end
 
         def get_days(month)
           return 0 if @access_record_count == 0
+
           date_diff = 0
           last_created = @access_restrictions.last.created_at
           if month == 'current'
@@ -47,15 +50,15 @@ module Groovepacker
           elsif @access_record_count > 1 && month == 'last'
             date_diff = last_created - @access_restrictions[-2].created_at
           end
-          days = date_diff / 86400
-          ((date_diff % 86400) > 0) ? days + 1 : days
+          days = date_diff / 86_400
+          (date_diff % 86_400) > 0 ? days + 1 : days
         end
 
         def get_total_shipped(month)
           if month == 'current'
-            return @access_restrictions.last.total_scanned_shipments
+            @access_restrictions.last.total_scanned_shipments
           elsif @access_record_count > 1 && month == 'last'
-            return @access_restrictions[-2].total_scanned_shipments
+            @access_restrictions[-2].total_scanned_shipments
           end
         end
 
@@ -99,7 +102,7 @@ module Groovepacker
           accepted_data.keys.each do |key|
             if key == 'shipped_last'
               shipping_result[key] = @access_restrictions[-2][accepted_data[key]] if @access_record_count > 1
-            elsif key == "shipped_current"
+            elsif key == 'shipped_current'
               shipping_result[key] = @access_restrictions[-1][accepted_data[key]] if @access_record_count >= 1
             else
               shipping_result[key] = latest_access_data[accepted_data[key]]
@@ -113,15 +116,15 @@ module Groovepacker
               shipped = {}
               access_data = @access_restrictions[-i]
               next if access_data.created_at.nil?
+
               shipped['shipping_duration'] =
-                (access_data.created_at).strftime('%d %b') +
+                access_data.created_at.strftime('%d %b') +
                 ' - ' + (access_data.created_at + 1.month).strftime('%d %b')
               shipped['shipped_count'] = access_data.total_scanned_shipments.to_s
               shipping_result['shipped_last6'] << shipped
             else
               shipping_result['shipped_last6'] << { 'shipping_duration' => '-',
-                                                    'shipped_count' => '-'
-                                                  }
+                                                    'shipped_count' => '-' }
             end
           end
         end

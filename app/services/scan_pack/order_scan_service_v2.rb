@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   class OrderScanServiceV2 < ScanPack::Base
     include OrdersHelper
@@ -23,7 +25,7 @@ module ScanPack
       @orders = []
       @scanpack_settings = ScanPackSetting.all.first
       @session = session.merge!(most_recent_scanned_product: nil,
-                               parent_order_item: false)
+                                parent_order_item: false)
       @single_order = nil
       @single_order_result = { 'matched_orders' => [] }
       @scan_by_id = check_for_hex
@@ -56,9 +58,9 @@ module ScanPack
       collect_orders
       @single_order, @single_order_result = get_single_order_with_result
 
-      if @single_order_result["matched_orders"].count > 0 && @store_order_id.to_i != 0
+      if @single_order_result['matched_orders'].count > 0 && @store_order_id.to_i != 0
         @single_order = @orders.where(store_order_id: @store_order_id).first
-        @single_order_result["matched_orders"] = []
+        @single_order_result['matched_orders'] = []
       end
       do_if_single_order_not_present && return unless @single_order
       do_if_single_order_present
@@ -66,8 +68,8 @@ module ScanPack
 
     def collect_orders
       if (@scanpack_settings.scan_by_shipping_label || @scanpack_settings.scan_by_packing_slip_or_shipping_label) && !@order_by_number
-        @orders = Order.includes([:store, :order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 10').order("LENGTH(tracking_num) DESC")
-        @orders = Order.includes([:store, :order_items]).where('? LIKE CONCAT("%", tracking_num) and LENGTH(tracking_num) >= 10', @input).order("LENGTH(tracking_num) DESC") if @orders.blank?
+        @orders = Order.includes(%i[store order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 10').order('LENGTH(tracking_num) DESC')
+        @orders = Order.includes(%i[store order_items]).where('? LIKE CONCAT("%", tracking_num) and LENGTH(tracking_num) >= 10', @input).order('LENGTH(tracking_num) DESC') if @orders.blank?
         find_order if @orders.blank? && @scanpack_settings.scan_by_packing_slip_or_shipping_label
       else
         find_order
@@ -78,6 +80,7 @@ module ScanPack
     def find_order
       ["('awaiting')", "('onhold')", "('serviceissue', 'cancelled', 'scanned')"].each do |status|
         return unless @orders.blank?
+
         query = generate_query(status)
         @orders = Order.where(query)
       end
@@ -87,8 +90,8 @@ module ScanPack
       input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) }
       input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/, &:to_s) }
       se_order_input = input_without_special_char + ' ('
-      input_with_special_char_without_space = input_with_special_char.gsub(/\s+/, "")
-      input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, "")
+      input_with_special_char_without_space = input_with_special_char.gsub(/\s+/, '')
+      input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, '')
       # id = @scanpack_settings.scan_by_hex_number ?  "store_order_id" : "increment_id"
       # %(\
       #   (#{id} IN \(\
@@ -174,14 +177,14 @@ module ScanPack
     end
 
     def do_check_order_status_for_single_and_matched(
-                       matched_single, single_order_status, matched_single_status,
-                       order_placed_for_single_before_than_matched_single
+      matched_single, single_order_status, matched_single_status,
+      order_placed_for_single_before_than_matched_single
     )
-      %w(awaiting onhold serviceissue).each do |status|
+      %w[awaiting onhold serviceissue].each do |status|
         prev_states = []
         if matched_single_status == status && !single_order_status.in?(prev_states) && (
             single_order_status != status || order_placed_for_single_before_than_matched_single
-        )
+          )
           @single_order = matched_single
           break
         else
@@ -230,10 +233,10 @@ module ScanPack
       # Rails.cache.clear
 
       return unless @single_order.order_items.present? &&
-        (
-          (single_order_status.eql?('awaiting') && has_inactive_or_new_products) ||
-          (single_order_status.eql?('onhold') && !has_inactive_or_new_products)
-        )
+                    (
+                      (single_order_status.eql?('awaiting') && has_inactive_or_new_products) ||
+                      (single_order_status.eql?('onhold') && !has_inactive_or_new_products)
+                    )
 
       @single_order.update_order_status
     end
@@ -263,12 +266,20 @@ module ScanPack
           if product.is_kit == 1
             product.product_kit_skuss.each do |kit_item|
               kit_item.qty.times do
-                barcode = Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode rescue nil
+                barcode = begin
+                            Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode
+                          rescue StandardError
+                            nil
+                          end
                 single_scan(barcode, order_item)
               end
             end
           else
-            barcode = order_item.product.product_barcodes.map(&:barcode)[0] rescue nil
+            barcode = begin
+                        order_item.product.product_barcodes.map(&:barcode)[0]
+                      rescue StandardError
+                        nil
+                      end
             single_scan(barcode, order_item)
           end
         end
@@ -284,7 +295,7 @@ module ScanPack
         do_if_single_order_status_cancelled if single_order_status.eql?('cancelled')
         # if order has status of Awaiting Scanning
         do_if_single_order_status_awaiting if single_order_status.eql?('awaiting')
-      #----------------------------
+        #----------------------------
       end
       do_if_single_order_present_and_under_max_limit_of_shipment if @single_order
     end
@@ -319,7 +330,11 @@ module ScanPack
         if data.any?
           data.each do |item|
             product = item.product
-            sku = product.product_skus.first.sku rescue nil
+            sku = begin
+                    product.product_skus.first.sku
+                  rescue StandardError
+                    nil
+                  end
             item.order.addactivity('Item with sku ' + sku.to_s + ' having 0 qty removed', 'GroovePacker Automaticaly')
             item.delete
           end
@@ -339,12 +354,12 @@ module ScanPack
         if @current_user.can?('add_edit_products') || (
             @session[:product_edit_matched_for_current_user] &&
             @session[:product_edit_matched_for_order] == @single_order.id
-        )
+          )
           @single_order_result.merge!('product_edit_matched' => true,
                                       'inactive_or_new_products' => @single_order.get_inactive_or_new_products,
                                       'next_state' => 'scanpack.rfp.product_edit')
 
-            message = check_for_zero_qty_item
+          message = check_for_zero_qty_item
 
         else
           @session.merge!(product_edit_matched_for_current_user: false,
@@ -352,7 +367,7 @@ module ScanPack
                           product_edit_matched_for_order: false,
                           product_edit_matched_for_products: [])
           @single_order_result['next_state'] = 'scanpack.rfp.confirmation.product_edit'
-          message = "The order you've scanned has a status of Action Required because it contains items that are New or Inactive. Often one or more items in the order need to have a barcode added. This will require Product Edit permissions. <br />" +
+          message = "The order you've scanned has a status of Action Required because it contains items that are New or Inactive. Often one or more items in the order need to have a barcode added. This will require Product Edit permissions. <br />" \
                     'Please ask a user with product edit permissions to scan or enter their confirmation code if you wish to add the barcodes and continue packing this order. Alternatively you can scan a different packing slip to pack another order.'
         end
       else
@@ -424,7 +439,7 @@ module ScanPack
       end
     end
 
-    def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, current_user_name)
+    def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, _current_user_name)
       if @single_order.post_scanning_flag.nil?
         case true
         when scanpack_settings_post_scanning_option == 'Verify'
@@ -458,18 +473,18 @@ module ScanPack
         apply_second_action
       end
     end
-    
+
     def apply_second_action
       case @scanpack_settings.post_scanning_option_second
       when 'Verify'
-        unless @single_order.tracking_num.present?
+        if @single_order.tracking_num.present?
+          @single_order_result['next_state'] = 'scanpack.rfp.verifying'
+        else
           @single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
           @single_order.addactivity(
             'Tracking information was not imported with this order so the shipping label could not be verified ',
             @current_user.username
           )
-        else
-          @single_order_result['next_state'] = 'scanpack.rfp.verifying'
         end
       when 'PackingSlip'
         @single_order_result['next_state'] = 'scanpack.rfo'
@@ -483,7 +498,7 @@ module ScanPack
         set_order_scanned_state_and_result_data
       end
     end
-  
+
     def set_order_scanned_state_and_result_data
       @single_order.set_order_to_scanned_state(@current_user.username)
       @single_order_result['next_state'] = 'scanpack.rfo'

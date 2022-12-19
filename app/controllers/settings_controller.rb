@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class SettingsController < ApplicationController
   before_action :groovepacker_authorize!
   include SettingsHelper
@@ -19,7 +21,7 @@ class SettingsController < ApplicationController
 
   def export_csv
     puts 'export_csv'
-    @result = {'status' => true, 'messages' => []}
+    @result = { 'status' => true, 'messages' => [] }
     if current_user.can?('create_backups')
       GrooveBulkActions.execute_groove_bulk_action('export', params, current_user)
     else
@@ -88,19 +90,59 @@ class SettingsController < ApplicationController
   end
 
   def get_settings
-    @result = {'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'data'=> {}}
+    @result = { 'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'data' => {} }
     current_tenant = Tenant.find_by_name(Apartment::Tenant.current)
-    @result['scheduled_import_toggle'] = current_tenant.scheduled_import_toggle rescue false
-    @result['inventory_report_toggle'] = current_tenant.inventory_report_toggle rescue false
-    @result['is_multi_box'] = current_tenant.is_multi_box rescue false
-    @result['api_call'] = current_tenant.api_call rescue false
-    @result['allow_rts'] = current_tenant.allow_rts rescue false
-    @result['product_ftp_import'] = current_tenant.product_ftp_import rescue false
-    @result['groovelytic_stat'] = current_tenant.groovelytic_stat rescue true
+    @result['scheduled_import_toggle'] = begin
+                                           current_tenant.scheduled_import_toggle
+                                         rescue StandardError
+                                           false
+                                         end
+    @result['inventory_report_toggle'] = begin
+                                           current_tenant.inventory_report_toggle
+                                         rescue StandardError
+                                           false
+                                         end
+    @result['is_multi_box'] = begin
+                                current_tenant.is_multi_box
+                              rescue StandardError
+                                false
+                              end
+    @result['api_call'] = begin
+                            current_tenant.api_call
+                          rescue StandardError
+                            false
+                          end
+    @result['allow_rts'] = begin
+                             current_tenant.allow_rts
+                           rescue StandardError
+                             false
+                           end
+    @result['product_ftp_import'] = begin
+                                      current_tenant.product_ftp_import
+                                    rescue StandardError
+                                      false
+                                    end
+    @result['groovelytic_stat'] = begin
+                                    current_tenant.groovelytic_stat
+                                  rescue StandardError
+                                    true
+                                  end
     @result['is_active'] = current_user.active
-    @result['custom_product_fields'] = current_tenant.custom_product_fields rescue false
-    @result['packing_cam'] = current_tenant.packing_cam rescue false
-    @result['product_activity'] = current_tenant.product_activity_switch rescue false
+    @result['custom_product_fields'] = begin
+                                         current_tenant.custom_product_fields
+                                       rescue StandardError
+                                         false
+                                       end
+    @result['packing_cam'] = begin
+                               current_tenant.packing_cam
+                             rescue StandardError
+                               false
+                             end
+    @result['product_activity'] = begin
+                                    current_tenant.product_activity_switch
+                                  rescue StandardError
+                                    false
+                                  end
     @result['time_zone'] = Groovepacks::Application.config.time_zones
     all_zones = {}
     ActiveSupport::TimeZone.all.map { |e| all_zones["(GMT#{e.now.formatted_offset}) #{e.name} (#{e.tzinfo.identifier})"] = e.name }
@@ -110,7 +152,7 @@ class SettingsController < ApplicationController
     offset = general_setting.try(:time_zone).to_i
     # offset = general_setting.try(:dst) ? offset : offset + 3600
     @result['gp_tz_dst'] = check_for_dst(offset)
-    @result['pst_tz_dst'] = check_for_dst(-28799) # PST offset as per YML file
+    @result['pst_tz_dst'] = check_for_dst(-28_799) # PST offset as per YML file
     offset = check_for_dst(offset) ? offset + 3600 : offset
     # @result['current_time'] = (Time.current + offset).strftime('%I:%M %p')
     @result['current_time'] = Time.current.strftime('%I:%M %p')
@@ -122,12 +164,12 @@ class SettingsController < ApplicationController
     @result['ss_api_create_label'] = current_tenant&.ss_api_create_label
 
     if general_setting.present?
-      if params[:app]
-        @result['data']['settings'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
-      else
-        @result['data']['settings'] = general_setting
-      end
-      @result['data']['settings'] = @result['data']['settings'].as_json.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type"))
+      @result['data']['settings'] = if params[:app]
+                                      GeneralSetting.last.attributes.slice(*filter_general_settings)
+                                    else
+                                      general_setting
+                                    end
+      @result['data']['settings'] = @result['data']['settings'].as_json.merge('packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"))
     else
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
@@ -136,26 +178,26 @@ class SettingsController < ApplicationController
     printing_setting = PrintingSetting.all.last
     printing_setting = PrintingSetting.create if printing_setting.nil?
     if printing_setting.present?
-      @result['data']['settings'] =  @result['data']['settings'].as_json.merge('product_barcode_label_size'=> printing_setting.product_barcode_label_size)
+      @result['data']['settings'] = @result['data']['settings'].as_json.merge('product_barcode_label_size' => printing_setting.product_barcode_label_size)
     else
       @result['status'] &= false
       @result['error_messages'] = ['No printing settings available for the system. Contact administrator.']
     end
 
-    @result["email_address_for_billing_notification"] = general_setting.email_address_for_billing_notification
+    @result['email_address_for_billing_notification'] = general_setting.email_address_for_billing_notification
     render json: @result
   end
 
   def get_setting
-    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'data'=> {}}
+    @result = { 'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'data' => {} }
     scan_pack_setting = ScanPackSetting.all.first
     general_setting = GeneralSetting.all.first
 
     if general_setting.present? && scan_pack_setting.present?
       @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
-      @result['data']['general_setting'] = @result['data']['general_setting'].as_json.merge('packing_type'=> $redis.get("#{Apartment::Tenant.current}_packing_type")).merge(GeneralSetting.last.per_tenant_settings)
+      @result['data']['general_setting'] = @result['data']['general_setting'].as_json.merge('packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type")).merge(GeneralSetting.last.per_tenant_settings)
       scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
-      @result['data']["scanpack_setting"] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select("id, name, max_totes"))
+      @result['data']['scanpack_setting'] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select('id, name, max_totes'))
     else
       @result['status'] &= false
       @result['error_messages'] = ['No general settings Or Scan Pack settings  available for the system. Contact administrator.']
@@ -166,11 +208,15 @@ class SettingsController < ApplicationController
 
   def find_stripe_customer
     tenant = Apartment::Tenant.current
-    customer = Subscription.find_by_tenant_name(tenant) rescue nil
+    customer = begin
+                 Subscription.find_by_tenant_name(tenant)
+               rescue StandardError
+                 nil
+               end
   end
 
   def update_settings
-    @result = {'status' => true, 'error_messages' =>[], 'success_messages'=> [], 'notice_messages' => []}
+    @result = { 'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [] }
     general_setting = GeneralSetting.all.first
     printing_setting = PrintingSetting.all.last
     printing_setting = PrintingSetting.create if printing_setting.nil?
@@ -181,7 +227,7 @@ class SettingsController < ApplicationController
   end
 
   def cancel_bulk_action
-    result = {'status' => true, 'success_messages' => [],'notice_messages' => [], 'error_messages' => [],'bulk_action_cancelled_ids' => []}
+    result = { 'status' => true, 'success_messages' => [], 'notice_messages' => [], 'error_messages' => [], 'bulk_action_cancelled_ids' => [] }
 
     if params[:id].present?
       params[:id].each do |bulk_action_id|
@@ -205,12 +251,12 @@ class SettingsController < ApplicationController
   end
 
   def get_scan_pack_settings
-    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'settings'=> {}}
+    @result = { 'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'settings' => {} }
     scan_pack_setting = ScanPackSetting.all.first
 
     if scan_pack_setting.present?
       scan_pack_setting =   ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
-      @result['settings'] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select("id, name, max_totes"))
+      @result['settings'] = scan_pack_setting.as_json.merge!('scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select('id, name, max_totes'))
     else
       @result['status'] &= false
       @result['error_messages'] = ['No Scan Pack settings available for the system. Contact administrator.']
@@ -225,27 +271,27 @@ class SettingsController < ApplicationController
     tote_set = ToteSet.find(params[:id])
     if tote_set.totes.any?
       action_view = ScanPack::Base.new.do_get_action_view_object_for_html_rendering
-      file_name = Apartment::Tenant.current + Time.current.strftime('%d_%b_%Y_%I_%S_%M_%p') + "_tote_barcodes"
-      reader_file_path = Rails.root.join('public', 'pdfs', "tote_barcodes.pdf")
-      pdf_html = action_view.render :template => 'settings/tote_barcodes.html.erb', :layout => nil, :locals => {:@totes => tote_set.totes, :@tote_identifier => ScanPackSetting.last.tote_identifier.upcase}
+      file_name = Apartment::Tenant.current + Time.current.strftime('%d_%b_%Y_%I_%S_%M_%p') + '_tote_barcodes'
+      reader_file_path = Rails.root.join('public', 'pdfs', 'tote_barcodes.pdf')
+      pdf_html = action_view.render template: 'settings/tote_barcodes.html.erb', layout: nil, locals: { :@totes => tote_set.totes, :@tote_identifier => ScanPackSetting.last.tote_identifier.upcase }
       doc_pdf = WickedPdf.new.pdf_from_string(
         pdf_html,
-       :inline => true,
-       :save_only => false,
-       :orientation => 'Portrait',
-       :page_height => '4in',
-       :page_width => '6in',
-       :margin => {:top => '10', :bottom => '1', :left => '1', :right => '1'}
-     )
-     File.open(reader_file_path, 'wb') do |file|
-       file << doc_pdf
-     end
+        inline: true,
+        save_only: false,
+        orientation: 'Portrait',
+        page_height: '4in',
+        page_width: '6in',
+        margin: { top: '10', bottom: '1', left: '1', right: '1' }
+      )
+      File.open(reader_file_path, 'wb') do |file|
+        file << doc_pdf
+      end
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
       base_file_name = File.basename(pdf_path)
       pdf_file = File.open(reader_file_path)
       GroovS3.create_pdf(Apartment::Tenant.current, base_file_name, pdf_file.read)
       pdf_file.close
-      generate_url = ENV['S3_BASE_URL']+'/'+Apartment::Tenant.current+'/pdf/'+base_file_name
+      generate_url = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + base_file_name
       result[:status] = true
       result[:url] = generate_url
     else
@@ -255,7 +301,7 @@ class SettingsController < ApplicationController
     render json: result
   end
 
-  #This method will generate barcode pdf and upload it in S3 and return url from S3
+  # This method will generate barcode pdf and upload it in S3 and return url from S3
   def print_action_barcode
     require 'wicked_pdf'
     scan_pack_setting = ScanPackSetting.all.first
@@ -267,15 +313,15 @@ class SettingsController < ApplicationController
     @tenant_name = Apartment::Tenant.current
     file_name = @tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
     pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-    pdf_html = action_view.render :template => "settings/action_barcodes.html.erb", :layout => nil, :locals => {:@action_code => @action_code}
+    pdf_html = action_view.render template: 'settings/action_barcodes.html.erb', layout: nil, locals: { :@action_code => @action_code }
     doc_pdf = WickedPdf.new.pdf_from_string(
-       pdf_html,
-      :inline => true,
-      :save_only => false,
-      :orientation => 'Portrait',
-      :page_height => '1in',
-      :page_width => '3in',
-      :margin => {:top => '0', :bottom => '0',:left => '0',:right => '0'}
+      pdf_html,
+      inline: true,
+      save_only: false,
+      orientation: 'Portrait',
+      page_height: '1in',
+      page_width: '3in',
+      margin: { top: '0', bottom: '0', left: '0', right: '0' }
     )
     File.open(reader_file_path, 'wb') do |file|
       file << doc_pdf
@@ -284,13 +330,13 @@ class SettingsController < ApplicationController
     pdf_file = File.open(reader_file_path)
     GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
     pdf_file.close
-    generate_barcode = ENV['S3_BASE_URL']+'/'+@tenant_name+'/pdf/'+base_file_name
+    generate_barcode = ENV['S3_BASE_URL'] + '/' + @tenant_name + '/pdf/' + base_file_name
     # generate_barcode.save
-    render json: {url: generate_barcode}
+    render json: { url: generate_barcode }
   end
 
   def update_scan_pack_settings
-    @result = {'status' => true,'error_messages' => [],'success_messages' => [],'notice_messages' => []}
+    @result = { 'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [] }
 
     scan_pack_setting = ScanPackSetting.all.first
 
@@ -311,7 +357,11 @@ class SettingsController < ApplicationController
       scan_pack_setting = ScanPackSetting.first
       if params[:image] && params[:type].in?(%w[email_logo customer_page_logo])
         current_object = scan_pack_setting.send(params[:type])
-        GroovS3.delete_object(current_object.gsub("#{ENV['S3_BASE_URL']}/", '')) rescue nil
+        begin
+          GroovS3.delete_object(current_object.gsub("#{ENV['S3_BASE_URL']}/", ''))
+        rescue StandardError
+          nil
+        end
         file_name = "packing_cam/#{params[:type]}/#{params[:image].original_filename}"
         GroovS3.create_image(current_tenant, file_name, params[:image].read, params[:image].content_type)
         url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
@@ -334,14 +384,14 @@ class SettingsController < ApplicationController
 
   def search_by_product
     setting = GeneralSetting.all.first
-    search_toggle = !params["_json"]
+    search_toggle = !params['_json']
     setting.search_by_product = search_toggle
     setting.save
     render json: @result
   end
 
   def update_auto_time_zone
-    zone = ActiveSupport::TimeZone.all.select { |x| x.utc_offset == params[:offset].to_i*60 }.first
+    zone = ActiveSupport::TimeZone.all.select { |x| x.utc_offset == params[:offset].to_i * 60 }.first
     setting = GeneralSetting.last
     zone && setting && setting.update(new_time_zone: zone.name)
     render json: { status: zone.present?, zone: zone, time: Time.use_zone(GeneralSetting.new_time_zone) { Time.current.strftime('%I:%M %p') } }
@@ -356,24 +406,24 @@ class SettingsController < ApplicationController
   end
 
   def convert_offset_in_second(offset)
-    minutes = offset.split("-")[1].present? ? -offset.split(":")[1].to_i*60 : offset.split(":")[1].to_i*60
-    minutes + offset.split(":")[0].to_i*3600
+    minutes = offset.split('-')[1].present? ? -offset.split(':')[1].to_i * 60 : offset.split(':')[1].to_i * 60
+    minutes + offset.split(':')[0].to_i * 3600
   end
 
   def update_stat_status
     result = {}
     setting = GeneralSetting.all.first
-    setting.update_attribute(:stat_status, "preparing to update") if params[:percentage].to_i == 0
+    setting.update_attribute(:stat_status, 'preparing to update') if params[:percentage].to_i == 0
     setting.update_attribute(:stat_status, nil) if params[:percentage].to_i.between?(1, 99)
-    setting.update_attribute(:stat_status, "completed") if params[:percentage].to_i == 100
-    result[:status] = "true"
+    setting.update_attribute(:stat_status, 'completed') if params[:percentage].to_i == 100
+    result[:status] = 'true'
     result[:stat_status] = setting.stat_status
     render json: result
   end
 
   def update_email_address_for_packer_notes
     setting = GeneralSetting.all.first
-    setting.email_address_for_packer_notes = params["email"]
+    setting.email_address_for_packer_notes = params['email']
     setting.save
     render json: {}
   end

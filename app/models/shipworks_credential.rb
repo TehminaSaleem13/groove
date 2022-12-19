@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ShipworksCredential < ActiveRecord::Base
   # attr_accessible :auth_token, :store_id
 

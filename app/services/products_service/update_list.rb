@@ -1,6 +1,7 @@
+# frozen_string_literal: true
+
 module ProductsService
   class UpdateList < ProductsService::Base
-  
     include ProductMethodsHelper
 
     def initialize(*args)
@@ -17,16 +18,16 @@ module ProductsService
       end
       @product.reload
       @product.update_product_status
-    rescue => e
+    rescue StandardError => e
       puts e.inspect
     end
 
     def var_matches_attr_names?
-      %w(
+      %w[
         name status is_skippable type_scan_enabled
-        click_scan_enabled packing_instructions 
+        click_scan_enabled packing_instructions
         custom_product_1 custom_product_2 custom_product_3
-      ).include?(@var)
+      ].include?(@var)
     end
 
     def update_product
@@ -52,14 +53,14 @@ module ProductsService
     end
 
     def unmatched_var?
-      @var.in? %w(sku category barcode)
+      @var.in? %w[sku category barcode]
     end
 
     def location_params?
-      %w(
+      %w[
         location_primary location_secondary location_tertiary
         location_name qty_on_hand
-      ).include?(@var)
+      ].include?(@var)
     end
 
     def find_or_create_product_location
@@ -74,7 +75,7 @@ module ProductsService
 
     def update_product_location
       product_location = find_or_create_product_location
-      if @var.in? %w(location_primary location_secondary location_tertiary)
+      if @var.in? %w[location_primary location_secondary location_tertiary]
         product_location[@var] = @value
       elsif @var == 'location_name'
         product_location.name = @value

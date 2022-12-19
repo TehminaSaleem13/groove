@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 class Subscription < ActiveRecord::Base
-  # attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors, 
+  # attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors,
   #                 :subscription_plan_id, :status, :user_name, :password, :coupon_id,
   #                 :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
   #                 :progress, :customer_subscription_id, :created_at, :updated_at, :interval,
@@ -11,72 +13,69 @@ class Subscription < ActiveRecord::Base
   after_create :add_subscriber_to_campaignmonitor
   before_save :check_value_of_customer_subscription
 
-  
   def check_value_of_customer_subscription
-    self.customer_subscription_id = self.changes.values[0][0] if [nil, "", "null", "undefined"].include?(self.customer_subscription_id)
+    self.customer_subscription_id = changes.values[0][0] if [nil, '', 'null', 'undefined'].include?(customer_subscription_id)
   end
+
   def save_with_payment(one_time_payment)
-    begin
-      if valid?
-        on_demand_logger = Logger.new("#{Rails.root}/log/subscription_logs.log")
-        on_demand_logger.info("=========================================")
-        log = { tenant: Apartment::Tenant.current, subscription: self }
-        on_demand_logger.info(log)
+    if valid?
+      on_demand_logger = Logger.new("#{Rails.root}/log/subscription_logs.log")
+      on_demand_logger.info('=========================================')
+      log = { tenant: Apartment::Tenant.current, subscription: self }
+      on_demand_logger.info(log)
 
-        if self.coupon_id
-          Apartment::Tenant.switch!()
-          one_time_payment = calculate_otp(self.coupon_id, one_time_payment.to_i)
-        end
-        unless self.shopify_customer
-          create_subscribed_plan_if_not_exist
-          customer = create_customer(one_time_payment)
-        end
-
-        if customer
-          self.update_progress('customer_created')
-          self.stripe_customer_id = customer.id
-          create_tenant_and_transaction(customer)
-        elsif self.shopify_customer and self.all_charges_paid
-          self.update_progress('customer_created')
-          create_tenant_and_transaction()
-        end
-        self.status = 'completed'
-        self.is_active = true
-        self.save
+      if coupon_id
+        Apartment::Tenant.switch!
+        one_time_payment = calculate_otp(coupon_id, one_time_payment.to_i)
       end
-    rescue Stripe::CardError => e
-      update_status_and_send_email(e)
-      # logger.error "There was an error with Stripe: #{e.message}"
-      false
-    rescue Stripe::InvalidRequestError => e
-      update_status_and_send_email(e)
-      # logger.error "Stripe error while creating customer: #{e.message}"
-      # errors.add :base, "There was a problem with your credit card."
-      false
-    rescue Exception => e
-      update_status_and_send_email(e)
-      # logger.error "There was a problem with subscription process #{e.message}"
-      false
+      unless shopify_customer
+        create_subscribed_plan_if_not_exist
+        customer = create_customer(one_time_payment)
+      end
+
+      if customer
+        update_progress('customer_created')
+        self.stripe_customer_id = customer.id
+        create_tenant_and_transaction(customer)
+      elsif shopify_customer && all_charges_paid
+        update_progress('customer_created')
+        create_tenant_and_transaction
+      end
+      self.status = 'completed'
+      self.is_active = true
+      save
     end
+  rescue Stripe::CardError => e
+    update_status_and_send_email(e)
+    # logger.error "There was an error with Stripe: #{e.message}"
+    false
+  rescue Stripe::InvalidRequestError => e
+    update_status_and_send_email(e)
+    # logger.error "Stripe error while creating customer: #{e.message}"
+    # errors.add :base, "There was a problem with your credit card."
+    false
+  rescue Exception => e
+    update_status_and_send_email(e)
+    # logger.error "There was a problem with subscription process #{e.message}"
+    false
   end
 
   def create_subscribed_plan_if_not_exist
     interval = self.interval
     # interval = self.subscription_plan_id.split("-").first=="an" ? "year" : "month"
     currency = 'usd'
-    subsc_amount = self.amount.to_i
-    name = self.subscription_plan_id.titleize
-    subsc_plan_id = self.subscription_plan_id
+    subsc_amount = amount.to_i
+    name = subscription_plan_id.titleize
+    subsc_plan_id = subscription_plan_id
     begin
       create_plan(subsc_amount, interval, name, currency, subsc_plan_id, 30)
     rescue Stripe::InvalidRequestError => e
-
     end
   end
 
   def update_progress(progress)
     self.progress = progress
-    self.save
+    save
   end
 
   def calculate_otp(coupon_id, one_time_payment)
@@ -102,40 +101,37 @@ class Subscription < ActiveRecord::Base
 
   def check_status(coupon)
     status = coupon.is_valid
-    if coupon.max_redemptions
-      status &= coupon.max_redemptions > coupon.times_redeemed
-    end
+    status &= coupon.max_redemptions > coupon.times_redeemed if coupon.max_redemptions
     status
   end
 
-  def create_tenant_and_transaction(customer=nil)
-    
-    if self.shopify_customer
+  def create_tenant_and_transaction(customer = nil)
+    if shopify_customer
       self.customer_subscription_id = nil
-    elsif customer.present? and customer.subscriptions.data.first
+    elsif customer.present? && customer.subscriptions.data.first
       self.customer_subscription_id = customer.subscriptions.data.first.id
     else
       return
     end
     CreateTenant.new.create_tenant self
 
-    Apartment::Tenant.switch!()
-    create_transaction(customer) unless self.shopify_customer
-    self.update_progress('transaction_complete')
+    Apartment::Tenant.switch!
+    create_transaction(customer) unless shopify_customer
+    update_progress('transaction_complete')
   end
 
   def create_customer(one_time_payment)
     customer = Stripe::Customer.create(
-      card: self.stripe_user_token,
-      email: self.email,
-      plan: self.subscription_plan_id,
+      card: stripe_user_token,
+      email: email,
+      plan: subscription_plan_id,
       account_balance: one_time_payment
     )
     customer
   end
 
   def create_transaction(customer)
-    transactions = Stripe::BalanceTransaction.list(:limit => 1)
+    transactions = Stripe::BalanceTransaction.list(limit: 1)
     @transaction = transactions.first
     if @transaction
       self.stripe_transaction_identifier = @transaction.id
@@ -143,12 +139,13 @@ class Subscription < ActiveRecord::Base
       if @card_data
         Transaction.create(
           transaction_id: @transaction.id,
-          amount: self.amount,
+          amount: amount,
           card_type: @card_data.brand,
           exp_month_of_card: @card_data.exp_month,
           exp_year_of_card: @card_data.exp_year,
           date_of_payment: Date.today,
-          subscription_id: self.id)
+          subscription_id: id
+        )
       end
     end
   end
@@ -162,32 +159,33 @@ class Subscription < ActiveRecord::Base
       redeem_by: coupon_data.redeem_by,
       max_redemptions: coupon_data.max_redemptions,
       times_redeemed: coupon_data.times_redeemed,
-      is_valid: coupon_data.valid)
+      is_valid: coupon_data.valid
+    )
     coupon
   end
 
   def update_status_and_send_email(e)
     self.status = 'failed'
     self.transaction_errors = e.message
-    self.save
+    save
     TransactionEmail.failed_subscription(self, e).deliver
   end
 
   def get_progress_errors
     case progress
     when 'not_started'
-      "There was an error adding you as a customer."
-    when "customer_created"
-      "You have been added as a customer but we were unable to create an account." \
-      " an error creating your account. We will continue to try but if you do not " \
-      " receive an email at the provided address in 10 minutes please contact" \
-      " support@groovepacker.com so we can provide your account details and setup" \
-      " information."
+      'There was an error adding you as a customer.'
+    when 'customer_created'
+      'You have been added as a customer but we were unable to create an account.' \
+      ' an error creating your account. We will continue to try but if you do not ' \
+      ' receive an email at the provided address in 10 minutes please contact' \
+      ' support@groovepacker.com so we can provide your account details and setup' \
+      ' information.'
     when 'tenant_created'
-      "Your account has been created but we were unable to email you at the address given." \
-      " We will continue to try but if you do not receive it in 10 minutes please contact" \
-      " support@groovepacker.com so we can provide your account details and setup" \
-      " information."
+      'Your account has been created but we were unable to email you at the address given.' \
+      ' We will continue to try but if you do not receive it in 10 minutes please contact' \
+      ' support@groovepacker.com so we can provide your account details and setup' \
+      ' information.'
     else
       ''
     end
@@ -200,5 +198,4 @@ class Subscription < ActiveRecord::Base
   def initialize_campaingmonitor
     @cm ||= Groovepacker::CampaignMonitor::CampaignMonitor.new(subscriber: self)
   end
-
 end

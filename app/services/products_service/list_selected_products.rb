@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class ListSelectedProducts < ProductsService::Base
     include ProductsHelper
@@ -10,14 +12,14 @@ module ProductsService
     end
 
     def call
-      result =  if select_all_with_inverted?
-                  if search?
-                    do_search(params)
-                  else
-                    do_getproducts(params)
-                  end
-                else
-                  params[:productArray]
+      result = if select_all_with_inverted?
+                 if search?
+                   do_search(params)
+                 else
+                   do_getproducts(params)
+                 end
+               else
+                 params[:productArray]
                 end
 
       generate_result(result)
@@ -49,9 +51,7 @@ module ProductsService
         not_in.push(product['id'])
       end
       result.each do |single_product|
-        unless not_in.include? single_product['id']
-          result_rows.push('id' => single_product['id'])
-        end
+        result_rows.push('id' => single_product['id']) unless not_in.include? single_product['id']
       end
     end
 

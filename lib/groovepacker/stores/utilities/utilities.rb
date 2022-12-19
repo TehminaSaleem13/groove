@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Utilities
@@ -6,12 +8,12 @@ module Groovepacker
           self.handler = handler
         end
 
-        def verify_tags(tags)
+        def verify_tags(_tags)
           {}
         end
 
         def get_handler
-          self.handler
+          handler
         end
 
         def build_result
@@ -26,6 +28,7 @@ module Groovepacker
         end
 
         protected
+
         attr_accessor :handler
       end
     end

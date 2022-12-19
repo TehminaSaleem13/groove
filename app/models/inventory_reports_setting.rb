@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class InventoryReportsSetting < ActiveRecord::Base
   # attr_accessible :send_email_on_mon, :send_email_on_tue, :send_email_on_wed, :send_email_on_thurs,  :send_email_on_fri,   :send_email_on_sat, :send_email_on_sun, :auto_email_report, :start_time, :end_time, :time_to_send_report_email, :report_email, :report_days_option
 
@@ -5,10 +7,10 @@ class InventoryReportsSetting < ActiveRecord::Base
 
   def scheduled_inv_report
     if auto_email_inv_report_with_changed_hash
-      schedule_job_inv_report("inv_report", time_to_send_report_email)
+      schedule_job_inv_report('inv_report', time_to_send_report_email)
     else
       destroy_inv_report_email_scheduled
-    end    
+    end
   end
 
   def should_inv_report(date)
@@ -38,6 +40,6 @@ class InventoryReportsSetting < ActiveRecord::Base
 
   def destroy_inv_report_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "schedule_inventory_report_#{tenant}", Time.current).destroy_all
+    Delayed::Job.where('queue =? && run_at < ?', "schedule_inventory_report_#{tenant}", Time.current).destroy_all
   end
 end

@@ -1,21 +1,21 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
       module MagentoRest
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
-          
           def import
-            handler = self.get_handler
+            handler = get_handler
             credential = handler[:credential]
-            if credential.store_version=='2.x'
-							result = Groovepacker::Stores::Importers::MagentoRest::V2::OrdersImporter.new(handler).import
-						else
-							result = Groovepacker::Stores::Importers::MagentoRest::V1::OrdersImporter.new(handler).import
-						end
+            result = if credential.store_version == '2.x'
+                       Groovepacker::Stores::Importers::MagentoRest::V2::OrdersImporter.new(handler).import
+                     else
+                       Groovepacker::Stores::Importers::MagentoRest::V1::OrdersImporter.new(handler).import
+                     end
             update_orders_status
             result
           end
-          
         end
       end
     end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ElixirApi
   module Processor
     module CSV
@@ -8,19 +10,21 @@ module ElixirApi
 
         def initialize(order_params)
           @order_params = order_params
-          @order_params['params'].merge!(
-            import_summary_id: find_summary
-          )
+          @order_params['params'][:import_summary_id] = find_summary
           tenant = Apartment::Tenant.current
           $redis.set("total_orders_#{tenant}", Order.count)
-          $redis.set("new_order_#{tenant}",  0 )
+          $redis.set("new_order_#{tenant}", 0)
           $redis.set("update_order_#{tenant}", 0)
           $redis.set("skip_order_#{tenant}", 0)
-          last_order = Order.last.created_at rescue nil
-          $redis.set("last_order_#{tenant}",last_order)
-          $redis.set("import_action_#{tenant}", order_params["params"][:import_action])
-          $redis.set("file_name_#{tenant}",order_params["params"][:file_name])
-          $redis.set("is_create_barcode_#{tenant}",GeneralSetting.last.create_barcode_at_import)
+          last_order = begin
+                         Order.last.created_at
+                       rescue StandardError
+                         nil
+                       end
+          $redis.set("last_order_#{tenant}", last_order)
+          $redis.set("import_action_#{tenant}", order_params['params'][:import_action])
+          $redis.set("file_name_#{tenant}", order_params['params'][:file_name])
+          $redis.set("is_create_barcode_#{tenant}", GeneralSetting.last.create_barcode_at_import)
         end
 
         def self.cancel_import(tenant)
@@ -71,7 +75,7 @@ module ElixirApi
           key = redis_key_for_elixir_pid
           val = response['data']['pid'].to_s
           Rails.cache.write(key, val)
-        rescue
+        rescue StandardError
         end
 
         def find_elixir_process_pid
@@ -85,7 +89,9 @@ module ElixirApi
         # end
 
         def find_summary
-          OrderImportSummary.find_by_status('not_started').id rescue OrderImportSummary.create(import_summary_type: "import_orders", status: "not_started", user_id: 2).id
+          OrderImportSummary.find_by_status('not_started').id
+        rescue StandardError
+          OrderImportSummary.create(import_summary_type: 'import_orders', status: 'not_started', user_id: 2).id
         end
 
         # def today_start

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Groovepacks::Application.configure do
   # Settings specified here will take precedence over those in config/application.rb
 
@@ -19,7 +21,7 @@ Groovepacks::Application.configure do
 
   # Generate digests for assets URLs
   config.assets.digest = true
-  config.action_mailer.default_url_options = { :host => ENV['HOST_NAME'] }
+  config.action_mailer.default_url_options = { host: ENV['HOST_NAME'] }
   config.eager_load = true
   # Defaults to nil and saved in location specified by config.assets.prefix
   # config.assets.manifest = YOUR_PATH
@@ -65,22 +67,22 @@ Groovepacks::Application.configure do
   config.action_mailer.delivery_method = :smtp
 
   config.action_mailer.smtp_settings = {
-    :address => "email-smtp.us-east-1.amazonaws.com",
-    :port => 587,
-    :authentication => "login",
-    :enable_starttls_auto => true,
-    :domain => 'groovepacker.com',
-    :user_name => 'AKIAIB6EZSOUF5ZOMOKQ',
-    :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
-    :openssl_verify_mode  => 'none'
+    address: 'email-smtp.us-east-1.amazonaws.com',
+    port: 587,
+    authentication: 'login',
+    enable_starttls_auto: true,
+    domain: 'groovepacker.com',
+    user_name: 'AKIAIB6EZSOUF5ZOMOKQ',
+    password: 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
+    openssl_verify_mode: 'none'
   }
 
-  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port => ENV['REDIS_PORT'].to_i,
-    password: ENV['REDIS_PASSWORD'])
+  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
+                     password: ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes }
 
-  ENV['SHOPIFY_BILLING_IN_TEST'] = "false"
+  ENV['SHOPIFY_BILLING_IN_TEST'] = 'false'
 end
 Rails.application.configure do
   config.lograge.formatter = Lograge::Formatters::Json.new
@@ -100,7 +102,7 @@ Rails.application.configure do
       params: event.payload[:params],
       rails_env: Rails.env,
       exception: event.payload[:exception]&.first,
-      request_id: event.payload[:headers]['action_dispatch.request_id'],
+      request_id: event.payload[:headers]['action_dispatch.request_id']
     }.compact
   end
 end

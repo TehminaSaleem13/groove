@@ -11,6 +11,7 @@ namespace :check do
       begin
         import_item.each do |csv_import|
           next unless (Time.current.to_i - csv_import.updated_at.to_i) > 600
+
           time_of_import = csv_import.created_at
           file_name = $redis.get("file_name_#{tenant}")
           log = AddLogCsv.new

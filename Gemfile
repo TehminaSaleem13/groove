@@ -40,9 +40,9 @@ group :development, :test do
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
   # gem 'rubocop-rails', require: false
-  gem 'rubocop-rspec', require: false
   gem 'rspec-rails', '~> 3.5.0'
   gem 'rspec_junit_formatter', '~> 0.4.0.pre2'
+  gem 'rubocop-rspec', require: false
   gem 'rubycritic', require: false
 end
 

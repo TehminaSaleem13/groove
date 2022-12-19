@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProductSku < ActiveRecord::Base
   belongs_to :product
   belongs_to :order_item
@@ -8,19 +10,17 @@ class ProductSku < ActiveRecord::Base
   after_create :gen_barcode_from_sku_if_intangible_product
 
   def delete_empty
-    if self.sku.blank?
-      self.destroy
-    end
+    destroy if sku.blank?
   end
 
-  def self.get_temp_sku    
+  def self.get_temp_sku
     temp_skus = ProductSku.where("sku LIKE 'TSKU-%'").order(:sku)
-    while(1)
-      if temp_skus.length > 0
-        next_sku = "TSKU-" + (get_last_temp_sku_token(temp_skus) + 1).to_s
-      else
-        next_sku = "TSKU-1"
-      end
+    while 1
+      next_sku = if !temp_skus.empty?
+                   'TSKU-' + (get_last_temp_sku_token(temp_skus) + 1).to_s
+                 else
+                   'TSKU-1'
+                 end
       if !ProductSku.find_by_sku(next_sku)
         break
       else
@@ -34,6 +34,7 @@ class ProductSku < ActiveRecord::Base
   def gen_barcode_from_sku_if_intangible_product
     scanpack_settings = ScanPackSetting.last
     return unless scanpack_settings
+
     if scanpack_settings.intangible_setting_enabled && scanpack_settings.intangible_setting_gen_barcode_from_sku
       ProductBarcode.generate_barcode_from_sku(self)
     end
@@ -46,7 +47,6 @@ class ProductSku < ActiveRecord::Base
     temp_skus.each do |sku|
       sku_tokens << sku.sku.split('-').last.to_i
     end
-    sku_tokens.sort.last
+    sku_tokens.max
   end
-
 end

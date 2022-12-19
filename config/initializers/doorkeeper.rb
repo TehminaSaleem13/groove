@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Doorkeeper.configure do
   # Change the ORM that doorkeeper will use.
   # Currently supported options are :active_record, :mongoid2, :mongoid3,
@@ -10,18 +12,14 @@ Doorkeeper.configure do
     current_user || redirect_to(new_user_session_url)
   end
 
-  resource_owner_from_credentials do |routes|
-    u = User.find_for_database_authentication(:username => params[:username])
-    u if u && u.valid_password?(params[:password])
+  resource_owner_from_credentials do |_routes|
+    u = User.find_for_database_authentication(username: params[:username])
+    u if u&.valid_password?(params[:password])
   end
 
   # If you want to restrict access to the web interface for adding oauth authorized applications, you need to declare the block below.
   admin_authenticator do
-    if !current_user.nil? && current_user.name == 'gpadmin'
-      admin_user = current_user 
-    else
-      admin_user = nil
-    end
+    admin_user = (current_user if !current_user.nil? && current_user.name == 'gpadmin')
     admin_user || redirect_to(new_user_session_url)
   end
 
@@ -46,7 +44,7 @@ Doorkeeper.configure do
   # reuse_access_token
 
   # Issue access tokens with refresh token (disabled by default)
-   use_refresh_token
+  use_refresh_token
 
   # Provide support for an owner to be assigned to each registered application (disabled by default)
   # Optional parameter :confirmation => true (default false) if you want to enforce ownership of
@@ -57,7 +55,7 @@ Doorkeeper.configure do
   # Define access token scopes for your provider
   # For more information go to
   # https://github.com/doorkeeper-gem/doorkeeper/wiki/Using-Scopes
-  default_scopes  :read, :write
+  default_scopes :read, :write
   # optional_scopes :write, :update
 
   # Change the way client credentials are retrieved from the request object.
@@ -101,7 +99,7 @@ Doorkeeper.configure do
   #   http://tools.ietf.org/html/rfc6819#section-4.4.2
   #   http://tools.ietf.org/html/rfc6819#section-4.4.3
   #
-  grant_flows %w(authorization_code client_credentials refresh_token password)
+  grant_flows %w[authorization_code client_credentials refresh_token password]
 
   # Under some circumstances you might want to have applications auto-approved,
   # so that the user skips the authorization step.
@@ -113,4 +111,4 @@ Doorkeeper.configure do
   # WWW-Authenticate Realm (default "Doorkeeper").
   # realm "Doorkeeper"
 end
-#Doorkeeper.configuration.token_grant_types << "password"
+# Doorkeeper.configuration.token_grant_types << "password"

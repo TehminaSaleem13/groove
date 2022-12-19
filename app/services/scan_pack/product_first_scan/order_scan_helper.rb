@@ -26,7 +26,7 @@ module ScanPack
 
       def run_if_can_complete_any_order(can_complete_orders, product)
         @result[:scan_tote_to_complete] = true
-        tote = can_complete_orders.map(&:tote).sort_by(&:number).first
+        tote = can_complete_orders.map(&:tote).min_by(&:number)
         order = tote.order
         order_item = OrderItem.find(order.get_unscanned_items(limit: nil).first['order_item_id'])
         @result[:tote] = tote
@@ -42,12 +42,12 @@ module ScanPack
         tote.update_attributes(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = begin
                                         (current_item['scanned_qty'] + 1)
-                                      rescue
+                                      rescue StandardError
                                         nil
                                       end
         current_item['qty_remaining'] = begin
                                           (current_item['qty_remaining'] - 1)
-                                        rescue
+                                        rescue StandardError
                                           nil
                                         end
         @result[:barcode_input] = input
@@ -57,7 +57,7 @@ module ScanPack
       end
 
       def run_if_can_not_complete_any_order(orders, product)
-        tote = orders.map(&:tote).sort_by(&:number).first
+        tote = orders.map(&:tote).min_by(&:number)
         @result[:put_in_tote] = true
         order = tote.order
         order_item = order.order_items.where(product_id: product.id).first
@@ -74,7 +74,7 @@ module ScanPack
         tote.update_attributes(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = begin
                                         current_item['scanned_qty'] + 1
-                                      rescue
+                                      rescue StandardError
                                         nil
                                       end
         current_item['qty_remaining'] = (current_item['qty_remaining'] || 0) - 1
@@ -91,7 +91,7 @@ module ScanPack
         current_item = order.get_unscanned_items(limit: nil).select { |item| item['order_item_id'] == order_item.id }.first
         current_item['scanned_qty'] = begin
                                         current_item['scanned_qty'] + 1
-                                      rescue
+                                      rescue StandardError
                                         nil
                                       end
         current_item['qty_remaining'] = (current_item['qty_remaining'] || 0) - 1

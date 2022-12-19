@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   class ProductInstructionService < ScanPack::Base
     def initialize(current_user, session, params)
@@ -9,7 +11,7 @@ module ScanPack
     def run
       product_instruction if params_and_data_valid && (
         !@general_setting.strict_cc || @current_user.confirmation_code == @params[:code]
-        )
+      )
       @result
     end
 
@@ -38,7 +40,6 @@ module ScanPack
       if do_check_valid_order_item_or_valid_kit_product(next_item)
         @order.addactivity("Item instruction scanned for product - #{next_item['name']}", @current_user.username)
       end
-
     end
 
     def do_check_valid_order_item_or_valid_kit_product(next_item)
@@ -52,6 +53,5 @@ module ScanPack
       end
       @result['status']
     end
-
   end
 end

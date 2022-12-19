@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Orders
     class Import < Groovepacker::Orders::Base
@@ -9,22 +11,22 @@ module Groovepacker
         @result['activestoreindex'] = @params[:activestoreindex] unless @params[:activestoreindex].blank?
 
         begin
-          #import if magento products
+          # import if magento products
           import_result = get_context(store).import_orders
         rescue Exception => e
           set_status_and_message(false, e.message, ['push'])
         end
-        return @result, import_result
+        [@result, import_result]
       end
 
       def start_import_for_all
         tenant = Apartment::Tenant.current
-        tenant = Tenant.where(name: "#{tenant}").first
+        tenant = Tenant.where(name: tenant.to_s).first
         if tenant.uniq_shopify_import
-          if Store.where("status = '1' AND store_type != 'system'").where(store_type: "Shopify").length > 0
-            unless uniq_job_detail == nil
-              if ((@job_timestamp.to_time.to_f - Time.current.strftime("%Y-%m-%d %H:%M:%S.%L").to_time.to_f).abs < 3)
-                set_status_and_message(false, 'Import is already in progress', ['push', 'error_messages'])
+          unless Store.where("status = '1' AND store_type != 'system'").where(store_type: 'Shopify').empty?
+            unless uniq_job_detail.nil?
+              if (@job_timestamp.to_time.to_f - Time.current.strftime('%Y-%m-%d %H:%M:%S.%L').to_time.to_f).abs < 3
+                set_status_and_message(false, 'Import is already in progress', %w[push error_messages])
 
                 on_demand_logger = Logger.new("#{Rails.root}/log/shopify_import#{Apartment::Tenant.current}.log")
                 log = { message: 'Terminate import because of two worker working on same job' }
@@ -36,8 +38,8 @@ module Groovepacker
             update_uniq_job_table
             sleep 1
             if @job_id.present?
-              if UniqJobTable.where(job_id: "#{@job_id}").group_by(&:created_at).count >= 2
-                set_status_and_message(false, 'Import is already in progress', ['push', 'error_messages'])
+              if UniqJobTable.where(job_id: @job_id.to_s).group_by(&:created_at).count >= 2
+                set_status_and_message(false, 'Import is already in progress', %w[push error_messages])
 
                 on_demand_logger = Logger.new("#{Rails.root}/log/shopify_import#{Apartment::Tenant.current}.log")
                 log = { message: 'Terminate import because of two worker working on same job' }
@@ -49,7 +51,7 @@ module Groovepacker
         end
 
         if $redis.get("importing_orders_#{Apartment::Tenant.current}")
-          set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
+          set_status_and_message(false, 'Import is in progress', %w[push error_messages])
           return @result
         else
           $redis.set("importing_orders_#{Apartment::Tenant.current}", true)
@@ -59,26 +61,30 @@ module Groovepacker
         order_summary = OrderImportSummary.where(status: 'in_progress')
 
         if order_summary.present?
-          set_status_and_message(false, 'Import is in progress', ['push', 'error_messages'])
+          set_status_and_message(false, 'Import is in progress', %w[push error_messages])
           return @result
         end
 
-        Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) if Tenant.where(name: Apartment::Tenant.current).first.product_ftp_import rescue nil
+        begin
+          Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) if Tenant.where(name: Apartment::Tenant.current).first.product_ftp_import
+        rescue StandardError
+          nil
+        end
 
-        if Store.where("status = '1' AND store_type != 'system'").length > 0
+        if !Store.where("status = '1' AND store_type != 'system'").empty?
           add_import_to_delayed_job(order_summary)
-          st = Store.where(store_type: "Shipstation API 2",status: true)
+          st = Store.where(store_type: 'Shipstation API 2', status: true)
           data = []
           st.each do |s|
             if s.shipstation_rest_credential.api_key.nil? || s.shipstation_rest_credential.api_secret.nil?
-              set_status_and_message(false, 'Please click here to open your ShipStation connection settings and add your API details.', ['push', 'error_messages'])
+              set_status_and_message(false, 'Please click here to open your ShipStation connection settings and add your API details.', %w[push error_messages])
             end
           end
           @result['success_messages'].push('Scouring the interwebs for new orders...')
         else
-          set_status_and_message(false, 'You currently have no Active Stores in your Store List', ['push', 'error_messages'])
+          set_status_and_message(false, 'You currently have no Active Stores in your Store List', %w[push error_messages])
         end
-        return @result
+        @result
       end
 
       # def import_ftp_order(tenant)
@@ -125,102 +131,112 @@ module Groovepacker
       def create_order_import_summary(store, user, tenant)
         Apartment::Tenant.switch!(tenant)
         @order_summary = OrderImportSummary.last
-        @order_summary.update_attribute(:status, "not_started") if @order_summary.present?
-        @order_summary = OrderImportSummary.create(user_id: user.id, import_summary_type: "import_orders", status: 'not_started') if @order_summary.blank?
+        @order_summary.update_attribute(:status, 'not_started') if @order_summary.present?
+        @order_summary = OrderImportSummary.create(user_id: user.id, import_summary_type: 'import_orders', status: 'not_started') if @order_summary.blank?
         ImportItem.where("store_id=? and status!='in_progress'", store.id).destroy_all
         @order_summary.reload
         @import_item = @order_summary.import_items.build(store_id: store.id)
         @import_item.status = 'not_started'
         @import_item.save
         new_import_item = @import_item
-        @import_item = ImportItem.find(@import_item.id) rescue new_import_item
+        @import_item = begin
+                         ImportItem.find(@import_item.id)
+                       rescue StandardError
+                         new_import_item
+                       end
       end
 
       def import_shipworks(auth_token, request, status = 200)
-        return status if @params[:auth_token].nil? || request.headers["HTTP_USER_AGENT"] != 'shipworks'
+        return status if @params[:auth_token].nil? || request.headers['HTTP_USER_AGENT'] != 'shipworks'
 
         begin
-          #find store/credential by using the auth_token
+          # find store/credential by using the auth_token
           credential = ShipworksCredential.find_by_auth_token(auth_token)
           tenant = Apartment::Tenant.current
           value = Hash.from_xml(request.body.read)
           if Tenant.where(name: tenant).last.is_delay == false
             status = create_or_update_item(credential, status, value)
           else
-            return 401 unless !(credential.nil? || !credential.store.status)
+            return 401 if credential.nil? || !credential.store.status
+
             cred = {}
             cred[:id] = credential.id
             import_item = ImportItem.find_by_store_id(credential.store.id)
             import_item = ImportItem.create_or_update(import_item, credential)
             import_orders_obj = ImportOrders.new(@params)
-            import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "shipworks_importing_orders_#{tenant}", priority: 95).start_shipwork_import(cred, status, value, tenant)
+            import_orders_obj.delay(run_at: 1.seconds.from_now, queue: "shipworks_importing_orders_#{tenant}", priority: 95).start_shipwork_import(cred, status, value, tenant)
           end
         rescue Exception => e
           tenant = Apartment::Tenant.current
-          ImportMailer.failed({ tenant: tenant, import_item: @import_item, exception: e }).deliver rescue nil
+          begin
+            ImportMailer.failed(tenant: tenant, import_item: @import_item, exception: e).deliver
+          rescue StandardError
+            nil
+          end
           @import_item.status = 'failed'
           @import_item.message = e.message
           @import_item.save
           Rollbar.error(e, e.message, Apartment::Tenant.current)
           status = 401
         end
-        return status
+        status
       end
 
       private
 
-        def update_uniq_job_table
-          tenant = Apartment::Tenant.current
-          Apartment::Tenant.switch!("#{tenant}")
-          # @tenant = Tenant.where(name: "#{tenant}").first
-          if UniqJobTable.last.blank?
-            UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{tenant}_shopify_import-#{UniqJobTable.new.job_count + 1}", job_count: UniqJobTable.new.job_count + 1)
-          else
-            UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{tenant}_shopify_import-#{UniqJobTable.last.job_count + 1}", job_count: UniqJobTable.last.job_count + 1)
-          end
-          # uniq_job_table.update_attributes(job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L", worker_id: @worker_id, job_id: "#{tenant}_se_#{job_count}")
+      def update_uniq_job_table
+        tenant = Apartment::Tenant.current
+        Apartment::Tenant.switch!(tenant.to_s)
+        # @tenant = Tenant.where(name: "#{tenant}").first
+        if UniqJobTable.last.blank?
+          UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{tenant}_shopify_import-#{UniqJobTable.new.job_count + 1}", job_count: UniqJobTable.new.job_count + 1)
+        else
+          UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{tenant}_shopify_import-#{UniqJobTable.last.job_count + 1}", job_count: UniqJobTable.last.job_count + 1)
         end
+        # uniq_job_table.update_attributes(job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L", worker_id: @worker_id, job_id: "#{tenant}_se_#{job_count}")
+      end
 
-        def uniq_job_detail
-          tenant = Apartment::Tenant.current
-          Apartment::Tenant.switch!("#{tenant}")
-          @job_id = UniqJobTable.last.job_id unless UniqJobTable.last.blank?
-          @job_timestamp = UniqJobTable.last.job_timestamp unless UniqJobTable.last.blank?
-        end
+      def uniq_job_detail
+        tenant = Apartment::Tenant.current
+        Apartment::Tenant.switch!(tenant.to_s)
+        @job_id = UniqJobTable.last.job_id unless UniqJobTable.last.blank?
+        @job_timestamp = UniqJobTable.last.job_timestamp unless UniqJobTable.last.blank?
+      end
 
-        def add_import_to_delayed_job(order_summary)
-          order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started', display_summary: true)
-          # call delayed job
-          tenant = Apartment::Tenant.current
-          @params[:user_id] = @current_user.id
-          import_orders_obj = ImportOrders.new(@params)
-          Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
-          import_orders_obj.delay(:run_at => 1.seconds.from_now, :queue => "importing_orders_#{tenant}", priority: 95).import_orders tenant
-          # import_orders_obj.import_orders tenant
-        end
+      def add_import_to_delayed_job(_order_summary)
+        order_summary_info = OrderImportSummary.create(user_id: @current_user.id, status: 'not_started', display_summary: true)
+        # call delayed job
+        tenant = Apartment::Tenant.current
+        @params[:user_id] = @current_user.id
+        import_orders_obj = ImportOrders.new(@params)
+        Delayed::Job.where(queue: "importing_orders_#{tenant}").destroy_all
+        import_orders_obj.delay(run_at: 1.seconds.from_now, queue: "importing_orders_#{tenant}", priority: 95).import_orders tenant
+        # import_orders_obj.import_orders tenant
+      end
 
-        def create_or_update_item(credential, status, value)
-          return 401 unless !(credential.nil? || !credential.store.status)
-          @import_item = ImportItem.find_by_store_id(credential.store.id)
-          @import_item = ImportItem.create_or_update(@import_item, credential)
-          shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, @import_item)
-          Groovepacker::Stores::Context.new(shipwork_handler).import_order(value["ShipWorks"]["Customer"]["Order"]) if value["ShipWorks"]["Customer"].present?
-          change_status_if_not_failed
-          return status
-        end
+      def create_or_update_item(credential, status, value)
+        return 401 if credential.nil? || !credential.store.status
 
-        def change_status_if_not_failed
-          return unless @import_item.status != 'failed'
-          @import_item.update_attributes(:status => 'completed')
-        end
+        @import_item = ImportItem.find_by_store_id(credential.store.id)
+        @import_item = ImportItem.create_or_update(@import_item, credential)
+        shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, @import_item)
+        Groovepacker::Stores::Context.new(shipwork_handler).import_order(value['ShipWorks']['Customer']['Order']) if value['ShipWorks']['Customer'].present?
+        change_status_if_not_failed
+        status
+      end
 
-        def import_status_hash
-          return {  'total_imported' => 0,
-                    'success_imported' => 0,
-                    'previous_imported' => 0,
-                    'activestoreindex' => 0
-                  }
-        end
+      def change_status_if_not_failed
+        return unless @import_item.status != 'failed'
+
+        @import_item.update_attributes(status: 'completed')
+      end
+
+      def import_status_hash
+        { 'total_imported' => 0,
+          'success_imported' => 0,
+          'previous_imported' => 0,
+          'activestoreindex' => 0 }
+      end
     end
   end
 end

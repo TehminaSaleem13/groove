@@ -1,6 +1,7 @@
-class Mws::Apis::Orders
+# frozen_string_literal: true
 
-  def initialize(connection, overrides={})
+class Mws::Apis::Orders
+  def initialize(connection, overrides = {})
     @connection = connection
     @param_defaults = {
       market: 'ATVPDKIKX0DER'

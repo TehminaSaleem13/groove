@@ -1,9 +1,11 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module CampaignMonitor
     class Base
       include Rails.application.routes.url_helpers
 
-      def initialize(attrs={})
+      def initialize(attrs = {})
         @subscriber = attrs[:subscriber]
       end
 
@@ -16,9 +18,8 @@ module Groovepacker
       end
 
       def end_point
-        "https://api.createsend.com/api/v3.1"
+        'https://api.createsend.com/api/v3.1'
       end
-
     end
   end
 end

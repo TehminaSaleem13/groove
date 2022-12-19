@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :doo do
   desc 'Truncate Logs'
   task truncate_logs: :environment do

@@ -1,15 +1,16 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Products
     class Aliasing < Groovepacker::Products::Base
-
       def set_alias
         map_product_sku_and_unique_kit
-        if @result["status"]
+        if @result['status']
           @product_orig = Product.find(@params[:id])
           skus_len = @product_orig.product_skus.all.length
           barcodes_len = @product_orig.product_barcodes.all.length
           @product_aliases = Product.where(id: @params[:product_alias_ids])
-          if @product_aliases.length < 1
+          if @product_aliases.empty?
             @result['status'] = false
             @result['messages'].push('No products found to alias')
             return @result
@@ -26,82 +27,85 @@ module Groovepacker
       def map_product_sku_and_unique_kit
         product = Product.where(id: @params[:id]).first
         return unless product
+
         product_skus_ids = product.product_kit_skuss.map(&:option_product_id)
         return if (product_skus_ids & @params[:product_alias_ids]).blank?
+
         @result['status'] = false
-        @result["messages"].push('Can not add kit to itself')
+        @result['messages'].push('Can not add kit to itself')
       end
 
       private
-        def do_aliasing(product_alias, skus_len, barcodes_len)
-          #all SKUs of the alias will be copied. dont use product_alias.product_skus
-          copy_skus_of_alias(product_alias, skus_len)
-          #all Borcodes of the alias will be copied. dont use product_alias.product_skus
-          copy_barcodes_of_alias(product_alias, barcodes_len)
-          #update order items of aliased products to original products
-          update_order_items_of_aliased_products(product_alias)
-          #update kit. Replace the alias product with original product
-          update_productkitsku_to_orig_product(product_alias)
 
-          #Ensure all inventory data is copied over
-          #The code has been modified keeping in mind that we use only one warehouse per product as of now.
-          ProductInventoryWarehouses.copy_inventory_data_for_aliasing(product_alias, @product_orig)
+      def do_aliasing(product_alias, skus_len, barcodes_len)
+        # all SKUs of the alias will be copied. dont use product_alias.product_skus
+        copy_skus_of_alias(product_alias, skus_len)
+        # all Borcodes of the alias will be copied. dont use product_alias.product_skus
+        copy_barcodes_of_alias(product_alias, barcodes_len)
+        # update order items of aliased products to original products
+        update_order_items_of_aliased_products(product_alias)
+        # update kit. Replace the alias product with original product
+        update_productkitsku_to_orig_product(product_alias)
 
-          #destroy the aliased object
-          return if product_alias.destroy
-          #status will be updated to false if not able to destroy the product alias
-          @result['status'] &= false
-          @result['messages'].push('Error deleting the product alias id:'+product_alias.id)
+        # Ensure all inventory data is copied over
+        # The code has been modified keeping in mind that we use only one warehouse per product as of now.
+        ProductInventoryWarehouses.copy_inventory_data_for_aliasing(product_alias, @product_orig)
+
+        # destroy the aliased object
+        return if product_alias.destroy
+
+        # status will be updated to false if not able to destroy the product alias
+        @result['status'] &= false
+        @result['messages'].push('Error deleting the product alias id:' + product_alias.id)
+      end
+
+      def copy_skus_of_alias(product_alias, skus_len)
+        @product_skus = ProductSku.where(product_id: product_alias.id)
+        copy_sku_or_barocdes_of_aliased_product(@product_skus, skus_len, 'sku')
+      end
+
+      def copy_barcodes_of_alias(product_alias, barcodes_len)
+        @product_barcodes = ProductBarcode.where(product_id: product_alias.id)
+        copy_sku_or_barocdes_of_aliased_product(@product_barcodes, barcodes_len, 'barcode')
+      end
+
+      def copy_sku_or_barocdes_of_aliased_product(objects, objects_len, type)
+        objects.each do |object|
+          if type == 'sku'
+            p = Product.find(object.product_id)
+            @product_orig.add_product_activity("The Product with SKU #{p.product_skus.first.sku} was added as an alias to this product", @current_user.name)
+          end
+          object.product_id = @product_orig.id
+          object.order = objects_len
+          objects_len += 1
+          set_status_and_msg('Barcode', object) unless object.save
         end
+      end
 
-        def copy_skus_of_alias(product_alias, skus_len)
-          @product_skus = ProductSku.where(:product_id => product_alias.id)
-          copy_sku_or_barocdes_of_aliased_product(@product_skus, skus_len, "sku")
+      def update_order_items_of_aliased_products(product_alias)
+        @order_items = OrderItem.where(product_id: product_alias.id)
+        @order_items.each do |order_item|
+          order_item.product_id = @product_orig.id
+          set_status_and_msg('order item', order_item) unless order_item.save
+          order_item.add_kit_products
         end
+      end
 
-        def copy_barcodes_of_alias(product_alias, barcodes_len)
-          @product_barcodes = ProductBarcode.where(:product_id => product_alias.id)
-          copy_sku_or_barocdes_of_aliased_product(@product_barcodes, barcodes_len, "barcode")
-        end
-
-        def copy_sku_or_barocdes_of_aliased_product(objects, objects_len, type)
-          objects.each do |object|
-            if type == "sku"
-              p = Product.find(object.product_id)
-              @product_orig.add_product_activity("The Product with SKU #{p.product_skus.first.sku} was added as an alias to this product", @current_user.name)
-            end
-            object.product_id = @product_orig.id
-            object.order = objects_len
-            objects_len+=1
-            set_status_and_msg('Barcode', object) unless object.save
+      def update_productkitsku_to_orig_product(product_alias)
+        product_kit_skus = ProductKitSkus.where(option_product_id: product_alias.id)
+        product_kit_skus.each do |product_kit_sku|
+          product_kit_sku.option_product_id = @product_orig.id
+          unless product_kit_sku.save
+            @result['status'] &= false
+            @result['messages'].push('Error replacing aliased product in the kits')
           end
         end
+      end
 
-        def update_order_items_of_aliased_products(product_alias)
-          @order_items = OrderItem.where(:product_id => product_alias.id)
-          @order_items.each do |order_item|
-            order_item.product_id = @product_orig.id
-            set_status_and_msg('order item', order_item) unless order_item.save
-            order_item.add_kit_products
-          end
-        end
-
-        def update_productkitsku_to_orig_product(product_alias)
-          product_kit_skus = ProductKitSkus.where(option_product_id: product_alias.id)
-          product_kit_skus.each do |product_kit_sku|
-            product_kit_sku.option_product_id = @product_orig.id
-            unless product_kit_sku.save
-              @result['status'] &= false
-              @result['messages'].push('Error replacing aliased product in the kits')
-            end
-          end
-        end
-
-        def set_status_and_msg(obj_class, alias_obj)
-          @result['status'] &= false
-          @result['messages'].push("Error saving #{obj_class} for #{obj_class} id #{alias_obj.id}")
-        end
-
+      def set_status_and_msg(obj_class, alias_obj)
+        @result['status'] &= false
+        @result['messages'].push("Error saving #{obj_class} for #{obj_class} id #{alias_obj.id}")
+      end
     end
   end
 end

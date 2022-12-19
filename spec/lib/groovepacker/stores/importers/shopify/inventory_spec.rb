@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 describe Groovepacker::Stores::Importers::Shopify::Inventory do
@@ -7,7 +9,7 @@ describe Groovepacker::Stores::Importers::Shopify::Inventory do
   describe '#inventory' do
     let(:params) { { select_all: true } }
     let(:credential) { create(:shopify_credential, store: store) }
-    let(:result) { Groovepacker::Stores::Importers::Shopify::Inventory.new(Apartment::Tenant.current, credential.store_id).pull_inventories }
+    let(:result) { described_class.new(Apartment::Tenant.current, credential.store_id).pull_inventories }
     let(:shopify_product_variant_id) { '123123' }
     let(:inventory_quantity) { 5 }
 

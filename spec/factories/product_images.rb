@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 # Read about factories at https://github.com/thoughtbot/factory_girl
 
 FactoryBot.define do
   factory :product_image do
-    product {nil}
-    image {"MyString"}
+    product { nil }
+    image { 'MyString' }
   end
 end

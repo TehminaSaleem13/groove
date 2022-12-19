@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class SearchProducts < ProductsService::Base
     attr_accessor :params, :result_only
@@ -12,13 +14,14 @@ module ProductsService
       result_rows = Product.find_by_sql("#{base_query} #{@query_add}")
       preload_associations(result_rows)
       return result_rows if @result_only
+
       generate_result(result_rows, base_query)
     end
 
     private
 
     def setup_query_params
-      @supported_order_keys = %w(ASC DESC) # Caps letters only
+      @supported_order_keys = %w[ASC DESC] # Caps letters only
 
       set_sort_key
       set_sort_order
@@ -46,10 +49,10 @@ module ProductsService
     end
 
     def supported_sort_keys
-      %w(
+      %w[
         updated_at name sku status barcode location_primary location_secondary
         location_tertiary location_name cat qty store_type
-      )
+      ]
     end
 
     def set_sort_order
@@ -76,7 +79,7 @@ module ProductsService
     end
 
     def set_search_query_exact
-      @search_exact = ActiveRecord::Base.connection.quote("#{params[:search]}")
+      @search_exact = ActiveRecord::Base.connection.quote(params[:search].to_s)
     end
 
     def set_is_kit
@@ -90,11 +93,13 @@ module ProductsService
 
     def set_kit_query
       return if @is_kit == -1
+
       @kit_query = 'AND products.is_kit=' + @is_kit.to_s + ' '
     end
 
     def set_query_add
       return if select_all_or_inverted
+
       @query_add = ' LIMIT ' + @limit.to_s + ' OFFSET ' + @offset.to_s
     end
 
@@ -170,12 +175,12 @@ module ProductsService
     def generate_result(result_rows, base_query)
       {
         'products' => result_rows,
-        'count' =>  if select_all_or_inverted
-                      result_rows.length
-                    else
-                      Product.count_by_sql(
-                        %(SELECT count(*) as count from\(#{base_query}\) as tmp)
-                      )
+        'count' => if select_all_or_inverted
+                     result_rows.length
+                   else
+                     Product.count_by_sql(
+                       %(SELECT count(*) as count from\(#{base_query}\) as tmp)
+                     )
                     end
       }
     end

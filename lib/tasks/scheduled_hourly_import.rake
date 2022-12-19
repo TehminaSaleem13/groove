@@ -14,6 +14,7 @@ namespace :doo do
           result = setting.should_import_orders_today
 
           next unless result == true && setting.schedule_import_mode == 'Hourly'
+
           order_summary_info = OrderImportSummary.new
           order_summary_info.user_id = nil
           order_summary_info.status = 'not_started'

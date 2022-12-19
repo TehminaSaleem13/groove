@@ -1,10 +1,12 @@
+# frozen_string_literal: true
+
 class HomeController < ApplicationController
   layout 'angular'
 
   before_action :groovepacker_authorize!, except: [:check_tenant]
 
   def index
-    #if current user is not signed in, show login page
+    # if current user is not signed in, show login page
     if !user_signed_in?
       redirect_to new_user_session_path
     else
@@ -14,7 +16,7 @@ class HomeController < ApplicationController
   end
 
   def userinfo
-    user = Hash.new
+    user = {}
     unless current_user.nil?
       user['username'] = current_user.username
       user['name'] = current_user.name
@@ -34,17 +36,11 @@ class HomeController < ApplicationController
   end
 
   def request_socket_notifs
-    GenerateBarcode.where("status != 'completed' AND status != 'failed' AND status != 'cancelled'").each do |barcode|
-      barcode.emit_data_to_user
-    end
-    CsvProductImport.where("status != 'completed' AND status != 'cancelled'").each do |product_import|
-      product_import.emit_data_to_user
-    end
+    GenerateBarcode.where("status != 'completed' AND status != 'failed' AND status != 'cancelled'").each(&:emit_data_to_user)
+    CsvProductImport.where("status != 'completed' AND status != 'cancelled'").each(&:emit_data_to_user)
     import_summary = OrderImportSummary.top_summary
-    unless import_summary.nil?
-      import_summary.emit_data_to_user(true)
-    end
-    render json: {status: true}
+    import_summary&.emit_data_to_user(true)
+    render json: { status: true }
   end
 
   def import_status
@@ -53,13 +49,13 @@ class HomeController < ApplicationController
 
   def check_tenant
     result = true
-    tenant = params["tenant"]
+    tenant = params['tenant']
     begin
       Apartment::Tenant.switch! tenant
       result = true
-    rescue
+    rescue StandardError
       result = false
     end
-    render json: {status: result}
+    render json: { status: result }
   end
 end

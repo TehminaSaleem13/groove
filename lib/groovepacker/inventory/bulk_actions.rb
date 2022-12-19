@@ -1,13 +1,12 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Inventory
     class BulkActions
-
       include Groovepacker::Inventory::Helper
 
       def process_unprocessed(order_id = nil)
-        unless inventory_tracking_enabled?
-          return true
-        end
+        return true unless inventory_tracking_enabled?
 
         order = Order.where(id: order_id).first if order_id
         if order.try(:present?)
@@ -64,20 +63,20 @@ module Groovepacker
             bulk_action.save
             orders.each_with_index do |single_order, index|
               do_process_single(single_order)
-              if (index + 1) % check_length === 0 || index === (orders.length - 1)
-                bulk_action.reload
-                if bulk_action.cancel?
-                  bulk_action.status = 'cancelled'
-                  bulk_action.save
-                  do_unprocess_all
-                  general_setting = GeneralSetting.all.first
-                  general_setting.update_column(:inventory_tracking, false)
-                  GeneralSetting.unset_setting
-                  return true
-                end
-                bulk_action.completed = index + 1
+              next unless (index + 1) % check_length === 0 || index === (orders.length - 1)
+
+              bulk_action.reload
+              if bulk_action.cancel?
+                bulk_action.status = 'cancelled'
                 bulk_action.save
+                do_unprocess_all
+                general_setting = GeneralSetting.all.first
+                general_setting.update_column(:inventory_tracking, false)
+                GeneralSetting.unset_setting
+                return true
               end
+              bulk_action.completed = index + 1
+              bulk_action.save
             end
             process_unprocessed
             bulk_action.status = 'completed'
@@ -114,9 +113,7 @@ module Groovepacker
           bulk_action.completed = 0
           bulk_action.status = 'in_progress'
           bulk_action.save
-          unless inventory_tracking_enabled?
-            do_unprocess_all
-          end
+          do_unprocess_all unless inventory_tracking_enabled?
           bulk_action.total = 1
           bulk_action.completed = 1
           bulk_action.status = 'completed'
@@ -127,7 +124,7 @@ module Groovepacker
           bulk_action.status = 'failed'
           bulk_action.messages = ['Processing failed'] + [e.message]
           bulk_action.save
-          #Log e somewhere
+          # Log e somewhere
         end
         true
       end
@@ -148,18 +145,12 @@ module Groovepacker
       end
 
       def check_after_every(length)
-        if length <= 1000
-          return 5
-        end
-        if length <= 5000
-          return 25
-        end
-        if length <= 10000
-          return 50
-        end
-        return 100
-      end
+        return 5 if length <= 1000
+        return 25 if length <= 5000
+        return 50 if length <= 10_000
 
+        100
+      end
     end
   end
 end

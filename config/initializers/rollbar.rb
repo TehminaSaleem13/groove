@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 require 'rollbar'
 
 Rollbar.configure do |config|
@@ -7,14 +9,10 @@ Rollbar.configure do |config|
   config.access_token = '6fd94c05f4bd41cd8a788bd71752b80b'
 
   # Here we'll disable in 'test':
-  if Rails.env.test?
-    config.enabled = false
-  end
+  config.enabled = false if Rails.env.test?
 
-  if Rails.env.development?
-    config.enabled = false
-  end
-  #config.use_delayed_job
+  config.enabled = false if Rails.env.development?
+  # config.use_delayed_job
   # By default, Rollbar will try to call the `current_user` controller method
   # to fetch the logged-in user object, and then call that object's `id`,
   # `username`, and `email` methods to fetch those properties. To customize:
@@ -63,4 +61,3 @@ Rollbar.configure do |config|
   config.environment = ENV['ROLLBAR_ENV'] || Rails.env
 end
 # Rollbar.debug("Running Script")
-

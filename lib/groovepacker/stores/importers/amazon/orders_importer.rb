@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -7,57 +9,71 @@ module Groovepacker
             init_common_objects
             begin
               @orders = []
-              first_call=true
+              first_call = true
               response = {}
-              while 1 do
+              loop do
                 begin
                   if first_call
                     first_call = false
                     last_imported_at = @credential.last_imported_at
-                    if last_imported_at.present? && @import_item.import_type == "regular"
+                    if last_imported_at.present? && @import_item.import_type == 'regular'
                       days_count = (DateTime.now.in_time_zone.to_date - @credential.last_imported_at.to_date).to_i
                       days_count = days_count == 0 ? 1 : days_count
-                    elsif @import_item.import_type == "deep"
+                    elsif @import_item.import_type == 'deep'
                       days_count = @import_item.days
                     else
                       days_count = 5
                     end
-                    shipped_response = @mws.orders.list_orders :last_updated_after => days_count.days.ago, :order_status => ['Shipped'] if @credential.shipped_status
-                    unshipped_response = @mws.orders.list_orders :last_updated_after => days_count.days.ago, :order_status => ['Unshipped' , 'PartiallyShipped'] if @credential.unshipped_status
+                    shipped_response = @mws.orders.list_orders last_updated_after: days_count.days.ago, order_status: ['Shipped'] if @credential.shipped_status
+                    unshipped_response = @mws.orders.list_orders last_updated_after: days_count.days.ago, order_status: %w[Unshipped PartiallyShipped] if @credential.unshipped_status
                     if @credential.shipped_status && @credential.unshipped_status
-                      response["orders"] = (shipped_response.orders).push(unshipped_response.orders).flatten
+                      response['orders'] = shipped_response.orders.push(unshipped_response.orders).flatten
                     elsif shipped_response.present?
                       response = shipped_response
                     else
                       response = unshipped_response
                     end
                   else
-                    while 1 do
-                      begin
-                        response = @mws.orders.next
-                        break
-                      rescue
-                        response = @mws.orders.next
-                      end
+                    loop do
+                      response = @mws.orders.next
+                      break
+                    rescue StandardError
+                      response = @mws.orders.next
                     end
                   end
-                rescue
+                rescue StandardError
                   response
                 end
-                orders_count = response["orders"].try(:count) rescue 0
-                grouped_response = response["orders"].group_by { |d| d["fulfillment_channel"] } rescue {}
+                orders_count = begin
+                                 response['orders'].try(:count)
+                               rescue StandardError
+                                 0
+                               end
+                grouped_response = begin
+                                     response['orders'].group_by { |d| d['fulfillment_channel'] }
+                                   rescue StandardError
+                                     {}
+                                   end
                 if !@credential.afn_fulfillment_channel && !@credential.mfn_fulfillment_channel
                   response = {}
                 elsif @credential.afn_fulfillment_channel && !@credential.mfn_fulfillment_channel
-                  response["orders"] = grouped_response["AFN"]
+                  response['orders'] = grouped_response['AFN']
                 elsif @credential.mfn_fulfillment_channel && !@credential.afn_fulfillment_channel
-                  response["orders"] = grouped_response["MFN"]
+                  response['orders'] = grouped_response['MFN']
                 end
-                response["orders"].kind_of?(Array) && !response["orders"].nil? ? (@orders || []).push(response["orders"]) : @orders = response["orders"]
+                response['orders'].is_a?(Array) && !response['orders'].nil? ? (@orders || []).push(response['orders']) : @orders = response['orders']
                 break if orders_count.to_i < 100
               end
-              @orders = @orders.flatten rescue []
-              @result[:total_imported] = @orders.count rescue 0
+              @orders = begin
+                          @orders.flatten
+                        rescue StandardError
+                          []
+                        end
+              @result[:total_imported] = begin
+                                           @orders.count
+                                         rescue StandardError
+                                           0
+                                         end
               check_orders
             rescue Exception => e
               @result[:status] &= false
@@ -74,7 +90,7 @@ module Groovepacker
           end
 
           def check_orders
-            if !@orders.nil?
+            unless @orders.nil?
               initialize_import_item
               orders_import
             end
@@ -84,13 +100,14 @@ module Groovepacker
             @orders.each do |order|
               import_item_fix
               break if @import_item.status == 'cancelled' || @import_item.status.nil?
-              @import_item.update_attributes(current_increment_id: order.amazon_order_id, current_order_items: -1, current_order_imported_item: -1 )
+
+              @import_item.update_attributes(current_increment_id: order.amazon_order_id, current_order_items: -1, current_order_imported_item: -1)
               orders_with_increment_id(order)
             end
           end
 
           def orders_with_increment_id(order)
-            if Order.where(:increment_id => order.amazon_order_id).length == 0
+            if Order.where(increment_id: order.amazon_order_id).empty?
               create_order_and_update_import_item(order)
               grouped_item_sku
               check_shipping_order(order)
@@ -102,8 +119,8 @@ module Groovepacker
           end
 
           def create_order_and_update_import_item(order)
-            @order = Order.new(status: 'awaiting',increment_id: order.amazon_order_id, order_placed_time: order.purchase_date, store: @credential.store)
-            @order_items = @mws.orders.list_order_items :amazon_order_id => order.amazon_order_id
+            @order = Order.new(status: 'awaiting', increment_id: order.amazon_order_id, order_placed_time: order.purchase_date, store: @credential.store)
+            @order_items = @mws.orders.list_order_items amazon_order_id: order.amazon_order_id
             @import_item.update_attributes(current_order_items: @order_items.length, current_order_imported_item: 0)
           end
 
@@ -120,18 +137,18 @@ module Groovepacker
             @order_item = @order.order_items.build
             unless item.item_price.nil?
               @order_item.assign_attributes(price: item.item_price.amount.to_i)
-              @order_item.row_total= item.item_price.amount.to_i * item.quantity_ordered.to_i if item.item_price.amount.present? && item.quantity_ordered.present?
+              @order_item.row_total = item.item_price.amount.to_i * item.quantity_ordered.to_i if item.item_price.amount.present? && item.quantity_ordered.present?
             end
             @order_item.assign_attributes(qty: item.quantity_ordered, sku: item.seller_sku)
           end
 
           def create_productsku_order_item(item)
-            if ProductSku.where(:sku => item.seller_sku).length == 0
+            if ProductSku.where(sku: item.seller_sku).empty?
               create_product_and_product_sku(item)
-              Groovepacker::Stores::Importers::Amazon::ProductsImporter.new(handler).import_single({ product_sku: item.seller_sku, product_id: @product.id, handler: handler })
+              Groovepacker::Stores::Importers::Amazon::ProductsImporter.new(handler).import_single(product_sku: item.seller_sku, product_id: @product.id, handler: handler)
               @order_item.product = @product
             else
-              @order_item.product = ProductSku.where(:sku => item.seller_sku).first.product
+              @order_item.product = ProductSku.where(sku: item.seller_sku).first.product
             end
           end
 
@@ -141,7 +158,7 @@ module Groovepacker
             @product.save
           end
 
-          def update_import_item(item)
+          def update_import_item(_item)
             @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             @import_item.save
           end
@@ -172,9 +189,9 @@ module Groovepacker
           # end
 
           def order_add_activity
-            @order.addactivity("Order Import", "#{@credential.store.name} Import")
+            @order.addactivity('Order Import', "#{@credential.store.name} Import")
             @order.order_items.each do |item|
-              if item.qty.blank? || item.qty<1
+              if item.qty.blank? || item.qty < 1
                 @order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{@credential.store.name} Import")
                 item.destroy
                 next

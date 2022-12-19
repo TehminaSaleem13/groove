@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class DeleteOrders
   # include Delayed::RecurringJob
   # run_every 1.day
@@ -20,8 +22,8 @@ class DeleteOrders
     # else
     tenants = begin
                   Tenant.order(:name)
-                rescue
-                  Tenant.all
+              rescue StandardError
+                Tenant.all
                 end
     system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
     tenants.each { |tenant| destroy_order_items(tenant) }

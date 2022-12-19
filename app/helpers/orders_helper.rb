@@ -1,125 +1,118 @@
+# frozen_string_literal: true
+
 module OrdersHelper
   require 'barby'
   require 'barby/barcode/code_128'
   require 'barby/outputter/png_outputter'
 
-  def import_magento_product(client, session, sku, store_id, import_images, import_products)
-    begin
-      response = client.call(:catalog_product_info,
-                             message: {session: session, productId: sku})
-      if response.success?
-        @product = response.body[:catalog_product_info_response][:info]
+  def import_magento_product(client, session, sku, store_id, import_images, _import_products)
+    response = client.call(:catalog_product_info,
+                           message: { session: session, productId: sku })
+    if response.success?
+      @product = response.body[:catalog_product_info_response][:info]
 
+      # add product to the database
+      @productdb = Product.new
+      @productdb.name = @product[:name]
+      @productdb.store_product_id = @product[:product_id]
+      @productdb.product_type = @product[:type]
+      @productdb.store_id = store_id
+      @productdb.weight = @product[:weight].to_f * 16
 
-        #add product to the database
-        @productdb = Product.new
-        @productdb.name = @product[:name]
-        @productdb.store_product_id = @product[:product_id]
-        @productdb.product_type = @product[:type]
-        @productdb.store_id = store_id
-        @productdb.weight = @product[:weight].to_f * 16
+      # Magento product api does not provide a barcode, so all
+      # magento products should be marked with a status new as t
+      # they cannot be scanned.
+      @productdb.status = 'new'
 
-        # Magento product api does not provide a barcode, so all
-        # magento products should be marked with a status new as t
-        #they cannot be scanned.
-        @productdb.status = 'new'
+      @productdbsku = ProductSku.new
+      # add productdb sku
+      if @product[:sku] != { "@xsi:type": 'xsd:string' }
+        @productdbsku.sku = @product[:sku]
+        @productdbsku.purpose = 'primary'
 
-        @productdbsku = ProductSku.new
-        #add productdb sku
-        if @product[:sku] != {:"@xsi:type" => "xsd:string"}
-          @productdbsku.sku = @product[:sku]
-          @productdbsku.purpose = 'primary'
+        # publish the sku to the product record
+        @productdb.product_skus << @productdbsku
+      end
 
-          #publish the sku to the product record
-          @productdb.product_skus << @productdbsku
-        end
-
-        #get images and categories
-        if !@product[:sku].nil? && import_images
-          getimages = client.call(:catalog_product_attribute_media_list, message: {session: session,
-                                                                                   productId: sku})
-          if getimages.success?
-            @images = getimages.body[:catalog_product_attribute_media_list_response][:result][:item]
-            if !@images.nil?
-              if @images.kind_of?(Array)
-                @images.each do |image|
-                  @productimage = ProductImage.new
-                  @productimage.image = image[:url]
-                  @productimage.caption = image[:label]
-                  @productdb.product_images << @productimage
-                end
-              else
+      # get images and categories
+      if !@product[:sku].nil? && import_images
+        getimages = client.call(:catalog_product_attribute_media_list, message: { session: session,
+                                                                                  productId: sku })
+        if getimages.success?
+          @images = getimages.body[:catalog_product_attribute_media_list_response][:result][:item]
+          unless @images.nil?
+            if @images.is_a?(Array)
+              @images.each do |image|
                 @productimage = ProductImage.new
-                @productimage.image = @images[:url]
-                @productimage.caption = @images[:label]
+                @productimage.image = image[:url]
+                @productimage.caption = image[:label]
                 @productdb.product_images << @productimage
               end
+            else
+              @productimage = ProductImage.new
+              @productimage.image = @images[:url]
+              @productimage.caption = @images[:label]
+              @productdb.product_images << @productimage
             end
           end
         end
-
-        if !@product[:categories][:item].nil? &&
-          @product[:categories][:item].kind_of?(Array)
-          @product[:categories][:item].each do |category_id|
-            begin
-              get_categories = client.call(:catalog_product_info, message: {session: session,
-                                                                            categoryId: category_id})
-              if get_categories.success?
-                @category = get_categories.body[:catalog_product_info_response][:info]
-                @product_cat = ProductCat.new
-                @product_cat.category = @category[:name]
-
-                if !@product_cat.category.nil?
-                  @productdb.product_cats << @product_cat
-                end
-              end
-            rescue
-            end
-          end
-        end
-
-        #add inventory warehouse
-        inv_wh = ProductInventoryWarehouses.new
-        inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
-        @productdb.product_inventory_warehousess << inv_wh
-
-        @productdb.save
-        @productdb.set_product_status
-        @productdb.id
       end
-    rescue Exception => e
+
+      if !@product[:categories][:item].nil? &&
+         @product[:categories][:item].is_a?(Array)
+        @product[:categories][:item].each do |category_id|
+          get_categories = client.call(:catalog_product_info, message: { session: session,
+                                                                         categoryId: category_id })
+          if get_categories.success?
+            @category = get_categories.body[:catalog_product_info_response][:info]
+            @product_cat = ProductCat.new
+            @product_cat.category = @category[:name]
+
+            @productdb.product_cats << @product_cat unless @product_cat.category.nil?
+          end
+        rescue StandardError
+        end
+      end
+
+      # add inventory warehouse
+      inv_wh = ProductInventoryWarehouses.new
+      inv_wh.inventory_warehouse_id = @store.inventory_warehouse_id
+      @productdb.product_inventory_warehousess << inv_wh
+
+      @productdb.save
+      @productdb.set_product_status
+      @productdb.id
     end
+  rescue Exception => e
   end
 
   def build_pack_item(name, product_type, images, sku, qty_remaining,
                       scanned_qty, packing_placement,
                       barcodes, product_id, order_item_id, child_items, instruction, confirmation, skippable, record_serial,
-                      box_id, kit_product_id , updated_at)
+                      box_id, kit_product_id, updated_at)
 
-    unscanned_item = Hash.new
-    unscanned_item["name"] = name
-    unscanned_item["instruction"] = instruction
-    unscanned_item["confirmation"] = confirmation
-    unscanned_item["images"] = images
-    unscanned_item["sku"] = sku
-    unscanned_item["packing_placement"] = packing_placement
-    unscanned_item["barcodes"] = barcodes
-    unscanned_item["product_id"] = product_id
-    unscanned_item["skippable"] = skippable
-    unscanned_item["record_serial"] = record_serial
-    unscanned_item["order_item_id"] = order_item_id
-    unscanned_item["product_type"] = product_type
-    unscanned_item["qty_remaining"] = qty_remaining
-    unscanned_item["scanned_qty"] = scanned_qty
-    unscanned_item["box_id"] = box_id
-    unscanned_item["kit_product_id"] = kit_product_id
+    unscanned_item = {}
+    unscanned_item['name'] = name
+    unscanned_item['instruction'] = instruction
+    unscanned_item['confirmation'] = confirmation
+    unscanned_item['images'] = images
+    unscanned_item['sku'] = sku
+    unscanned_item['packing_placement'] = packing_placement
+    unscanned_item['barcodes'] = barcodes
+    unscanned_item['product_id'] = product_id
+    unscanned_item['skippable'] = skippable
+    unscanned_item['record_serial'] = record_serial
+    unscanned_item['order_item_id'] = order_item_id
+    unscanned_item['product_type'] = product_type
+    unscanned_item['qty_remaining'] = qty_remaining
+    unscanned_item['scanned_qty'] = scanned_qty
+    unscanned_item['box_id'] = box_id
+    unscanned_item['kit_product_id'] = kit_product_id
     unscanned_item['updated_at'] = updated_at
 
-    if !child_items.nil?
-      unscanned_item['child_items'] = child_items
-    end
+    unscanned_item['child_items'] = child_items unless child_items.nil?
 
-    return unscanned_item
+    unscanned_item
   end
 
   def build_order_with_single_item_from_ebay(order, transaction, order_transaction)
@@ -129,27 +122,27 @@ module OrdersHelper
     order.order_placed_time = transaction.createdDate
 
     if !transaction.buyer.nil? && !transaction.buyer.buyerInfo.nil? &&
-      !transaction.buyer.buyerInfo.shippingAddress.nil?
+       !transaction.buyer.buyerInfo.shippingAddress.nil?
       order.address_1 = transaction.buyer.buyerInfo.shippingAddress.street1
       order.city = transaction.buyer.buyerInfo.shippingAddress.cityName
       order.state = transaction.buyer.buyerInfo.shippingAddress.stateOrProvince
       order.country = transaction.buyer.buyerInfo.shippingAddress.country
       order.postcode = transaction.buyer.buyerInfo.shippingAddress.postalCode
-      #split name separated by a space
-      if !transaction.buyer.buyerInfo.shippingAddress.name.nil?
+      # split name separated by a space
+      unless transaction.buyer.buyerInfo.shippingAddress.name.nil?
         split_name = transaction.buyer.buyerInfo.shippingAddress.name.split(' ')
         order.lastname = split_name.pop
         order.firstname = split_name.join(' ')
       end
     end
 
-    #single item transaction does not have transaction array
+    # single item transaction does not have transaction array
     order_item = OrderItem.new
     order_item.price = transaction.transactionPrice
     order_item.qty = transaction.quantityPurchased
     order_item.row_total = transaction.amountPaid
     order_item.sku = order_transaction.transaction.item.sKU
-    #create product if it does not exist already
+    # create product if it does not exist already
     order_item.product_id =
       import_ebay_product(order_transaction.transaction.item.itemID,
                           order_transaction.transaction.item.sKU, @eBay, @credential)
@@ -164,28 +157,28 @@ module OrdersHelper
     order.increment_id = order_detail.shippingDetails.sellingManagerSalesRecordNumber
     order.order_placed_time = order_detail.createdTime
 
-    if !order_detail.shippingAddress.nil?
+    unless order_detail.shippingAddress.nil?
       order.address_1 = order_detail.shippingAddress.street1
       order.city = order_detail.shippingAddress.cityName
       order.state = order_detail.shippingAddress.stateOrProvince
       order.country = order_detail.shippingAddress.country
       order.postcode = order_detail.shippingAddress.postalCode
-      #split name separated by a space
-      if !order_detail.shippingAddress.name.nil?
+      # split name separated by a space
+      unless order_detail.shippingAddress.name.nil?
         split_name = order_detail.shippingAddress.name.split(' ')
         order.lastname = split_name.pop
         order.firstname = split_name.join(' ')
       end
     end
 
-    #multiple order items from transaction array
+    # multiple order items from transaction array
     order_detail.transactionArray.each do |transaction|
       order_item = OrderItem.new
       order_item.price = transaction.transactionPrice
       order_item.qty = transaction.quantityPurchased
       order_item.row_total = transaction.amountPaid
       order_item.sku = transaction.item.sKU
-      #create product if it does not exist already
+      # create product if it does not exist already
       order_item.product_id =
         import_ebay_product(transaction.item.itemID,
                             transaction.item.sKU, @eBay, @credential)
@@ -200,30 +193,33 @@ module OrdersHelper
     outputter = Barby::PngOutputter.new(order_barcode)
     outputter.margin = 0
     outputter.xdim = 2
-    blob = outputter.to_png #Raw PNG data
+    blob = outputter.to_png # Raw PNG data
     increment_id = increment_id.gsub(/[\#\s+]/, '')
     image_name = Digest::MD5.hexdigest(increment_id)
-    if !File.exist?("#{Rails.root}/public/images/#{image_name}.png")
+    unless File.exist?("#{Rails.root}/public/images/#{image_name}.png")
       File.open("#{Rails.root}/public/images/#{image_name}.png",
                 'wb') do |f|
         f.write blob
       end
     end
-    #increment_id
+    # increment_id
   end
 
-  def init_product_attrs(product, available_inv)
-    location_primary = product.try(:primary_warehouse).location_primary rescue ""
-    order_item = {'productinfo' => product,
-                  'available_inv' => order_item_available_inv(product),
-                  'sku' => product.primary_sku,
-                  'barcode' => product.primary_barcode,
-                  'category' => product.primary_category,
-                  'image' => product.base_product.primary_image,
-                  'packing_instructions' => product.packing_instructions,
-                  'qty_on_hand' => product.try(:primary_warehouse).try(:quantity_on_hand) ,
-                  'location_primary' => location_primary
-                 }
+  def init_product_attrs(product, _available_inv)
+    location_primary = begin
+                         product.try(:primary_warehouse).location_primary
+                       rescue StandardError
+                         ''
+                       end
+    order_item = { 'productinfo' => product,
+                   'available_inv' => order_item_available_inv(product),
+                   'sku' => product.primary_sku,
+                   'barcode' => product.primary_barcode,
+                   'category' => product.primary_category,
+                   'image' => product.base_product.primary_image,
+                   'packing_instructions' => product.packing_instructions,
+                   'qty_on_hand' => product.try(:primary_warehouse).try(:quantity_on_hand),
+                   'location_primary' => location_primary }
   end
 
   def make_orders_list(orders)
@@ -232,71 +228,80 @@ module OrdersHelper
     orders_scanning_count = Order.multiple_orders_scanning_count(orders)
 
     orders.each do |order|
-      itemslength = orders_scanning_count[order.id].values.sum rescue 0
-      order.scan_pack_v2 = (params[:app].present? rescue @params[:app].present?)
-      (params[:app] rescue @params[:app]) ? generate_order_hash_v2(order, itemslength) : generate_order_hash(order, itemslength)
+      itemslength = begin
+                      orders_scanning_count[order.id].values.sum
+                    rescue StandardError
+                      0
+                    end
+      order.scan_pack_v2 = (begin
+                              params[:app].present?
+                            rescue StandardError
+                              @params[:app].present?
+                            end)
+      begin
+         params[:app]
+      rescue StandardError
+        @params[:app]
+       end ? generate_order_hash_v2(order, itemslength) : generate_order_hash(order, itemslength)
     end
-    return @orders_result
+    @orders_result
   end
 
   def generate_order_hash(order, itemslength)
-  	if order.store != nil
-      store_name = order.store.name
-    else
-      store_name = ""
-    end
+    store_name = if !order.store.nil?
+                   order.store.name
+                 else
+                   ''
+                 end
     order_data = { 'id' => order.id,
-      'store_name' => store_name,
-      'notes' => order.notes_internal,
-      'ordernum' => order.increment_id,
-      'order_date' => order.order_placed_time,
-      'itemslength' => itemslength,
-      'status' => order.status,
-      'recipient' => "#{order.firstname} #{order.lastname}",
-      'email' => order.email,
-      'tracking_num' => order.tracking_num,
-      'city' => order.city,
-      'state' => order.state,
-      'postcode' => order.postcode,
-      'country' => order.country,
-      'tags' => order.order_tags,
-      'custom_field_one' => order.custom_field_one,
-      'custom_field_two' => order.custom_field_two,
-      'store_order_id' => order.store_order_id,
-      'last_modified' => order.last_modified
-      }
+                   'store_name' => store_name,
+                   'notes' => order.notes_internal,
+                   'ordernum' => order.increment_id,
+                   'order_date' => order.order_placed_time,
+                   'itemslength' => itemslength,
+                   'status' => order.status,
+                   'recipient' => "#{order.firstname} #{order.lastname}",
+                   'email' => order.email,
+                   'tracking_num' => order.tracking_num,
+                   'city' => order.city,
+                   'state' => order.state,
+                   'postcode' => order.postcode,
+                   'country' => order.country,
+                   'tags' => order.order_tags,
+                   'custom_field_one' => order.custom_field_one,
+                   'custom_field_two' => order.custom_field_two,
+                   'store_order_id' => order.store_order_id,
+                   'last_modified' => order.last_modified }
     tote = order.tote
     order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
     @orders_result.push(order_data)
   end
 
   def generate_order_hash_v2(order, itemslength)
-  	store_name = order.store != nil ? order.store.name : ''
+    store_name = !order.store.nil? ? order.store.name : ''
     order_data = { 'id' => order.id,
-      'ordernum' => order.increment_id,
-      'itemslength' => itemslength,
-      }
+                   'ordernum' => order.increment_id,
+                   'itemslength' => itemslength }
     order_data[:print_ss_label] = order.print_ss_label?
     order_data[:order_info] = { 'id' => order.id,
-      'store_name' => store_name,
-      'notes' => order.notes_internal,
-      'ordernum' => order.increment_id,
-      'order_date' => order.order_placed_time,
-      'itemslength' => itemslength,
-      'status' => order.status,
-      'recipient' => "#{order.firstname} #{order.lastname}",
-      'email' => order.email,
-      'tracking_num' => order.tracking_num,
-      'city' => order.city,
-      'state' => order.state,
-      'postcode' => order.postcode,
-      'country' => order.country,
-      'tags' => order.order_tags,
-      'custom_field_one' => order.custom_field_one,
-      'custom_field_two' => order.custom_field_two,
-      'store_order_id' => order.store_order_id,
-      'last_modified' => order.last_modified
-      }
+                                'store_name' => store_name,
+                                'notes' => order.notes_internal,
+                                'ordernum' => order.increment_id,
+                                'order_date' => order.order_placed_time,
+                                'itemslength' => itemslength,
+                                'status' => order.status,
+                                'recipient' => "#{order.firstname} #{order.lastname}",
+                                'email' => order.email,
+                                'tracking_num' => order.tracking_num,
+                                'city' => order.city,
+                                'state' => order.state,
+                                'postcode' => order.postcode,
+                                'country' => order.country,
+                                'tags' => order.order_tags,
+                                'custom_field_one' => order.custom_field_one,
+                                'custom_field_two' => order.custom_field_two,
+                                'store_order_id' => order.store_order_id,
+                                'last_modified' => order.last_modified }
     tote = order.tote
     order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
     order_data[:scan_hash] = {
@@ -304,7 +309,7 @@ module OrdersHelper
         order: order.as_json
       }
     }
-    order_data[:scan_hash][:data][:order].merge!({unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {}})
+    order_data[:scan_hash][:data][:order].merge!(unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {})
     order_data[:scan_hash][:data][:order][:multi_shipments] = order.get_se_old_shipments(order_data[:scan_hash][:data][:order][:multi_shipments])
     order_data[:scan_hash][:data][:order][:activities] = []
     generate_agor = Expo::GenerateAgor.new(order_data)
@@ -322,23 +327,23 @@ module OrdersHelper
       tscan_count += order.total_scan_count
       tscan_time += order.total_scan_time
     end
-    (tscan_time == 0 || tscan_count == 0) ? nil : tscan_time/tscan_count
+    tscan_time == 0 || tscan_count == 0 ? nil : tscan_time / tscan_count
   end
 
-  def sort_order params, orders
-    params["sort"] = "increment_id" if params["sort"] == "ordernum"
-    params["sort"] = "order_placed_time" if params["sort"] == "order_date"
+  def sort_order(params, orders)
+    params['sort'] = 'increment_id' if params['sort'] == 'ordernum'
+    params['sort'] = 'order_placed_time' if params['sort'] == 'order_date'
     begin
       orders = orders.order("#{params[:sort]} #{params[:order]}")
-    rescue
+    rescue StandardError
       orders
     end
-    return orders
+    orders
   end
 
   def update_access_restriction
     tenant = Apartment::Tenant.current
-    stat_stream_obj = SendStatStream.new()
+    stat_stream_obj = SendStatStream.new
     stat_stream_obj.delay(priority: 95).update_restriction(tenant)
   end
 
@@ -346,21 +351,21 @@ module OrdersHelper
     product = Product.new
     product.name = item.name
     product.status = 'new'
-    product.store_id = self.store_id
+    product.store_id = store_id
     product.store_product_id = 0
 
     if product.save
       product.set_product_status
-      #now add skus
+      # now add skus
       @sku = ProductSku.new
       @sku.sku = item.sku
       @sku.purpose = 'primary'
       @sku.product_id = product.id
-      result &= false if !@sku.save
+      result &= false unless @sku.save
     end
     item.product_id = product.id
     item.save
-    import_amazon_product_details(self.store_id, item.sku, item.product_id)
+    import_amazon_product_details(store_id, item.sku, item.product_id)
   end
 
   def update_scanned_list(order_item, scanned_list)
@@ -368,10 +373,10 @@ module OrdersHelper
       option_products = order_item.cached_option_products
       case order_item.cached_product.kit_parsing
       when 'single'
-        #if single, then add order item to unscanned list
+        # if single, then add order item to unscanned list
         scanned_list.push(order_item.build_scanned_single_item)
       when 'individual'
-        #else if individual then add all order items as children to unscanned list
+        # else if individual then add all order items as children to unscanned list
         scanned_list.push(order_item.build_scanned_individual_kit(option_products))
       when 'depends'
         if order_item.kit_split
@@ -393,18 +398,19 @@ module OrdersHelper
         option_products = order_item.cached_option_products
         case order_item.cached_product.kit_parsing
         when 'single'
-          #if single, then add order item to unscanned list
+          # if single, then add order item to unscanned list
           unscanned_list.push(order_item.build_unscanned_single_item)
         when 'individual'
-          #else if individual then add all order items as children to unscanned list
+          # else if individual then add all order items as children to unscanned list
           unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
         when 'depends'
           if order_item.kit_split
-            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true)) if (order_item.kit_split_qty > order_item.kit_split_scanned_qty)
+            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true)) if order_item.kit_split_qty > order_item.kit_split_scanned_qty
 
             if order_item.qty > order_item.kit_split_qty
               unscanned_item = order_item.build_unscanned_single_item(true)
               return unless unscanned_item['qty_remaining'] > 0
+
               if scan_pack_v2
                 order_item.scan_pack_v2 = true
                 unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
@@ -425,7 +431,6 @@ module OrdersHelper
             #           individual_kit_count = individual_kit_count + 1
             #       end
             #     end
-
 
             #     #unscanned list building kits
             #     if individual_kit_count < order_item.kit_split_qty
@@ -449,9 +454,13 @@ module OrdersHelper
           # add order item to unscanned list
           unscanned_item = order_item.build_unscanned_single_item
           if unscanned_item['qty_remaining'] > 0
-            loc = unscanned_item["location"].present? ? unscanned_item["location"] : ""
-            placement = "%.3i" %unscanned_item['packing_placement'] rescue unscanned_item['packing_placement']
-            unscanned_item["next_item"] = "#{placement} #{loc} #{unscanned_item['sku']}"
+            loc = unscanned_item['location'].present? ? unscanned_item['location'] : ''
+            placement = begin
+                          format('%.3i', unscanned_item['packing_placement'])
+                        rescue StandardError
+                          unscanned_item['packing_placement']
+                        end
+            unscanned_item['next_item'] = "#{placement} #{loc} #{unscanned_item['sku']}"
             unscanned_list.push(unscanned_item)
           end
         end
@@ -492,7 +501,6 @@ module OrdersHelper
   #   end
   #   old_shipments
   # end
-
 
   # def se_all_shipments(order)
   #   all_shipments = { shipments: [] }

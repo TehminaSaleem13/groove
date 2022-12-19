@@ -1,35 +1,39 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Handlers
       class ShippingEasyHandler < Handler
         def build_handle
-          shipping_easy_credential = ShippingEasyCredential.find_by_store_id(self.store.id)
+          shipping_easy_credential = ShippingEasyCredential.find_by_store_id(store.id)
 
-          unless shipping_easy_credential.nil?
-            client = Groovepacker::ShippingEasy::Client.new(shipping_easy_credential)
-          end
+          client = Groovepacker::ShippingEasy::Client.new(shipping_easy_credential) unless shipping_easy_credential.nil?
 
-          self.make_handle(shipping_easy_credential, client)
+          make_handle(shipping_easy_credential, client)
         end
 
         def import_orders
           Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
-            self.build_handle).import
+            build_handle
+          ).import
         end
 
         def import_single_order_from(order_no)
           Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
-            self.build_handle).ondemand_import_single_order(order_no)
+            build_handle
+          ).ondemand_import_single_order(order_no)
         end
 
         def range_import(start_date, end_date, type, current_user_id)
           Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
-              self.build_handle).range_import(start_date, end_date, type, current_user_id)
+            build_handle
+          ).range_import(start_date, end_date, type, current_user_id)
         end
-        
+
         def quick_fix_import(import_date, order_id, current_user_id)
           Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
-              self.build_handle).quick_fix_import(import_date, order_id, current_user_id)
+            build_handle
+          ).quick_fix_import(import_date, order_id, current_user_id)
         end
       end
     end

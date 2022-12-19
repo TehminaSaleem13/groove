@@ -1,21 +1,24 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Handlers
       class ShipstationRestHandler < Handler
         def build_handle
-          shipstation_rest_credential = ShipstationRestCredential.where(:store_id => self.store.id).first
+          shipstation_rest_credential = ShipstationRestCredential.where(store_id: store.id).first
 
-          if !shipstation_rest_credential.nil?
+          unless shipstation_rest_credential.nil?
             client = Groovepacker::ShipstationRuby::Rest::Client.new(shipstation_rest_credential.api_key,
                                                                      shipstation_rest_credential.api_secret)
           end
 
-          self.make_handle(shipstation_rest_credential, client)
+          make_handle(shipstation_rest_credential, client)
         end
 
         def import_products
           Groovepacker::Stores::Importers::ShipstationRest::ProductsImporter.new(
-            self.build_handle).import
+            build_handle
+          ).import
         end
 
         def import_orders
@@ -27,32 +30,38 @@ module Groovepacker
           #     self.build_handle).import
           # end
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-            self.build_handle).import
+            build_handle
+          ).import
         end
 
         def import_images
           Groovepacker::Stores::Importers::ShipstationRest::ImagesImporter.new(
-            self.build_handle).import
+            build_handle
+          ).import
         end
 
         def update_product(hash)
           Groovepacker::Stores::Updaters::ShipstationRest::ProductsUpdater.new(
-            self.build_handle).update_single(hash[:product], hash[:store_order_id])
+            build_handle
+          ).update_single(hash[:product], hash[:store_order_id])
         end
 
         def update_all_products
           Groovepacker::Stores::Updaters::ShipstationRest::ProductsUpdater.new(
-            self.build_handle).update_all
+            build_handle
+          ).update_all
         end
 
         def verify_tags(tags)
           Groovepacker::Stores::Utilities::ShipstationRest::Utilities.new(
-            self.build_handle).verify_tags(tags)
+            build_handle
+          ).verify_tags(tags)
         end
 
-        def verify_awaiting_tags(gp_ready_tag_name)
+        def verify_awaiting_tags(_gp_ready_tag_name)
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporter.new(
-            self.build_handle).verify_awaiting_tags
+            build_handle
+          ).verify_awaiting_tags
         end
 
         def import_single_order_from(order_no, user_id, on_demand_quickfix, controller)
@@ -64,22 +73,26 @@ module Groovepacker
           #     self.build_handle).import_single_order(order_no)
           # end
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-            self.build_handle).import_single_order(order_no, user_id, on_demand_quickfix, controller)
+            build_handle
+          ).import_single_order(order_no, user_id, on_demand_quickfix, controller)
         end
 
         def find_or_create_product(item)
           Groovepacker::Stores::Importers::ShipstationRest::OrderProductImporter.new(
-            self.build_handle).find_or_create_product(item)
+            build_handle
+          ).find_or_create_product(item)
         end
 
         def range_import(start_date, end_date, type, current_user_id)
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).range_import(start_date, end_date, type, current_user_id)
+            build_handle
+          ).range_import(start_date, end_date, type, current_user_id)
         end
-        
+
         def quick_fix_import(import_date, order_id, current_user_id)
           Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
-              self.build_handle).quick_fix_import(import_date, order_id, current_user_id)
+            build_handle
+          ).quick_fix_import(import_date, order_id, current_user_id)
         end
       end
     end

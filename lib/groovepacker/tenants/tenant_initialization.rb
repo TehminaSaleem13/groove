@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Tenants
     class TenantInitialization
@@ -6,9 +8,9 @@ module Groovepacker
       end
 
       def plan_hash(plan)
-        plan_amount = plan.split("-").last.to_i
-        users_count = plan_amount/50
-        return {'shipments' => 999999, 'users' => users_count, 'stores' => 99}
+        plan_amount = plan.split('-').last.to_i
+        users_count = plan_amount / 50
+        { 'shipments' => 999_999, 'users' => users_count, 'stores' => 99 }
 
         # {
         #   'groove-duo-60' => {'shipments' => 2200, 'users' => 2, 'stores' => 2},

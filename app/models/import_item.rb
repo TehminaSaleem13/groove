@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ImportItem < ActiveRecord::Base
   belongs_to :order_import_summary
   belongs_to :store
@@ -8,7 +10,6 @@ class ImportItem < ActiveRecord::Base
   #                 :updated_orders_import, :import_error, :failed_count
   # after_save :emit_data_to_user
   # after_save :emit_countdown_data_to_user
-
 
   # def emit_data_to_user
   #   if self.order_import_summary.nil?
@@ -34,7 +35,7 @@ class ImportItem < ActiveRecord::Base
     import_item.current_order_imported_item = -1
     import_item.to_import = 1
     import_item.save
-    return import_item
+    import_item
   end
 
   # def eligible_to_update_ui
@@ -46,39 +47,48 @@ class ImportItem < ActiveRecord::Base
   # end
 
   def emit_countdown_data_to_user
-    if self.saved_changes["current_increment_id"].present?
-      result = {'progress_info' => self.reload }
-      GroovRealtime::emit('countdown_update', result, :tenant)
+    if saved_changes['current_increment_id'].present?
+      result = { 'progress_info' => reload }
+      GroovRealtime.emit('countdown_update', result, :tenant)
     end
   end
 
   def get_import_item_info(store_id)
     result = { status: false }
-    return result if self.to_import.zero?
+    return result if to_import.zero?
+
     begin
-      current_import = self.success_imported + self.updated_orders_import
+      current_import = success_imported + updated_orders_import
       result[:total_imported] = current_import
-      result[:remaining_items] = self.to_import - current_import
+      result[:remaining_items] = to_import - current_import
       result[:completed] = Order.last(2).first.try(:increment_id)
-      result[:in_progess] = self.current_increment_id
-      time = Order.last.try(:updated_at) - self.created_at < 0 ? Time.zone.now - self.created_at : Order.last.try(:updated_at) - self.created_at
+      result[:in_progess] = current_increment_id
+      time = Order.last.try(:updated_at) - created_at < 0 ? Time.zone.now - created_at : Order.last.try(:updated_at) - created_at
       if result[:total_imported] != 0
         time_for_one_order = time / result[:total_imported].to_f
-        time_for_total_order = time_for_one_order * self.to_import
+        time_for_total_order = time_for_one_order * to_import
         time_for_order_imported = time_for_one_order * result[:total_imported]
         time_zone_for_remaining_order = time_for_total_order - time_for_order_imported
-        result[:elapsed_time] = Time.at(time_for_order_imported).utc.strftime("%H:%M:%S")
-        result[:elapsed_time_remaining] = Time.at(time_zone_for_remaining_order).utc.strftime("%H:%M:%S")
+        result[:elapsed_time] = Time.at(time_for_order_imported).utc.strftime('%H:%M:%S')
+        result[:elapsed_time_remaining] = Time.at(time_zone_for_remaining_order).utc.strftime('%H:%M:%S')
       end
       # time_zone = GeneralSetting.time_zone
-      last_update = $redis.get("#{Apartment::Tenant.current}_#{store_id}").to_time.utc rescue nil
+      last_update = begin
+                      $redis.get("#{Apartment::Tenant.current}_#{store_id}").to_time.utc
+                    rescue StandardError
+                      nil
+                    end
       # last_update = last_update.nil? ? nil : last_update + time_zone
-      result[:last_imported_data] = Time.zone.parse(last_update) rescue nil
+      result[:last_imported_data] = begin
+                                      Time.zone.parse(last_update)
+                                    rescue StandardError
+                                      nil
+                                    end
       result[:store_id] = store_id
       result[:status] = true
-    rescue
+    rescue StandardError
       result[:status] = false
     end
-    return result
+    result
   end
 end

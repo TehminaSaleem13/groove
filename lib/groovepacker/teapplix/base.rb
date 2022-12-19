@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Teapplix
     class Base
@@ -6,11 +8,10 @@ module Groovepacker
 
       def initialize(teapplix_credential)
         @account_name = teapplix_credential.account_name
-  	    @username = teapplix_credential.username
-  	    @password = teapplix_credential.password
-  	    @credential = teapplix_credential
+        @username = teapplix_credential.username
+        @password = teapplix_credential.password
+        @credential = teapplix_credential
       end
-      
     end
   end
 end

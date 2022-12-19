@@ -1,48 +1,49 @@
+# frozen_string_literal: true
 
 module FTP
   class SFTP < FTPBase
     include ApplicationHelper
-  	require ('net/sftp')
+    require 'net/sftp'
 
     def connect
-      result = self.build_result
+      result = build_result
       begin
-        unless self.host.nil? || self.username.nil? || self.password.nil?
+        if host.nil? || username.nil? || password.nil?
+          result[:status] = false
+          result[:error_messages].push('Connection Failed. FTP Credentials are missing.')
+        else
           Timeout.timeout(10) do
-            if self.host.include?(":")
-              host = self.host.split(":")[0]
-              port = self.host.split(":")[1]
-              result[:connection_obj] = Net::SFTP.start(host, self.username, :password => self.password, :port => port)
+            if host.include?(':')
+              host = self.host.split(':')[0]
+              port = self.host.split(':')[1]
+              result[:connection_obj] = Net::SFTP.start(host, username, password: password, port: port)
             else
-              result[:connection_obj] = Net::SFTP.start(self.host, self.username, :password => self.password)
+              result[:connection_obj] = Net::SFTP.start(self.host, username, password: password)
             end
           end
           return result
-        else
-          result[:status] = false
-          result[:error_messages].push("Connection Failed. FTP Credentials are missing.")
         end
       rescue Errno::ECONNREFUSED
         result[:status] = false
-        result[:error_messages].push("Connection refused.")
+        result[:error_messages].push('Connection refused.')
       rescue Timeout::Error
         result[:status] = false
-        result[:error_messages].push("Operation timed out.")
+        result[:error_messages].push('Operation timed out.')
       rescue SocketError
         result[:status] = false
-        result[:error_messages].push("Unknown server name.")
+        result[:error_messages].push('Unknown server name.')
       rescue Net::SSH::AuthenticationFailed
         result[:status] = false
-        result[:error_messages].push("Authentication failed. Please check your credentails.")
+        result[:error_messages].push('Authentication failed. Please check your credentails.')
       rescue Exception => e
         result[:status] = false
-        result[:error_messages].push("Error in connecting the server. Please check your credentails.")
+        result[:error_messages].push('Error in connecting the server. Please check your credentails.')
       end
       result
     end
 
     def retrieve
-      result = self.build_result
+      result = build_result
       begin
         response = connect
         if response[:error_messages].empty? && response[:status] == true
@@ -51,7 +52,7 @@ module FTP
 
           if file.nil?
             result[:status] = false
-            result[:error_messages].push("All CSV files on the server appear to have been imported.")
+            result[:error_messages].push('All CSV files on the server appear to have been imported.')
           else
             result[:success_messages].push("Connection succeeded! #{file} was found.")
           end
@@ -64,7 +65,7 @@ module FTP
         end
       rescue Net::SFTP::StatusException
         result[:status] = false
-        result[:error_messages].push("Please specify the correct derectory path.")
+        result[:error_messages].push('Please specify the correct derectory path.')
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
@@ -73,17 +74,17 @@ module FTP
     end
 
     def check_imported
-      result = self.build_result
+      result = build_result
       begin
         response = connect
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           folder = find_folder(connection_obj)
           if folder == true
-            result[:success_messages].push("Imported Folder Ready")
+            result[:success_messages].push('Imported Folder Ready')
           else
             result[:status] = false
-            result[:error_messages].push("Unable to create the imported folder in the current directory. Please create it manually.")
+            result[:error_messages].push('Unable to create the imported folder in the current directory. Please create it manually.')
           end
         else
           result[:status] = false
@@ -94,7 +95,7 @@ module FTP
         end
       rescue Net::SFTP::StatusException
         result[:status] = false
-        result[:error_messages].push("Please specify the correct derectory path.")
+        result[:error_messages].push('Please specify the correct derectory path.')
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
@@ -103,7 +104,7 @@ module FTP
     end
 
     def download(current_tenant)
-      result = self.build_result
+      result = build_result
       result[:file_info] = {}
       result[:file_info][:file_path] = ''
       result[:file_info][:ftp_file_name] = ''
@@ -118,18 +119,18 @@ module FTP
 
           file = find_file(connection_obj)
 
-          unless file.nil?
+          if file.nil?
+            result[:status] = false
+            result[:error_messages].push('All CSV files on the server appear to have been imported.')
+          else
             file_name = "#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            handle = connection_obj.open!("#{self.directory}/#{file}")
-            connection_obj.download!("#{self.directory}/#{file}", "ftp_files/#{current_tenant}/#{file_name}")
+            handle = connection_obj.open!("#{directory}/#{file}")
+            connection_obj.download!("#{directory}/#{file}", "ftp_files/#{current_tenant}/#{file_name}")
             connection_obj.close!(handle)
 
             file_path = "#{Rails.root}/ftp_files/#{current_tenant}/#{file_name}"
             result[:file_info][:file_path] = file_path
             result[:file_info][:ftp_file_name] = file
-          else
-            result[:status] = false
-            result[:error_messages].push("All CSV files on the server appear to have been imported.")
           end
         else
           result[:status] = false
@@ -140,7 +141,7 @@ module FTP
         end
       rescue Net::SFTP::StatusException
         result[:status] = false
-        result[:error_messages].push("All CSV files on the server appear to have been imported.")
+        result[:error_messages].push('All CSV files on the server appear to have been imported.')
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
@@ -149,17 +150,17 @@ module FTP
     end
 
     def update(ftp_file_name)
-      result = self.build_result
+      result = build_result
       begin
         response = connect
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           new_file = rename_file(ftp_file_name)
-          handle = connection_obj.open!("#{self.directory}/#{ftp_file_name}")
+          handle = connection_obj.open!("#{directory}/#{ftp_file_name}")
           begin
-            connection_obj.rename!("#{self.directory}/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
+            connection_obj.rename!("#{directory}/#{ftp_file_name}", "#{directory}/imported/#{new_file}")
           rescue Exception => e
-            connection_obj.rename!("#{self.directory}/#{ftp_file_name}", "#{self.directory}/#{new_file}")
+            connection_obj.rename!("#{directory}/#{ftp_file_name}", "#{directory}/#{new_file}")
           end
           connection_obj.close!(handle)
         else
@@ -176,18 +177,22 @@ module FTP
     end
 
     def upload_file(url, filename)
-      result = self.build_result
+      result = build_result
       begin
         response = connect
         on_demand_logger = Logger.new("#{Rails.root}/log/ftp_export_upload.log")
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           begin
-            data = Net::HTTP.get(URI.parse(url)) rescue nil
-            File.open(filename, 'wb') {|f| f.write(data) }
-            connection_obj.upload!(File.open(filename), "#{self.directory}/#{filename}")
-          rescue => e
-            log = { tenant: Apartment::Tenant.current, data: self.as_json, error: e, time: Time.current.utc }
+            data = begin
+                     Net::HTTP.get(URI.parse(url))
+                   rescue StandardError
+                     nil
+                   end
+            File.open(filename, 'wb') { |f| f.write(data) }
+            connection_obj.upload!(File.open(filename), "#{directory}/#{filename}")
+          rescue StandardError => e
+            log = { tenant: Apartment::Tenant.current, data: as_json, error: e, time: Time.current.utc }
             on_demand_logger.info(log)
           end
         else
@@ -195,21 +200,21 @@ module FTP
           response[:error_messages].each do |message|
             result[:error_messages].push(message)
           end
-          log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
+          log = { tenant: Apartment::Tenant.current, data: as_json, error: result, time: Time.current.utc }
           on_demand_logger.info(log)
           return result
         end
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
-        log = { tenant: Apartment::Tenant.current, data: self.as_json, error: result, time: Time.current.utc }
+        log = { tenant: Apartment::Tenant.current, data: as_json, error: result, time: Time.current.utc }
         on_demand_logger.info(log)
       end
       result
     end
 
     def download_imported(current_tenant)
-      result = self.build_result
+      result = build_result
       result[:file_info] = {}
       result[:file_info][:file_path] = ''
       result[:file_info][:ftp_file_name] = ''
@@ -224,18 +229,18 @@ module FTP
 
           file = find_imported_file(connection_obj)
 
-          unless file.nil?
+          if file.nil?
+            result[:status] = false
+            result[:error_messages].push('All CSV files on the server appears to be verified.')
+          else
             file_name = "#{Time.current.strftime('%Y-%m-%d_%H-%M-%S')}.csv"
-            handle = connection_obj.open!("#{self.directory}/imported/#{file}")
-            connection_obj.download!("#{self.directory}/imported/#{file}", "ftp_files/#{current_tenant}/verification/#{file_name}")
+            handle = connection_obj.open!("#{directory}/imported/#{file}")
+            connection_obj.download!("#{directory}/imported/#{file}", "ftp_files/#{current_tenant}/verification/#{file_name}")
             connection_obj.close!(handle)
 
             file_path = "#{Rails.root}/ftp_files/#{current_tenant}/verification/#{file_name}"
             result[:file_info][:file_path] = file_path
             result[:file_info][:ftp_file_name] = file
-          else
-            result[:status] = false
-            result[:error_messages].push("All CSV files on the server appears to be verified.")
           end
         else
           result[:status] = false
@@ -246,7 +251,7 @@ module FTP
         end
       rescue Net::SFTP::StatusException
         result[:status] = false
-        result[:error_messages].push("All CSV files on the server appears to be verified.")
+        result[:error_messages].push('All CSV files on the server appears to be verified.')
       rescue Exception => e
         result[:status] = false
         result[:error_messages].push(e.message)
@@ -255,20 +260,20 @@ module FTP
     end
 
     def update_verified_status(ftp_file_name, verified = true)
-      result = self.build_result
+      result = build_result
       begin
         response = connect
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           if verified
             new_file = rename_file(ftp_file_name, '-v')
-            handle = connection_obj.open!("#{self.directory}/imported/#{ftp_file_name}")
-            connection_obj.rename!("#{self.directory}/imported/#{ftp_file_name}", "#{self.directory}/imported/#{new_file}")
+            handle = connection_obj.open!("#{directory}/imported/#{ftp_file_name}")
+            connection_obj.rename!("#{directory}/imported/#{ftp_file_name}", "#{directory}/imported/#{new_file}")
             connection_obj.close!(handle)
           else
             new_file = ftp_file_name.gsub('-imported', '')
-            handle = connection_obj.open!("#{self.directory}/imported/#{ftp_file_name}")
-            connection_obj.rename!("#{self.directory}/imported/#{ftp_file_name}", "#{self.directory}/#{new_file}")
+            handle = connection_obj.open!("#{directory}/imported/#{ftp_file_name}")
+            connection_obj.rename!("#{directory}/imported/#{ftp_file_name}", "#{directory}/#{new_file}")
             connection_obj.close!(handle)
           end
         else
@@ -287,27 +292,27 @@ module FTP
     private
 
     def find_file(connection_obj)
-    	file = nil
-      files = connection_obj.dir.glob(self.directory, "*.csv") + connection_obj.dir.glob(self.directory, "*.CSV")
-    	files = files.sort_by { |f| f.attributes.mtime }
+      file = nil
+      files = connection_obj.dir.glob(directory, '*.csv') + connection_obj.dir.glob(directory, '*.CSV')
+      files = files.sort_by { |f| f.attributes.mtime }
       files.each do |individual_file|
         unless '-imported'.in? individual_file.name
           file = individual_file.name
           break
         end
       end
-      return file
+      file
     end
 
     def find_folder(connection_obj)
       folder_found = true
       begin
-        found = connection_obj.dir.glob(self.directory, "imported")
-        if found.any?
-          folder_found = true
-        else
-          folder_found = false
-        end
+        found = connection_obj.dir.glob(directory, 'imported')
+        folder_found = if found.any?
+                         true
+                       else
+                         false
+                       end
       rescue Exception => e
         folder_found = false
       end
@@ -315,7 +320,7 @@ module FTP
         return true
       else
         begin
-          connection_obj.mkdir("#{self.directory}/imported", :permissions => 0755).wait
+          connection_obj.mkdir("#{directory}/imported", permissions: 0o755).wait
           return true
         rescue Exception => e
           return false
@@ -325,7 +330,7 @@ module FTP
 
     def find_imported_file(connection_obj)
       file = nil
-      files = connection_obj.dir.glob(self.directory + '/imported', "*.csv") + connection_obj.dir.glob(self.directory + '/imported', "*.CSV")
+      files = connection_obj.dir.glob(directory + '/imported', '*.csv') + connection_obj.dir.glob(directory + '/imported', '*.CSV')
       files = files.sort_by { |f| f.attributes.mtime }
       files.each do |individual_file|
         unless '-imported-v'.in? individual_file.name

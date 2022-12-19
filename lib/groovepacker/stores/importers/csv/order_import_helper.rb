@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -23,8 +25,8 @@ module Groovepacker
           def blank_or_invalid(single_row)
             blank_row?(single_row) ||
               !verify_single_item(single_row, 'increment_id')
-               # ||
-              # !verify_single_item(single_row, 'sku')
+            # ||
+            # !verify_single_item(single_row, 'sku')
           end
 
           def build_final_records
@@ -39,9 +41,10 @@ module Groovepacker
             existing_order_numbers = []
             filtered_final_record = []
             existing_order_numbers = Order.pluck(:increment_id)
-            
+
             final_record.each do |single_row|
               next unless verify_single_item(single_row, 'increment_id')
+
               filtered_final_record << single_row unless
                 existing_order_numbers.include? get_row_data(single_row, 'increment_id')
             end
@@ -51,7 +54,8 @@ module Groovepacker
           def not_imported?(imported_orders, inc_id)
             imported_orders.key?(inc_id) ||
               Order.where(
-                increment_id: inc_id).empty? ||
+                increment_id: inc_id
+              ).empty? ||
               params[:contains_unique_order_items] == true
           end
 
@@ -68,10 +72,10 @@ module Groovepacker
           end
 
           def create_order_map
-            %w( address_1 address_2 city country customer_comments
+            %w[ address_1 address_2 city country customer_comments
                 notes_internal notes_toPacker email firstname increment_id
                 lastname method postcode sku state price tracking_num qty
-                custom_field_one custom_field_two)
+                custom_field_one custom_field_two]
           end
 
           def initialize_import_item
@@ -99,12 +103,13 @@ module Groovepacker
           def calculate_order_placed_time(single_row)
             require 'time'
             imported_order_time = get_row_data(single_row, 'order_placed_time')
-            imported_order_time += " 00:00:00" unless imported_order_time.include?(":")
+            imported_order_time += ' 00:00:00' unless imported_order_time.include?(':')
             separator = (imported_order_time.include? '/') ? '/' : '-'
-            order_time_hash = build_order_time_hash(separator)           
-            return DateTime.strptime(
+            order_time_hash = build_order_time_hash(separator)
+            DateTime.strptime(
               imported_order_time,
-              order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]])
+              order_time_hash[params[:order_date_time_format]][params[:day_month_sequence]]
+            )
           end
 
           def get_sku(single_row, order_increment_sku, unique_order_item)
@@ -147,7 +152,7 @@ module Groovepacker
           def update_status_and_save(order)
             order.status = 'onhold'
             order.save!
-            #order.addactivity(
+            # order.addactivity(
             #  'Order Import CSV Import',
             #  Store.find(params[:store_id]).name + ' Import')
             order.update_order_status

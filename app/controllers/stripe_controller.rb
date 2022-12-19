@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class StripeController < ApplicationController
   protect_from_forgery except: :webhook
 
@@ -16,7 +18,7 @@ class StripeController < ApplicationController
         subs = Subscription.where(customer_subscription_id: @invoice.subscription_id).last
         if subs.present? && subs.tenant.present?
           tenant = subs.tenant
-          tenant.last_charge_in_stripe = @invoice.date 
+          tenant.last_charge_in_stripe = @invoice.date
           tenant.save
         end
         StripeInvoiceEmail.send_success_invoice(@invoice).deliver
@@ -42,16 +44,16 @@ class StripeController < ApplicationController
     @line_data = object.lines.data.last
     if @line_data
       @plan = @line_data.plan
-      invoice.plan_id = @plan.id if @plan && @plan.id
+      invoice.plan_id = @plan.id if @plan&.id
       @period = @line_data.period
       invoice.period_start = time_utc(@period.start)
       invoice.period_end = time_utc(@period.end)
-      if object.starting_balance == 0
-        invoice.amount = object.total.to_f / 100
-        # invoice.amount = @line_data.amount.to_f / 100
-      else
-        invoice.amount = object.starting_balance.to_f / 100
-      end
+      invoice.amount = if object.starting_balance == 0
+                         object.total.to_f / 100
+                       # invoice.amount = @line_data.amount.to_f / 100
+                       else
+                         object.starting_balance.to_f / 100
+                       end
       invoice.quantity = @line_data.quantity if @line_data.quantity
     end
     invoice.save!

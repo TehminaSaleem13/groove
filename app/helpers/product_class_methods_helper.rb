@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductClassMethodsHelper
   # def to_csv(folder, options = {})
   #   require 'csv'
@@ -30,55 +32,58 @@ module ProductClassMethodsHelper
   def generate_eager_loaded_obj(products)
     product_ids = products.map(&:id)
 
-    #delete all caches
-    Rails.cache.delete_matched("*for_tenant_#{Apartment::Tenant.current}") rescue nil
+    # delete all caches
+    begin
+      Rails.cache.delete_matched("*for_tenant_#{Apartment::Tenant.current}")
+    rescue StandardError
+      nil
+    end
 
     # To reduce individual product query fire on order items
 
-      option_products_if_kit_one = Product.where(
-          id: products.where(is_kit: 1).map{|p| p.product_kit_skuss.collect(&:option_product_id)}.flatten
-        )
-      multi_product_order_items =
-        OrderItem.where(product_id: product_ids, scanned_status: 'notscanned')
-        .includes(
-          :order_item_kit_products,
-          :product,
-          order: [order_items: :product]
-        )
+    option_products_if_kit_one = Product.where(
+      id: products.where(is_kit: 1).map { |p| p.product_kit_skuss.collect(&:option_product_id) }.flatten
+    )
+    multi_product_order_items =
+      OrderItem.where(product_id: product_ids, scanned_status: 'notscanned')
+               .includes(
+                 :order_item_kit_products,
+                 :product,
+                 order: [order_items: :product]
+               )
 
-      kit_skus_if_kit_zero =
-        ProductKitSkus.where(option_product_id: products.where(is_kit: 0).map(&:id))
-        .includes(product: :product_kit_skuss)
+    kit_skus_if_kit_zero =
+      ProductKitSkus.where(option_product_id: products.where(is_kit: 0).map(&:id))
+                    .includes(product: :product_kit_skuss)
 
-      multi_base_sku_products = Product.where(base_sku: products.map(&:primary_sku))
+    multi_base_sku_products = Product.where(base_sku: products.map(&:primary_sku))
 
-      eager_loaded_obj = {
-        multi_product_order_items: multi_product_order_items,
-        kit_skus_if_kit_zero: kit_skus_if_kit_zero,
-        option_products_if_kit_one: option_products_if_kit_one,
-        multi_base_sku_products: multi_base_sku_products
-      }
+    eager_loaded_obj = {
+      multi_product_order_items: multi_product_order_items,
+      kit_skus_if_kit_zero: kit_skus_if_kit_zero,
+      option_products_if_kit_one: option_products_if_kit_one,
+      multi_base_sku_products: multi_base_sku_products
+    }
 
     eager_loaded_obj
   end
 
   def emit_message_for_access_token
-    result = {"message" => "The Shopfiy token appears to be invalid. Please disconnect and re-authorize your Shopify store. If you see this issue occur regularly please contact GroovePacker support."}
-    GroovRealtime::emit('access_token_message', result, :tenant)
+    result = { 'message' => 'The Shopfiy token appears to be invalid. Please disconnect and re-authorize your Shopify store. If you see this issue occur regularly please contact GroovePacker support.' }
+    GroovRealtime.emit('access_token_message', result, :tenant)
   end
 
   def emit_message_for_shopify_running_imports
     result = { message: 'Another Shopify import is in queue, Please wait for it to complete.' }
-    GroovRealtime::emit('access_token_message', result, :user)
+    GroovRealtime.emit('access_token_message', result, :user)
   end
-
 
   def update_action_intangibleness(params)
     action_intangible = Groovepacker::Products::ActionIntangible.new
     scan_pack_setting = ScanPackSetting.all.first
     intangible_setting_enabled = scan_pack_setting.intangible_setting_enabled
     intangible_string = scan_pack_setting.intangible_string
-    action_intangible.delay(run_at: 1.seconds.from_now, queue: "update_intangibleness", priority: 95).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
+    action_intangible.delay(run_at: 1.seconds.from_now, queue: 'update_intangibleness', priority: 95).update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
     # action_intangible.update_intangibleness(Apartment::Tenant.current, params, intangible_setting_enabled, intangible_string)
   end
 
@@ -102,7 +107,7 @@ module ProductClassMethodsHelper
     is_kit = 0
     supported_kit_params = ['0', '1', '-1']
     is_kit = params[:is_kit] if supported_kit_params.include?(params[:is_kit])
-    conditions = { status: %w(active inactive new) }
+    conditions = { status: %w[active inactive new] }
     conditions[:is_kit] = is_kit.to_s unless is_kit == '-1'
     counts = Product.select('status,count(*) as count').where(conditions).group(:status)
   end
@@ -110,12 +115,17 @@ module ProductClassMethodsHelper
   def update_product_list(params, result)
     product = Product.find_by_id(params[:id])
     return result.merge('status' => false, 'error_msg' => 'Cannot find Product') if product.nil?
+
     if params[:var] == 'barcode'
       result = product.check_barcode_add_update(params, result)
     else
       product.create_sku = true if params[:app]
       response = product.updatelist(product, params[:var], params[:value], params[:current_user])
-      errors = response.errors.full_messages rescue nil
+      errors = begin
+                 response.errors.full_messages
+               rescue StandardError
+                 nil
+               end
       result = result.merge('status' => false, 'error_msg' => errors) if errors
     end
     result

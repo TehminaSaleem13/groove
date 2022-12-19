@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class NotesFromPacker < ActionMailer::Base
   default from: 'app@groovepacker.com'
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class GenerateKitCSV < ProductsService::Base
     attr_accessor :products, :csv, :bulk_actions_id, :headers, :default_inv_id
@@ -48,6 +50,7 @@ module ProductsService
 
     def bulk_action?
       return unless bulk_actions_id
+
       @bulk_action = GrooveBulkActions.find(bulk_actions_id)
     end
 
@@ -127,6 +130,7 @@ module ProductsService
 
     def do_if_bulk_action
       return unless @bulk_action
+
       @bulk_action.completed += 1
       @bulk_action.save
     end

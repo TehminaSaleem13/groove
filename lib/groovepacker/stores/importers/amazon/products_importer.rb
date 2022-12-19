@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -8,7 +10,7 @@ module Groovepacker
 
           def import
             init_common_objects
-            handler = self.get_handler
+            handler = get_handler
             # requestamazonreport
             # checkamazonreportstatus
             import_all_products
@@ -37,7 +39,7 @@ module Groovepacker
           def import_single(import_hash)
             @result = true
             begin
-              @import_hash = import_hash 
+              @import_hash = import_hash
               @credential = @import_hash[:handler][:credential]
               @mws = @import_hash[:handler][:store_handle][:alternate_handle]
               get_matching_products
@@ -50,20 +52,24 @@ module Groovepacker
           end
 
           def import_all_products
-            csv_url = GroovS3.find_csv(Apartment::Tenant.current, 'amazon_product', @credential.store.id).url.gsub('http:', 'https:') rescue nil
-            file_data = open(csv_url).read().split("\n")
+            csv_url = begin
+                        GroovS3.find_csv(Apartment::Tenant.current, 'amazon_product', @credential.store.id).url.gsub('http:', 'https:')
+                      rescue StandardError
+                        nil
+                      end
+            file_data = open(csv_url).read.split("\n")
             response = file_data.drop(1)
             header = file_data.first.split("\t")
             response.each do |row|
               row = row.split("\t")
               @product = {}
-              row.each_with_index {|p, i| @product[header[i]] = p}
+              row.each_with_index { |p, i| @product[header[i]] = p }
               generate_product
             end
           end
 
           def generate_product
-            if ProductSku.where(:sku => @product["seller-sku"]).length == 0
+            if ProductSku.where(sku: @product['seller-sku']).empty?
               add_productdb
               add_productdb_sku
               add_inventry_warehouse
@@ -74,13 +80,13 @@ module Groovepacker
           end
 
           def add_productdb
-            name = @product["item-name"].blank? ?  "Amazon Product" : @product["item-name"]
-            @productdb = Product.new(name: name, store_product_id: @product["product-id"] || 'not_available', product_type: 'not_used', status: 'new')
+            name = @product['item-name'].blank? ? 'Amazon Product' : @product['item-name']
+            @productdb = Product.new(name: name, store_product_id: @product['product-id'] || 'not_available', product_type: 'not_used', status: 'new')
             @productdb.store = @credential.store
           end
 
           def add_productdb_sku
-            @productdbsku = @productdb.product_skus.build(sku: @product["seller-sku"], purpose: 'primary')
+            @productdbsku = @productdb.product_skus.build(sku: @product['seller-sku'], purpose: 'primary')
           end
 
           def add_inventry_warehouse
@@ -90,12 +96,12 @@ module Groovepacker
           end
 
           def save_productdb
-            if !ProductSku.where(:sku => @productdbsku.sku).length == 0
-              @result[:messages].push(sku: @product["seller-sku"]) unless @productdbsku.sku.nil?
+            if !ProductSku.where(sku: @productdbsku.sku).length == 0
+              @result[:messages].push(sku: @product['seller-sku']) unless @productdbsku.sku.nil?
               @result[:previous_imported] = @result[:previous_imported] + 1
-            else  
+            else
               @productdb.save
-              @productdb.add_product_activity("Product Import","#{@productdb.store.try(:name)}")
+              @productdb.add_product_activity('Product Import', @productdb.store.try(:name).to_s)
               import_amazon_product_details(@credential.store.id, @productdbsku.sku, @productdb.id)
               @result[:success_imported] = @result[:success_imported] + 1
             end
@@ -103,16 +109,17 @@ module Groovepacker
 
           def get_matching_products
             products_xml = @mws.products.get_matching_products_for_id(
-              :marketplace_id => @credential.marketplace_id,
-              :id_type => 'SellerSKU',
-              :id_list => [@import_hash[:product_sku]])
+              marketplace_id: @credential.marketplace_id,
+              id_type: 'SellerSKU',
+              id_list: [@import_hash[:product_sku]]
+            )
             require 'active_support/core_ext/hash/conversions'
             @product_hash = Hash.from_xml(products_xml.to_s)
           end
 
           def check_product_import_attr
             if !@product_hash.nil?
-              product_attributes_and_identifiers  
+              product_attributes_and_identifiers
               single_import_product_attributes
             else
               Rails.logger.info('No data fetched for SKU: ' + @import_hash[:product_sku])
@@ -146,14 +153,14 @@ module Groovepacker
             @product.weight = @product_attributes['ItemDimensions']['Weight'].to_f * 16 if !@product_attributes['ItemDimensions'].nil? && !@product_attributes['ItemDimensions']['Weight'].nil?
             package_dimentions = @product_attributes['PackageDimensions']
             @product.shipping_weight = package_dimentions['Weight'].to_f * 16 if !package_dimentions.nil? && !package_dimentions['Weight'].nil?
-            @product.store_product_id = @product_identifiers['MarketplaceASIN']['ASIN'] if !@product_identifiers['MarketplaceASIN'].nil?
+            @product.store_product_id = @product_identifiers['MarketplaceASIN']['ASIN'] unless @product_identifiers['MarketplaceASIN'].nil?
           end
 
           def add_product_image
             if @credential.import_images && !@product_attributes['SmallImage'].nil? && !@product_attributes['SmallImage']['URL'].nil?
               image = ProductImage.new(image: @product_attributes['SmallImage']['URL'])
               @product.product_images << image
-            end 
+            end
           end
 
           def add_product_cat
@@ -170,14 +177,15 @@ module Groovepacker
           end
 
           private
-            # def init_common_objects
-            #   handler = self.get_handler
-            #   @mws = handler[:store_handle][:main_handle]
-            #   @credential = handler[:credential]
-            #   @import_item = handler[:import_item]
-            #   @alt_mws = handler[:store_handle][:alternate_handle]
-            #   @result = self.build_result
-            # end
+
+          # def init_common_objects
+          #   handler = self.get_handler
+          #   @mws = handler[:store_handle][:main_handle]
+          #   @credential = handler[:credential]
+          #   @import_item = handler[:import_item]
+          #   @alt_mws = handler[:store_handle][:alternate_handle]
+          #   @result = self.build_result
+          # end
         end
       end
     end

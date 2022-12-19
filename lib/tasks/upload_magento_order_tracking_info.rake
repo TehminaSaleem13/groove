@@ -9,17 +9,16 @@ namespace :doo do
       $redis.expire('upload_magento_order_tracking_info', 300)
       tenants = Tenant.all
       tenants.each do |tenant|
+        Apartment::Tenant.switch!(tenant.name)
+        stores = Store.joins(:magento_credentials).where("store_type='Magento' and status=true and magento_credentials.enable_status_update=true")
+        next if stores.blank?
+
         begin
-          Apartment::Tenant.switch!(tenant.name)
-          stores = Store.joins(:magento_credentials).where("store_type='Magento' and status=true and magento_credentials.enable_status_update=true")
-          next if stores.blank?
-          begin
-             MagentoSoapOrders.new(tenant: tenant.name).delay(run_at: 1.seconds.from_now, queue: 'update_magento_orders_status', priority: 95).perform
-           rescue
-             nil
-           end
-        rescue
-        end
+           MagentoSoapOrders.new(tenant: tenant.name).delay(run_at: 1.seconds.from_now, queue: 'update_magento_orders_status', priority: 95).perform
+        rescue StandardError
+          nil
+         end
+      rescue StandardError
       end
     end
     exit(1)

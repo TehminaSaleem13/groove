@@ -1,15 +1,18 @@
+# frozen_string_literal: true
+
 module PaymentsHelper
   def card_list(current_tenant)
     create_result_hash
     @result['cards'] = []
     customer = get_current_customer(current_tenant)
-    @result['cards'] = customer.cards if customer && customer.cards
+    @result['cards'] = customer.cards if customer&.cards
   end
 
   def add_card(card_info, current_tenant)
     create_result_hash
     customer = get_current_customer(current_tenant)
     return unless customer
+
     begin
       token = create_token(card_info)
       card = customer.cards.create(card: token.id)
@@ -21,13 +24,13 @@ module PaymentsHelper
           update_result_fail('The card could not be created because of server problem')
         end
       else
-        card.delete()
+        card.delete
         update_result_fail('The CVC entered is not correct. Modify it.')
       end
     rescue Stripe::CardError => e
       update_result_fail(e.message)
-    rescue Stripe::InvalidRequestError => er
-      update_result_fail(er.message)
+    rescue Stripe::InvalidRequestError => e
+      update_result_fail(e.message)
     end
   end
 
@@ -56,23 +59,25 @@ module PaymentsHelper
     create_result_hash
     @result['default_card'] = nil
     customer = get_current_customer(current_tenant)
-    @result['default_card'] = customer.default_card if customer && customer.default_card
+    @result['default_card'] = customer.default_card if customer&.default_card
   end
 
   def delete_a_card(card, current_tenant)
     create_result_hash
     customer = get_current_customer(current_tenant)
-    customer.cards.retrieve(card).delete() if customer && customer.cards.retrieve(card)
+    customer.cards.retrieve(card).delete if customer&.cards&.retrieve(card)
   end
 
   def get_current_customer(current_tenant)
     @tenant = Tenant.where(name: current_tenant).first
     return unless @tenant
+
     begin
       subscription = @tenant.subscription
       return nil if subscription.nil? || subscription.stripe_customer_id.nil?
+
       @customer_info = get_stripe_customer(subscription.stripe_customer_id)
-      if (defined?(@customer_info.deleted).nil?)
+      if defined?(@customer_info.deleted).nil?
         return @customer_info
       else
         update_result_fail('This customer account has been permanently closed.')
@@ -84,16 +89,16 @@ module PaymentsHelper
       #   # @result['messages'].push("You don't have a valid customer id")
       #   return nil
       # end
-    rescue Stripe::InvalidRequestError => er
-      update_result_fail(er.message)
+    rescue Stripe::InvalidRequestError => e
+      update_result_fail(e.message)
       return nil
     end
   end
 
   def delete_customer(customer_id)
     customer = get_stripe_customer(customer_id)
-    if (defined?(customer.deleted).nil?)
-      #customer.delete()
+    if defined?(customer.deleted).nil?
+      # customer.delete()
     end
   end
 
@@ -118,10 +123,10 @@ module PaymentsHelper
   def get_next_payment_date(subscription)
     create_result_hash
     @result['next_date'] = nil
-    if subscription && subscription.stripe_customer_id
+    if subscription&.stripe_customer_id
       customer = get_stripe_customer(subscription.stripe_customer_id)
       subscriptions_data = customer.subscriptions.data
-      @result['next_date'] = (Time.at(subscriptions_data.first.current_period_end).to_datetime).strftime "%B %d %Y" unless subscriptions_data.empty?
+      @result['next_date'] = Time.at(subscriptions_data.first.current_period_end).to_datetime.strftime '%B %d %Y' unless subscriptions_data.empty?
     end
     @result
   end
@@ -133,6 +138,7 @@ module PaymentsHelper
     @result['discount_amount'] = 0
     coupons.each do |coupon|
       next if coupon.id != coupon_id
+
       valid = true
       if coupon.percent_off
         @result['discount_amount'] = (ENV['ONE_TIME_PAYMENT'].to_i * coupon.percent_off) / 100
@@ -166,7 +172,7 @@ module PaymentsHelper
   end
 
   def construct_plan_hash
-    { 
+    {
       'Groove 100' => 'groove-100',
       'Groove 150' => 'groove-150',
       'Groove 200' => 'groove-200',
@@ -182,7 +188,7 @@ module PaymentsHelper
     }
   end
 
-  def create_plan(amount, interval, name, currency, id, trial_period_days=nil)
+  def create_plan(amount, interval, name, currency, id, trial_period_days = nil)
     Stripe::Plan.create(
       amount: amount,
       interval: interval,
@@ -194,11 +200,9 @@ module PaymentsHelper
   end
 
   def get_plan_name(plan_id)
-    begin
-      Stripe::Plan.retrieve(plan_id).name
-    rescue
-      ''
-    end
+    Stripe::Plan.retrieve(plan_id).name
+  rescue StandardError
+    ''
   end
 
   def get_stripe_customer(customer_id)

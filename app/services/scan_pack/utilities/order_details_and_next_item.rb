@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   module Utilities
     module OrderDetailsAndNextItem
@@ -10,12 +12,16 @@ module ScanPack
         data['unscanned_items'] = @single_order.get_unscanned_items(most_recent_scanned_product: @session[:most_recent_scanned_product])
         data['scanned_items'] = @single_order.get_scanned_items
         data['scanning_count'] = @single_order.scanning_count
-        do_if_unscanned_items_present(data) unless data['unscanned_items'].length == 0
-        product_inv_warehouse = ProductInventoryWarehouses.where(product_id: data['next_item']["product_id"])[0] rescue nil
+        do_if_unscanned_items_present(data) unless data['unscanned_items'].empty?
+        product_inv_warehouse = begin
+                                  ProductInventoryWarehouses.where(product_id: data['next_item']['product_id'])[0]
+                                rescue StandardError
+                                  nil
+                                end
         data['next_item']['location'] = product_inv_warehouse.try(:location_primary)
         data['next_item']['location2'] = product_inv_warehouse.try(:location_secondary)
         data['next_item']['location3'] = product_inv_warehouse.try(:location_tertiary)
-        return data
+        data
       end
 
       def do_if_unscanned_items_present(data)
@@ -39,7 +45,7 @@ module ScanPack
         end
       end
 
-      def do_get_next_item(data, scanned_product_id, unscanned_item, product_type)
+      def do_get_next_item(_data, scanned_product_id, unscanned_item, product_type)
         session_parent_order_item = @session[:parent_order_item]
         unscanned_item_child_items = unscanned_item['child_items']
 
@@ -65,27 +71,27 @@ module ScanPack
 
       def do_find_next_item_in_child_items(unscanned_item_child_items, scanned_product_id)
         return unscanned_item_child_items.first.clone if unscanned_item_child_items.present? && unscanned_item_child_items.first['product_id'] == scanned_product_id
+
         # unscanned_item_child_items.each do |child_item|
         #   if child_item['product_id'] == scanned_product_id
         #     return child_item.clone
         #   end
         # end
-        return nil # to avoid returning unscanned_item_child_items
+        nil # to avoid returning unscanned_item_child_items
       end
 
       def do_if_next_item_still_not_present(data)
         unscanned_items = data['unscanned_items']
         product_type = unscanned_items.first['product_type']
         data['next_item'] = if product_type == 'single'
-          unscanned_items.first.clone
-        elsif product_type == 'individual' && unscanned_items.first['child_items'].present?
-          unscanned_items.first['child_items'].first.clone
-        else
-          {'qty' => 0, 'scanned_qty' => 0, 'qty_remaining' => 0 }
+                              unscanned_items.first.clone
+                            elsif product_type == 'individual' && unscanned_items.first['child_items'].present?
+                              unscanned_items.first['child_items'].first.clone
+                            else
+                              { 'qty' => 0, 'scanned_qty' => 0, 'qty_remaining' => 0 }
         end
       end
       #--------END of ORDER DETAILS AND NEXT ITEM-----------------------------
-
     end
   end
 end

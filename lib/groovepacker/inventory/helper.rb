@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Inventory
     module Helper
@@ -6,31 +8,29 @@ module Groovepacker
         # We'll have to come up with a better solution later
         #
         # if Thread.current[:inventory_tracking_enabled].nil?
-        # 	Thread.current[:inventory_tracking_enabled] = false
-        # 	general_setting = GeneralSetting.all.first
-        # 	unless general_setting.nil?
-        # 		Thread.current[:inventory_tracking_enabled] = general_setting.inventory_tracking?
-        # 	end
+        #   Thread.current[:inventory_tracking_enabled] = false
+        #   general_setting = GeneralSetting.all.first
+        #   unless general_setting.nil?
+        #     Thread.current[:inventory_tracking_enabled] = general_setting.inventory_tracking?
+        #   end
         # end
         # Thread.current[:inventory_tracking_enabled]
-        #inventory_tracking_enabled = Thread.current[:inventory_tracking_enabled]
-        #return inventory_tracking_enabled unless inventory_tracking_enabled.nil?
-        #Thread.current[:inventory_tracking_enabled] = GeneralSetting.setting.try(:inventory_tracking?) || false
+        # inventory_tracking_enabled = Thread.current[:inventory_tracking_enabled]
+        # return inventory_tracking_enabled unless inventory_tracking_enabled.nil?
+        # Thread.current[:inventory_tracking_enabled] = GeneralSetting.setting.try(:inventory_tracking?) || false
         result = false
         general_setting = GeneralSetting.setting
-        unless general_setting.nil?
-          result = general_setting.inventory_tracking?
-        end
+        result = general_setting.inventory_tracking? unless general_setting.nil?
         result
       end
 
       def hold_orders_due_to_inventory?
         # if Thread.current[:hold_orders_due_to_inventory].nil?
-        # 	Thread.current[:hold_orders_due_to_inventory] = false
-        # 	general_setting = GeneralSetting.all.first
-        # 	unless general_setting.nil?
-        # 		Thread.current[:hold_orders_due_to_inventory] = general_setting.hold_orders_due_to_inventory? if self.inventory_tracking_enabled?
-        # 	end
+        #   Thread.current[:hold_orders_due_to_inventory] = false
+        #   general_setting = GeneralSetting.all.first
+        #   unless general_setting.nil?
+        #     Thread.current[:hold_orders_due_to_inventory] = general_setting.hold_orders_due_to_inventory? if self.inventory_tracking_enabled?
+        #   end
         # end
         #
         # Thread.current[:hold_orders_due_to_inventory]
@@ -46,14 +46,14 @@ module Groovepacker
         warehouse
       end
 
-      def add_delete_log(tenant, order_increment_ids, name, params)
+      def add_delete_log(_tenant, order_increment_ids, name, params)
         current_user = User.find(params[:user_id]).username
         logs = EventLog.new
         logs.user_id = params[:user_id]
         logs.data = {
           order_increment_ids: order_increment_ids
         }
-        logs.message = ("The #{name}")
+        logs.message = "The #{name}"
         logs.save!
       end
     end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Updaters
@@ -6,13 +8,13 @@ module Groovepacker
           def update_all
             result = {
               update_status: true,
-              message: ""
+              message: ''
             }
 
             order_count = 0
             product_count = 0
 
-            handler = self.get_handler
+            handler = get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
             errors = []
@@ -27,7 +29,7 @@ module Groovepacker
             import_item.to_import = 0
             import_item.save
 
-            statuses = ["awaiting_shipment", "on_hold"]
+            statuses = %w[awaiting_shipment on_hold]
             if credential.warehouse_location_update
               shipstation_orders = []
               statuses.each do |status|
@@ -35,31 +37,30 @@ module Groovepacker
                   status,
                   nil
                 )
-                shipstation_orders = shipstation_orders + response["orders"] unless response["orders"].nil?
+                shipstation_orders += response['orders'] unless response['orders'].nil?
               end
-
 
               import_item.to_import = shipstation_orders.length unless shipstation_orders.nil?
               import_item.save
               shipstation_orders.each do |order|
                 import_item.current_increment_id = order['orderNumber']
-                import_item.current_order_items = order["items"].length
+                import_item.current_order_items = order['items'].length
                 import_item.current_order_imported_item = 0
                 import_item.save
                 order_item_update_count = 0
-                order["items"].each_with_index do |order_item, index|
+                order['items'].each_with_index do |order_item, index|
                   import_item.current_order_imported_item = index + 1
                   import_item.save
 
-                  unless ProductSku.where(sku: order_item["sku"]).empty?
-                    product = ProductSku.where(sku: order_item["sku"]).first.product
-                    unless product.nil?
-                      update_response = update_product(product, client, credential, order)
-                      result[:update_status] &= update_response[:update_status]
-                      order_item_update_count = order_item_update_count + update_response[:order_count]
-                      errors << update_response[:message] unless update_response[:update_status]
-                    end
-                  end
+                  next if ProductSku.where(sku: order_item['sku']).empty?
+
+                  product = ProductSku.where(sku: order_item['sku']).first.product
+                  next if product.nil?
+
+                  update_response = update_product(product, client, credential, order)
+                  result[:update_status] &= update_response[:update_status]
+                  order_item_update_count += update_response[:order_count]
+                  errors << update_response[:message] unless update_response[:update_status]
                 end
 
                 if order_item_update_count > 0
@@ -75,27 +76,27 @@ module Groovepacker
               import_item.status = 'completed'
             else
               import_item.status = 'failed'
-              import_item.message = errors.join(", ")
-              result[:message] = errors.join(", ")
+              import_item.message = errors.join(', ')
+              result[:message] = errors.join(', ')
             end
             import_item.save
             result
           end
 
           def update_single(product, order_id)
-            handler = self.get_handler
+            handler = get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
-            result = self.build_result
+            result = build_result
 
-            #update inventory warehouse's primary location
+            # update inventory warehouse's primary location
             shipstation_order = client.get_order(order_id)
             update_product(product, client, credential, shipstation_order)
           end
 
           private
 
-          def update_product(product, client, credential, shipstation_order)
+          def update_product(product, client, _credential, shipstation_order)
             result = {
               update_status: true,
               order_count: 0,
@@ -103,31 +104,30 @@ module Groovepacker
             }
 
             begin
-              #update warehouse location of an SKU.
-              if shipstation_order["orderStatus"] == 'awaiting_shipment' ||
-                shipstation_order["orderStatus"] == 'on_hold'
-                shipstation_order["items"].each_with_index do |item, index|
-                  if item["sku"] == product.primary_sku &&
-                    !product.primary_warehouse.nil? &&
-                    product.primary_warehouse.location_primary != nil &&
-                    product.primary_warehouse.location_primary != '' &&
-                    item["warehouseLocation"] != product.primary_warehouse.location_primary
-                    #update location only if the above conditions are satisfied
-                    item["warehouseLocation"] = product.primary_warehouse.location_primary
-                    shipstation_order["items"][index] = item
-                    client.update_order(shipstation_order["orderId"], shipstation_order)
-                    result[:order_count] = result[:order_count] + 1
-                  end
+              # update warehouse location of an SKU.
+              if shipstation_order['orderStatus'] == 'awaiting_shipment' ||
+                 shipstation_order['orderStatus'] == 'on_hold'
+                shipstation_order['items'].each_with_index do |item, index|
+                  next unless item['sku'] == product.primary_sku &&
+                              !product.primary_warehouse.nil? &&
+                              !product.primary_warehouse.location_primary.nil? &&
+                              product.primary_warehouse.location_primary != '' &&
+                              item['warehouseLocation'] != product.primary_warehouse.location_primary
+
+                  # update location only if the above conditions are satisfied
+                  item['warehouseLocation'] = product.primary_warehouse.location_primary
+                  shipstation_order['items'][index] = item
+                  client.update_order(shipstation_order['orderId'], shipstation_order)
+                  result[:order_count] = result[:order_count] + 1
                 end
               end
-            rescue Exception => ex
+            rescue Exception => e
               result[:update_status] = false
-              result[:message] = ex.message
+              result[:message] = e.message
             end
 
             result
           end
-
         end
       end
     end

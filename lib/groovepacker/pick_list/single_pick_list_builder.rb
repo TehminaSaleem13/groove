@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module PickList
     class SinglePickListBuilder < PickListBuilder
@@ -11,30 +13,32 @@ module Groovepacker
           primary_location = product_inventory_warehouse.location_primary
           secondary_location = product_inventory_warehouse.location_secondary
         else
-          primary_location = "-"
-          secondary_location = "-"
+          primary_location = '-'
+          secondary_location = '-'
         end
 
-        if !product_skus.first.nil?
+        unless product_skus.first.nil?
           sku = product_skus.first.sku
 
-          if pick_list.length > 0
+          if !pick_list.empty?
             pick_list.each do |item|
-              if item['sku']== sku
-                sku_found = true
-                item['qty'] = item['qty'] + qty
-                break
-              end
+              next unless item['sku'] == sku
+
+              sku_found = true
+              item['qty'] = item['qty'] + qty
+              break
             end
-            if !sku_found
+            unless sku_found
               pick_list.push(build_pick_list_item(
                                primary_location, sku, qty,
-                               product.name, secondary_location))
+                               product.name, secondary_location
+                             ))
             end
           else
             pick_list.push(build_pick_list_item(
                              primary_location, sku, qty,
-                             product.name, secondary_location))
+                             product.name, secondary_location
+                           ))
           end
         end
         pick_list

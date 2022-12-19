@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 module ProductService
   class ProductService
     include ProductsHelper
 
-    def initialize(attrs={})
+    def initialize(attrs = {})
       @result = attrs[:result]
       @params = attrs[:params]
       @current_user = attrs[:current_user]
@@ -18,30 +20,31 @@ module ProductService
       import_result = import_images_for_single_store
 
       unless import_result.nil?
-        import_result[:messages].each {|msg| @result['messages'].push(msg)}
+        import_result[:messages].each { |msg| @result['messages'].push(msg) }
         @result['total_imported'] = import_result[:total_imported]
         @result['success_imported'] = import_result[:success_imported]
         @result['previous_imported'] = import_result[:previous_imported]
       end
 
-      return @result
+      @result
     end
 
     private
-      def import_images_for_single_store
-        import_result = nil
-        begin
-          case @store.store_type
-          when 'Shipstation'
-          	handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(@store)
-          end
-          context = Groovepacker::Stores::Context.new(handler)
-          import_result = context.import_images
-        rescue Exception => e
-          @result['status'] = false
-          @result['messages'].push(e.message)
+
+    def import_images_for_single_store
+      import_result = nil
+      begin
+        case @store.store_type
+        when 'Shipstation'
+          handler = Groovepacker::Stores::Handlers::ShipstationHandler.new(@store)
         end
-        return import_result
+        context = Groovepacker::Stores::Context.new(handler)
+        import_result = context.import_images
+      rescue Exception => e
+        @result['status'] = false
+        @result['messages'].push(e.message)
       end
+      import_result
+    end
   end
 end

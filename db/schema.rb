@@ -10,9 +10,9 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20210811133531) do
+ActiveRecord::Schema.define(version: 20221205132045) do
 
-  create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
     t.integer "num_shipments", default: 0, null: false
     t.integer "num_import_sources", default: 0, null: false
@@ -27,7 +27,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.integer "added_through_ui", default: 0
   end
 
-  create_table "ahoy_events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "ahoy_events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "visit_id"
     t.integer "user_id"
     t.string "name"
@@ -39,7 +39,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["visit_id", "name"], name: "index_ahoy_events_on_visit_id_and_name"
   end
 
-  create_table "amazon_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "amazon_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "merchant_id", null: false
     t.string "marketplace_id", null: false
     t.bigint "store_id"
@@ -60,7 +60,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["store_id"], name: "index_amazon_credentials_on_store_id"
   end
 
-  create_table "big_commerce_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "big_commerce_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.string "shop_name"
     t.string "store_hash"
@@ -70,14 +70,14 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "last_imported_at"
   end
 
-  create_table "boxes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "boxes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order_id"
   end
 
-  create_table "column_preferences", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "column_preferences", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "user_id"
     t.string "identifier"
     t.datetime "created_at", null: false
@@ -86,7 +86,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["user_id"], name: "index_column_preferences_on_user_id"
   end
 
-  create_table "coupons", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "coupons", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "coupon_id", null: false
     t.integer "percent_off"
     t.decimal "amount_off", precision: 10
@@ -99,14 +99,14 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "csv_import_log_entries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "csv_import_log_entries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "index"
     t.integer "csv_import_summary_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "csv_import_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "csv_import_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "file_name"
     t.decimal "file_size", precision: 8, scale: 4, default: "0.0"
     t.string "import_type"
@@ -115,7 +115,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.text "log_record"
   end
 
-  create_table "csv_mappings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "csv_mappings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.text "order_map"
     t.text "product_map"
@@ -126,7 +126,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.integer "kit_csv_map_id"
   end
 
-  create_table "csv_maps", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "csv_maps", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "kind"
     t.string "name"
     t.boolean "custom", default: true
@@ -135,7 +135,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "csv_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "csv_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "status"
     t.integer "success", default: 0
     t.integer "total", default: 0
@@ -151,7 +151,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.integer "success_updated", default: 0
   end
 
-  create_table "delayed_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "delayed_jobs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "priority", default: 0, null: false
     t.integer "attempts", default: 0, null: false
     t.text "handler", null: false
@@ -166,7 +166,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
-  create_table "ebay_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "ebay_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "store_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -180,7 +180,16 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["store_id"], name: "index_ebay_credentials_on_store_id"
   end
 
-  create_table "export_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "event_logs", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.text "data", limit: 4294967295
+    t.text "message"
+    t.integer "user_id"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["user_id"], name: "index_event_logs_on_user_id"
+  end
+
+  create_table "export_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.boolean "auto_email_export", default: true
     t.datetime "time_to_send_export_email"
     t.boolean "send_export_email_on_mon", default: false
@@ -223,9 +232,10 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "daily_packed_export_type", default: "30"
     t.string "daily_packed_email"
     t.boolean "auto_ftp_export", default: false
+    t.boolean "include_partially_scanned_orders", default: false
   end
 
-  create_table "ftp_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "ftp_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "host"
     t.integer "port", default: 21
     t.string "username", default: ""
@@ -245,7 +255,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["store_id"], name: "index_ftp_credentials_on_store_id"
   end
 
-  create_table "general_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "general_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.boolean "inventory_tracking", default: false
     t.boolean "low_inventory_alert_email", default: false
     t.string "low_inventory_email_address", default: ""
@@ -317,9 +327,10 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "starting_value", default: "10000000"
     t.boolean "show_sku_in_barcodeslip", default: true
     t.boolean "print_product_barcode_labels", default: false
+    t.string "new_time_zone", default: "UTC"
   end
 
-  create_table "generate_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "generate_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "status"
     t.string "url"
     t.datetime "created_at", null: false
@@ -337,7 +348,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["user_id"], name: "index_generate_barcodes_on_user_id"
   end
 
-  create_table "groove_bulk_actions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "groove_bulk_actions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "identifier", null: false
     t.string "activity", null: false
     t.integer "total", default: 0
@@ -350,7 +361,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "import_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "import_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "status"
     t.integer "store_id"
     t.integer "success_imported", default: 0
@@ -371,7 +382,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "importer_id"
   end
 
-  create_table "inventory_reports_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "inventory_reports_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.boolean "send_email_on_mon", default: false, null: false
     t.boolean "send_email_on_tue", default: false, null: false
     t.boolean "send_email_on_wed", default: false, null: false
@@ -389,7 +400,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.integer "report_days_option", default: 1
   end
 
-  create_table "inventory_warehouses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "inventory_warehouses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name", null: false
     t.string "location"
     t.datetime "created_at", null: false
@@ -398,7 +409,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "is_default", default: false
   end
 
-  create_table "invoices", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "invoices", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.datetime "date"
     t.string "invoice_id"
     t.string "subscription_id"
@@ -417,7 +428,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "leader_boards", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "leader_boards", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "scan_time"
     t.integer "order_id"
     t.integer "order_item_count"
@@ -425,7 +436,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "magento_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "magento_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "host", null: false
     t.string "username", null: false
     t.string "password", default: ""
@@ -448,7 +459,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["store_id"], name: "index_magento_credentials_on_store_id"
   end
 
-  create_table "magento_rest_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "magento_rest_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.string "host"
     t.string "api_key"
@@ -466,7 +477,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "store_token"
   end
 
-  create_table "oauth_access_grants", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "oauth_access_grants", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "resource_owner_id", null: false
     t.integer "application_id", null: false
     t.string "token", null: false
@@ -478,7 +489,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["token"], name: "index_oauth_access_grants_on_token", unique: true
   end
 
-  create_table "oauth_access_tokens", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "oauth_access_tokens", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "resource_owner_id"
     t.integer "application_id"
     t.string "token", null: false
@@ -492,7 +503,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["token"], name: "index_oauth_access_tokens_on_token", unique: true
   end
 
-  create_table "oauth_applications", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "oauth_applications", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name", null: false
     t.string "uid", null: false
     t.string "secret", null: false
@@ -503,11 +514,11 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["uid"], name: "index_oauth_applications_on_uid", unique: true
   end
 
-  create_table "order_activities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_activities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.datetime "activitytime"
     t.bigint "order_id"
     t.bigint "user_id"
-    t.string "action"
+    t.text "action", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "username"
@@ -517,7 +528,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["user_id"], name: "index_order_activities_on_user_id"
   end
 
-  create_table "order_exceptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_exceptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "reason"
     t.string "description"
     t.bigint "user_id"
@@ -528,7 +539,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["user_id"], name: "index_order_exceptions_on_user_id"
   end
 
-  create_table "order_import_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_import_summaries", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "user_id"
     t.string "status"
     t.datetime "created_at", null: false
@@ -537,7 +548,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "display_summary", default: false
   end
 
-  create_table "order_item_boxes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_item_boxes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "box_id"
     t.integer "order_item_id"
     t.integer "item_qty"
@@ -546,7 +557,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "order_item_kit_product_scan_times", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_item_kit_product_scan_times", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.datetime "scan_start"
     t.datetime "scan_end"
     t.integer "order_item_kit_product_id"
@@ -554,7 +565,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "order_item_kit_products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_item_kit_products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "order_item_id"
     t.bigint "product_kit_skus_id"
     t.string "scanned_status", default: "unscanned"
@@ -566,7 +577,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["product_kit_skus_id"], name: "index_order_item_kit_products_on_product_kit_skus_id"
   end
 
-  create_table "order_item_order_serial_product_lots", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_item_order_serial_product_lots", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "order_item_id"
     t.integer "product_lot_id"
     t.integer "order_serial_id"
@@ -575,7 +586,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.integer "qty", default: 0
   end
 
-  create_table "order_item_scan_times", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_item_scan_times", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.datetime "scan_start"
     t.datetime "scan_end"
     t.integer "order_item_id"
@@ -583,7 +594,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "order_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_items", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "sku"
     t.integer "qty"
     t.decimal "price", precision: 10, scale: 2
@@ -606,12 +617,14 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "is_deleted", default: false
     t.integer "box_id"
     t.integer "skipped_qty", default: 0
+    t.integer "removed_qty", default: 0
+    t.integer "added_count", default: 0
     t.index ["inv_status", "scanned_status"], name: "index_order_items_on_inv_status_and_scanned_status"
     t.index ["is_deleted"], name: "index_order_items_on_is_deleted"
     t.index ["order_id"], name: "index_order_items_on_order_id"
   end
 
-  create_table "order_serials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_serials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "order_id"
     t.bigint "product_id"
     t.string "serial"
@@ -622,7 +635,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["product_id"], name: "index_order_serials_on_product_id"
   end
 
-  create_table "order_shippings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_shippings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "firstname"
     t.string "lastname"
     t.string "email"
@@ -639,7 +652,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["order_id"], name: "index_order_shippings_on_order_id"
   end
 
-  create_table "order_tags", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_tags", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name", null: false
     t.string "color", null: false
     t.string "mark_place", default: "0"
@@ -648,13 +661,13 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "predefined", default: false
   end
 
-  create_table "order_tags_orders", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "order_tags_orders", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "order_id"
     t.integer "order_tag_id"
     t.index ["order_id", "order_tag_id"], name: "index_order_tags_orders_on_order_id_and_order_tag_id"
   end
 
-  create_table "orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "orders", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "increment_id"
     t.datetime "order_placed_time"
     t.string "sku"
@@ -720,6 +733,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "import_item_id"
     t.string "job_timestamp"
     t.string "tags"
+    t.string "post_scanning_flag"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
     t.index ["scanned_on"], name: "index_orders_on_scanned_on"
@@ -728,23 +742,30 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["tracking_num"], name: "index_orders_on_tracking_num"
   end
 
-  create_table "printing_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "packing_cams", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.bigint "order_id", null: false
+    t.bigint "order_item_id"
+    t.bigint "user_id", null: false
+    t.string "url"
+    t.string "username"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_packing_cams_on_order_id"
+    t.index ["order_item_id"], name: "index_packing_cams_on_order_item_id"
+    t.index ["user_id"], name: "index_packing_cams_on_user_id"
+  end
+
+  create_table "printing_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "product_barcode_label_size", default: "3 x 1"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "printings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
-    t.string "product_barcode_label_size"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
-  create_table "product_activities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_activities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.datetime "activitytime"
     t.bigint "product_id"
     t.bigint "user_id"
-    t.string "action"
+    t.text "action", limit: 4294967295
     t.string "username"
     t.string "activity_type"
     t.boolean "acknowledged", default: false
@@ -754,19 +775,19 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["user_id"], name: "index_product_activities_on_user_id"
   end
 
-  create_table "product_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "product_id"
     t.string "barcode"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.integer "order", default: 0
     t.string "lot_number"
-    t.string "packing_count"
+    t.integer "packing_count", default: 1
     t.boolean "is_multipack_barcode", default: false
     t.index ["product_id"], name: "index_product_barcodes_on_product_id"
   end
 
-  create_table "product_cats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_cats", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "category"
     t.bigint "product_id"
     t.datetime "created_at", null: false
@@ -774,9 +795,9 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["product_id"], name: "index_product_cats_on_product_id"
   end
 
-  create_table "product_images", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_images", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "product_id"
-    t.string "image"
+    t.text "image"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "caption"
@@ -787,7 +808,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["product_id"], name: "index_product_images_on_product_id"
   end
 
-  create_table "product_inventory_reports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_inventory_reports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name"
     t.boolean "scheduled", default: false
     t.boolean "type", default: false
@@ -796,7 +817,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "is_locked", default: false
   end
 
-  create_table "product_inventory_warehouses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_inventory_warehouses", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "location"
     t.integer "qty"
     t.bigint "product_id"
@@ -818,11 +839,12 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.integer "location_secondary_qty"
     t.integer "location_tertiary_qty"
     t.integer "location_quaternary_qty"
+    t.integer "product_inv_target_level", default: 1
     t.index ["inventory_warehouse_id"], name: "index_product_inventory_warehouses_on_inventory_warehouse_id"
     t.index ["product_id"], name: "index_product_inventory_warehouses_on_product_id"
   end
 
-  create_table "product_kit_activities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_kit_activities", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "product_id"
     t.string "activity_message"
     t.string "username"
@@ -832,7 +854,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "acknowledged", default: false
   end
 
-  create_table "product_kit_skus", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_kit_skus", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "product_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -842,7 +864,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["product_id"], name: "index_product_kit_skus_on_product_id"
   end
 
-  create_table "product_lots", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_lots", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "product_id"
     t.string "lot_number"
     t.datetime "created_at", null: false
@@ -850,7 +872,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["product_id"], name: "index_product_lots_on_product_id"
   end
 
-  create_table "product_skus", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "product_skus", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "sku"
     t.string "purpose"
     t.bigint "product_id"
@@ -861,9 +883,9 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["sku"], name: "index_product_skus_on_sku"
   end
 
-  create_table "products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "store_product_id"
-    t.string "name", null: false
+    t.string "name", collation: "utf8mb4_unicode_ci"
     t.string "product_type"
     t.bigint "store_id", null: false
     t.datetime "created_at", null: false
@@ -905,15 +927,16 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "supplier_sku"
     t.decimal "avg_cost", precision: 10, scale: 2
     t.string "count_group", limit: 1
+    t.integer "restock_lead_time", default: 0
     t.index ["store_id"], name: "index_products_on_store_id"
   end
 
-  create_table "products_product_inventory_reports", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "products_product_inventory_reports", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "product_inventory_report_id"
     t.bigint "product_id"
   end
 
-  create_table "roles", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "roles", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name", null: false
     t.boolean "display", default: false, null: false
     t.boolean "custom", default: true, null: false
@@ -938,9 +961,15 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "add_edit_stores", default: false, null: false
     t.boolean "create_backups", default: false, null: false
     t.boolean "restore_backups", default: false, null: false
+    t.boolean "edit_product_location", default: false, null: false
+    t.boolean "edit_product_quantity", default: false, null: false
+    t.boolean "edit_shipping_settings", default: false, null: false
+    t.boolean "edit_visible_services", default: false, null: false
+    t.boolean "add_edit_shortcuts", default: false, null: false
+    t.boolean "add_edit_dimension_presets", default: false, null: false
   end
 
-  create_table "scan_pack_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "scan_pack_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.boolean "enable_click_sku", default: true
     t.boolean "ask_tracking_number", default: false
     t.datetime "created_at", null: false
@@ -999,6 +1028,9 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "click_scan_barcode", default: "CLICKSCAN"
     t.boolean "scanned", default: false
     t.string "scanned_barcode", default: "SCANNED"
+    t.string "camera_option", default: "photo"
+    t.string "packing_option", default: "after_packing"
+    t.integer "resolution", default: 100
     t.string "post_scanning_option_second", default: "None"
     t.boolean "require_serial_lot", default: false
     t.string "valid_prefixes"
@@ -1020,9 +1052,19 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "display_location2", default: false
     t.boolean "display_location3", default: false
     t.boolean "show_tags", default: false
+    t.boolean "packing_cam_enabled", default: false
+    t.boolean "email_customer_option", default: false
+    t.text "email_subject"
+    t.string "email_insert_dropdown", default: "order_number"
+    t.text "email_message"
+    t.string "email_logo"
+    t.string "customer_page_dropdown", default: "order_number"
+    t.text "customer_page_message"
+    t.string "customer_page_logo"
+    t.boolean "scanning_log", default: false
   end
 
-  create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.string "api_key"
     t.string "api_secret"
@@ -1036,12 +1078,13 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "ready_to_ship", default: false
     t.string "store_api_key"
     t.boolean "import_upc", default: false
-    t.boolean "allow_duplicate_id", default: false
+    t.boolean "allow_duplicate_id", default: true
     t.boolean "large_popup", default: true
     t.boolean "multiple_lines_per_sku_accepted", default: false
+    t.boolean "use_alternate_id_as_order_num", default: false
   end
 
-  create_table "shipstation_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "shipstation_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "username", null: false
     t.string "password", null: false
     t.datetime "created_at", null: false
@@ -1050,7 +1093,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "last_imported_at"
   end
 
-  create_table "shipstation_rest_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "shipstation_rest_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "api_key"
     t.string "api_secret"
     t.date "last_imported_at"
@@ -1085,9 +1128,13 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.text "label_shortcuts"
     t.boolean "skip_ss_label_confirmation", default: false
     t.text "disabled_rates"
+    t.boolean "add_gpscanned_tag", default: false
+    t.boolean "remove_cancelled_orders", default: false
+    t.text "contracted_carriers"
+    t.text "presets"
   end
 
-  create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "auth_token", null: false
     t.integer "store_id", null: false
     t.datetime "created_at", null: false
@@ -1102,7 +1149,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "shall_import_ignore_local", default: false
   end
 
-  create_table "shopify_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "shopify_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "shop_name"
     t.string "access_token"
     t.integer "store_id"
@@ -1120,9 +1167,12 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "import_updated_sku", default: false
     t.string "updated_sku_handling", default: "add_to_existing"
     t.boolean "permit_shared_barcodes", default: false
+    t.boolean "fix_all_product_images", default: false
+    t.boolean "import_fulfilled_having_tracking", default: false
+    t.text "temp_cookies", limit: 4294967295
   end
 
-  create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "status"
     t.integer "success_imported", default: 0
     t.integer "success_updated", default: 0
@@ -1134,7 +1184,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name", null: false
     t.boolean "status", default: false, null: false
     t.string "store_type", null: false
@@ -1154,9 +1204,10 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "regular_import_v2", default: false
     t.boolean "quick_fix", default: false
     t.boolean "troubleshooter_option", default: true
+    t.boolean "order_cup_direct_shipping", default: false
   end
 
-  create_table "subscriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "subscriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "email"
     t.string "tenant_name"
     t.decimal "amount", precision: 8, scale: 2, default: "0.0"
@@ -1185,7 +1236,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "shopify_payment_token"
   end
 
-  create_table "sync_options", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "sync_options", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "product_id"
     t.boolean "sync_with_bc", default: false
     t.integer "bc_product_id"
@@ -1201,7 +1252,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.string "teapplix_product_sku"
   end
 
-  create_table "teapplix_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "teapplix_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.string "account_name"
     t.string "username"
@@ -1214,7 +1265,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "gen_barcode_from_sku", default: false
   end
 
-  create_table "tenants", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "tenants", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -1235,6 +1286,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "test_tenant_toggle", default: false
     t.boolean "product_activity_switch", default: false
     t.datetime "last_charge_in_stripe"
+    t.boolean "packing_cam", default: false
     t.boolean "custom_product_fields", default: false
     t.text "price"
     t.boolean "groovelytic_stat", default: false
@@ -1251,16 +1303,17 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.boolean "expo_logs_delay", default: true
     t.boolean "gdpr_shipstation", default: false
     t.boolean "uniq_shopify_import", default: false
+    t.boolean "order_cup_direct_shipping", default: false
   end
 
-  create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "max_totes", default: 40
     t.string "name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
 
-  create_table "totes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "totes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name"
     t.integer "number"
     t.bigint "order_id"
@@ -1272,7 +1325,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["tote_set_id"], name: "index_totes_on_tote_set_id"
   end
 
-  create_table "transactions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "transactions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "transaction_id"
     t.decimal "amount", precision: 8, scale: 2, default: "0.0"
     t.string "card_type"
@@ -1284,7 +1337,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "uniq_job_tables", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "uniq_job_tables", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "worker_id"
     t.string "job_timestamp"
     t.string "job_id"
@@ -1293,7 +1346,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.datetime "updated_at", null: false
   end
 
-  create_table "user_inventory_permissions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "user_inventory_permissions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.bigint "user_id", null: false
     t.bigint "inventory_warehouse_id", null: false
     t.boolean "see", default: false, null: false
@@ -1303,7 +1356,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["user_id"], name: "index_user_inventory_permissions_on_user_id"
   end
 
-  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "users", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "encrypted_password", default: "", null: false
     t.string "reset_password_token"
     t.datetime "reset_password_sent_at"
@@ -1336,7 +1389,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["role_id"], name: "index_users_on_role_id"
   end
 
-  create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "visit_token"
     t.string "visitor_token"
     t.string "ip"
@@ -1367,7 +1420,7 @@ ActiveRecord::Schema.define(version: 20210811133531) do
     t.index ["visit_token"], name: "index_visits_on_visit_token", unique: true
   end
 
-  create_table "webhooks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4" do |t|
+  create_table "webhooks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.binary "event", limit: 16777215
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false

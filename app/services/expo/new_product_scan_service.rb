@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Expo
   class NewProductScanService < ScanPack::Base
     include ScanPack::Utilities::ProductScan::LotNumber
@@ -9,49 +11,49 @@ module Expo
     def initialize(args)
       @current_user, @session, @input, @state, @id, @box_id, @typein_count = args
       @result = {
-        "status"=>true, "matched"=>true, "error_messages"=>[],
-        "success_messages"=>[], "notice_messages"=>[],
-        "data"=>{
-          "next_state"=>"scanpack.rfp.default", "serial"=>{"ask"=>false}}
+        'status' => true, 'matched' => true, 'error_messages' => [],
+        'success_messages' => [], 'notice_messages' => [],
+        'data' => {
+          'next_state' => 'scanpack.rfp.default', 'serial' => { 'ask' => false }
         }
-      @session.merge!({
+      }
+      @session.merge!(
         product_edit_matched_for_current_user: false,
         order_edit_matched_for_current_user: false,
         product_edit_matched_for_order: false,
         product_edit_matched_for_products: []
-        })
+      )
       @single_order = Order.where(id: @id).last
       @scanpack_settings = ScanPackSetting.first
     end
 
-    def run(clicked, serial_added, multibarcode=false)
+    def run(clicked, serial_added, _multibarcode = false)
       product_scan(clicked, serial_added)
       @result
     end
 
-    def product_scan(clicked, serial_added)
-
+    def product_scan(clicked, _serial_added)
       if clicked
         @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1
         @single_order.save
       end
-      case
-      when @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
+      if @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
         do_if_restart_code_is_enabled_and_and_eql_to_input
-      when @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
+      elsif @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
         do_if_service_issue_code_is_enabled_and_and_eql_to_input
-      when @scanpack_settings.remove_enabled? && @input == @scanpack_settings.remove_barcode
+      elsif @scanpack_settings.remove_enabled? && @input == @scanpack_settings.remove_barcode
         do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input('REMOVE')
       end
       do_if_single_order_present if @single_order.present?
 
       update_session
 
-      return @result
+      @result
     end
 
     def update_session
       return unless @result['data']['next_state'].eql?('scanpack.rfo')
+
       @session[:most_recent_scanned_product] = nil
     end
 
@@ -86,15 +88,14 @@ module Expo
     #   return list.flatten
     # end
 
-
     def do_if_service_issue_code_is_enabled_and_and_eql_to_input
-      if @single_order.status !='scanned'
+      if @single_order.status != 'scanned'
         @single_order.reset_scanned_status(@current_user)
         @single_order.status = 'serviceissue'
         @result['data']['next_state'] = 'scanpack.rfo'
         @result['data']['ask_note'] = true
       else
-        set_error_messages('Order with id: '+@id+' is already in scanned state')
+        set_error_messages('Order with id: ' + @id + ' is already in scanned state')
       end
     end
 
@@ -103,17 +104,15 @@ module Expo
         @single_order.reset_scanned_status(@current_user)
         @result['data']['next_state'] = 'scanpack.rfo'
       else
-        set_error_messages('Order with id: '+@id.to_s+' is already in scanned state')
+        set_error_messages('Order with id: ' + @id.to_s + ' is already in scanned state')
       end
     end
 
     def do_if_single_order_present
       @single_order.packing_user_id = @current_user.id
-      unless @single_order.save
-        set_error_messages("Could not save order with id: #{@single_order.id}")
-      end
+      set_error_messages("Could not save order with id: #{@single_order.id}") unless @single_order.save
       @result['data']['order'] = order_details_and_next_item
       @result['data']['scan_pack_settings'] = @scanpack_settings
     end
   end # class end
-end #module end
+end # module end

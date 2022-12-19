@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   class Base
     include ScanPack::Utilities::OrderDetailsAndNextItem
@@ -18,7 +20,7 @@ module ScanPack
     end
 
     def request_api(params)
-      require "net/http"
+      require 'net/http'
       Apartment::Tenant.switch! params[:tenant]
       order = Order.find(params[:scan_pack][:_json])
       store = order.store
@@ -60,13 +62,11 @@ module ScanPack
       orders = []
 
       @single_order = Order.find(order.id)
-      if @single_order.present?
-        orders.push(id: @single_order.id, increment_id: @single_order.increment_id)
-      end
-      unless orders.empty?
-        do_generate_barcode_with_delayed_job(orders)
-      else
+      orders.push(id: @single_order.id, increment_id: @single_order.increment_id) if @single_order.present?
+      if orders.empty?
         @result['notice_messages'].push('No Orders Found')
+      else
+        do_generate_barcode_with_delayed_job(orders)
       end
     end
 
@@ -118,7 +118,7 @@ module ScanPack
                                                                                             status: 'in_progress')
       base_file_name = do_generate_pdf_file_for_barcode(order)
       generate_barcode.url = ENV['S3_BASE_URL'] + '/' + @tenant_name + '/pdf/' + base_file_name
-      generate_barcode.dimensions = "1x3"
+      generate_barcode.dimensions = '1x3'
       generate_barcode.print_type = 'order_barcode'
       generate_barcode.status = 'completed'
       generate_barcode.save
@@ -144,7 +144,7 @@ module ScanPack
       File.open(reader_file_path, 'wb') do |file|
         file << doc_pdf
       end
-      base_file_name = File.basename(pdf_path).gsub('#', '')
+      base_file_name = File.basename(pdf_path).delete('#')
       pdf_file = File.open(reader_file_path)
       GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
       pdf_file.close
@@ -183,7 +183,11 @@ module ScanPack
       generate_url = generate_barcodes_pdf_and_url(type, items, action_view)
       if type == 'order_items'
         g = GenerateBarcode.new(url: generate_url, status: 'completed', current_increment_id: 'bulk_barcode')
-        g.user_id = User.where(username: username).first.id rescue nil
+        g.user_id = begin
+                      User.where(username: username).first.id
+                    rescue StandardError
+                      nil
+                    end
         g.save
       else
         GroovRealtime.emit('barcode_lable', { url: generate_url, last_batch: last_batch, username: username }, :tenant)
@@ -201,35 +205,34 @@ module ScanPack
 
         template_locals = { :@order_items => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip }
         height_per_page = '1in'
-        reader_file_path = Rails.root.join('public', 'pdfs', "bulk_barcode_generation.pdf")
+        reader_file_path = Rails.root.join('public', 'pdfs', 'bulk_barcode_generation.pdf')
       when 'products'
         printing_setting = PrintingSetting.all.last
-        if printing_setting.present?
-          product_barcode_label_size = printing_setting.product_barcode_label_size
-        else
-          product_barcode_label_size = '3 x 1'
-        end
+        product_barcode_label_size = if printing_setting.present?
+                                       printing_setting.product_barcode_label_size
+                                     else
+                                       '3 x 1'
+                                     end
         pdf_template = 'products/print_barcode_label.html.erb'
-        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => product_barcode_label_size}
+        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => product_barcode_label_size }
         height_per_page = '1in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
 
       if printing_setting.present?
-        case
-        when printing_setting.product_barcode_label_size == '2 x 1'
-          pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-          common(pdf_html, reader_file_path, height_per_page, '2in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
-        when printing_setting.product_barcode_label_size == '1.5 x 1'
-          pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-          common(pdf_html, reader_file_path, height_per_page, '1.5in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+        if printing_setting.product_barcode_label_size == '2 x 1'
+          pdf_html = action_view.render template: pdf_template, layout: nil, locals: template_locals
+          common(pdf_html, reader_file_path, height_per_page, '2in', top: '0', bottom: '0', left: '0', right: '0')
+        elsif printing_setting.product_barcode_label_size == '1.5 x 1'
+          pdf_html = action_view.render template: pdf_template, layout: nil, locals: template_locals
+          common(pdf_html, reader_file_path, height_per_page, '1.5in', top: '0', bottom: '0', left: '0', right: '0')
         else
-          pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-          common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+          pdf_html = action_view.render template: pdf_template, layout: nil, locals: template_locals
+          common(pdf_html, reader_file_path, height_per_page, '3in', top: '0', bottom: '0', left: '0', right: '0')
         end
       else
-        pdf_html = action_view.render :template => pdf_template, :layout => nil, :locals => template_locals
-        common(pdf_html, reader_file_path, height_per_page, '3in', {:top => '0', :bottom => '0', :left => '0', :right => '0'})
+        pdf_html = action_view.render template: pdf_template, layout: nil, locals: template_locals
+        common(pdf_html, reader_file_path, height_per_page, '3in', top: '0', bottom: '0', left: '0', right: '0')
       end
 
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
@@ -306,7 +309,11 @@ module ScanPack
     end
 
     def check_for_hex
-      if (@input.starts_with? '^#^') && (@input.split('^')[2].present? rescue nil)
+      if (@input.starts_with? '^#^') && (begin
+                                           @input.split('^')[2].present?
+                                         rescue StandardError
+                                           nil
+                                         end)
         @input = @input.split('^')[2].to_i(16).to_s
         return 'store_order_id'
       end

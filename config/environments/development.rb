@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 Groovepacks::Application.configure do
   config.after_initialize do
     Bullet.enable = false
@@ -27,18 +29,18 @@ Groovepacks::Application.configure do
   config.action_mailer.raise_delivery_errors = true
   config.action_mailer.perform_deliveries = false
 
-# Print deprecation notices to the Rails logger
+  # Print deprecation notices to the Rails logger
   config.active_support.deprecation = :log
 
   # Only use best-standards-support built into browsers
   config.action_dispatch.best_standards_support = :builtin
 
   # Raise exception on mass assignment protection for Active Record models
-  #config.active_record.mass_assignment_sanitizer = :strict
+  # config.active_record.mass_assignment_sanitizer = :strict
 
   # Log the query plan for queries taking more than this (works
   # with SQLite, MySQL, and PostgreSQL)
-  #config.active_record.auto_explain_threshold_in_seconds = 0.5
+  # config.active_record.auto_explain_threshold_in_seconds = 0.5
 
   # Do not compress assets
   config.assets.compress = false
@@ -46,31 +48,31 @@ Groovepacks::Application.configure do
   # Expands the lines which load the assets
   config.assets.debug = true
 
-  #Default URL options for mailers
-  config.action_mailer.default_url_options = { :host => 'localhost:3000' }
+  # Default URL options for mailers
+  config.action_mailer.default_url_options = { host: 'localhost:3000' }
 
   config.action_mailer.delivery_method = :smtp
 
   config.action_mailer.smtp_settings = {
-    :address => "email-smtp.us-east-1.amazonaws.com",
-    :port => 587,
-    :authentication => "login",
-    :enable_starttls_auto => true,
-    :domain => 'groovepacker.com',
-    :user_name => 'AKIAIB6EZSOUF5ZOMOKQ',
-    :password => 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
-    :openssl_verify_mode  => 'none'
+    address: 'email-smtp.us-east-1.amazonaws.com',
+    port: 587,
+    authentication: 'login',
+    enable_starttls_auto: true,
+    domain: 'groovepacker.com',
+    user_name: 'AKIAIB6EZSOUF5ZOMOKQ',
+    password: 'ArzLSfZxyQtXjTSnd3ZAxwbqIGBOZky/u4YD+A479ghZ',
+    openssl_verify_mode: 'none'
   }
 
   Rails.logger = Logger.new(STDOUT)
   config.log_level = :info
 
-  $redis = Redis.new(:host => ENV['REDIS_HOST'], :port=> ENV['REDIS_PORT'].to_i,
-    :password => ENV['REDIS_PASSWORD'])
+  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
+                     password: ENV['REDIS_PASSWORD'])
 
   config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes } #
 
-  ENV['SHOPIFY_BILLING_IN_TEST'] = "true"
+  ENV['SHOPIFY_BILLING_IN_TEST'] = 'true'
 
   config.action_mailer.delivery_method = :letter_opener_web
   config.action_mailer.perform_deliveries = true

@@ -1,22 +1,22 @@
+# frozen_string_literal: true
+
 class ApplyAccessRestrictions
   def apply_access_restrictions(tenant_name)
-    begin
-      @subscription = Subscription.where(tenant_name: tenant_name, is_active: true).first
-      if @subscription && @subscription.tenant
-        plan_id = @subscription.subscription_plan_id
-        Apartment::Tenant.switch!(tenant_name)
-        # tenant = Tenant.find_by_name(tenant_name)
-        # day = tenant.created_at.strftime("%d").to_i
-        apply(plan_id)
-        # Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
-        # ApplyAccessRestrictions.new.delay(
-        #   run_at: (Time.current.change(day: "#{day}") + 1.month).beginning_of_day,
-        #   queue: "reset_access_restrictions_#{tenant_name}"
-        # ).apply_access_restrictions(tenant_name)
-      end
-    rescue Exception => e
-      Rails.logger.info e.backtrace.join("\n")
+    @subscription = Subscription.where(tenant_name: tenant_name, is_active: true).first
+    if @subscription&.tenant
+      plan_id = @subscription.subscription_plan_id
+      Apartment::Tenant.switch!(tenant_name)
+      # tenant = Tenant.find_by_name(tenant_name)
+      # day = tenant.created_at.strftime("%d").to_i
+      apply(plan_id)
+      # Delayed::Job.where(queue: 'reset_access_restrictions_#{tenant_name}').destroy_all
+      # ApplyAccessRestrictions.new.delay(
+      #   run_at: (Time.current.change(day: "#{day}") + 1.month).beginning_of_day,
+      #   queue: "reset_access_restrictions_#{tenant_name}"
+      # ).apply_access_restrictions(tenant_name)
     end
+  rescue Exception => e
+    Rails.logger.info e.backtrace.join("\n")
   end
 
   def apply(plan_id)

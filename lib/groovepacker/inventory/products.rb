@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Inventory
     class Products
@@ -5,9 +7,8 @@ module Groovepacker
         include Groovepacker::Inventory::Helper
 
         def allocate(product, qty, warehouse_id = nil)
-          unless inventory_tracking_enabled?
-            return false
-          end
+          return false unless inventory_tracking_enabled?
+
           result = true
           if product.base_product.should_scan_as_single_product?
             result &= do_allocate(select_product_warehouse(product, warehouse_id), qty)
@@ -22,30 +23,27 @@ module Groovepacker
         end
 
         def individual_allocate(kit, qty, warehouse_id = nil)
-          unless inventory_tracking_enabled?
-            return false
-          end
+          return false unless inventory_tracking_enabled?
+
           result = true
           kit.product_kit_skuss.each do |kit_item|
-            result &= allocate(kit_item.option_product, qty * kit_item.qty,warehouse_id)
+            result &= allocate(kit_item.option_product, qty * kit_item.qty, warehouse_id)
           end
           result
         end
 
         def kit_item_inv_change(kit_item, difference)
-          unless inventory_tracking_enabled?
-            return false
-          end
-          order_items = OrderItem.where(:product_id=>kit_item.product_id)
+          return false unless inventory_tracking_enabled?
+
+          order_items = OrderItem.where(product_id: kit_item.product_id)
           order_items.each do |order_item|
-            Groovepacker::Inventory::Orders.kit_item_process(order_item,kit_item,difference)
+            Groovepacker::Inventory::Orders.kit_item_process(order_item, kit_item, difference)
           end
         end
 
-        def sell(product, qty, warehouse_id = nil,update_available = false, update_allocated = false)
-          unless inventory_tracking_enabled?
-            return false
-          end
+        def sell(product, qty, warehouse_id = nil, update_available = false, update_allocated = false)
+          return false unless inventory_tracking_enabled?
+
           result = true
           if product.should_scan_as_single_product?
             result &= do_sell(select_product_warehouse(product, warehouse_id), qty, update_available, update_allocated)
@@ -58,9 +56,8 @@ module Groovepacker
         private
 
         def individual_sell(kit, qty, warehouse_id = nil, update_available = false, update_allocated = false)
-          unless inventory_tracking_enabled?
-            return false
-          end
+          return false unless inventory_tracking_enabled?
+
           result = true
           kit.product_kit_skuss.each do |kit_item|
             result &= sell(kit_item.option_product, qty * kit_item.qty, warehouse_id, update_available, update_allocated)
@@ -68,23 +65,12 @@ module Groovepacker
           result
         end
 
-
-
         def do_sell(product_warehouse, qty, update_available = false, update_allocated = false)
-          unless inventory_tracking_enabled?
-            return false
-          end
-          if product_warehouse.nil? || qty == 0
-            return false
-          end
+          return false unless inventory_tracking_enabled?
+          return false if product_warehouse.nil? || qty == 0
 
-
-          if update_available
-            product_warehouse.available_inv = product_warehouse.available_inv + qty
-          end
-          if update_allocated
-            product_warehouse.allocated_inv = product_warehouse.allocated_inv - qty
-          end
+          product_warehouse.available_inv = product_warehouse.available_inv + qty if update_available
+          product_warehouse.allocated_inv = product_warehouse.allocated_inv - qty if update_allocated
           product_warehouse.sold_inv = product_warehouse.sold_inv + qty
           product_warehouse.save
           true
@@ -92,12 +78,9 @@ module Groovepacker
 
         def do_allocate(product_warehouse, qty)
           qty = 0 if qty.nil?
-          unless inventory_tracking_enabled?
-            return false
-          end
-          if product_warehouse.nil? || qty == 0
-            return false
-          end
+          return false unless inventory_tracking_enabled?
+          return false if product_warehouse.nil? || qty == 0
+
           product_warehouse.available_inv = product_warehouse.available_inv - qty
           product_warehouse.allocated_inv = product_warehouse.allocated_inv + qty
           product_warehouse.save
@@ -105,7 +88,6 @@ module Groovepacker
 
           true
         end
-
       end
     end
   end

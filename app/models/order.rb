@@ -1,18 +1,20 @@
+# frozen_string_literal: true
+
 class Order < ActiveRecord::Base
   belongs_to :store
   # attr_accessible :customercomments, :status, :storename, :store_order_id, :store, :order_total
   # attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname, :increment_id, :lastname,:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal, :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company, :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz, :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change, :status, :scan_start_time, :last_modified, :last_suggested_at, :prime_order_id, :split_from_order_id, :source_order_ids, :cloned_from_shipment_id
 
   #===========================================================================================
-  #please update the delete_orders library if adding before_destroy or after_destroy callback
+  # please update the delete_orders library if adding before_destroy or after_destroy callback
   # or adding dependent destroy for associated models
   #===========================================================================================
-  has_many :order_items, :dependent => :destroy
-  has_one :order_shipping, :dependent => :destroy
-  has_one :tote, :dependent => :nullify
-  has_one :order_exception, :dependent => :destroy
-  has_many :order_activities, :dependent => :destroy
-  has_many :order_serials, :dependent => :destroy
+  has_many :order_items, dependent: :destroy
+  has_one :order_shipping, dependent: :destroy
+  has_one :tote, dependent: :nullify
+  has_one :order_exception, dependent: :destroy
+  has_many :order_activities, dependent: :destroy
+  has_many :order_serials, dependent: :destroy
   has_many :packing_cams, dependent: :destroy
   has_and_belongs_to_many :order_tags
   belongs_to :packing_user, class_name: 'User'
@@ -38,9 +40,9 @@ class Order < ActiveRecord::Base
 
   serialize :ss_label_data, JSON
 
-  ALLOCATE_STATUSES = ['awaiting', 'onhold', 'serviceissue']
-  UNALLOCATE_STATUSES = ['cancelled']
-  SOLD_STATUSES = ['scanned']
+  ALLOCATE_STATUSES = %w[awaiting onhold serviceissue].freeze
+  UNALLOCATE_STATUSES = ['cancelled'].freeze
+  SOLD_STATUSES = ['scanned'].freeze
 
   def assign_increment_id
     return if increment_id.present?
@@ -49,7 +51,7 @@ class Order < ActiveRecord::Base
   end
 
   def check_for_duplicate
-    ((self.store.store_type == "ShippingEasy" && self.store.shipping_easy_credential.allow_duplicate_id) || (self.store.store_type == "Shipstation API 2" && self.store.shipstation_rest_credential.allow_duplicate_order))
+    ((store.store_type == 'ShippingEasy' && store.shipping_easy_credential.allow_duplicate_id) || (store.store_type == 'Shipstation API 2' && store.shipstation_rest_credential.allow_duplicate_order))
   end
 
   def customer_name
@@ -57,12 +59,12 @@ class Order < ActiveRecord::Base
   end
 
   def has_store_and_warehouse?
-    !self.store.nil? && self.store.ensure_warehouse?
+    !store.nil? && store.ensure_warehouse?
   end
 
-  def addactivity(order_activity_message, username='', activity_type ='regular')
+  def addactivity(order_activity_message, username = '', activity_type = 'regular')
     @activity = OrderActivity.new
-    @activity.order_id = self.id
+    @activity.order_id = id
     @activity.action = order_activity_message
     @activity.username = username
     @activity.activitytime = current_time_from_proper_timezone
@@ -75,8 +77,12 @@ class Order < ActiveRecord::Base
   def process_unprocessed_orders
     # bulkaction = Groovepacker::Inventory::BulkActions.new
     # bulkaction.process_unprocessed
-    if (Tenant.find_by_name(Apartment::Tenant.current).try(:delayed_inventory_update) rescue nil)
-      Groovepacker::Inventory::BulkActions.new.process_unprocessed(self.id)
+    if begin
+          Tenant.find_by_name(Apartment::Tenant.current).try(:delayed_inventory_update)
+       rescue StandardError
+         nil
+        end
+      Groovepacker::Inventory::BulkActions.new.process_unprocessed(id)
     else
       Groovepacker::Inventory::BulkActions.new.process_unprocessed
     end
@@ -84,22 +90,22 @@ class Order < ActiveRecord::Base
   end
 
   def update_tracking_num_value
-    if self.tracking_num == ""
+    if tracking_num == ''
       self.tracking_num = nil
-      self.save
+      save
     end
   end
 
   def addnewitems
-    @order_items = OrderItem.where(:order_id => self.id)
+    @order_items = OrderItem.where(order_id: id)
     result = true
 
     @order_items.each do |item|
-      #add new product if item is not added.
-      if ProductSku.where(:sku => item.sku).length == 0 && !item.name.nil? && item.name != '' && !item.sku.nil?
+      # add new product if item is not added.
+      if ProductSku.where(sku: item.sku).empty? && !item.name.nil? && item.name != '' && !item.sku.nil?
         add_new_product_for_item(item, result)
       else
-        item.product_id = ProductSku.where(:sku => item.sku).first.product_id
+        item.product_id = ProductSku.where(sku: item.sku).first.product_id
         item.save
       end
     end
@@ -107,20 +113,20 @@ class Order < ActiveRecord::Base
   end
 
   def compute_packing_score
-    100 - (self.total_scan_time.to_f / self.total_scan_count)
+    100 - (total_scan_time.to_f / total_scan_count)
   end
 
   def set_order_to_scanned_state(username)
     self.status = 'scanned'
     self.already_scanned = true
     self.scanned_on = current_time_from_proper_timezone
-    self.addactivity('Order Scanning Complete', username) if !ScanPackSetting.last.order_verification
-    self.packing_score = self.compute_packing_score
+    addactivity('Order Scanning Complete', username) unless ScanPackSetting.last.order_verification
+    self.packing_score = compute_packing_score
     self.post_scanning_flag = nil
-    self.save
+    save
     update_access_restriction
     tenant = Apartment::Tenant.current
-    SendStatStream.new.delay(:run_at => 1.seconds.from_now, :queue => 'export_stat_stream_scheduled', priority: 95).build_send_stream(tenant, self.id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
+    SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled', priority: 95).build_send_stream(tenant, id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
   end
 
   def contains_zero_qty_order_item?
@@ -139,7 +145,7 @@ class Order < ActiveRecord::Base
     # Implement hold orders from Groovepacker::Inventory
     result = !has_inactive_or_new_products
 
-    result &= false if unacknowledged_activities.length > 0
+    result &= false unless unacknowledged_activities.empty?
 
     if result
       if status == 'onhold'
@@ -159,31 +165,30 @@ class Order < ActiveRecord::Base
   def set_order_status
     result = !has_inactive_or_new_products
 
-    result &= false if self.unacknowledged_activities.length > 0
+    result &= false unless unacknowledged_activities.empty?
     status = result ? 'awaiting' : 'onhold'
 
-    if self.id.present?
+    if id.present?
       update_column(:status, status)
       update_column(:scan_start_time, nil)
     else
       self.status = status
       self.scan_start_time = nil
-      self.save
+      save
     end
 
-    #self.apply_and_update_predefined_tags
+    # self.apply_and_update_predefined_tags
   end
 
   def has_unscanned_items
     result = false
-    self.reload
-    self.order_items.includes(:product).each do |order_item|
-      unless order_item.product.try(:is_intangible)
-        if order_item.scanned_status != 'scanned'
-          result |= true
-          break
-        end
-      end
+    reload
+    order_items.includes(:product).each do |order_item|
+      next if order_item.product.try(:is_intangible)
+      next unless order_item.scanned_status != 'scanned'
+
+      result |= true
+      break
     end
 
     result
@@ -191,7 +196,7 @@ class Order < ActiveRecord::Base
 
   def contains_kit
     result = false
-    self.order_items.includes(:product).each do |order_item|
+    order_items.includes(:product).each do |order_item|
       if order_item.product.is_kit == 1
         result = true
         break
@@ -202,29 +207,27 @@ class Order < ActiveRecord::Base
 
   def contains_splittable_kit
     result = false
-    self.order_items.includes(:product).each do |order_item|
-      if order_item.product.is_kit == 1 &&
-        order_item.product.kit_parsing == 'depends'
-        result = true
-        break
-      end
+    order_items.includes(:product).each do |order_item|
+      next unless order_item.product.is_kit == 1 &&
+                  order_item.product.kit_parsing == 'depends'
+
+      result = true
+      break
     end
     result
   end
 
   def scanning_count
-    Order.multiple_orders_scanning_count([self])[self.id]
+    Order.multiple_orders_scanning_count([self])[id]
   end
 
   def reset_scanned_status(current_user)
-    self.order_items.includes([:order_item_kit_products]).each do |order_item|
-      order_item.reset_scanned
-    end
-    self.addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
-    self.order_serials.destroy_all
+    order_items.includes([:order_item_kit_products]).each(&:reset_scanned)
+    addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
+    order_serials.destroy_all
     destroy_boxes
-    self.set_order_status
-    self.update_columns(post_scanning_flag: nil, clicked_scanned_qty: 0)
+    set_order_status
+    update_columns(post_scanning_flag: nil, clicked_scanned_qty: 0)
   end
 
   def addtag(tag_id)
@@ -232,9 +235,9 @@ class Order < ActiveRecord::Base
 
     tag = OrderTag.find(tag_id)
 
-    if !tag.nil? && (!self.order_tags.include? tag)
-      self.order_tags << tag
-      self.save
+    if !tag.nil? && (!order_tags.include? tag)
+      order_tags << tag
+      save
       result = true
     end
 
@@ -246,9 +249,9 @@ class Order < ActiveRecord::Base
 
     tag = OrderTag.find(tag_id)
 
-    if !tag.nil? && (self.order_tags.include? tag)
-      self.order_tags.delete(tag)
-      self.save
+    if !tag.nil? && (order_tags.include? tag)
+      order_tags.delete(tag)
+      save
       result = true
     end
 
@@ -257,16 +260,17 @@ class Order < ActiveRecord::Base
 
   def get_items_count
     count = 0
-    return count if self.order_items.empty?
-    self.order_items.each do |item|
-      count = count + item.qty unless item.qty.nil?
+    return count if order_items.empty?
+
+    order_items.each do |item|
+      count += item.qty unless item.qty.nil?
     end
     count
   end
 
   def update_inventory_levels_for_items
-    changed_hash = self.saved_changes
-    #TODO: remove this from here as soon as possible.
+    changed_hash = saved_changes
+    # TODO: remove this from here as soon as possible.
     # Very slow way to ensure inventory always gets allocated
     Groovepacker::Inventory::Orders.allocate(self)
 
@@ -288,39 +292,37 @@ class Order < ActiveRecord::Base
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
         Groovepacker::Inventory::Orders.unsell(self)
-        if self.order_items.select { |o| o.product.is_intangible == false }.count ==  self.order_items.where(scanned_status: "scanned").select { |o| o.product.is_intangible == false }.count
+        if order_items.select { |o| o.product.is_intangible == false }.count == order_items.where(scanned_status: 'scanned').select { |o| o.product.is_intangible == false }.count
           user = User.find_by_id(GroovRealtime.current_user_id)
-          self.reset_scanned_status(user)
+          reset_scanned_status(user)
         end
       end
     end
-    self.update_column(:reallocate_inventory, false)
+    update_column(:reallocate_inventory, false)
     true
   end
 
   def perform_pre_save_checks
-    self.non_hyphen_increment_id = non_hyphenated_string(self.increment_id.to_s).squish
-    self.increment_id = self.increment_id.to_s.squish!
-    if self.status.nil?
-      self.status = 'onhold'
-    end
+    self.non_hyphen_increment_id = non_hyphenated_string(increment_id.to_s).squish
+    self.increment_id = increment_id.to_s.squish!
+    self.status = 'onhold' if status.nil?
   end
 
   def scanned_items_count
     count = 0
-    self.order_items.each do |item|
+    order_items.each do |item|
       if item.try(:product).try(:is_kit) == 1
         if item.product.kit_parsing == 'depends'
-          count = count + item.single_scanned_qty
+          count += item.single_scanned_qty
           item.order_item_kit_products.each do |kit_product|
-            count = count + kit_product.scanned_qty
+            count += kit_product.scanned_qty
           end
         elsif item.product.kit_parsing == 'individual'
           item.order_item_kit_products.each do |kit_product|
-            count = count + kit_product.scanned_qty
+            count += kit_product.scanned_qty
           end
         else
-          count = count + item.scanned_qty
+          count += item.scanned_qty
         end
       else
         count += item.scanned_qty
@@ -331,19 +333,19 @@ class Order < ActiveRecord::Base
 
   def clicked_items_count
     count = 0
-    self.order_items.each do |item|
+    order_items.each do |item|
       if item.product.is_kit == 1
         if item.product.kit_parsing == 'depends'
-          count = count + item.clicked_qty
+          count += item.clicked_qty
           item.order_item_kit_products.each do |kit_product|
-            count = count + kit_product.clicked_qty
+            count += kit_product.clicked_qty
           end
         elsif item.product.kit_parsing == 'individual'
           item.order_item_kit_products.each do |kit_product|
-            count = count + kit_product.clicked_qty
+            count += kit_product.clicked_qty
           end
         else
-          count = count + item.clicked_qty
+          count += item.clicked_qty
         end
       else
         count += item.clicked_qty
@@ -360,20 +362,18 @@ class Order < ActiveRecord::Base
     order_item = OrderItem.new
     order_item.product = product
     order_item.name = product.name
-    unless product.product_skus.empty?
-      order_item.sku = product.product_skus.first.sku
-    end
+    order_item.sku = product.product_skus.first.sku unless product.product_skus.empty?
     order_item.qty = 1
     order_item.order = self
     order_item.save
-    self.update_order_status
+    update_order_status
   end
 
   def destroy_exceptions(result, current_user, tenant)
     if order_exception.destroy
-      addactivity("Order Exception Cleared", current_user.name)
-      stat_stream_obj = SendStatStream.new()
-      stat_stream_obj.delay(:run_at => 1.seconds.from_now, :queue => 'clear_order_exception_#{self.id}', priority: 95).send_order_exception(self.id, tenant)
+      addactivity('Order Exception Cleared', current_user.name)
+      stat_stream_obj = SendStatStream.new
+      stat_stream_obj.delay(run_at: 1.seconds.from_now, queue: 'clear_order_exception_#{self.id}', priority: 95).send_order_exception(id, tenant)
     else
       result['status'] &= false
       result['messages'].push('Error clearing exceptions')
@@ -383,7 +383,7 @@ class Order < ActiveRecord::Base
 
   def set_traced_in_dashboard
     self.traced_in_dashboard = true
-    self.save!
+    save!
   end
 
   def partially_load_order_item(order_item_status, limit, offset)
@@ -393,26 +393,26 @@ class Order < ActiveRecord::Base
     #   order_items.where(scanned_status: order_item_status).limit(limit).offset(offset)
     # end
     all_order_items = order_items.where(scanned_status: order_item_status)
-    order_item_status == %w(scanned partially_scanned) ? all_order_items.order('updated_at desc').offset(offset) : all_order_items.limit(limit).offset(offset)
+    order_item_status == %w[scanned partially_scanned] ? all_order_items.order('updated_at desc').offset(offset) : all_order_items.limit(limit).offset(offset)
   end
 
   def order_items_with_eger_load_and_cache(order_item_status, limit, offset)
     # key = "order_items_#{id}_was_egar_loaded"
     limited_order_items = partially_load_order_item(order_item_status, limit, offset)
-    if !( %w(lairdsuperfood).include?(Apartment::Tenant.current)) && (limited_order_items.map(&:keys?).include? true)
+    if !%w[lairdsuperfood].include?(Apartment::Tenant.current) && (limited_order_items.map(&:keys?).include? true)
       limited_order_items
     else
       # Rails.cache.write(key, true, expires_in: 30.minutes)
       limited_order_items.includes(
         order_item_kit_products: [
           product_kit_skus: [
-            product: %i(product_skus product_images product_barcodes product_inventory_warehousess)
+            product: %i[product_skus product_images product_barcodes product_inventory_warehousess]
           ]
         ],
-        product: %i(product_skus product_images product_barcodes product_inventory_warehousess)
+        product: %i[product_skus product_images product_barcodes product_inventory_warehousess]
       )
     end
-  rescue
+  rescue StandardError
     delete_cached_order_items_keys
     retry
   end
@@ -423,15 +423,15 @@ class Order < ActiveRecord::Base
 
   def delete_if_order_exist
     orders = Order.where(increment_id: increment_id)
-    self.destroy if orders.count > 1
+    destroy if orders.count > 1
   end
 
   def unique_order_items
-    self.order_items = self.order_items.uniq_by {|obj| obj.product_id}
+    self.order_items = order_items.uniq_by(&:product_id)
   end
 
   def destroy_boxes
-    Box.where(order_id: self.id).destroy_all
+    Box.where(order_id: id).destroy_all
   end
 
   def scanned?

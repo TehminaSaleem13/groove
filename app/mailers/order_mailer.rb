@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrderMailer < ActionMailer::Base
   default from: 'app@groovepacker.com'
 

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -5,11 +7,11 @@ module Groovepacker
         class OrderProductImporter < Groovepacker::Stores::Importers::Importer
           include ProductsHelper
           include Groovepacker::Stores::Importers::ImporterCommonMethods
-          
+
           def find_or_create_product(item)
             init_common_objects
-            product = find_create_product(item) #defined in common module which is included in this importer
-            return product
+            product = find_create_product(item) # defined in common module which is included in this importer
+            product
           end
 
           private
@@ -35,7 +37,7 @@ module Groovepacker
           #     product = get_product_with_temp_skus(products)
           #   end
           #   return product
-          # end    
+          # end
         end
       end
     end

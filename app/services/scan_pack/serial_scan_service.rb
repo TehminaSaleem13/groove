@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   class SerialScanService < ScanPack::Base
     include ScanPackHelper
@@ -22,13 +24,13 @@ module ScanPack
       when !(order_id.present? && product_id.present?)
         set_error_messages('Order id and Product id are required')
       when !@order
-        set_error_messages('Could not find order with id: '+order_id.to_s)
+        set_error_messages('Could not find order with id: ' + order_id.to_s)
       when !@product
-        set_error_messages('Could not find product with id: '+product_id.to_s)
+        set_error_messages('Could not find product with id: ' + product_id.to_s)
       when barcode_found_or_special_code(serial)
         set_error_messages(
           "Product Serial number: #{serial} can not be the same as a "\
-          "confirmation code, one of the action codes or any product barcode"
+          'confirmation code, one of the action codes or any product barcode'
         )
       end
 
@@ -37,14 +39,14 @@ module ScanPack
     end
 
     def check_prefix(serial)
-      scan_pack_settings  = ScanPackSetting.last
+      scan_pack_settings = ScanPackSetting.last
       if scan_pack_settings.require_serial_lot
-        unless scan_pack_settings.valid_prefixes.nil? || (scan_pack_settings.valid_prefixes.strip.equal? "")
+        unless scan_pack_settings.valid_prefixes.nil? || (scan_pack_settings.valid_prefixes.strip.equal? '')
           all_valid_prefixes = scan_pack_settings.valid_prefixes
           all_valid_prefixes = all_valid_prefixes.split(',')
           value = false
           all_valid_prefixes.each do |string|
-            if (serial.downcase.start_with?(string.downcase))
+            if serial.downcase.start_with?(string.downcase)
               value = true
               break
             end
@@ -60,15 +62,19 @@ module ScanPack
       serial_added = do_check_serial_added
       order_serial = do_find_or_create_order_serial
 
-      unless @params[:product_lot_id].present?
-        do_if_product_lot_id_not_present(order_serial)
-      else
+      if @params[:product_lot_id].present?
         do_if_product_lot_id_present(order_serial)
+      else
+        do_if_product_lot_id_not_present(order_serial)
       end
-      should_scan_serial = (!@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]) rescue (!@params['is_scan'] && @params['ask'] && @params['ask_2'])
+      should_scan_serial = begin
+                             (!@params['scan_pack']['is_scan'] && @params['scan_pack']['ask'] && @params['scan_pack']['ask_2'])
+                           rescue StandardError
+                             (!@params['is_scan'] && @params['ask'] && @params['ask_2'])
+                           end
       # if !@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]
       if should_scan_serial
-        @order.addactivity("Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"", @current_user.name)
+        @order.addactivity("Product: \"#{@product.name}\" Serial scanned: \"#{@params[:serial]}\"", @current_user.name)
       else
         do_product_scan(serial_added)
       end
@@ -84,23 +90,23 @@ module ScanPack
     end
 
     def do_find_or_create_order_serial
-      if @params["second_serial"]
-        order_serials = OrderSerial.where( order_id: @order.id, product_id: @product.id)
-        order_serials.last.update_attribute(:second_serial,  @params[:serial])
-      elsif @params["ask"]
-        order_serials = OrderSerial.where( order_id: @order.id, product_id: @product.id, serial: @params[:serial])
+      if @params['second_serial']
+        order_serials = OrderSerial.where(order_id: @order.id, product_id: @product.id)
+        order_serials.last.update_attribute(:second_serial, @params[:serial])
+      elsif @params['ask']
+        order_serials = OrderSerial.where(order_id: @order.id, product_id: @product.id, serial: @params[:serial])
       else
-        order_serials = OrderSerial.where( order_id: @order.id, product_id: @product.id, second_serial: @params[:serial])
+        order_serials = OrderSerial.where(order_id: @order.id, product_id: @product.id, second_serial: @params[:serial])
       end
-      order_serial =  unless order_serials.empty?
-        order_serials.first
-      else
-        if @params["ask"]
-          OrderSerial.create!(order_id: @order.id, product_id: @product.id, serial: @params[:serial])
-        else
-          OrderSerial.create!(order_id: @order.id, product_id: @product.id, second_serial: @params[:serial])
-        end
-      end
+      order_serial = if order_serials.empty?
+                       if @params['ask']
+                         OrderSerial.create!(order_id: @order.id, product_id: @product.id, serial: @params[:serial])
+                       else
+                         OrderSerial.create!(order_id: @order.id, product_id: @product.id, second_serial: @params[:serial])
+                       end
+                     else
+                       order_serials.first
+                     end
     end
 
     def do_if_product_lot_id_not_present(order_serial)
@@ -108,7 +114,11 @@ module ScanPack
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id],
         order_serial_id: order_serial.id
       )
-      check_serial_lot = (!(@params["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"])) rescue (!(@params["is_scan"] && @params["ask"] && @params["ask_2"]))
+      check_serial_lot = begin
+                           !(@params['is_scan'] && @params['scan_pack']['ask'] && @params['scan_pack']['ask_2'])
+                         rescue StandardError
+                           (!(@params['is_scan'] && @params['ask'] && @params['ask_2']))
+                         end
       # if !(@params["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"])
       if check_serial_lot
         if order_item_serial_lots.empty?
@@ -127,13 +137,13 @@ module ScanPack
     def do_if_product_lot_id_present(order_serial)
       order_item_serial_lots = OrderItemOrderSerialProductLot.where(
         order_item_id: @params[:order_item_id], product_lot_id: @params[:product_lot_id]
-        )
+      )
 
       unless order_item_serial_lots.empty?
         existing_serials = order_item_serial_lots.where(order_serial_id: order_serial.id)
         if existing_serials.empty?
           new_serial = order_item_serial_lots.where(order_serial_id: nil).first ||
-                        order_item_serial_lots.create(order_serial_id: nil)
+                       order_item_serial_lots.create(order_serial_id: nil)
           new_serial.order_serial = order_serial
           new_serial.save
         else
@@ -146,19 +156,24 @@ module ScanPack
     end
 
     def do_product_scan(serial_added)
-      count = ProductBarcode.find_by_barcode(@params["barcode"]).packing_count rescue 1 if !@params["clicked"]
+      unless @params['clicked']
+        count = begin
+                  ProductBarcode.find_by_barcode(@params['barcode']).packing_count
+                rescue StandardError
+                  1
+                end
+      end
       @order.addactivity(
-        "Product: \"#{@product.name.to_s}\" Serial scanned: \"#{@params[:serial].to_s}\"",
+        "Product: \"#{@product.name}\" Serial scanned: \"#{@params[:serial]}\"",
         @current_user.name
       )
-      if @params["clicked"]
-        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], { clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session})
+      if @params['clicked']
+        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session)
       else
-        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], { clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session , typein_count: count.to_i})
+        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session, typein_count: count.to_i)
       end
 
       @result
     end
-
   end
 end

@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 class TenantMiddleware < Apartment::Elevators::Subdomain
   def call(env)
-    if (env['SERVER_NAME'].include? 'ngrok')
+    if env['SERVER_NAME'].include? 'ngrok'
       env['SERVER_NAME'] = 'gp55.localpackerapi.com'
       env['REQUEST_URI'] = 'http://gp55.localpackerapi.com'
       env['HTTP_HOST'] = 'gp55.localpackerapi.com'
@@ -16,7 +18,7 @@ class TenantMiddleware < Apartment::Elevators::Subdomain
       Rails.logger.error "ERROR: Apartment Tenant not found: #{Apartment::Tenant.current.inspect}"
       return [
         404,
-        {"Content-Type" => "text/html"},
+        { 'Content-Type' => 'text/html' },
         [
           File.open("#{Rails.root}/public/tenant_not_found.html").read
         ]

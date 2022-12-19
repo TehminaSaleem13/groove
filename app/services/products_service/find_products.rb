@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class FindProducts < ProductsService::Base
     attr_accessor :params
@@ -131,25 +133,25 @@ module ProductsService
     end
 
     def expected_sort_keys
-      %w(
+      %w[
         sku store_type barcode location_primary location_secondary
         location_tertiary location_name available_inv cat qty_on_hand
-      )
+      ]
     end
 
     def supported_sort_keys
-      %w(
+      %w[
         updated_at name sku status barcode location_primary location_secondary
         location_tertiary location_name cat available_inv store_type qty_on_hand
-      )
+      ]
     end
 
     def supported_order_keys
-      %w(ASC DESC) # Caps letters only
+      %w[ASC DESC] # Caps letters only
     end
 
     def supported_status_filters
-      %w(all active inactive new)
+      %w[all active inactive new]
     end
 
     def set_limit
@@ -163,7 +165,7 @@ module ProductsService
     end
 
     def set_sort_key
-      params[:sort] = "store_type" if params[:sort] == "store_name"
+      params[:sort] = 'store_type' if params[:sort] == 'store_name'
       p_sort = params[:sort]
       @sort_key = supported_sort_keys_contains(p_sort) ? p_sort : 'updated_at'
     end
@@ -205,16 +207,19 @@ module ProductsService
 
     def set_kit_query
       return if @is_kit == -1
+
       @kit_query = ' WHERE products.is_kit=' + @is_kit.to_s
     end
 
     def set_query_add
       return if params[:select_all] || params[:inverted]
+
       @query_add += ' LIMIT ' + @limit.to_s + ' OFFSET ' + @offset.to_s
     end
 
     def set_status_filter_text
       return if @status_filter == 'all'
+
       @status_filter_text = @is_kit == '-1' ? ' WHERE ' : ' AND '
       @status_filter_text += " products.status='" + @status_filter + "'"
     end
@@ -330,7 +335,8 @@ module ProductsService
     end
 
     def query_if_no_products
-      return unless @products.length == 0
+      return unless @products.empty?
+
       @products = Product.where(id: 1)
       default_query
     end
@@ -347,11 +353,13 @@ module ProductsService
 
     def filter_by_status
       return if @status_filter.eql?('all')
+
       @products = @products.where(status: @status_filter)
     end
 
     def filter_by_limit_offset
       return if select_all_and_inverted?
+
       @products = @products.limit(@limit).offset(@offset)
     end
 

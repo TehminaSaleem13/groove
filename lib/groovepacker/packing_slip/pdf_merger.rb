@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module PackingSlip
     class PdfMerger
@@ -6,27 +8,28 @@ module Groovepacker
         if packing_slip_file_paths.any?
           input = result['data']['destination']
 
-          #join the path names with a space in between each consicutive paths and give as input
+          # join the path names with a space in between each consicutive paths and give as input
           `pdftk #{packing_slip_file_paths.join(' ')} cat output #{input.to_s}`
 
-          raise "Problem combining PDF files" unless $?.success?
+          raise 'Problem combining PDF files' unless $CHILD_STATUS.success?
+
           rearrange_pdfs(result, file_name, input) if size == '8.5 x 11' && orientation == 'landscape'
         end
       end
 
       def rearrange_pdfs(result, file_name, input)
         result['data']['destination'] = Rails.root.join('public', 'pdfs', "#{file_name}_packing_slip_landscape.pdf")
-        result['data']['merged_packing_slip_url'] = '/pdfs/'+ file_name + '_packing_slip_landscape.pdf'
+        result['data']['merged_packing_slip_url'] = '/pdfs/' + file_name + '_packing_slip_landscape.pdf'
 
-        #render the merged pdf into a separate pdf as two packing_slips per page
+        # render the merged pdf into a separate pdf as two packing_slips per page
         `pdfjam --nup 2x1 #{input} --outfile #{result['data']['destination'].to_s} --papersize '{11in,8.5in}'`
-        #delete the perviously generated merged pdf
+        # delete the perviously generated merged pdf
         File.delete(input)
       end
 
       def do_get_action_view_object_for_html_rendering
         ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
-        action_view = ActionView::Base.new()
+        action_view = ActionView::Base.new
         action_view.view_paths = ActionController::Base.view_paths
         action_view.class_eval do
           include Rails.application.routes.url_helpers

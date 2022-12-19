@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SettingsService
   class OrderExceptionExport < SettingsService::Base
     attr_reader :current_user, :params, :result, :row_map, :exceptions
@@ -20,10 +22,9 @@ module SettingsService
         total_clicked_items: ''
       }
 
-      start_time = params[:start].gsub(/GMT/,'+00:00')
-      end_time = params[:end].gsub(/GMT/,'+00:00')
+      start_time = params[:start].gsub(/GMT/, '+00:00')
+      end_time = params[:end].gsub(/GMT/, '+00:00')
       @exceptions = OrderException.where(updated_at: Time.parse(start_time).getutc..Time.parse(end_time).getutc)
-
     end
 
     def call
@@ -61,15 +62,23 @@ module SettingsService
         end
       end
 
-      public_url =  GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-exceptions","#{Time.current}", data).url.gsub('http:', 'https:')
-      @result['filename'] = {'url' => public_url, 'filename' => @result['filename']}
+      public_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'groove-order-exceptions', Time.current.to_s, data).url.gsub('http:', 'https:')
+      @result['filename'] = { 'url' => public_url, 'filename' => @result['filename'] }
     end
 
     def generate_single_record(exception, single_row)
       order = exception.order
       user = exception.user
-      single_row[:total_packed_items] = order.order_items.map(&:scanned_qty).sum rescue nil
-      single_row[:total_clicked_items] = order.order_items.map(&:clicked_qty).sum rescue nil
+      single_row[:total_packed_items] = begin
+                                          order.order_items.map(&:scanned_qty).sum
+                                        rescue StandardError
+                                          nil
+                                        end
+      single_row[:total_clicked_items] = begin
+                                           order.order_items.map(&:clicked_qty).sum
+                                         rescue StandardError
+                                           nil
+                                         end
       push_order_data(single_row, order)
 
       single_row[:reason] = exception.reason
@@ -84,9 +93,9 @@ module SettingsService
       single_row[:scanned_date],
       single_row[:ordered_qty],
       single_row[:click_scanned_items] = order.as_json(
-        only: [
-          :increment_id, :order_placed_time, :scanned_on,
-          :scanned_items_count, :clicked_items_count
+        only: %i[
+          increment_id order_placed_time scanned_on
+          scanned_items_count clicked_items_count
         ]
       ).values
     end

@@ -1,19 +1,21 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Dashboard
     module Stats
       class AnalyticStatStream
-        def initialize
-        end
+        def initialize; end
 
         def stream_detail(tenant_name, trace_untraced = false)
           begin
             stat_stream = []
             Apartment::Tenant.switch!(tenant_name)
-            puts "switched tenant."
+            puts 'switched tenant.'
             orders = get_list(trace_untraced)
-            puts "found all orders with scanned status"
+            puts 'found all orders with scanned status'
             return stat_stream if orders.empty?
-            puts "iterate over the orders"
+
+            puts 'iterate over the orders'
             orders.each do |order|
               if order.increment_id
                 result = build_stream(order)
@@ -31,11 +33,11 @@ module Groovepacker
           @user = order.packing_user
           # uncomment the following line when is_deleted field is added to users table.
           # return result if @user && @user.is_deleted
-          if @user && !@user.is_deleted
-            result[:packing_user_name] = @user.username
-          else
-            result[:packing_user_name] = 'deleted_user'
-          end
+          result[:packing_user_name] = if @user && !@user.is_deleted
+                                         @user.username
+                                       else
+                                         'deleted_user'
+                                       end
           bind_order_data(order, result)
           bind_exception(order, result)
           result
@@ -68,8 +70,9 @@ module Groovepacker
         end
 
         def get_list(trace_untraced)
-          return Order.where("status = ? and traced_in_dashboard = ? and scanned_by_status_change = ?", 'scanned', false, false) if trace_untraced
-          Order.where("status = ? and scanned_by_status_change = ?", 'scanned', false)
+          return Order.where('status = ? and traced_in_dashboard = ? and scanned_by_status_change = ?', 'scanned', false, false) if trace_untraced
+
+          Order.where('status = ? and scanned_by_status_change = ?', 'scanned', false)
         end
 
         def get_order_stream(tenant, order_id)

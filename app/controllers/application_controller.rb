@@ -24,8 +24,9 @@ class ApplicationController < ActionController::Base
   def verify_authenticity_token
     auth_header = request.headers['Authorization']
     return if auth_header&.include?('Bearer') && !current_user.nil?
+
     raise
-  rescue
+  rescue StandardError
     super
   end
 
@@ -49,19 +50,13 @@ class ApplicationController < ActionController::Base
       # store session data or any authentication data you want here, generate to JSON data
       stored_session = JSON.generate('tenant' => Apartment::Tenant.current, 'user_id' => current_user.id, 'username' => current_user.username)
       $redis.hset('groovehacks:session', cookies['_validation_token_key'], stored_session)
-      if session[:redirect_uri]
-        session[:redirect_uri]
-      else
-        super(resource_or_scope)
-      end
+      session[:redirect_uri] || super(resource_or_scope)
     end
   end
 
   def after_sign_out_path_for(resource_or_scope)
     # expire session in redis
-    if cookies['_validation_token_key'].present?
-      $redis.hdel('groovehacks:session', cookies['_validation_token_key'])
-    end
+    $redis.hdel('groovehacks:session', cookies['_validation_token_key']) if cookies['_validation_token_key'].present?
     session[:redirect_uri] = nil
     super(resource_or_scope)
   end
@@ -76,6 +71,7 @@ class ApplicationController < ActionController::Base
   def check_for_dst(offset)
     tz_name = Groovepacks::Application.config.time_zone_names.values.first.key(offset.to_i)
     return false if tz_name.nil? || GeneralSetting.all.first.try(:dst)
+
     ActiveSupport::TimeZone[tz_name].tzinfo.current_period.dst?
   end
 
@@ -84,8 +80,16 @@ class ApplicationController < ActionController::Base
   def save_bc_auth_if_present
     bc_auth = cookies[:bc_auth]
     unless bc_auth.blank?
-      access_token = bc_auth['access_token'] rescue nil
-      store_hash = bc_auth['context'] rescue nil
+      access_token = begin
+                       bc_auth['access_token']
+                     rescue StandardError
+                       nil
+                     end
+      store_hash = begin
+                     bc_auth['context']
+                   rescue StandardError
+                     nil
+                   end
       @store = Store.new
       @store = @store.create_store_with_defaults('BigCommerce')
       BigCommerceCredential.create(store_id: @store.id, access_token: access_token, store_hash: store_hash)

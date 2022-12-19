@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ExportData
   extend ActiveSupport::Concern
 
@@ -14,17 +16,19 @@ module ExportData
   #   }
   # end
 
-  def export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array, box = nil)
+  def export_if_order_with_serial_lot(order_item, row_map, order_hash_item_array, _box = nil)
     order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
     return if order_item_serial_lots.empty?
+
     order_item_serial_lots.each do |order_item_serial_lot|
       product_lot = order_item_serial_lot.product_lot
       order_serial = order_item_serial_lot.order_serial
       next unless order_serial || product_lot
+
       parse_order_item_serial_lots([
-        order_item_serial_lot, row_map, order_item,
-        product_lot, order_serial, order_hash_item_array
-      ])
+                                     order_item_serial_lot, row_map, order_item,
+                                     product_lot, order_serial, order_hash_item_array
+                                   ])
     end
   end
 
@@ -48,14 +52,17 @@ module ExportData
     else
       lot_number = product_lot.lot_number
       single_row[:lot_number] = lot_number
-      single_row[:barcode_with_lot] = order_item.get_barcode_with_lotnumber(
-        order_item.product.primary_barcode, lot_number
-      ) if lot_number.present?
+      if lot_number.present?
+        single_row[:barcode_with_lot] = order_item.get_barcode_with_lotnumber(
+          order_item.product.primary_barcode, lot_number
+        )
+      end
     end
   end
 
   def process_order_serial(single_row, order_serial, order_item)
     return '' if order_serial.blank?
+
     fetch_product_data(single_row, order_serial, order_item)
     single_row[:serial_number] = order_serial.serial
     single_row[:serial_number_2] = order_serial.second_serial
@@ -65,10 +72,11 @@ module ExportData
   def fetch_product_data(single_row, order_serial, order_item)
     order_serial_product = order_serial.product
     return unless order_serial_product.is_kit == 0 && order_item.product.is_kit == 1
+
     single_row[:part_sku] = order_serial_product.primary_sku
     single_row[:product_name] = order_serial_product.name
     single_row[:item_sale_price] = order_serial_product.order_items
-                                   .try(:first).try(:price).to_f
+                                                       .try(:first).try(:price).to_f
   end
 
   def calculate_scan_order(single_row, order_serial, order_item)
@@ -145,7 +153,7 @@ module ExportData
   end
 
   def generate_default_row_map
-    generate_header.reduce({}){|h, (k, v)| h[k] = ''; h}
+    generate_header.each_with_object({}) { |(k, _v), h| h[k] = ''; }
   end
 
   def sort_by_scan_order(order_hash_item_array)
@@ -186,6 +194,7 @@ module ExportData
     orders.each do |order|
       order_items = order.order_items
       next if order_items.reload.empty?
+
       order_hash_item_array = []
       order_items.each do |order_item|
         if order_item.boxes.present?
@@ -220,8 +229,12 @@ module ExportData
         csv << order_hash.values_at(*csv_row_map.keys)
       end
     end
-    GroovS3.create_export_csv(tenant, filename, data) rescue nil
-    #url = GroovS3.find_export_csv(tenant, filename)
+    begin
+      GroovS3.create_export_csv(tenant, filename, data)
+    rescue StandardError
+      nil
+    end
+    # url = GroovS3.find_export_csv(tenant, filename)
     # ExportOrder.export(tenant).deliver if ExportSetting.first.manual_export == true
   end
 end

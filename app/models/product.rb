@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class Product < ActiveRecord::Base
   extend ProductClassMethodsHelper
   include ProductsHelper
@@ -41,17 +43,17 @@ class Product < ActiveRecord::Base
 
   has_many :product_skus, dependent: :destroy
   has_many :product_cats, dependent: :destroy
-  has_many :product_barcodes,:class_name => 'ProductBarcode', dependent: :destroy
-  has_many :product_images,:class_name => 'ProductImage', dependent: :destroy
-  has_many :product_kit_skuss, :class_name => 'ProductKitSkus',  dependent: :destroy
-  has_many :product_inventory_warehousess,:class_name => 'ProductInventoryWarehouses',  dependent: :destroy
+  has_many :product_barcodes, class_name: 'ProductBarcode', dependent: :destroy
+  has_many :product_images, class_name: 'ProductImage', dependent: :destroy
+  has_many :product_kit_skuss, class_name: 'ProductKitSkus', dependent: :destroy
+  has_many :product_inventory_warehousess, class_name: 'ProductInventoryWarehouses', dependent: :destroy
   has_many :order_serial
   has_many :order_items
   has_many :product_kit_activities, dependent: :destroy
   has_many :product_lots
   has_and_belongs_to_many :product_inventory_reports, join_table: :products_product_inventory_reports
   has_one :sync_option
-  has_many :product_activities, :dependent => :destroy
+  has_many :product_activities, dependent: :destroy
 
   after_save :check_inventory_warehouses
   after_save :gen_barcode_from_sku_if_intangible
@@ -62,9 +64,9 @@ class Product < ActiveRecord::Base
   after_save :delete_cache
   after_save :check_and_update_status_updated_column
 
-  SINGLE_KIT_PARSING = 'single'.freeze
-  DEPENDS_KIT_PARSING = 'depends'.freeze
-  INDIVIDUAL_KIT_PARSING = 'individual'.freeze
+  SINGLE_KIT_PARSING = 'single'
+  DEPENDS_KIT_PARSING = 'depends'
+  INDIVIDUAL_KIT_PARSING = 'individual'
 
   SINGLE_SCAN_STATUSES = [SINGLE_KIT_PARSING, DEPENDS_KIT_PARSING].freeze
   INDIVIDUAL_SCAN_STATUSES = [INDIVIDUAL_KIT_PARSING].freeze
@@ -85,12 +87,12 @@ class Product < ActiveRecord::Base
     general_setting = GeneralSetting.setting
 
     @order_items = if eager_loaded_obj[:multi_product_order_items]
-      eager_loaded_obj[:multi_product_order_items].select{ |oi| oi.product_id == id }
-    else
-      OrderItem.where(
-        product_id: id, scanned_status: 'notscanned'
-      )
-      .includes(:order_item_kit_products, :product, order: [order_items: :product])
+                     eager_loaded_obj[:multi_product_order_items].select { |oi| oi.product_id == id }
+                   else
+                     OrderItem.where(
+                       product_id: id, scanned_status: 'notscanned'
+                     )
+                              .includes(:order_item_kit_products, :product, order: [order_items: :product])
     end
 
     if status != 'inactive' || force_from_inactive_state
@@ -140,23 +142,22 @@ class Product < ActiveRecord::Base
           @kit_products =
             if eager_loaded_obj[:kit_skus_if_kit_zero]
               eager_loaded_obj[:kit_skus_if_kit_zero]
-                .select{ |pkss| pkss.option_product_id == id }
+                .select { |pkss| pkss.option_product_id == id }
             else
               ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
             end
 
           # To reduce individual product query fire on order items
           multi_product_order_items =
-            OrderItem.where(product_id: @kit_products.map{|kp| kp.product.id}, scanned_status: 'notscanned')
-            # .includes(order: [order_items: [:product, :order_item_kit_products]])
+            OrderItem.where(product_id: @kit_products.map { |kp| kp.product.id }, scanned_status: 'notscanned')
+          # .includes(order: [order_items: [:product, :order_item_kit_products]])
 
-          #result_kit = true
+          # result_kit = true
           @kit_products.each do |kit_product|
-            if kit_product.product.status != 'inactive'
-              kit_product.product.update_product_status(nil, {
-                multi_product_order_items: multi_product_order_items
-              })
-            end
+            next unless kit_product.product.status != 'inactive'
+
+            kit_product.product.update_product_status(nil,
+                                                      multi_product_order_items: multi_product_order_items)
           end
         end
       end
@@ -165,7 +166,7 @@ class Product < ActiveRecord::Base
         products =
           if eager_loaded_obj[:multi_base_sku_products]
             eager_loaded_obj[:multi_base_sku_products]
-              .select{ |p| p.base_sku == primary_sku }
+              .select { |p| p.base_sku == primary_sku }
           else
             Product.where(base_sku: primary_sku)
           end
@@ -173,11 +174,14 @@ class Product < ActiveRecord::Base
         # To reduce individual product query fire on order items
         multi_product_order_items =
           OrderItem.where(product_id: products.map(&:id), scanned_status: 'notscanned')
-          .includes(order: [order_items: [:product, :order_item_kit_products]])
+                   .includes(order: [order_items: %i[product order_item_kit_products]])
 
-        products.each{|p| p.update_product_status(nil, {
-          multi_product_order_items: multi_product_order_items
-        })} unless products.empty?
+        unless products.empty?
+          products.each do |p|
+            p.update_product_status(nil,
+                                    multi_product_order_items: multi_product_order_items)
+          end
+        end
       end
     end
     # update order items status from onhold to awaiting
@@ -185,9 +189,9 @@ class Product < ActiveRecord::Base
     #   process_order_item
     # else
     #   @order_items.each do |item|
-        # item.order.update_order_status unless item.order.nil? ||
-        #                                      !%w(awaiting onhold)
-        #                                      .include?(item.order.status)
+    # item.order.update_order_status unless item.order.nil? ||
+    #                                      !%w(awaiting onhold)
+    #                                      .include?(item.order.status)
     #     bulkaction.process(item) if general_setting.inventory_tracking?
     #     item.delete_cache_for_associated_obj
     #   end
@@ -199,16 +203,17 @@ class Product < ActiveRecord::Base
     obj = self
     obj.update_column(:status_updated, true)
     updated_products = Product.where(status_updated: true)
-    orders = Order.eager_load(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
-    return if orders.length<1
-    action = GrooveBulkActions.where(identifier: "order", activity: "status_update", status: "pending").first
-    action = GrooveBulkActions.new(identifier: "order", activity: "status_update", status: "pending") if action.blank?
+    orders = Order.eager_load(:order_items).where('order_items.product_id IN (?)', updated_products.map(&:id))
+    return if orders.empty?
+
+    action = GrooveBulkActions.where(identifier: 'order', activity: 'status_update', status: 'pending').first
+    action = GrooveBulkActions.new(identifier: 'order', activity: 'status_update', status: 'pending') if action.blank?
     action.total = orders.count
     action.save
   end
 
   def check_and_update_status_updated_column
-    process_order_item if self.saved_changes["status"].present?
+    process_order_item if saved_changes['status'].present?
   end
 
   def update_due_to_inactive_product
@@ -225,18 +230,19 @@ class Product < ActiveRecord::Base
 
     kit_products.each do |kit_product|
       next unless kit_product.product.status != 'inactive'
+
       kit_product.product.status = 'new'
       kit_product.product.save
       tmp_order_items = order_items.select { |oi| oi.product_id = kit_product.product_id }
       tmp_order_items.each do |item|
-        item.order.update_order_status unless item.order.nil?
+        item.order&.update_order_status
         item.delete_cache_for_associated_obj
       end
     end
 
     order_items = order_items.select { |oi| oi.product_id = id }
     order_items.each do |item|
-      item.order.update_order_status unless item.order.nil?
+      item.order&.update_order_status
       item.delete_cache_for_associated_obj
     end
   end
@@ -349,7 +355,7 @@ class Product < ActiveRecord::Base
   def primary_sku_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds
-    product_skus.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
+    product_skus.min { |a, b| a.order.to_i <=> b.order.to_i }
   end
 
   def primary_sku=(value)
@@ -365,14 +371,14 @@ class Product < ActiveRecord::Base
       base_product_sku = ProductSku
                          .where(sku: base_sku)
                          .includes(
-                           product: [
-                             :product_inventory_warehousess, :product_skus,
-                             :product_cats, :product_barcodes, :product_images
+                           product: %i[
+                             product_inventory_warehousess product_skus
+                             product_cats product_barcodes product_images
                            ]
                          ).first
-      return base_product_sku.try :product
+      base_product_sku.try :product
     else
-      return self
+      self
     end
   end
 

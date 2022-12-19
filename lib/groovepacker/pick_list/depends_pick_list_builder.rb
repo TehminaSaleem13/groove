@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module PickList
     class DependsPickListBuilder < PickListBuilder
@@ -8,18 +10,18 @@ module Groovepacker
         product_skus = product.product_skus
         sku_found = false
         # check if sku is found or not, get index if found
-        if !product_skus.first.nil?
+        unless product_skus.first.nil?
           sku = product_skus.first.sku
-          if pick_list.length > 0
+          unless pick_list.empty?
             pick_list.each do |item|
-              if item['sku']== sku
-                sku_found = true
-                index = pick_list.index(item)
-                # if sku is found, then single_pick_list = pick_list[index]['single']
-                single_pick_list = pick_list[index]['single']
-                individual_pick_list = pick_list[index]['individual']
-                break
-              end
+              next unless item['sku'] == sku
+
+              sku_found = true
+              index = pick_list.index(item)
+              # if sku is found, then single_pick_list = pick_list[index]['single']
+              single_pick_list = pick_list[index]['single']
+              individual_pick_list = pick_list[index]['individual']
+              break
             end
           end
         end
@@ -29,23 +31,26 @@ module Groovepacker
           qty,
           product,
           single_pick_list,
-          inventory_warehouse_id)
+          inventory_warehouse_id
+        )
 
         individual_pick_list_builder = IndividualPickListBuilder.new
         individual_pick_list = individual_pick_list_builder.build(
           qty,
           product,
           individual_pick_list,
-          inventory_warehouse_id)
-        #if sku is not found
+          inventory_warehouse_id
+        )
+        # if sku is not found
         if !sku_found
-          pick_list.push({
-                           "sku" => sku,
-                           "single" => single_pick_list,
-                           "individual" => individual_pick_list})
+          pick_list.push(
+            'sku' => sku,
+            'single' => single_pick_list,
+            'individual' => individual_pick_list
+          )
         else
-          pick_list[index]['single']= single_pick_list
-          pick_list[index]['individual']= individual_pick_list
+          pick_list[index]['single'] = single_pick_list
+          pick_list[index]['individual'] = individual_pick_list
         end
 
         pick_list
@@ -53,5 +58,3 @@ module Groovepacker
     end
   end
 end
-
-

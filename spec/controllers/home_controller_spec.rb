@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe HomeController, type: :controller do
-  before(:each) do
+  before do
     Groovepacker::SeedTenant.new.seed
     user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true)
     @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)

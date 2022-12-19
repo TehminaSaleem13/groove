@@ -23,11 +23,11 @@ class InventoryReportMailer < ActionMailer::Base
 
   def auto_inventory_report(flag, report = nil, report_ids = nil, tenant)
     Apartment::Tenant.switch! tenant if tenant.present?
-    if report_ids.present?
-      reports = ProductInventoryReport.where(id: report_ids)
-    else
-      reports = report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
-    end
+    reports = if report_ids.present?
+                ProductInventoryReport.where(id: report_ids)
+              else
+                report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
+              end
     @product_inv_setting = InventoryReportsSetting.last
     reports.each do |report|
       file_name = "sku_per_day_report_#{Time.current.strftime('%y%m%d_%H%M%S')}.csv"
@@ -43,13 +43,13 @@ class InventoryReportMailer < ActionMailer::Base
   end
 
   def get_products(report)
-    if (report.name == 'All_Products_Report') && report.is_locked
-      products = Product.all
-    elsif (report.name == 'Active_Products_Report') && report.is_locked
-      products = Product.where(status: 'active')
-    else
-      products = report.products
-     end
+    products = if (report.name == 'All_Products_Report') && report.is_locked
+                 Product.all
+               elsif (report.name == 'Active_Products_Report') && report.is_locked
+                 Product.where(status: 'active')
+               else
+                 report.products
+                end
     products
   end
 end

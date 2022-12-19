@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 class Expo::NewScanRecordingService < ScanPack::Base
   def initialize(args)
     @current_user, @input, @id = args
     @result = {
-      "status"=>true,
-      "matched"=>false,
-      "error_messages"=>[],
-      "success_messages"=>[],
-      "notice_messages"=>[],
-      "data"=>{}
+      'status' => true,
+      'matched' => false,
+      'error_messages' => [],
+      'success_messages' => [],
+      'notice_messages' => [],
+      'data' => {}
     }
     @order = Order.where(id: @id).last
     @scanpack_settings_post_scanning_option_second = ScanPackSetting.last.post_scanning_option_second
@@ -22,17 +24,17 @@ class Expo::NewScanRecordingService < ScanPack::Base
   def scan_recording
     @result['data']['next_state'] = 'scanpack.rfp.recording'
     if @order.status == 'awaiting'
-      #allow tracking id to be saved without special permissions
-      if @scanpack_settings_post_scanning_option_second == "None" || @scanpack_settings_post_scanning_option_second == "Record" 
+      # allow tracking id to be saved without special permissions
+      if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Record'
         check_tracking_number_validation
       else
         @order.tracking_num = @input
         @order.post_scanning_flag = 'Record'
         @order.save
         apply_second_action
-      end  
+      end
     else
-      set_error_messages("The order is not in awaiting state. Cannot scan the tracking number")
+      set_error_messages('The order is not in awaiting state. Cannot scan the tracking number')
     end
   end
 
@@ -46,27 +48,27 @@ class Expo::NewScanRecordingService < ScanPack::Base
     @order.set_order_to_scanned_state(@current_user.username)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
-    #update inventory when inventory warehouses is implemented.
+    # update inventory when inventory warehouses is implemented.
     @order.save
   end
 
   def apply_second_action
     case @scanpack_settings_post_scanning_option_second
-      when "Verify"
-        unless @order.tracking_num.present?
-          @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-          @order.addactivity("Tracking information was not imported with this order so the shipping label could not be verified ", @current_user.username)
-        else
-          @result['data']['next_state'] = 'scanpack.rfp.verifying'
-        end
-      when "PackingSlip"
-        do_set_order_scanned_state_and_result_data
-        generate_packing_slip(@order)
-      when "Barcode"
-        do_set_order_scanned_state_and_result_data
-        generate_order_barcode_slip(@order)
+    when 'Verify'
+      if @order.tracking_num.present?
+        @result['data']['next_state'] = 'scanpack.rfp.verifying'
       else
-        do_set_order_scanned_state_and_result_data
+        @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
+        @order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username)
+        end
+    when 'PackingSlip'
+      do_set_order_scanned_state_and_result_data
+      generate_packing_slip(@order)
+    when 'Barcode'
+      do_set_order_scanned_state_and_result_data
+      generate_order_barcode_slip(@order)
+    else
+      do_set_order_scanned_state_and_result_data
       end
   end
 

@@ -1,5 +1,6 @@
-class PaymentsController < ApplicationController
+# frozen_string_literal: true
 
+class PaymentsController < ApplicationController
   before_action :groovepacker_authorize!, :get_current_tenant
   include PaymentsHelper
 

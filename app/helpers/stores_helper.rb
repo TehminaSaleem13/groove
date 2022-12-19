@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module StoresHelper
   def get_default_warehouse_id
-    warehouse_name_or_id("id")
+    warehouse_name_or_id('id')
     # inventory_warehouses = InventoryWarehouse.where(:is_default => 1)
     # if !inventory_warehouses.nil?
     #   inventory_warehouse = inventory_warehouses.first
@@ -10,7 +12,7 @@ module StoresHelper
   end
 
   def get_default_warehouse_name
-    warehouse_name_or_id("name")
+    warehouse_name_or_id('name')
     # inventory_warehouses = InventoryWarehouse.where(:is_default => 1)
     # if !inventory_warehouses.nil?
     #   inventory_warehouse = inventory_warehouses.first
@@ -20,13 +22,13 @@ module StoresHelper
   end
 
   def warehouse_name_or_id(flag)
-    inventory_warehouses = InventoryWarehouse.where(:is_default => 1)
-    if !inventory_warehouses.nil?
+    inventory_warehouses = InventoryWarehouse.where(is_default: 1)
+    unless inventory_warehouses.nil?
       inventory_warehouse = inventory_warehouses.first
-      if flag == "id"
+      if flag == 'id'
         default_warehouse_id = inventory_warehouse.id
         return default_warehouse_id
-      elsif flag == "name"
+      elsif flag == 'name'
         default_warehouse_name = inventory_warehouse.name
         return default_warehouse_name
       end
@@ -34,7 +36,7 @@ module StoresHelper
   end
 
   def init_store_data
-    params[:name]=nil if params[:name]=='undefined'
+    params[:name] = nil if params[:name] == 'undefined'
     if params[:status].present?
       @store.name = params[:name] || get_default_warehouse_name
       @store.store_type = params[:store_type]
@@ -55,72 +57,72 @@ module StoresHelper
   end
 
   def store_duplicate
-    @result = {"status"=>true, "messages"=>[]}
+    @result = { 'status' => true, 'messages' => [] }
     if current_user.can? 'add_edit_stores'
       params['_json'].each do |store|
         if Store.can_create_new?
-          @store = Store.find(store["id"])
+          @store = Store.find(store['id'])
           @newstore = @store.dup
           index = 0
-          @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-          @storeslist = Store.where(:name => @newstore.name)
+          @newstore.name = @store.name + '(duplicate' + index.to_s + ')'
+          @storeslist = Store.where(name: @newstore.name)
           begin
-            index = index + 1
-            @newstore.name = @store.name+"(duplicate"+index.to_s+")"
-            @storeslist = Store.where(:name => @newstore.name)
-          end while (!@storeslist.nil? && @storeslist.length > 0)
-          if !@newstore.save(:validate => false) || !@newstore.dupauthentications(@store.id)
+            index += 1
+            @newstore.name = @store.name + '(duplicate' + index.to_s + ')'
+            @storeslist = Store.where(name: @newstore.name)
+          end while (!@storeslist.nil? && !@storeslist.empty?)
+          if !@newstore.save(validate: false) || !@newstore.dupauthentications(@store.id)
             @result['status'] = false
             @result['messages'] = @newstore.errors.full_messages
           end
         else
           @result['status'] = false
-          @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
+          @result['messages'] = 'You have reached the maximum limit of number of stores for your subscription.'
         end
       end
     else
-      @result["status"] = false
-      @result["messages"].push("User does not have permissions to duplicate store")
+      @result['status'] = false
+      @result['messages'].push('User does not have permissions to duplicate store')
     end
   end
 
   def store_delete
-    @result = {"status"=>false, "messages"=>[]}
+    @result = { 'status' => false, 'messages' => [] }
     if current_user.can? 'add_edit_stores'
       system_store_id = Store.find_by_store_type('system').id.to_s
       params['_json'].each do |store|
-        @store = Store.where(id: store["id"]).first
-        unless @store.nil?
-          Product.update_all(['store_id = '+system_store_id, 'store_id ='+@store.id.to_s])
-          Order.update_all(['store_id = '+system_store_id, 'store_id ='+@store.id.to_s])
-          destroy_csv_store
-          # if @store.store_type == 'CSV'
-          #   csv_mapping = CsvMapping.find_by_store_id(@store.id)
-          #   csv_mapping.destroy unless csv_mapping.nil?
-          #   ftp_credential = FtpCredential.find_by_store_id(@store.id)
-          #   ftp_credential.destroy unless ftp_credential.nil?
-          # end
-          # @result['status'] = true if @store.deleteauthentications && @store.destroy
-        end
+        @store = Store.where(id: store['id']).first
+        next if @store.nil?
+
+        Product.update_all(['store_id = ' + system_store_id, 'store_id =' + @store.id.to_s])
+        Order.update_all(['store_id = ' + system_store_id, 'store_id =' + @store.id.to_s])
+        destroy_csv_store
+        # if @store.store_type == 'CSV'
+        #   csv_mapping = CsvMapping.find_by_store_id(@store.id)
+        #   csv_mapping.destroy unless csv_mapping.nil?
+        #   ftp_credential = FtpCredential.find_by_store_id(@store.id)
+        #   ftp_credential.destroy unless ftp_credential.nil?
+        # end
+        # @result['status'] = true if @store.deleteauthentications && @store.destroy
       end
     else
-      @result["status"] = false
-      @result["messages"].push("User does not have permissions to delete store")
+      @result['status'] = false
+      @result['messages'].push('User does not have permissions to delete store')
     end
   end
 
   def destroy_csv_store
     if @store.store_type == 'CSV'
       csv_mapping = CsvMapping.find_by_store_id(@store.id)
-      csv_mapping.destroy unless csv_mapping.nil?
+      csv_mapping&.destroy
       ftp_credential = FtpCredential.find_by_store_id(@store.id)
-      ftp_credential.destroy unless ftp_credential.nil?
+      ftp_credential&.destroy
     end
     @result['status'] = true if @store.deleteauthentications && @store.destroy
   end
 
   def show_store
-    if !@store.nil? then
+    if !@store.nil?
       @result['status'] = true
       @result['store'] = @store
       access_restrictions = AccessRestriction.last
@@ -146,12 +148,12 @@ module StoresHelper
   end
 
   def check_include_pro_or_shipping_label(flag)
-    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params["store_id"])
+    shippingeasy_cred = ShippingEasyCredential.find_by_store_id(params['store_id'])
     result = {}
-    if flag == "popup_shipping_label"
+    if flag == 'popup_shipping_label'
       shippingeasy_cred.popup_shipping_label = !shippingeasy_cred.popup_shipping_label
       shippingeasy_cred.save
-      result["popup_shipping_label"] = shippingeasy_cred.popup_shipping_label
+      result['popup_shipping_label'] = shippingeasy_cred.popup_shipping_label
     end
     result
   end
@@ -159,15 +161,15 @@ module StoresHelper
   def update_store_status
     if current_user.can? 'add_edit_stores'
       params['_json'].each do |store|
-        @store = Store.find(store["id"])
-        @store.status = store["status"]
-        @result['status'] = false if !@store.save
+        @store = Store.find(store['id'])
+        @store.status = store['status']
+        @result['status'] = false unless @store.save
         stop_running_import if @store.status == false
       end
-      OrderImportSummary.first.emit_data_to_user unless OrderImportSummary.first.nil?
+      OrderImportSummary.first&.emit_data_to_user
     else
-      @result["status"] = false
-      @result["messages"].push('User does not have permissions to change store status')
+      @result['status'] = false
+      @result['messages'].push('User does not have permissions to change store status')
     end
   end
 
@@ -214,13 +216,13 @@ module StoresHelper
       #   @result['messages'].push("Import is in progress. Try after it is complete")
       # end
     elsif params[:type] == 'kit'
-      groove_bulk_actions = GrooveBulkActions.new(:identifier=>'csv_import', :activity=>'kit')
+      groove_bulk_actions = GrooveBulkActions.new(identifier: 'csv_import', activity: 'kit')
       # groove_bulk_actions.identifier = 'csv_import'
       # groove_bulk_actions.activity = 'kit'
       groove_bulk_actions.save
       data[:bulk_action_id] = groove_bulk_actions.id
       import_csv = ImportCsv.new
-      import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_kit_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
+      import_csv.delay(run_at: 1.seconds.from_now, queue: "import_kit_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
       # import_csv.import(Apartment::Tenant.current, data.to_s)
     elsif params[:type] == 'product'
       product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -231,7 +233,7 @@ module StoresHelper
       #   product_import.save
       # end
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(:run_at => 1.seconds.from_now, :queue => "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
+      delayed_job = import_csv.delay(run_at: 1.seconds.from_now, queue: "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
       # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
       product_import.update_attributes(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
     end
@@ -241,25 +243,25 @@ module StoresHelper
   def order_csv_import(data)
     if OrderImportSummary.where(status: 'in_progress').empty?
       bulk_actions = Groovepacker::Orders::BulkActions.new
-      bulk_actions.delay(:run_at => 1.seconds.from_now, :queue => 'import_csv_orders', priority: 95).import_csv_orders(Apartment::Tenant.current, @store.id, data.to_s, current_user.id)
+      bulk_actions.delay(run_at: 1.seconds.from_now, queue: 'import_csv_orders', priority: 95).import_csv_orders(Apartment::Tenant.current, @store.id, data.to_s, current_user.id)
       # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
     else
       @result['status'] = false
-      @result['messages'].push("Import is in progress. Try after it is complete")
+      @result['messages'].push('Import is in progress. Try after it is complete')
     end
   end
 
   def ebay_token_update(url)
     @store = @store.first
     req = Net::HTTP::Post.new(url.path)
-    req.add_field("X-EBAY-API-REQUEST-CONTENT-TYPE", 'text/xml')
-    req.add_field("X-EBAY-API-COMPATIBILITY-LEVEL", "675")
-    req.add_field("X-EBAY-API-DEV-NAME", ENV['EBAY_DEV_ID'])
-    req.add_field("X-EBAY-API-APP-NAME", ENV['EBAY_APP_ID'])
-    req.add_field("X-EBAY-API-CERT-NAME", ENV['EBAY_CERT_ID'])
-    req.add_field("X-EBAY-API-SITEID", 0)
-    req.add_field("X-EBAY-API-CALL-NAME", "FetchToken")
-    req.body ='<?xml version="1.0" encoding="utf-8"?>'+ '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">'+ "<SessionID>#{$redis.get('ebay_session_id')}</SessionID>" + '</FetchTokenRequest>'
+    req.add_field('X-EBAY-API-REQUEST-CONTENT-TYPE', 'text/xml')
+    req.add_field('X-EBAY-API-COMPATIBILITY-LEVEL', '675')
+    req.add_field('X-EBAY-API-DEV-NAME', ENV['EBAY_DEV_ID'])
+    req.add_field('X-EBAY-API-APP-NAME', ENV['EBAY_APP_ID'])
+    req.add_field('X-EBAY-API-CERT-NAME', ENV['EBAY_CERT_ID'])
+    req.add_field('X-EBAY-API-SITEID', 0)
+    req.add_field('X-EBAY-API-CALL-NAME', 'FetchToken')
+    req.body = '<?xml version="1.0" encoding="utf-8"?>' + '<FetchTokenRequest xmlns="urn:ebay:apis:eBLBaseComponents">' + "<SessionID>#{$redis.get('ebay_session_id')}</SessionID>" + '</FetchTokenRequest>'
     http = Net::HTTP.new(url.host, url.port)
     http.use_ssl = true
     res = http.start do |http_runner|
@@ -283,13 +285,13 @@ module StoresHelper
     else
       unless params[:var].eql?('status')
         @result['status'] = false
-        @result['message'] = "Unkown Field"
+        @result['message'] = 'Unkown Field'
         return @result
       end
       @store.status = params[:value] if params[:var] == 'status'
       if @result['status'] && !@store.save
         @result['status'] = false
-        @result['message'] = "Could not save store info"
+        @result['message'] = 'Could not save store info'
       end
       stop_running_import if @store.status == false
     end
@@ -306,7 +308,7 @@ module StoresHelper
         params[:id] = @store.id
       else
         @result['status'] = false
-        @result['messages'] = "You have reached the maximum limit of number of stores for your subscription."
+        @result['messages'] = 'You have reached the maximum limit of number of stores for your subscription.'
       end
     end
     update_create_store unless params[:id].blank?
@@ -316,7 +318,11 @@ module StoresHelper
     @store ||= Store.find(params[:id])
     FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV' && @store.ftp_credential.nil?
     create_and_update_store
-    @result["store_id"] = @store.id if !@store.nil? && @store.id.present? rescue nil
+    begin
+      @result['store_id'] = @store.id if !@store.nil? && @store.id.present?
+    rescue StandardError
+      nil
+    end
   end
 
   def create_and_update_store
@@ -334,12 +340,13 @@ module StoresHelper
       @result = check_store_type
     else
       @result['status'] = false
-      @result['messages'].push("Current user does not have permission to create or edit a store")
+      @result['messages'].push('Current user does not have permission to create or edit a store')
     end
   end
 
   def stop_running_import
     return unless OrderImportSummary.last
+
     OrderImportSummary.last.import_items.each do |import_item|
       import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
     end
@@ -358,16 +365,16 @@ module StoresHelper
         return result[:status] = false if response['orders'].nil? || response['orders'].blank?
 
         result[:status] = true
-        result_modifyDate = Time.zone.parse(response['orders'].last["updated_at"]) + Time.zone.utc_offset
-        result_createDate = Time.zone.parse(response['orders'].last["ordered_at"]) + Time.zone.utc_offset
+        result_modifyDate = Time.zone.parse(response['orders'].last['updated_at']) + Time.zone.utc_offset
+        result_createDate = Time.zone.parse(response['orders'].last['ordered_at']) + Time.zone.utc_offset
 
         time_zone = GeneralSetting.last.time_zone.to_i
-        result_createDate_tz = Time.zone.parse(response['orders'].last["ordered_at"]) + time_zone
+        result_createDate_tz = Time.zone.parse(response['orders'].last['ordered_at']) + time_zone
 
         result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
-          orderStatus: response['orders'].last["order_status"].titleize)
+                      orderStatus: response['orders'].last['order_status'].titleize)
 
-        result.merge!(return_range_dates_hash(store, response['orders'].last["external_order_identifier"], result_modifyDate, result_createDate))
+        result.merge!(return_range_dates_hash(store, response['orders'].last['external_order_identifier'], result_modifyDate, result_createDate))
       elsif store.store_type == 'Shopify'
         credential = store.shopify_credential
         client = Groovepacker::ShopifyRuby::Client.new(credential)
@@ -376,15 +383,15 @@ module StoresHelper
         return result[:status] = false if response['orders'].nil? || response['orders'].blank?
 
         result[:status] = true
-        result_modifyDate = Time.zone.parse(response['orders'].first["updated_at"])
-        result_createDate = Time.zone.parse(response['orders'].first["created_at"])
+        result_modifyDate = Time.zone.parse(response['orders'].first['updated_at'])
+        result_createDate = Time.zone.parse(response['orders'].first['created_at'])
 
         # time_zone = GeneralSetting.last.time_zone.to_i
         # result_createDate_tz = Time.zone.parse(response['orders'].first["created_at"]) + time_zone
         # result_createDate_tz = Time.zone.parse(response['orders'].first["created_at"])
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
-          orderStatus: response['orders'].first["fulfillment_status"]&.titleize)
+                      orderStatus: response['orders'].first['fulfillment_status']&.titleize)
       elsif store.store_type == 'Shipstation API 2'
         credential = store.shipstation_rest_credential
         client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
@@ -392,26 +399,29 @@ module StoresHelper
         return result[:status] = false if response.nil?
 
         result[:status] = true
-        result_modifyDate = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["modifyDate"]).to_time
-        result_createDate = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).to_time
+        result_modifyDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['modifyDate']).to_time
+        result_createDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['orderDate']).to_time
 
         # time_zone = GeneralSetting.last.time_zone.to_i
         # result_createDate_tz = ActiveSupport::TimeZone["Pacific Time (US & Canada)"].parse(response.last["orderDate"]).to_time
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
-          orderStatus: response.last["orderStatus"].titleize,
-          gp_ready_status: response.last["tagIds"].nil? ? 'No' : (response.last["tagIds"].include?(48826) ?  'Yes' : 'No'))
+                      orderStatus: response.last['orderStatus'].titleize,
+                      gp_ready_status: response.last['tagIds'].nil? ? 'No' : (response.last['tagIds'].include?(48_826) ? 'Yes' : 'No'))
 
-        result.merge!(return_range_dates_hash(store, response.last["orderNumber"], result_modifyDate, result_createDate))
+        result.merge!(return_range_dates_hash(store, response.last['orderNumber'], result_modifyDate, result_createDate))
       end
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
       ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}", priority: 95).import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
       result[:store_type] = store.store_type
     end
-    order_found = Order.where(increment_id: "#{params[:order_no]}").last
-    result.merge!(gp_order_found: order_found.status, id: order_found.id) if order_found.present?
-    return result
+    order_found = Order.where(increment_id: (params[:order_no]).to_s).last
+    if order_found.present?
+      result[:gp_order_found] = order_found.status
+      result[:id] = order_found.id
+    end
+    result
   end
 
   def return_range_dates_hash(store, order_id, result_modifyDate, result_createDate)
@@ -457,7 +467,7 @@ module StoresHelper
   end
 
   def get_time_in_pst(time)
-    zone = "Pacific Time (US & Canada)"
+    zone = 'Pacific Time (US & Canada)'
     pst_time = ActiveSupport::TimeZone[zone].parse(time.to_s)
   end
 
@@ -473,6 +483,7 @@ module StoresHelper
 
     closest_date = Order.select('last_modified').where('store_id = ? AND increment_id != ?', store_id, order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
     return closest_date if closest_date.present?
+
     date
   end
 end

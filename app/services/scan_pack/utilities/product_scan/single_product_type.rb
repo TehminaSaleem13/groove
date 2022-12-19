@@ -1,11 +1,13 @@
+# frozen_string_literal: true
+
 module ScanPack::Utilities::ProductScan::SingleProductType
   def do_if_product_type_is_single(params)
     item, clean_input, serial_added, clicked, barcode_found, type_scan = params
     item['barcodes'].each do |barcode|
       if GeneralSetting.all.first.master_switch == false
-        if barcode.barcode.strip.downcase == clean_input.strip.downcase || (@scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && item['skippable'])
+        if barcode.barcode.strip.casecmp(clean_input.strip).zero? || (@scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && item['skippable'])
           barcode_found = true
-          #process product barcode scan
+          # process product barcode scan
           order_item = OrderItem.find(item['order_item_id'])
 
           # from LotNumber Module
@@ -64,10 +66,10 @@ module ScanPack::Utilities::ProductScan::SingleProductType
     order_item = OrderItem.find(item['order_item_id'])
     # qty = 0
     # if order_item.scanned_status == 'partially_scanned'
-      order_item.removed_qty = order_item.qty - order_item.scanned_qty
-      order_item.qty = order_item.scanned_qty
-      order_item.scanned_status = 'scanned'
-      order_item.save
+    order_item.removed_qty = order_item.qty - order_item.scanned_qty
+    order_item.qty = order_item.scanned_qty
+    order_item.scanned_status = 'scanned'
+    order_item.save
     # else
     #   qty = order_item.qty - order_item.scanned_qty
     #   order = order_item.order

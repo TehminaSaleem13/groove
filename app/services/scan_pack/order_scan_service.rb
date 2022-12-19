@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   class OrderScanService < ScanPack::Base
     def initialize(current_user, session, input, state, id, store_order_id, order_by_number)
@@ -20,11 +22,11 @@ module ScanPack
       @orders = []
       @scanpack_settings = ScanPackSetting.all.first
       @session = session.merge!(most_recent_scanned_product: nil,
-                               parent_order_item: false)
+                                parent_order_item: false)
       @single_order = nil
       @single_order_result = { 'matched_orders' => [] }
       @scan_by_id = check_for_hex
-      @se_shipment_handling_v2_present = (Store.where(store_type: 'ShippingEasy').pluck(:split_order) & %w(shipment_handling_v2 verify_separately)).any?
+      @se_shipment_handling_v2_present = (Store.where(store_type: 'ShippingEasy').pluck(:split_order) & %w[shipment_handling_v2 verify_separately]).any?
       @order_by_number = order_by_number
       @scan_by_tracking_num = @scanpack_settings.scan_by_shipping_label && !@order_by_number
     end
@@ -63,8 +65,8 @@ module ScanPack
 
     def collect_orders
       if (@scanpack_settings.scan_by_shipping_label || @scanpack_settings.scan_by_packing_slip_or_shipping_label) && !@order_by_number
-        @orders = Order.includes([:store, :order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 10').order("LENGTH(tracking_num) DESC")
-        @orders = Order.includes([:store, :order_items]).where('? LIKE CONCAT("%", tracking_num) and LENGTH(tracking_num) >= 10', @input).order("LENGTH(tracking_num) DESC") if @orders.blank?
+        @orders = Order.includes(%i[store order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 10').order('LENGTH(tracking_num) DESC')
+        @orders = Order.includes(%i[store order_items]).where('? LIKE CONCAT("%", tracking_num) and LENGTH(tracking_num) >= 10', @input).order('LENGTH(tracking_num) DESC') if @orders.blank?
         if @orders.first.try(:status) == 'scanned' && @scanpack_settings.scan_by_packing_slip_or_shipping_label
           old_orders = @orders
           @orders = []
@@ -81,17 +83,18 @@ module ScanPack
     def find_order
       ["('awaiting')", "('onhold')", "('serviceissue', 'cancelled', 'scanned')"].each do |status|
         return unless @orders.blank?
+
         query = generate_query(status)
-        @orders = Order.includes([:store, :order_items]).where(query)
+        @orders = Order.includes(%i[store order_items]).where(query)
       end
     end
 
     def generate_query(status)
-      input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
-      input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/) { |c| "#{c}" } }
+      input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) }
+      input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/, &:to_s) }
       se_order_input = input_without_special_char + ' ('
-      input_with_special_char_without_space = input_with_special_char.gsub(/\s+/, "")
-      input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, "")
+      input_with_special_char_without_space = input_with_special_char.gsub(/\s+/, '')
+      input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, '')
       # id = @scanpack_settings.scan_by_hex_number ? 'store_order_id' : 'increment_id'
       # %(\
       #   (#{id} IN \(\
@@ -182,14 +185,14 @@ module ScanPack
     end
 
     def do_check_order_status_for_single_and_matched(
-                       matched_single, single_order_status, matched_single_status,
-                       order_placed_for_single_before_than_matched_single
+      matched_single, single_order_status, matched_single_status,
+      order_placed_for_single_before_than_matched_single
     )
-      %w(awaiting onhold serviceissue).each do |status|
+      %w[awaiting onhold serviceissue].each do |status|
         prev_states = []
         if matched_single_status == status && !single_order_status.in?(prev_states) && (
             single_order_status != status || order_placed_for_single_before_than_matched_single
-        )
+          )
           @single_order = matched_single
           break
         else
@@ -201,10 +204,10 @@ module ScanPack
     def do_if_single_order_not_present
       message = if @scanpack_settings.scan_by_shipping_label
                   'Order with tracking number ' + @input +
-                  ' cannot be found. It may not have been imported yet'
+                    ' cannot be found. It may not have been imported yet'
                 else
                   'Order with number ' + @input +
-                  ' cannot be found. It may not have been imported yet'
+                    ' cannot be found. It may not have been imported yet'
       end
       @result['matched'] = false
       @result['do_on_demand_import'] = true
@@ -272,12 +275,20 @@ module ScanPack
           if product.is_kit == 1
             product.product_kit_skuss.each do |kit_item|
               kit_item.qty.times do
-                barcode = Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode rescue nil
+                barcode = begin
+                            Product.find_by_id(kit_item.option_product_id).product_barcodes[0].barcode
+                          rescue StandardError
+                            nil
+                          end
                 single_scan(barcode, order_item)
               end
             end
           else
-            barcode = order_item.product.product_barcodes.map(&:barcode)[0] rescue nil
+            barcode = begin
+                        order_item.product.product_barcodes.map(&:barcode)[0]
+                      rescue StandardError
+                        nil
+                      end
             single_scan(barcode, order_item)
           end
         end
@@ -328,7 +339,11 @@ module ScanPack
         if data.any?
           data.each do |item|
             product = item.product
-            sku = product.product_skus.first.sku rescue nil
+            sku = begin
+                    product.product_skus.first.sku
+                  rescue StandardError
+                    nil
+                  end
             item.order.addactivity('Item with sku ' + sku.to_s + ' having 0 qty removed', 'GroovePacker Automaticaly')
             item.delete
           end
@@ -348,7 +363,7 @@ module ScanPack
         if @current_user.can?('add_edit_products') || (
             @session[:product_edit_matched_for_current_user] &&
             @session[:product_edit_matched_for_order] == @single_order.id
-        )
+          )
           @single_order_result.merge!('product_edit_matched' => true,
                                       'inactive_or_new_products' => @single_order.get_inactive_or_new_products,
                                       'next_state' => 'scanpack.rfp.product_edit')
@@ -433,7 +448,7 @@ module ScanPack
       end
     end
 
-    def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, current_user_name)
+    def do_if_scanpack_settings_post_scanning_option_not_none(scanpack_settings_post_scanning_option, _current_user_name)
       if @single_order.post_scanning_flag.nil?
         case true
         when scanpack_settings_post_scanning_option == 'Verify'
@@ -471,14 +486,14 @@ module ScanPack
     def apply_second_action
       case @scanpack_settings.post_scanning_option_second
       when 'Verify'
-        unless @single_order.tracking_num.present?
+        if @single_order.tracking_num.present?
+          @single_order_result['next_state'] = 'scanpack.rfp.verifying'
+        else
           @single_order_result['next_state'] = 'scanpack.rfp.no_tracking_info'
           @single_order.addactivity(
             'Tracking information was not imported with this order so the shipping label could not be verified ',
             @current_user.username
           )
-        else
-          @single_order_result['next_state'] = 'scanpack.rfp.verifying'
         end
       when 'PackingSlip'
         @single_order_result['next_state'] = 'scanpack.rfo'
@@ -492,7 +507,7 @@ module ScanPack
         set_order_scanned_state_and_result_data
       end
     end
-  
+
     def set_order_scanned_state_and_result_data
       @single_order.set_order_to_scanned_state(@current_user.username)
       @single_order_result['next_state'] = 'scanpack.rfo'

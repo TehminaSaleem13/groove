@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class EbayImport < ProductsService::Base
     def initialize(*args)
@@ -70,9 +72,10 @@ module ProductsService
 
     def product_images
       return unless can_import_images?
+
       @productimage = ProductImage.new
       @productimage.image = 'http://i.ebayimg.com' +
-        @item.pictureDetails.pictureURL.first.request_uri
+                            @item.pictureDetails.pictureURL.first.request_uri
       add_product_images
     end
 
@@ -90,11 +93,13 @@ module ProductsService
 
     def product_categories
       return unless @credential.import_products
-      %w(primary secondary).each { |type| create_category(type) }
+
+      %w[primary secondary].each { |type| create_category(type) }
     end
 
     def create_category(type)
       return unless @item.send("#{type}Category").present?
+
       @product_cat = ProductCat.new
       @product_cat.category = @item.send("#{type}Category").categoryName
       add_product_category

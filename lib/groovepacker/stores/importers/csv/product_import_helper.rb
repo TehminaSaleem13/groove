@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -24,6 +26,7 @@ module Groovepacker
 
           def import_product_info(product, single_row, prop, prop_type)
             return unless @helper.verify_single_item(single_row, prop)
+
             if prop_type == 'barcode'
               barcode = ProductBarcode.new
               barcode.barcode = @helper.get_row_data(single_row, prop).strip
@@ -68,17 +71,17 @@ module Groovepacker
           end
 
           def import_product_name(product, single_row)
-            if params[:use_sku_as_product_name] == true
-              product.name = @helper.get_row_data(single_row, 'sku').strip
-            elsif @helper.verify_single_item(single_row, 'product_name')
-              product.name = @helper.get_row_data(single_row, 'product_name')
-            else
-              product.name = 'Product created from order import'
-            end
+            product.name = if params[:use_sku_as_product_name] == true
+                             @helper.get_row_data(single_row, 'sku').strip
+                           elsif @helper.verify_single_item(single_row, 'product_name')
+                             @helper.get_row_data(single_row, 'product_name')
+                           else
+                             'Product created from order import'
+                           end
           end
 
           def import_product_weight(product, single_row)
-            product.weight = @helper.get_row_data(single_row, 'product_weight') if @helper.verify_single_item(single_row, 'product_weight') && @helper.get_row_data(single_row, 'product_weight') != ""
+            product.weight = @helper.get_row_data(single_row, 'product_weight') if @helper.verify_single_item(single_row, 'product_weight') && @helper.get_row_data(single_row, 'product_weight') != ''
           end
 
           def push_barcode(product, barcode)
@@ -88,13 +91,13 @@ module Groovepacker
           end
 
           def import_sec_ter_barcode(product, single_row)
-            %w(secondary_barcode tertiary_barcode quaternary_barcode quinary_barcode senary_barcode).each do |prop|
+            %w[secondary_barcode tertiary_barcode quaternary_barcode quinary_barcode senary_barcode].each do |prop|
               import_product_info(product, single_row, prop, 'barcode')
             end
           end
 
           def import_sec_ter_sku(product, single_row)
-            %w(secondary_sku tertiary_sku).each do |prop|
+            %w[secondary_sku tertiary_sku].each do |prop|
               import_product_info(product, single_row, prop, 'sku')
             end
           end
@@ -110,10 +113,9 @@ module Groovepacker
 
           def import_image(product, single_row, check_duplicacy = false)
             return unless @helper.verify_single_item(single_row, 'image')
+
             if check_duplicacy
-              unless duplicate_image?(product, single_row)
-                import_product_image(product, single_row)
-              end
+              import_product_image(product, single_row) unless duplicate_image?(product, single_row)
             else
               import_product_image(product, single_row)
             end
@@ -174,7 +176,8 @@ module Groovepacker
             elsif @helper.verify_single_item(single_row, 'barcode')
               barcode = @helper.get_row_data(single_row, 'barcode')
               if ProductBarcode.where(
-                barcode: barcode.strip).empty?
+                barcode: barcode.strip
+              ).empty?
                 push_barcode(product, barcode)
               end
             end

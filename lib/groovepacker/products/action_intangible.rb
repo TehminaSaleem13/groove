@@ -1,16 +1,18 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Products
     class ActionIntangible
       def update_intangibleness(tenant, params, intangible_setting_enabled, intangible_string)
         Apartment::Tenant.switch!(tenant)
-        intangible_strings = intangible_string.split(",")
-        intangible_param_strings = params[:intangible_string].to_s.split(",")
+        intangible_strings = intangible_string.split(',')
+        intangible_param_strings = params[:intangible_string].to_s.split(',')
         if params[:intangible_setting_enabled]
           if intangible_param_strings != intangible_strings || intangible_setting_enabled == false
             products = Product.all
             products.each do |product|
               intangible_strings.each do |string|
-                if ((product.name).downcase.include? (string.downcase)) || sku_starts_with_intangible_string(product, string)
+                if (product.name.downcase.include? string.downcase) || sku_starts_with_intangible_string(product, string)
                   product.is_intangible = false
                   product.save
                 end
@@ -19,7 +21,7 @@ module Groovepacker
             products = Product.all
             products.each do |product|
               intangible_param_strings.each do |param_string|
-                if ((product.name).downcase.include? (param_string.downcase)) || sku_starts_with_intangible_string(product, param_string)
+                if (product.name.downcase.include? param_string.downcase) || sku_starts_with_intangible_string(product, param_string)
                   product.is_intangible = true
                   product.save
                 end
@@ -31,7 +33,7 @@ module Groovepacker
           products.each do |product|
             intangible_param_strings.each do |string|
               # sku_starts_with_intangible_string(product,string)
-              if ((product.name).downcase.include? (string.downcase)) || sku_starts_with_intangible_string(product, string)
+              if (product.name.downcase.include? string.downcase) || sku_starts_with_intangible_string(product, string)
                 product.is_intangible = false
                 product.save
               end
@@ -46,12 +48,12 @@ module Groovepacker
         product_skus = product.product_skus
         intangible = false
         product_skus.each do |product_sku|
-          if (product_sku.sku).downcase.include? (intangible_string.downcase)
+          if product_sku.sku.downcase.include? intangible_string.downcase
             intangible = true
             break
           end
         end
-        return intangible
+        intangible
       end
     end
   end

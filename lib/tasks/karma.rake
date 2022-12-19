@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 namespace :karma do
   task :install do
     system 'npm install -g karma'
@@ -10,12 +12,12 @@ namespace :karma do
     exit(1)
   end
 
-  task :start => :environment do
+  task start: :environment do
     with_tmp_config :start
     exit(1)
   end
 
-  task :run => :environment do
+  task run: :environment do
     with_tmp_config :start, '--single-run'
     exit(1)
   end

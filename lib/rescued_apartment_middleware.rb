@@ -1,6 +1,8 @@
+# frozen_string_literal: true
+
 module RescuedApartmentMiddleware
   def call(env)
-    if (env['SERVER_NAME'].include? 'ngrok')
+    if env['SERVER_NAME'].include? 'ngrok'
       env['SERVER_NAME'] = 'gp55.localpackerapi.com'
       env['REQUEST_URI'] = 'http://gp55.localpackerapi.com'
       env['HTTP_HOST'] = 'gp55.localpackerapi.com'
@@ -12,12 +14,12 @@ module RescuedApartmentMiddleware
 
     begin
       Apartment::Tenant.switch! database if database
-    rescue => e
+    rescue StandardError => e
       Rails.logger.error "ERROR: Apartment Tenant not found: \"#{database}\" in #{Apartment::Tenant.current.inspect}"
       Rails.logger.error e.inspect
       return [
         404,
-        {"Content-Type" => "text/html"},
+        { 'Content-Type' => 'text/html' },
         [
           File.open("#{Rails.root}/public/tenant_not_found.html").read
         ]

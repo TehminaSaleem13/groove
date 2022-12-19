@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ExportSetting < ActiveRecord::Base
   include ExportData
   include AhoyEvent
@@ -18,18 +20,20 @@ class ExportSetting < ActiveRecord::Base
   after_commit :log_events
 
   def log_events
-    track_changes(title: 'Export Settings Changed', tenant: Apartment::Tenant.current,
-                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes) if saved_changes.present? && saved_changes.keys != ['updated_at']
+    if saved_changes.present? && saved_changes.keys != ['updated_at']
+      track_changes(title: 'Export Settings Changed', tenant: Apartment::Tenant.current,
+                    username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
+    end
   end
 
   def scheduled_export
     if auto_stat_email_export_with_changed_hash
-      schedule_job("stat_export", time_to_send_stat_export_email)
+      schedule_job('stat_export', time_to_send_stat_export_email)
     else
       destroy_stat_export_email_scheduled
     end
     if auto_email_export_with_changed_hash
-      schedule_job("export_order", time_to_send_export_email)
+      schedule_job('export_order', time_to_send_export_email)
     else
       destroy_order_export_email_scheduled
     end
@@ -38,7 +42,7 @@ class ExportSetting < ActiveRecord::Base
 
   def daily_packed_check
     if auto_email_daily_export_with_changed_hash
-      schedule_job("daily_packed", time_to_send_daily_packed_export_email)
+      schedule_job('daily_packed', time_to_send_daily_packed_export_email)
     else
       destroy_daily_packed_email_scheduled
     end
@@ -75,45 +79,45 @@ class ExportSetting < ActiveRecord::Base
     single_row
   end
 
-  def export_data(tenant=nil)
+  def export_data(tenant = nil)
     require 'csv'
     # Apartment::Tenant.switch! (tenant)
     # result = set_result_hash
     # Time.use_zone(GeneralSetting.new_time_zone) do
-      start_time, end_time = set_start_and_end_time
-      return with_error_filename if start_time.blank?
+    start_time, end_time = set_start_and_end_time
+    return with_error_filename if start_time.blank?
 
-      scanned_orders = Order.where(scanned_on: start_time..end_time)
-      partially_orders = Order.where(updated_at: start_time..end_time).joins(:order_items).where.not(status: 'scanned').where("order_items.scanned_status =? OR order_items.scanned_status =? OR order_items.removed_qty > 0 OR order_items.added_count > 0", "partially_scanned","scanned").distinct
+    scanned_orders = Order.where(scanned_on: start_time..end_time)
+    partially_orders = Order.where(updated_at: start_time..end_time).joins(:order_items).where.not(status: 'scanned').where('order_items.scanned_status =? OR order_items.scanned_status =? OR order_items.removed_qty > 0 OR order_items.added_count > 0', 'partially_scanned', 'scanned').distinct
 
-      if include_partially_scanned_orders == true
-        if order_export_type == 'partially_scanned_only'
-          orders = partially_orders
-        elsif order_export_type == 'removed_only'
-          partical_orders = partially_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
-          scan_orders = scanned_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
-          orders = partical_orders + scan_orders
-        else
-          orders = partially_orders + scanned_orders
-        end
+    if include_partially_scanned_orders == true
+      if order_export_type == 'partially_scanned_only'
+        orders = partially_orders
+      elsif order_export_type == 'removed_only'
+        partical_orders = partially_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
+        scan_orders = scanned_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
+        orders = partical_orders + scan_orders
       else
-        if order_export_type == 'partially_scanned_only'
-          orders = partially_orders
-        elsif order_export_type == 'removed_only'
-          orders = scanned_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
-        else
-          orders = scanned_orders
-        end
+        orders = partially_orders + scanned_orders
       end
+    else
+      orders = if order_export_type == 'partially_scanned_only'
+                 partially_orders
+               elsif order_export_type == 'removed_only'
+                 scanned_orders.joins(:order_items).where('order_items.removed_qty > 0 OR order_items.added_count > 0').distinct
+               else
+                 scanned_orders
+               end
+    end
 
-      ExportSetting.update_all(:last_exported => Time.current)
-      filename = generate_file_name
-      if order_export_type == 'do_not_include'
-        do_export_if_orders_not_included(orders, filename)
-      else
-        do_export_with_orders(orders, filename, tenant)
-      end
-      filename
+    ExportSetting.update_all(last_exported: Time.current)
+    filename = generate_file_name
+    if order_export_type == 'do_not_include'
+      do_export_if_orders_not_included(orders, filename)
+    else
+      do_export_with_orders(orders, filename, tenant)
+    end
+    filename
     # end
   end
 
@@ -148,7 +152,7 @@ class ExportSetting < ActiveRecord::Base
 
   def destroy_order_export_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "order_export_email_scheduled_#{tenant}", Time.current).destroy_all
+    Delayed::Job.where('queue =? && run_at < ?', "order_export_email_scheduled_#{tenant}", Time.current).destroy_all
     # Delayed::Job.where(
     #   queue: "order_export_email_scheduled_#{tenant}"
     # ).destroy_all
@@ -156,12 +160,12 @@ class ExportSetting < ActiveRecord::Base
 
   def destroy_daily_packed_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "generate_daily_packed_export_#{tenant}", Time.current).destroy_all
+    Delayed::Job.where('queue =? && run_at < ?', "generate_daily_packed_export_#{tenant}", Time.current).destroy_all
   end
 
   def destroy_stat_export_email_scheduled
     tenant = Apartment::Tenant.current
-    Delayed::Job.where("queue =? && run_at < ?", "generate_stat_export_#{tenant}", Time.current).destroy_all
+    Delayed::Job.where('queue =? && run_at < ?', "generate_stat_export_#{tenant}", Time.current).destroy_all
   end
 
   def update_single_row(single_row, order, box = nil, order_item = nil)
@@ -180,17 +184,18 @@ class ExportSetting < ActiveRecord::Base
     single_row[:clicked_scanned_qty] = order_item.clicked_qty
     single_row[:added_count] = order_item.added_count
     if box.present?
-     single_row[:ordered_qty] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
-     single_row[:box_number] = box.name.split(" ").last
+      single_row[:ordered_qty] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
+      single_row[:box_number] = box.name.split(' ').last
     end
   end
 
   def update_single_row_for_packing_user(single_row, order_item, order)
     packing_user = order.packing_user
     return if packing_user.blank?
+
     single_row[:packing_user] = "#{packing_user.name} (#{packing_user.username})"
     single_row[:warehouse_name] = order_item.product.try(:primary_warehouse)
-                                  .try(:inventory_warehouse).try(:name)
+                                            .try(:inventory_warehouse).try(:name)
   end
 
   def update_single_row_for_product_info(single_row, order_item)
@@ -211,20 +216,28 @@ class ExportSetting < ActiveRecord::Base
   end
 
   def set_start_and_end_time
-    start_time = self.start_time.beginning_of_day rescue (DateTime.now.in_time_zone - 1.days)
-    end_time = self.end_time.end_of_day rescue DateTime.now.in_time_zone
+    start_time = begin
+                   self.start_time.beginning_of_day
+                 rescue StandardError
+                   (DateTime.now.in_time_zone - 1.days)
+                 end
+    end_time = begin
+                 self.end_time.end_of_day
+               rescue StandardError
+                 DateTime.now.in_time_zone
+               end
     return [start_time, end_time] if manual_export
 
     if export_orders_option.eql? 'on_same_day'
       begin
         job_time = Delayed::Job.where(queue: "order_export_email_scheduled_#{Apartment::Tenant.current}").map(&:locked_at).compact[0]
         job_time = DateTime.now.in_time_zone if job_time.blank?
-        start_time = job_time - time_to_send_export_email.strftime("%H").to_i.hours - time_to_send_export_email.strftime("%M").to_i.minutes
+        start_time = job_time - time_to_send_export_email.strftime('%H').to_i.hours - time_to_send_export_email.strftime('%M').to_i.minutes
         end_time = job_time
-      rescue
+      rescue StandardError
         # If time_to_send_export_email is not present
         time_to_send_export_email ||= 12.hour.from_now
-        time = time_to_send_export_email.strftime("%H:%M")
+        time = time_to_send_export_email.strftime('%H:%M')
         seconds = Time.zone.parse(time).seconds_since_midnight
         start_time = Time.current
         end_time = Time.current.beginning_of_day + seconds
@@ -275,8 +288,8 @@ class ExportSetting < ActiveRecord::Base
     end
     tenant = Apartment::Tenant.current
     GroovS3.create_export_csv(tenant, filename, data)
-    #url = GroovS3.find_export_csv(tenant, filename)
-    #ExportOrder.export(tenant).deliver if ExportSetting.first.manual_export == true
+    # url = GroovS3.find_export_csv(tenant, filename)
+    # ExportOrder.export(tenant).deliver if ExportSetting.first.manual_export == true
   end
 
   def generate_row_mapping
@@ -318,6 +331,7 @@ class ExportSetting < ActiveRecord::Base
   def assign_packing_user(single_row, order)
     packing_user = order.packing_user
     return unless packing_user
+
     single_row[:packing_user] = "#{packing_user.name} ( #{packing_user.username} )"
   end
 

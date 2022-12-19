@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class PackingCamController < ApplicationController
   skip_before_action :verify_authenticity_token
   before_action :set_order, only: :show
@@ -7,7 +9,7 @@ class PackingCamController < ApplicationController
     result = { status: true }
     if @order
       result.merge!(setting: @scan_pack_setting, order: @order, packing_cams: @order.packing_cams, order_items: @order.order_items)
-      result.merge!(order_activities: @order.order_activities) if @scan_pack_setting.scanning_log
+      result[:order_activities] = @order.order_activities if @scan_pack_setting.scanning_log
     else
       result[:status] = false
     end

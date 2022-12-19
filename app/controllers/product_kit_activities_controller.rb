@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 class ProductKitActivitiesController < ApplicationController
   before_action :groovepacker_authorize!
 
   def acknowledge
-    result = Hash.new
+    result = {}
     result['status'] = true
     result['messages'] = []
 

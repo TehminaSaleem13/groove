@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ProductsController < ApplicationController
   include ProductConcern
 
@@ -147,9 +149,8 @@ class ProductsController < ApplicationController
   #
   def index
     @products = do_getproducts(params)
-    @result = @result.merge({ 'products' => make_products_list(@products),
-                              'products_count' => get_products_count()
-                            })
+    @result = @result.merge('products' => make_products_list(@products),
+                            'products_count' => get_products_count)
     render json: @result
   end
 
@@ -161,9 +162,8 @@ class ProductsController < ApplicationController
 
   def get_report_products
     @products = do_get_report_products(params)
-    @result = @result.merge({ 'products' => make_products_list(@products),
-                              'products_count' => get_report_products_count()
-                            })
+    @result = @result.merge('products' => make_products_list(@products),
+                            'products_count' => get_report_products_count)
     render json: @result
   end
 
@@ -177,16 +177,16 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
-  #This method will generate pdf for receiving inventory label, upload to S3 and return result as url of uploaded file
+  # This method will generate pdf for receiving inventory label, upload to S3 and return result as url of uploaded file
   def print_receiving_label
     params[:tenant] =  Apartment::Tenant.current
     scan_pack_object = ScanPack::Base.new
-    if (params["productArray"].count > 20 || params["select_all"] == true)
+    if params['productArray'].count > 20 || params['select_all'] == true
       val = scan_pack_object.delay(priority: 95).print_label_with_delay(params)
       render json: {}
     else
       url = scan_pack_object.print_label_with_delay(params)
-      render json: {url: url}
+      render json: { url: url }
     end
   end
 
@@ -199,7 +199,7 @@ class ProductsController < ApplicationController
     data = {}
     data[:result] = @result
     tenant_name = Apartment::Tenant.current
-    if (params["productArray"].count > 20 || params["select_all"] == true)
+    if params['productArray'].count > 20 || params['select_all'] == true
       export_product.delay(priority: 95).generate_barcode_with_delay(params, data, tenant_name)
     else
       export_product.generate_barcode_with_delay(params, data, tenant_name)
@@ -211,7 +211,7 @@ class ProductsController < ApplicationController
     data = {}
     data[:result] = @result
     tenant_name = Apartment::Tenant.current
-    if (params["productArray"].count > 20 || params["select_all"] == true)
+    if params['productArray'].count > 20 || params['select_all'] == true
       export_product = ExportSsProductsCsv.new
       export_product.delay(priority: 95).generate_numeric_barcode_with_delay(params, data, tenant_name)
     else
@@ -222,15 +222,14 @@ class ProductsController < ApplicationController
   end
 
   def search
-    unless params[:search].blank?
-      @products = do_search(params, false)
-      @result = @result.merge({ 'products' => make_products_list(@products['products']),
-                                'products_count' => get_products_count
-                              })
-      @result['products_count']['search'] = @products['count']
-    else
+    if params[:search].blank?
       @result['status'] = false
       @result['message'] = 'Improper search string'
+    else
+      @products = do_search(params, false)
+      @result = @result.merge('products' => make_products_list(@products['products']),
+                              'products_count' => get_products_count)
+      @result['products_count']['search'] = @products['count']
     end
 
     render json: @result
@@ -243,17 +242,17 @@ class ProductsController < ApplicationController
   end
 
   def change_product_status
-    #execute_groove_bulk_action(activity)
+    # execute_groove_bulk_action(activity)
     execute_groove_bulk_action('status_update')
   end
 
   def delete_product
-    #execute_groove_bulk_action(activity)
+    # execute_groove_bulk_action(activity)
     execute_groove_bulk_action('delete')
   end
 
   def duplicate_product
-    #execute_groove_bulk_action(activity)
+    # execute_groove_bulk_action(activity)
     execute_groove_bulk_action('duplicate')
   end
 
@@ -265,14 +264,14 @@ class ProductsController < ApplicationController
   end
 
   def add_product_to_kit
-    #@kit is coming from find_kit_product method of products concern
+    # @kit is coming from find_kit_product method of products concern
     @result = ProductKitSkus.app_product_to_kit(@kit, params, @result, current_user) if check_if_not_a_kit
 
     render json: @result
   end
 
   def remove_products_from_kit
-    #@kit is coming from find_kit_product method of products concern
+    # @kit is coming from find_kit_product method of products concern
     @result = ProductKitSkus.remove_products_from_kit(@kit, params, @result, current_user) if check_if_not_a_kit
 
     render json: @result
@@ -280,31 +279,39 @@ class ProductsController < ApplicationController
 
   def update
     @result = gp_products_module.update_product_attributes
-    product_hash_scan_pack_v2(@params ? @params : params) if (params[:app] rescue @params[:app])
+    product_hash_scan_pack_v2(@params || params) if begin
+                                                                params[:app]
+                                                    rescue StandardError
+                                                      @params[:app]
+                                                              end
     render json: @result
   end
 
-  #This method will genearte barcode pdf file and store it in S3 and return url of the file from S3.
+  # This method will genearte barcode pdf file and store it in S3 and return url of the file from S3.
   def generate_barcode_slip
     require 'wicked_pdf'
     general_settings = GeneralSetting.last
     @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
     @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
-    @item = OrderItem.find(params[:item_id]) rescue nil
+    @item = begin
+              OrderItem.find(params[:item_id])
+            rescue StandardError
+              nil
+            end
     @product = Product.find(params[:id])
     @barcode_qty = params[:barcode_qty].to_i
-    @barcode_qty = 1 if  @barcode_qty == 0
-    @barcode = params["barcode"]
+    @barcode_qty = 1 if @barcode_qty == 0
+    @barcode = params['barcode']
     respond_to do |format|
       format.html
-      format.pdf {
-        render :pdf => "file_name",
-               :template => "products/generate_barcode_slip.html.erb",
-               :orientation => 'Portrait',
-               :page_height => '1in',
-               :page_width => '3in',
-               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
-      }
+      format.pdf do
+        render pdf: 'file_name',
+               template: 'products/generate_barcode_slip.html.erb',
+               orientation: 'Portrait',
+               page_height: '1in',
+               page_width: '3in',
+               margin: { top: '0', bottom: '0', left: '0', right: '0' }
+      end
     end
     # base_file_name = File.basename(pdf_path)
     # pdf_file = File.open(reader_file_path)
@@ -321,36 +328,46 @@ class ProductsController < ApplicationController
   def bulk_barcode_pdf
     require 'wicked_pdf'
     general_settings = GeneralSetting.last
-    order_ids = params["ids"].split(",").reject { |c| c.empty? } rescue nil
+    order_ids = begin
+                  params['ids'].split(',').reject(&:empty?)
+                rescue StandardError
+                  nil
+                end
     @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
     @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
-    @order_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).where("id in (?)", order_ids).map(&:order_items).flatten
+    @order_items = params[:ids] == 'all' ? (params[:status] == 'all' ? Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).where('id in (?)', order_ids).map(&:order_items).flatten
     respond_to do |format|
       format.html
-      format.pdf {
-        render :pdf => "file_name",
-               :template => "products/bulk_barcode_pdf.html.erb",
-               :orientation => 'Portrait',
-               :page_height => '1in',
-               :page_width => '3in',
-               :margin => {:top => '0', :bottom => '0', :left => '0', :right => '0'}
-      }
+      format.pdf do
+        render pdf: 'file_name',
+               template: 'products/bulk_barcode_pdf.html.erb',
+               orientation: 'Portrait',
+               page_height: '1in',
+               page_width: '3in',
+               margin: { top: '0', bottom: '0', left: '0', right: '0' }
+      end
     end
   end
 
   def update_product_list
-    params["current_user"] = current_user.name
+    params['current_user'] = current_user.name
     @result = Product.update_product_list(params, @result)
-    Order.find(params[:order_id]).update_order_status rescue nil if params[:order_id].present?
+    if params[:order_id].present?
+      begin
+        Order.find(params[:order_id]).update_order_status
+      rescue StandardError
+        nil
+      end
+    end
     render json: @result
   end
 
-  #This action will remove the entry for this product (the Alias) and the SKU of this new
-  #product will be added to the list of skus for the existing product that the user is linking it to.
-  #Any product can be turned into an alias, it doesn?t have to have the status of new, although most if the time it probably will.
-  #The operation can not be undone.
-  #If you had a situation where the newly imported product was actually the one you wanted to keep you could
-  #find the original product and make it an alias of the new product...
+  # This action will remove the entry for this product (the Alias) and the SKU of this new
+  # product will be added to the list of skus for the existing product that the user is linking it to.
+  # Any product can be turned into an alias, it doesn?t have to have the status of new, although most if the time it probably will.
+  # The operation can not be undone.
+  # If you had a situation where the newly imported product was actually the one you wanted to keep you could
+  # find the original product and make it an alias of the new product...
   def set_alias
     product_aliasing.set_alias
 
@@ -364,20 +381,20 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
-  #input params[:id] gives product id params[:inv_wh_id] gives inventory warehouse id
-  #params[:inventory_count] contains the inventory count from the recount
-  #params[:method] this can contain two options: 'recount' or 'receive'
-  #PUT request and it updates the available inventory if method is recount
+  # input params[:id] gives product id params[:inv_wh_id] gives inventory warehouse id
+  # params[:inventory_count] contains the inventory count from the recount
+  # params[:method] this can contain two options: 'recount' or 'receive'
+  # PUT request and it updates the available inventory if method is recount
   # or adds to the available inventory if method is receive if the product is
-  #not associated with the inventory warehouse, then it automatically associates it and
-  #sets the value.
+  # not associated with the inventory warehouse, then it automatically associates it and
+  # sets the value.
   def adjust_available_inventory
-    unless params[:id].nil? || params[:inv_wh_id].nil? || params[:method].nil?
-      params["current_user"] = current_user.name
-      result = ProductInventoryWarehouses.adjust_available_inventory(params, result)
-    else
+    if params[:id].nil? || params[:inv_wh_id].nil? || params[:method].nil?
       @result['status'] &= false
       @result['error_messages'].push('Cannot recount inventory without product id and inventory_warehouse_id')
+    else
+      params['current_user'] = current_user.name
+      result = ProductInventoryWarehouses.adjust_available_inventory(params, result)
     end
     render json: @result
   end
@@ -395,28 +412,28 @@ class ProductsController < ApplicationController
   end
 
   def generate_broken_image
-    result = {};
+    result = {}
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
     export_product.delay(priority: 95).export_broken_image(tenant, params)
-    result["status"] = true
+    result['status'] = true
     render json: result
   end
 
   def fix_shopify_broken_images
-    result = {};
+    result = {}
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
     export_product.delay(priority: 95).fix_shopify_product_images(tenant, params)
     # export_product.fix_shopify_product_images(tenant, params)
-    result["status"] = true
+    result['status'] = true
     render json: result
   end
 
   def cancel_shopify_product_imports
-    result = { }
+    result = {}
     StoreProductImport.destroy_all
-    result["status"] = true
+    result['status'] = true
     render json: result
   end
 
@@ -439,80 +456,88 @@ class ProductsController < ApplicationController
   def get_inventory_setting
     setting = InventoryReportsSetting.last
     setting = setting.blank? ? InventoryReportsSetting.create : setting
-    @result["setting"] = JSON.parse(setting.to_json).merge(current_time: Time.current.strftime('%I:%M %p'))
-    @result["inventory_report_toggle"] = Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle rescue nil
-    @result["products"] = {}
+    @result['setting'] = JSON.parse(setting.to_json).merge(current_time: Time.current.strftime('%I:%M %p'))
+    @result['inventory_report_toggle'] = begin
+                                           Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
+                                         rescue StandardError
+                                           nil
+                                         end
+    @result['products'] = {}
     reports = ProductInventoryReport.includes([:products]).all
     reports.each_with_index do |report, index|
-    @result["products"][index] = {"id" => report.id, "name" => report.name,
-                                  "no_of_items" => get_item_count(report),
-                                  "scheduled" => report.scheduled, "type" => report.type,
-                                  "selected_id" => report.products.map(&:id),
-                                  "is_locked" => report.is_locked }
+      @result['products'][index] = { 'id' => report.id, 'name' => report.name,
+                                     'no_of_items' => get_item_count(report),
+                                     'scheduled' => report.scheduled, 'type' => report.type,
+                                     'selected_id' => report.products.map(&:id),
+                                     'is_locked' => report.is_locked }
     end
     render json: @result
   end
 
   def get_item_count(report)
-    if report.name == "All_Products_Report"
-      count = Product.count
-    elsif report.name == "Active_Products_Report"
-      count = Product.where(status: "active").count
-    else
-      count = report.products.count
-    end
+    count = if report.name == 'All_Products_Report'
+              Product.count
+            elsif report.name == 'Active_Products_Report'
+              Product.where(status: 'active').count
+            else
+              report.products.count
+            end
     count
   end
 
   def update_inventory_settings
-    @result= {}
+    @result = {}
     setting = InventoryReportsSetting.last
     setting = setting.blank? ? InventoryReportsSetting.new : InventoryReportsSetting.last
-    atrs = params["setting"].except("updated_at", "created_at", "id", "current_time")
+    atrs = params['setting'].except('updated_at', 'created_at', 'id', 'current_time')
     setting.assign_attributes(atrs.permit!)
     setting.save
-    @result["status"] = true
+    @result['status'] = true
     render json: @result
   end
 
   def update_inventory_record
-    data = params["data"]
+    data = params['data']
     @result = update_inv_record(data, params)
     render json: @result
   end
 
   def remove_inventory_record
-    ids = params["selected_ids"]
-    inventory_reports = ProductInventoryReport.where("id in (?)", ids)
+    ids = params['selected_ids']
+    inventory_reports = ProductInventoryReport.where('id in (?)', ids)
     if inventory_reports.present?
-      inventory_reports.each { |report| report.products.destroy_all}
+      inventory_reports.each { |report| report.products.destroy_all }
       inventory_reports.destroy_all
     end
-    @result["status"] = true
+    @result['status'] = true
     render json: @result
   end
 
   def update_inventory_option
     product_inv_setting = InventoryReportsSetting.last
     begin
-      product_inv_setting.report_days_option = params["option"]
+      product_inv_setting.report_days_option = params['option']
       product_inv_setting.save
-    rescue
+    rescue StandardError
     end
     render json: @result
   end
 
   def generate_product_inventory_report
-    generate_report(params["report_ids"])
+    generate_report(params['report_ids'])
     render json: @result
   end
 
   def update_generic
-    image = ProductImage.find_by_id(params["id"])
+    image = ProductImage.find_by_id(params['id'])
     images = ProductImage.where(image: image.try(:image))
-    images.update_all(placeholder: params["flag"])
-    image = image.reload rescue image
-    @result["placeholder"] = image.placeholder
+    images.update_all(placeholder: params['flag'])
+    image = begin
+              image.reload
+            rescue StandardError
+              image
+            end
+    @result['placeholder'] = image.placeholder
     render json: @result
   end
 
@@ -523,6 +548,7 @@ class ProductsController < ApplicationController
   end
 
   private
+
   def execute_groove_bulk_action(activity)
     GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user)
 
@@ -530,11 +556,15 @@ class ProductsController < ApplicationController
   end
 
   def product_hash_scan_pack_v2(params)
-    product = Product.find_by_id(params[:basicinfo][:id]) rescue nil
+    product = begin
+                Product.find_by_id(params[:basicinfo][:id])
+              rescue StandardError
+                nil
+              end
     if product.is_kit? && product.kit_parsing != 'single'
-      result = Hash.new
+      result = {}
       result = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
-      result['product_type'] =  product.kit_parsing
+      result['product_type'] = product.kit_parsing
       result['child_items'] = []
       option_products_array = product.product_kit_skuss.map(&:option_product)
       option_products_array.each do |kit_product|
@@ -544,7 +574,7 @@ class ProductsController < ApplicationController
         child_item = OrderItem.new.build_basic_item(kit_product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
         child_item['kit_packing_placement'] = product_kit_sku.packing_order
         child_item['kit_product_id'] = kit_product.id
-        child_item["product_qty_in_kit"] = product_kit_sku.qty
+        child_item['product_qty_in_kit'] = product_kit_sku.qty
         result['child_items'].push(child_item)
       end
       result['child_items'] = result['child_items'].sort_by { |hsh| hsh['kit_packing_placement'] }
@@ -552,9 +582,9 @@ class ProductsController < ApplicationController
     else
       @result['scan_pack_product'] = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
     end
-  rescue => e
+  rescue StandardError => e
     on_demand_logger = Logger.new("#{Rails.root}/log/product_hash_scan_pack_v2.log")
-    on_demand_logger.info("=========================================")
+    on_demand_logger.info('=========================================')
     log = { tenant: Apartment::Tenant.current, params: params, result: @result, error: e }
     on_demand_logger.info(log)
   end

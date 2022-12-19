@@ -25,7 +25,7 @@ module ProductsService
       puts 'Getting Products List'
       shopify_products = begin
                            Groovepacker::ShopifyRuby::Client.new(shopify_credential).products('refresh_catalog', '')['products']
-                         rescue
+                         rescue StandardError
                            []
                          end
 

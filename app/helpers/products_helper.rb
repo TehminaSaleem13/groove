@@ -1,5 +1,6 @@
-module ProductsHelper
+# frozen_string_literal: true
 
+module ProductsHelper
   require 'barby'
   require 'barby/barcode/code_128'
   require 'barby/outputter/png_outputter'
@@ -68,7 +69,7 @@ module ProductsHelper
       product_report.product_ids = (product_report.product_ids << product_ids).flatten.uniq
     end
     @result['status'] = true
-    return @result
+    @result
   end
 
   def remove_report_products(params)
@@ -87,17 +88,19 @@ module ProductsHelper
       end
     end
     @result['status'] = true
-    return @result
+    @result
   end
 
   def make_product_intangible(product)
     scan_pack_settings = ScanPackSetting.all.first
     return unless scan_pack_settings.intangible_setting_enabled &&
                   scan_pack_settings.intangible_string.present?
+
     intangible_strings = scan_pack_settings.intangible_string.strip.split(',')
     intangible_strings.each do |string|
-      next unless (product.name.downcase.include?(string.downcase)) ||
-                  (product.primary_sku.try(:downcase).try(:include?, string.downcase))
+      next unless product.name.downcase.include?(string.downcase) ||
+                  product.primary_sku.try(:downcase).try(:include?, string.downcase)
+
       product = Product.readonly(false).find(product.id)
       product.is_intangible = true
       product.save
@@ -110,19 +113,19 @@ module ProductsHelper
     intangible_strings = scan_pack_settings.intangible_string.downcase.strip.split(',')
     coupan_product = nil
     intangible_strings.each do |string|
-      if product.downcase.include?(string) || sku.downcase.include?(string)
-        coupan_product = Product.joins(:product_skus).where("product_skus.sku =  ?", "GP Coupon").readonly(false).last
-        if coupan_product.nil?
-          coupan_product  =  Product.new
-          coupan_product.name = "GP Coupon"
-          coupan_product.store_id = 1
-        end
-        coupan_product.is_intangible =  true
-        coupan_product.status=  "active"
-        coupan_product.save
-        coupan_product.product_skus.create(sku: "GP Coupon") if coupan_product.present?
-        break
+      next unless product.downcase.include?(string) || sku.downcase.include?(string)
+
+      coupan_product = Product.joins(:product_skus).where('product_skus.sku =  ?', 'GP Coupon').readonly(false).last
+      if coupan_product.nil?
+        coupan_product = Product.new
+        coupan_product.name = 'GP Coupon'
+        coupan_product.store_id = 1
       end
+      coupan_product.is_intangible = true
+      coupan_product.status = 'active'
+      coupan_product.save
+      coupan_product.product_skus.create(sku: 'GP Coupon') if coupan_product.present?
+      break
     end
     coupan_product
   end
@@ -134,9 +137,9 @@ module ProductsHelper
 
   def get_weight_format(weight_format)
     if weight_format.present?
-      return weight_format
+      weight_format
     else
-      return GeneralSetting.get_product_weight_format
+      GeneralSetting.get_product_weight_format
     end
   end
 
@@ -155,29 +158,29 @@ module ProductsHelper
   end
 
   def update_inv_record(data, params)
-    selected_ids = data["selected"] || data["selected_id"]
+    selected_ids = data['selected'] || data['selected_id']
 
-    if data["select_toggle"]
+    if data['select_toggle']
       search_params = { search: data[:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
       product_ids = data[:search].present? ? do_search(search_params).map(&:id) : Product.all.map(&:id)
     else
       product_ids = selected_ids
     end
 
-    id = data["report_id"] || params["data"]["id"]
+    id = data['report_id'] || params['data']['id']
     report = id.present? ? ProductInventoryReport.find(id) : ProductInventoryReport.new
-    report.scheduled = data["scheduled"] if id.present?
-    report.type = data["type"] if id.present?
+    report.scheduled = data['scheduled'] if id.present?
+    report.type = data['type'] if id.present?
     report.product_ids = product_ids unless report.persisted?
-    report_name = data["report_name"] || data["name"]
-    report.name = report_name.present? ? report_name : "Default Report"
+    report_name = data['report_name'] || data['name']
+    report.name = report_name.present? ? report_name : 'Default Report'
     report.save
-    @result["status"] = true
+    @result['status'] = true
     @result
   end
 
   def fetch_order_response_from_ss(start_date, end_date, type, import_item = nil)
-    response = {"orders" => []}
+    response = { 'orders' => [] }
     statuses.each do |status|
       status_response = @client.get_range_import_orders(start_date, end_date, type, @credential.order_import_range_days, status, import_item)
       response = get_orders_from_union(response, status_response)
@@ -187,12 +190,16 @@ module ProductsHelper
 
   def barcode_labels_generate(tenant, params, bulk_actions_id, username)
     Apartment::Tenant.switch!(tenant)
-    result = {"messages"=>[], "status"=>true}
+    result = { 'messages' => [], 'status' => true }
     bulk_action = GrooveBulkActions.find(bulk_actions_id)
     bulk_action_type = bulk_action.activity == 'order_product_barcode_label' ? 'order_items' : 'products'
     if bulk_action.activity == 'order_product_barcode_label'
-      order_ids = params['ids'].split(",").reject { |c| c.empty? } rescue nil
-      all_items = params[:ids] == "all" ? (params[:status] == "all" ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where("id in (?)", order_ids).includes(:order_items).map(&:order_items).flatten
+      order_ids = begin
+                    params['ids'].split(',').reject(&:empty?)
+                  rescue StandardError
+                    nil
+                  end
+      all_items = params[:ids] == 'all' ? (params[:status] == 'all' ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where('id in (?)', order_ids).includes(:order_items).map(&:order_items).flatten
     else
       all_items = list_selected_products(params)
     end
@@ -200,29 +207,27 @@ module ProductsHelper
   end
 
   def process_barcode_generation(bulk_action, all_items, username, bulk_action_type, result)
-    begin
-      bulk_action.update_attributes(:status => 'in_progress', total: all_items.count)
-      (all_items||[]).in_groups_of(500, false) do |item_batch|
-        bulk_action.reload
-        if bulk_action.cancel?
-          bulk_action.update_attributes(:status => 'cancelled')
-          return true
-        end
-        last_batch = (all_items||[]).in_groups_of(500, false).last == item_batch
-        ScanPack::Base.new.bulk_barcodes_with_delay(item_batch, username, bulk_action_type, last_batch)
-        bulk_action.update_attributes(:completed => all_items.find_index(item_batch.last) + 1)
+    bulk_action.update_attributes(status: 'in_progress', total: all_items.count)
+    (all_items || []).in_groups_of(500, false) do |item_batch|
+      bulk_action.reload
+      if bulk_action.cancel?
+        bulk_action.update_attributes(status: 'cancelled')
+        return true
       end
-      bulk_action.update_attributes(:status => result['status'] ? 'completed' : 'failed', :messages => result['messages'], :current => '') unless bulk_action.cancel?
-    rescue Exception => e
-      bulk_action.update_attributes(:status => 'failed', :messages => e, :current => '')
+      last_batch = (all_items || []).in_groups_of(500, false).last == item_batch
+      ScanPack::Base.new.bulk_barcodes_with_delay(item_batch, username, bulk_action_type, last_batch)
+      bulk_action.update_attributes(completed: all_items.find_index(item_batch.last) + 1)
     end
+    bulk_action.update_attributes(status: result['status'] ? 'completed' : 'failed', messages: result['messages'], current: '') unless bulk_action.cancel?
+  rescue Exception => e
+    bulk_action.update_attributes(status: 'failed', messages: e, current: '')
   end
 
   def search_order_in_db(order)
     if @credential.allow_duplicate_order == true
-      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order["orderNumber"], order["orderId"])
+      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order['orderNumber'], order['orderId'])
     else
-      Order.find_by_store_id_and_increment_id(@credential.store_id, order["orderNumber"])
+      Order.find_by_store_id_and_increment_id(@credential.store_id, order['orderNumber'])
     end
   end
 end

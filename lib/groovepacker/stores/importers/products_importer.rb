@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -6,7 +8,7 @@ module Groovepacker
           {}
         end
 
-        def import_single(hash)
+        def import_single(_hash)
           {}
         end
       end

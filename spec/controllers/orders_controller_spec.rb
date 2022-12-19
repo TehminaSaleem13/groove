@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe OrdersController, type: :controller do
-  before(:each) do
+  before do
     Groovepacker::SeedTenant.new.seed
     generalsetting = GeneralSetting.all.first
     generalsetting.update_column(:inventory_tracking, true)
@@ -15,11 +15,11 @@ RSpec.describe OrdersController, type: :controller do
     @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: @inv_wh, status: true)
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: @store.id)
     tenant = Apartment::Tenant.current
-    Apartment::Tenant.switch!("#{tenant}")
-    @tenant = Tenant.create(name: "#{tenant}")
+    Apartment::Tenant.switch!(tenant.to_s)
+    @tenant = Tenant.create(name: tenant.to_s)
   end
 
-  after :each do
+  after do
     @tenant.destroy
   end
 
@@ -64,17 +64,17 @@ RSpec.describe OrdersController, type: :controller do
       request.accept = 'application/json'
       allow_any_instance_of(Groovepacker::Orders::Xml::Import).to receive(:check_count_is_equle?).and_return(true)
 
-      post :import_xml, params: { xml: IO.read(Rails.root.join("spec/fixtures/files/order_import_aliased_xml.xml")).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
+      post :import_xml, params: { xml: IO.read(Rails.root.join('spec/fixtures/files/order_import_aliased_xml.xml')).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
       expect(response.status).to eq(200)
 
       # Alias Product
-      Groovepacker::Products::Aliasing.new(result: { "status" => true }, params_attrs: { id: product.id, product_alias_ids: [product2.id]}, current_user: @user).set_alias
+      Groovepacker::Products::Aliasing.new(result: { 'status' => true }, params_attrs: { id: product.id, product_alias_ids: [product2.id] }, current_user: @user).set_alias
 
       # Update Order CSV Import
       $redis.set("import_action_#{Apartment::Tenant.current}", 'update_order')
 
       ImportItem.create(status: 'not_started', store_id: @store.id, order_import_summary_id: order_import_summary.id, import_type: 'regular')
-      post :import_xml, params: { xml: IO.read(Rails.root.join("spec/fixtures/files/order_import_aliased_xml.xml")).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
+      post :import_xml, params: { xml: IO.read(Rails.root.join('spec/fixtures/files/order_import_aliased_xml.xml')).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
       expect(response.status).to eq(200)
 
       expect(Order.all.count).to eq(1)
@@ -92,7 +92,7 @@ RSpec.describe OrdersController, type: :controller do
       @request.headers.merge! header
     end
 
-    it  'Delete Bulk Order' do
+    it 'Delete Bulk Order' do
       product = FactoryBot.create(:product, name: 'PRODUCT1')
       FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
       FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCT1')
@@ -136,7 +136,7 @@ RSpec.describe OrdersController, type: :controller do
       order3 = FactoryBot.create(:order, increment_id: 'ORDER3', status: 'awaiting', store: se_store, prime_order_id: '1660160773', store_order_id: '1660160773')
       FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order3, name: product.name)
 
-      expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/se_shipment_v2.yaml'))))
+      expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/se_shipment_v2.yaml'))))
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -149,13 +149,13 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import SE QF Range Orders' do
-      expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/SE_test_qf_range_orders.yaml'))))
+      expect_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:fetch_orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/SE_test_qf_range_orders.yaml'))))
 
       request.accept = 'application/json'
 
       se_store = Store.where(store_type: 'ShippingEasy').last
 
-      get :import_for_ss, params: { store_id: se_store.id, days: 0, import_type: 'range_import', import_date: 'null', start_date: '2020-08-03 09:00:25', end_date: '2020-08-03 21:00:25', order_date_type: 'modified', order_id: 'null'}
+      get :import_for_ss, params: { store_id: se_store.id, days: 0, import_type: 'range_import', import_date: 'null', start_date: '2020-08-03 09:00:25', end_date: '2020-08-03 21:00:25', order_date_type: 'modified', order_id: 'null' }
       expect(response.status).to eq(200)
       expect(Order.count).to eq(6)
       se_import_item = ImportItem.find_by_store_id(se_store.id)
@@ -193,7 +193,7 @@ RSpec.describe OrdersController, type: :controller do
       ImportItem.create(status: 'in_progress', store: se_store)
 
       request.accept = 'application/json'
-      get :import_for_ss, params: { store_id: se_store.id, days: 0, import_type: 'range_import', start_date: '2020-09-26%2007:22:39', end_date: '2020-09-27%2007:22:39', order_date_type: 'modified'}
+      get :import_for_ss, params: { store_id: se_store.id, days: 0, import_type: 'range_import', start_date: '2020-09-26%2007:22:39', end_date: '2020-09-27%2007:22:39', order_date_type: 'modified' }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
@@ -205,7 +205,7 @@ RSpec.describe OrdersController, type: :controller do
       ImportItem.create(status: 'in_progress', store: se_store)
 
       request.accept = 'application/json'
-      get :cancel_import, params: {"store_id"=>se_store.id, "order"=>{"store_id"=>se_store.id}}
+      get :cancel_import, params: { 'store_id' => se_store.id, 'order' => { 'store_id' => se_store.id } }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['error_messages']).to include('No imports are in progress')
@@ -227,8 +227,8 @@ RSpec.describe OrdersController, type: :controller do
     it 'Import Orders' do
       shopify_store = Store.where(store_type: 'Shopify').last
 
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -247,17 +247,17 @@ RSpec.describe OrdersController, type: :controller do
     it 'Same Job Id Multiple Time Import Orders' do
       shopify_store = Store.where(store_type: 'Shopify').last
 
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:product).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
 
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
       @tenant.uniq_shopify_import = true
       @tenant.save
-       sleep 3
+      sleep 3
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(0)
@@ -267,14 +267,14 @@ RSpec.describe OrdersController, type: :controller do
     it 'Orders Import Job Created Just 3 Second Before.' do
       shopify_store = Store.where(store_type: 'Shopify').last
 
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:product).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).not_to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_product.yaml'))))
 
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
-      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime("%Y-%m-%d %H:%M:%S.%L"), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopify_import-2", job_count: 1)
       @tenant.uniq_shopify_import = true
       @tenant.save
       get :import_all
@@ -299,7 +299,7 @@ RSpec.describe OrdersController, type: :controller do
     it 'Import Orders' do
       ss_store = Store.where(store_type: 'ShipStation API 2').last
 
-      expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:remove_gp_tags_from_ss).and_return(true)
       allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:should_fetch_shipments?).and_return(false)
       request.accept = 'application/json'
@@ -316,44 +316,43 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'SS  Range Import' do
-      store = Store.where(name: "GrooveShipStationTest")
+      store = Store.where(name: 'GrooveShipStationTest')
       if store.present?
         store_id = store.id
         Store.find(store_id).destroy
       end
-      ss_store = Store.create!(name: "GrooveShipStationTest", status: true, store_type: "Shipstation API 2", order_date: nil, inventory_warehouse_id: @inv_wh.id, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: "null", on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
-      ShipstationRestCredential.create(api_key: "14ccf1296c2043cb9076b90953b7ea9b", api_secret: "e6fc8ff9f7a7411180d2960eb838e2ca", last_imported_at: "2021-07-12", store_id: ss_store.id, created_at: "2021-04-01 16:53:35", updated_at: "2021-07-13 12:52:36", shall_import_awaiting_shipment: true, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: false, shall_import_internal_notes: false, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: true, quick_import_last_modified: "2021-07-12 12:50:44", use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: true, bulk_import: false, quick_import_last_modified_v2: "2021-07-06 14:39:53", order_import_range_days: 30, import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: "27502", disabled_carriers: [], label_shortcuts: {"w"=>"weight", "p"=>"USPS First Class Mail - Letter"}, skip_ss_label_confirmation: false, disabled_rates: {"stamps_com"=>[]})
+      ss_store = Store.create!(name: 'GrooveShipStationTest', status: true, store_type: 'Shipstation API 2', order_date: nil, inventory_warehouse_id: @inv_wh.id, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: 'null', on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
+      ShipstationRestCredential.create(api_key: '14ccf1296c2043cb9076b90953b7ea9b', api_secret: 'e6fc8ff9f7a7411180d2960eb838e2ca', last_imported_at: '2021-07-12', store_id: ss_store.id, created_at: '2021-04-01 16:53:35', updated_at: '2021-07-13 12:52:36', shall_import_awaiting_shipment: true, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: false, shall_import_internal_notes: false, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: true, quick_import_last_modified: '2021-07-12 12:50:44', use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: true, bulk_import: false, quick_import_last_modified_v2: '2021-07-06 14:39:53', order_import_range_days: 30, import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: '27502', disabled_carriers: [], label_shortcuts: { 'w' => 'weight', 'p' => 'USPS First Class Mail - Letter' }, skip_ss_label_confirmation: false, disabled_rates: { 'stamps_com' => [] })
       ImportItem.create(status: 'completed', store: ss_store)
       tenant = Apartment::Tenant.current
-      tenant = Tenant.where(name: "#{tenant}").first
-      Order.create(increment_id: "CSV-100151", order_placed_time: "2021-04-14 23:52:17", sku: nil, customer_comments: nil, store_id: ss_store.id, qty: nil, price: nil, firstname: "Alpha", lastname: "Tester", email: "alphatester@yopmail.com", address_1: "110 COBBLESTONE CIR", address_2: "", city: "NORTH LITTLE ROCK", state: "AR", postcode: "72116-3739", country: "US", method: nil, created_at: "2021-07-14 08:35:37", updated_at: "2021-07-14 08:35:37", notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: "onhold", scanned_on: nil, tracking_num: nil, company: nil, packing_user_id: nil, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: 0.0, notes_from_buyer: nil, weight_oz: 8, non_hyphen_increment_id: "CSV100151", note_confirmation: false, inaccurate_scan_count: 0, scan_start_time: nil, reallocate_inventory: false, last_suggested_at: nil, total_scan_time: 0, total_scan_count: 0, packing_score: 0, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: false, import_s3_key: nil, last_modified: "2021-04-14 23:53:00", prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: "", ss_label_data: {"orderId"=>830373892, "carrierCode"=>"stamps_com", "serviceCode"=>"usps_parcel_select", "packageCode"=>"package", "confirmation"=>"none", "shipDate"=>"2021-05-10", "weight"=>{"value"=>8.0, "units"=>"ounces", "WeightUnits"=>1}, "dimensions"=>nil, "insuranceOptions"=>{"provider"=>nil, "insureShipment"=>false, "insuredValue"=>0.0}, "internationalOptions"=>{"contents"=>nil, "customsItems"=>nil, "nonDelivery"=>nil}, "advancedOptions"=>{"warehouseId"=>82982, "nonMachinable"=>false, "saturdayDelivery"=>false, "containsAlcohol"=>false, "mergedOrSplit"=>false, "mergedIds"=>[], "parentId"=>nil, "storeId"=>203151, "customField1"=>nil, "customField2"=>nil, "customField3"=>nil, "source"=>nil, "billToParty"=>"my_other_account", "billToAccount"=>nil, "billToPostalCode"=>nil, "billToCountryCode"=>nil, "billToMyOtherAccount"=>nil}}, importer_id: "worker_0ebe21f3948d557300cd5f77aeaf5afb", clicked_scanned_qty: nil, import_item_id: "21", job_timestamp: nil)
+      tenant = Tenant.where(name: tenant.to_s).first
+      Order.create(increment_id: 'CSV-100151', order_placed_time: '2021-04-14 23:52:17', sku: nil, customer_comments: nil, store_id: ss_store.id, qty: nil, price: nil, firstname: 'Alpha', lastname: 'Tester', email: 'alphatester@yopmail.com', address_1: '110 COBBLESTONE CIR', address_2: '', city: 'NORTH LITTLE ROCK', state: 'AR', postcode: '72116-3739', country: 'US', method: nil, created_at: '2021-07-14 08:35:37', updated_at: '2021-07-14 08:35:37', notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: 'onhold', scanned_on: nil, tracking_num: nil, company: nil, packing_user_id: nil, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: 0.0, notes_from_buyer: nil, weight_oz: 8, non_hyphen_increment_id: 'CSV100151', note_confirmation: false, inaccurate_scan_count: 0, scan_start_time: nil, reallocate_inventory: false, last_suggested_at: nil, total_scan_time: 0, total_scan_count: 0, packing_score: 0, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: false, import_s3_key: nil, last_modified: '2021-04-14 23:53:00', prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: '', ss_label_data: { 'orderId' => 830_373_892, 'carrierCode' => 'stamps_com', 'serviceCode' => 'usps_parcel_select', 'packageCode' => 'package', 'confirmation' => 'none', 'shipDate' => '2021-05-10', 'weight' => { 'value' => 8.0, 'units' => 'ounces', 'WeightUnits' => 1 }, 'dimensions' => nil, 'insuranceOptions' => { 'provider' => nil, 'insureShipment' => false, 'insuredValue' => 0.0 }, 'internationalOptions' => { 'contents' => nil, 'customsItems' => nil, 'nonDelivery' => nil }, 'advancedOptions' => { 'warehouseId' => 82_982, 'nonMachinable' => false, 'saturdayDelivery' => false, 'containsAlcohol' => false, 'mergedOrSplit' => false, 'mergedIds' => [], 'parentId' => nil, 'storeId' => 203_151, 'customField1' => nil, 'customField2' => nil, 'customField3' => nil, 'source' => nil, 'billToParty' => 'my_other_account', 'billToAccount' => nil, 'billToPostalCode' => nil, 'billToCountryCode' => nil, 'billToMyOtherAccount' => nil } }, importer_id: 'worker_0ebe21f3948d557300cd5f77aeaf5afb', clicked_scanned_qty: nil, import_item_id: '21', job_timestamp: nil)
       tenant.gdpr_shipstation = true
       tenant.save
       request.accept = 'application/json'
-      get :import_for_ss, params: {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"range_import", "import_date"=>"null", "start_date"=>DateTime.now.in_time_zone - 2.days, "end_date"=>DateTime.now.in_time_zone, "order_date_type"=>"modified", "order_id"=>"null"}
+      get :import_for_ss, params: { 'store_id' => ss_store.id, 'days' => '0', 'import_type' => 'range_import', 'import_date' => 'null', 'start_date' => DateTime.now.in_time_zone - 2.days, 'end_date' => DateTime.now.in_time_zone, 'order_date_type' => 'modified', 'order_id' => 'null' }
       expect(response.status).to eq(200)
 
       ss_store.destroy
     end
 
     it 'SS Quick Import' do
-      store = Store.where(name: "GrooveShipStationTest")
+      store = Store.where(name: 'GrooveShipStationTest')
       if store.present?
         store_id = store.id
         Store.find(store_id).destroy
       end
-      ss_store =  Store.create!(name: "GrooveShipStationTest", status: true, store_type: "Shipstation API 2", order_date: nil, inventory_warehouse_id: @inv_wh.id, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: "null", on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
-      ShipstationRestCredential.create(api_key: "14ccf1296c2043cb9076b90953b7ea9b", api_secret: "e6fc8ff9f7a7411180d2960eb838e2ca", last_imported_at: "2021-07-12", store_id: ss_store.id, created_at: "2021-04-01 16:53:35", updated_at: "2021-07-13 12:52:36", shall_import_awaiting_shipment: true, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: false, shall_import_internal_notes: false, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: true, quick_import_last_modified: "2021-07-12 12:50:44", use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: true, bulk_import: false, quick_import_last_modified_v2: "2021-07-06 14:39:53", order_import_range_days: 30, import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: "27502", disabled_carriers: [], label_shortcuts: {"w"=>"weight", "p"=>"USPS First Class Mail - Letter"}, skip_ss_label_confirmation: false, disabled_rates: {"stamps_com"=>[]})
+      ss_store = Store.create!(name: 'GrooveShipStationTest', status: true, store_type: 'Shipstation API 2', order_date: nil, inventory_warehouse_id: @inv_wh.id, thank_you_message_to_customer: nil, auto_update_products: false, update_inv: false, on_demand_import: false, fba_import: false, csv_beta: true, is_verify_separately: nil, split_order: 'null', on_demand_import_v2: true, regular_import_v2: false, quick_fix: true, troubleshooter_option: false)
+      ShipstationRestCredential.create(api_key: '14ccf1296c2043cb9076b90953b7ea9b', api_secret: 'e6fc8ff9f7a7411180d2960eb838e2ca', last_imported_at: '2021-07-12', store_id: ss_store.id, created_at: '2021-04-01 16:53:35', updated_at: '2021-07-13 12:52:36', shall_import_awaiting_shipment: true, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: false, shall_import_internal_notes: false, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: true, quick_import_last_modified: '2021-07-12 12:50:44', use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: true, bulk_import: false, quick_import_last_modified_v2: '2021-07-06 14:39:53', order_import_range_days: 30, import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: '27502', disabled_carriers: [], label_shortcuts: { 'w' => 'weight', 'p' => 'USPS First Class Mail - Letter' }, skip_ss_label_confirmation: false, disabled_rates: { 'stamps_com' => [] })
       ImportItem.create(status: 'completed', store: ss_store)
       tenant = Apartment::Tenant.current
-      tenant = Tenant.where(name: "#{tenant}").first
-      Order.create(increment_id: "CSV-100151", order_placed_time: "2021-04-14 23:52:17", sku: nil, customer_comments: nil, store_id: ss_store.id, qty: nil, price: nil, firstname: "Alpha", lastname: "Tester", email: "alphatester@yopmail.com", address_1: "110 COBBLESTONE CIR", address_2: "", city: "NORTH LITTLE ROCK", state: "AR", postcode: "72116-3739", country: "US", method: nil, created_at: "2021-07-14 08:35:37", updated_at: "2021-07-14 08:35:37", notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: "onhold", scanned_on: nil, tracking_num: nil, company: nil, packing_user_id: nil, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: 0.0, notes_from_buyer: nil, weight_oz: 8, non_hyphen_increment_id: "CSV100151", note_confirmation: false, inaccurate_scan_count: 0, scan_start_time: nil, reallocate_inventory: false, last_suggested_at: nil, total_scan_time: 0, total_scan_count: 0, packing_score: 0, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: false, import_s3_key: nil, last_modified: "2021-04-14 23:53:00", prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: "", ss_label_data: {"orderId"=>830373892, "carrierCode"=>"stamps_com", "serviceCode"=>"usps_parcel_select", "packageCode"=>"package", "confirmation"=>"none", "shipDate"=>"2021-05-10", "weight"=>{"value"=>8.0, "units"=>"ounces", "WeightUnits"=>1}, "dimensions"=>nil, "insuranceOptions"=>{"provider"=>nil, "insureShipment"=>false, "insuredValue"=>0.0}, "internationalOptions"=>{"contents"=>nil, "customsItems"=>nil, "nonDelivery"=>nil}, "advancedOptions"=>{"warehouseId"=>82982, "nonMachinable"=>false, "saturdayDelivery"=>false, "containsAlcohol"=>false, "mergedOrSplit"=>false, "mergedIds"=>[], "parentId"=>nil, "storeId"=>203151, "customField1"=>nil, "customField2"=>nil, "customField3"=>nil, "source"=>nil, "billToParty"=>"my_other_account", "billToAccount"=>nil, "billToPostalCode"=>nil, "billToCountryCode"=>nil, "billToMyOtherAccount"=>nil}}, importer_id: "worker_0ebe21f3948d557300cd5f77aeaf5afb", clicked_scanned_qty: nil, import_item_id: "21", job_timestamp: nil)
+      tenant = Tenant.where(name: tenant.to_s).first
+      Order.create(increment_id: 'CSV-100151', order_placed_time: '2021-04-14 23:52:17', sku: nil, customer_comments: nil, store_id: ss_store.id, qty: nil, price: nil, firstname: 'Alpha', lastname: 'Tester', email: 'alphatester@yopmail.com', address_1: '110 COBBLESTONE CIR', address_2: '', city: 'NORTH LITTLE ROCK', state: 'AR', postcode: '72116-3739', country: 'US', method: nil, created_at: '2021-07-14 08:35:37', updated_at: '2021-07-14 08:35:37', notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: 'onhold', scanned_on: nil, tracking_num: nil, company: nil, packing_user_id: nil, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: 0.0, notes_from_buyer: nil, weight_oz: 8, non_hyphen_increment_id: 'CSV100151', note_confirmation: false, inaccurate_scan_count: 0, scan_start_time: nil, reallocate_inventory: false, last_suggested_at: nil, total_scan_time: 0, total_scan_count: 0, packing_score: 0, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: false, import_s3_key: nil, last_modified: '2021-04-14 23:53:00', prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: '', ss_label_data: { 'orderId' => 830_373_892, 'carrierCode' => 'stamps_com', 'serviceCode' => 'usps_parcel_select', 'packageCode' => 'package', 'confirmation' => 'none', 'shipDate' => '2021-05-10', 'weight' => { 'value' => 8.0, 'units' => 'ounces', 'WeightUnits' => 1 }, 'dimensions' => nil, 'insuranceOptions' => { 'provider' => nil, 'insureShipment' => false, 'insuredValue' => 0.0 }, 'internationalOptions' => { 'contents' => nil, 'customsItems' => nil, 'nonDelivery' => nil }, 'advancedOptions' => { 'warehouseId' => 82_982, 'nonMachinable' => false, 'saturdayDelivery' => false, 'containsAlcohol' => false, 'mergedOrSplit' => false, 'mergedIds' => [], 'parentId' => nil, 'storeId' => 203_151, 'customField1' => nil, 'customField2' => nil, 'customField3' => nil, 'source' => nil, 'billToParty' => 'my_other_account', 'billToAccount' => nil, 'billToPostalCode' => nil, 'billToCountryCode' => nil, 'billToMyOtherAccount' => nil } }, importer_id: 'worker_0ebe21f3948d557300cd5f77aeaf5afb', clicked_scanned_qty: nil, import_item_id: '21', job_timestamp: nil)
       tenant.gdpr_shipstation = true
       tenant.save
 
-
       request.accept = 'application/json'
-      get :import_for_ss, params:  {"store_id"=>ss_store.id, "days"=>"0", "import_type"=>"quickfix", "import_date"=>DateTime.now.in_time_zone, "start_date"=>"null", "end_date"=>"null", "order_date_type"=>"null", "order_id"=>"CSV-100151"}
+      get :import_for_ss, params: { 'store_id' => ss_store.id, 'days' => '0', 'import_type' => 'quickfix', 'import_date' => DateTime.now.in_time_zone, 'start_date' => 'null', 'end_date' => 'null', 'order_date_type' => 'null', 'order_id' => 'CSV-100151' }
 
       expect(response.status).to eq(200)
       ss_store.destroy
@@ -364,7 +363,7 @@ RSpec.describe OrdersController, type: :controller do
       ImportItem.create(status: 'in_progress', store: ss_store)
 
       request.accept = 'application/json'
-      get :cancel_import, params: {"store_id"=>ss_store.id, "order"=>{"store_id"=>ss_store.id}}
+      get :cancel_import, params: { 'store_id' => ss_store.id, 'order' => { 'store_id' => ss_store.id } }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['error_messages']).to include('No imports are in progress')
@@ -426,11 +425,11 @@ RSpec.describe OrdersController, type: :controller do
         order = FactoryBot.create :order, store_id: @store.id
         current_tenant = Apartment::Tenant.current
         image = { image: 'iVBORw0KGgoAAAANSUhEUgAAAAgAAAAIAQMAAAD+wSzIAAAABlBMVEX///+/v7+jQ3Y5AAAADklEQVQI12P4AIX8EAgALgAD/aNpbtEAAAAASUVORK5CYII', content_type: 'image/png', original_filename: 'sample_image.png' }
-        file_name = "packing_cams/#{SecureRandom.random_number(20000)}_#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{current_tenant}_#{order.id}_" + image[:original_filename].gsub('#', '')
+        file_name = "packing_cams/#{SecureRandom.random_number(20_000)}_#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{current_tenant}_#{order.id}_" + image[:original_filename].delete('#')
         GroovS3.create_image(current_tenant, file_name, image[:image], image[:content_type])
         url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
         packing_cam = order.packing_cams.create(url: url, user: @user, username: @user&.username)
-        
+
         post :remove_packing_cam_image, params: { id: order.id, packing_cam_id: packing_cam.id }
         expect(response.status).to eq(200)
         result = JSON.parse(response.body)
@@ -446,8 +445,8 @@ RSpec.describe OrdersController, type: :controller do
 
       it 'update ss label data' do
         order = FactoryBot.create :order, store_id: @store.id
-        
-        params = { order_number: order.increment_id, ss_label_data: { shipping_address: { name: 'sigma tester', address1: '781 WARWICK AVE', address2: nil, state: 'RI', postal_code: '02888-2601', city: 'WARWICKs', country: 'US'}, dimensions: { units: 'centimeters', length: 14, width: 65, height: 43 }, weight: { value: 13, units: 'pounds'} } }
+
+        params = { order_number: order.increment_id, ss_label_data: { shipping_address: { name: 'sigma tester', address1: '781 WARWICK AVE', address2: nil, state: 'RI', postal_code: '02888-2601', city: 'WARWICKs', country: 'US' }, dimensions: { units: 'centimeters', length: 14, width: 65, height: 43 }, weight: { value: 13, units: 'pounds' } } }
 
         post :update_ss_label_order_data, params: params
         expect(response.status).to eq(200)
@@ -458,7 +457,7 @@ RSpec.describe OrdersController, type: :controller do
     it 'Print Packing Slip' do
       order = FactoryBot.create :order, store_id: @store.id
 
-      post :generate_packing_slip, params: {orderArray: [{id: order.id}]} 
+      post :generate_packing_slip, params: { orderArray: [{ id: order.id }] }
       expect(response.status).to eq(200)
     end
 
@@ -468,38 +467,38 @@ RSpec.describe OrdersController, type: :controller do
 
       request.accept = 'application/json'
 
-      get :print_activity_log, params:{ id: order.id }
+      get :print_activity_log, params: { id: order.id }
       expect(response.status).to eq(200)
     end
 
     it 'Does not prints activity log if id is wrong' do
       request.accept = 'application/json'
 
-      get :print_activity_log, params:{ id: SecureRandom.random_number(50000) }
+      get :print_activity_log, params: { id: SecureRandom.random_number(50_000) }
       expect(response.status).to eq(200)
     end
 
     it 'App Orders params' do
-      order = Order.create(increment_id: "C000209814-B(Duplicate-2)", order_placed_time: Time.current, sku: nil, customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: "BIKE", lastname: "ACTIONGmbH", email: "east@raceface.com", address_1: "WEISKIRCHER STR. 102", address_2: nil, city: "RODGAU", state: nil, postcode: "63110", country: "GERMANY", method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: "scanned", scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: "C000209814B(Duplicate2)", note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: "orders/2021-07-29-162759275061.xml", last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: "", ss_label_data: nil, importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
-      product1 = Product.create(store_product_id: "0", name: "TRIGGER SS JERSEY-BLACK-M", product_type: "", store_id: @store.id, status: "active", packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: "individual", is_kit: 1, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: "on", click_scan_enabled: "on", weight_format: "oz", add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: "", custom_product_2: "", custom_product_3: "", custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: "821973374048", isbn: nil, ean: "0821973374048", supplier_sku: nil, avg_cost: 0.0, count_group: nil)
-      product2 = Product.create(store_product_id: "1", name: "TRIGGER SS JERSEY-BLACK-L", product_type: "", store_id: @store.id, status: "active", packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: "individual", is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: "on", click_scan_enabled: "on", weight_format: "oz", add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: "", custom_product_2: "", custom_product_3: "", custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: "821973374048", isbn: nil, ean: "0821973374048", supplier_sku: nil, avg_cost: 0.0, count_group: nil)
-      ProductKitSkus.create( product_id: product1.id, option_product_id: product2.id, qty: 1, packing_order: 50)
-      order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: "TRIGGER SS JERSEY-BLACK-M", product_id: product1.id, scanned_status: "notscanned", scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: "unprocessed", inv_status_reason: "", clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
-      order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: "TRIGGER SS JERSEY-BLACK-M", product_id: product1.id, scanned_status: "scanned", scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: "unprocessed", inv_status_reason: "", clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      order = Order.create(increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil, customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: 'BIKE', lastname: 'ACTIONGmbH', email: 'east@raceface.com', address_1: 'WEISKIRCHER STR. 102', address_2: nil, city: 'RODGAU', state: nil, postcode: '63110', country: 'GERMANY', method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: 'scanned', scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: 'C000209814B(Duplicate2)', note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: 'orders/2021-07-29-162759275061.xml', last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: '', ss_label_data: nil, importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
+      product1 = Product.create(store_product_id: '0', name: 'TRIGGER SS JERSEY-BLACK-M', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 1, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      product2 = Product.create(store_product_id: '1', name: 'TRIGGER SS JERSEY-BLACK-L', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      ProductKitSkus.create(product_id: product1.id, option_product_id: product2.id, qty: 1, packing_order: 50)
+      order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product1.id, scanned_status: 'notscanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product1.id, scanned_status: 'scanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
 
       request.accept = 'application/json'
 
-      post :index, params:{"filter"=>"all", "sort"=>"", "order"=>"DESC", "limit"=>"20", "offset"=>"0", "product_search_toggle"=>"undefined", "app"=>true}
+      post :index, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true }
       expect(response.status).to eq(200)
 
-      expect(JSON.parse(response.body)["orders_count"]["scanned"]).to eq(1)
-      expect(JSON.parse(response.body)["orders_count"]["all"]).to eq(1)
+      expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
+      expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
 
-      post :index, params:{"filter"=>"all", "sort"=>"", "order"=>"DESC", "limit"=>"20", "offset"=>"0", "product_search_toggle"=>"undefined", "app"=>true, "count"=> "1"}
+      post :index, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1' }
       expect(response.status).to eq(200)
 
-      expect(JSON.parse(response.body)["orders_count"]["scanned"]).to eq(1)
-      expect(JSON.parse(response.body)["orders_count"]["all"]).to eq(1)
+      expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
+      expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
     end
   end
 end

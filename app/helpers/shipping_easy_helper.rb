@@ -1,18 +1,19 @@
-module ShippingEasyHelper
+# frozen_string_literal: true
 
+module ShippingEasyHelper
   def create_s3_image(item)
-    image_data = Net::HTTP.get(URI.parse(item["product"]["image"]["original"]))
+    image_data = Net::HTTP.get(URI.parse(item['product']['image']['original']))
     # image_data = IO.read(open(item["product"]["image"]["original"]))
-    file_name = "#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}".gsub('#', '')
+    file_name = "#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_shipping_easy_#{item['sku'].downcase}".delete('#')
     tenant = Apartment::Tenant.current
     GroovS3.create_image(tenant, file_name, image_data, 'public_read')
     s3_image_url = "#{ENV['S3_BASE_URL']}/#{tenant}/image/#{file_name}"
-    return s3_image_url
+    s3_image_url
   end
 
   def not_to_update(shiping_easy_order, se_order)
-    not_update = (shiping_easy_order.persisted? and shiping_easy_order.status=="scanned" || (shiping_easy_order.order_items.map(&:scanned_status).include?("scanned") || shiping_easy_order.order_items.map(&:scanned_status).include?("partially_scanned")))
-    not_update = not_update ? not_update : shiping_easy_order.last_modified == se_order["updated_at"].to_datetime
+    not_update = (shiping_easy_order.persisted? && shiping_easy_order.status == 'scanned' || (shiping_easy_order.order_items.map(&:scanned_status).include?('scanned') || shiping_easy_order.order_items.map(&:scanned_status).include?('partially_scanned')))
+    not_update ||= shiping_easy_order.last_modified == se_order['updated_at'].to_datetime
     @order_to_update = not_update
     not_update
   end
@@ -32,7 +33,7 @@ module ShippingEasyHelper
     OrderImportSummary.where("status != 'in_progress' OR status = 'completed'").destroy_all
     ImportItem.where(store_id: @credential.store.id).where("status = 'cancelled' OR status = 'completed'").destroy_all
     @import_summary = OrderImportSummary.top_summary
-    @import_summary = OrderImportSummary.create(user_id: user_id, status: 'not_started', display_summary: false) unless @import_summary
+    @import_summary ||= OrderImportSummary.create(user_id: user_id, status: 'not_started', display_summary: false)
     @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'not_started')
     @import_summary.emit_data_to_user(true)
   end
@@ -64,6 +65,7 @@ module ShippingEasyHelper
 
     closest_date = Order.select('last_modified').where('store_id = ? AND id != ?', @credential.store.id, order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
     return closest_date if closest_date.present?
+
     date
   end
 
@@ -76,7 +78,11 @@ module ShippingEasyHelper
   def ondemand_import_single_order(order)
     init_common_objects
     response = @client.get_single_order(order)
-    res = response['orders'][0] rescue nil
+    res = begin
+            response['orders'][0]
+          rescue StandardError
+            nil
+          end
     # if res && res['split_from_order_id']
     #   response['orders'] = response['orders'].reject { |o| o['split_from_order_id'] != res['split_from_order_id'] }
     #   import_orders_from_response(response, nil)
@@ -86,26 +92,30 @@ module ShippingEasyHelper
     # TODO GROOV-2752 multiple order not import in ondemand FD(https://groovepacker.freshdesk.com/a/tickets/34000)
     import_orders_from_response(response, nil)
     remove_duplicate_order_items
-    @import_item.destroy rescue nil
+    begin
+      @import_item.destroy
+    rescue StandardError
+      nil
+    end
   end
 
   def init_common_objects
-    handler = self.get_handler
+    handler = get_handler
     @credential = handler[:credential]
     @client = handler[:store_handle]
     @import_item = handler[:import_item]
     @import_item.update_attributes(updated_orders_import: 0)
-    @result = self.build_result
+    @result = build_result
     @statuses = get_statuses
     @worker_id = 'worker_' + SecureRandom.hex
   end
 
-  def import_item_count(order=nil)
-    unless order.blank?
-      @import_item.current_order_items = order["recipients"][0]["line_items"].length
-      @import_item.current_order_imported_item = 0
-    else
+  def import_item_count(order = nil)
+    if order.blank?
       @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
+    else
+      @import_item.current_order_items = order['recipients'][0]['line_items'].length
+      @import_item.current_order_imported_item = 0
     end
     @import_item.save
   end
@@ -119,14 +129,14 @@ module ShippingEasyHelper
   end
 
   def destroy_cleared_orders(response)
-    skus = ProductKitSkus.where("option_product_id = product_id")
+    skus = ProductKitSkus.where('option_product_id = product_id')
     skus.destroy_all
-    orders_to_clear = Order.where("store_id=? and status!=? and increment_id in (?)", @credential.store_id, "scanned", response["cleared_orders_ids"])
+    orders_to_clear = Order.where('store_id=? and status!=? and increment_id in (?)', @credential.store_id, 'scanned', response['cleared_orders_ids'])
     orders_to_clear.destroy_all
   end
 
   def remove_duplicate_order_items
-    order_item_dup = OrderItem.where("created_at >= ?", Time.current.beginning_of_day).select(:order_id).group(:order_id, :product_id).having("count(*) > 1").count
+    order_item_dup = OrderItem.where('created_at >= ?', Time.current.beginning_of_day).select(:order_id).group(:order_id, :product_id).having('count(*) > 1').count
     unless order_item_dup.empty?
       order_item_dup.each do |i|
         item = OrderItem.where(order_id: i[0][0], product_id: i[0][1])
@@ -137,6 +147,7 @@ module ShippingEasyHelper
 
   def update_multi_shipment_status(prime_order_id)
     return unless @credential.store.split_order == 'shipment_handling_v2'
+
     prime_order = Order.where(store_order_id: prime_order_id).present?
     multi_shipments = Order.where('orders.store_order_id != orders.prime_order_id AND orders.prime_order_id = ? AND orders.status != ?', prime_order_id, 'scanned')
     if prime_order
@@ -150,17 +161,25 @@ module ShippingEasyHelper
 
   def check_prev_splitted_order(order)
     delete_split_combined_orders(order)
-    duplicated_in_se = Order.where('shipment_id = ?', order["shipments"][0]['cloned_from_shipment_id'].to_s) if order["shipments"].any? && order["shipments"][0]['cloned_from_shipment_id'].present?
+    duplicated_in_se = Order.where('shipment_id = ?', order['shipments'][0]['cloned_from_shipment_id'].to_s) if order['shipments'].any? && order['shipments'][0]['cloned_from_shipment_id'].present?
     if duplicated_in_se.try(:any?) # || (order["shipments"].try(:any?) && order["shipments"][0]['cloned_from_shipment_id'].present?)
       if duplicated_in_se.try(:count) == 1
         order['external_order_identifier'] = duplicated_in_se.first.increment_id + ' (D1)'
       elsif duplicated_in_se.try(:count) > 1
-        duplicated_inc_id = duplicated_in_se.pluck(:increment_id).sort.last.split(" (D")
-        main_increment = duplicated_inc_id[0..(duplicated_inc_id.length - 2)].join rescue order['external_order_identifier']
-        shipment_increment = duplicated_inc_id.last.chop rescue nil
+        duplicated_inc_id = duplicated_in_se.pluck(:increment_id).max.split(' (D')
+        main_increment = begin
+                           duplicated_inc_id[0..(duplicated_inc_id.length - 2)].join
+                         rescue StandardError
+                           order['external_order_identifier']
+                         end
+        shipment_increment = begin
+                               duplicated_inc_id.last.chop
+                             rescue StandardError
+                               nil
+                             end
         inc_no = shipment_increment.to_i + 1 if shipment_increment.to_i.to_s == shipment_increment
         order['external_order_identifier'] = main_increment + " (D#{inc_no})" if inc_no
-      # else
+        # else
         # similar_duplicate_orders = Order.where('increment_id LIKE ?', "#{order['external_order_identifier'] + ' (' + order['id'].to_s + ')'}%")
         # if similar_duplicate_orders.blank?
         #   order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')'
@@ -178,11 +197,19 @@ module ShippingEasyHelper
       extra_count = Order.where('increment_id LIKE ? AND store_order_id != ?', "%#{order['external_order_identifier']}%", order['split_from_order_id']).group(:prime_order_id).count.count
       if split_orders.blank?
         order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
-        order['external_order_identifier'] = order['external_order_identifier'] + " (S1)"
+        order['external_order_identifier'] = order['external_order_identifier'] + ' (S1)'
       else
-        splitted_inc_id = split_orders.pluck(:increment_id).sort.last.split(" (S")
-        main_increment = splitted_inc_id[0..(splitted_inc_id.length - 2)].join rescue order['external_order_identifier']
-        shipment_increment = splitted_inc_id.last.chop rescue nil
+        splitted_inc_id = split_orders.pluck(:increment_id).max.split(' (S')
+        main_increment = begin
+                           splitted_inc_id[0..(splitted_inc_id.length - 2)].join
+                         rescue StandardError
+                           order['external_order_identifier']
+                         end
+        shipment_increment = begin
+                               splitted_inc_id.last.chop
+                             rescue StandardError
+                               nil
+                             end
         inc_no = shipment_increment.to_i + 1 if shipment_increment.to_i.to_s == shipment_increment
         order['external_order_identifier'] = main_increment + " (S#{inc_no})" if inc_no
       end
@@ -192,7 +219,7 @@ module ShippingEasyHelper
         same_order.update_attributes(increment_id: same_order.increment_id + ' (' + same_order.store_order_id + ')') if same_order.store_order_id.present?
         order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')'
       end
-      order['external_order_identifier'] = order['external_order_identifier'] + " (C)" if order['source_order_ids'].present?
+      order['external_order_identifier'] = order['external_order_identifier'] + ' (C)' if order['source_order_ids'].present?
       # extra_count = Order.where("increment_id LIKE ?", "%#{order['external_order_identifier']}%").group(:prime_order_id).count.count
       # order['external_order_identifier'] = order['external_order_identifier'] + "-#{extra_count}" if extra_count > 0
     end
@@ -208,10 +235,14 @@ module ShippingEasyHelper
   end
 
   def add_split_combined_activity(order, shiping_easy_order)
-    user_name = User.find_by_id(@import_item.order_import_summary.user_id).name rescue nil
+    user_name = begin
+                  User.find_by_id(@import_item.order_import_summary.user_id).name
+                rescue StandardError
+                  nil
+                end
 
-    shiping_easy_order.addactivity("Order with ##{order['deleted_after_split'].join(", ")} removed from GP after the original order is splitted in ShippingEasy", user_name) if order['deleted_after_split'].present?
+    shiping_easy_order.addactivity("Order with ##{order['deleted_after_split'].join(', ')} removed from GP after the original order is splitted in ShippingEasy", user_name) if order['deleted_after_split'].present?
 
-    shiping_easy_order.addactivity("Order with ##{order['deleted_after_combined'].join(", ")} removed from GP after the original order is combined in ShippingEasy", user_name) if order['deleted_after_combined'].present?
+    shiping_easy_order.addactivity("Order with ##{order['deleted_after_combined'].join(', ')} removed from GP after the original order is combined in ShippingEasy", user_name) if order['deleted_after_combined'].present?
   end
 end

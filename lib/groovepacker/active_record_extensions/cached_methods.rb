@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # ========================================
 #                  USAGE
 # ========================================
@@ -31,8 +33,8 @@ module CachedMethods
               instance_variable_defined?(instance) &&
               instance_variable_get(instance)
             ) || instance_variable_set(instance, read_multi(key))
-          rescue
-            nil
+                   rescue StandardError
+                     nil
           end
           if cached
             begin
@@ -42,14 +44,18 @@ module CachedMethods
               else
                 cached.send(:clear_association_cache)
               end
-            rescue
+            rescue StandardError
               nil
             end
             return cached
           end
           load_assoc = send(association)
           load_assoc = load_assoc.to_a if load_assoc.class == ActiveRecord::Relation
-          Rails.cache.write(key, load_assoc, expires_in: 5.minutes) rescue nil
+          begin
+            Rails.cache.write(key, load_assoc, expires_in: 5.minutes)
+          rescue StandardError
+            nil
+          end
           update_cache_keys(key)
           load_assoc
         end
@@ -70,12 +76,17 @@ module CachedMethods
     keys = Rails.cache.read(multi_key) || []
     keys << key
     keys = keys.class == String ? Marshal.load(keys) : keys
-    Rails.cache.write(multi_key, keys.uniq) rescue nil
+    begin
+      Rails.cache.write(multi_key, keys.uniq)
+    rescue StandardError
+      nil
+    end
   end
 
   def delete_cache
     cached = Rails.cache.read(multi_key)
     return unless cached
+
     cached = cached.class == String ? Marshal.load(cached) : cached
     cached.each { |key| Rails.cache.delete(key) }
     Rails.cache.delete(multi_key)
@@ -99,7 +110,7 @@ module CachedMethods
 
   def read_multi(key)
     @read_multi[key] || @read_multi.merge!(key => Rails.cache.read(key))[key]
-  rescue
+  rescue StandardError
     (@read_multi = { key => Rails.cache.read(key) })[key]
   end
 end

@@ -39,7 +39,7 @@ class OrderImportSummary < ActiveRecord::Base
       else
         # import_item.updated_at += time_zone
         result['import_items'].push(store_info: import_item.store, import_info: import_item,
-                                    show_update: show_update(import_item.store), progress: ((import_item.status == 'in_progress' && with_progress) ? import_item.get_import_item_info(import_item.store&.id) : nil))
+                                    show_update: show_update(import_item.store), progress: (import_item.status == 'in_progress' && with_progress ? import_item.get_import_item_info(import_item.store&.id) : nil))
       end
     end
     result

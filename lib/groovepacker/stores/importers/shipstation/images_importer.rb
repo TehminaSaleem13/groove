@@ -1,13 +1,15 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
       module Shipstation
         class ImagesImporter < Groovepacker::Stores::Importers::Importer
           def import
-            handler = self.get_handler
+            handler = get_handler
             credential = handler[:credential]
             client = handler[:store_handle]
-            result = self.build_result
+            result = build_result
 
             begin
               store = credential.store
@@ -16,12 +18,12 @@ module Groovepacker
               unless products.nil?
                 result[:total_imported] = products.length
                 products.each do |product|
-                  if ProductImage.where(:product_id => product.id).length==0
+                  if ProductImage.where(product_id: product.id).empty?
                     image = ProductImage.new
                     product_skus = product.product_skus
                     unless product_skus.nil?
                       product_sku = product_skus.first
-                      order_items = client.order_items.where("SKU" => product_sku.sku)
+                      order_items = client.order_items.where('SKU' => product_sku.sku)
                       unless order_items.nil?
                         unless order_items.first.nil?
                           unless order_items.first.thumbnail_url.nil?

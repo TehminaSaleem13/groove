@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SettingsService
   class Restore < SettingsService::Base
     attr_reader :current_user, :params, :products_to_check_later,
@@ -39,20 +41,25 @@ module SettingsService
       # Clear tables if delete method is invoked
       delete_table_data(mapping)
       # Open uploaded zip file
-      File.open("/tmp/#{Apartment::Tenant.current}_product_restore", "wb") { |f| f.write(Net::HTTP.get(URI.parse(params[:file]))) }
+      File.open("/tmp/#{Apartment::Tenant.current}_product_restore", 'wb') { |f| f.write(Net::HTTP.get(URI.parse(params[:file]))) }
       Zip::File.open("/tmp/#{Apartment::Tenant.current}_product_restore") do |zipfile|
         # For each csv in the zip
         zipfile.each do |file|
           # Remove .csv extension to check if we have mapping defined for it
-          current_mapping = file.name.chomp('.csv') 
+          current_mapping = file.name.chomp('.csv')
 
           next unless mapping.key?(current_mapping)
+
           # Parse the file by it's data
           parse_csv_file(file, zipfile, mapping, default_warehouse_map, current_mapping)
         end
       end
       products_to_check_later.each(&:update_product_status)
-      CsvExportMailer.product_restore(@tenant).deliver rescue nil
+      begin
+        CsvExportMailer.product_restore(@tenant).deliver
+      rescue StandardError
+        nil
+      end
     end
 
     def load_mappings
@@ -65,7 +72,7 @@ module SettingsService
         'Location 1 Qty' => 'location_primary_qty',
         'Location 2 Qty' => 'location_secondary_qty',
         'Location 3 Qty' => 'location_tertiary_qty',
-        'Location 4 Qty' => 'location_quaternary_qty',
+        'Location 4 Qty' => 'location_quaternary_qty'
       }
       # end
       mapping = YAML.load_file('config/data_mappings/restore_map.yml')
@@ -102,7 +109,7 @@ module SettingsService
 
         if current_mapping == 'products'
           single_row.attributes = Hash[csv_row.as_json].as_json(
-            only: %w(primary_sku primary_barcode primary_category primary_image)
+            only: %w[primary_sku primary_barcode primary_category primary_image]
           )
 
           find_or_create_product_inventory(
@@ -120,11 +127,14 @@ module SettingsService
     )
       query = generate_query(current_mapping, csv_row)
 
-      single_row = mapping[current_mapping][:model].constantize.where(
-        query.merge(product_id: csv_row['product_id'])
-      ).first if query
+      if query
+        single_row = mapping[current_mapping][:model].constantize.where(
+          query.merge(product_id: csv_row['product_id'])
+        ).first
+      end
 
       return [false, single_row] if single_row.present?
+
       single_row = mapping[current_mapping][:model].constantize.new
       [true, single_row]
     end
@@ -150,9 +160,7 @@ module SettingsService
         column_first = column[0]
         column_second = column[1]
         csv_row_first_column = csv_row[column_first]
-        if current_mapping == 'product_skus' && column_second == 'id' && !create_new
-          break
-        end
+        break if current_mapping == 'product_skus' && column_second == 'id' && !create_new
 
         # If mapping's CSV index is present, update row
         if csv_row_first_column.blank?
@@ -175,11 +183,12 @@ module SettingsService
 
     def do_if_first_column_blank(current_mapping, column_second, single_row)
       return unless current_mapping == 'products' && column_second == 'name'
+
       single_row['name'] = 'Product from Restore'
     end
 
     def in_list?(column_first)
-      column_first.in? %w(barcode sku category)
+      column_first.in? %w[barcode sku category]
     end
 
     def find_or_create_product_inventory(

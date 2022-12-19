@@ -1,8 +1,9 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module CampaignMonitor
     class CampaignMonitor
-      
-      def initialize(attrs={})
+      def initialize(attrs = {})
         @subscriber = attrs[:subscriber]
         @client = ::Groovepacker::CampaignMonitor::Client.new(subscriber: attrs[:subscriber])
       end
@@ -23,7 +24,6 @@ module Groovepacker
       def remove_subscriber_from_new_customers_list
         @client.remove_subscriber_from_new_customers_list
       end
-
     end
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 ShopifyAPI::Context.setup(
   api_key: ENV['SHOPIFY_API_KEY'],
   api_secret_key: ENV['SHOPIFY_SHARED_SECRET'],

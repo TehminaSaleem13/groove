@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -24,7 +26,8 @@ module Groovepacker
           def create_update_order_item(single_row, product, single_sku, order)
             order_items = OrderItem.where(
               product_id: product.id,
-              order_id: order.id)
+              order_id: order.id
+            )
             if order_items.empty?
               order_item = create_new_order_item(single_row, product, single_sku, order)
             else
@@ -32,13 +35,14 @@ module Groovepacker
               order_item = initialize_or_update_order_item(single_row, order_item)
             end
             @product_helper.import_image(product, single_row, true)
-            
+
             order_item
           end
 
           def initialize_or_update_order_item(single_row, order_item)
-            %w(qty item_sale_price).each do |item|
+            %w[qty item_sale_price].each do |item|
               next unless @helper.verify_single_item(single_row, item)
+
               case item
               when 'qty'
                 order_item.qty =  (order_item.try(:qty).to_i +
@@ -49,7 +53,7 @@ module Groovepacker
               end
             end
             order_item.save
-            return order_item
+            order_item
           end
         end
       end

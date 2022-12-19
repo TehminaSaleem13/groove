@@ -7,25 +7,27 @@ namespace :check do
       Apartment::Tenant.switch! tenant.name
       import_items = ImportItem.joins(:store).where("stores.status=1 and (import_items.status='in_progress' OR import_items.status='not_started')").readonly(false)
       next unless import_items.any?
+
       in_progress_items = import_items.where(status: 'in_progress')
       not_started_items = import_items.where(status: 'not_started')
       begin
         failed_import_items = []
         in_progress_items.each do |import_item|
           next unless (Time.current.to_i - import_item.updated_at.to_i) > 90
+
           import_item.update_attributes(status: 'cancelled', message: 'Import Failed. Please try again.')
-            begin
-              import_item.order_import_summary.update_attributes(status: 'cancelled')
-            rescue
-              nil
-            end
+          begin
+            import_item.order_import_summary.update_attributes(status: 'cancelled')
+          rescue StandardError
+            nil
+          end
           failed_import_items << import_item
         end
         if failed_import_items.any?
           not_started_items.update_all(status: 'cancelled')
           begin
             OrderImportSummary.top_summary.emit_data_to_user(true)
-          rescue
+          rescue StandardError
             nil
           end
           import_start_count = $redis.get("import_restarted_#{tenant.name}").to_i || 0
@@ -39,7 +41,7 @@ namespace :check do
             ImportMailer.failed_imports(tenant.name, failed_import_items).deliver
           end
         end
-      rescue
+      rescue StandardError
       end
     end
   end

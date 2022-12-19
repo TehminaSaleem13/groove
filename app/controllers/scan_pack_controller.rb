@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ScanPackController < ApplicationController
   before_action :groovepacker_authorize!, :set_result_instance
   include ScanPackHelper
@@ -17,7 +19,11 @@ class ScanPackController < ApplicationController
   end
 
   def scan_pack_v2
-    current_timestamp = params[:data].last['time'].in_time_zone rescue nil
+    current_timestamp = begin
+                          params[:data].last['time'].in_time_zone
+                        rescue StandardError
+                          nil
+                        end
     if params[:data].present?
       tenant = Tenant.find_by_name(Apartment::Tenant.current)
       log_scn_obj = Groovepacker::ScanPackV2::LogScanService.new
@@ -109,7 +115,7 @@ class ScanPackController < ApplicationController
     # Regular Scan
     # => <ActionController::Parameters {"_json"=>{{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:50:17.140Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}], "controller"=>"scan_pack", "action"=>"scan_pack_v2", "scan_pack"=>{"_json"=>[{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:50:17.140Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}]}} permitted: false>
 
-    #Click Scan
+    # Click Scan
     # => <ActionController::Parameters {"_json"=>[{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:51:52.955Z", "state"=>"scanpack.rfp.default", "event"=>"click_scan"}, {"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:53:07.339Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}], "controller"=>"scan_pack", "action"=>"scan_pack_v2", "scan_pack"=>{"_json"=>[{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:51:52.955Z", "state"=>"scanpack.rfp.default", "event"=>"click_scan"}, {"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:53:07.339Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}]}} permitted: false>
 
     # on_demand_logger = Logger.new("#{Rails.root}/log/log_scan_pack.log")
@@ -120,7 +126,11 @@ class ScanPackController < ApplicationController
   end
 
   def new_scan_pack_v2
-    current_timestamp = params[:data].last['time'].in_time_zone rescue nil
+    current_timestamp = begin
+                          params[:data].last['time'].in_time_zone
+                        rescue StandardError
+                          nil
+                        end
     if params[:data].present?
       tenant = Tenant.find_by_name(Apartment::Tenant.current)
       log_scn_obj = Groovepacker::ScanPackV2::NewLogScanService.new
@@ -281,25 +291,25 @@ class ScanPackController < ApplicationController
   def send_request_to_api
     if params[:scan_pack][:_json].present?
       current_tenant = Apartment::Tenant.current
-      params[:tenant] =  current_tenant
+      params[:tenant] = current_tenant
       scan_pack_object = ScanPack::Base.new
-      scan_pack_object.delay(:run_at => 1.seconds.from_now, :queue => "shopakira_request", priority: 95).request_api(params)
+      scan_pack_object.delay(run_at: 1.seconds.from_now, queue: 'shopakira_request', priority: 95).request_api(params)
     end
     render json: {}
   end
 
   def order_change_into_scanned
-    @result = Hash.new
+    @result = {}
     order = Order.find(params[:id])
     if !order.nil?
-      order.order_items.update_all(scanned_status: "scanned")
-      order.addactivity("Order is scanned through SCANNED barcode", current_user.try(:username))
+      order.order_items.update_all(scanned_status: 'scanned')
+      order.addactivity('Order is scanned through SCANNED barcode', current_user.try(:username))
       order.set_order_to_scanned_state(current_user.try(:username))
       @result['status'] = true
       @result['error_messages'] = []
       @result['success_messages'] = []
       @result['notice_messages'] = []
-      @result['data'] = Hash.new
+      @result['data'] = {}
       @result['data']['order_complete'] = true
       @result['data']['next_state'] = 'scanpack.rfo'
     else
@@ -311,11 +321,9 @@ class ScanPackController < ApplicationController
 
   def click_scan
     render json: product_scan(
-        params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id],
-        {
-          clicked: true, current_user: current_user, session: session
-        }
-      ).merge('awaiting' => get_awaiting_orders_count)
+      params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id],
+      clicked: true, current_user: current_user, session: session
+    ).merge('awaiting' => get_awaiting_orders_count)
   end
 
   def product_first_scan
@@ -334,7 +342,7 @@ class ScanPackController < ApplicationController
 
   def confirmation_code
     general_setting = GeneralSetting.first
-    render json: {confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code])}
+    render json: { confirmed: (!general_setting.strict_cc || current_user.confirmation_code == params[:code]) }
   end
 
   def type_scan
@@ -353,20 +361,32 @@ class ScanPackController < ApplicationController
 
   def get_shipment
     result = {}
-    filters = {includes: "products", id: params["order_id"].to_i} rescue nil
-    filters = filters.merge(get_cred(params["store_id"]))
-    response = ::ShippingEasy::Resources::Order.find(filters) rescue nil
-    result[:shipment_id] = response["order"]["shipments"][0]["id"] rescue nil
+    filters = begin
+                { includes: 'products', id: params['order_id'].to_i }
+              rescue StandardError
+                nil
+              end
+    filters = filters.merge(get_cred(params['store_id']))
+    response = begin
+                 ::ShippingEasy::Resources::Order.find(filters)
+               rescue StandardError
+                 nil
+               end
+    result[:shipment_id] = begin
+                             response['order']['shipments'][0]['id']
+                           rescue StandardError
+                             nil
+                           end
     render json: result
   end
 
   def update_scanned
-    order = Order.find_by_increment_id(params["increment_id"])
+    order = Order.find_by_increment_id(params['increment_id'])
     if order.present?
-      order.already_scanned =  true
+      order.already_scanned = true
       order.save
     else
-      @result["notice_messages"] = "Order not found"
+      @result['notice_messages'] = 'Order not found'
     end
     render json: @result
   end
@@ -379,14 +399,14 @@ class ScanPackController < ApplicationController
         current_tenant = Apartment::Tenant.current
         image_content = Base64.decode64(params[:image][:image].to_s)
         content_type = params[:image][:content_type]
-        file_name = "packing_cams/#{SecureRandom.random_number(20000)}_#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{current_tenant}_#{order.id}_" + params[:image][:original_filename].gsub('#', '')
+        file_name = "packing_cams/#{SecureRandom.random_number(20_000)}_#{Time.current.strftime('%d_%b_%Y_%I__%M_%p')}_#{current_tenant}_#{order.id}_" + params[:image][:original_filename].delete('#')
         GroovS3.create_image(current_tenant, file_name, image_content, content_type)
 
         url = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
         packing_cam = order.packing_cams.create(url: url, user: current_user, username: current_user&.username)
         result[:image] = packing_cam
       end
-    rescue => e
+    rescue StandardError => e
       result[:error] = e.message
       result[:status] = false
     end
@@ -396,14 +416,18 @@ class ScanPackController < ApplicationController
   private
 
   def get_cred(store_id)
-    cred = ShippingEasyCredential.find_by_store_id(store_id) rescue nil
-    return response = {api_key: cred.api_key, api_secret: cred.api_secret}
+    cred = begin
+             ShippingEasyCredential.find_by_store_id(store_id)
+           rescue StandardError
+             nil
+           end
+    response = { api_key: cred.api_key, api_secret: cred.api_secret }
   end
 
   def set_result_instance
     @result = {
-      "status" => true, "error_messages" => [], "success_messages" => [],
-      "notice_messages" => [], 'data' => {}, 'awaiting' => get_awaiting_orders_count
+      'status' => true, 'error_messages' => [], 'success_messages' => [],
+      'notice_messages' => [], 'data' => {}, 'awaiting' => get_awaiting_orders_count
     }
   end
 

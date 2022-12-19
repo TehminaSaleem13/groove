@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module PickList
     class PickListBuilder
@@ -12,8 +14,8 @@ module Groovepacker
         pick_list_item
       end
 
-      def build(order_item, product,
-                pick_list, inventory_warehouse_id)
+      def build(_order_item, _product,
+                _pick_list, _inventory_warehouse_id)
         []
       end
     end

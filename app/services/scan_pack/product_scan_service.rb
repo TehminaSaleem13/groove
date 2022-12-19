@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ScanPack
   class ProductScanService < ScanPack::Base
     include ScanPack::Utilities::ProductScan::LotNumber
@@ -9,22 +11,23 @@ module ScanPack
     def initialize(args)
       @current_user, @session, @input, @state, @id, @box_id, @typein_count, @type_scan = args
       @result = {
-        "status"=>true, "matched"=>true, "error_messages"=>[],
-        "success_messages"=>[], "notice_messages"=>[],
-        "data"=>{
-          "next_state"=>"scanpack.rfp.default", "serial"=>{"ask"=>false}}
+        'status' => true, 'matched' => true, 'error_messages' => [],
+        'success_messages' => [], 'notice_messages' => [],
+        'data' => {
+          'next_state' => 'scanpack.rfp.default', 'serial' => { 'ask' => false }
         }
-      @session.merge!({
+      }
+      @session.merge!(
         product_edit_matched_for_current_user: false,
         order_edit_matched_for_current_user: false,
         product_edit_matched_for_order: false,
         product_edit_matched_for_products: []
-        })
+      )
       @single_order = Order.where(id: @id).last
       @scanpack_settings = ScanPackSetting.first
     end
 
-    def run(clicked, serial_added, multibarcode=false)
+    def run(clicked, serial_added, multibarcode = false)
       @multibarcode = multibarcode
       case true
       when @id.blank? || @input.blank?
@@ -35,60 +38,58 @@ module ScanPack
         product_scan(clicked, serial_added)
       end
       begin
-        order = Order.find_by_increment_id(@result["data"]["order"]["increment_id"])
-        @result["data"]["order"]["store_type"] = order.store.store_type
-        @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label if @result["data"]["order"]["store_type"] == "ShippingEasy"
-        @result["data"]["order"]["large_popup"] = order.store.shipping_easy_credential.large_popup if @result["data"]["order"]["store_type"] == "ShippingEasy"
-        @result["data"]["order"]["order_cup_direct_shipping"] = order.order_cup_direct_shipping
-        @result["data"]["order"]["multiple_lines_per_sku_accepted"] = order.store.shipping_easy_credential.multiple_lines_per_sku_accepted if @result["data"]["order"]["store_type"] == "ShippingEasy"
-        @result["data"]["order"]["use_api_create_label"] = order.store.shipstation_rest_credential.use_api_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
+        order = Order.find_by_increment_id(@result['data']['order']['increment_id'])
+        @result['data']['order']['store_type'] = order.store.store_type
+        @result['data']['order']['popup_shipping_label'] = order.store.shipping_easy_credential.popup_shipping_label if @result['data']['order']['store_type'] == 'ShippingEasy'
+        @result['data']['order']['large_popup'] = order.store.shipping_easy_credential.large_popup if @result['data']['order']['store_type'] == 'ShippingEasy'
+        @result['data']['order']['order_cup_direct_shipping'] = order.order_cup_direct_shipping
+        @result['data']['order']['multiple_lines_per_sku_accepted'] = order.store.shipping_easy_credential.multiple_lines_per_sku_accepted if @result['data']['order']['store_type'] == 'ShippingEasy'
+        @result['data']['order']['use_api_create_label'] = order.store.shipstation_rest_credential.use_api_create_label if @result['data']['order']['store_type'] == 'Shipstation API 2' && order.store.shipstation_rest_credential.present?
         # @result["data"]["order"]["ss_label_data"] = order.store.shipstation_rest_credential.fetch_label_related_data(order.ss_label_data, order.increment_id, order.store_order_id) if !order.has_unscanned_items && @result["data"]["order"]["use_api_create_label"]        @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
-        @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
-        @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
-        @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
-        @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if @result["data"]["order"]["store_type"] == "Shipstation API 2" && order.store.shipstation_rest_credential.present?
-        @result["data"]["order"] = order.get_se_old_shipments(@result["data"]["order"])
+        @result['data']['order']['use_chrome_extention'] = order.store.shipstation_rest_credential.use_chrome_extention if @result['data']['order']['store_type'] == 'Shipstation API 2' && order.store.shipstation_rest_credential.present?
+        @result['data']['order']['switch_back_button'] = order.store.shipstation_rest_credential.switch_back_button if @result['data']['order']['store_type'] == 'Shipstation API 2' && order.store.shipstation_rest_credential.present?
+        @result['data']['order']['auto_click_create_label'] = order.store.shipstation_rest_credential.auto_click_create_label if @result['data']['order']['store_type'] == 'Shipstation API 2' && order.store.shipstation_rest_credential.present?
+        @result['data']['order']['return_to_order'] = order.store.shipstation_rest_credential.return_to_order if @result['data']['order']['store_type'] == 'Shipstation API 2' && order.store.shipstation_rest_credential.present?
+        @result['data']['order'] = order.get_se_old_shipments(@result['data']['order'])
 
         # @result['data']['order']['se_old_split_shipments'] = se_old_split_shipments(order)
         # @result['data']['order']['se_old_combined_shipments'] = se_old_combined_shipments(order) if @result['data']['order']['se_old_split_shipments'].blank?
         # @result['data']['order']['se_all_shipments'] = se_all_shipments(order) if @result['data']['order']['se_old_split_shipments'].blank? && @result['data']['order']['se_old_combined_shipments'].blank?
 
-        if @result["data"]["order"]["store_type"] == "Shipstation API 2"
+        if @result['data']['order']['store_type'] == 'Shipstation API 2'
           if Tenant.find_by_name(Apartment::Tenant.current).try(:ss_api_create_label)
-            @result["data"]["order"]["use_api_create_label"] = order.store.shipstation_rest_credential.use_api_create_label if order.store.shipstation_rest_credential.present?
+            @result['data']['order']['use_api_create_label'] = order.store.shipstation_rest_credential.use_api_create_label if order.store.shipstation_rest_credential.present?
           else
-            @result["data"]["order"]["use_chrome_extention"] = order.store.shipstation_rest_credential.use_chrome_extention if order.store.shipstation_rest_credential.present?
-            @result["data"]["order"]["switch_back_button"] = order.store.shipstation_rest_credential.switch_back_button if order.store.shipstation_rest_credential.present?
-            @result["data"]["order"]["auto_click_create_label"] = order.store.shipstation_rest_credential.auto_click_create_label if order.store.shipstation_rest_credential.present?
-            @result["data"]["order"]["return_to_order"] = order.store.shipstation_rest_credential.return_to_order if order.store.shipstation_rest_credential.present?
+            @result['data']['order']['use_chrome_extention'] = order.store.shipstation_rest_credential.use_chrome_extention if order.store.shipstation_rest_credential.present?
+            @result['data']['order']['switch_back_button'] = order.store.shipstation_rest_credential.switch_back_button if order.store.shipstation_rest_credential.present?
+            @result['data']['order']['auto_click_create_label'] = order.store.shipstation_rest_credential.auto_click_create_label if order.store.shipstation_rest_credential.present?
+            @result['data']['order']['return_to_order'] = order.store.shipstation_rest_credential.return_to_order if order.store.shipstation_rest_credential.present?
           end
-        elsif @result["data"]["order"]["store_type"] == "ShippingEasy"
-          @result["data"]["order"]["popup_shipping_label"] = order.store.shipping_easy_credential.popup_shipping_label
-          @result["data"]["order"] = order.get_se_old_shipments(@result["data"]["order"])
+        elsif @result['data']['order']['store_type'] == 'ShippingEasy'
+          @result['data']['order']['popup_shipping_label'] = order.store.shipping_easy_credential.popup_shipping_label
+          @result['data']['order'] = order.get_se_old_shipments(@result['data']['order'])
         end
         do_set_result_for_boxes(order)
-      rescue
+      rescue StandardError
       end
       @result
     end
 
     def product_scan(clicked, serial_added)
-
       if clicked
         @single_order.clicked_scanned_qty = @single_order.clicked_scanned_qty.to_i + 1
         @single_order.save
       end
 
-      case
-      when @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
+      if @scanpack_settings.restart_code_enabled? && @input == @scanpack_settings.restart_code
         do_if_restart_code_is_enabled_and_and_eql_to_input
-      when @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
+      elsif @scanpack_settings.service_issue_code_enabled? && @input == @scanpack_settings.service_issue_code
         do_if_service_issue_code_is_enabled_and_and_eql_to_input
-      when @scanpack_settings.partial? && @input == @scanpack_settings.partial_barcode
+      elsif @scanpack_settings.partial? && @input == @scanpack_settings.partial_barcode
         do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input('PARTIAL')
-      when @scanpack_settings.remove_enabled? && @input == @scanpack_settings.remove_barcode
+      elsif @scanpack_settings.remove_enabled? && @input == @scanpack_settings.remove_barcode
         do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input('REMOVE')
-      when @scanpack_settings.scanned && @input == @scanpack_settings.scanned_barcode
+      elsif @scanpack_settings.scanned && @input == @scanpack_settings.scanned_barcode
         do_if_scanned_code_is_anabled_and_and_eql_to_input
       else
         do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
@@ -97,17 +98,18 @@ module ScanPack
 
       update_session
 
-      return @result
+      @result
     end
 
     def update_session
       return unless @result['data']['next_state'].eql?('scanpack.rfo')
+
       @session[:most_recent_scanned_product] = nil
     end
 
     def do_if_scanned_code_is_anabled_and_and_eql_to_input
-      @single_order.order_items.update_all(scanned_status: "scanned")
-      @single_order.addactivity("Order is scanned through SCANNED barcode", @current_user.try(:username))
+      @single_order.order_items.update_all(scanned_status: 'scanned')
+      @single_order.addactivity('Order is scanned through SCANNED barcode', @current_user.try(:username))
       do_if_barcode_found
     end
 
@@ -127,22 +129,21 @@ module ScanPack
 
     def do_if_restart_code_and_service_issue_code_not_enabled(clicked, serial_added)
       escape_string = ''
-      @input = @input.gsub((@scanpack_settings.string_removal || ""), "") if @scanpack_settings.string_removal_enabled && !@input.index(@scanpack_settings.string_removal || "").nil?
+      @input = @input.gsub((@scanpack_settings.string_removal || ''), '') if @scanpack_settings.string_removal_enabled && !@input.index(@scanpack_settings.string_removal || '').nil?
       if @scanpack_settings.escape_string_enabled && !clicked
         first_escape_string = @scanpack_settings.escape_string
         second_escape_string = @scanpack_settings.second_escape_string
-        first_escape = @scanpack_settings.first_escape_string_enabled && first_escape_string.present? && !@input.index(first_escape_string || "").nil?
-        second_escape = @scanpack_settings.second_escape_string_enabled && second_escape_string.present? && !@input.index(second_escape_string || "").nil?
-        case
-        when first_escape && second_escape
-          clean_input = @input.split(first_escape_string)[0].split(second_escape_string)[0]
-        when first_escape
-          clean_input = @input.slice(0..(@input.index(first_escape_string || "")-1))
-        when second_escape
-          clean_input = @input.slice(0..(@input.index(second_escape_string || "")-1))
-        else
-          clean_input = @input
-        end
+        first_escape = @scanpack_settings.first_escape_string_enabled && first_escape_string.present? && !@input.index(first_escape_string || '').nil?
+        second_escape = @scanpack_settings.second_escape_string_enabled && second_escape_string.present? && !@input.index(second_escape_string || '').nil?
+        clean_input = if first_escape && second_escape
+                        @input.split(first_escape_string)[0].split(second_escape_string)[0]
+                      elsif first_escape
+                        @input.slice(0..(@input.index(first_escape_string || '') - 1))
+                      elsif second_escape
+                        @input.slice(0..(@input.index(second_escape_string || '') - 1))
+                      else
+                        @input
+                      end
       else
         clean_input = @input
       end
@@ -152,32 +153,31 @@ module ScanPack
       #   clean_input = @input
       # end
 
-      @result['data'].merge!({
+      @result['data'].merge!(
         'serial' => {
           'clicked' => clicked,
           'barcode' => clean_input,
           'order_id' => @id
         },
         'order_num' => @single_order.increment_id
-      })
+      )
 
-      
       if @single_order.has_unscanned_items
         case @scanpack_settings.scanning_sequence
-        when "any_sequence"
+        when 'any_sequence'
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
-        when "items_sequence"
+        when 'items_sequence'
           unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
-          if check_scanning_item(unscanned_items,clean_input)
+          if check_scanning_item(unscanned_items, clean_input)
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
             @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
-            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first["barcodes"].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
+            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first['barcodes'].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
             @result['status'] &= false
             message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : 'Please scan items in the suggested order'
             @result['error_messages'].push(message)
           end
-        when "kits_sequence"
+        when 'kits_sequence'
           do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           # list = check_scanning_kit(clean_input)
           # if list.empty?
@@ -189,7 +189,7 @@ module ScanPack
           #   @result['status'] &= false
           #   @result['error_messages'].push("Please scan items in the suggested order")
           # end
-        when "kit_packing_mode"
+        when 'kit_packing_mode'
           list = check_kit_mode(clean_input)
           if list.empty? || list.include?(clean_input) || check_for_skip_settings(clean_input)
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
@@ -197,30 +197,29 @@ module ScanPack
             @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
             @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
             @result['status'] &= false
-            @result['error_messages'].push("Please scan items in the suggested order")
+            @result['error_messages'].push('Please scan items in the suggested order')
           end
         end
       else
         @result['status'] &= false
-        @result['error_messages'].push("There are no unscanned items in this order")
+        @result['error_messages'].push('There are no unscanned items in this order')
       end
     end
 
-
     def check_scanning_item(unscanned_items, clean_input)
       list = []
-      list << unscanned_items.first["barcodes"].map(&:barcode)
-      if !unscanned_items.first["child_items"].nil?
+      list << unscanned_items.first['barcodes'].map(&:barcode)
+      unless unscanned_items.first['child_items'].nil?
         # data = []
         # unscanned_items.first["child_items"].each do |child_item|
         #   data << child_item["barcodes"].map(&:barcode)
         # end
         # list << data
-        list << unscanned_items.first["child_items"].first["barcodes"].map(&:barcode)
+        list << unscanned_items.first['child_items'].first['barcodes'].map(&:barcode)
       end
-      value = list.flatten.include?("#{clean_input}")
+      value = list.flatten.include?(clean_input.to_s)
       value = check_for_skippable_item(unscanned_items.first) if !value && check_for_skip_settings(clean_input)
-      return value
+      value
     end
 
     def check_for_skip_settings(clean_input)
@@ -254,23 +253,23 @@ module ScanPack
       total_items = @single_order.get_unscanned_items(barcode: clean_input)
       list = []
       total_items.each do |item|
-        if item["partially_scanned"] == true && item["child_items"].present?
-          item["child_items"].each do |i|
-            list << i["barcodes"].map(&:barcode) if ((item["qty_remaining"] * i["product_qty_in_kit"] - i["product_qty_in_kit"]) < i["qty_remaining"] )
-          end
+        next unless item['partially_scanned'] == true && item['child_items'].present?
+
+        item['child_items'].each do |i|
+          list << i['barcodes'].map(&:barcode) if (item['qty_remaining'] * i['product_qty_in_kit'] - i['product_qty_in_kit']) < i['qty_remaining']
         end
       end
-      return list.flatten
+      list.flatten
     end
 
     def do_if_service_issue_code_is_enabled_and_and_eql_to_input
-      if @single_order.status !='scanned'
+      if @single_order.status != 'scanned'
         @single_order.reset_scanned_status(@current_user)
         @single_order.status = 'serviceissue'
         @result['data']['next_state'] = 'scanpack.rfo'
         @result['data']['ask_note'] = true
       else
-        set_error_messages('Order with id: '+@id+' is already in scanned state')
+        set_error_messages('Order with id: ' + @id + ' is already in scanned state')
       end
     end
 
@@ -279,15 +278,13 @@ module ScanPack
         @single_order.reset_scanned_status(@current_user)
         @result['data']['next_state'] = 'scanpack.rfo'
       else
-        set_error_messages('Order with id: '+@id.to_s+' is already in scanned state')
+        set_error_messages('Order with id: ' + @id.to_s + ' is already in scanned state')
       end
     end
 
     def do_if_single_order_present
       @single_order.packing_user_id = @current_user.id
-      unless @single_order.save
-        set_error_messages("Could not save order with id: #{@single_order.id}")
-      end
+      set_error_messages("Could not save order with id: #{@single_order.id}") unless @single_order.save
       @result['data']['order'] = order_details_and_next_item
       @result['data']['scan_pack_settings'] = @scanpack_settings
     end
@@ -299,31 +296,39 @@ module ScanPack
       @single_order.save
 
       unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
-      #search if barcode exists
+      # search if barcode exists
       if check_for_skip_settings(clean_input)
         barcode_found = check_for_skippable_item(unscanned_items.first)
         barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if barcode_found
       else
         barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
-        barcode_found = do_if_barcode_not_found(clean_input, serial_added, clicked) unless barcode_found
+        barcode_found ||= do_if_barcode_not_found(clean_input, serial_added, clicked)
       end
 
       if barcode_found
         last_activity = @single_order.order_activities.last
         action_keyword = last_activity.try(:action).try(:split, ' ')
-        sku_for_activity = @order_item.product.primary_sku rescue nil
-        order_item_sku = sku_for_activity.split(' ')[0] rescue nil
+        sku_for_activity = begin
+                             @order_item.product.primary_sku
+                           rescue StandardError
+                             nil
+                           end
+        order_item_sku = begin
+                           sku_for_activity.split(' ')[0]
+                         rescue StandardError
+                           nil
+                         end
         type_in_count = @typein_count
         if action_keyword.present? && order_item_sku.present? && action_keyword.include?(order_item_sku) && @typein_count > 1
-          if action_keyword.include?("click")
+          if action_keyword.include?('click')
             type_in_count = @typein_count.to_i + 1
-            last_activity.action  += " for a Type-In count"
+            last_activity.action += ' for a Type-In count'
             last_activity.save
-          elsif action_keyword.include?("barcode:")
+          elsif action_keyword.include?('barcode:')
             type_in_count = @typein_count.to_i + 1
           end
         end
-        add_log(sku_for_activity,type_in_count)
+        add_log(sku_for_activity, type_in_count)
         do_if_barcode_found
       else
         if Apartment::Tenant.current == 'gp50'
@@ -333,7 +338,7 @@ module ScanPack
         @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
         @result['status'] &= false
 
-        msg = @scanpack_settings.scanning_sequence == "items_sequence" ? "Barcode '#{clean_input}'' does not match the currently suggested item" : "Barcode '"+clean_input+"' doesn't match any item remaining on this order"
+        msg = @scanpack_settings.scanning_sequence == 'items_sequence' ? "Barcode '#{clean_input}'' does not match the currently suggested item" : "Barcode '" + clean_input + "' doesn't match any item remaining on this order"
 
         message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : msg
         @result['error_messages'].push(message)
@@ -353,13 +358,13 @@ module ScanPack
       barcode_found
     end
 
-    def do_set_result_for_boxes order
+    def do_set_result_for_boxes(order)
       result = order.get_boxes_data
-      @result["data"]["order"]["box"] = result[:box]
-      @result["data"]["order"]["order_item_boxes"] = result[:order_item_boxes]
+      @result['data']['order']['box'] = result[:box]
+      @result['data']['order']['order_item_boxes'] = result[:order_item_boxes]
     end
 
-    def add_log(sku_for_activity,type_in_count)
+    def add_log(sku_for_activity, type_in_count)
       general_setting = GeneralSetting.last
       if @multibarcode
         if @box_id.nil?
@@ -385,6 +390,5 @@ module ScanPack
         end
       end
     end
-
   end # class end
-end #module end
+end # module end

@@ -1,12 +1,12 @@
+# frozen_string_literal: true
+
 module FTP
   class FTPBase
     attr_accessor :directory, :host, :connection_method, :username, :password
     def initialize(store, type)
       self.store = store
       credential = store.ftp_credential
-      unless credential.nil?
-        set_connection_values(credential, type)
-      end
+      set_connection_values(credential, type) unless credential.nil?
     end
 
     def set_connection_values(credential, type)
@@ -17,12 +17,14 @@ module FTP
       split_location = credential.send(val + 'host').split('/')
       self.host = split_location.first
       split_location.shift
-      self.directory = split_location.join("/") rescue ""
+      self.directory = begin
+                         split_location.join('/')
+                       rescue StandardError
+                         ''
+                       end
     end
 
-    def connect
-      
-    end
+    def connect; end
 
     def build_result
       {
@@ -34,6 +36,7 @@ module FTP
     end
 
     protected
-      attr_accessor :store
+
+    attr_accessor :store
   end
 end

@@ -1,18 +1,20 @@
-require File.expand_path('../boot', __FILE__)
+# frozen_string_literal: true
+
+require File.expand_path('boot', __dir__)
 
 require 'rails/all'
 require 'apartment/elevators/subdomain'
 
 if defined?(Bundler)
   # If you precompile assets before deploying to production, use this line
-  Bundler.require(*Rails.groups(:assets => %w(development test)))
+  Bundler.require(*Rails.groups(assets: %w[development test]))
   # If you want your assets lazily compiled in production, use this line
   # Bundler.require(:default, :assets, Rails.env)
 end
 
 module Groovepacks
   class Application < Rails::Application
-    config.assets.precompile += %w( cost_calculator.js )
+    config.assets.precompile += %w[cost_calculator.js]
     # Settings in config/environments/* take precedence over those specified here.
     # Application configuration should go into files in config/initializers
     # -- all .rb files in that directory are automatically loaded.
@@ -36,7 +38,7 @@ module Groovepacks
     # config.i18n.default_locale = :de
 
     # Configure the default encoding used in templates for Ruby 1.9.
-    config.encoding = "utf-8"
+    config.encoding = 'utf-8'
 
     # Configure sensitive parameters which will be filtered from the log file.
     config.filter_parameters += [:password]
@@ -53,14 +55,14 @@ module Groovepacks
     # This will create an empty whitelist of attributes available for mass-assignment for all models
     # in your app. As such, your models will need to explicitly whitelist or blacklist accessible
     # parameters by using an attr_accessible or attr_protected declaration.
-    #config.active_record.whitelist_attributes = true
-    #config.skylight.environments += ["staging"]
+    # config.active_record.whitelist_attributes = true
+    # config.skylight.environments += ["staging"]
     # Enable the asset pipeline
     config.assets.enabled = true
 
     # Version of your assets, change this if you want to expire all your assets
     config.assets.version = '1.0'
-    #config.assets.precompile += %w( font-awesome-ie7.min.css )
+    # config.assets.precompile += %w( font-awesome-ie7.min.css )
 
     config.public_file_server.enabled = true
 
@@ -68,26 +70,26 @@ module Groovepacks
     config.eager_load_paths << Rails.root.join('lib')
     config.autoload_paths << Rails.root.join('lib')
     config.autoload_paths += Dir["#{config.root}/lib/**/"]
-    config.middleware.use   Apartment::Elevators::Subdomain
-    config.assets.paths << Rails.root.join("app", "assets", "fonts")
-    config.assets.paths << Rails.root.join("vendor", "assets", "components")
-    config.assets.precompile += %w(*.png *.jpg *.jpeg *.gif *.woff *.ttf *.svg)
+    config.middleware.use Apartment::Elevators::Subdomain
+    config.assets.paths << Rails.root.join('app', 'assets', 'fonts')
+    config.assets.paths << Rails.root.join('vendor', 'assets', 'components')
+    config.assets.precompile += %w[*.png *.jpg *.jpeg *.gif *.woff *.ttf *.svg]
 
-    config.autoload_paths += Dir[ Rails.root.join('app', 'models', "concerns", '**/') ]
-    config.autoload_paths += Dir[ Rails.root.join('app', 'controllers', "concerns", '**/') ]
+    config.autoload_paths += Dir[Rails.root.join('app', 'models', 'concerns', '**/')]
+    config.autoload_paths += Dir[Rails.root.join('app', 'controllers', 'concerns', '**/')]
 
     # To enable Cross-Origin requests
     config.middleware.insert_before 0, Rack::Cors do
       allow do
         origins '*'
-        resource '*', :headers => :any, :methods => [:get, :post, :delete, :put, :patch, :options]
+        resource '*', headers: :any, methods: %i[get post delete put patch options]
       end
     end
-    config.time_zones = YAML.load(File.open(Rails.root.join('config', 'time_zones.yml')))
-    config.time_zone_names = YAML.load(File.open(Rails.root.join('config', 'time_zone_names.yml')))
-    config.tz_abbreviations = YAML.load(File.open(Rails.root.join('config', 'tz_abbreviations.yml')))
+    config.time_zones = YAML.safe_load(File.open(Rails.root.join('config', 'time_zones.yml')))
+    config.time_zone_names = YAML.safe_load(File.open(Rails.root.join('config', 'time_zone_names.yml')))
+    config.tz_abbreviations = YAML.safe_load(File.open(Rails.root.join('config', 'tz_abbreviations.yml')))
 
     config.active_job.queue_adapter = :delayed_job
   end
 end
-#require Rails.root.join('config','initializers','groove_constants.rb')
+# require Rails.root.join('config','initializers','groove_constants.rb')

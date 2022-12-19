@@ -1,37 +1,45 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Dashboard
     module Stats
       class Exception
         def initialize(user_id)
           @user_id = user_id
-          @exceptions_considered = %w(qty_related incorrect_item missing_item)
+          @exceptions_considered = %w[qty_related incorrect_item missing_item]
           @results = []
           @exceptions = []
         end
 
         def most_recent
-          if @user_id.nil?
-            @exceptions = OrderException.where(
-              'reason IN (?)', @exceptions_considered).order(created_at: :desc)
-          else
-            @exceptions = OrderException.where(
-              user_id: @user_id).where(
-                'reason IN (?)', @exceptions_considered).order(
-                  created_at: :desc)
-          end
+          @exceptions = if @user_id.nil?
+                          OrderException.where(
+                            'reason IN (?)', @exceptions_considered
+                          ).order(created_at: :desc)
+                        else
+                          OrderException.where(
+                            user_id: @user_id
+                          ).where(
+                            'reason IN (?)', @exceptions_considered
+                          ).order(
+                            created_at: :desc
+                          )
+                        end
           build_exception_data
 
           @results.reverse
         end
 
         def by_frequency
-          if @user_id.nil?
-            @exceptions = OrderException.where(
-              'reason IN (?)', @exceptions_considered)
-          else
-            @exceptions = OrderException.where(user_id: @user_id).where(
-              'reason IN (?)', @exceptions_considered)
-          end
+          @exceptions = if @user_id.nil?
+                          OrderException.where(
+                            'reason IN (?)', @exceptions_considered
+                          )
+                        else
+                          OrderException.where(user_id: @user_id).where(
+                            'reason IN (?)', @exceptions_considered
+                          )
+                        end
           build_exception_data
 
           @results.sort_by { |k| k[:frequency] }.reverse!

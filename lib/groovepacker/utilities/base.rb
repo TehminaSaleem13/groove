@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Utilities
     class Base
@@ -5,7 +7,7 @@ module Groovepacker
       attr_accessor :import_params
       include ::AhoyEvent
 
-      def initialize(params={})
+      def initialize(params = {})
         self.import_params = params
       end
 
@@ -36,45 +38,46 @@ module Groovepacker
         when 'Teapplix'
           handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(store, import_item)
         end
-        return handler
+        handler
       end
 
       def common_data_attributes
-        return ["fix_width", "fixed_width", "sep", "delimiter", "rows", "map", "map", "import_action",
-                "contains_unique_order_items", "generate_barcode_from_sku", "use_sku_as_product_name",
-                "order_placed_at", "order_date_time_format", "day_month_sequence", "encoding_format"
-              ]
+        %w[fix_width fixed_width sep delimiter rows map map import_action
+           contains_unique_order_items generate_barcode_from_sku use_sku_as_product_name
+           order_placed_at order_date_time_format day_month_sequence encoding_format]
       end
 
-      def build_data(map,store)
+      def build_data(map, store)
         map = fix_corrupted_map(map)
-        data = {:flag => "ftp_download", :type => "order", :store_id => store.id}
+        data = { flag: 'ftp_download', type: 'order', store_id: store.id }
         common_data_attributes.each { |attr| data[attr.to_sym] = map[:map][attr.to_sym] }
-        return data
+        data
       end
 
       def fix_corrupted_map(map)
         return map unless map.map.class == String
-        map.update_attributes(map: YAML.load(map.map.gsub("!ruby/object:ActionController::Parameters\n  parameters: ", '').gsub("  permitted: false\n", '')))
+
+        map.update_attributes(map: YAML.safe_load(map.map.gsub("!ruby/object:ActionController::Parameters\n  parameters: ", '').gsub("  permitted: false\n", '')))
         map.reload
-      rescue
+      rescue StandardError
         map
       end
 
       def get_order_import_summary
         return nil unless OrderImportSummary.where(status: 'in_progress').empty?
         return nil if order_import_summaries.empty?
+
         @order_import_summary = order_import_summaries.first
         @order_import_summary.update_attributes(status: 'in_progress')
         @order_import_summary.reload
       end
 
       def order_import_summaries
-        @order_import_summaries ||= OrderImportSummary.where(status: 'not_started').order("updated_at DESC")
+        @order_import_summaries ||= OrderImportSummary.where(status: 'not_started').order('updated_at DESC')
       end
 
       def delete_existing_order_import_summaries
-        OrderImportSummary.where("status in (?)", ['completed', 'cancelled']).delete_all
+        OrderImportSummary.where('status in (?)', %w[completed cancelled]).delete_all
       end
 
       def new_import_item(store_id, message = nil, status = nil)
@@ -91,9 +94,13 @@ module Groovepacker
         ois = OrderImportSummary.find_by_id(order_import_summary_id)
         if ois
           track_changes(title: 'Import Started : Order Import Summary ' + ois.id.to_s, tenant: tenant,
-            username: (User.find(ois.user_id).username rescue nil) || 'GP App', object_id: ois.id)
+                        username: (begin
+                         User.find(ois.user_id).username
+                                   rescue StandardError
+                                     nil
+                       end) || 'GP App', object_id: ois.id)
           ois.update_attributes(status: 'in_progress')
-          ois.import_items.each {|import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
+          ois.import_items.each { |import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
           ois.reload
           ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
         end
@@ -113,7 +120,6 @@ module Groovepacker
       #     GC.start
       #   end
       # end
-
     end
   end
 end

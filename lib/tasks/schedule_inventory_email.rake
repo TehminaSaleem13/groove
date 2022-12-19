@@ -9,11 +9,9 @@ namespace :doo do
       tenants = Tenant.order(:name)
       import_orders_obj = ImportOrders.new
       tenants.each do |tenant|
-        begin
-          import_orders_obj.reschedule_job('low_inventory_email', tenant.name)
-        rescue StandardError
-          nil
-        end
+        import_orders_obj.reschedule_job('low_inventory_email', tenant.name)
+      rescue StandardError
+        nil
       end
     end
     exit(1)

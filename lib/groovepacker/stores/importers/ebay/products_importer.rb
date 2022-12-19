@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -6,40 +8,43 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            #do ebay connect.
-            handler = self.get_handler
+            # do ebay connect.
+            handler = get_handler
             credential = handler[:credential]
             ebay = handler[:store_handle]
-            result = self.build_result
+            result = build_result
 
             seller_list = ebay.GetSellerList(
-              :startTimeFrom => (Date.today - 3.months).to_datetime,
-              :startTimeTo => (Date.today + 1.day).to_datetime)
+              startTimeFrom: (Date.today - 3.months).to_datetime,
+              startTimeTo: (Date.today + 1.day).to_datetime
+            )
 
             result[:total_imported] = seller_list.itemArray.length
-            total_pages = (result[:total_imported] / 10) +1
+            total_pages = (result[:total_imported] / 10) + 1
             page_num = 1
 
             begin
               seller_list = ebay.GetSellerList(
-                :startTimeFrom => (Date.today - 3.months).to_datetime,
-                :startTimeTo => (Date.today + 1.day).to_datetime,
-                :detailLevel => 'ReturnAll',
-                :pagination => {:entriesPerPage => '10',
-                                :pageNumber => page_num})
+                startTimeFrom: (Date.today - 3.months).to_datetime,
+                startTimeTo: (Date.today + 1.day).to_datetime,
+                detailLevel: 'ReturnAll',
+                pagination: { entriesPerPage: '10',
+                              pageNumber: page_num }
+              )
 
-              page_num = page_num + 1
+              page_num += 1
 
               seller_list.itemArray.each do |item|
-                #add product to the database
-                if Product.where(:store_product_id => item.itemID).length == 0
-                  #hash includes itemID, sku, ebay, credential
-                  result_product_id = self.import_single({
-                                                           itemID: item.itemID,
-                                                           sku: nil,
-                                                           ebay: ebay,
-                                                           credential: credential},
-                                                         true)
+                # add product to the database
+                if Product.where(store_product_id: item.itemID).empty?
+                  # hash includes itemID, sku, ebay, credential
+                  result_product_id = import_single({
+                                                      itemID: item.itemID,
+                                                      sku: nil,
+                                                      ebay: ebay,
+                                                      credential: credential
+                                                    },
+                                                    true)
 
                   if result_product_id > 0
                     result[:success_imported] = result[:success_imported] + 1
@@ -54,7 +59,7 @@ module Groovepacker
             result
           end
 
-          #hash includes itemID, sku, ebay, credential
+          # hash includes itemID, sku, ebay, credential
           def import_single(input_hash, sku_check_override = false)
             sku = input_hash[:sku]
             ebay = input_hash[:ebay]
@@ -62,9 +67,9 @@ module Groovepacker
             itemID = input_hash[:itemID]
 
             product_id = 0
-            if ProductSku.where(:sku => input_hash[:sku]).length == 0 ||
-              sku_check_override
-              @item = ebay.getItem(:ItemID => itemID).item
+            if ProductSku.where(sku: input_hash[:sku]).empty? ||
+               sku_check_override
+              @item = ebay.getItem(ItemID: itemID).item
               @productdb = Product.new
               @productdb.name = @item.title
               @productdb.store_product_id = @item.itemID
@@ -73,18 +78,22 @@ module Groovepacker
               @productdb.store = credential.store
 
               unless @item.shippingDetails.nil? ||
-                @item.shippingDetails.calculatedShippingRate.nil?
+                     @item.shippingDetails.calculatedShippingRate.nil?
 
-                weight_lbs =
-                  @item.shippingDetails.calculatedShippingRate.weightMajor.to_i unless @item.shippingDetails.calculatedShippingRate.weightMajor.nil?
+                unless @item.shippingDetails.calculatedShippingRate.weightMajor.nil?
+                  weight_lbs =
+                    @item.shippingDetails.calculatedShippingRate.weightMajor.to_i
+                end
 
-                weight_oz =
-                  @item.shippingDetails.calculatedShippingRate.weightMinor.to_i unless @item.shippingDetails.calculatedShippingRate.weightMinor.nil?
+                unless @item.shippingDetails.calculatedShippingRate.weightMinor.nil?
+                  weight_oz =
+                    @item.shippingDetails.calculatedShippingRate.weightMinor.to_i
+                end
 
                 @productdb.weight = weight_lbs * 16 + weight_oz
               end
 
-              #add productdb sku
+              # add productdb sku
               # @productdbsku = ProductSku.new
               # if @item.sKU.nil?
               #   @productdbsku.sku = "not_available"
@@ -93,58 +102,58 @@ module Groovepacker
               # end
               # #@item.productListingType.uPC
               # @productdbsku.purpose = 'primary'
-              
+
               # #publish the sku to the product record
               # @productdb.product_skus << @productdbsku
 
               if @item.sKU.present?
                 @productdbsku = ProductSku.new
                 @productdbsku.sku = @item.sKU
-                #@item.productListingType.uPC
+                # @item.productListingType.uPC
                 @productdbsku.purpose = 'primary'
 
-                #publish the sku to the product record
+                # publish the sku to the product record
                 @productdb.product_skus << @productdbsku
               end
 
               if credential.import_images
-                if !@item.pictureDetails.nil?
+                unless @item.pictureDetails.nil?
                   if !@item.pictureDetails.pictureURL.nil? &&
-                    @item.pictureDetails.pictureURL.length > 0
+                     !@item.pictureDetails.pictureURL.empty?
                     @productimage = ProductImage.new
-                    @productimage.image = "http://i.ebayimg.com" +
-                      @item.pictureDetails.pictureURL.first.request_uri()
+                    @productimage.image = 'http://i.ebayimg.com' +
+                                          @item.pictureDetails.pictureURL.first.request_uri
                     @productdb.product_images << @productimage
                   end
                 end
               end
 
               if credential.import_products
-                if !@item.primaryCategory.nil?
+                unless @item.primaryCategory.nil?
                   @product_cat = ProductCat.new
                   @product_cat.category = @item.primaryCategory.categoryName
                   @productdb.product_cats << @product_cat
                 end
 
-                if !@item.secondaryCategory.nil?
+                unless @item.secondaryCategory.nil?
                   @product_cat = ProductCat.new
                   @product_cat.category = @item.secondaryCategory.categoryName
                   @productdb.product_cats << @product_cat
                 end
               end
 
-              #add inventory warehouse
+              # add inventory warehouse
               inv_wh = ProductInventoryWarehouses.new
               inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id
               @productdb.product_inventory_warehousess << inv_wh
 
               @productdb.save
-              @productdb.add_product_activity("Product Import","#{@productdb.store.try(:name)}")
+              @productdb.add_product_activity('Product Import', @productdb.store.try(:name).to_s)
               make_product_intangible(@productdb)
               @productdb.set_product_status
               product_id = @productdb.id
             else
-              product_id = ProductSku.where(:sku => input_hash[:sku]).first.product_id
+              product_id = ProductSku.where(sku: input_hash[:sku]).first.product_id
             end
 
             product_id

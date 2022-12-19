@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class AmazonImport < ProductsService::Base
     attr_accessor :product_hash
@@ -12,9 +14,10 @@ module ProductsService
 
     def call
       return false if amazon_credentials_blank?
+
       do_get_matching_products
       do_find_update_product
-    rescue => e
+    rescue StandardError => e
       puts e.inspect
     end
 
@@ -33,7 +36,7 @@ module ProductsService
         MWS_auth_token: @credential.mws_auth_token
       )
 
-      #send request to amazon mws get matching product API
+      # send request to amazon mws get matching product API
       products_xml = mws.products.get_matching_products_for_id(
         marketplace_id: @credential.marketplace_id,
         id_type: 'SellerSKU', id_list: [@product_sku]
@@ -89,6 +92,5 @@ module ProductsService
         product.product_cats << category
       end
     end
-
   end
 end

@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module SettingsService
   class OrderSerialExport < SettingsService::Base
     attr_reader :current_user, :params, :result, :row_map, :serials
@@ -22,8 +24,7 @@ module SettingsService
         ordered_qty: '', scanned_date: '', warehouse_name: ''
       }
       @serials = OrderSerial.where(updated_at:
-        Time.parse(params[:start])..Time.parse(params[:end])
-      )
+        Time.parse(params[:start])..Time.parse(params[:end]))
     end
 
     def call
@@ -57,8 +58,8 @@ module SettingsService
         end
       end
 
-      public_url = GroovS3.create_public_csv(Apartment::Tenant.current,"groove-order-serials","#{Time.current}", data).url.gsub('http:', 'https:')
-      @result[:filename] = { url: public_url, filename: @result['filename']}
+      public_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'groove-order-serials', Time.current.to_s, data).url.gsub('http:', 'https:')
+      @result[:filename] = { url: public_url, filename: @result['filename'] }
     end
 
     def update_scan_order_and_order_number(serial, order_number, scan_order)
@@ -81,11 +82,11 @@ module SettingsService
 
       # item sale price
       order_items = order.order_items.where(product_id: product.id)
-      if order_items.empty?
-        single_row[:item_sale_price] = ''
-      else
-        single_row[:item_sale_price] = order_items.first.price
-      end
+      single_row[:item_sale_price] = if order_items.empty?
+                                       ''
+                                     else
+                                       order_items.first.price
+                                     end
     end
 
     def push_order_data(single_row, order)
@@ -99,9 +100,9 @@ module SettingsService
       single_row[:state],
       single_row[:zip],
       single_row[:ordered_qty] = order.as_json(
-        only: [
-          :scan_order, :increment_id, :order_placed_time, :scanned_on,
-          :address_1, :address_2, :city, :state, :postcode
+        only: %i[
+          scan_order increment_id order_placed_time scanned_on
+          address_1 address_2 city state postcode
         ],
         methods: :get_items_count
       ).values
@@ -110,9 +111,10 @@ module SettingsService
     def push_user_data(single_row, order, product)
       packing_user = order.packing_user
       return unless packing_user
+
       single_row[:packing_user] = "#{packing_user.name} (#{packing_user.username})"
       single_row[:warehouse_name] = product.primary_warehouse
-                                    .try(:inventory_warehouse).try(:name)
+                                           .try(:inventory_warehouse).try(:name)
     end
 
     def push_product_data(single_row, product, order, serial)

@@ -1,5 +1,6 @@
-class DeleteFiles
+# frozen_string_literal: true
 
+class DeleteFiles
   def self.delete_files
     @files = []
     Dir.chdir('public')
@@ -18,24 +19,21 @@ class DeleteFiles
       File.delete(file)
     end
     Dir.chdir(Rails.root)
-    DeleteFiles.delay(:run_at => 20.seconds.from_now, priority: 95).delete_pdfs
+    DeleteFiles.delay(run_at: 20.seconds.from_now, priority: 95).delete_pdfs
   end
 
   def self.get_all_files(dir)
     files = []
     Dir.entries(dir).each do |f|
       p f
-      if f !='.' && f != '..' && f != '.gitignore'
-        full_filename = File.join(Dir.pwd, f)
-        stat = File::Stat.new(full_filename)
-        seconds_diff = (Time.current - stat.ctime).to_i.abs
-        minutes = seconds_diff / 60
-        if minutes > 1
-          files << full_filename
-        end
-      end
+      next unless f != '.' && f != '..' && f != '.gitignore'
+
+      full_filename = File.join(Dir.pwd, f)
+      stat = File::Stat.new(full_filename)
+      seconds_diff = (Time.current - stat.ctime).to_i.abs
+      minutes = seconds_diff / 60
+      files << full_filename if minutes > 1
     end
     files
   end
-
 end

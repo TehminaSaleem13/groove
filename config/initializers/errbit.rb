@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Airbrake.configure do |config|
 #   config.api_key = '2a7a92294f148823be87621957298e72'
 #   config.host    = 'errbit.barcodepacker.com'

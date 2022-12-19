@@ -1,1 +1,3 @@
-Spring.watch "spec"
+# frozen_string_literal: true
+
+Spring.watch 'spec'

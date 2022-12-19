@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Stores
     module Importers
@@ -6,24 +8,24 @@ module Groovepacker
           include ProductsHelper
 
           def import
-            handler = self.get_handler
+            handler = get_handler
             credential = handler[:credential]
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
             begin
-              response = client.call(:catalog_product_list, message: {session: session})
-              result = self.build_result
+              response = client.call(:catalog_product_list, message: { session: session })
+              result = build_result
 
-              #fetching all products
+              # fetching all products
               if response.success?
-                #listing found products
+                # listing found products
                 @products = response.body[:catalog_product_list_response][:store_view][:item]
                 @products.each do |product|
                   result[:total_imported] = result[:total_imported] + 1
 
-                  if Product.where(:store_product_id => product[:product_id]).length == 0
+                  if Product.where(store_product_id: product[:product_id]).empty?
                     result_product_id =
-                      self.import_single({sku: product[:sku], product_id: product[:product_id]})
+                      import_single(sku: product[:sku], product_id: product[:product_id])
                     result[:success_imported] = result[:success_imported] + 1 unless result_product_id == 0
                   else
                     result[:previous_imported] = result[:previous_imported] + 1
@@ -40,9 +42,9 @@ module Groovepacker
             result
           end
 
-          #sku
+          # sku
           def import_single(hash)
-            handler = self.get_handler
+            handler = get_handler
             credential = handler[:credential]
             client = handler[:store_handle][:handle]
             session = handler[:store_handle][:session]
@@ -52,13 +54,13 @@ module Groovepacker
 
             begin
               response = client.call(:catalog_product_info,
-                                     message: {session: session, id: product_id})
+                                     message: { session: session, id: product_id })
 
               if response.success?
                 @product = response.body[:catalog_product_info_response][:info]
-                #add product to the database
+                # add product to the database
                 @productdb = Product.new
-                @productdb.name = @product[:name] || "Un-named Magento Product"
+                @productdb.name = @product[:name] || 'Un-named Magento Product'
                 @productdb.store_product_id = @product[:product_id]
                 @productdb.product_type = @product[:type]
                 @productdb.store = credential.store
@@ -66,27 +68,27 @@ module Groovepacker
 
                 # Magento product api does not provide a barcode, so all
                 # magento products should be marked with a status new as t
-                #they cannot be scanned.
+                # they cannot be scanned.
                 @productdb.status = 'new'
 
                 @productdbsku = ProductSku.new
-                #add productdb sku
-                if @product[:sku] != {:"@xsi:type" => "xsd:string"}
+                # add productdb sku
+                if @product[:sku] != { "@xsi:type": 'xsd:string' }
                   @productdbsku.sku = @product[:sku]
                   @productdbsku.purpose = 'primary'
 
-                  #publish the sku to the product record
+                  # publish the sku to the product record
                   @productdb.product_skus << @productdbsku
                 end
 
-                #get images and categories
+                # get images and categories
                 if !@product[:sku].nil? && credential.import_images
-                  getimages = client.call(:catalog_product_attribute_media_list, message: {session: session,
-                                                                                           productId: product_id})
+                  getimages = client.call(:catalog_product_attribute_media_list, message: { session: session,
+                                                                                            productId: product_id })
                   if getimages.success?
                     @images = getimages.body[:catalog_product_attribute_media_list_response][:result][:item]
-                    if !@images.nil?
-                      if @images.kind_of?(Array)
+                    unless @images.nil?
+                      if @images.is_a?(Array)
                         @images.each do |image|
                           @productimage = ProductImage.new
                           @productimage.image = image[:url]
@@ -104,27 +106,23 @@ module Groovepacker
                 end
 
                 if credential.import_images &&
-                  !@product[:categories][:item].nil? &&
-                  @product[:categories][:item].kind_of?(Array)
+                   !@product[:categories][:item].nil? &&
+                   @product[:categories][:item].is_a?(Array)
                   @product[:categories][:item].each do |category_id|
-                    begin
-                      get_categories = client.call(:catalog_product_info, message: {session: session,
-                                                                                    categoryId: category_id})
-                      if get_categories.success?
-                        @category = get_categories.body[:catalog_product_info_response][:info]
-                        @product_cat = ProductCat.new
-                        @product_cat.category = @category[:name]
+                    get_categories = client.call(:catalog_product_info, message: { session: session,
+                                                                                   categoryId: category_id })
+                    if get_categories.success?
+                      @category = get_categories.body[:catalog_product_info_response][:info]
+                      @product_cat = ProductCat.new
+                      @product_cat.category = @category[:name]
 
-                        if !@product_cat.category.nil?
-                          @productdb.product_cats << @product_cat
-                        end
-                      end
-                    rescue
+                      @productdb.product_cats << @product_cat unless @product_cat.category.nil?
                     end
+                  rescue StandardError
                   end
                 end
 
-                #add inventory warehouse
+                # add inventory warehouse
                 unless credential.store.nil? && credential.store.inventory_warehouse_id.nil?
                   inv_wh = ProductInventoryWarehouses.new
                   inv_wh.inventory_warehouse_id = credential.store.inventory_warehouse_id

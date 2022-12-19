@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module ShopifyRuby
     class Base

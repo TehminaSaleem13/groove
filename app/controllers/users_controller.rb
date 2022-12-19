@@ -34,7 +34,7 @@ class UsersController < ApplicationController
     elsif params[:is_annual] == 'true'
       StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount]).deliver
       result['annual_request'] = true
-    elsif @subscription['interval'] == 'year' && params[:is_annual] == 'false' &&  params[:users].to_i != access_restriction.num_users
+    elsif @subscription['interval'] == 'year' && params[:is_annual] == 'false' && params[:users].to_i != access_restriction.num_users
       result['status'] = false
       result['error_messages'] = "Can't Change Yearly Plan to Monthly"
     end
@@ -131,7 +131,7 @@ class UsersController < ApplicationController
         HTTParty.post("#{ENV['GROOV_ANALYTIC_URL']}/users/update_username",
                       query: { username: user.username, packing_user_id: user.id, active: user.active },
                       headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
-      rescue
+      rescue StandardError
         nil
       end
     end

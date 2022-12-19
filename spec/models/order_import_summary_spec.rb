@@ -1,8 +1,10 @@
+# frozen_string_literal: true
+
 require 'rails_helper'
 
 RSpec.describe OrdersImportSummary, type: :model do
   it 'order import summary should belongs to store' do
-    order_import_summary = OrdersImportSummary.reflect_on_association(:store)
+    order_import_summary = described_class.reflect_on_association(:store)
     expect(order_import_summary.macro).to eq(:belongs_to)
   end
 

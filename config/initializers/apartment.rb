@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 # Require whichever elevator you're using below here...
 #
 # require 'apartment/elevators/generic'
@@ -11,7 +13,6 @@ Apartment::Elevators::Subdomain.prepend RescuedApartmentMiddleware
 # Apartment Configuration
 #
 Apartment.configure do |config|
-
   # These models will not be multi-tenanted,
   # but remain in the global (public) namespace
   #
@@ -20,13 +21,13 @@ Apartment.configure do |config|
   #
   # config.excluded_models = %w{Tenant}
   #
-  config.excluded_models = %w{}
+  config.excluded_models = %w[]
 
   # use postgres schemas?
   config.use_schemas = true
-  Apartment::Elevators::Subdomain.excluded_subdomains = ['34','35', '10','100', 'admin']
+  Apartment::Elevators::Subdomain.excluded_subdomains = %w[34 35 10 100 admin]
   # use raw SQL dumps for creating postgres schemas? (only appies with use_schemas set to true)
-  #config.use_sql = true
+  # config.use_sql = true
 
   # configure persistent schemas (E.g. hstore )
   # config.persistent_schemas = %w{ hstore }
@@ -37,9 +38,9 @@ Apartment.configure do |config|
 
   # supply list of database names for migrations to run on
   # config.tenant_names = lambda{ ToDo_Tenant_Or_User_Model.pluck :database }
-  config.tenant_names = lambda{ Tenant.pluck :name }
+  config.tenant_names = -> { Tenant.pluck :name }
   # config.tenant_names = ['test', 'test1']
-  config.excluded_models = ['Delayed::Job','Tenant','Subscription','Coupon']
+  config.excluded_models = ['Delayed::Job', 'Tenant', 'Subscription', 'Coupon']
 end
 
 ##

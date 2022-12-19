@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class GroovRealtime
   class << self
     def current_user_id=(user)
@@ -9,26 +11,20 @@ class GroovRealtime
     end
 
     def emit(event, data, scope = :tenant)
-      allowed_scopes = [:global, :tenant, :user]
+      allowed_scopes = %i[global tenant user]
       selected_scope = scope
-      unless allowed_scopes.include? scope
-        selected_scope = :tenant
-      end
-      self.emit_to_channel(selected_scope, {event: event, data: data}, self.current_user_id)
+      selected_scope = :tenant unless allowed_scopes.include? scope
+      emit_to_channel(selected_scope, { event: event, data: data }, current_user_id)
     end
 
     def user_emit(event, data, uid)
-      self.emit_to_channel(:user, {event: event, data: data}, uid)
+      emit_to_channel(:user, { event: event, data: data }, uid)
     end
 
     def emit_to_channel(scope, data, uid)
       channel = 'groovepacker'
-      if [:tenant, :user].include?(scope)
-        channel+= ':'+Apartment::Tenant.current
-      end
-      if scope == :user
-        channel+= ':'+ uid.to_s
-      end
+      channel += ':' + Apartment::Tenant.current if %i[tenant user].include?(scope)
+      channel += ':' + uid.to_s if scope == :user
 
       $redis.publish(channel, data.to_json) unless Rails.env.test?
     end

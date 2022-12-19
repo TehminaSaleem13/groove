@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class OrdersController < ApplicationController
   before_action :groovepacker_authorize!
   include OrderConcern
@@ -20,19 +22,29 @@ class OrdersController < ApplicationController
 
   def update
     if current_user.can?('create_edit_notes')
-      @order.notes_internal = params[:order]['notes_internal'] rescue  nil
+      @order.notes_internal = begin
+                                params[:order]['notes_internal']
+                              rescue StandardError
+                                nil
+                              end
     else
       set_status_and_message(false, 'You do not have the permissions to edit notes', ['push'])
     end
     update_order_attrs
 
-    if @result['status'] && @order.save
-      @result['messages'].push(@order.errors.full_messages)
-    end
+    @result['messages'].push(@order.errors.full_messages) if @result['status'] && @order.save
 
-    if (params[:app] rescue @params[:app])
+    if begin
+          params[:app]
+       rescue StandardError
+         @params[:app]
+        end
       orders_scanning_count = Order.multiple_orders_scanning_count(Order.where(id: @order.id))
-      itemslength = orders_scanning_count[@order.id].values.sum rescue 0
+      itemslength = begin
+                      orders_scanning_count[@order.id].values.sum
+                    rescue StandardError
+                      0
+                    end
       @result['scan_pack_data'] = generate_order_hash_v2(@order, itemslength)
     end
 
@@ -49,22 +61,22 @@ class OrdersController < ApplicationController
   # If no filter is passed, then the API will default to 'active'
   def index
     @orders = gp_orders_module.do_getorders
-    #GroovRealtime::emit('test',{does:'it work for user '+current_user.username+'?'})
-    #GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current+'?'},:tenant)
-    #GroovRealtime::emit('test',{does:'it work for global?'},:global)
+    # GroovRealtime::emit('test',{does:'it work for user '+current_user.username+'?'})
+    # GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current+'?'},:tenant)
+    # GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
     if params[:app]
       @result['general_settings'] = GeneralSetting.last.attributes.slice(*filter_general_settings).merge(GeneralSetting.last.per_tenant_settings)
       @result['scan_pack_settings'] = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings)
-      @result['orders_count'] = get__filtered_orders_count()
+      @result['orders_count'] = get__filtered_orders_count
     else
-      @result['orders_count'] = get_orders_count()
+      @result['orders_count'] = get_orders_count
     end
     render json: @result
   end
 
   def duplicate_orders
-    execute_groove_bulk_action("duplicate")
+    execute_groove_bulk_action('duplicate')
     render json: @result
     # if current_user.can?('add_edit_order_items')
     #   GrooveBulkActions.execute_groove_bulk_action("duplicate", params, current_user, list_selected_orders)
@@ -93,7 +105,7 @@ class OrdersController < ApplicationController
       ensure
         file.delete
       end
-    rescue => e
+    rescue StandardError => e
       result[:status] = false
       result[:error] = e
     end
@@ -101,7 +113,7 @@ class OrdersController < ApplicationController
   end
 
   def delete_orders
-    execute_groove_bulk_action("delete")
+    execute_groove_bulk_action('delete')
     render json: @result
     # if current_user.can? 'add_edit_order_items'
     #   GrooveBulkActions.execute_groove_bulk_action("delete", params, current_user, list_selected_orders)
@@ -115,29 +127,29 @@ class OrdersController < ApplicationController
   # For search pass in parameter params[:search] and a params[:limit] and params[:offset].
   # If limit and offset are not passed, then it will be default to 10 and 0
   def search
-    unless params[:search].blank?
+    if params[:search].blank?
+      set_status_and_message(false, 'Improper search string')
+    else
       @orders = gp_orders_search.do_search(false)
       @result['orders'] = make_orders_list(@orders['orders'])
-      @result['orders_count'] = get_orders_count()
+      @result['orders_count'] = get_orders_count
       @result['orders_count']['search'] = @orders['count']
-    else
-      set_status_and_message(false, 'Improper search string')
     end
     render json: @result
   end
 
   def change_orders_status
     if current_user.can? 'change_order_status'
-      GrooveBulkActions.execute_groove_bulk_action("status_update", params, current_user, list_selected_orders)
+      GrooveBulkActions.execute_groove_bulk_action('status_update', params, current_user, list_selected_orders)
       # list_selected_orders.each { |order| change_order_status(order) }
     else
-      set_status_and_message(false, "You do not have enough permissions to change order status", ['push', 'error_messages'])
+      set_status_and_message(false, 'You do not have enough permissions to change order status', %w[push error_messages])
     end
     render json: @result
   end
 
   def clear_assigned_tote
-    execute_groove_bulk_action("clear_assigned_tote")
+    execute_groove_bulk_action('clear_assigned_tote')
     render json: @result
   end
 
@@ -147,11 +159,11 @@ class OrdersController < ApplicationController
   end
 
   def show
-    unless @order.nil?
-      @result['order'] = {'basicinfo' => @order}
-      retrieve_order_items
+    if @order.nil?
+      set_status_and_message(false, 'Could not find order' ['error_messages'])
     else
-      set_status_and_message(false, "Could not find order" ['error_messages'])
+      @result['order'] = { 'basicinfo' => @order }
+      retrieve_order_items
     end
     render json: @result
   end
@@ -162,17 +174,17 @@ class OrdersController < ApplicationController
   end
 
   def record_exception
-    unless params[:reason].blank?
-      #Finiding @order in concern
-      @result = gp_orders_exception.record_exception(@order, Apartment::Tenant.current)
-    else
+    if params[:reason].blank?
       set_status_and_message(false, 'Cannot record exception without a reason', ['&', 'push'])
+    else
+      # Finiding @order in concern
+      @result = gp_orders_exception.record_exception(@order, Apartment::Tenant.current)
     end
     render json: @result
   end
 
   def clear_exception
-    #Finiding order in concern
+    # Finiding order in concern
     if @order.order_exception.nil?
       set_status_and_message(false, 'Order does not have exception to clear', ['&', 'push'])
     elsif current_user.can? 'edit_packing_ex'
@@ -184,26 +196,26 @@ class OrdersController < ApplicationController
   end
 
   def add_item_to_order
-    #setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
+    # setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
     @result = gp_orders_module.add_item_to_order if @result['status']
     render json: @result
   end
 
   def update_item_in_order
-    #setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
+    # setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
     @result = gp_orders_module.update_order_item if @result['status']
     render json: @result
   end
 
   def remove_item_from_order
-    #setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
+    # setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
     @result = gp_orders_module.remove_item_from_order if @result['status']
     render json: @result
   end
 
   def rollback
     if params[:single].nil?
-      set_status_and_message(false, "Order can not be nil", ['&', 'push'])
+      set_status_and_message(false, 'Order can not be nil', ['&', 'push'])
     else
       rollback_order_changes
     end
@@ -211,19 +223,19 @@ class OrdersController < ApplicationController
   end
 
   def save_by_passed_log
-    #Finiding order in concern
+    # Finiding order in concern
     if @order.nil?
-      set_status_and_message(false, "Cannot find Order", ['error_msg'])
+      set_status_and_message(false, 'Cannot find Order', ['error_msg'])
     else
-      @result = gp_orders_module.add_by_passed_activity(@order,params[:sku])
+      @result = gp_orders_module.add_by_passed_activity(@order, params[:sku])
     end
     render json: @result
   end
 
   def update_order_list
-    #Finiding order in concern
+    # Finiding order in concern
     if @order.nil?
-      set_status_and_message(false, "Cannot find Order", ['error_msg'])
+      set_status_and_message(false, 'Cannot find Order', ['error_msg'])
     else
       @result = gp_orders_module.update_orders_list(@order)
     end
@@ -231,25 +243,25 @@ class OrdersController < ApplicationController
   end
 
   def generate_pick_list
-    @result, @pick_list, @depends_pick_list  =
-                            gp_orders_module.generate_pick_list( list_selected_orders )
+    @result, @pick_list, @depends_pick_list =
+      gp_orders_module.generate_pick_list(list_selected_orders)
 
-    file_name = 'pick_list_'+Time.current.strftime('%d_%b_%Y_%H_%M_%S_%p')
-    @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf"}
+    file_name = 'pick_list_' + Time.current.strftime('%d_%b_%Y_%H_%M_%S_%p')
+    @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf" }
     render_pdf(file_name)
     pdf_file = File.open(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"), 'rb')
     base_file_name = File.basename(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"))
     tenant_name = Apartment::Tenant.current
     GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
     pdf_file.close
-    @result["url"] = ENV['S3_BASE_URL']+'/'+tenant_name+'/pdf/'+base_file_name
+    @result['url'] = ENV['S3_BASE_URL'] + '/' + tenant_name + '/pdf/' + base_file_name
     respond_to do |format|
       format.html {}
       format.pdf {}
-      format.json {
+      format.json do
         # render_pdf(file_name) #defined in application helper
         render json: @result
-      }
+      end
     end
   end
 
@@ -257,7 +269,7 @@ class OrdersController < ApplicationController
     @result['status'] = false
     settings_to_generate_packing_slip
     @orders = []
-    list_selected_orders.each { |order| @orders.push({id: order.id, increment_id: order.increment_id}) }
+    list_selected_orders.each { |order| @orders.push(id: order.id, increment_id: order.increment_id) }
 
     unless @orders.empty?
       generate_barcode_for_packingslip
@@ -269,20 +281,20 @@ class OrdersController < ApplicationController
   def generate_all_packing_slip
     @public_ip = `curl http://checkip.amazonaws.com` unless Rails.env.development?
     if params[:select_all].blank?
-      @orders = params["filter"] == "all" ? Order.all : Order.where(status: params["filter"])
-      value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
-      @orders = value ? sort_order(params, @orders)  : @orders
+      @orders = params['filter'] == 'all' ? Order.all : Order.where(status: params['filter'])
+      value = (params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status')
+      @orders = value ? sort_order(params, @orders) : @orders
     else
       @orders = gp_orders_search.do_search(false)
-      value = ( params["sort"] == "custom_field_one" || params["sort"] == "custom_field_two" || params["sort"] == "order_date" || params["sort"] == "ordernum" ||  params["sort"] == "status" )
-      @orders = value ? sort_order(params, @orders["orders"]) : @orders["orders"]
+      value = (params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status')
+      @orders = value ? sort_order(params, @orders['orders']) : @orders['orders']
     end
-    @orders.map(&:increment_id).each do |increment_id| generate_order_barcode_for_html(increment_id) end
+    @orders.map(&:increment_id).each { |increment_id| generate_order_barcode_for_html(increment_id) }
   end
 
   def cancel_packing_slip
     if params[:id].nil?
-      set_status_and_message(false, 'No id given. Can not cancel generating', ['push', 'error_messages'])
+      set_status_and_message(false, 'No id given. Can not cancel generating', %w[push error_messages])
     else
       barcode = GenerateBarcode.find_by_id(params[:id])
       cancel_packing(barcode)
@@ -290,7 +302,7 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
-  #The method is called when Export Items link is clicked from Webclient.
+  # The method is called when Export Items link is clicked from Webclient.
   def order_items_export
     @result['filename'] = ''
     selected_orders = list_selected_orders(true)
@@ -307,7 +319,7 @@ class OrdersController < ApplicationController
     if current_user.can? 'import_orders'
       @result = gp_orders_import.start_import_for_all
     else
-      set_status_and_message(false, 'You do not have the permission to import orders', ['push', 'error_messages'])
+      set_status_and_message(false, 'You do not have the permission to import orders', %w[push error_messages])
     end
     render json: @result
   end
@@ -316,7 +328,7 @@ class OrdersController < ApplicationController
     if order_summary.nil? && no_running_imports(params[:store_id]) # order_summary defined in application helper
       initiate_import_for_single_store
     else
-      set_status_and_message(false, "Import is in progress", ['push', 'error_messages'])
+      set_status_and_message(false, 'Import is in progress', %w[push error_messages])
     end
     render json: @result
   end
@@ -334,7 +346,7 @@ class OrdersController < ApplicationController
   end
 
   def no_running_imports(store_id)
-    ImportItem.where('status NOT IN (?) AND store_id = ?', %w(cancelled completed failed), store_id).blank?
+    ImportItem.where('status NOT IN (?) AND store_id = ?', %w[cancelled completed failed], store_id).blank?
   end
 
   def import_xml
@@ -342,7 +354,7 @@ class OrdersController < ApplicationController
       order_import_summary = OrderImportSummary.includes(:import_items).find(params[:import_summary_id])
       import_item = order_import_summary.import_items.where(store_id: params[:store_id])
       import_item = import_item.first
-    rescue
+    rescue StandardError
       import_item = nil
     end
 
@@ -350,7 +362,7 @@ class OrdersController < ApplicationController
       if import_item && !import_item.eql?('cancelled')
         if params[:order_xml].nil?
           # params[:xml] has content
-          file_name = Time.current.to_i.to_s  + "#{SecureRandom.random_number(100)}.xml"
+          file_name = Time.current.to_i.to_s + "#{SecureRandom.random_number(100)}.xml"
           File.open(Rails.root.join('public', 'csv', file_name), 'wb') do |file|
             file.write(params[:xml])
           end
@@ -362,35 +374,35 @@ class OrdersController < ApplicationController
           end
         end
 
-        order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params["file_name"], params["flag"])
+        order_importer = Groovepacker::Orders::Xml::Import.new(file_name, params['file_name'], params['flag'])
         order_importer.process
 
-        if File.exists?(Rails.root.join('public', 'csv', file_name))
+        if File.exist?(Rails.root.join('public', 'csv', file_name))
           File.delete(Rails.root.join('public', 'csv', file_name))
         end
       else
-        import_item && import_item.save
+        import_item&.save
       end
     end
-      render json: {status: "OK"}
+    render json: { status: 'OK' }
   end
 
   def cancel_import
-    if order_summary_to_cancel.nil?   #order_summary defined in application helper
-      set_status_and_message(false, "No imports are in progress", ['push', 'error_messages'])
+    if order_summary_to_cancel.nil? # order_summary defined in application helper
+      set_status_and_message(false, 'No imports are in progress', %w[push error_messages])
     else
       $redis.set("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 'cancelled')
-      $redis.expire("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 20000)
+      $redis.expire("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 20_000)
       change_status_to_cancel
       ahoy.track(
-        "Order Import",
+        'Order Import',
         {
-          title: "Order Import Canceled",
+          title: 'Order Import Canceled',
           tenant: Apartment::Tenant.current,
           user_id: current_user.id,
           store_id: params[:store_id]
         },
-        time: Time.current,
+        time: Time.current
       )
     end
     render json: @result
@@ -398,7 +410,7 @@ class OrdersController < ApplicationController
 
   def cancel_all
     @result = {}
-    import_items = ImportItem.where(status: %w(in_progress not_started)).update_all(status: 'cancelled', message: 'cancel_all')
+    import_items = ImportItem.where(status: %w[in_progress not_started]).update_all(status: 'cancelled', message: 'cancel_all')
     top_summary = OrderImportSummary.top_summary
     if top_summary
       top_summary.update_attributes(status: 'cancelled')
@@ -424,7 +436,7 @@ class OrdersController < ApplicationController
   def next_split_order
     original_id = params[:id]
     key = begin
-            params[:id].split(' (S')[0..(params[:id].split(' (S').length - 2)].join + " (S%"
+            params[:id].split(' (S')[0..(params[:id].split(' (S').length - 2)].join + ' (S%'
           rescue StandardError
             nil
           end
@@ -467,7 +479,11 @@ class OrdersController < ApplicationController
       ss_label_data = {}
       ss_credential = ShipstationRestCredential.find(params[:credential_id])
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
-      ss_label_data['available_carriers'] = JSON.parse(ss_client.list_carriers.body) rescue []
+      ss_label_data['available_carriers'] = begin
+                                              JSON.parse(ss_client.list_carriers.body)
+                                            rescue StandardError
+                                              []
+                                            end
       requested_carriers = params[:carrier_code].to_s.split(',').map(&:strip)
       if requested_carriers.any?
         ss_label_data['available_carriers'] = ss_label_data['available_carriers'].select { |carrier| requested_carriers.include? carrier['code'] }
@@ -488,22 +504,34 @@ class OrdersController < ApplicationController
           confirmation: params[:post_data][:confirmation]
         }
         rates_response = ss_client.get_ss_label_rates(data.to_h)
-        carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ')}.join('<br>') unless rates_response.ok?
+        carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
         next unless rates_response.ok?
+
         carrier['rates'] = JSON.parse(rates_response.body)
         carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
         carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
         carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
         carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
-        carrier['rates'].map { |r| r['visible'] = !((ss_credential.disabled_rates[carrier['code']].include? r['serviceName']) rescue false) }
+        carrier['rates'].map do |r|
+          r['visible'] = !(begin
+                                                      (ss_credential.disabled_rates[carrier['code']].include? r['serviceName'])
+                           rescue StandardError
+                             false
+                                                    end)
+        end
         carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
         next unless carrier['code'] == 'stamps_com'
+
         carrier['rates'].each do |rate|
-          rate['packageCode'] = carrier['packages'].select { |h| h['name'] == rate['serviceName'].split(' - ').last }.first['code'] rescue nil
+          rate['packageCode'] = begin
+                                  carrier['packages'].select { |h| h['name'] == rate['serviceName'].split(' - ').last }.first['code']
+                                rescue StandardError
+                                  nil
+                                end
         end
       end
       result[:ss_label_data] = ss_label_data
-    rescue => e
+    rescue StandardError => e
       result[:status] = false
       result[:error_messages] = e.message
     end
@@ -531,9 +559,9 @@ class OrdersController < ApplicationController
       order.city = params[:ss_label_data][:shipping_address][:city] || ''
       order.postcode = params[:ss_label_data][:shipping_address][:postal_code] || ''
       order.country = params[:ss_label_data][:shipping_address][:country] || ''
-      order.ss_label_data = (order.ss_label_data || {}).merge({ weight: params[:ss_label_data][:weight].to_unsafe_h, dimensions: params[:ss_label_data][:dimensions].to_unsafe_h })
+      order.ss_label_data = (order.ss_label_data || {}).merge(weight: params[:ss_label_data][:weight].to_unsafe_h, dimensions: params[:ss_label_data][:dimensions].to_unsafe_h)
       order.save
-    rescue
+    rescue StandardError
       result = { status: false }
     end
 
@@ -552,7 +580,7 @@ class OrdersController < ApplicationController
         result[:status] = false
         result[:error] = 'Please Check Order Store Settings'
       end
-    rescue => e
+    rescue StandardError => e
       result[:status] = false
       result[:error] = e
     end
@@ -566,7 +594,7 @@ class OrdersController < ApplicationController
       result[:status] = GroovS3.delete_object(packing_cam.url.gsub("#{ENV['S3_BASE_URL']}/", ''))
       result[:error] = 'No Such Key' unless result[:status]
       packing_cam.destroy
-    rescue => e
+    rescue StandardError => e
       result[:status] = false
       result[:error] = e
     end
@@ -590,7 +618,7 @@ class OrdersController < ApplicationController
       else
         result[:status] = false
       end
-    rescue => e
+    rescue StandardError => e
       result[:status] = false
       result[:error] = e
     end
@@ -598,12 +626,13 @@ class OrdersController < ApplicationController
   end
 
   private
+
   def execute_groove_bulk_action(activity)
     params[:user_id] = current_user.id
     if current_user.can?('add_edit_order_items')
       GrooveBulkActions.execute_groove_bulk_action(activity, params, current_user, list_selected_orders)
     else
-      set_status_and_message(false, "You do not have enough permissions to #{activity}", ['push', 'error_messages'])
+      set_status_and_message(false, "You do not have enough permissions to #{activity}", %w[push error_messages])
     end
   end
 end

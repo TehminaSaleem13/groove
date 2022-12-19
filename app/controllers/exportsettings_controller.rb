@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ExportsettingsController < ApplicationController
   before_action :groovepacker_authorize!
 
@@ -5,7 +7,7 @@ class ExportsettingsController < ApplicationController
     @result = build_result_hash
 
     @export_setting = ExportSetting.first
-    
+
     if @export_setting
       if @export_setting.order_export_email.nil?
         @export_setting.order_export_email = GeneralSetting.first.admin_email
@@ -30,7 +32,7 @@ class ExportsettingsController < ApplicationController
 
     if @export_setting
       if current_user.can? 'edit_general_prefs'
-        @export_setting.auto_email_export =  params[:auto_email_export] unless params[:auto_email_export].nil?
+        @export_setting.auto_email_export = params[:auto_email_export] unless params[:auto_email_export].nil?
         @export_setting.time_to_send_export_email = params[:time_to_send_export_email] unless params[:time_to_send_export_email].nil?
         @export_setting.last_exported = params[:last_exported] unless [:last_exported].nil?
         @export_setting.export_orders_option = params[:export_orders_option] unless params[:export_orders_option].nil?
@@ -47,7 +49,7 @@ class ExportsettingsController < ApplicationController
         @export_setting.send_stat_export_email_on_tue = params[:send_stat_export_email_on_tue] unless params[:send_stat_export_email_on_tue].nil?
         @export_setting.send_stat_export_email_on_wed = params[:send_stat_export_email_on_wed] unless params[:send_stat_export_email_on_wed].nil?
         @export_setting.send_stat_export_email_on_thu = params[:send_stat_export_email_on_thu] unless params[:send_stat_export_email_on_thu].nil?
-        @export_setting.send_stat_export_email_on_fri = params[:send_stat_export_email_on_fri] unless params[:send_stat_export_email_on_fri].nil? 
+        @export_setting.send_stat_export_email_on_fri = params[:send_stat_export_email_on_fri] unless params[:send_stat_export_email_on_fri].nil?
         @export_setting.send_stat_export_email_on_sat = params[:send_stat_export_email_on_sat] unless params[:send_stat_export_email_on_sat].nil?
         @export_setting.send_stat_export_email_on_sun = params[:send_stat_export_email_on_sun] unless params[:send_stat_export_email_on_sun].nil?
         @export_setting.auto_stat_email_export = params[:auto_stat_email_export] unless params[:auto_stat_email_export].nil?
@@ -64,7 +66,7 @@ class ExportsettingsController < ApplicationController
         @export_setting.daily_packed_email_on_fri = params[:daily_packed_email_on_fri] unless params[:daily_packed_email_on_fri].nil?
         @export_setting.daily_packed_email_on_sat = params[:daily_packed_email_on_sat] unless params[:daily_packed_email_on_sat].nil?
         @export_setting.daily_packed_email_on_sun = params[:daily_packed_email_on_sun] unless params[:daily_packed_email_on_sun].nil?
-        @export_setting.daily_packed_email = params[:daily_packed_email] unless params[:daily_packed_email].nil? 
+        @export_setting.daily_packed_email = params[:daily_packed_email] unless params[:daily_packed_email].nil?
         @export_setting.daily_packed_export_type = params[:daily_packed_export_type] unless params[:daily_packed_export_type].nil?
         @export_setting.auto_ftp_export = params[:auto_ftp_export] unless params[:auto_ftp_export].nil?
         @export_setting.include_partially_scanned_orders = params[:include_partially_scanned_orders] unless params[:include_partially_scanned_orders].nil?
@@ -97,7 +99,7 @@ class ExportsettingsController < ApplicationController
           start_time: Time.parse(params[:start]),
           end_time: Time.parse(params[:end]),
           manual_export: true
-          )
+        )
         # export_setting.export_data(Apartment::Tenant.current)
         # export_setting.update_attributes(manual_export: false)
         ExportOrder.delay(priority: 95).export(Apartment::Tenant.current)
@@ -111,23 +113,23 @@ class ExportsettingsController < ApplicationController
       end
       public_url = GroovS3.get_csv_export_exception(filename)
 
-      filename = {url: public_url, filename: filename}
+      filename = { url: public_url, filename: filename }
     end
     render json: result
     # send_file filename, :type => 'text/csv'
   end
 
   def email_stats
-    stat_stream_obj = SendStatStream.new()
+    stat_stream_obj = SendStatStream.new
     export_setting = ExportSetting.first
-    params = {"duration"=>export_setting.stat_export_type.to_i, "email"=>export_setting.stat_export_email}
-    stat_stream_obj.delay(:queue => "generate_stat_export_#{Apartment::Tenant.current}", priority: 95).generate_export(Apartment::Tenant.current, params)
+    params = { 'duration' => export_setting.stat_export_type.to_i, 'email' => export_setting.stat_export_email }
+    stat_stream_obj.delay(queue: "generate_stat_export_#{Apartment::Tenant.current}", priority: 95).generate_export(Apartment::Tenant.current, params)
     render json: {}
   end
 
   def daily_packed
-    daily_pack  = DailyPacked.new()
-    daily_pack.delay(:queue => "generate_daily_packed_export_#{Apartment::Tenant.current}", priority: 95).send_daily_pack_csv(Apartment::Tenant.current)
+    daily_pack = DailyPacked.new
+    daily_pack.delay(queue: "generate_daily_packed_export_#{Apartment::Tenant.current}", priority: 95).send_daily_pack_csv(Apartment::Tenant.current)
     render json: {}
   end
 

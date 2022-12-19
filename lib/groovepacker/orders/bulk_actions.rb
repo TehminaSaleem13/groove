@@ -1,16 +1,18 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Orders
     class BulkActions
-
       include Groovepacker::Inventory::Helper
 
       def init_results
-        @result = Hash.new
+        @result = {}
         @result['messages'] = []
         @result['status'] = true
         @scanpack_settings = ScanPackSetting.last
         @remove_skipped = @scanpack_settings.remove_skipped
       end
+
       # Changes the status of orders
       def status_update(tenant, params, bulk_actions_id, username)
         Apartment::Tenant.switch!(tenant)
@@ -20,9 +22,10 @@ module Groovepacker
         init_results
         begin
           unless orders.empty?
-            bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+            bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
             orders.each do |order|
               return if check_bulk_cancel(bulk_action)
+
               bulk_action.update_attribute(:current, order.increment_id)
               product_not_active = false
               change_order_status(order, params, username)
@@ -32,38 +35,40 @@ module Groovepacker
             end
             check_bulk_action_completed_or_not(bulk_action)
           end
-        rescue
-          bulk_action.update_attributes(status: 'failed',messages: ['Some error occurred'], current: '')
+        rescue StandardError
+          bulk_action.update_attributes(status: 'failed', messages: ['Some error occurred'], current: '')
         end
         $redis.del("bulk_action_data_#{tenant}_#{bulk_actions_id}")
       end
 
       def check_inactive_product_exist(product_not_active, params, order)
         return unless params['status'].eql?('awaiting')
+
         if order.order_items.present? && (order.order_items.map(&:qty).sum == 0 && order.order_items.map(&:skipped_qty).sum == 0)
-          order.update_attribute(:status, "onhold")
+          order.update_attribute(:status, 'onhold')
           @result['status'] &= false
           @result['messages'].push('Only orders containing Active items can be Awaiting')
           # product_not_active = true
         end
         order.order_items.each do |order_item|
-          unless order_item.product.status.eql?('active')
-            @result['status'] &= false
-            @result['messages'].push('There was a problem changing order status for '+
-              order.increment_id + '. Reason: Order must have active products in it'
-            )
-            product_not_active = true
-            break
-          end
+          next if order_item.product.status.eql?('active')
+
+          @result['status'] &= false
+          @result['messages'].push('There was a problem changing order status for ' +
+            order.increment_id + '. Reason: Order must have active products in it')
+          product_not_active = true
+          break
         end
         product_not_active
       end
 
       def change_order_status(order, params, username)
         return if permitted_to_status_change(order, params)
+
         non_scanning_states = { 'serviceissue' => 'Service Issue', 'onhold' => 'Action Required' }
         return if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
         return if order_has_inactive_or_new_products(order, params)
+
         order_status = order.status
         order.status = params[:status]
         order.scanned_on = nil if params[:status] != 'scanned'
@@ -90,6 +95,7 @@ module Groovepacker
         end
         order.packing_user_id = User.find_by_username(username).try(:id)
         return if order.save
+
         set_status_and_message(false, order.errors.full_messages)
       end
 
@@ -98,13 +104,14 @@ module Groovepacker
       end
 
       def order_has_inactive_or_new_products(order, params)
-        return false unless order.has_inactive_or_new_products && params[:status].in?(%w(awaiting scanned))
+        return false unless order.has_inactive_or_new_products && params[:status].in?(%w[awaiting scanned])
+
         if params[:status].eql? 'awaiting'
           order.status = 'onhold'
           order.save
         end
 
-        #@result['notice_messages'].push 'One or more of the selected orders contains'\
+        # @result['notice_messages'].push 'One or more of the selected orders contains'\
         #    ' New or Inactive items so they can not be changed to Awaiting.'\
         #    ' <a target="_blank"  href="https://groovepacker.freshdesk.com/solution/articles/6000058066-how-do-order-statuses-and-product-statuses-work-in-goovepacker-">'\
         #    'More Info</a>.'
@@ -113,7 +120,11 @@ module Groovepacker
 
       def update_status_and_add_activity(order, username)
         order.scanned_on = Time.current
-        current_user = User.find_by_name("myplan") rescue nil
+        current_user = begin
+                         User.find_by_name('myplan')
+                       rescue StandardError
+                         nil
+                       end
         order.packing_user_id = current_user
         order.scanned_by_status_change = true
         order.addactivity('Order Manually Moved To Scanned Status', username)
@@ -136,7 +147,7 @@ module Groovepacker
         orders = Marshal.load(orders)
         order_ids = orders.pluck(:id)
         init_results
-        bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+        bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
         orders.each { |order| order.reset_assigned_tote(user_id) }
         bulk_action.update_attributes(completed: orders.count)
         check_bulk_action_completed_or_not(bulk_action)
@@ -149,10 +160,10 @@ module Groovepacker
         orders = $redis.get("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
         orders = Marshal.load(orders)
         order_increment_ids = orders.pluck(:increment_id)
-        add_delete_log(current_tenant, order_increment_ids, "List of deleted orders", params)
+        add_delete_log(current_tenant, order_increment_ids, 'List of deleted orders', params)
         order_ids = orders.pluck(:id)
         init_results
-        bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+        bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
         # orders.each do |order|
         #   return if check_bulk_cancel(bulk_action)
         #   bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
@@ -169,7 +180,6 @@ module Groovepacker
         destroy_orders_associations(order_ids)
         bulk_action.update_attributes(completed: orders.count)
 
-
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
       end
@@ -180,17 +190,18 @@ module Groovepacker
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         orders = $redis.get("bulk_action_duplicate_data_#{tenant}_#{bulk_actions_id}")
         orders = Marshal.load(orders)
-        bulk_action.update_attributes(:total => orders.count, :completed => 0, :status => 'in_progress')
+        bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
         temp_increment_id = ''
         orders.each do |order|
           index = 1
           return if check_bulk_cancel(bulk_action)
+
           neworder = order.dup
           begin
-            temp_increment_id = order.increment_id.split(/[(]Duplicate|&|\+/).first + "(Duplicate-"+index.to_s+ ")"
+            temp_increment_id = order.increment_id.split(/[(]Duplicate|&|\+/).first + '(Duplicate-' + index.to_s + ')'
             neworder.increment_id = temp_increment_id
-            orderslist = Order.where(:increment_id => temp_increment_id)
-            index = index + 1
+            orderslist = Order.where(increment_id: temp_increment_id)
+            index += 1
             bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
           end while orderslist.present?
           if neworder.try(:store).try(:store_type) == 'ShippingEasy'
@@ -201,7 +212,7 @@ module Groovepacker
             neworder.split_from_order_id = ''
             neworder.store_order_id = ''
           end
-          neworder.save(:validate => false)
+          neworder.save(validate: false)
           neworder.persisted? ? Order.add_activity_to_new_order(neworder, order.order_items, username) : @result['status'] = false
         end
         check_bulk_action_completed_or_not(bulk_action)
@@ -214,7 +225,7 @@ module Groovepacker
           bulk_action.update_attribute(:status, 'cancelled')
           return true
         end
-        return false
+        false
       end
 
       def check_bulk_action_completed_or_not(bulk_action)
@@ -230,7 +241,7 @@ module Groovepacker
           OrderImportSummary.delete_all
           order_import_summary = OrderImportSummary.create(user_id: current_user_id, status: 'not_started')
           order_import_summaries = OrderImportSummary.where(status: 'not_started')
-          if !order_import_summaries.blank?
+          unless order_import_summaries.blank?
             ordered_import_summaries = order_import_summaries.order('updated_at' + ' ' + 'desc')
             ordered_import_summaries.each do |orderimport_summary|
               if orderimport_summary == ordered_import_summaries.first
@@ -253,23 +264,28 @@ module Groovepacker
         end
       end
 
-      def update_bulk_orders_status(result, params, tenant)
+      def update_bulk_orders_status(_result, _params, tenant)
         Apartment::Tenant.switch!(tenant)
         bulk_action = GrooveBulkActions.where("identifier='order' and activity='status_update'").last
         return if bulk_action.blank?
-        bulk_action_update_status(bulk_action, "in_progress")
+
+        bulk_action_update_status(bulk_action, 'in_progress')
         count = 1
         updated_products = Product.where(status_updated: true)
-        orders = Order.eager_load(:order_items).where("order_items.product_id IN (?)", updated_products.map(&:id))
-        (orders||[]).find_each(:batch_size => 100) do |order|
+        orders = Order.eager_load(:order_items).where('order_items.product_id IN (?)', updated_products.map(&:id))
+        (orders || []).find_each(batch_size: 100) do |order|
           order.update_order_status
           bulk_action.completed = count
           bulk_action.save
           count += 1
         end
         updated_products.update_all(status_updated: false)
-        bulk_action_update_status(bulk_action, "completed")
-        update_all_pending_order_bulk_actions rescue nil
+        bulk_action_update_status(bulk_action, 'completed')
+        begin
+          update_all_pending_order_bulk_actions
+        rescue StandardError
+          nil
+        end
       end
 
       def bulk_action_update_status(bulk_action, status)
@@ -292,7 +308,6 @@ module Groovepacker
         Tote.where(order_id: order_ids).update_all(order_id: nil)
       end
 
-
       def destroy_order_items(order_ids, bulk_action)
         order_items = OrderItem.where(['order_id IN (?)', order_ids])
 
@@ -302,7 +317,7 @@ module Groovepacker
           bulk_action.update_attributes(total: order_items.count, identifier: 'inventory_balance', activity: 'adjustment')
 
           order_items
-          .find_in_batches(batch_size: 20) do |items|
+            .find_in_batches(batch_size: 20) do |items|
             items_ids = items.map(&:id)
 
             # Update inventory
@@ -319,7 +334,6 @@ module Groovepacker
         end
       end
 
-
       def delete_order_items(order_items_ids)
         OrderItemKitProduct.where(['order_item_id IN (?)', order_items_ids]).delete_all
         OrderItemOrderSerialProductLot.where(['order_item_id IN (?)', order_items_ids]).delete_all
@@ -327,10 +341,9 @@ module Groovepacker
         OrderItem.where(['id IN (?)', order_items_ids]).delete_all
       end
 
-      def delete_boxes order
+      def delete_boxes(order)
         Box.where(order_id: order.id).destroy_all
       end
-
     end
   end
 end

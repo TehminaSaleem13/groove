@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class ServiceInit
   def call(*_args)
     self

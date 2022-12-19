@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module PickList
     class IndividualPickListBuilder < PickListBuilder
@@ -9,7 +11,8 @@ module Groovepacker
             qty * kit_product.qty,
             kit_product.option_product,
             pick_list,
-            inventory_warehouse_id)
+            inventory_warehouse_id
+          )
         end
         pick_list
       end

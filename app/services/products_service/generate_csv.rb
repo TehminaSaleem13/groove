@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module ProductsService
   class GenerateCSV < ProductsService::Base
     attr_accessor :products, :csv, :bulk_actions_id, :headers, :default_inv_id
@@ -102,21 +104,22 @@ module ProductsService
 
     def bulk_action?
       return unless bulk_actions_id
+
       @bulk_action = GrooveBulkActions.find(bulk_actions_id)
     end
 
     def set_header
       @headers = [
-        'ID', 'Product Name', 'SKU 1', 'SKU 2', 'SKU 3', 'SKU 4', 'SKU 5', 'SKU 6', 'Barcode 1','Barcode 1 Qty', 'Barcode 2', 'Barcode 2 Qty', 'Barcode 3', 'Barcode 3 Qty', 'Barcode 4', 'Barcode 4 Qty', 'Barcode 5', 'Barcode 5 Qty', 'Barcode 6', 'Barcode 6 Qty', 'Location 1', 'Location 1 Qty', 'Location 2', 'Location 2 Qty', 'Location 3', 'Location 3 Qty', 'Location 4', 'Location 4 Qty', 'Qty On Hand','Absolute Image URL', 'Packing Instructions', 'Packing Instructions Conf', 'Product Receiving Instructions', 'Categories', 'FNSKU', 'ASIN', 'FBA-UPC', 'ISBN', 'EAN', 'Supplier SKU', 'AVG Cost', 'Count Group', 'Restock Lead Time', 'Product Scanning Sequence', 'Custom Product 1', 'Custom Product Display 1', 'Custom Product 2', 'Custom Product Display 2', 'Custom Product 3', 'Custom Product Display 3', 'Opt. Click Scan', 'Opt. Type-in Count', 'Opt. Intangible', 'Opt. Add to Any Order', 'Opt. Skippable', 'Opt. Record Serial 1', 'Opt. Record Serial 2', 'Inv. Alert Level', 'Inventory Target Level', 'Store ID', 'Status', 'Created At', 'Updated At'
+        'ID', 'Product Name', 'SKU 1', 'SKU 2', 'SKU 3', 'SKU 4', 'SKU 5', 'SKU 6', 'Barcode 1', 'Barcode 1 Qty', 'Barcode 2', 'Barcode 2 Qty', 'Barcode 3', 'Barcode 3 Qty', 'Barcode 4', 'Barcode 4 Qty', 'Barcode 5', 'Barcode 5 Qty', 'Barcode 6', 'Barcode 6 Qty', 'Location 1', 'Location 1 Qty', 'Location 2', 'Location 2 Qty', 'Location 3', 'Location 3 Qty', 'Location 4', 'Location 4 Qty', 'Qty On Hand', 'Absolute Image URL', 'Packing Instructions', 'Packing Instructions Conf', 'Product Receiving Instructions', 'Categories', 'FNSKU', 'ASIN', 'FBA-UPC', 'ISBN', 'EAN', 'Supplier SKU', 'AVG Cost', 'Count Group', 'Restock Lead Time', 'Product Scanning Sequence', 'Custom Product 1', 'Custom Product Display 1', 'Custom Product 2', 'Custom Product Display 2', 'Custom Product 3', 'Custom Product Display 3', 'Opt. Click Scan', 'Opt. Type-in Count', 'Opt. Intangible', 'Opt. Add to Any Order', 'Opt. Skippable', 'Opt. Record Serial 1', 'Opt. Record Serial 2', 'Inv. Alert Level', 'Inventory Target Level', 'Store ID', 'Status', 'Created At', 'Updated At'
       ]
     end
 
     def filter_and_arrange_fields(all_product_fields)
-      delete_list = ['store_product_id', 'product_type', 'pack_time_adj', 'kit_parsing', 'is_kit', 'disable_conf_req', 'total_avail_ext', 'shipping_weight', 'status_updated', 'is_inventory_product']
+      delete_list = %w[store_product_id product_type pack_time_adj kit_parsing is_kit disable_conf_req total_avail_ext shipping_weight status_updated is_inventory_product]
       delete_list.each do |del|
         all_product_fields.delete_at(all_product_fields.index(del)) if all_product_fields.index(del)
       end
-      insert_list = ['store_id', 'status', 'created_at', 'updated_at']
+      insert_list = %w[store_id status created_at updated_at]
       insert_list.each do |ins|
         all_product_fields.insert(-1, all_product_fields.delete(ins))
       end
@@ -251,16 +254,15 @@ module ProductsService
     end
 
     def find_other_skus_barcodes(item, title, attribute)
-      begin
-        collection = attribute == "packing_count" ? item.send("product_barcodes") : item.send("product_#{attribute}s")
-        index = title.gsub(/[^\d]/, '').to_i
-        collection.length > 1 ? collection[index - 1].send(attribute) : ''
-      rescue
-      end
+      collection = attribute == 'packing_count' ? item.send('product_barcodes') : item.send("product_#{attribute}s")
+      index = title.gsub(/[^\d]/, '').to_i
+      collection.length > 1 ? collection[index - 1].send(attribute) : ''
+    rescue StandardError
     end
 
     def do_if_bulk_action
       return unless @bulk_action
+
       @bulk_action.completed += 1
       @bulk_action.save
     end

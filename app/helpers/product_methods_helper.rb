@@ -1,5 +1,7 @@
+# frozen_string_literal: true
+
 module ProductMethodsHelper
-  def add_product_activity(product_activity_message, username='', activity_type ='regular')
+  def add_product_activity(product_activity_message, username = '', activity_type = 'regular')
     @activity = ProductActivity.new
     @activity.product_id = id
     @activity.action = product_activity_message
@@ -13,10 +15,11 @@ module ProductMethodsHelper
 
   def gen_barcode_from_sku_if_intangible
     return unless is_intangible
+
     sku_for_barcode = product_skus.find_by_purpose('primary')
     sku_for_barcode ||= product_skus.first
     # method will not generate barcode if already exists
-    sku_for_barcode.gen_barcode_from_sku_if_intangible_product if sku_for_barcode
+    sku_for_barcode&.gen_barcode_from_sku_if_intangible_product
   end
 
   def add_new_image(params)
@@ -36,11 +39,11 @@ module ProductMethodsHelper
     if params[:base_64_img_upload]
       image_content = Base64.decode64(params[:product_image][:image].to_s)
       content_type = params[:product_image][:content_type]
-      file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p')+ id.to_s + params[:product_image][:original_filename].gsub('#', '')
+      file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image][:original_filename].delete('#')
       GroovS3.create_image(current_tenant, file_name, image_content, content_type)
       # return file_name
     else
-      file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image].original_filename.gsub('#', '')
+      file_name = Time.current.strftime('%d_%b_%Y_%I__%M_%p') + id.to_s + params[:product_image].original_filename.delete('#')
       GroovS3.create_image(current_tenant, file_name, params[:product_image].read, params[:product_image].content_type)
       # return file_name
     end
@@ -88,36 +91,38 @@ module ProductMethodsHelper
     starting_value
   end
 
-  def create_or_update_productkitsku(kit_product, products=[])
+  def create_or_update_productkitsku(kit_product, products = [])
     actual_product =
       products.find do |_product|
         _product.product_id == id &&
-        _product.option_product_id == kit_product['option_product_id']
+          _product.option_product_id == kit_product['option_product_id']
       end ||
       ProductKitSkus.find_by_option_product_id_and_product_id(kit_product['option_product_id'], id)
 
     return unless actual_product
+
     actual_product.qty = kit_product['qty']
     actual_product.packing_order = kit_product['packing_order']
     actual_product.save
   end
 
-  def create_or_update_product_sku_or_barcode(item, order, status = nil, db_item=nil,current_user, item_type)
-    return true if (item_type == 'barcode' && db_item && db_item.barcode == item[item_type.downcase] && db_item.packing_count.to_i == item['packing_count'].to_i)
+  def create_or_update_product_sku_or_barcode(item, order, status = nil, db_item = nil, current_user, item_type)
+    return true if item_type == 'barcode' && db_item && db_item.barcode == item[item_type.downcase] && db_item.packing_count.to_i == item['packing_count'].to_i
+
     product_item = status == 'new' ? (item_type == 'barcode' ? ProductBarcode.new : ProductSku.new) : db_item
-    product_item.product.add_product_activity( "The #{item_type} of this item was changed from #{product_item.send(item_type.downcase.to_sym)} to #{item[item_type.downcase]} ",current_user.username) if (status != 'new' && item[item_type.downcase] != product_item.send(item_type.downcase.to_sym))
+    product_item.product.add_product_activity("The #{item_type} of this item was changed from #{product_item.send(item_type.downcase.to_sym)} to #{item[item_type.downcase]} ", current_user.username) if status != 'new' && item[item_type.downcase] != product_item.send(item_type.downcase.to_sym)
     product_item.send(item_type.downcase + '=', item[item_type.downcase])
     product_item.purpose = item['purpose'] if item_type == 'SKU'
     product_item.product_id = id unless product_item.persisted?
     product_item.order = order
-    product_item.packing_count = item['packing_count'] if item_type.downcase == 'barcode'
-    product_item.product.add_product_activity( "The #{item_type} #{product_item.send(item_type.downcase.to_sym)} was added to this item",current_user.username) if status == 'new'
+    product_item.packing_count = item['packing_count'] if item_type.casecmp('barcode').zero?
+    product_item.product.add_product_activity("The #{item_type} #{product_item.send(item_type.downcase.to_sym)} was added to this item", current_user.username) if status == 'new'
     product_item.permit_shared_barcodes = true if item[:permit_same_barcode]
     product_item.save
   end
 
-  def create_or_update_productimage(image, order, images=[])
-    product_image = images.find{|_img| _img.id == image["id"]} || ProductImage.new
+  def create_or_update_productimage(image, order, images = [])
+    product_image = images.find { |_img| _img.id == image['id'] } || ProductImage.new
     product_image.image = image['image']
     product_image.caption = image['caption']
     product_image.product_id = id unless product_image.persisted?
@@ -125,8 +130,8 @@ module ProductMethodsHelper
     product_image.save
   end
 
-  def create_or_update_productcat(category, categories=[])
-    product_cat = categories.find{|cat| cat.id == category['id']} ||categories.find{|cat| cat.id == category['category']} || ProductCat.new
+  def create_or_update_productcat(category, categories = [])
+    product_cat = categories.find { |cat| cat.id == category['id'] } || categories.find { |cat| cat.id == category['category'] } || ProductCat.new
     product_cat.category = category['category']
     product_cat.product_id = id unless product_cat.persisted?
     product_cat.save
@@ -206,7 +211,7 @@ module ProductMethodsHelper
   def primary_image_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds
-    product_images.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
+    product_images.min { |a, b| a.order.to_i <=> b.order.to_i }
   end
 
   def primary_image=(value)
@@ -229,7 +234,7 @@ module ProductMethodsHelper
   def primary_barcode_obj
     # Faster incase of eger loaded data in times
     # Takes 9.5e-05 seconds
-    product_barcodes.sort { |a, b| a.order.to_i <=> b.order.to_i }.first
+    product_barcodes.min { |a, b| a.order.to_i <=> b.order.to_i }
   end
 
   def check_barcode_add_update(params, result)
@@ -251,7 +256,11 @@ module ProductMethodsHelper
     elsif (params[:permit_same_barcode] && (product_barcodes.pluck(:barcode).exclude? params[:value])) || db_barcode.blank?
       self.create_barcode = true if params[:create_barcode]
       response = updatelist(self, params[:var], params[:value], params[:current_user], params[:permit_same_barcode])
-      errors = response.errors.full_messages rescue nil
+      errors = begin
+                 response.errors.full_messages
+               rescue StandardError
+                 nil
+               end
       result = result.merge('status' => false, 'error_msg' => errors) if errors
     end
     result
@@ -272,7 +281,7 @@ module ProductMethodsHelper
     broken_image
   rescue StandardError => e
     on_demand_logger = Logger.new("#{Rails.root}/log/broken_images.log")
-    on_demand_logger.info("=========================================")
+    on_demand_logger.info('=========================================')
     log = { tenant: Apartment::Tenant.current, product: self, error: e }
     on_demand_logger.info(log)
     true

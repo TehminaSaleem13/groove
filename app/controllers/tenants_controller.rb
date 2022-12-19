@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 class TenantsController < ApplicationController
   include PaymentsHelper
   include TenantsHelper
@@ -47,7 +49,11 @@ class TenantsController < ApplicationController
     current_tenant = Apartment::Tenant.current
     result = update_plan_ar(type)
     Apartment::Tenant.switch!(current_tenant)
-    result["shopify_customer"] = Tenant.find(params["basicinfo"]["id"]).subscription.shopify_customer rescue nil
+    result['shopify_customer'] = begin
+                                   Tenant.find(params['basicinfo']['id']).subscription.shopify_customer
+                                 rescue StandardError
+                                   nil
+                                 end
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }
@@ -66,19 +72,31 @@ class TenantsController < ApplicationController
   end
 
   def update_price_field
-    tenant = Tenant.find(params["id"])
-    feature = params["feature"]
-    toggle =  params["value"]["toggle"]
-    amount =  params["value"]["amount"]
-    db_price =  tenant.price rescue nil
+    tenant = Tenant.find(params['id'])
+    feature = params['feature']
+    toggle =  params['value']['toggle']
+    amount =  params['value']['amount']
+    db_price = begin
+                  tenant.price
+               rescue StandardError
+                 nil
+                end
     unless db_price.blank?
-      db_price[feature]["toggle"] = toggle rescue nil
-      db_price[feature]["amount"] = amount rescue nil
+      db_price[feature]['toggle'] = begin
+                                      toggle
+                                    rescue StandardError
+                                      nil
+                                    end
+      db_price[feature]['amount'] = begin
+                                      amount
+                                    rescue StandardError
+                                      nil
+                                    end
     end
     tenant.price = db_price
     tenant.save
     add_plan_to_subscription(amount, tenant, feature) if toggle == true
-    remove_plan_to_subscription(tenant, feature)  if  toggle == false
+    remove_plan_to_subscription(tenant, feature) if toggle == false
     render json: {}
   end
 
@@ -92,12 +110,12 @@ class TenantsController < ApplicationController
   end
 
   def update_import_mode
-    tenant = Tenant.find(params["tenant"])
+    tenant = Tenant.find(params['tenant'])
     Apartment::Tenant.switch! tenant.name
     # setting = GeneralSetting.last
-    #tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
-    #tenant.inventory_report_toggle = params["inventory_report_toggle"]
-    tenant.test_tenant_toggle = params["test_tenant_toggle"]
+    # tenant.scheduled_import_toggle = params["scheduled_import_toggle"]
+    # tenant.inventory_report_toggle = params["inventory_report_toggle"]
+    tenant.test_tenant_toggle = params['test_tenant_toggle']
     tenant.save
     # if tenant.scheduled_import_toggle == false
     #   setting.schedule_import_mode = "Daily"
@@ -111,8 +129,8 @@ class TenantsController < ApplicationController
   end
 
   def update_scan_workflow
-    tenant = Tenant.find(params["tenant_id"])
-    tenant.scan_pack_workflow = params['workflow'] if params['workflow'].in? %w(default product_first_scan_to_put_wall)
+    tenant = Tenant.find(params['tenant_id'])
+    tenant.scan_pack_workflow = params['workflow'] if params['workflow'].in? %w[default product_first_scan_to_put_wall]
     Apartment::Tenant.switch! tenant.name
     ToteSet.last || ToteSet.create(name: 'T')
     Apartment::Tenant.switch!
@@ -121,32 +139,32 @@ class TenantsController < ApplicationController
   end
 
   def update_store_order_respose_log
-    tenant = Tenant.find(params["tenant_id"])
+    tenant = Tenant.find(params['tenant_id'])
     tenant.store_order_respose_log = !tenant.store_order_respose_log
     tenant.save
-    GroovS3.bucket.objects({prefix: "#{tenant.name}/se_import_log"}).each { |obj| obj.destroy }
+    GroovS3.bucket.objects(prefix: "#{tenant.name}/se_import_log").each(&:destroy)
     render json: {}
   end
 
   def update_groovelytic_stat
-    tenant = Tenant.find(params["tenant_id"])
+    tenant = Tenant.find(params['tenant_id'])
     tenant.groovelytic_stat = !tenant.groovelytic_stat
     tenant.save
     unless tenant.groovelytic_stat
       Apartment::Tenant.switch! tenant.name
       users = User.where('username != ? and is_deleted = ?', 'gpadmin', false)
-      users.update_all(view_dashboard: "none")
+      users.update_all(view_dashboard: 'none')
     end
     render json: {}
   end
 
   def update_scheduled_import_toggle
     setting = GeneralSetting.last
-    tenant = Tenant.find(params["tenant_id"])
+    tenant = Tenant.find(params['tenant_id'])
     tenant.scheduled_import_toggle = !tenant.scheduled_import_toggle
     tenant.save
     if tenant.scheduled_import_toggle == false
-      setting.schedule_import_mode = "Daily"
+      setting.schedule_import_mode = 'Daily'
       setting.save
     end
     render json: {}
@@ -163,26 +181,26 @@ class TenantsController < ApplicationController
 
   def delete_summary
     result = {}
-    name = Tenant.find(params["tenant"]).name
+    name = Tenant.find(params['tenant']).name
     Apartment::Tenant.switch! name
-    OrderImportSummary.update_all(status: "cancelled")
-    ImportItem.update_all(status: "cancelled")
+    OrderImportSummary.update_all(status: 'cancelled')
+    ImportItem.update_all(status: 'cancelled')
     result[:status] = true
     render json: result
   end
 
   def activity_log
-    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_activity_log", priority: 95).send_activity_log
+    AddLogCsv.new.delay(run_at: 1.seconds.from_now, queue: 'download_activity_log', priority: 95).send_activity_log
     render json: {}
   end
 
   def activity_log_v2
-    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_activity_log", priority: 95).send_activity_log_v2(params)
+    AddLogCsv.new.delay(run_at: 1.seconds.from_now, queue: 'download_activity_log', priority: 95).send_activity_log_v2(params)
     render json: {}
   end
 
   def bulk_event_logs
-    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_bulk_event_logs", priority: 95).send_bulk_event_logs(params)
+    AddLogCsv.new.delay(run_at: 1.seconds.from_now, queue: 'download_bulk_event_logs', priority: 95).send_bulk_event_logs(params)
     render json: {}
   end
 
@@ -193,17 +211,17 @@ class TenantsController < ApplicationController
   end
 
   def get_duplicates_order_info
-    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_duplicates_order_list", priority: 95).get_duplicates_order_info(params)
+    AddLogCsv.new.delay(run_at: 1.seconds.from_now, queue: 'download_duplicates_order_list', priority: 95).get_duplicates_order_info(params)
     render json: {}
   end
 
   def remove_duplicates_order
-    OrderService::RemoveDuplicates.new.delay(:run_at => 1.seconds.from_now, :queue => "remove_duplicates_order_list", priority: 95).get_duplicates_order_info(params)
+    OrderService::RemoveDuplicates.new.delay(run_at: 1.seconds.from_now, queue: 'remove_duplicates_order_list', priority: 95).get_duplicates_order_info(params)
     render json: {}
   end
 
   def tenant_log
-    AddLogCsv.new.delay(:run_at => 1.seconds.from_now, :queue => "download_tenant_log", priority: 95).send_tenant_log
+    AddLogCsv.new.delay(run_at: 1.seconds.from_now, queue: 'download_tenant_log', priority: 95).send_tenant_log
     render json: {}
   end
 
@@ -212,7 +230,7 @@ class TenantsController < ApplicationController
     require 'rake'
     Groovepacks::Application.load_tasks
     Rake::Task['doo:clear_redis'].execute
-    result[:status] =  true
+    result[:status] = true
     render json: result
   end
 
@@ -221,10 +239,14 @@ class TenantsController < ApplicationController
       Apartment::Tenant.switch!(tenant.name)
       ImportItem.where("status='in_progress' OR status='not_started'").update_all(status: 'cancelled')
       items = ImportItem.joins(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started' OR import_items.status='failed')")
-      items.each {|item| item.update_attributes(status: 'cancelled')} rescue nil
+      begin
+        items.each { |item| item.update_attributes(status: 'cancelled') }
+      rescue StandardError
+        nil
+      end
       order_import_summary = OrderImportSummary.all
       order_import_summary.each do |import_summary|
-        import_summary.status = "completed"
+        import_summary.status = 'completed'
         import_summary.save
       end
     end
@@ -239,7 +261,7 @@ class TenantsController < ApplicationController
   end
 
   def update_tenant_attributes(params)
-    return false unless params[:setting] && params[:setting].in?(Tenant.column_names)
+    return false unless params[:setting]&.in?(Tenant.column_names)
 
     @tenant.update(params[:setting].to_sym => !@tenant.send(params[:setting]))
   end

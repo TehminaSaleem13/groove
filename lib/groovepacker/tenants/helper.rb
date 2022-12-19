@@ -1,3 +1,5 @@
+# frozen_string_literal: true
+
 module Groovepacker
   module Tenants
     class Helper
@@ -7,13 +9,11 @@ module Groovepacker
       def do_gettenants(params)
         offset = params[:offset].to_i || 0
         limit = params[:limit].to_i || 10
-        page_sort = params["pages_sort"]
-        if page_sort == "true"
+        page_sort = params['pages_sort']
+        if page_sort == 'true'
           tenants = Tenant.order('')
         else
-          unless params[:select_all] || params[:inverted]
-            tenants = Tenant.order('').limit(limit).offset(offset)
-          end
+          tenants = Tenant.order('').limit(limit).offset(offset) unless params[:select_all] || params[:inverted]
         end
         tenants
       end
@@ -44,81 +44,85 @@ module Groovepacker
         end
         @sort = sort_param(params)
         if @sort && @sort != ''
-          tenants_result = tenants_result.sort_by { |v| v[@sort].class == Fixnum ? v[@sort] : v[@sort].to_s.downcase }
-          tenants_result = tenants_result.sort_by { |v|  v["latest_activity"].to_i } if @sort == "most_recent_activity"
-          tenants_result = tenants_result.sort_by { |v|  v["last_charge_in_stripe"].to_i } if @sort == "last_charge_in_stripe"
+          tenants_result = tenants_result.sort_by { |v| v[@sort].class == Integer ? v[@sort] : v[@sort].to_s.downcase }
+          tenants_result = tenants_result.sort_by { |v|  v['latest_activity'].to_i } if @sort == 'most_recent_activity'
+          tenants_result = tenants_result.sort_by { |v|  v['last_charge_in_stripe'].to_i } if @sort == 'last_charge_in_stripe'
           tenants_result.reverse! if params[:order] == 'DESC'
         end
-        params["pages_sort"] == "true" ? tenants_result[offset, limit] : tenants_result
+        params['pages_sort'] == 'true' ? tenants_result[offset, limit] : tenants_result
       end
 
       def do_search(params)
         query_add = ''
-        sort_key = %w(updated_at name).include?(params[:sort]) ? params[:sort].to_s : 'updated_at'
-        sort_order = %w(ASC DESC).include?(params[:order]) ? params[:order].to_s : 'DESC'
+        sort_key = %w[updated_at name].include?(params[:sort]) ? params[:sort].to_s : 'updated_at'
+        sort_order = %w[ASC DESC].include?(params[:order]) ? params[:order].to_s : 'DESC'
 
         # Get passed in parameter variables if they are valid.
         limit = params[:limit].to_i || 10
 
         search = ActiveRecord::Base.connection.quote('%' + params[:search] + '%')
 
-        unless params[:select_all] || params[:inverted]
-          query_add = ' LIMIT ' + limit.to_s + ' OFFSET 0'
-        end
+        query_add = ' LIMIT ' + limit.to_s + ' OFFSET 0' unless params[:select_all] || params[:inverted]
         construct_query_and_get_result(params, search, sort_key, sort_order, query_add)
       end
 
       def get_subscription_data(name, state)
         subscription_result = subscription_result_hash
 
-        @tenant = @tenants ? @tenants.find{ |t| t.name.eql?(name)} : Tenant.find_by_name(name)
+        @tenant = @tenants ? @tenants.find { |t| t.name.eql?(name) } : Tenant.find_by_name(name)
 
         rec_subscription(@tenant, subscription_result)
         begin
-          if state == "show"
+          if state == 'show'
             subscriptions = Stripe::Customer.retrieve(@tenant.subscription.stripe_customer_id).subscriptions
             subscription_ids = subscriptions.data.map(&:id)
             subscription_result['verified_stripe_account'] = subscription_ids.include? @tenant.subscription.customer_subscription_id
           end
-        rescue
+        rescue StandardError
           subscription_result['verified_stripe_account'] = false
         end
-        subscription_result["interval"] = @tenant.subscription.interval rescue nil
-        subscription_result["shopify_customer"] = @tenant.subscription.shopify_customer rescue nil
+        subscription_result['interval'] = begin
+                                            @tenant.subscription.interval
+                                          rescue StandardError
+                                            nil
+                                          end
+        subscription_result['shopify_customer'] = begin
+                                                    @tenant.subscription.shopify_customer
+                                                  rescue StandardError
+                                                    nil
+                                                  end
         subscription_result
       end
 
       def delete_data(tenant, params, result, current_user)
-        begin
-          Apartment::Tenant.switch!(tenant.name)
-          if params[:action_type] == 'orders'
-            delete_orders(result)
-          elsif params[:action_type] == 'products'
-            delete_products(current_user)
-          elsif params[:action_type] == 'both'
-            delete_all_orders
-            delete_all_product_data
-          elsif params[:action_type] == 'inventory'
-            helper = Groovepacker::Tenants::Helper.new
-            helper.delay(priority: 95).reset_inventory(result, Apartment::Tenant.current)
-          elsif params[:action_type] == 'all'
-            ActiveRecord::Base.connection.tables.each do |table|
-              ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations' || table == 'users'
-            end
-            # Groovepacker::SeedTenant.new.seed()
-            # users = User.where(:name => 'admin')
-            # unless users.empty?
-            #   users.first.destroy unless users.first.nil?
-            # end
-            User.where('username != ?', 'gpadmin').destroy_all
-            subscription = tenant.subscription if tenant.subscription
-            CreateTenant.new.apply_restrictions_and_seed(subscription)
+        Apartment::Tenant.switch!(tenant.name)
+        if params[:action_type] == 'orders'
+          delete_orders(result)
+        elsif params[:action_type] == 'products'
+          delete_products(current_user)
+        elsif params[:action_type] == 'both'
+          delete_all_orders
+          delete_all_product_data
+        elsif params[:action_type] == 'inventory'
+          helper = Groovepacker::Tenants::Helper.new
+          helper.delay(priority: 95).reset_inventory(result, Apartment::Tenant.current)
+        elsif params[:action_type] == 'all'
+          ActiveRecord::Base.connection.tables.each do |table|
+            ActiveRecord::Base.connection.execute("TRUNCATE #{table}") unless table == 'access_restrictions' || table == 'schema_migrations' || table == 'users'
           end
-          result
-        rescue Exception => e
-          result['status'] = false
-          result['error_messages'].push(e.message);
+          # Groovepacker::SeedTenant.new.seed()
+          # users = User.where(:name => 'admin')
+          # unless users.empty?
+          #   users.first.destroy unless users.first.nil?
+          # end
+          User.where('username != ?', 'gpadmin').destroy_all
+          subscription = tenant.subscription if tenant.subscription
+          CreateTenant.new.apply_restrictions_and_seed(subscription)
         end
+        result
+      rescue Exception => e
+        result['status'] = false
+        result['error_messages'].push(e.message)
       end
 
       def take_action(action_type, result, current_user, tenant_name)
@@ -138,6 +142,7 @@ module Groovepacker
       def delete_orders(result)
         orders = Order.all
         return if orders.empty?
+
         orders.each do |order|
           if order.destroy
             result['status'] &= true
@@ -148,13 +153,13 @@ module Groovepacker
       end
 
       def delete_all_orders
-        %w(orders order_activities order_items order_serials packing_cams order_item_boxes order_item_kit_product_scan_times order_item_kit_products order_item_order_serial_product_lots order_item_scan_times order_shippings order_serials order_tags order_tags_orders order_exceptions).each do |table|
+        %w[orders order_activities order_items order_serials packing_cams order_item_boxes order_item_kit_product_scan_times order_item_kit_products order_item_order_serial_product_lots order_item_scan_times order_shippings order_serials order_tags order_tags_orders order_exceptions].each do |table|
           ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
         end
       end
 
       def delete_all_product_data
-        %w(products product_activities product_cats product_images products_product_inventory_reports product_inventory_warehouses product_kit_activities product_kit_skus product_lots product_skus product_barcodes).each do |table|
+        %w[products product_activities product_cats product_images products_product_inventory_reports product_inventory_warehouses product_kit_activities product_kit_skus product_lots product_skus product_barcodes].each do |table|
           ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
         end
       end
@@ -173,11 +178,9 @@ module Groovepacker
         bulk_actions.delete(Apartment::Tenant.current, parameters, groove_bulk_actions.id, current_user.username)
       end
 
-      def reset_inventory(result, tenant)
+      def reset_inventory(_result, tenant)
         Apartment::Tenant.switch! tenant
-        ProductInventoryWarehouses.where("allocated_inv != 0").each do |inventory|
-          inventory.update_allocated_inv
-        end
+        ProductInventoryWarehouses.where('allocated_inv != 0').each(&:update_allocated_inv)
       end
 
       def delete_all(tenant_name)
@@ -202,10 +205,10 @@ module Groovepacker
             @subscription_data.update_attributes(tenant_name: "#{tenant}-deleted", email: @subscription_data.email.to_s + '-deleted')
             destroy_tenant(@customer_id, @tenant, @subscription_data, result)
           else
-            Apartment::Tenant.drop(tenant) if Apartment::tenant_names.include? (tenant)
+            Apartment::Tenant.drop(tenant) if Apartment.tenant_names.include? tenant
             @tenant.destroy
           end
-        rescue => e
+        rescue StandardError => e
           update_fail_status(result, e.message)
         else
           result['success_messages'].push('Removed tenant ' + tenant + ' Database')
@@ -217,21 +220,23 @@ module Groovepacker
         # if subscription_data && customer_id
         duplicate_tenant_id = tenant.duplicate_tenant_id
         tenant_name = tenant.name
-        unless duplicate_tenant_id
-          delete_customer(customer_id) rescue nil
-        else
+        if duplicate_tenant_id
           begin
             duplicate_tenant_name = Tenant.find(duplicate_tenant_id).name
             create_subscription(subscription_data, duplicate_tenant_name, tenant)
             subscription_data.is_active = false
             subscription_data.save
-          rescue
+          rescue StandardError
+          end
+        else
+          begin
+            delete_customer(customer_id)
+          rescue StandardError
+            nil
           end
         end
         Apartment::Tenant.drop(tenant_name)
-        if tenant.destroy
-          result['success_messages'].push('Removed ' + tenant_name + ' from tenants table')
-        end
+        result['success_messages'].push('Removed ' + tenant_name + ' from tenants table') if tenant.destroy
         # else
         #   update_fail_status(result, 'The tenant does not have a valid subscription')
         # end
@@ -264,29 +269,30 @@ module Groovepacker
         begin
           Apartment::Tenant.switch!(tenant.name)
           @access_restriction = AccessRestriction.all.last
-          unless params["basicinfo"]["is_multi_box"]
+          unless params['basicinfo']['is_multi_box']
             setting = GeneralSetting.all.first
             setting.update_attribute(:multi_box_shipments, false)
           end
 
           return result unless @access_restriction
-          access_restrictions_info = params["access_restrictions_info"]
+
+          access_restrictions_info = params['access_restrictions_info']
           retrieve_and_save_restrictions(@access_restriction, access_restrictions_info)
-        rescue => e
+        rescue StandardError => e
           update_fail_status(result, e.message)
         end
         result
       end
 
       def retrieve_and_save_restrictions(access_restriction, access_restrictions_info)
-        access_restriction.num_shipments = access_restrictions_info["max_allowed"]
-        access_restriction.num_users = access_restrictions_info["max_users"]
-        access_restriction.num_import_sources = access_restrictions_info["max_import_sources"]
-        access_restriction.allow_bc_inv_push = access_restrictions_info["allow_bc_inv_push"]
-        access_restriction.allow_mg_rest_inv_push = access_restrictions_info["allow_mg_rest_inv_push"]
-        access_restriction.allow_shopify_inv_push = access_restrictions_info["allow_shopify_inv_push"]
-        access_restriction.allow_teapplix_inv_push = access_restrictions_info["allow_teapplix_inv_push"]
-        access_restriction.allow_magento_soap_tracking_no_push = access_restrictions_info["allow_magento_soap_tracking_no_push"]
+        access_restriction.num_shipments = access_restrictions_info['max_allowed']
+        access_restriction.num_users = access_restrictions_info['max_users']
+        access_restriction.num_import_sources = access_restrictions_info['max_import_sources']
+        access_restriction.allow_bc_inv_push = access_restrictions_info['allow_bc_inv_push']
+        access_restriction.allow_mg_rest_inv_push = access_restrictions_info['allow_mg_rest_inv_push']
+        access_restriction.allow_shopify_inv_push = access_restrictions_info['allow_shopify_inv_push']
+        access_restriction.allow_teapplix_inv_push = access_restrictions_info['allow_teapplix_inv_push']
+        access_restriction.allow_magento_soap_tracking_no_push = access_restrictions_info['allow_magento_soap_tracking_no_push']
         access_restriction.save
       end
 
@@ -298,7 +304,7 @@ module Groovepacker
           tenant.addon_notes = basic_tenant_info[:addon_notes] if basic_tenant_info[:addon_notes]
           tenant.activity_log = basic_tenant_info[:activity_log] if basic_tenant_info[:activity_log]
           tenant.save
-        rescue => e
+        rescue StandardError => e
           update_fail_status(result, e.message)
         end
         result
@@ -309,29 +315,30 @@ module Groovepacker
         @subscription = tenant.subscription
         if @subscription
           @subscription_info = params[:subscription_info]
-          @subscription.update_attributes(:customer_subscription_id => params[:subscription_info][:customer_subscription_id],:stripe_customer_id => params[:subscription_info][:customer_id], :subscription_plan_id => params[:subscription_info][:plan_id])
+          @subscription.update_attributes(customer_subscription_id: params[:subscription_info][:customer_subscription_id], stripe_customer_id: params[:subscription_info][:customer_id], subscription_plan_id: params[:subscription_info][:plan_id])
           return result unless (@subscription.amount.to_i != (@subscription_info[:amount].to_i * 100)) || (@subscription.interval != @subscription_info[:interval])
+
           begin
             create_new_plan_and_assign(tenant)
             update_modification_status(tenant)
-          rescue Exception => ex
-            result = check_exception(ex, result)
-            Rollbar.error(ex, ex.message)
+          rescue Exception => e
+            result = check_exception(e, result)
+            Rollbar.error(e, e.message)
           end
         else
-          update_fail_status(result, 'Couldn\'t find a valid subscription for the tenant.');
+          update_fail_status(result, 'Couldn\'t find a valid subscription for the tenant.')
         end
         result
       end
 
       def check_exception(ex, result)
         result['status'] = false
-        if ex.message.include?("does not have a subscription")
-          result['error_messages'] = "Customer does not have any plan subscription."
-        else
-          result['error_messages'] = "Some error occured."
-        end
-        return result
+        result['error_messages'] = if ex.message.include?('does not have a subscription')
+                                     'Customer does not have any plan subscription.'
+                                   else
+                                     'Some error occured.'
+                                   end
+        result
       end
 
       def duplicate(id, duplicate_name)
@@ -351,13 +358,13 @@ module Groovepacker
             is_modified: @tenant.is_modified
           )
           created_tenant.update_attribute(:initial_plan_id, @tenant.initial_plan_id)
-          created_tenant.price = {"bigCommerce_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"shopify_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento2_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"teapplix_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"product_activity_log_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"magento_soap_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"multi_box_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"amazon_fba_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"post_scanning_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"allow_Real_time_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"import_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"inventory_report_option_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""},"custom_product_fields_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "high_sku_feature"=>{"toggle"=>false, "amount"=>50, "stripe_id"=>""}, "double_high_sku"=>{"toggle"=>false, "amount"=>100, "stripe_id"=>""}, "cust_maintenance_1"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "cust_maintenance_2"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "groovelytic_stat_feature"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}, "product_ftp_import"=>{"toggle"=>false, "amount"=>30, "stripe_id"=>""}}
+          created_tenant.price = { 'bigCommerce_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'shopify_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'magento2_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'teapplix_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'product_activity_log_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'magento_soap_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'multi_box_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'amazon_fba_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'post_scanning_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'allow_Real_time_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'import_option_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'inventory_report_option_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'custom_product_fields_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'high_sku_feature' => { 'toggle' => false, 'amount' => 50, 'stripe_id' => '' }, 'double_high_sku' => { 'toggle' => false, 'amount' => 100, 'stripe_id' => '' }, 'cust_maintenance_1' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'cust_maintenance_2' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'groovelytic_stat_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'product_ftp_import' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' } }
           created_tenant.save
-          Subscription.create!(tenant_name: created_tenant.name, tenant_id: created_tenant.id,progress: "transaction_complete" , interval: "month", status: "completed" , user_name: "test", password: "12345678", subscription_plan_id: created_tenant.initial_plan_id)
+          Subscription.create!(tenant_name: created_tenant.name, tenant_id: created_tenant.id, progress: 'transaction_complete', interval: 'month', status: 'completed', user_name: 'test', password: '12345678', subscription_plan_id: created_tenant.initial_plan_id)
           @tenant.duplicate_tenant_id = created_tenant.id
           @tenant.save
           SendStatStream.new.delay(priority: 95).duplicate_groovlytic_tenant(current_tenant, duplicate_name)
-        rescue => e
+        rescue StandardError => e
           update_fail_status(result, e.message)
           Rollbar.error(e, e.message, Apartment::Tenant.current)
         end
@@ -368,7 +375,7 @@ module Groovepacker
         result = result_hash
         begin
           @subscription = tenant.subscription
-          if @subscription && @subscription.stripe_customer_id
+          if @subscription&.stripe_customer_id
             if params['var'] == 'plan'
               plan_id = get_plan_id(params['value'])
               init = Groovepacker::Tenants::TenantInitialization.new
@@ -379,7 +386,7 @@ module Groovepacker
               @subscription.save!
             end
           end
-        rescue => e
+        rescue StandardError => e
           update_fail_status(result, e.message)
         end
         result
@@ -388,7 +395,7 @@ module Groovepacker
       def new_plan_info(tenant)
         rand_value = Random.new.rand(999).to_s
         time_now = Time.current.strftime('%y-%m-%d')
-        return {
+        {
           'plan_id' => time_now + '-' + tenant.name + '-' + rand_value,
           'plan_name' => time_now + ' ' + tenant.name + ' ' + rand_value
         }
@@ -396,6 +403,7 @@ module Groovepacker
 
       def update_modification_status(tenant)
         return if tenant.is_modified
+
         tenant.is_modified = true
         tenant.save
       end
@@ -410,21 +418,25 @@ module Groovepacker
         tenant_hash['inventory_report_toggle'] = tenant.reload.inventory_report_toggle
         tenant_hash['test_tenant_toggle'] = tenant.reload.test_tenant_toggle
         tenant_hash['is_cf'] = tenant.reload.is_cf
-        tenant_hash['last_charge_in_stripe'] = tenant.last_charge_in_stripe.strftime('%a %m/%e/%Y %l:%M:%S %p') rescue nil
+        tenant_hash['last_charge_in_stripe'] = begin
+                                                 tenant.last_charge_in_stripe.strftime('%a %m/%e/%Y %l:%M:%S %p')
+                                               rescue StandardError
+                                                 nil
+                                               end
         Apartment::Tenant.switch! tenant.name
         tenant_hash['last_import_store_type'] = tenant.last_import_store_type || ImportItem.last.try(:store).try(:store_type)
         Apartment::Tenant.switch!
       end
 
       def retrieve_plan_data(tenant_name, tenant_hash)
-        plan_data = get_subscription_data(tenant_name, "index")
+        plan_data = get_subscription_data(tenant_name, 'index')
         tenant_hash['start_day'] = plan_data['start_day']
         tenant_hash['plan'] = plan_data['plan']
         tenant_hash['amount'] = plan_data['amount']
         tenant_hash['progress'] = plan_data['progress']
         tenant_hash['transaction_errors'] = plan_data['transaction_errors']
         tenant_hash['stripe_url'] = plan_data['customer_id']
-        tenant_hash['url'] = tenant_name + ".groovepacker.com"
+        tenant_hash['url'] = tenant_name + '.groovepacker.com'
       end
 
       def retrieve_shipping_data(tenant_name, tenant_hash)
@@ -451,7 +463,8 @@ module Groovepacker
         return unless query.present?
 
         @access_restrictions_per_tenant.merge!(
-          AccessRestriction.find_by_sql(query).group_by { |order| order.tenant_name })
+          AccessRestriction.find_by_sql(query).group_by(&:tenant_name)
+        )
       end
 
       def construct_query_and_get_result(params, search, sort_key, sort_order, query_add)
@@ -461,11 +474,11 @@ module Groovepacker
         base_query = build_query(search, sort_key, sort_order)
 
         result['tenants'] = Tenant.find_by_sql(base_query + query_add)
-        if params[:select_all] || params[:inverted]
-          result['count'] = result['tenants'].length
-        else
-          result['count'] = Tenant.count_by_sql('SELECT count(*) as count from(' + base_query + ') as tmp')
-        end
+        result['count'] = if params[:select_all] || params[:inverted]
+                            result['tenants'].length
+                          else
+                            Tenant.count_by_sql('SELECT count(*) as count from(' + base_query + ') as tmp')
+                          end
         Apartment::Tenant.switch!(current_tenant)
         result
       end
@@ -494,9 +507,13 @@ module Groovepacker
 
       def retrieve_subscription_result(subscription_result, subscription)
         sub_plan_id = subscription.subscription_plan_id
-        subscription_result['plan'] = construct_plan_hash.key(sub_plan_id) || sub_plan_id.capitalize.gsub("-"," ") rescue nil #get_plan_name(sub_plan_id)
+        subscription_result['plan'] = begin
+                                        construct_plan_hash.key(sub_plan_id) || sub_plan_id.capitalize.tr('-', ' ')
+                                      rescue StandardError
+                                        nil
+                                      end # get_plan_name(sub_plan_id)
         subscription_result['plan_id'] = sub_plan_id
-        subscription_result['amount'] = '%.2f' % [(subscription.amount * 100).round / 100.0 / 100.0] if subscription.amount
+        subscription_result['amount'] = format('%.2f', (subscription.amount * 100).round / 100.0 / 100.0) if subscription.amount
         subscription_result['start_day'] = subscription.created_at.strftime('%d %b')
         subscription_result['customer_id'] = subscription.stripe_customer_id if subscription.stripe_customer_id
         subscription_result['email'] = subscription.email if subscription.email
@@ -514,18 +531,38 @@ module Groovepacker
         create_plan(amount,
                     @subscription_info[:interval] || @subscription.interval,
                     plan_info['plan_name'],
-                    "usd",
+                    'usd',
                     plan_id)
-        update_stripe_subscription(plan_id) rescue nil
-        update_subscription_item(plan_id, existing_plan) rescue nil
-        update_annual_subscription(plan_id) rescue nil
+        begin
+          update_stripe_subscription(plan_id)
+        rescue StandardError
+          nil
+        end
+        begin
+          update_subscription_item(plan_id, existing_plan)
+        rescue StandardError
+          nil
+        end
+        begin
+          update_annual_subscription(plan_id)
+        rescue StandardError
+          nil
+        end
         update_app_subscription(plan_id, amount, @subscription_info[:interval]) if @updated_in_stripe == true
-        (existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]]) rescue nil
+        begin
+          (existing_plan.delete unless construct_plan_hash[@subscription_info[:plan]])
+        rescue StandardError
+          nil
+        end
       end
 
       def update_stripe_subscription(plan_id)
         @customer = get_stripe_customer(@subscription.stripe_customer_id)
-        plan = Stripe::Plan.retrieve(plan_id) rescue nil
+        plan = begin
+                 Stripe::Plan.retrieve(plan_id)
+               rescue StandardError
+                 nil
+               end
         if @customer
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
           @trial_end_time = subscription.trial_end
@@ -547,7 +584,7 @@ module Groovepacker
               end
               @updated_in_stripe = true
             rescue Exception => e
-               Rollbar.error(e, e.message, Apartment::Tenant.current)
+              Rollbar.error(e, e.message, Apartment::Tenant.current)
               @updated_in_stripe = false
             end
           end
@@ -561,15 +598,15 @@ module Groovepacker
           if subscription.items.count >= 2
             @trial_end_time = subscription.trial_end
             subscription.items.data.each do |item|
-              if item.plan["id"] ==  existing_plan.id
-                prorate =  (@trial_end_time && (@trial_end_time > Time.current.to_i)) ? false : true
-                begin
-                  Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
-                  @updated_in_stripe = true
-                rescue Exception => e
-                  Rollbar.error(e, e.message, Apartment::Tenant.current)
-                  @updated_in_stripe = false
-                end
+              next unless item.plan['id'] == existing_plan.id
+
+              prorate = @trial_end_time && (@trial_end_time > Time.current.to_i) ? false : true
+              begin
+                Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
+                @updated_in_stripe = true
+              rescue Exception => e
+                Rollbar.error(e, e.message, Apartment::Tenant.current)
+                @updated_in_stripe = false
               end
             end
           end
@@ -579,7 +616,7 @@ module Groovepacker
       def update_annual_subscription(plan_id)
         if @customer
           subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
-          if @customer.subscriptions.count >= 2 && subscription.plan.interval == "year"
+          if @customer.subscriptions.count >= 2 && subscription.plan.interval == 'year'
             if @trial_end_time && (@trial_end_time > Time.current.to_i)
               begin
                 Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
@@ -617,19 +654,23 @@ module Groovepacker
           tenant_hash['most_recent_activity'] = most_recent_login(tenant_name)['date_time']
           last_login = tenant_hash['last_activity']['most_recent_login']
           last_scan =  tenant_hash['last_activity']['most_recent_scan']
-          (tenant_hash['last_activity']['most_recent_scan']['user'] = tenant_hash['last_activity']['most_recent_scan']['user'].username) rescue nil
-          if last_login["date_time"].to_i < last_scan["date_time"].to_i
+          begin
+            (tenant_hash['last_activity']['most_recent_scan']['user'] = tenant_hash['last_activity']['most_recent_scan']['user'].username)
+          rescue StandardError
+            nil
+          end
+          if last_login['date_time'].to_i < last_scan['date_time'].to_i
             tenant_hash['last_activity']['most_recent_login'] = most_recent_scan(tenant_name)
             tenant_hash['last_activity']['most_recent_login']['user'] = tenant_hash['last_activity']['most_recent_login']['user'].username
             tenant_hash['most_recent_activity'] = most_recent_scan(tenant_name)
-            tenant_hash["latest_activity"] = last_scan["date_time"]
+            tenant_hash['latest_activity'] = last_scan['date_time']
           else
-            tenant_hash["latest_activity"] = last_login["date_time"]
+            tenant_hash['latest_activity'] = last_login['date_time']
           end
           check_split_or_production
-        rescue => e
+        rescue StandardError => e
           tenant_hash['most_recent_activity'] = nil
-          tenant_hash["last_activity"] = nil
+          tenant_hash['last_activity'] = nil
           check_split_or_production
         end
         Apartment::Tenant.switch!(current_tenant)
@@ -638,7 +679,7 @@ module Groovepacker
       def check_split_or_production
         Apartment::Tenant.switch!
         db_name = Apartment::Tenant.current
-        db_name.include?("split") ? Apartment::Tenant.switch!('scadmintools') : Apartment::Tenant.switch!('admintools')
+        db_name.include?('split') ? Apartment::Tenant.switch!('scadmintools') : Apartment::Tenant.switch!('admintools')
       end
 
       def activity_data_hash
@@ -668,7 +709,7 @@ module Groovepacker
         @recent_login_per_tenant = Hash.new([])
 
         query = @tenant_names.reduce('') do |_query, t_name|
-          _query += %Q(\
+          _query += %(\
             #{'union' if _query.present?} (select *,'#{t_name}' as 'tenant_name' \
             from #{t_name}.users \
             where(username!='gpadmin' and current_sign_in_at is not null) \
@@ -679,7 +720,8 @@ module Groovepacker
         return unless query.present?
 
         @recent_login_per_tenant.merge!(
-          User.find_by_sql(query).group_by { |order| order.tenant_name })
+          User.find_by_sql(query).group_by(&:tenant_name)
+        )
       end
 
       def most_recent_scan(tenant_name)
@@ -689,7 +731,11 @@ module Groovepacker
 
         if @order
           most_recent_scan_data['date_time'] = @order.scanned_on
-          most_recent_scan_data['user'] = @latest_scanned_order_packing_user_per_tenant[tenant_name].first rescue nil
+          most_recent_scan_data['user'] = begin
+                                            @latest_scanned_order_packing_user_per_tenant[tenant_name].first
+                                          rescue StandardError
+                                            nil
+                                          end
         end
         most_recent_scan_data
       end
@@ -698,7 +744,7 @@ module Groovepacker
         @latest_scanned_orders_per_tenant = Hash.new([])
 
         query = @tenant_names.reduce('') do |_query, t_name|
-          _query += %Q(\
+          _query += %(\
             #{'union' if _query.present?} (select *,'#{t_name}' as 'tenant_name' \
             from #{t_name}.orders \
             where(status='scanned') ORDER BY scanned_on desc LIMIT 1)\
@@ -706,8 +752,10 @@ module Groovepacker
         end
 
         return unless query.present?
+
         @latest_scanned_orders_per_tenant.merge!(
-          Order.find_by_sql(query).group_by { |order| order.tenant_name })
+          Order.find_by_sql(query).group_by(&:tenant_name)
+        )
       end
 
       def latest_scanned_order_packing_user_for_all_tenants
@@ -718,7 +766,7 @@ module Groovepacker
 
           next _query unless user_id
 
-          _query += %Q(\
+          _query += %(\
             #{'union' if _query.present?} (select *,'#{t_name}' as 'tenant_name' \
             from #{t_name}.users \
             where(id=#{user_id}))\
@@ -728,7 +776,8 @@ module Groovepacker
         return unless query.present?
 
         @latest_scanned_order_packing_user_per_tenant.merge!(
-          User.find_by_sql(query).group_by { |user| user.tenant_name})
+          User.find_by_sql(query).group_by(&:tenant_name)
+        )
       end
 
       def rec_subscription(tenant, subscription_result)
@@ -745,7 +794,7 @@ module Groovepacker
 
       def find_parent_tenant(id)
         @parent_tenants ?
-        @parent_tenants.find{|pt| pt.duplicate_tenant_id.eql?(id)} :
+        @parent_tenants.find { |pt| pt.duplicate_tenant_id.eql?(id) } :
         Tenant.find_by_duplicate_tenant_id(id)
       end
 
@@ -755,12 +804,13 @@ module Groovepacker
 
       def sort_param(params)
         return 'most_recent_activity' if params[:sort] == 'last_activity'
+
         params[:sort]
       end
 
       def update_parent(tenant)
         parent = Tenant.find_by_duplicate_tenant_id(tenant.id)
-        parent.update_attribute(:duplicate_tenant_id, nil) if parent
+        parent&.update_attribute(:duplicate_tenant_id, nil)
       end
     end
   end
