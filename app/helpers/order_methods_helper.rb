@@ -389,6 +389,7 @@ module OrderMethodsHelper
       rates_response = ss_client.get_ss_label_rates(data.to_h)
       carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
       next unless rates_response.ok?
+      next if params[:app] && !carrier['expanded']
 
       carrier['rates'] = JSON.parse(rates_response.body)
       carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
