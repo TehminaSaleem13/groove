@@ -6330,7 +6330,7 @@
           <label style="margin-top: 30px; margin-left: 0px; font-size: 35px;line-height: 42px; font-weight: 400px">Total Items:  <%= order_count %></label>
         </div>
         <div class="span8" style="margin-top: -130px;">
-          <div style="width: 550px; margin-left: -80px; text-align: left;"> 
+          <div style="width: 550px; margin-left: -135px; text-align: left;"> 
             <% barcode_string = generate_order_barcode(@order.increment_id) %>
             <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:150px; width:480px; overflow:hidden;">
               <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto;width: 480px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 480}) %></div>
@@ -6350,7 +6350,7 @@
       </div>
 
       <div class="span12" style="border-collapse: collapse; font-size: 30px; width: 86%;">
-        <table style="margin-left:0px; width: 90%;">
+        <table style="margin-left:0px; width: 85%;">
           <thead>
           <td colspan="2"> Item</td>
           <td> Description</td>
@@ -6426,7 +6426,7 @@
             <label style="margin-top: 30px; margin-left:0px; font-size: 35px;line-height: 42px; font-weight: 400px">Total Items:  <%= order_count %></label>
           </div>
           <div class="span8" style="margin-top: -110px;">
-          <div style="width: 550px; margin-left: -80px; text-align: left;"> 
+          <div style="width: 550px; margin-left: -150px; text-align: left;"> 
             <% barcode_string = generate_order_barcode(@order.increment_id) %>
             <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:120px; width:480px; overflow:hidden;">
               <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto; width: 480px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 480}) %></div>
@@ -6448,7 +6448,7 @@
         </div>
 
         <div class="span4" style="border-collapse: collapse; font-size: 30px; width: 86%;">
-          <table style="margin-left:0px; width: 90%;">
+          <table style="margin-left:0px; margin-top:-30px; width: 83%;">
             <thead>
             <td colspan="2"> Item</td>
             <td> Description</td>
