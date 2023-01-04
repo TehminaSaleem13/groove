@@ -97,7 +97,7 @@ class AddLogCsv
 
     GroovS3.create_csv(current_tenant, 'send_bulk_event_logs', store_id, file_data, :public_read)
     url = GroovS3.find_csv(current_tenant, 'send_bulk_event_logs', store_id).url.gsub('http:', 'https:')
-    CsvExportMailer.send_bulk_record_csv(url,current_tenant).deliver
+    CsvExportMailer.send_bulk_record_csv(url,params[:tenant_names][0]).deliver
   end
 
   def get_duplicates_order_info(params)
