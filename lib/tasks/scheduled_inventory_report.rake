@@ -9,34 +9,40 @@ namespace :doo do
       failed_tenant = []
       tenants = Tenant.order(:name)
       tenants.each do |tenant|
-        Apartment::Tenant.switch! tenant.name
-        Time.use_zone(GeneralSetting.new_time_zone) do
-          product_inv_setting = InventoryReportsSetting.last
-          # gn_setting = GeneralSetting.first
-          #  time = product_inv_setting.time_to_send_report_email - gn_setting.time_zone.to_i.seconds
-          time = product_inv_setting.time_to_send_report_email
-          #  time -= 3600 unless gn_setting.dst
-          day = time.strftime('%A')
-          result = false
-          if day == 'Sunday' && product_inv_setting.send_email_on_sun
-            result = true
-          elsif day == 'Monday' && product_inv_setting.send_email_on_mon
-            result = true
-          elsif day == 'Tuesday' && product_inv_setting.send_email_on_tue
-            result = true
-          elsif day == 'Wednesday' && product_inv_setting.send_email_on_wed
-            result = true
-          elsif day == 'Thursday' && product_inv_setting.send_email_on_thurs
-            result = true
-          elsif day == 'Friday' && product_inv_setting.send_email_on_fri
-            result = true
-          elsif day == 'Saturday' && product_inv_setting.send_email_on_sat
-            result = true
+        begin
+          Apartment::Tenant.switch! tenant.name
+          Time.use_zone(GeneralSetting.new_time_zone) do
+            product_inv_setting = InventoryReportsSetting.last
+            # gn_setting = GeneralSetting.first
+            #  time = product_inv_setting.time_to_send_report_email - gn_setting.time_zone.to_i.seconds
+            time = product_inv_setting.time_to_send_report_email
+            #  time -= 3600 unless gn_setting.dst
+            # day = time.strftime('%A')
+            current_day = Time.current.strftime("%A")
+            result = false
+            scheduled_report = ProductInventoryReport.where(scheduled: true)
+            unless scheduled_report.empty?
+              if product_inv_setting.send_email_on_sun == true && product_inv_setting.send_email_on_sun && current_day == "Sunday"
+                result = true
+              elsif product_inv_setting.send_email_on_mon == true && product_inv_setting.send_email_on_mon && current_day == "Monday"
+                result = true
+              elsif product_inv_setting.send_email_on_tue == true && product_inv_setting.send_email_on_tue && current_day == "Tuesday"
+                result = true
+              elsif product_inv_setting.send_email_on_wed == true && product_inv_setting.send_email_on_wed && current_day == "Wednesday"
+                result = true
+              elsif product_inv_setting.send_email_on_thurs == true && product_inv_setting.send_email_on_thurs && current_day == "Thursday"
+                result = true
+              elsif product_inv_setting.send_email_on_fri == true && product_inv_setting.send_email_on_fri && current_day == "Friday"
+                result = true
+              elsif product_inv_setting.send_email_on_sat == true && product_inv_setting.send_email_on_sat && current_day == "Saturday"
+                result = true
+              end
+            end
+            tenant_name = tenant.name
+            InventoryReportMailer.delay(run_at: time.strftime('%H:%M:%S'), queue: "schedule_inventory_report_#{tenant_name}", priority: 95).auto_inventory_report(false, nil, nil, tenant_name) if result == true
           end
-          tenant_name = tenant.name
-          InventoryReportMailer.delay(run_at: time.strftime('%H:%M:%S'), queue: "schedule_inventory_report_#{tenant_name}", priority: 95).auto_inventory_report(false, nil, nil, tenant_name) if result == true
+        rescue StandardError
         end
-      rescue StandardError
       end
     end
     exit(1)
