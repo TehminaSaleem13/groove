@@ -81,23 +81,22 @@ module ApplicationHelper
   end
 
   def settings_to_generate_packing_slip
-    @page_height = '11'
-    @page_width = '8.5'
-
-    if GeneralSetting.get_packing_slip_size == '4 x 6'
+    case current_user.packing_slip_size
+    when '4 x 6'
       @page_height = '6'
       @page_width = '4'
-    end
-    if GeneralSetting.get_packing_slip_size == '4 x 4'
+    when '4 x 4'
       @page_height = '4'
       @page_width = '4'
-    end
-    if GeneralSetting.get_packing_slip_size == '4 x 2'
+    when '4 x 2'
       @page_height = '2'
       @page_width = '4'
+    else
+      @page_height = '11'
+      @page_width = '8.5'
     end
 
-    @size = GeneralSetting.get_packing_slip_size
+    @size = current_user.packing_slip_size
     @orientation = GeneralSetting.get_packing_slip_orientation
     @result['data'] = { 'packing_slip_file_paths' => [] }
     @page_height = (@page_height.to_f / 2).to_s if @orientation == 'landscape'

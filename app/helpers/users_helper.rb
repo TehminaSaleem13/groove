@@ -166,6 +166,7 @@ module UsersHelper
     @user.custom_field_one = params[:custom_field_one]
     @user.custom_field_two = params[:custom_field_two]
     @user.warehouse_postcode = params[:warehouse_postcode]
+    @user.packing_slip_size = params[:packing_slip_size]
   end
 
   def assign_user_role(params)
