@@ -37,6 +37,33 @@ RSpec.describe ProductsController, type: :controller do
       get :show, params: { id: kit.id }
       expect(response.status).to eq(200)
     end
+
+    it 'Get Inventory Settings' do
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'PRODUCT2')
+      product_sku = FactoryBot.create(:product_barcode, barcode: 'PRODUCT_SKU2', product_id: product.id)
+      request.accept = 'application/json'
+
+      get :get_inventory_setting, params: { id: product.id}
+      expect(response.status).to eq(200)
+    end
+
+    it 'Update generic' do
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'PRODUCT3')
+      product_image = FactoryBot.create(:product_image, image: "MyString", product_id: product.id)
+      request.accept = 'application/json'
+
+      post :update_generic, params: { id: product_image.id, flag: 1 }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Generate Barcode' do
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'PRODUCT3')
+      product_sku = FactoryBot.create(:product_barcode, barcode: 'PRODUCT_SKU3', product_id: product.id)
+      request.accept = 'application/json'
+
+      get :generate_barcode, params: { id: product.id, productArray: [{ id: product.id }] }
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Permit Shared Imports' do

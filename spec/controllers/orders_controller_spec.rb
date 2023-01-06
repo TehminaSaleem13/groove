@@ -454,10 +454,76 @@ RSpec.describe OrdersController, type: :controller do
       end
     end
 
-    it 'Print Packing Slip' do
+    it 'Print Packing Slip 4 x 4' do
       order = FactoryBot.create :order, store_id: @store.id
+      @user = FactoryBot.create(:user, name: 'Tester',username: 'packing_slip_tester1', packing_slip_size: '4 x 4')
 
       post :generate_packing_slip, params: { orderArray: [{ id: order.id }] }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Print Packing Slip 4 x 2' do
+      order = FactoryBot.create :order, store_id: @store.id
+      @user = FactoryBot.create(:user, name: 'Tester',username: 'packing_slip_tester2', packing_slip_size: '4 x 2')
+
+      post :generate_packing_slip, params: { orderArray: [{ id: order.id }] }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Print Packing Slip' do
+      order = FactoryBot.create :order, store_id: @store.id
+      @user = FactoryBot.create(:user, name: 'Tester',username: 'packing_slip_tester1', packing_slip_size: '8.5 x 11')
+
+      post :generate_packing_slip, params: { orderArray: [{ id: order.id }] }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Show Order' do
+      @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+      store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true) 
+      ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id) 
+      order = FactoryBot.create :order, store_id: @store.id
+      params = {id: order.id}
+
+      get :show, params: params
+      expect(response.status).to eq(200)
+    end
+
+    it 'Get Real Time Rates' do
+      @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+      store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true) 
+      ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id) 
+      order = FactoryBot.create :order, store_id: @store.id
+      params = { credential_id: ss_credential.id, carrier_code: "fedex", post_data: {weight: '10',fromPostalCode: '10005',toState: 'South Carolina',toCountry: 'US',toPostalCode: '25918-2743',confirmation_code: 'none'} }
+      
+      post :get_realtime_rates, params: params
+      expect(response.status).to eq(200)
+    end
+
+    it 'Record Exception' do
+      order = FactoryBot.create :order, store_id: @store.id
+
+      request.accept = 'application/json'
+
+      post :record_exception, params: { id: order.id, reason: '' }
+      expect(response.status).to eq(200)
+    end
+    
+    it 'Saved By Pass Log' do
+      order = FactoryBot.create :order, store_id: @store.id
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      product_sku = FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
+      request.accept = 'application/json'
+      
+      post :save_by_passed_log, params: { id: order.id, sku: product_sku.sku }
+      expect(response.status).to eq (200)
+    end
+
+    it 'Generate pick list' do
+      order = FactoryBot.create :order, store_id: @store.id
+      request.accept = 'application/json'
+
+      post :generate_pick_list, params:{ orderArray: [{ id: order.id }] }
       expect(response.status).to eq(200)
     end
 

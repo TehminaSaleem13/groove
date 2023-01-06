@@ -658,6 +658,17 @@ RSpec.describe ScanPackController, type: :controller do
       result = JSON.parse(response.body)
       expect(result['data']['order']['next_item']['qty_remaining']).to eq(4)
     end
+
+    it 'Get Shipment' do
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'sp_store', store_type: 'ShippingEasy', inventory_warehouse: inv_wh, status: true)
+      sp_credential = FactoryBot.create(:shipping_easy_credential, store_id: store.id) 
+      order = FactoryBot.create(:order, increment_id: 'ORDER-TEST', store: store)
+      request.accept = 'application/json'
+
+      post :get_shipment, params: { order_id: order.id, store_id: store.id}
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Expo Logs Process' do
@@ -804,6 +815,26 @@ RSpec.describe ScanPackController, type: :controller do
         expect(response.status).to eq(200)
         expect(@order.reload.post_scanning_flag).to eq('Barcode')
       end
+    end
+  end
+
+  describe 'Order Status' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      product = FactoryBot.create(:product, :with_sku_barcode)
+
+      @order = FactoryBot.create(:order, status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: @order, name: product.name, scanned_status: 'scanned')
+    end
+
+    it 'Change Order Status To Scanned' do
+      post :order_change_into_scanned, params: { id: @order.id}
+      expect(response.status).to eq(200)
     end
   end
 end

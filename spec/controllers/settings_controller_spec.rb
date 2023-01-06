@@ -143,6 +143,13 @@ RSpec.describe SettingsController, type: :controller do
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)
     end
+
+    it 'Update Stat Status' do
+      @tenant = Tenant.create(name: Apartment::Tenant.current)
+      request.accept = 'application/json'
+      post :update_stat_status, params: { percentage: 100 }
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Basic Functions' do

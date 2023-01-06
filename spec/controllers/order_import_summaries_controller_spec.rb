@@ -46,5 +46,39 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)).should_not be_nil
     end
+
+    it 'Fix Imported at' do
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'bc_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'bc_store', store_type: 'BigCommerce', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'se_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'se_store', store_type: 'ShippingEasy', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'ss_store', store_type: 'Shipstation API 2', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'tp_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'tp_store', store_type: 'Teapplix', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'mg_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'mg_store', store_type: 'Magento', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'sp_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'sp_store', store_type: 'Shopify', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'az_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'az_store', store_type: 'Amazon', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+
+      inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ma_inventory_warehouse')
+      store = FactoryBot.create(:store, name: 'ma_store', store_type: 'Magento API 2', inventory_warehouse: inv_wh, status: true)
+      get :fix_imported_at, params: {store_id: store.id}
+    end
   end
 end

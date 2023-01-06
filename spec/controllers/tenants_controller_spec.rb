@@ -112,6 +112,61 @@ RSpec.describe TenantsController, type: :controller do
       tenant.destroy
     end
 
+    it 'Update Scan Workflow' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+      Apartment::Tenant.switch! tenant.name
+
+      request.accept = 'application/json'
+
+      post :update_scan_workflow, params: { tenant_id: tenant.id, workflow: 'default' }
+      # post :update_access_restrictions, params: { id: tenant.id, basicinfo: {id: tenant.id, orders_delete_days: 14, is_multi_box: true} }
+      # post :update_scheduled_import_toggle, params: { tenant_id: tenant.id }
+      # post :clear_all_imports
+      expect(response.status).to eq(200)
+
+      tenant.destroy
+    end
+
+    it 'Update Access Restriction' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+      Apartment::Tenant.switch! tenant.name
+
+      request.accept = 'application/json'
+
+      post :update_access_restrictions, params: { id: tenant.id, basicinfo: {id: tenant.id, orders_delete_days: 14, is_multi_box: true} }
+      expect(response.status).to eq(200)
+
+      tenant.destroy
+    end
+
+    it 'Update Scheduled Import Toggle' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+      Apartment::Tenant.switch! tenant.name
+
+      request.accept = 'application/json'
+
+      post :update_scheduled_import_toggle, params: { tenant_id: tenant.id }
+      expect(response.status).to eq(200)
+
+      tenant.destroy
+    end
+
+    it 'Clear All Imports' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+      Apartment::Tenant.switch! tenant.name
+
+      request.accept = 'application/json'
+
+      post :clear_all_imports
+      expect(response.status).to eq(200)
+
+      tenant.destroy
+    end
+
     context 'Admintools' do
       it 'fixes corrupt product data' do
         tenant = Apartment::Tenant.current

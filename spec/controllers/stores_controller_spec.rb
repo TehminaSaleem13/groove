@@ -233,12 +233,20 @@ RSpec.describe StoresController, type: :controller do
       ship_store_credentials = ShipstationRestCredential.create(api_key: '14ccf1296c2043cb9076b90953b7ea9c', api_secret: '26fc8ff9f7a7411180d2960eb838e2ca', last_imported_at: nil, store_id: @ship_store.id, created_at: '2021-03-26 08:23:45', updated_at: '2021-05-10 07:57:55', shall_import_awaiting_shipment: true, shall_import_shipped: false, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: false, quick_import_last_modified: nil, use_chrome_extention: true, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: false, bulk_import: false, order_import_range_days: 14, quick_import_last_modified_v2: '2021-04-22 22:53:15', import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: '', label_shortcuts: { 'w' => 'weight', nil => nil, 'd' => 'USPS Parcel Select Ground - Package', '5' => 'Print Label' }, disabled_carriers: ['ups_walleted'], disabled_rates: {}, skip_ss_label_confirmation: true)
     end
 
-    it 'Shipstation  Store Settings' do
+    it 'Shipstation Store Settings' do
       request.accept = 'application/json'
       post :create_update_store, params: { 'file_path' => '', 'inventory_warehouse_id' => '1', 'is_fba' => 'false', 'product_ftp_import' => 'false', 'id' => @ship_store.id, 'name' => 'Shipstation Orders', 'status' => 'true', 'store_type' => 'Shipstation API 2', 'order_date' => 'null', 'created_at' => '2020-10-11T02:29:20.000Z', 'updated_at' => '2021-05-25T07:51:42.000Z', 'thank_you_message_to_customer' => 'null', 'auto_update_products' => 'false', 'update_inv' => 'false', 'on_demand_import' => 'false', 'fba_import' => 'false', 'csv_beta' => 'true', 'is_verify_separately' => 'null', 'split_order' => 'null', 'product_add' => 'null', 'product_export' => 'null', 'on_demand_import_v2' => 'true', 'regular_import_v2' => 'true', 'quick_fix' => 'true', 'troubleshooter_option' => 'true', 'allow_bc_inv_push' => 'false', 'allow_mg_rest_inv_push' => 'false', 'allow_shopify_inv_push' => 'false', 'allow_teapplix_inv_push' => 'false', 'allow_magento_soap_tracking_no_push' => 'false', 'use_chrome_extention' => 'false', 'use_api_create_label' => 'false', 'ss_api_create_label' => 'false', 'switch_back_button' => 'true', 'return_to_order' => 'false', 'auto_click_create_label' => 'false', 'api_key' => '7dfa40094387480992148bb501ed4f7d', 'api_secret' => '1924a70194f84d21bd37644e8b745ee5', 'shall_import_awaiting_shipment' => 'true', 'shall_import_shipped' => 'true', 'shall_import_pending_fulfillment' => 'true', 'shall_import_customer_notes' => 'false', 'shall_import_internal_notes' => 'true', 'hex_barcode' => 'undefined', 'regular_import_range' => '5', 'import_days' => '0,1,2,3,4,5,6', 'warehouse_location_update' => 'false', 'gp_ready_tag_name' => 'GP Ready', 'gp_imported_tag_name' => 'GP Imported', 'gen_barcode_from_sku' => 'true', 'import_upc' => 'true', 'allow_duplicate_order' => 'false', 'tag_import_option' => 'true', 'order_import_range_days' => '190', 'import_tracking_info' => 'true', 'postcode' => '', 'skip_ss_label_confirmation' => 'false', 'enabled_status' => 'true' }
       shipstation = ShipstationRestCredential.where(store_id: @ship_store.id)
       expect(response.status).to eq(200)
       expect(shipstation.first.gen_barcode_from_sku).to eq(true)
+    end
+
+    it 'Fetch Label Related Data' do
+      request.accept = 'application/json'
+      order = FactoryBot.create(:order, increment_id: "SS_3453", store_id: @store.id)
+
+      post :fetch_label_related_data, params: { id: order.id}
+      expect(response.status).to eq (200)
     end
   end
 
@@ -284,6 +292,20 @@ RSpec.describe StoresController, type: :controller do
       get :toggle_shopify_sync, params: { id: shopify_store.id, type: 'enable' }
       expect(response.status).to eq(200)
     end
+
+    it 'Export Active Products' do
+      request.accept = 'application/json'
+
+      get :export_active_products
+      expect(response.status).to eq(200)
+
+      product = FactoryBot.create(:product, store_id: @store.id)
+      product_sku = FactoryBot.create(:product_sku, sku: 'BEFORE_SKU', product_id: product.id)
+      request.accept = 'application/json'
+
+      get :export_active_products
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Show Store' do
@@ -303,6 +325,59 @@ RSpec.describe StoresController, type: :controller do
       shopify_store = Store.where(store_type: 'Shopify').last
 
       get :show, params: { id: shopify_store.id }
+      expect(response.status).to eq(200)
+    end
+  end
+
+  describe 'Ebay' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      ebay_store = Store.create(name: 'Ebay', status: true, store_type: 'Ebay', inventory_warehouse: InventoryWarehouse.last, on_demand_import: true)
+      ebay_store_credentials = EbayCredentials.create(store_id: ebay_store.id)
+    end
+
+    it 'Update Ebay User Token' do
+      request.accept = 'application/json'
+
+      eb_store = Store.where(store_type: 'Ebay').last
+
+      get :update_ebay_user_token, params: { id: eb_store.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Delete Ebay Token' do
+      request.accept = 'application/json'
+
+      eb_store = Store.where(store_type: 'Ebay').last
+
+      get :delete_ebay_token, params: { id: eb_store.id }
+      expect(response.status).to eq(200)
+    end
+  end
+
+  describe 'Amazon' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      amazon_store = Store.create(name: 'Amazon', status: true, store_type: 'Amazon', inventory_warehouse: InventoryWarehouse.last, on_demand_import: true)
+      amazon_store_credentials = AmazonCredentials.create(store_id: amazon_store.id)
+    end
+
+    it 'Amazon FBA' do
+      request.accept = 'application/json'
+
+      am_store = Store.where(store_type: 'Amazon').last
+
+      get :amazon_fba, params: { store_id: am_store.id }
       expect(response.status).to eq(200)
     end
   end

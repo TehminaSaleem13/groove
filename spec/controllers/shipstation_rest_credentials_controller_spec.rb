@@ -39,5 +39,38 @@ RSpec.describe ShipstationRestCredentialsController, type: :controller do
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)
     end
+
+    it 'Set Carrier Visibilit' do
+      post :set_carrier_visibility, params: { credential_id: @shipstation.id, carrier_code: "fedex"}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+    end
+
+    it 'Set Rate Visibility' do
+      post :set_rate_visibility, params: { credential_id: @shipstation.id}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+    end
+
+    it 'Update Product Image' do
+      put :update_product_image, params: {store_id: @store.id, credential_id: @shipstation.id}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+    end
+
+    it 'Switch Back Button' do
+      put :switch_back_button, params: {store_id: @store.id, credential_id: @shipstation.id}
+      expect(response.status).to eq(200)
+    end
+
+    it 'Use Chrome Extension' do
+      put :use_chrome_extention, params: {store_id: @store.id, credential_id: @shipstation.id}
+      expect(response.status).to eq(200)
+    end
+
+    it 'Auto Click Create Label' do
+      put :auto_click_create_label, params: {store_id: @store.id, credential_id: @shipstation.id}
+      expect(response.status).to eq(200)
+    end
   end
 end
