@@ -394,16 +394,15 @@ class OrdersController < ApplicationController
       $redis.set("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 'cancelled')
       $redis.expire("#{Apartment::Tenant.current}-#{OrderImportSummary.first.id}", 20_000)
       change_status_to_cancel
-      ahoy.track(
-        'Order Import',
-        {
-          title: 'Order Import Canceled',
-          tenant: Apartment::Tenant.current,
-          user_id: current_user.id,
-          store_id: params[:store_id]
-        },
-        time: Time.current
-      )
+      properties = {
+        title: 'Order Import Canceled',
+        tenant: Apartment::Tenant.current,
+        user_id: current_user.id,
+        username: current_user.username,
+        store_id: params[:store_id]
+      }
+      ahoy.track('Order Import', properties, time: Time.current)
+      Ahoy::Event.create(version_2: true, time: Time.current, properties: properties)
     end
     render json: @result
   end
@@ -514,10 +513,10 @@ class OrdersController < ApplicationController
         carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
         carrier['rates'].map do |r|
           r['visible'] = !(begin
-                                                      (ss_credential.disabled_rates[carrier['code']].include? r['serviceName'])
-                           rescue StandardError
-                             false
-                                                    end)
+                            (ss_credential.disabled_rates[carrier['code']].include? r['serviceName'])
+                          rescue StandardError
+                            false
+                          end)
         end
         carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
         next unless carrier['code'] == 'stamps_com'
