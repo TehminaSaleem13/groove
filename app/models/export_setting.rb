@@ -186,6 +186,7 @@ class ExportSetting < ActiveRecord::Base
     if box.present?
       single_row[:ordered_qty] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
       single_row[:box_number] = box.name.split(' ').last
+      single_row[:box_id] = box.id
     end
   end
 
