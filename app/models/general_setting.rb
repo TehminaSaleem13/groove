@@ -37,6 +37,7 @@ class GeneralSetting < ActiveRecord::Base
   after_update :inventory_state_change_check
   before_save :validate_params
   after_commit :log_events
+  after_commit :update_user_packing_slip_sizes
   before_save :validate_barcode_length_and_starting_value
   @@all_tenants_settings = {}
 
@@ -361,5 +362,13 @@ class GeneralSetting < ActiveRecord::Base
     result[:packing_cam] = current_tenant&.packing_cam
     result[:product_activity] = current_tenant&.product_activity_switch
     result
+  end
+
+  private
+
+  def update_user_packing_slip_sizes
+    return unless saved_change_to_packing_slip_size?
+
+    User.update_all(packing_slip_size: packing_slip_size)
   end
 end
