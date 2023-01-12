@@ -75,6 +75,7 @@ module SettingsHelper
         display_location string_removal_enabled string_removal
         first_escape_string_enabled second_escape_string_enabled
         second_escape_string order_verification scan_by_packing_slip
+        pass_scan pass_scan_barcode
         return_to_orders scanning_sequence click_scan click_scan_barcode
         scanned scanned_barcode partial partial_barcode post_scanning_option_second
         require_serial_lot valid_prefixes replace_gp_code single_item_order_complete_msg

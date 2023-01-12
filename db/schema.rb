@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20221205132045) do
+ActiveRecord::Schema.define(version: 20221220102615) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1062,6 +1062,8 @@ ActiveRecord::Schema.define(version: 20221205132045) do
     t.text "customer_page_message"
     t.string "customer_page_logo"
     t.boolean "scanning_log", default: false
+    t.boolean "pass_scan", default: true
+    t.string "pass_scan_barcode", default: "PASS"
   end
 
   create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
