@@ -51,5 +51,21 @@ RSpec.describe UsersController, type: :controller do
       expect(response.status).to eq(200)
       @tenant.destroy
     end
+
+    it 'Show User' do 
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!(tenant.to_s)
+      @tenant = Tenant.create(name: tenant.to_s)
+      user_role = FactoryBot.create(:role, name: 'tester_role', add_edit_users: true)
+      @user = FactoryBot.create(:user, name: 'Admin User', username: 'tester', role: user_role, confirmation_code: 12312)
+      request.accept = 'application/json'
+
+      get :show, params: {id: @user.id, confirmation_code: @user.confirmation_code}
+      expect(response.status).to eq(200)
+
+      get :show, params: {id: @user.id}
+      expect(response.status).to eq(200)
+      @tenant.destroy
+    end
   end
 end
