@@ -218,7 +218,11 @@ class UsersController < ApplicationController
   end
 
   def show
-    @user = User.find(params[:id])
+    @user = if params[:confirmation_code].present?
+      User.find_by_confirmation_code(params[:confirmation_code])
+    else
+      User.find(params[:id])
+    end
     result = {}
 
     if !@user.nil?

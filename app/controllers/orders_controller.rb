@@ -139,7 +139,8 @@ class OrdersController < ApplicationController
   end
 
   def change_orders_status
-    if current_user.can? 'change_order_status'
+    @user = User.find_by_confirmation_code(params[:confirmation_code])
+    if current_user.can? 'change_order_status' or @user.can? 'change_order_status'
       GrooveBulkActions.execute_groove_bulk_action('status_update', params, current_user, list_selected_orders)
       # list_selected_orders.each { |order| change_order_status(order) }
     else
