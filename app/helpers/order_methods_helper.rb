@@ -374,8 +374,7 @@ module OrderMethodsHelper
     order_ss_label_data['available_carriers'].each do |carrier|
       carrier['visible'] = !(ss_rest_credential.disabled_carriers.include? carrier['code'])
       carrier['expanded'] = !(ss_rest_credential.contracted_carriers.include? carrier['code'])
-      next if params[:app] && !carrier['expanded']
-      next unless carrier['visible']
+      next unless should_show_carrier(params[:app], carrier, order_ss_label_data['carrierCode'])
 
       data = {
         carrierCode: carrier['code'],
@@ -389,7 +388,6 @@ module OrderMethodsHelper
       rates_response = ss_client.get_ss_label_rates(data.to_h)
       carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
       next unless rates_response.ok?
-      next if params[:app] && !carrier['expanded']
 
       carrier['rates'] = JSON.parse(rates_response.body)
       carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
@@ -484,5 +482,15 @@ module OrderMethodsHelper
     return false unless Tenant.find_by_name(Apartment::Tenant.current)&.ss_api_create_label
 
     store&.store_type === 'Shipstation API 2' && store&.shipstation_rest_credential&.use_api_create_label
+  end
+
+  private
+
+  def should_show_carrier(ex_app, carrier_data, carrier_code)
+    return true if carrier_code.present? && carrier_data['code'] == carrier_code
+ 
+    return false if ex_app && !carrier_data['expanded']
+
+    !!carrier_data['visible']
   end
 end
