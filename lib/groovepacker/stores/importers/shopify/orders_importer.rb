@@ -166,7 +166,7 @@ module Groovepacker
             @import_item.current_order_items = order['line_items'].length
             @import_item.current_order_imported_item = 0
             @import_item.save
-            order['line_items'] = order['line_items'].reject { |h| h['fulfillment_status'].nil? && h['fulfillable_quantity'] == 0 }
+            # order['line_items'] = order['line_items'].reject { |h| h['fulfillment_status'].nil? && h['fulfillable_quantity'] == 0 }
             order['line_items'] = check_removed_items_quantity(order)
             order['line_items'].each do |item|
               order_item = import_order_item(order_item, item)
@@ -305,7 +305,7 @@ module Groovepacker
                                          end
               end
             end
-            order['line_items']
+            order['line_items'].reject { |item| item['quantity'] <= 0 }
           rescue StandardError
             order['line_items']
           end
