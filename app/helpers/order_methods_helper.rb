@@ -385,6 +385,10 @@ module OrderMethodsHelper
         confirmation: order_ss_label_data['confirmation']
       }
       data = data.merge(weight: order_ss_label_data['weight']) if order_ss_label_data['weight']
+
+      should_fetch_rates = should_show_carrier(params[:app], carrier, nil)
+      next unless should_fetch_rates
+
       rates_response = ss_client.get_ss_label_rates(data.to_h)
       carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
       next unless rates_response.ok?
