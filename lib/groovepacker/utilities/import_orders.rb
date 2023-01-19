@@ -323,6 +323,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       shipwork_handler = Groovepacker::Stores::Handlers::ShipworksHandler.new(credential.store, import_item)
       context = Groovepacker::Stores::Context.new(shipwork_handler)
       context.import_order(value['ShipWorks']['Customer']['Order'])
+      Tenant.save_se_import_data("========Shipworks Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Value', value)
     end
   end
 
