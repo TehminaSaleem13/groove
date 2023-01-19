@@ -156,6 +156,7 @@ module Groovepacker
           value = Hash.from_xml(request.body.read)
           if Tenant.where(name: tenant).last.is_delay == false
             status = create_or_update_item(credential, status, value)
+            Tenant.save_se_import_data("========Shipworks Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Value', value)
           else
             return 401 if credential.nil? || !credential.store.status
 
