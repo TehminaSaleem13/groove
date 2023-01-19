@@ -13,9 +13,9 @@ FactoryBot.define do
     address_1 { "7-1-79, SV's Meera Mansion" }
     address_2 { 'Ameerpet, Hyderabad' }
     city { 'Hyderabad' }
-    state { 'Andhra Pradesh' }
-    postcode { '500016' }
-    country { 'India' }
+    state { 'OR' }
+    postcode { '29212' }
+    country { 'US' }
     status { 'awaiting' }
     scanned_on { '' }
   end
