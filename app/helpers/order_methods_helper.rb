@@ -390,9 +390,9 @@ module OrderMethodsHelper
       next unless rates_response.ok?
 
       should_fetch_rates = should_show_carrier(params[:app], carrier, nil)
+
       unless  should_fetch_rates
         carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
-        carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
         order_ss_label_data['service'] = carrier['services'].select { |c| c['code'] == order_ss_label_data['serviceCode'] }.first if order_ss_label_data['serviceCode'].present? && carrier['code'] == 'stamps_com' && order_ss_label_data['carrierCode'].present? && carrier['code'] == order_ss_label_data['carrierCode']
       end
       next unless should_fetch_rates
