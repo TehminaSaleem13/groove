@@ -387,13 +387,16 @@ module OrderMethodsHelper
       data = data.merge(weight: order_ss_label_data['weight']) if order_ss_label_data['weight']
 
       should_fetch_rates = should_show_carrier(params[:app], carrier, nil)
-      next unless should_fetch_rates
 
-      rates_response = ss_client.get_ss_label_rates(data.to_h)
-      carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
-      next unless rates_response.ok?
+      rate_error = false
+      if should_fetch_rates
+        rates_response = ss_client.get_ss_label_rates(data.to_h)
+        carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
+        rate_error = !rates_response.ok?
+      end
+      next if rate_error
 
-      carrier['rates'] = JSON.parse(rates_response.body)
+      carrier['rates'] = should_fetch_rates ? JSON.parse(rates_response.body) : []
       carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
       carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
       if order_ss_label_data['carrierCode'].present? && carrier['code'] == order_ss_label_data['carrierCode']
