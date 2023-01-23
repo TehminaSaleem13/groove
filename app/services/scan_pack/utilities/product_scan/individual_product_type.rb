@@ -34,14 +34,15 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
       # from LotNumber Module
 
       store_lot_number(order_item, serial_added)
+      option_product_id = ProductKitSkus.find_by(id: order_item_kit_product.product_kit_skus_id).option_product_id
 
       if order_item_kit_product.present?
         do_if_order_item_kit_product_present(
           [item, child_item, serial_added, clicked, order_item_kit_product, type_scan]
         )
-        insert_in_box(order_item, order_item_kit_product.id) if GeneralSetting.last.multi_box_shipments? && !child_item['record_serial'] && !should_remove_kit_item?(clean_input, child_item['skippable'])
+        insert_in_box(order_item, order_item_kit_product.id, option_product_id) if GeneralSetting.last.multi_box_shipments? && !child_item['record_serial'] && !should_remove_kit_item?(clean_input, child_item['skippable'])
         if child_item['record_serial'] && serial_added && GeneralSetting.last.multi_box_shipments?
-          insert_in_box(order_item, order_item_kit_product.id) unless should_remove_kit_item?(clean_input, child_item['skippable'])
+          insert_in_box(order_item, order_item_kit_product.id, option_product_id) unless should_remove_kit_item?(clean_input, child_item['skippable'])
         end
         remove_kit_item_from_order(child_item) if should_remove_kit_item?(clean_input, child_item['skippable'])
       end
@@ -99,29 +100,29 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
     @session[:parent_order_item] = item['order_item_id']
   end
 
-  def insert_in_box(item, kit_id)
+  def insert_in_box(item, kit_id, product_id)
     if @box_id.blank?
       box = Box.find_or_create_by(name: 'Box 1', order_id: item.order.id)
       @box_id = box.id
-      order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
+      order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id, product_id: product_id).first
       if order_item_box.nil?
-        OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id)
+        OrderItemBox.create(order_item_id: item.id, box_id: box.id, item_qty: @typein_count, kit_id: kit_id, product_id: product_id)
       else
-        if_order_item_present(item, kit_id)
+        if_order_item_present(item, kit_id, product_id)
       end
     else
-      if_order_item_present(item, kit_id)
+      if_order_item_present(item, kit_id, product_id)
     end
   end
 
-  def if_order_item_present(item, kit_id)
+  def if_order_item_present(item, kit_id, product_id)
     box = Box.find_by_id(@box_id)
     if @single_order.id == box.order_id
-      order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id).first
+      order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id, product_id: product_id).first
       if order_item_box
         order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
       else
-        OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id)
+        OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id, product_id: product_id)
       end
     end
   end

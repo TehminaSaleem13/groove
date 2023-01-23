@@ -40,9 +40,9 @@ module ScanPack::Utilities::ProductScan::ProcessScan
     if @box_id.blank?
       box = Box.find_or_create_by(name: 'Box 1', order_id: @order_item.order.id)
       @box_id = box.id
-      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
+      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id, product_id: @order_item.product_id).first
       if order_item_box.nil?
-        OrderItemBox.create(order_item_id: @order_item.id, box_id: box.id, item_qty: @typein_count)
+        OrderItemBox.create(order_item_id: @order_item.id, box_id: box.id, item_qty: @typein_count, product_id: @order_item.product_id)
       else
         if_order_item
       end
@@ -54,11 +54,11 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   def if_order_item
     box = Box.find_by_id(@box_id)
     if @single_order.id == box.order_id
-      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id).first
+      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id, product_id: @order_item.product_id).first
       if order_item_box
         order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
       else
-        OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count)
+        OrderItemBox.create(order_item_id: @order_item.id, box_id: @box_id, item_qty: @typein_count, product_id: @order_item.product_id)
       end
     end
   end
