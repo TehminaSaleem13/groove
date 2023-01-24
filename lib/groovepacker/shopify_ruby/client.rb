@@ -117,6 +117,26 @@ module Groovepacker
                                  body: attrs.to_json, headers: headers)
       end
 
+      def add_gp_scanned_tag(store_order_id, tag)
+        order = get_order(store_order_id)
+        tagged = (order['tags'].include? tag)  ? order['tags'] : tag + ' , ' + order['tags']
+          
+        attrs = { order: { id: store_order_id, tags: tagged } }
+        update_order(store_order_id, attrs)
+      end
+
+      def update_order(store_order_id, attrs)
+        response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders/#{store_order_id}.json",
+                                 body: attrs.to_json, headers: headers)
+        response
+      end
+
+      def get_order(store_order_id)
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders/#{store_order_id}.json",
+                                 headers: headers)
+        response['order'] || {}
+      end
+
       def locations
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/locations.json",
                                 headers: headers)

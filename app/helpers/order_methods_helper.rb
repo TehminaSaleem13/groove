@@ -8,7 +8,16 @@ module OrderMethodsHelper
     return unless ss_credential&.add_gpscanned_tag
 
     ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
-    ss_client.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_#{Apartment::Tenant.current}", priority: 95).add_gp_scanned_tag(store_order_id)
+    ss_client.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_ss_#{Apartment::Tenant.current}", priority: 95).add_gp_scanned_tag(store_order_id)
+  end
+
+  def add_gp_scanned_tag_in_shopify
+    shopify_credential = store.shopify_credential
+    return unless shopify_credential&.add_gp_scanned_tag
+
+    tag = "GP SCANNED"
+    client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
+    client.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_shopify_#{Apartment::Tenant.current}", priority: 95).add_gp_scanned_tag(store_order_id, tag)
   end
 
   def get_se_old_shipments(result_order)

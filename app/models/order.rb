@@ -444,5 +444,7 @@ class Order < ActiveRecord::Base
     return unless saved_changes['status'].present? && status == 'scanned'
 
     add_gp_scanned_tag if store&.store_type == 'Shipstation API 2' && store&.shipstation_rest_credential&.add_gpscanned_tag
+    
+    add_gp_scanned_tag_in_shopify if store&.store_type == 'Shopify' && store&.shopify_credential&.add_gp_scanned_tag
   end
 end
