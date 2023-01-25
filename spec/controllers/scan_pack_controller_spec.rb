@@ -721,16 +721,69 @@ RSpec.describe ScanPackController, type: :controller do
       expect(JSON.parse(response.body)['status']).to eq('OK')
     end
 
-    it 'Order Scanned Using Click In Multibox' do 
+    it 'Order Scanned Using Click In Multibox With Single Product' do 
       GeneralSetting.last.update(multi_box_shipments: true)
       ScanPackSetting.last.update(partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
-      post :scan_pack_v2, params:{ data: [{input: 'RESTART', id: @order.id, order_item_id: @order_item.id, time: Time.current, rem_qty: 1, SKU: 'PRODUCT1', Log_count: '', product_name: '', name: Apartment::Tenant.current, state: "scanpack.rfp.default", event: "regular", updated_at: Time.current, increment_id: @order.increment_id}, { Log_count: '1', SKU: 'PRODUCT2', is_kit: false, qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT2', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT2', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product2.id }] }
+      post :scan_pack_v2, params:{ data: [{Log_count: '1', SKU: 'PRODUCT1', qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT1', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT1', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }, {Log_count: '1', SKU: 'PRODUCT1', qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT1', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT1', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK') 
+    end
+
+    it 'Order Scanned Using Click In Multibox With Single Product Create Box' do 
+      GeneralSetting.last.update(multi_box_shipments: true)
+      ScanPackSetting.last.update(partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      @box = Box.create(name: 'Box 1', order_id: @order.id)
+      @order_item_box = OrderItemBox.create(order_item_id: @order_item.id, box_id: @box.id, item_qty: 1, kit_id: 1, product_id: @product1.id)
+      
+      post :scan_pack_v2, params:{ data: [{Log_count: '1', SKU: 'PRODUCT1', qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT1', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT1', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }, {Log_count: '1', SKU: 'PRODUCT1', qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT1', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT1', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq('OK')
+    end
 
-      ScanPackSetting.update(scanning_sequence: 'kit_packing_mode')
+    it 'Order Scanned Using Click In Multibox With Single Product Passing Box Id' do 
+      GeneralSetting.last.update(multi_box_shipments: true)
+      ScanPackSetting.last.update(partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      @box = Box.create(name: 'Box 1', order_id: @order.id)
+      @order_item_box = OrderItemBox.create(order_item_id: @order_item.id, box_id: @box.id, item_qty: 1, kit_id: 1, product_id: @product1.id)
+      @box1 = Box.create(name: 'Box 1', order_id: @order.id)
+      @order_item_box.update_attributes(order_item_id: @order_item1.id, box_id: @box1.id, kit_id: 3, product_id: 8)
+      
+      post :scan_pack_v2, params:{ data: [{box_id: @box.id, Log_count: '1', SKU: 'PRODUCT1', qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT1', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT1', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }, {box_id: @box.id, Log_count: '1', SKU: 'PRODUCT1', qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT1', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT1', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+    end
+
+    it 'Order Scanned Using Click In Multibox With Kit' do 
+      GeneralSetting.last.update(multi_box_shipments: true)
+      ScanPackSetting.last.update(scanning_sequence: 'kit_packing_mode', partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
       @product1.update_attributes(product_type: 'individual', is_kit: 1)
       post :scan_pack_v2, params:{ data: [{input: 'RESTART', id: @order.id, order_item_id: @order_item.id, time: Time.current, rem_qty: 1, SKU: 'PRODUCT1', Log_count: '', product_name: '', name: Apartment::Tenant.current, state: "scanpack.rfp.default", event: "regular", updated_at: Time.current, increment_id: @order.increment_id}, { Log_count: '1', SKU: 'PRODUCT2', is_kit: true, qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT2', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT2', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product2.id }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+    end
+
+    it 'Order Scanned Using Click In Multibox Passing Without Box Id' do 
+      GeneralSetting.last.update(multi_box_shipments: true)
+      ScanPackSetting.last.update(scanning_sequence: 'kit_packing_mode', partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      @product1.update_attributes(product_type: 'individual', is_kit: 1)
+      @box = Box.create(name: 'Box 1', order_id: @order.id)
+      @order_item_box = OrderItemBox.create(order_item_id: @order_item.id, box_id: @box.id, item_qty: 1, kit_id: 1, product_id: @product2.id)
+      
+      post :scan_pack_v2, params:{ data: [{Log_count: '1', SKU: 'PRODUCT2', is_kit: true, qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT2', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT2', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product2.id }, {Log_count: '1', SKU: 'PRODUCT2', is_kit: true, qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT2', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT2', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product2.id }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK') 
+    end
+
+    it 'Order Scanned Using Click Box Already In Multibox Passing Box Id' do 
+      GeneralSetting.last.update(multi_box_shipments: true)
+      ScanPackSetting.last.update(scanning_sequence: 'kit_packing_mode', partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')
+      @product1.update_attributes(product_type: 'individual', is_kit: 1)
+      @box = Box.create(name: 'Box 1', order_id: @order.id)
+      @order_item_box = OrderItemBox.create(order_item_id: @order_item.id, box_id: @box.id, item_qty: 1, kit_id: 1, product_id: @product2.id)
+      @box1 = Box.create(name: 'Box 1', order_id: @order.id)
+      @order_item_box.update_attributes(order_item_id: @order_item1.id, box_id: @box1.id, kit_id: 3, product_id: 8)
+      
+      post :scan_pack_v2, params:{ data: [{box_id: @box.id, Log_count: '1', SKU: 'PRODUCT2', is_kit: true, qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT2', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT2', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product2.id }, {box_id: @box.id, Log_count: '1', SKU: 'PRODUCT2', is_kit: true, qty_rem: 0, actionBarcode: false, event: 'click_scan', id: @order.id, increment_id: @order.increment_id, input: 'PRODUCT2', name: Apartment::Tenant.current, order_item_id: @order_item1.id, product_name: 'PRODUCT2', rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product2.id }] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq('OK')
     end
