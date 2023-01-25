@@ -286,6 +286,14 @@ RSpec.describe StoresController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    it 'Update Shopify Store' do
+      request.accept = 'application/json'
+
+      store = Store.where(store_type: 'Shopify').last
+      post :create_update_store, params: { id: store.id, shop_name: 'Shopify', store_type: store.store_type, add_gp_scanned_tag: true }
+      expect(response.status).to eq(200)
+    end
+
     it 'Toggle Sync Option' do
       request.accept = 'application/json'
 
