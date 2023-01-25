@@ -78,4 +78,15 @@ RSpec.describe Order, type: :model do
     order = FactoryBot.create(:order, status: 'awaiting', store_order_id: 512_412, store: store)
     order.update(status: 'scanned')
   end
+
+  it 'add GP SCANNED tag in Shopify' do
+    allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:get_order).and_return('gpscanned' => 1234)
+    expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:add_gp_scanned_tag)
+
+    inv_wh = FactoryBot.create(:inventory_warehouse, name: 'inventory_warehouse')
+    store = FactoryBot.create(:store, store_type: 'Shopify', name: 'Shopify Store', inventory_warehouse: inv_wh, status: true)
+    FactoryBot.create(:shopify_credential, store: store, add_gp_scanned_tag: true)
+    order = FactoryBot.create(:order, status: 'awaiting', store_order_id: 4838541754537, store: store)
+    order.update(status: 'scanned')
+  end
 end

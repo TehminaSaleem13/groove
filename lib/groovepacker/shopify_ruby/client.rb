@@ -119,9 +119,8 @@ module Groovepacker
 
       def add_gp_scanned_tag(store_order_id, tag)
         order = get_order(store_order_id)
-        tagged = (order['tags'].include? tag)  ? order['tags'] : tag + ' , ' + order['tags']
-          
-        attrs = { order: { id: store_order_id, tags: tagged } }
+        tags = order['tags'].split(', ').push(tag).uniq.join(', ')
+        attrs = { order: { id: store_order_id, tags: tags } }
         update_order(store_order_id, attrs)
       end
 
