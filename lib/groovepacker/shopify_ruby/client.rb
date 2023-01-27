@@ -121,6 +121,9 @@ module Groovepacker
         order = get_order(store_order_id)
         tags = order['tags'].split(', ').push(tag).uniq.join(', ')
         attrs = { order: { id: store_order_id, tags: tags } }
+
+        sleep 0.5
+
         update_order(store_order_id, attrs)
       end
 
