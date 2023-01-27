@@ -15,9 +15,7 @@ module OrderMethodsHelper
     shopify_credential = store.shopify_credential
     return unless shopify_credential&.add_gp_scanned_tag
 
-    tag = "GP SCANNED"
-    client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
-    client.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_shopify_#{Apartment::Tenant.current}", priority: 95).add_gp_scanned_tag(store_order_id, tag)
+    shopify_credential.class.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_shopify_#{Apartment::Tenant.current}", priority: 95).add_tag_to_order(Apartment::Tenant.current, shopify_credential.id, store_order_id)
   end
 
   def get_se_old_shipments(result_order)

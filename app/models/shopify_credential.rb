@@ -26,4 +26,13 @@ class ShopifyCredential < ActiveRecord::Base
     val += 'partial%2C' if partial_status?
     val
   end
+
+  def self.add_tag_to_order(tenant, credential_id, store_order_id)
+    Apartment::Tenant.switch! tenant
+    tag = "GP SCANNED"
+    client = Groovepacker::ShopifyRuby::Client.new(self.find(credential_id))
+    client.add_gp_scanned_tag(store_order_id, tag)
+  rescue StandardError => e
+    puts e.backtrace.join(', ')
+  end
 end
