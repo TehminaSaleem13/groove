@@ -253,6 +253,10 @@ class ShopifyController < ApplicationController
 
     @shopify_credential&.update_attributes(temp_cookies: cookies.to_h)
 
+    redis_key = 'shopify_temp_cookies'
+    $redis.set(redis_key, cookies.to_h)
+    $redis.expire(redis_key, 1.minutes.to_i)
+
     redirect_to auth_response[:auth_route]
   end
 
@@ -265,14 +269,17 @@ class ShopifyController < ApplicationController
             rescue StandardError
               nil
             end
-    shopify_credential = store.shopify_credential
+    shopify_credential = store&.shopify_credential
+
+    auth_params = request.parameters.symbolize_keys.except(:controller, :action)
+    auth_cookies = shopify_credential&.temp_cookies || (eval $redis.get('shopify_temp_cookies') rescue {})
 
     auth_result = ShopifyAPI::Auth::Oauth.validate_auth_callback(
-      cookies: shopify_credential.temp_cookies,
-      auth_query: ShopifyAPI::Auth::Oauth::AuthQuery.new(request.parameters.symbolize_keys.except(:controller, :action))
+      cookies: auth_cookies,
+      auth_query: ShopifyAPI::Auth::Oauth::AuthQuery.new(auth_params)
     )
 
-    shopify_credential.update_attributes(access_token: auth_result[:session].access_token, temp_cookies: {})
+    shopify_credential&.update_attributes(access_token: auth_result[:session].access_token, temp_cookies: {})
 
     redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['FRONTEND_HOST']}/#/shopify/complete"
   rescue Exception => e
