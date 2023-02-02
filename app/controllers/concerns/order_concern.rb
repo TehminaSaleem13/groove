@@ -309,7 +309,7 @@ module OrderConcern
   end
 
   def check_order_edit_permissions
-    return if current_user.can? 'add_edit_order_items'
+    return if current_user.can? 'add_edit_order_items' or params[:is_allowed]
 
     set_status_and_message(false, 'You can not add or edit order items', ['&', 'push'])
   end

@@ -1064,6 +1064,8 @@ ActiveRecord::Schema.define(version: 20221220102615) do
     t.boolean "scanning_log", default: false
     t.boolean "pass_scan", default: true
     t.string "pass_scan_barcode", default: "PASS"
+    t.boolean "add_next", default: true
+    t.string "add_next_barcode", default: "ADDNEXT"
   end
 
   create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

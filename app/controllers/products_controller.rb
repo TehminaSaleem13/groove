@@ -225,6 +225,8 @@ class ProductsController < ApplicationController
     if params[:search].blank?
       @result['status'] = false
       @result['message'] = 'Improper search string'
+    elsif !params[:barcode].blank?
+      @result = Product.joins(:product_barcodes).where("product_barcodes.barcode": params[:barcode])
     else
       @products = do_search(params, false)
       @result = @result.merge('products' => make_products_list(@products['products']),

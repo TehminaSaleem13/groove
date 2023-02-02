@@ -257,7 +257,11 @@ module Groovepacker
         end
 
         @products.each do |product|
-          add_single_item(product)
+          if @order.order_items.exists?(product_id: product.id)
+            increase_qty_scanned(product)
+          else
+            add_single_item(product)
+          end
         end
 
         @order.update_order_status
@@ -272,13 +276,32 @@ module Groovepacker
         @order.order_items << orderitem
 
         if orderitem.save
-          product_sku = begin
-                            product.product_skus.first.sku
-                        rescue StandardError
-                          nil
-                          end
-          @order.addactivity('Item with sku ' + product_sku.to_s + ' added', @current_user.name)
+          add_product_sku(product)
         end
+      end
+
+      def increase_qty_scanned(product)
+        orderitem = first_order_item(product)
+        orderitem.qty += 1
+        orderitem.scanned_qty += 1
+        orderitem.scanned_status = 'partially_scanned'
+        if orderitem.save
+          add_product_sku(product)
+        end
+      end
+
+      def first_order_item(product)
+       order = @order.order_items.where(product_id: product.id)
+       order.first
+      end
+
+      def add_product_sku(product)
+        product_sku = begin
+                        product.product_skus.first.sku
+                      rescue StandardError
+                        nil
+                      end
+        @order.addactivity('Item with sku ' + product_sku.to_s + ' added', @current_user.name)
       end
 
       def init_order_item(product)
@@ -289,6 +312,10 @@ module Groovepacker
         orderitem.name = product.name
         orderitem.price = @params[:price]
         orderitem.qty = qty.to_i
+        if @params[:add_to_scanned_list].present?
+          orderitem.scanned_status = 'scanned'
+          orderitem.scanned_qty = qty
+        end
         orderitem.added_count = qty.to_i
         orderitem.row_total = @params[:price].to_f * @params[:qty].to_f
         orderitem.product_id = product.id

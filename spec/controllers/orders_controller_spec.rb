@@ -478,6 +478,32 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    it 'Add item to order if product exists' do
+      order = FactoryBot.create :order, store_id: @store.id
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+
+      post :add_item_to_order, params: { id: order.id, productids: [product.id.to_s] }
+      expect(response.status).to eq(200)
+
+      post :add_item_to_order, params: { id: order.id, productids: [product.id.to_s] }
+      expect(order.order_items.last.qty).to eq(2)
+      expect(order.order_items.last.scanned_qty).to eq(1)
+    end
+
+    it 'Add item to order without product' do
+      order = FactoryBot.create :order, store_id: @store.id
+
+      post :add_item_to_order, params: { id: order.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Add item to order with scanned status' do
+      order = FactoryBot.create :order, store_id: @store.id, status: 'scanned'
+
+      post :add_item_to_order, params: { id: order.id }
+      expect(response.status).to eq(200)
+    end
+
     it 'Show Order' do
       @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
       store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true) 
