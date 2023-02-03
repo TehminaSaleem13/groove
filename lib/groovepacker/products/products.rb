@@ -133,6 +133,8 @@ module Groovepacker
 
       def reset_recent_order_items_cache
         @product.order_items.not_scanned.joins(:order).where('orders.last_suggested_at > ?', 2.minutes.ago).map(&:delete_cache_for_associated_obj)
+        # Reset Cache for Kit Items
+        OrderItem.not_scanned.joins(:order, order_item_kit_products: :product_kit_skus).where('orders.last_suggested_at > ?', 2.minutes.ago).where(order_item_kit_products: { product_kit_skus: { option_product_id: @product.id } }).map(&:delete_cache_for_associated_obj)
       end
 
       def general_setting

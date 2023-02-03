@@ -380,6 +380,8 @@ class OrderItem < ActiveRecord::Base
   def delete_cache_for_associated_obj
     product.try(:delete_cache)
     order_item_kit_products.map(&:delete_cache)
+    order_item_kit_products.map(&:product_kit_skus).map(&:delete_cache)
+    order_item_kit_products.map(&:product_kit_skus).map(&:option_product).map(&:delete_cache)
     delete_cache
   end
 
