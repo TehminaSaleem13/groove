@@ -43,7 +43,8 @@ module Groovepacker
         @product = update_product_and_associated_info
         @product.update_product_status
         reset_recent_order_items_cache
-
+        @result["params"][:skus] = @product.product_skus.map(&:serializable_hash)
+        @result["params"][:barcodes] = @product.product_barcodes.map(&:serializable_hash)
         @result
       end
 
