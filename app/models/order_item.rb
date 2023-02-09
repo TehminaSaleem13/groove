@@ -42,6 +42,8 @@ class OrderItem < ActiveRecord::Base
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
+  QTY_OF_SKU = 'Qty 1 of SKU: '
+
   scope :not_scanned, -> { where.not(scanned_status: SCANNED_STATUS) }
 
   def has_unscanned_kit_items
@@ -392,13 +394,13 @@ class OrderItem < ActiveRecord::Base
       self.clicked_qty = clicked_qty + 1
       if box_id.blank?
         if GeneralSetting.last.multi_box_shipments?
-          order.addactivity('Item with SKU: ' + sku.to_s + ' has been click scanned in Box 1', username) unless ScanPackSetting.last.order_verification
+          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option in Box 1', username) unless ScanPackSetting.last.order_verification
         else
-          order.addactivity('Item with SKU: ' + sku.to_s + ' has been click scanned', username) unless ScanPackSetting.last.order_verification
+          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option', username) unless ScanPackSetting.last.order_verification
         end
       else
         box = Box.where(id: box_id).last
-        order.addactivity('Item with SKU: ' + sku.to_s + " has been click scanned in #{box.try(:name)}", username) unless ScanPackSetting.last.order_verification
+        order.addactivity(QTY_OF_SKU + sku.to_s + " was passed with the Pass option in #{box.try(:name)}", username) unless ScanPackSetting.last.order_verification
       end
     end
   end
