@@ -69,6 +69,8 @@ class GeneratePackingSlipPdf
       include Rails.application.routes.url_helpers
       include ApplicationHelper
     end
+    general_setting = GeneralSetting.all.first
+    @increment_id = general_setting.truncate_order_number_in_packing_slip ? order.increment_id.split("-").first : order.increment_id
     @order = order
     template = if page_width == '4' && page_height == '2'
                  'orders/generate_packing_slip_4_x_2.html'
@@ -78,7 +80,7 @@ class GeneratePackingSlipPdf
                  'orders/generate_packing_slip.html'
     end
     custom_template = template != 'orders/generate_packing_slip.html'
-    pdf_html = av.render template: template, layout: nil, locals: { :@order => @order, :@boxes => boxes }
+    pdf_html = av.render template: template, layout: nil, locals: { :@order => @order, :@boxes => boxes, :@increment_id => @increment_id }
     pdf_options = {
       orientation: orientation,
       page_height: page_height + 'in',

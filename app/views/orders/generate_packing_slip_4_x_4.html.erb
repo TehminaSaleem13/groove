@@ -6336,7 +6336,7 @@
               <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto;width: 480px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 480}) %></div>
             </div>
             <div style= "text-align:right; white-space:nowrap; width: 630px; text-overflow: ellipsis;">
-              <p style= "font-size: 30px; text-align:right; width: 78%;"> Order # :<%= @order.increment_id %></p>
+              <p style= "font-size: 30px; text-align:right; width: 78%;"> Order # :<%= @increment_id %></p>
             </div>
           </div>
         </div>
@@ -6432,7 +6432,7 @@
                 <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto; width: 480px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 480}) %></div>
               </div><br>
               <div style= "text-align:right; white-space:nowrap; width: 630px; text-overflow:ellipsis; line-height: 0px;">
-                <p style= "font-size: 30px; text-align:right; width: 78%;">Order # : <%= @order.increment_id %></p>
+                <p style= "font-size: 30px; text-align:right; width: 78%;">Order # : <%= @increment_id %></p>
               </div>
             </div>
             <br>
