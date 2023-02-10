@@ -123,6 +123,8 @@ class Order < ActiveRecord::Base
     addactivity('Order Scanning Complete', username) unless ScanPackSetting.last.order_verification
     self.packing_score = compute_packing_score
     self.post_scanning_flag = nil
+    # Remove tote assignment
+    Tote.where(order_id: id).update_all(order_id: nil, pending_order: false)
     save
     update_access_restriction
     tenant = Apartment::Tenant.current
@@ -444,7 +446,7 @@ class Order < ActiveRecord::Base
     return unless saved_changes['status'].present? && status == 'scanned'
 
     add_gp_scanned_tag if store&.store_type == 'Shipstation API 2' && store&.shipstation_rest_credential&.add_gpscanned_tag
-    
+
     add_gp_scanned_tag_in_shopify if store&.store_type == 'Shopify' && store&.shopify_credential&.add_gp_scanned_tag
   end
 end
