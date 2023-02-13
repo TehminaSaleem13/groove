@@ -114,7 +114,7 @@ module SettingsHelper
         export_items max_time_per_item send_email_on_mon
         send_email_on_tue send_email_on_wed send_email_on_thurs
         send_email_on_fri send_email_on_sat send_email_on_sun
-        scheduled_order_import time_to_import_orders
+        scheduled_order_import time_to_import_orders truncated_string
         import_orders_on_mon import_orders_on_tue import_orders_on_wed
         import_orders_on_thurs import_orders_on_fri import_orders_on_sat
         import_orders_on_sun tracking_error_order_not_found
