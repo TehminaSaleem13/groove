@@ -391,6 +391,19 @@ class ScanPackController < ApplicationController
     render json: @result
   end
 
+  def verify_order_scanning
+    order = Order.find_by_id(params['id'])
+    tenant = Apartment::Tenant.current
+
+    if order.status != 'scanned'
+      webhook_url = "https://hooks.slack.com/services/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?="
+      HTTParty.post(webhook_url,
+                    body: {text: "[#{tenant}] Scanned status change failed for Order [#{order.increment_id}] at [#{Time.current}]"}.to_json,
+                    headers: {'Content-Type' => 'application/json'})
+    end
+    head :ok
+  end
+
   def upload_image_on_s3
     result = { status: true }
     begin

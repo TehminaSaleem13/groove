@@ -839,6 +839,17 @@ RSpec.describe ScanPackController, type: :controller do
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq('OK')
     end
+
+    it 'Verify Order Scanning When Order is Awaiting ' do
+      post :verify_order_scanning, params: { id: @order.id}
+      expect(response.status).to eq(200)
+    end
+
+    it 'Verify Order Scanning When Order is Scanned ' do
+      @order.update(status: 'scanned')
+      post :verify_order_scanning, params: { id: @order.id}
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Image Upload' do
