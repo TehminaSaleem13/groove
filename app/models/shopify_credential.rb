@@ -24,6 +24,7 @@ class ShopifyCredential < ActiveRecord::Base
     val = 'shipped%2C' if shipped_status?
     val += 'unshipped%2C' if unshipped_status?
     val += 'partial%2C' if partial_status?
+    val += 'on_hold%2C' if on_hold_status?
     val
   end
 
