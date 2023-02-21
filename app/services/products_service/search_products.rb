@@ -31,11 +31,11 @@ module ProductsService
       set_offset
       set_search_query
       set_search_query_exact
-      @supported_kit_params = ['0', '1', '-1']
+      # @supported_kit_params = ['0', '1', '-1']
 
-      set_is_kit
+      # set_is_kit
 
-      set_kit_query
+      # set_kit_query
       set_query_add
     end
 
@@ -167,7 +167,6 @@ module ProductsService
                 \) \
               \) \
             \) \
-            #{@kit_query}\
           GROUP BY products.id ORDER BY #{@sort_key} #{@sort_order}
       )
     end
