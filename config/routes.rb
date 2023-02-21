@@ -306,7 +306,6 @@ Groovepacks::Application.routes.draw do
       post 'product_first_scan'
       post 'scan_to_tote'
       post 'scan_pack_v2'
-      post 'new_scan_pack_v2'
       post 'scan_pack_bug_report'
       post 'upload_image_on_s3'
       post 'verify_order_scanning'
