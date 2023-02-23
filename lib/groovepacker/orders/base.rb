@@ -47,7 +47,7 @@ module Groovepacker
       end
 
       def set_final_sort_key(sort_order, sort_key)
-        return 'created_at' if @params[:app]
+        return 'updated_at' if @params[:app]
 
         sort_key_hash = { 'ordernum' => 'increment_id', 'order_date' => 'order_placed_time', 'notes' => 'notes_internal', 'recipient' => "firstname #{sort_order}, lastname", 'store_name' => 'store_name' }
         sort_key = sort_key_hash[sort_key] if sort_key_hash.key?(sort_key)
