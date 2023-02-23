@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 module ScanPack
-  class OrderScanServiceV2 < ScanPack::Base
+  class OrderScanServiceV2 < OrderScanService
     include OrdersHelper
 
     def initialize(current_user, session, input, state, id, store_order_id, params, order_by_number)
@@ -37,33 +37,6 @@ module ScanPack
     def run
       order_scan if valid_input?
       @result
-    end
-
-    def valid_input?
-      if @scan_by_tracking_num
-        validity = @input.strip.length >= 10
-        msg = 'Please provide a valid tracking number with 10 or more characters.'
-      else
-        validity = @input.present?
-        msg = 'Please specify a barcode to scan the order'
-      end
-      unless validity
-        @result['status'] &= false
-        @result['error_messages'].push(msg)
-      end
-      validity
-    end
-
-    def order_scan
-      collect_orders
-      @single_order, @single_order_result = get_single_order_with_result
-
-      if @single_order_result['matched_orders'].count > 0 && @store_order_id.to_i != 0
-        @single_order = @orders.where(store_order_id: @store_order_id).first
-        @single_order_result['matched_orders'] = []
-      end
-      do_if_single_order_not_present && return unless @single_order
-      do_if_single_order_present
     end
 
     def collect_orders
@@ -135,27 +108,6 @@ module ScanPack
           \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.zone.now - 14.days).strftime('%Y-%m-%d')}
         )
       end
-    end
-
-    def get_single_order_with_result
-      # assign @single_order = first order for only one order
-      return [@orders.first, @single_order_result] if @orders.size == 1
-
-      # @orders.each do |matched_single|
-      #   matched_single_status, matched_single_order_placed_time,
-      #   single_order_status, single_order_order_placed_time,
-      #   order_placed_for_single_before_than_matched_single = do_set_check_variables(matched_single)
-      #   do_check_order_status_for_single_and_matched(
-      #     matched_single, single_order_status, matched_single_status,
-      #     order_placed_for_single_before_than_matched_single
-      #   ) if @single_order
-
-      #   unless %w(scanned cancelled).include?(matched_single_status)
-      #     @single_order_result['matched_orders'].push(matched_single)
-      #   end
-      # end
-
-      [@single_order, @single_order_result]
     end
 
     def do_set_check_variables(matched_single)

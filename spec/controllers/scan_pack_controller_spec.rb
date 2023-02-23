@@ -236,6 +236,25 @@ RSpec.describe ScanPackController, type: :controller do
       FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
     end
 
+    describe 'Scan Order Number' do
+      before do
+        inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+        store = FactoryBot.create(:store, name: 'ss_store', store_type: 'Shipstation API 2', inventory_warehouse: inv_wh, status: true)
+        ShipstationRestCredential.create(api_key: '14ccf1296c2043cb9076b90953b7ea9b', api_secret: 'e6fc8ff9f7a7411180d2960eb838e2ca', last_imported_at: '2021-07-12', store_id: store.id, allow_duplicate_order: true)
+
+        order = FactoryBot.create(:order, increment_id: '100', status: 'awaiting', store: store, store_order_id: 1234)
+        FactoryBot.create(:order_item, product_id: Product.first.id, qty: 5, price: '10', row_total: '10', order: order, name: Product.first.name)
+      end
+
+      it 'returns matched orders as well' do
+        get :scan_barcode, params: { input: '100', state: 'scanpack.rfo', store_order_id: 1234 }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['matched_orders']).not_to be_blank
+      end
+    end
+
     describe 'Scan Packing Slip' do
       before do
         ScanPackSetting.last.update_attributes(scan_by_packing_slip: true, scan_by_shipping_label: false, scan_by_packing_slip_or_shipping_label: false)
