@@ -18,12 +18,12 @@ class OrderItemKitProduct < ActiveRecord::Base
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
 
-  def process_item(clicked, username, typein_count = 1, is_skipped = nil)
+  def process_item(clicked, username, typein_count = 1, is_skipped = nil, on_ex)
     total_product_kit_skus = calculate_total_product_kit_skus
     return unless scanned_qty < total_product_kit_skus
 
     self.scanned_qty += is_skipped ? total_product_kit_skus : typein_count
-    set_clicked_qty(clicked, username, typein_count)
+    set_clicked_qty(clicked, username, typein_count, on_ex)
     set_scanned_status(total_product_kit_skus)
     save
     calculate_scan_time(typein_count, username)
@@ -57,10 +57,10 @@ class OrderItemKitProduct < ActiveRecord::Base
     total_qty * cached_product_kit_skus.qty
   end
 
-  def set_clicked_qty(clicked, username, typein_count)
+  def set_clicked_qty(clicked, username, typein_count, on_ex)
     if clicked
       self.clicked_qty = clicked_qty + typein_count
-      order_item.order.addactivity('Kit Part item with SKU: ' + cached_product_kit_skus.cached_option_product.cached_primary_sku + ' has been click scanned', username) unless ScanPackSetting.last.order_verification
+      order_item.order.addactivity('Kit Part item with SKU: ' + cached_product_kit_skus.cached_option_product.cached_primary_sku + ' has been click scanned', username, on_ex) unless ScanPackSetting.last.order_verification
     end
   end
 

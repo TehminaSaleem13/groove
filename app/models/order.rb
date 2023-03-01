@@ -62,7 +62,7 @@ class Order < ActiveRecord::Base
     !store.nil? && store.ensure_warehouse?
   end
 
-  def addactivity(order_activity_message, username = '', activity_type = 'regular')
+  def addactivity(order_activity_message, username = '', on_ex = nil , activity_type = 'regular')
     @activity = OrderActivity.new
     @activity.order_id = id
     @activity.action = order_activity_message
@@ -71,6 +71,7 @@ class Order < ActiveRecord::Base
     @activity.activity_type = activity_type
     @activity.user_id = User.find_by_username(username).try(:id)
     @activity.user_id = User.find_by_name(username).try(:id) if @activity.user_id.nil?
+    @activity.platform = on_ex unless on_ex.nil?
     @activity.save
   end
 
@@ -223,9 +224,9 @@ class Order < ActiveRecord::Base
     Order.multiple_orders_scanning_count([self])[id]
   end
 
-  def reset_scanned_status(current_user)
+  def reset_scanned_status(current_user,on_ex)
     order_items.includes([:order_item_kit_products]).each(&:reset_scanned)
-    addactivity('All scanned items removed. Order has been RESET', current_user.try(:name))
+    addactivity('All scanned items removed. Order has been RESET', current_user.try(:name), on_ex)
     order_serials.destroy_all
     destroy_boxes
     set_order_status

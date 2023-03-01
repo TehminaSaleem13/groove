@@ -224,7 +224,7 @@ class ScanPackController < ApplicationController
 
   def click_scan
     render json: product_scan(
-      params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id],
+      params[:barcode], 'scanpack.rfp.default', params[:id], params[:box_id], params[:on_ex],
       clicked: true, current_user: current_user, session: session
     ).merge('awaiting' => get_awaiting_orders_count)
   end

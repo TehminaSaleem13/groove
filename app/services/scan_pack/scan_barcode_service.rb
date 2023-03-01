@@ -115,10 +115,10 @@ module ScanPack
 
     def add_activity_for_barcode(item_sku)
       if @params[:box_id].nil?
-        GeneralSetting.last.multi_box_shipments? ? @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.name) : @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name)
+        GeneralSetting.last.multi_box_shipments? ? @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.name, @params[:on_ex]) : @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name, @params[:on_ex])
       else
         box = Box.where(id: @params[:box_id]).last
-        @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.name)
+        @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.name, @params[:on_ex])
       end
     end
 
@@ -167,13 +167,13 @@ module ScanPack
       @matcher[@params[:state]].each do |state_func|
         output = if state_func == 'product_scan' && @params[:app]
                    send(
-                     'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id],
+                     'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
                      current_user: @current_user, session: @session
                    )
                  elsif state_func == 'product_scan'
                    send(
-                     state_func, @params[:input], @params[:state], @params[:id], @params[:box_id],
-                     current_user: @current_user, session: @session
+                     state_func, @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
+                     current_user: @current_user, session: @session 
                    )
                  elsif state_func == 'order_scan' && @params[:app]
                    send(

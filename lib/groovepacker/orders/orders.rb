@@ -55,8 +55,8 @@ module Groovepacker
         order.addactivity('Order Manually Moved To Scanned Status', username)
       end
 
-      def add_by_passed_activity(order, sku)
-        order.addactivity('Product instructions confirmation for SKU: ' + sku.to_s + ' bypassed ', @current_user.name, 'by_passed')
+      def add_by_passed_activity(order, sku, on_ex)
+        order.addactivity('Product instructions confirmation for SKU: ' + sku.to_s + ' bypassed ', @current_user.name, on_ex, 'by_passed')
       end
 
       def generate_pick_list(orders)
@@ -244,7 +244,7 @@ module Groovepacker
 
         if item.remove_order_item_kit_products && item.destroy
           item.order.update_order_status
-          item.order.addactivity('Item with sku ' + sku.to_s + ' removed', @current_user.name)
+          item.order.addactivity('Item with sku ' + sku.to_s + ' removed', @current_user.name, @platform)
         else
           set_status_and_message(false, 'Removed items from order failed', ['&', 'push'])
         end
@@ -301,7 +301,7 @@ module Groovepacker
                       rescue StandardError
                         nil
                       end
-        @order.addactivity('Item with sku ' + product_sku.to_s + ' added', @current_user.name)
+        @order.addactivity('Item with sku ' + product_sku.to_s + ' added', @current_user.name, @platform)
       end
 
       def init_order_item(product)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20221220102615) do
+ActiveRecord::Schema.define(version: 20230222063807) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -524,6 +524,7 @@ ActiveRecord::Schema.define(version: 20221220102615) do
     t.string "username"
     t.string "activity_type"
     t.boolean "acknowledged", default: false
+    t.string "platform"
     t.index ["order_id"], name: "index_order_activities_on_order_id"
     t.index ["user_id"], name: "index_order_activities_on_user_id"
   end
@@ -555,6 +556,7 @@ ActiveRecord::Schema.define(version: 20221220102615) do
     t.integer "kit_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "product_id"
   end
 
   create_table "order_item_kit_product_scan_times", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1174,6 +1176,7 @@ ActiveRecord::Schema.define(version: 20221220102615) do
     t.boolean "fix_all_product_images", default: false
     t.boolean "import_fulfilled_having_tracking", default: false
     t.text "temp_cookies", limit: 4294967295
+    t.boolean "add_gp_scanned_tag", default: false
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1388,6 +1391,7 @@ ActiveRecord::Schema.define(version: 20221220102615) do
     t.string "custom_field_two"
     t.boolean "dashboard_switch", default: false
     t.string "warehouse_postcode", default: ""
+    t.string "packing_slip_size", default: "4 x 6"
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"

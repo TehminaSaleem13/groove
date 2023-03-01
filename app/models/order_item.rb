@@ -249,18 +249,18 @@ class OrderItem < ActiveRecord::Base
     result
   end
 
-  def process_item(clicked, username, typein_count = 1, box_id)
+  def process_item(clicked, username, typein_count = 1, box_id, on_ex)
     order_unscanned = false
     if scanned_qty < qty
       total_qty = 0
       if product.kit_parsing == 'depends'
         self.single_scanned_qty = single_scanned_qty + typein_count
-        set_clicked_quantity(clicked, product.primary_sku, username, box_id)
+        set_clicked_quantity(clicked, product.primary_sku, username, box_id, on_ex)
         self.scanned_qty = single_scanned_qty + kit_split_scanned_qty
         total_qty = qty - kit_split_qty
       else
         self.scanned_qty = scanned_qty + typein_count
-        set_clicked_quantity(clicked, product.primary_sku, username, box_id)
+        set_clicked_quantity(clicked, product.primary_sku, username, box_id, on_ex)
         total_qty = qty - kit_split_qty
       end
       scan_time = order_item_scan_times.build(
@@ -389,18 +389,18 @@ class OrderItem < ActiveRecord::Base
 
   private
 
-  def set_clicked_quantity(clicked, sku, username, box_id)
+  def set_clicked_quantity(clicked, sku, username, box_id,on_ex)
     if clicked
       self.clicked_qty = clicked_qty + 1
       if box_id.blank?
         if GeneralSetting.last.multi_box_shipments?
-          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option in Box 1', username) unless ScanPackSetting.last.order_verification
+          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option in Box 1', username, on_ex) unless ScanPackSetting.last.order_verification
         else
-          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option', username) unless ScanPackSetting.last.order_verification
+          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option', username, on_ex) unless ScanPackSetting.last.order_verification
         end
       else
         box = Box.where(id: box_id).last
-        order.addactivity(QTY_OF_SKU + sku.to_s + " was passed with the Pass option in #{box.try(:name)}", username) unless ScanPackSetting.last.order_verification
+        order.addactivity(QTY_OF_SKU + sku.to_s + " was passed with the Pass option in #{box.try(:name)}", username, on_ex) unless ScanPackSetting.last.order_verification
       end
     end
   end

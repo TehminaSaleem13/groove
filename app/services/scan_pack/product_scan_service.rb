@@ -9,7 +9,7 @@ module ScanPack
     include ScanPack::Utilities::ProductScan::SingleProductType
 
     def initialize(args)
-      @current_user, @session, @input, @state, @id, @box_id, @typein_count, @type_scan = args
+      @current_user, @session, @input, @state, @id, @box_id, @on_ex, @typein_count, @type_scan = args
       @result = {
         'status' => true, 'matched' => true, 'error_messages' => [],
         'success_messages' => [], 'notice_messages' => [],
@@ -109,20 +109,21 @@ module ScanPack
 
     def do_if_scanned_code_is_anabled_and_and_eql_to_input
       @single_order.order_items.update_all(scanned_status: 'scanned')
-      @single_order.addactivity('Order is scanned through SCANNED barcode', @current_user.try(:username))
+      @single_order.addactivity('Order is scanned through SCANNED barcode', @current_user.try(:username), @on_ex)
       do_if_barcode_found
     end
 
     def do_if_remove_or_partial_code_is_enabled_and_and_eql_to_input(code_type)
+
       if code_type == 'PARTIAL'
         @single_order.get_unscanned_items(limit: nil).each do |item|
           qty = remove_skippable_product(item)
-          @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username))
+          @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username), @on_ex)
         end
       elsif code_type == 'REMOVE'
         item = @single_order.get_unscanned_items(limit: nil).first
         qty = item['product_type'] == 'individual' ? remove_kit_product_item_from_order(item['child_items'].first) : remove_skippable_product(item)
-        @single_order.addactivity("QTY #{qty} of SKU #{item['product_type'] == 'individual' ? item['child_items'].first['sku'] : item['sku']} was removed using the REMOVE barcode", @current_user.try(:username))
+        @single_order.addactivity("QTY #{qty} of SKU #{item['product_type'] == 'individual' ? item['child_items'].first['sku'] : item['sku']} was removed using the REMOVE barcode", @current_user.try(:username), @on_ex)
       end
       do_if_barcode_found
     end
@@ -264,7 +265,7 @@ module ScanPack
 
     def do_if_service_issue_code_is_enabled_and_and_eql_to_input
       if @single_order.status != 'scanned'
-        @single_order.reset_scanned_status(@current_user)
+        @single_order.reset_scanned_status(@current_user, @on_ex)
         @single_order.status = 'serviceissue'
         @result['data']['next_state'] = 'scanpack.rfo'
         @result['data']['ask_note'] = true
@@ -275,7 +276,7 @@ module ScanPack
 
     def do_if_restart_code_is_enabled_and_and_eql_to_input
       if @single_order.status != 'scanned'
-        @single_order.reset_scanned_status(@current_user)
+        @single_order.reset_scanned_status(@current_user, @on_ex)
         @result['data']['next_state'] = 'scanpack.rfo'
       else
         set_error_messages('Order with id: ' + @id.to_s + ' is already in scanned state')

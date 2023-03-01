@@ -452,21 +452,21 @@ RSpec.describe ScanPackController, type: :controller do
       order_item1 = FactoryBot.create(:order_item, product_id: product1.id, qty: 5, price: 10, row_total: 10, order: order, name: product1.name)
 
       request.accept = 'application/json'
-      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default',on_ex: 'on GPX' }
       expect(response.status).to eq(200)
 
       # Serial Scan
-      post :serial_scan, params: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true, serial: 'PRODUCT1SERIAL', scan_pack: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true, serial: 'PRODUCT1SERIAL' } }
+      post :serial_scan, params: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, on_ex: 'on GPX', order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true, serial: 'PRODUCT1SERIAL', scan_pack: { state: 'scanpack.rfp.recording', barcode: 'PRODUCT1', order_id: order.id, order_item_id: order_item1.id, ask: true, ask_2: false, product_id: product1.id, is_scan: true, serial: 'PRODUCT1SERIAL' } }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['data']['order']['next_item']['qty_remaining']).to eq(4)
 
       # Type Scan
-      post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT1', next_item: result['data']['order']['next_item'] }
+      post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT1', on_ex: 'on GPX', next_item: result['data']['order']['next_item'] }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
 
-      post :type_scan, params: { id: order.id, count: 2, barcode: 'PRODUCT1', next_item: result['data']['data']['order']['next_item'] }
+      post :type_scan, params: { id: order.id, on_ex: 'on GPX', count: 2, barcode: 'PRODUCT1', next_item: result['data']['data']['order']['next_item'] }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['data']['data']['next_state']).to eq('scanpack.rfo')
@@ -648,7 +648,7 @@ RSpec.describe ScanPackController, type: :controller do
       product_barcode = FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT2')
       order = FactoryBot.create(:order, increment_id: 'ORDER-1', status: 'awaiting', store: @store, tracking_num: 'ORDER-TRACKING-NUM')
 
-      get :click_scan, params: { barcode: product_barcode.barcode, id: order.id, box_id: nil, scan_pack: { barcode: product_barcode.barcode, id: order.id, box_id: nil } }
+      get :click_scan, params: { barcode: product_barcode.barcode, id: order.id, box_id: nil, on_ex: 'on GPX', scan_pack: { barcode: product_barcode.barcode, id: order.id, box_id: nil } }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['data']['order']['clicked_scanned_qty']).to eq(1)

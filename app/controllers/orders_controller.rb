@@ -228,7 +228,7 @@ class OrdersController < ApplicationController
     if @order.nil?
       set_status_and_message(false, 'Cannot find Order', ['error_msg'])
     else
-      @result = gp_orders_module.add_by_passed_activity(@order, params[:sku])
+      @result = gp_orders_module.add_by_passed_activity(@order, params[:sku], params[:on_ex])
     end
     render json: @result
   end

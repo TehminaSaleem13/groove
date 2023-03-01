@@ -125,9 +125,9 @@ module ScanPack
         @current_user.name
       )
       if @params['clicked']
-        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session)
+        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], @params[:on_ex], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session)
       else
-        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session, typein_count: count.to_i)
+        @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], @params[:on_ex], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session, typein_count: count.to_i)
       end
 
       @result

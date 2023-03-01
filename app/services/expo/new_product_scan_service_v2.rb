@@ -9,7 +9,7 @@ module Expo
     include ScanPack::Utilities::ProductScan::SingleProductType
 
     def initialize(args)
-      @current_user, @session, @input, @state, @id, @box_id, @typein_count, @type_scan = args
+      @current_user, @session, @input, @state, @id, @box_id, @on_ex, @typein_count, @type_scan = args
       @result = {
         'status' => true, 'matched' => true, 'error_messages' => [],
         'success_messages' => [], 'notice_messages' => [],
