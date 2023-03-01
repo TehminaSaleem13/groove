@@ -10,7 +10,7 @@ module Groovepacker
         @result = params[:result]
         @params = params[:params_attrs]
         @current_user = params[:current_user]
-        @platform = params[:params_attrs][:on_ex]
+        @platform = params[:params_attrs].try(:[], :on_ex)
       end
 
       private
