@@ -224,7 +224,7 @@ class Order < ActiveRecord::Base
     Order.multiple_orders_scanning_count([self])[id]
   end
 
-  def reset_scanned_status(current_user,on_ex)
+  def reset_scanned_status(current_user, on_ex = nil)
     order_items.includes([:order_item_kit_products]).each(&:reset_scanned)
     addactivity('All scanned items removed. Order has been RESET', current_user.try(:name), on_ex)
     order_serials.destroy_all
