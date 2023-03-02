@@ -146,7 +146,7 @@ module ScanPack
         product_scan_object = ScanPack::ProductScanService.new(
           [
             @current_user, @session,
-            @params[:input], @params[:state], @params[:id], @params[:box_id], barcode.packing_count.to_i || 1
+            @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex], barcode.packing_count.to_i || 1
           ]
         )
         @result = product_scan_object.run(false, false, true)
@@ -165,7 +165,7 @@ module ScanPack
                  elsif state_func == 'product_scan'
                    send(
                      state_func, @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
-                     current_user: @current_user, session: @session 
+                     current_user: @current_user, session: @session
                    )
                  elsif state_func == 'order_scan' && @params[:app]
                    send(

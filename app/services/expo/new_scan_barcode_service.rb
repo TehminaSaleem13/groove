@@ -108,7 +108,7 @@ module Expo
         product_scan_object = Expo::NewProductScanService.new(
           [
             @current_user, @session,
-            @params[:input], @params[:state], @params[:id], @params[:box_id], barcode.packing_count.to_i || 1
+            @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex], barcode.packing_count.to_i || 1
           ]
         )
         @result = product_scan_object.run(false, false, true)
