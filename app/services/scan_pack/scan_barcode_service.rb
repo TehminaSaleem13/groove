@@ -113,14 +113,6 @@ module ScanPack
       end
     end
 
-    def add_activity_for_barcode(item_sku)
-      if @params[:box_id].nil?
-        GeneralSetting.last.multi_box_shipments? ? @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.name, @params[:on_ex]) : @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.name, @params[:on_ex])
-      else
-        box = Box.where(id: @params[:box_id]).last
-        @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.name, @params[:on_ex])
-      end
-    end
 
     def update_activity(output)
       return unless @params[:state] == 'scanpack.rfp.default' && output['status'] == false && @order
