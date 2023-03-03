@@ -85,6 +85,10 @@ class ExportSsProductsCsv
     ProductsService::FixBrokenImages.call(tenant, params)
   end
 
+  def re_associate_all_products(tenant, params)
+    ProductsService::ReAssociateAllProducts.call(tenant, params)
+  end
+
   def generate_csv(result, data, filename, products)
     unless result['status']
       data = CSV.generate { |csv| csv << result['messages'] }

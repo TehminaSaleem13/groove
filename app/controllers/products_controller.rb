@@ -432,6 +432,15 @@ class ProductsController < ApplicationController
     render json: result
   end
 
+  def re_associate_all_products_with_shopify
+    result = {}
+    tenant = Apartment::Tenant.current
+    export_product = ExportSsProductsCsv.new
+    export_product.delay(priority: 95).re_associate_all_products(tenant, params)
+    result['status'] = true
+    render json: result
+  end
+
   def cancel_shopify_product_imports
     result = {}
     StoreProductImport.destroy_all

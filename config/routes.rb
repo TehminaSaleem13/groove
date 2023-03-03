@@ -164,6 +164,7 @@ Groovepacks::Application.routes.draw do
       post 'generate_products_csv'
       post 'generate_broken_image'
       post 'fix_shopify_broken_images'
+      post 're_associate_all_products_with_shopify'
       post 'cancel_shopify_product_imports'
       post 'update_product_list'
       post 'update_image'

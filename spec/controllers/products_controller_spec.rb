@@ -408,6 +408,18 @@ RSpec.describe ProductsController, type: :controller do
       expect(response.status).to eq(200)
       expect(product.product_skus.count).to eq(2)
     end
+
+    it 'Re Associate Shopify Products'do
+      shopify_store = Store.where(store_type: 'Shopify').last
+      shopify_credential = shopify_store.shopify_credential
+
+      post :re_associate_all_products_with_shopify, params: { store_id: shopify_store.id}
+      expect(response.status).to eq(200)
+
+      shopify_credential = shopify_credential.update(re_associate_shopify_products:'re_associate_items')
+      post :re_associate_all_products_with_shopify, params: { store_id: shopify_store.id}
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Print' do
