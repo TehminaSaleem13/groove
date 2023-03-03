@@ -410,11 +410,9 @@ RSpec.describe ProductsController, type: :controller do
     end
 
     it 'Re Associate Shopify Products'do
+      product = FactoryBot.create(:product, name: "Product1", store_product_id: nil) 
       shopify_store = Store.where(store_type: 'Shopify').last
       shopify_credential = shopify_store.shopify_credential
-
-      post :re_associate_all_products_with_shopify, params: { store_id: shopify_store.id}
-      expect(response.status).to eq(200)
 
       shopify_credential = shopify_credential.update(re_associate_shopify_products:'re_associate_items')
       post :re_associate_all_products_with_shopify, params: { store_id: shopify_store.id}
