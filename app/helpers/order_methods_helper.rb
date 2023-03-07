@@ -46,7 +46,7 @@ module OrderMethodsHelper
                             end
           current_status = "Imported #{shipment.created_at.strftime('%B %e %Y %l:%M %p')} - #{shipment_status}"
         end
-        se_old_shipments << { id: shipment.id, increment_id: shipment.increment_id, status: current_status }
+        se_old_shipments << { id: shipment.id, increment_id: shipment.increment_id, status: current_status, store_order_id: shipment.store_order_id, firstname: shipment.firstname, lastname: shipment.lastname, tracking_num: shipment.tracking_num, order_placed_time: shipment.order_placed_time, items_count: shipment.get_items_count }
       end
       result_order['se_old_split_shipments'] = se_old_split_shipments ? se_old_shipments : nil
       result_order['se_old_combined_shipments'] = se_old_combined_shipments ? se_old_shipments : nil
@@ -57,8 +57,7 @@ module OrderMethodsHelper
 
       all_shipments[:present] = true
       shipments.each do |shipment|
-        items_count = shipment.get_items_count
-        all_shipments[:shipments] << { id: shipment.id, increment_id: shipment.increment_id, items_count: items_count }
+        all_shipments[:shipments] << { id: shipment.id, increment_id: shipment.increment_id, store_order_id: shipment.store_order_id, firstname: shipment.firstname, lastname: shipment.lastname, tracking_num: shipment.tracking_num, order_placed_time: shipment.order_placed_time, items_count: shipment.get_items_count }
       end
       result_order['se_all_shipments'] = all_shipments
     end
@@ -502,7 +501,7 @@ module OrderMethodsHelper
 
   def should_show_carrier(ex_app, carrier_data, carrier_code)
     return true if carrier_code.present? && carrier_data['code'] == carrier_code
- 
+
     return false if ex_app && !carrier_data['expanded']
 
     !!carrier_data['visible']

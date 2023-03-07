@@ -55,10 +55,13 @@ module ScanPack
       collect_orders
       @single_order, @single_order_result = get_single_order_with_result
 
-      if @single_order_result['matched_orders'].count > 0 && @store_order_id.to_i != 0
-        @single_order = @orders.where(store_order_id: @store_order_id).first
-        # @single_order_result['matched_orders'] = []
+      if @single_order_result['matched_orders'].count > 0
+        @single_order = @orders.where(store_order_id: @store_order_id).first if @store_order_id.to_i != 0
+        @single_order_result['matched_orders'] = @single_order_result['matched_orders'].collect do |matched_order|
+          matched_order.attributes.merge(items_count: matched_order.get_items_count)
+        end
       end
+
       do_if_single_order_not_present && return unless @single_order
       do_if_single_order_present
     end
