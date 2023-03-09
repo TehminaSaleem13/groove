@@ -187,10 +187,10 @@ module Groovepacker
                   end
           if @params[:qty] > (@orderitem.qty + @orderitem.skipped_qty)
             value = @params[:qty] - (@orderitem.qty + @orderitem.skipped_qty)
-            @orderitem.order.addactivity('Item with sku ' + sku.to_s + " QTY increased by #{value}", @current_user.name)
+            @orderitem.order.addactivity('Item with sku ' + sku.to_s + " QTY increased by #{value}", @current_user.name, @params[:on_ex])
           else
             value = (@orderitem.qty + @orderitem.skipped_qty) - @params[:qty]
-            @orderitem.order.addactivity('Item with sku ' + sku.to_s + " QTY decreased by #{value} ", @current_user.name)
+            @orderitem.order.addactivity('Item with sku ' + sku.to_s + " QTY decreased by #{value} ", @current_user.name, @params[:on_ex])
           end
           @orderitem.skipped_qty = 0
           if @orderitem.scanned_status == 'scanned' && @params[:qty] > @orderitem.qty
