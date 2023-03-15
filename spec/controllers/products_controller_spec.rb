@@ -145,23 +145,46 @@ RSpec.describe ProductsController, type: :controller do
       @request.headers.merge! header
 
       @product = FactoryBot.create(:product, is_kit: 0)
+      @product2 = FactoryBot.create(:product, is_kit: 0)
       @kit = FactoryBot.create(:product, is_kit: 1)
+      @kit2 = FactoryBot.create(:product, is_kit: 1)
       product_sku = FactoryBot.create(:product_sku, product: @product, sku: 'PRODUCT-SKU')
       kit_sku = FactoryBot.create(:product_sku, product: @kit, sku: 'KIT-SKU')
+      kit2_sku = FactoryBot.create(:product_sku, product: @kit2, sku: 'KIT2-SKU')
       product_kit_sku = FactoryBot.create(:product_kit_sku, product: @kit, option_product_id: @product.id)
+      product_kit_sku2 = FactoryBot.create(:product_kit_sku, product: @kit2, option_product_id: @product.id)
       (1..201).to_a.each do |index|
         order = FactoryBot.create(:order, increment_id: "ORDER-#{index}", store: @store)
         order.order_items.create(product: @kit, qty: 1)
+        order.order_items.create(product: @kit2, qty: 1)
       end
     end
 
     it 'removes products from kit' do
-      expect(ProductKitSkus.count).to eq(1)
+      expect(ProductKitSkus.count).to eq(2)
       post :remove_products_from_kit, params: { kit_products: [@product.id], id: @kit.id, product: {} }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
-      expect(ProductKitSkus.count).to eq(0)
+      expect(ProductKitSkus.count).to eq(1)
+    end
+
+    it 'add product from kit to kit (product alredy exists)' do
+      expect(@kit.product_kit_skuss.first.qty).to eq(1)
+      post :add_product_to_kit, params: { product_ids: [@kit2.id], id: @kit.id, product: {} }
+      expect(response.status).to eq(200)
+      @kit.product_kit_skuss.first.reload
+      expect(@kit.product_kit_skuss.first.qty).to eq(2)
+    end
+
+    it 'add product from kit to kit' do
+      @kit2.product_kit_skuss.first.update(option_product_id: @product2.id)
+      @kit2.product_kit_skuss.first.reload
+      expect(@kit.product_kit_skuss.count).to eq(1)
+      post :add_product_to_kit, params: { product_ids: [@kit2.id], id: @kit.id, product: {} }
+      expect(response.status).to eq(200)
+      @kit.product_kit_skuss.reload
+      expect(@kit.product_kit_skuss.count).to eq(2)
     end
   end
 

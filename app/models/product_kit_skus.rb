@@ -115,6 +115,14 @@ class ProductKitSkus < ActiveRecord::Base
       result['status'] &= false
       return result
     end
+
+    if item.is_kit == 1
+      item.product_kit_skuss.each { |product| result = add_kit_product_to_kit(kit, product, result) }
+      kit.add_product_activity("Products from KIT SKU #{item.product_skus.first.sku} was added to KIT SKU #{kit.product_skus.first.sku}", current_user.name)
+
+      return result
+    end
+
     product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.id, kit.id)
     if product_kit_sku.nil?
       @productkitsku = ProductKitSkus.new
@@ -137,6 +145,26 @@ class ProductKitSkus < ActiveRecord::Base
       result['status'] &= false
     end
     item.update_product_status
+    result
+  end
+
+  def self.add_kit_product_to_kit(kit, item, result)
+    product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.option_product_id, kit.id)
+    if product_kit_sku.nil?
+      @productkitsku = ProductKitSkus.new
+      @productkitsku.option_product_id = item.option_product_id
+      @productkitsku.qty += item.qty
+
+      kit.product_kit_skuss << @productkitsku unless kit.product_kit_skuss.map(&:option_product_id).include?(@productkitsku.option_product_id)
+      return result if kit.save
+
+      result['messages'].push('Could not save kit with sku: ' + kit.product_sku.first.sku)
+      result['status'] &= false
+    else
+      product_kit_sku.qty += item.qty
+      product_kit_sku.save
+    end
+
     result
   end
 end
