@@ -37,7 +37,7 @@ module Groovepacker
             unless order.nil?
               order.order_items.update_all(scanned_status: 'scanned')
               order.addactivity('Order is scanned through SCANNED barcode', current_user.try(:username))
-              order.set_order_to_scanned_state(current_user.try(:username))
+              order.set_order_to_scanned_state(current_user.try(:username), scn_params[:on_ex])
             end
           elsif scn_params[:event] == 'note'
             ScanPack::AddNoteService.new(

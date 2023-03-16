@@ -117,11 +117,11 @@ class Order < ActiveRecord::Base
     100 - (total_scan_time.to_f / total_scan_count)
   end
 
-  def set_order_to_scanned_state(username)
+  def set_order_to_scanned_state(username, on_ex = nil)
     self.status = 'scanned'
     self.already_scanned = true
     self.scanned_on = current_time_from_proper_timezone
-    addactivity('Order Scanning Complete', username) unless ScanPackSetting.last.order_verification
+    addactivity('Order Scanning Complete', username, on_ex) unless ScanPackSetting.last.order_verification
     self.packing_score = compute_packing_score
     self.post_scanning_flag = nil
     # Remove tote assignment
