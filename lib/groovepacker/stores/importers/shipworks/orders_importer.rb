@@ -202,12 +202,8 @@ module Groovepacker
                         end
                       end
             if item.present?
-              order.order_items.create!(
-                product: product,
-                price: item['UnitPrice'].to_f,
-                qty: item['Quantity'],
-                row_total: item['TotalPrice']
-              )
+              order_item = order.order_items.find_by(product_id: product.id) 
+              order_item ? order_item.update(qty: order_item.qty + item['Quantity'].to_i) : order.order_items.create!( product: product, price: item['UnitPrice'].to_f, qty: item['Quantity'], row_total: item['TotalPrice'])
           end
             import_item.current_order_imported_item = import_item.current_order_imported_item + 1
             import_item.save
