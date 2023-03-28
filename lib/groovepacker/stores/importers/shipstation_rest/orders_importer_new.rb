@@ -644,10 +644,8 @@ module Groovepacker
 
           def skip_the_order?(shipments_response, order)
             return false if @import_single_order
-            return false unless @credential.import_shipped_having_tracking
-            return false unless shipstation_order_import_status.any?('Shipped')
 
-            order['orderStatus'] == 'shipped' && order_tracking_number(order, shipments_response).nil?
+            @credential.import_shipped_having_tracking && order['orderStatus'] == 'shipped' && order_tracking_number(order, shipments_response).nil?
           end
           
           def order_tracking_number(order, shipments_response)
