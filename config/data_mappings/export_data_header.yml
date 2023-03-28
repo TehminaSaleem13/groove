@@ -15,6 +15,8 @@
 :ordered_qty: ordered_qty
 :scanned_date: scanned_date
 :warehouse_name: warehouse_name
+:custom_order_1: custom_order_1
+:custom_order_2: custom_order_2
 :item_sale_price: item_sale_price
 :kit_name: kit_name
 :customer_name: customer_name

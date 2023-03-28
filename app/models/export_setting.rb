@@ -183,6 +183,8 @@ class ExportSetting < ActiveRecord::Base
     single_row[:incorrect_scans] = order.inaccurate_scan_count
     single_row[:clicked_scanned_qty] = order_item.clicked_qty
     single_row[:added_count] = order_item.added_count
+    single_row[:custom_order_1] = GeneralSetting.first.custom_field_one
+    single_row[:custom_order_2] = GeneralSetting.first.custom_field_two
     if box.present?
       single_row[:ordered_qty] = box.order_item_boxes.where(order_item_id: order_item.id).last.item_qty
       single_row[:box_number] = box.name.split(' ').last
