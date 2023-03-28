@@ -108,6 +108,29 @@ RSpec.describe OrdersController, type: :controller do
     end
   end
 
+  describe 'Shipworks Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+    let(:order_xml) { IO.read(Rails.root.join('spec/fixtures/files/sw_order_import.xml')) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      sw_store = Store.create(name:'Shipworks', status:true, store_type:'Shipworks', inventory_warehouse: InventoryWarehouse.last)
+      @sw_store_credential = ShipworksCredential.create(store_id: sw_store.id, auth_token: "sw_auth_token==", shall_import_ignore_local: true)
+    end
+
+    it 'Import Shipworks Orders' do
+      request.accept = 'application/xml'
+      request.env['HTTP_USER_AGENT'] = 'shipworks'
+      expect {
+        post :import_shipworks, params: { auth_token: @sw_store_credential.auth_token }, body: order_xml
+      }.to change { OrderItem.count }.by(3)
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'ShippingEasy Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
