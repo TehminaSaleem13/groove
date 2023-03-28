@@ -143,6 +143,7 @@ module Groovepacker
         @shipstation.tag_import_option = params[:tag_import_option].to_boolean
         @shipstation.add_gpscanned_tag = params[:add_gpscanned_tag].to_boolean
         @shipstation.import_tracking_info = params[:import_tracking_info].to_boolean
+        @shipstation.import_shipped_having_tracking = params[:import_shipped_having_tracking].to_boolean
         @shipstation.remove_cancelled_orders = params[:remove_cancelled_orders].to_boolean
         @shipstation.postcode = params[:postcode] || ''
         @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'

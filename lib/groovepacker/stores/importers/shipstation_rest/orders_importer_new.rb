@@ -180,6 +180,7 @@ module Groovepacker
           end
 
           def import_single_order(order_no, user_id, on_demand_quickfix, controller)
+            @import_single_order = true
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
@@ -241,25 +242,9 @@ module Groovepacker
           def import_order_form_response(shipstation_order, order, shipments_response)
             if shipstation_order.present? && !shipstation_order.persisted? && order['orderStatus'] != 'cancelled'
               import_order(shipstation_order, order)
-              if order['orderStatus'] == 'shipped'
-                tracking_info = begin
-                                  (shipments_response || []).find { |shipment| shipment['orderId'] == order['orderId'] && shipment['voided'] == false } || {}
-                                rescue StandardError
-                                  {}
-                                end
-              end
-              if tracking_info.blank? && order['orderStatus'] == 'shipped' && should_fetch_shipments?
-                response = @client.get_shipments_by_orderno(order['orderNumber'])
-                tracking_info = {}
-                if response.present?
-                  response.each do |shipment|
-                    tracking_info = shipment if shipment['voided'] == false
-                  end
-                end
-              end
               shipstation_order = Order.find_by_id(shipstation_order.id) if shipstation_order.frozen?
               shipstation_order.tracking_num = begin
-                                                 tracking_info['trackingNumber']
+                                                 order_tracking_number(order, shipments_response)
                                                rescue StandardError
                                                  nil
                                                end
@@ -459,6 +444,8 @@ module Groovepacker
           end
 
           def update_import_item_and_import_order(order, shipments_response)
+            return if skip_the_order?(shipments_response, order)
+
             @import_item.update_attributes(current_increment_id: order['orderNumber'], current_order_items: -1, current_order_imported_item: -1)
             # If a large number of orders are imported into SS at the same time via CSV, their OSLMT will be the same. During each regular import, we count how many consecutive orders have had the same timestamp. While this count is => to 25 we will set a flag to 1 If a non-matching OSLMT is imported or if the import fails in any way, the flag is reset to 0. When each import is run we will check this flag. If it is set to 1 at the start of the import we will adjust our LRO timestamp forward by 1 second and set the flag back to 0 ##### @bulk_ss_import #####
             Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
@@ -653,6 +640,34 @@ module Groovepacker
           def delete_order_and_log_event(order)
             order.destroy
             EventLog.create(data: { increment_id: order.increment_id, store_order_id: order.store_order_id }, message: 'Deleted Cancelled SS Order')
+          end
+
+          def skip_the_order?(shipments_response, order)
+            return false if @import_single_order
+            return false unless @credential.import_shipped_having_tracking
+            return false unless shipstation_order_import_status.any?('Shipped')
+
+            order['orderStatus'] == 'shipped' && order_tracking_number(order, shipments_response).nil?
+          end
+          
+          def order_tracking_number(order, shipments_response)
+            if order['orderStatus'] == 'shipped'
+              tracking_info = begin
+                                (shipments_response || []).find { |shipment| shipment['orderId'] == order['orderId'] && shipment['voided'] == false } || {}
+                              rescue StandardError
+                                {}
+                              end
+            end
+            if tracking_info.blank? && order['orderStatus'] == 'shipped' && should_fetch_shipments?
+              response = @client.get_shipments_by_orderno(order['orderNumber'])
+              tracking_info = {}
+              if response.present?
+                response.each do |shipment|
+                  tracking_info = shipment if shipment['voided'] == false
+                end
+              end
+            end
+            tracking_info['trackingNumber']
           end
         end
       end
