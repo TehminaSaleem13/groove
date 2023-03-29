@@ -1,0 +1,54 @@
+---
+- shipmentId: 756894152
+  orderId: 727657309
+  orderKey: 97ea6464-6de9-51db-ad11-4162c9dadcdf
+  userId:
+  customerEmail: alphatester@yopmail.com
+  orderNumber: SSTestOrder
+  createDate: '2020-09-11T04:42:37.3930000'
+  shipDate: '2020-09-11'
+  shipmentCost: 4.44
+  insuranceCost: 0.0
+  trackingNumber: 9400111206238964979603
+  isReturnLabel: false
+  batchNumber: nil
+  carrierCode: stamps_com
+  serviceCode: usps_first_class_mail
+  packageCode: package
+  confirmation: delivery
+  warehouseId: 82982
+  voided: false
+  voidDate: nil
+  marketplaceNotified: false
+  notifyErrorMessage: nil
+  shipTo:
+    name: Alpha Tester
+    company: GROOVEPACKER
+    street1: 110 COBBLESTONE CIR
+    street2: ''
+    street3:
+    city: NORTH LITTLE ROCK
+    state: AR
+    postalCode: 72116-3739
+    country: US
+    phone: 111-111-1111
+    residential: true
+    addressVerified: Address validated successfully
+  weight:
+    value: 8.0
+    units: ounces
+    WeightUnits: 1
+  dimensions: nil
+  insuranceOptions: 
+    provider:
+    insureShipment: false
+    insuredValue: 0.0
+  advancedOptions: 
+    billToParty: 4 
+    billToAccount: 
+    billToPostalCode:
+    billToCountryCode:
+    storeId: 203151
+  shipmentItems:
+  labelData:
+  formData:
