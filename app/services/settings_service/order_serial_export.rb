@@ -75,6 +75,7 @@ module SettingsService
     def generate_single_record(serial, single_row)
       order = serial.order
       product = serial.product
+      return if product.nil?
 
       push_order_data(single_row, order)
       push_user_data(single_row, order, product)
