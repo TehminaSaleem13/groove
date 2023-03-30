@@ -71,11 +71,11 @@ class ExportSetting < ActiveRecord::Base
     send("daily_packed_email_on_#{day.downcase}")
   end
 
-  def calculate_row_data(single_row, order_item, box = nil)
+  def calculate_row_data(single_row, order_item, box = nil, order_item_box = nil)
     order = order_item.order
     update_single_row(single_row, order, box, order_item)
     update_single_row_for_packing_user(single_row, order_item, order)
-    update_single_row_for_product_info(single_row, order_item)
+    update_single_row_for_product_info(single_row, order_item, order_item_box)
     single_row
   end
 
@@ -200,20 +200,34 @@ class ExportSetting < ActiveRecord::Base
                                             .try(:inventory_warehouse).try(:name)
   end
 
-  def update_single_row_for_product_info(single_row, order_item)
+  def update_single_row_for_product_info(single_row, order_item, order_item_box = nil)
     product = order_item.product
-    single_row[:barcode] = product&.primary_barcode
-
-    if product&.is_kit == 1
-      single_row[:kit_name] = product&.name
-    else
-      single_row[:product_name] = product&.name
+    kit_product = order_item.order_item_kit_products.find_by(id: order_item_box&.kit_id) if order_item_box.present?
+    if product&.is_kit == 1 && kit_product&.scanned_status == "partially_scanned"
+      return update_partially_scanned_kit(single_row, order_item, product, kit_product)
     end
+    single_row[:product_name] = product&.name
+    single_row[:barcode] = product&.primary_barcode
 
     single_row[:primary_sku] = product&.primary_sku
     single_row[:item_sale_price] = order_item.price
     single_row[:scanned_count] = order_item.scanned_qty
     single_row[:unscanned_count] = order_item.qty - order_item.scanned_qty
+    single_row[:removed_count] = order_item.removed_qty
+  end
+
+  def update_partially_scanned_kit(single_row, order_item, product, kit_product)
+    kit_product_sku = ProductKitSkus.find_by(id: kit_product&.product_kit_skus_id)
+    product_barcode = ProductBarcode.find_by(product_id: kit_product_sku&.option_product_id)
+    product_sku = ProductSku.find_by(product_id: kit_product_sku&.option_product_id)
+    
+    single_row[:kit_name] = product&.name
+  
+    single_row[:primary_sku] = product_sku.sku
+    single_row[:barcode] = product_barcode.barcode
+    single_row[:scanned_count] = kit_product.scanned_qty
+    single_row[:item_sale_price] = order_item.price
+    single_row[:unscanned_count] = kit_product_sku.qty - kit_product.scanned_qty
     single_row[:removed_count] = order_item.removed_qty
   end
 
