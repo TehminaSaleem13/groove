@@ -283,7 +283,7 @@ module Groovepacker
       def increase_qty_scanned(product)
         orderitem = first_order_item(product)
         orderitem.qty += 1
-        orderitem.scanned_qty += 1
+        orderitem.scanned_qty += 1 if @params[:add_to_scanned_list].present?
         orderitem.scanned_status = 'partially_scanned'
         if orderitem.save
           add_product_sku(product)

@@ -509,7 +509,7 @@ RSpec.describe OrdersController, type: :controller do
       post :add_item_to_order, params: { id: order.id, productids: [product.id.to_s] }
       expect(response.status).to eq(200)
 
-      post :add_item_to_order, params: { id: order.id, productids: [product.id.to_s] }
+      post :add_item_to_order, params: { id: order.id, productids: [product.id.to_s], add_to_scanned_list: true }
       expect(order.order_items.last.qty).to eq(2)
       expect(order.order_items.last.scanned_qty).to eq(1)
     end
