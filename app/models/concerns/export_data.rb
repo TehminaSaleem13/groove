@@ -89,9 +89,9 @@ module ExportData
   def export_without_order_with_serial_lot(order_item, row_map, order_hash_item_array, box = nil)
     order_item_serial_lots = OrderItemOrderSerialProductLot.where(order_item_id: order_item.id)
     if order_item_serial_lots.empty?
-      if order_item.order_item_boxes.present?
-        order_item.order_item_boxes.each do |order_item_box|
-          single_row = do_if_serial_lots_empty(row_map, order_item, box, order_item_box)
+      if order_item.order_item_kit_products.present?
+        order_item.order_item_kit_products.each do |order_item_kit|
+          single_row = do_if_serial_lots_empty(row_map, order_item, box, order_item_kit)
           order_hash_item_array.push(single_row.dup)
         end
       else
@@ -114,10 +114,10 @@ module ExportData
     end
   end
 
-  def do_if_serial_lots_empty(row_map, order_item, box = nil, order_item_box = nil)
+  def do_if_serial_lots_empty(row_map, order_item, box = nil, order_item_kit = nil)
     single_row = row_map.dup
     single_row[:ordered_qty] = order_item.qty
-    single_row = calculate_row_data(single_row, order_item, box, order_item_box)
+    single_row = calculate_row_data(single_row, order_item, box, order_item_kit)
     single_row[:lot_number] = ''
     single_row[:barcode_with_lot] = ''
     single_row[:serial_number] = ''

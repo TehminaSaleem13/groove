@@ -71,11 +71,11 @@ class ExportSetting < ActiveRecord::Base
     send("daily_packed_email_on_#{day.downcase}")
   end
 
-  def calculate_row_data(single_row, order_item, box = nil, order_item_box = nil)
+  def calculate_row_data(single_row, order_item, box = nil, order_item_kit = nil)
     order = order_item.order
     update_single_row(single_row, order, box, order_item)
     update_single_row_for_packing_user(single_row, order_item, order)
-    update_single_row_for_product_info(single_row, order_item, order_item_box)
+    update_single_row_for_product_info(single_row, order_item, order_item_kit)
     single_row
   end
 
@@ -200,11 +200,10 @@ class ExportSetting < ActiveRecord::Base
                                             .try(:inventory_warehouse).try(:name)
   end
 
-  def update_single_row_for_product_info(single_row, order_item, order_item_box = nil)
+  def update_single_row_for_product_info(single_row, order_item, order_item_kit = nil)
     product = order_item.product
-    kit_product = order_item.order_item_kit_products.find_by(id: order_item_box&.kit_id) if order_item_box.present?
-    if product&.is_kit == 1 && kit_product&.scanned_status == "partially_scanned"
-      return update_partially_scanned_kit(single_row, order_item, product, kit_product)
+    if product&.is_kit == 1 && order_item_kit.present?
+      return update_partially_scanned_kit(single_row, order_item, product, order_item_kit)
     end
     single_row[:product_name] = product&.name
     single_row[:barcode] = product&.primary_barcode
@@ -228,6 +227,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:scanned_count] = kit_product.scanned_qty
     single_row[:item_sale_price] = order_item.price
     single_row[:unscanned_count] = kit_product_sku.qty - kit_product.scanned_qty
+    single_row[:clicked_scanned_qty] = kit_product.clicked_qty
     single_row[:removed_count] = order_item.removed_qty
   end
 
