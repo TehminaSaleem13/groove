@@ -78,6 +78,10 @@ every 1.day, at: '12:00 am' do
   rake 'doo:delete_orders_products_logs'
 end
 
+every 1.day, at: '12:00 am' do
+  rake 'doo:delete_older_ftp_files'
+end
+
 every 60.minutes do
   rake 'doo:schedule_hourly_import'
 end

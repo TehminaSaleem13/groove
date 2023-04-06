@@ -141,6 +141,46 @@ RSpec.describe StoresController, type: :controller do
       expect(@product.product_skus.count).to eq(1)
       expect(@product.product_skus.first.sku).to eql(existing_product_sku)
     end
+
+    it 'Import via FTP' do
+      store = Store.where(store_type: 'CSV', status: true).first
+      FtpCredential.create(store_id: store.id, host:"ecomdash-ftp.cloudapp.net/Inventory", username: "DeJaViewedLLC", password: "DeJaViewedLLC123!", connection_method: "ftp")
+      request.accept = 'application/json'
+
+      groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+      ftp = groove_ftp.delete_older_files
+      expect(response.status).to eq(200)
+    end
+
+    it 'Import via FTP without host' do
+      store = Store.where(store_type: 'CSV', status: true).first
+      FtpCredential.create(store_id: store.id, host:"ecomdash-ftp.cloudapp.net", username: nil, password: "DeJaViewedLLC123!", connection_method: "ftp")
+      request.accept = 'application/json'
+
+      groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+      ftp = groove_ftp.delete_older_files
+      expect(response.status).to eq(200)
+    end
+
+    it 'Import via SFTP' do
+      store = Store.where(store_type: 'CSV', status: true).first
+      FtpCredential.create(store_id: store.id, host:"34.202.114.73/groovepacker", username: "groovepacker", password: "grOOvePacKeRRG!!", connection_method: "sftp")
+      request.accept = 'application/json'
+
+      groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+      sftp = groove_ftp.delete_older_files
+      expect(response.status).to eq(200)
+    end
+
+    it 'Import Via SFTP without Username' do
+      store = Store.where(store_type: 'CSV', status:true).first
+      FtpCredential.create(store_id: store.id, host:"34.202.114.73/groovepacker", username: nil, password: "grOOvePacKeRRG!!", connection_method: "sftp")
+      request.accept = 'application/json'
+
+      groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+      sftp = groove_ftp.delete_older_files
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'ShippingEasy Imports' do

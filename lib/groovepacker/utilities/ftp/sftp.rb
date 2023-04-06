@@ -289,6 +289,24 @@ module FTP
       result
     end
 
+    def delete_older_files
+      result = build_result
+      response = connect
+      if response[:error_messages].empty? && response[:status] == true
+        connection_obj = response[:connection_obj]
+        connection_obj.dir.glob(directory + '/imported', '*.csv') + connection_obj.dir.glob(directory + '/imported', '*.CSV').each do |file|
+          modified_time = Time.at(file.attributes.mtime)
+          connection_obj.remove("/#{directory}/imported/#{file.name}") if modified_time < 90.days.ago
+        end
+      else
+        result[:status] = false
+        response[:error_messages].each do |message|
+          result[:error_messages].push(message)
+        end
+        return result
+      end
+    end
+
     private
 
     def find_file(connection_obj)
