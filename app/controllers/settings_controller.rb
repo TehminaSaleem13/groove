@@ -162,6 +162,7 @@ class SettingsController < ApplicationController
     @result['direct_printing_options'] = current_tenant&.direct_printing_options
     @result['order_cup_direct_shipping'] = current_tenant&.order_cup_direct_shipping
     @result['ss_api_create_label'] = current_tenant&.ss_api_create_label
+    @result['show_external_logs_button'] = current_tenant&.show_external_logs_button
 
     if general_setting.present?
       @result['data']['settings'] = if params[:app]
