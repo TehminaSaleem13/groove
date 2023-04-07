@@ -64,6 +64,14 @@ RSpec.describe ProductsController, type: :controller do
       get :generate_barcode, params: { id: product.id, productArray: [{ id: product.id }] }
       expect(response.status).to eq(200)
     end
+
+    it 'Search Product with Name' do
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'House of Products')
+      request.accept = 'application/json'
+
+      get :search, params: { search: "House", sort: "", order: "DESC", is_kit: 0, limit: 20, offset: 0}
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Permit Shared Imports' do
