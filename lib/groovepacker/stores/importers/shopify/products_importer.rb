@@ -64,15 +64,14 @@ module Groovepacker
               end
 
               begin
-                byebug
                 variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
-                variant['title'] = @credential.import_variant_names ? shopify_product['title'] : shopify_product['title'] + variant_title
+                variant['title'] = @credential.import_variant_names ? item['title'] : item['name']
                 product = create_product_from_variant(variant, @shopify_product)
               rescue StandardError
                 product = nil
               end
+              product.update_columns(custom_product_1:variant_title, custom_product_display_1:true) if variant_title.present? && product
             end
-            # product.update_columns(custom_product_1:variant_title, custom_product_display_1:true) if variant_title.present?
             product
           end
 
