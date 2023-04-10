@@ -500,7 +500,7 @@ module Groovepacker
             end
 
             shiping_easy_order.reload
-
+            
             if check_for_replace_product
               add_order_activity_for_gp_coupon(shiping_easy_order, order['recipients'][0]['line_items'])
             else
@@ -608,7 +608,7 @@ module Groovepacker
           def add_order_activity_for_gp_coupon(shiping_easy_order, params_item)
             shiping_easy_order.addactivity('Order Import', "#{@credential.store.name} Import")
             shiping_easy_order.order_items.each_with_index do |item, index|
-              product_name = params_item[index]['product'].nil? ? params_item[index]['item_name'] : params_item[index]['product']['description']
+              product_name = params_item[index]['product'].nil? ? params_item[index]['item_name'].to_s : params_item[index]['product']['description'].to_s
               if product_name == item.product.name && params_item[index]['sku'] == item.product.primary_sku
                 primary_sku = item.product.try(:primary_sku)
                 next if primary_sku.nil?

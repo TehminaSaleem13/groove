@@ -68,8 +68,8 @@ module SettingsHelper
         restart_code_enabled restart_code
         type_scan_code_enabled type_scan_code post_scanning_option
         escape_string_enabled escape_string record_lot_number
-        show_customer_notes show_internal_notes show_tags
-        scan_by_shipping_label intangible_setting_enabled
+        show_customer_notes show_internal_notes send_external_logs 
+        show_tags scan_by_shipping_label intangible_setting_enabled
         intangible_string intangible_setting_gen_barcode_from_sku
         post_scan_pause_enabled post_scan_pause_time
         display_location string_removal_enabled string_removal
