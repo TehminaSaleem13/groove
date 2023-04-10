@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20230222063807) do
+ActiveRecord::Schema.define(version: 20230405173634) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -327,7 +327,9 @@ ActiveRecord::Schema.define(version: 20230222063807) do
     t.string "starting_value", default: "10000000"
     t.boolean "show_sku_in_barcodeslip", default: true
     t.boolean "print_product_barcode_labels", default: false
-    t.string "new_time_zone", default: "UTC"
+    t.string "new_time_zone", default: "Eastern Time (US & Canada)"
+    t.boolean "truncate_order_number_in_packing_slip", default: false
+    t.string "truncated_string", default: "-"
   end
 
   create_table "generate_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1068,6 +1070,7 @@ ActiveRecord::Schema.define(version: 20230222063807) do
     t.string "pass_scan_barcode", default: "PASS"
     t.boolean "add_next", default: true
     t.string "add_next_barcode", default: "ADDNEXT"
+    t.boolean "send_external_logs", default: false
   end
 
   create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1138,6 +1141,7 @@ ActiveRecord::Schema.define(version: 20230222063807) do
     t.boolean "remove_cancelled_orders", default: false
     t.text "contracted_carriers"
     t.text "presets"
+    t.boolean "import_shipped_having_tracking", default: false
   end
 
   create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1177,6 +1181,9 @@ ActiveRecord::Schema.define(version: 20230222063807) do
     t.boolean "import_fulfilled_having_tracking", default: false
     t.text "temp_cookies", limit: 4294967295
     t.boolean "add_gp_scanned_tag", default: false
+    t.boolean "on_hold_status", default: false
+    t.string "re_associate_shopify_products", default: "associate_items"
+    t.boolean "import_variant_names", default: true
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1307,10 +1314,11 @@ ActiveRecord::Schema.define(version: 20230222063807) do
     t.boolean "is_cf", default: true
     t.boolean "ss_api_create_label", default: false
     t.boolean "direct_printing_options", default: false
-    t.boolean "expo_logs_delay", default: true
+    t.boolean "expo_logs_delay", default: false
     t.boolean "gdpr_shipstation", default: false
     t.boolean "uniq_shopify_import", default: false
     t.boolean "order_cup_direct_shipping", default: false
+    t.boolean "show_external_logs_button", default: false
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
