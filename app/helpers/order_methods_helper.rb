@@ -335,7 +335,7 @@ module OrderMethodsHelper
 
       product_kit_sku = order_item_kit_product.product_kit_skus
       product = Product.find(product_kit_sku.option_product_id)
-      data1 = { product_name: product.name, qty: o.item_qty, box: o.box.id }
+      data1 = { product_name: product.name, qty: o.item_qty, box: o.box.id, kit_id: o.kit_id }
       list << data1
     end
     list = list.group_by { |d| d[:box] }
