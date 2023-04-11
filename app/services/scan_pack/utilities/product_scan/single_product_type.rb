@@ -62,7 +62,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
   # Remove those order_items that are skippable when the scanned barcode
   # is SKIP entered as the barcode.
   def remove_skippable_product(item)
-    @single_order.order_activities.last.try(:destroy)
+    # @single_order.order_activities.last.try(:destroy)
     order_item = OrderItem.find(item['order_item_id'])
     # qty = 0
     # if order_item.scanned_status == 'partially_scanned'
