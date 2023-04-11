@@ -285,6 +285,12 @@ module Groovepacker
         orderitem.qty += 1
         orderitem.scanned_qty += 1 if @params[:add_to_scanned_list].present?
         orderitem.scanned_status = 'partially_scanned'
+        if orderitem.order_item_kit_products.present?
+          orderitem.order_item_kit_products.each do |kit_product|
+            kit_product.scanned_status = 'partially_scanned'
+            kit_product.save
+          end
+        end
         if orderitem.save
           add_product_sku(product)
         end

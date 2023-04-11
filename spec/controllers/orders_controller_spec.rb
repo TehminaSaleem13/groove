@@ -514,6 +514,22 @@ RSpec.describe OrdersController, type: :controller do
       expect(order.order_items.last.scanned_qty).to eq(1)
     end
 
+    it 'Add item to order if product is kit' do
+      order = FactoryBot.create :order, store_id: @store.id
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'scanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      kit = FactoryBot.create(:product, :with_sku_barcode, is_kit: 1, kit_parsing: 'individual', name: 'KIT1')
+      productkitsku = ProductKitSkus.create(product_id: kit.id, option_product_id: product.id, qty: 1)
+      kit.product_kit_skuss << productkitsku
+      ProductSku.create(sku: 'PRODUCT90', purpose: nil, product_id: product.id, order: 0)
+      OrderItemKitProduct.create(order_item_id: order_item.id, product_kit_skus_id: productkitsku.id, scanned_status: "scanned", scanned_qty: 1)
+
+      post :add_item_to_order, params: { id: order.id, productids: [product.id.to_s] }
+      expect(response.status).to eq(200)
+      expect(order.order_items.last.qty).to eq(2)
+      expect(order.order_items.last.scanned_status).to eq("partially_scanned")
+    end
+
     it 'Add item to order without product' do
       order = FactoryBot.create :order, store_id: @store.id
 
