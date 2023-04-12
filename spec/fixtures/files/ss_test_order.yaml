@@ -53,7 +53,7 @@ orders:
     options: []
     productId: 25108976
     fulfillmentSku:
-    adjustment: false
+    adjustment: true
     upc:
     createDate: '2020-09-11T04:42:37.517'
     modifyDate: '2020-09-11T04:42:37.517'
