@@ -140,6 +140,7 @@ module Groovepacker
         @shipstation.return_to_order = params[:return_to_order].to_boolean
         @shipstation.import_upc = params[:import_upc].to_boolean
         @shipstation.allow_duplicate_order = params[:allow_duplicate_order].to_boolean
+        @shipstation.import_discounts_option = params[:import_discounts_option].to_boolean
         @shipstation.tag_import_option = params[:tag_import_option].to_boolean
         @shipstation.add_gpscanned_tag = params[:add_gpscanned_tag].to_boolean
         @shipstation.import_tracking_info = params[:import_tracking_info].to_boolean
