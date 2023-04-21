@@ -236,16 +236,12 @@ class GeneralSetting < ActiveRecord::Base
           job_scheduled = true
         end
       elsif job_type == 'inv_report'
-        prod_inv_report = ProductInventoryReport.where(scheduled: true)
         inv_report_setting = InventoryReportsSetting.all.first
         if inv_report_setting.should_inv_report(time)
           existing_jobs = Delayed::Job.where('queue LIKE ? and run_at >= ? and run_at <= ?', "%schedule_inventory_report_#{tenant}%", time.beginning_of_day, time.end_of_day)
-
           existing_jobs.destroy_all if existing_jobs.any?
-          prod_inv_report.each do |_product_report|
-            InventoryReportMailer.delay(run_at: time.strftime('%H:%M:%S'), queue: "schedule_inventory_report_#{tenant}", priority: 95).auto_inventory_report(false, nil, nil, tenant)
-            job_scheduled = true
-          end
+          InventoryReportMailer.delay(run_at: time.strftime('%H:%M:%S'), queue: "schedule_inventory_report_#{tenant}", priority: 95).auto_inventory_report(false, nil, nil, tenant)
+          job_scheduled = true
         end
       elsif job_type == 'import_orders'
         if should_import_orders(date)
