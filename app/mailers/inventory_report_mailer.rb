@@ -28,13 +28,24 @@ class InventoryReportMailer < ActionMailer::Base
               else
                 report.present? ? [report] : ProductInventoryReport.where(scheduled: true)
               end
+    check_inventory_report(flag, reports, tenant)
+  end
+
+  def check_inventory_report(flag, reports, tenant)
     @product_inv_setting = InventoryReportsSetting.last
     reports.each do |report|
-      file_name = "sku_per_day_report_#{Time.current.strftime('%y%m%d_%H%M%S')}.csv"
-      products = get_products(report)
-      data = InventoryReport::SkuPerDay.new(@product_inv_setting, products, flag).get_data
-      attachments[file_name] = { mime_type: 'text/csv', content: data }
-      # attachments[file_name] = File.read("public/#{file_name}")
+      if (report.scheduled && report.type) || (!report.scheduled && report.type)
+        file_name = "sku_per_day_report_#{Time.current.strftime('%y%m%d_%H%M%S')}.csv"
+        products = get_products(report)
+        data = InventoryReport::SkuPerDay.new(@product_inv_setting, products, flag).get_data
+        attachments[file_name] = { mime_type: 'text/csv', content: data }
+        # attachments[file_name] = File.read("public/#{file_name}")
+      else
+        products = get_products(report)
+        file_name = "inventory_report_#{Time.current.strftime('%y%m%d_%H%M%S')}.csv"
+        data = InventoryReport::InvProjection.new(@product_inv_setting, products).get_data
+        attachments[file_name] = { mime_type: 'text/csv', content: data }
+      end
     end
     subject = "Inventory Projection Report [ #{tenant || Apartment::Tenant.current} ]"
     email = @product_inv_setting.report_email
