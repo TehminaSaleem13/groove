@@ -10,13 +10,15 @@ module Connection
     status
   end
 
-  def check_connection_for_shopify_or_bc(store, store_type, import_item)
+  def check_connection_for_shopify_or_bc_or_shippo(store, store_type, import_item)
     connection_status = true
     case store_type
     when 'BigCommerce'
       connection_status = check_bc_connection(store, import_item)
     when 'Shopify'
       connection_status = check_shopify_connection(store, import_item)
+    when "Shippo"
+      connection_status =  check_sp_connection(store, import_item)
     end
     connection_status
   end
@@ -36,5 +38,12 @@ module Connection
 
     import_item.update_attributes(status: 'failed', message: 'Not yet connected - Please click the Shopify icon and connect to your store')
     false
+  end
+
+  def check_sp_connection(store, import_item)
+    shippo_credential = ShippoCredential.where(store_id: store.id).first
+    return true if shippo_credential.api_key && shippo_credential.api_version
+    import_item.update_attributes(status: 'failed', message: 'Not yet connected - Please click the Shippo icon and connect to your store')
+    return false
   end
 end

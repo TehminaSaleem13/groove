@@ -120,11 +120,9 @@ class OrderImportSummariesController < ApplicationController
                                     4.day.ago.strftime('%Y-%m-%d %H:%M:%S')
                                   end
     elsif store_type == 'Shopify'
-      result[:last_imported_at] = begin
-                                    cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S')
-                                  rescue StandardError
-                                    1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
-                                  end
+      result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue 1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
+    elsif store_type == 'Shippo'
+      result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue 1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
     else
       result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? 1.day.ago.strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
     end

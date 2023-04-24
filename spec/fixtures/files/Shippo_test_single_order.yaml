@@ -1,0 +1,70 @@
+object_id: eb4e3e14623042b48f83e5c13ead3967
+order_number: '2299714'
+order_status: UNKNOWN
+placed_at: '2023-04-11T13:26:01.420Z'
+object_owner: kcpatel006@gmail.com
+to_address:
+  object_created: '2023-04-11T13:26:01.926Z'
+  object_updated: '2023-04-11T13:26:01.926Z'
+  object_id: 38d02bea5c3140d585c1d11615f27b18
+  is_complete: false
+  validation_results: {}
+  object_owner: kcpatel006@gmail.com
+  name: Julian Gonzalez
+  company: ''
+  street_no: ''
+  street1: Cuautla s/n esquina 21 de abril en el oxxo
+  street2: Colonia Venustiano Carranza
+  street3: ''
+  city: Panuco
+  state: VC
+  zip: '93994'
+  country: MX
+  longitude: null
+  latitude: null
+  phone: '8462615167'
+  email: julian19771.jg@gmail.com
+  is_residential: null
+  metadata: ''
+  test: null
+from_address: null
+shop_app: CSV_Import
+weight: '0.23'
+weight_unit: null
+transactions: []
+total_tax: '0.00'
+total_price: '0.00'
+subtotal_price: '0.00'
+currency: USD
+shipping_method: null
+shipping_cost: '0.00'
+shipping_cost_currency: USD
+line_items:
+  - object_id: 6adb9f4eb5e54db9b1f21ff913a273dd
+    title: Mars
+    variant_title: ''
+    sku: '190'
+    quantity: 1
+    total_price: '0.00'
+    currency: USD
+    weight: '0.0570'
+    weight_unit: null
+    manufacture_country: null
+    max_ship_time: null
+    max_delivery_time: null
+    description: null
+  - object_id: 042f12d8f80d4f108ac00ca5ced68e39
+    title: TeDivina
+    variant_title: ''
+    sku: '192'
+    quantity: 2
+    total_price: '0.00'
+    currency: USD
+    weight: '0.0850'
+    weight_unit: null
+    manufacture_country: null
+    max_ship_time: null
+    max_delivery_time: null
+    description: null
+notes: null
+test: false

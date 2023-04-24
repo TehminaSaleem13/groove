@@ -19,6 +19,7 @@ RSpec.describe OrderImportSummariesController, type: :controller do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
     let(:ss_store) { Store.create(name: 'Shipstation', status: true, store_type: 'Shipstation API 2', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:se_store) { Store.create(name: 'ShippingEasy', status: true, store_type: 'ShippingEasy', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
+    let(:sp_store) { Store.create(name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
@@ -28,6 +29,8 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       ss_store.create_shipstation_rest_credential(api_key: '14ccf1296c2043cb9076b90953b7ea9c', api_secret: '26fc8ff9f7a7411180d2960eb838e2ca', last_imported_at: nil, shall_import_awaiting_shipment: true, shall_import_shipped: false, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: false, quick_import_last_modified: nil, use_chrome_extention: true, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: false, bulk_import: false, order_import_range_days: 14, quick_import_last_modified_v2: '2021-04-22 22:53:15', import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: '', label_shortcuts: { 'w' => 'weight', nil => nil, 'd' => 'USPS Parcel Select Ground - Package', '5' => 'Print Label' }, disabled_carriers: ['ups_walleted'], disabled_rates: {}, skip_ss_label_confirmation: true)
 
       se_store.create_shipping_easy_credential(store_id: se_store.id, api_key: 'apikeyapikeyapikeyapikeyapikeyse', api_secret: 'apisecretapisecretapisecretapisecretapisecretapisecretapisecrets', import_ready_for_shipment: false, import_shipped: true, gen_barcode_from_sku: false, popup_shipping_label: false, ready_to_ship: true, import_upc: true, allow_duplicate_id: true)
+
+      sp_store.create_shippo_credential(store_id: sp_store.id, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08')
     end
 
     it 'gets last modified' do
@@ -37,6 +40,10 @@ RSpec.describe OrderImportSummariesController, type: :controller do
 
       # For SE
       get :get_last_modified, params: { store_id: se_store.id }
+      expect(response.status).to eq(200)
+
+      # For SP
+      get :get_last_modified, params: { store_id: sp_store.id }
       expect(response.status).to eq(200)
     end
 

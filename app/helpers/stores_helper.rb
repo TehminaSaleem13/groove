@@ -410,6 +410,18 @@ module StoresHelper
                       gp_ready_status: response.last['tagIds'].nil? ? 'No' : (response.last['tagIds'].include?(48_826) ? 'Yes' : 'No'))
 
         result.merge!(return_range_dates_hash(store, response.last['orderNumber'], result_modifyDate, result_createDate))
+      elsif store.store_type == 'Shippo'
+        credential = store.shippo_credential
+        client = Groovepacker::ShippoRuby::Client.new(credential)
+        response = client.get_single_order(params[:order_no])
+
+        return result[:status] = false if response.nil? || response.blank?
+
+        result[:status] = true
+        result_modifyDate = Time.zone.parse(response['to_address']["object_updated"])
+        result_createDate = Time.zone.parse(response['to_address']["object_created"])
+
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate)
       end
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current

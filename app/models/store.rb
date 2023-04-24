@@ -16,6 +16,7 @@ class Store < ActiveRecord::Base
   has_one :magento_rest_credential
   has_one :shipping_easy_credential
   has_one :teapplix_credential
+  has_one :shippo_credential
 
   belongs_to :inventory_warehouse
 
@@ -113,6 +114,13 @@ class Store < ActiveRecord::Base
       @result['shipworks_credentials'] = shipworks_credential
       @result['shipworks_hook_url'] = 'https://' + Apartment::Tenant.current + '.' + ENV['SITE_HOST'] + '/orders/import_shipworks?auth_token='
       @result['status'] = true
+    end
+    if self.store_type == 'Shippo'
+      @credentials = ShippoCredential.where(:store_id => self.id)
+      if !@credentials.nil? && @credentials.length > 0
+        @result['shippo_credentials'] = @credentials.first
+        @result['status'] =true
+      end
     end
     if store_type == 'Shopify'
       @result['shopify_credentials'] = shopify_credential

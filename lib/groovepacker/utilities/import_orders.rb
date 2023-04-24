@@ -106,7 +106,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       import_item = ImportItem.create(store_id: store.id, status: 'on_demand')
       handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
       context = Groovepacker::Stores::Context.new(handler)
-      if store.store_type.in? %w[ShippingEasy Shopify]
+      if store.store_type.in? %w[ShippingEasy Shopify Shippo]
         context.import_single_order_from(params[:order_no])
       else
         context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
@@ -198,7 +198,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       initiate_csv_import(tenant, store_type, store, import_item) if import_item.status.present?
     else
       handler = get_handler(store_type, store, import_item)
-      connection_successful = check_connection_for_shopify_or_bc(store, store_type, import_item)
+      connection_successful = check_connection_for_shopify_or_bc_or_shippo(store, store_type, import_item)
       return unless connection_successful
 
       initiate_import_for(store, import_item, handler)

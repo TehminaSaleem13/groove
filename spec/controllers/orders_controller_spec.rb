@@ -307,6 +307,43 @@ RSpec.describe OrdersController, type: :controller do
     end
   end
 
+  describe 'Shippo Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      shippo_store = Store.create(name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: InventoryWarehouse.last)
+      shippo_store_credentials = ShippoCredential.create(store_id: shippo_store.id, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08', generate_barcode_option: 'do_not_generate')
+    end
+
+    it 'Import Orders' do
+      shippo_store = Store.where(store_type: 'Shippo').last
+
+      expect_any_instance_of(Groovepacker::ShippoRuby::Client).to receive(:orders).and_return(YAML.load(IO.read(Rails.root.join('spec/fixtures/files/Shippo_test_order.yaml'))))
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      @tenant.save
+
+      get :import_all
+      expect(response.status).to eq(200)
+    end
+
+    it 'Shippo Import by Range' do
+      allow_any_instance_of(Groovepacker::ShippoRuby::Client).to receive(:get_single_order).and_return(YAML.load(IO.read(Rails.root.join("spec/fixtures/files/Shippo_test_single_order.yaml"))))
+
+      request.accept = 'application/json'
+
+      shippo_store = Store.where(store_type: 'Shippo').last
+
+      get :import_for_ss, params: { store_id: shippo_store.id, days: 0, import_type: 'range_import', start_date: '2023-04-10T13:26:01.926Z', end_date: '2023-04-13T13:26:01.926Z' }
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'Shipstation API 2 Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

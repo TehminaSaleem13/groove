@@ -358,6 +358,52 @@ RSpec.describe StoresController, type: :controller do
     end
   end
 
+  describe 'Shippo Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      shippo_store = Store.create(name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: InventoryWarehouse.last, on_demand_import: true)
+      shippo_store_credentials = ShippoCredential.create(store_id: shippo_store.id, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08')
+    end
+
+    it 'Shippo On Demand Import' do
+      allow_any_instance_of(Groovepacker::ShippoRuby::Client).to receive(:get_single_order).and_return(YAML.load(IO.read(Rails.root.join("spec/fixtures/files/Shippo_test_single_order.yaml"))))
+
+      request.accept = 'application/json'
+
+      shippo_store = Store.where(store_type: 'Shippo').last
+
+      get :get_order_details, params: { order_no: '2299714', store_id: shippo_store.id }
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+    end
+
+    it 'Shippo Store Settings' do
+      request.accept = 'application/json'
+      shippo_store = Store.where(store_type: 'Shippo').last
+      post :create_update_store, params: { id: shippo_store.id, store_type: shippo_store.store_type, status: true, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08', generate_barcode_option: 'do_not_generate' }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Show Store' do
+      request.accept = 'application/json'
+      shippo_store = Store.where(store_type: 'Shippo').last
+
+      get :show, params: { id: shippo_store.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Shippo Store Settings for Failed Status' do
+      request.accept = 'application/json'
+      post :create_update_store, params: { store_type: 'Shippo', status: true, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08', generate_barcode_option: 'do_not_generate' }
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'Show Store' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

@@ -17,6 +17,8 @@ module StoreConcern
       @result = init_store.ebay_update_create(session)
     when 'CSV' || 'system'
       @result = init_store.csv_update_create
+    when 'Shippo'
+      @result = init_store.shippo_update_create
     when 'Shipstation API 2'
       @result = init_store.shipstation_rest_update_create
     when 'ShippingEasy'

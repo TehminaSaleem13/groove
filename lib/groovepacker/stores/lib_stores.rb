@@ -357,6 +357,30 @@ module Groovepacker
         end
         @result
       end
+
+      def shippo_update_create
+        params = @params
+		    @shippo = ShippoCredential.find_by_store_id(@store.id)
+		    if @shippo.nil?
+		      @shippo = ShippoCredential.new(store_id: @store.id)
+          @shippo.save
+		      new_record = true
+		    else
+		      @shippo.update_attributes(api_key: params[:api_key], api_version: params[:api_version], generate_barcode_option: params[:generate_barcode_option])
+        end
+        @store.shippo_credential = @shippo
+		    begin
+		      @store.save!
+		      @shippo.save if !new_record
+		    rescue ActiveRecord::RecordInvalid => e
+		      @result['status'] = falseshipp
+		      @result['messages'] = [@store.errors.full_messages]
+		    rescue ActiveRecord::StatementInvalid => e
+		      @result['status'] = false
+		      @result['messages'] = [e.message]
+		    end
+		    @result
+      end
     end
   end
 end

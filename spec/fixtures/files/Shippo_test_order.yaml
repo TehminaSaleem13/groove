@@ -1,0 +1,59 @@
+---
+results:
+- object_id: cf33eaa774a04f7cb4b8dfd09ef3737d
+  order_number: '2299850'
+  order_status: UNKNOWN
+  placed_at: '2023-04-11T13:26:01.470Z'
+  object_owner: kcpatel006@gmail.com
+  to_address:
+    object_created: '2023-04-11T13:26:01.930Z'
+    object_updated: '2023-04-11T13:26:01.930Z'
+    object_id: a48b82e3c5594751b5caec0838ef49ab
+    is_complete: false
+    validation_results: {}
+    object_owner: kcpatel006@gmail.com
+    name: Jose domingo
+    company: donde fue el restaurant guiengola
+    street_no: ''
+    street1: allende no. 12
+    street2: primera seccion
+    street3: ''
+    city: SANTA MARIA MIXTEQUILLA
+    state: OA
+    zip: '70755'
+    country: MX
+    longitude: 
+    latitude: 
+    phone: '9711639278'
+    email: domm1825@gmail.com
+    is_residential: 
+    metadata: ''
+    test: 
+  from_address: 
+  shop_app: CSV_Import
+  weight: '0.17'
+  weight_unit: 
+  transactions: []
+  total_tax: '0.00'
+  total_price: '0.00'
+  subtotal_price: '0.00'
+  currency: USD
+  shipping_method: 
+  shipping_cost: '0.00'
+  shipping_cost_currency: USD
+  line_items:
+  - object_id: 6cf9accf5e7243b08b25923bd56b67d9
+    title: HCG
+    variant_title: 
+    sku: '138'
+    quantity: 1
+    total_price: '0.00'
+    currency: USD
+    weight: '0.0850'
+    weight_unit: 
+    manufacture_country: 
+    max_ship_time: 
+    max_delivery_time: 
+    description: 
+  notes: 
+  test: false
