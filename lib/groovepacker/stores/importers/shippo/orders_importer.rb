@@ -12,7 +12,7 @@ module Groovepacker
 
             @import_item.update_column(:importer_id, @worker_id)
             response = @client.orders(@import_item)
-            @result[:total_imported] = response["results"].nil? ? 0 : response["results"].length
+            @result[:total_imported] = response["results"]&.length || 0
             initialize_import_item
             return @result if response["results"].nil? || response['results'].blank? || response['results'].first.nil?
             response['results'] = response['results'].sort_by { |h| Time.zone.parse(h['to_address']['object_updated']) } rescue response['results']
@@ -32,15 +32,15 @@ module Groovepacker
           def range_import(start_date, end_date, type, user_id)
             init_common_objects
             initialize_import_item
-            start_date = type == 'created' ? get_gp_time_in_pst(start_date) : Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
-            end_date = type == 'created' ? get_gp_time_in_pst(end_date) : Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
+            start_date = Time.zone.parse(start_date).strftime("%Y-%m-%d %H:%M:%S")
+            end_date = Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
             response = @client.get_ranged_orders(start_date, end_date)
             @import_item.update_attributes(to_import: response['results'].count)
             response["results"].each do |order|
               import_single_order(order) if order.present?
             end
-            @import_item.update(status:"completed")
+            update_order_import_summary
           end
 
           def ondemand_import_single_order(order_number)
@@ -73,6 +73,13 @@ module Groovepacker
               @import_summary.emit_data_to_user(true)
             end
 
+            def update_order_import_summary
+              @import_item.update_attributes(status: 'completed') if @import_item.reload.status != 'cancelled'
+              destroy_nil_import_items
+              @import_summary.update_attributes(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
+              @import_summary.emit_data_to_user(true)
+            end
+
             def import_single_order(order)
               @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
 
@@ -89,11 +96,12 @@ module Groovepacker
               else
                 order_in_gp = Order.new(increment_id: order['name'], store: @store)
               end
+
               Order.transaction do
                 import_order_and_items(order, order_in_gp) 
               end
 
-              order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
+              update_import_count(order_in_gp_present ? 'success_updated' : 'success_imported')
               @credential.update_attributes(last_imported_at: Time.zone.parse(order['to_address']['object_updated'])) rescue nil
             end
 
@@ -120,16 +128,22 @@ module Groovepacker
               @import_item.current_order_items = order["line_items"].length
               @import_item.current_order_imported_item = 0
               @import_item.save
-              @shippo_credential = ShippoCredential.find_by(store_id: @store.id)
               order["line_items"].each do |item|
                 order_item = import_order_item(order_item, item)
-                @import_item.update_attributes(:current_order_imported_item => @import_item.current_order_imported_item+1)
+                @import_item.update_attributes(current_order_imported_item: @import_item.current_order_imported_item+1)
+
                 product = Product.find_by(store_product_id: item['object_id'])
+
                 if product.present?
                   order_item.product = product
                   shippo_order.order_items << order_item
                 else
-                  product = Product.create(name: item['title'], store_product_id: item['object_id'], weight: item['weight'].to_f, store_id: @store.id)
+                  product = Product.create(
+                            name: item['title'],
+                            store_product_id: item['object_id'],
+                            weight: item['weight'].to_f,
+                            store_id: @store.id
+                            )
                   product.product_skus.create(sku: item['sku'], product_id: product.id)
                   product.generate_numeric_barcode({}) if @credential.generate_barcode_option == "generate_numeric_barcode"
                   product.set_product_status
@@ -144,9 +158,11 @@ module Groovepacker
 
             def import_order_item(order_item, line_item)
               row_total = line_item["total_price"].to_f * line_item["quantity"]
-              order_item = OrderItem.new( :qty => line_item["quantity"],
-                                          :price => line_item["total_price"],
-                                          :row_total => row_total )
+              order_item = OrderItem.new( 
+                      qty: line_item["quantity"],
+                      price: line_item["total_price"],
+                      row_total: row_total
+                      )
             end
 
             def add_customer_info(shippo_order, order)
@@ -155,21 +171,6 @@ module Groovepacker
               shippo_order.lastname = order["to_address"]["name"].split(' ').last
               shippo_order.firstname = order["to_address"]["name"].split(' ').first
               return shippo_order
-            end
-
-            def get_gp_time_in_pst(time)
-              gp_to_utc = convert_time_from_gp(Time.zone.parse(time).utc)
-              convert_to_pst(gp_to_utc).strftime('%Y-%m-%d %H:%M:%S')
-            end
-  
-            def convert_time_from_gp(time)
-              time_zone = GeneralSetting.last.time_zone.to_i
-              (time - time_zone).strftime('%Y-%m-%d %H:%M:%S')
-            end
-  
-            def convert_to_pst(time)
-              zone = ActiveSupport::TimeZone.new('Pacific Time (US & Canada)')
-              time.to_datetime.in_time_zone(zone)
             end
 
             def add_order_shipping_address(shippo_order, order)
@@ -221,8 +222,7 @@ module Groovepacker
                   intangible_strings = ScanPackSetting.all.first.intangible_string.downcase.strip.split(',')
                   activity_added = false
                   intangible_strings.each do |string|
-                    is_intangible = (order["line_items"][index]["title"].downcase.include?(string) || order["line_items"][index]["sku"].downcase.include?(string)) rescue nil
-                    if is_intangible
+                    if is_intangible(order, string, index)
                       shippo_order.addactivity("Intangible item with SKU #{order["line_items"][index]["sku"]}  and Name #{order["line_items"][index]["title"]} was replaced with GP Coupon.","#{@store.name} Import")
                       activity_added = true
                       break
@@ -231,6 +231,10 @@ module Groovepacker
                   shippo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import") if !activity_added && item.product.try(:primary_sku)
                 end
               end
+            end
+
+            def is_intangible(order, string, index)
+              order["line_items"][index]["title"].downcase.include?(string) || order["line_items"][index]["sku"].downcase.include?(string)
             end
 
             def import_order_and_items(order, order_in_gp)
@@ -255,6 +259,12 @@ module Groovepacker
             return false if @on_demand_import
 
             return true if order['object_id'].nil?
+          end
+
+          def destroy_nil_import_items
+            ImportItem.where(store_id: @store.id, order_import_summary_id: nil).destroy_all
+          rescue StandardError
+            nil
           end
         end
       end
