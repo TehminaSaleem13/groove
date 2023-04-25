@@ -135,7 +135,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   def reschedule_job(type, tenant)
     Apartment::Tenant.switch!(tenant)
     Time.use_zone(GeneralSetting.new_time_zone) do
-      date = DateTime.now.in_time_zone
+      date = DateTime.now.in_time_zone + 1.day
       job_scheduled = false
       general_settings = GeneralSetting.all.first
       export_settings = ExportSetting.all.first
