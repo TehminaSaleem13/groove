@@ -132,21 +132,13 @@ module Groovepacker
                 order_item = import_order_item(order_item, item)
                 @import_item.update_attributes(current_order_imported_item: @import_item.current_order_imported_item+1)
 
-                product = Product.find_by(store_product_id: item['object_id'])
+                product = Product.find_by(name: item['title'])
 
                 if product.present?
                   order_item.product = product
                   shippo_order.order_items << order_item
                 else
-                  product = Product.create(
-                            name: item['title'],
-                            store_product_id: item['object_id'],
-                            weight: item['weight'].to_f,
-                            store_id: @store.id
-                            )
-                  product.product_skus.create(sku: item['sku'], product_id: product.id)
-                  product.generate_numeric_barcode({}) if @credential.generate_barcode_option == "generate_numeric_barcode"
-                  product.set_product_status
+                  product = create_new_product(item)
                   order_item.product = product
                   shippo_order.order_items << order_item
                 end
