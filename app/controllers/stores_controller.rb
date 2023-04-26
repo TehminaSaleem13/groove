@@ -368,7 +368,7 @@ class StoresController < ApplicationController
   def show
     @store = Store.find_by_id(params[:id])
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
-    @result = { is_fba: tenant&.is_fba, ss_api_create_label: tenant&.ss_api_create_label, product_ftp_import: tenant&.product_ftp_import, order_cup_direct_shipping: tenant&.order_cup_direct_shipping }
+    @result = { is_fba: tenant&.is_fba, ss_api_create_label: tenant&.ss_api_create_label, product_ftp_import: tenant&.product_ftp_import, order_cup_direct_shipping: tenant&.order_cup_direct_shipping, custom_product_fields: tenant&.custom_product_fields }
     show_store
     render json: @result
   end

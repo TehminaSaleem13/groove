@@ -64,13 +64,14 @@ module Groovepacker
               end
 
               begin
-                variant['title'] = item['name']
+                variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
+                variant['title'] = @credential.import_variant_names ? item['title'] : item['name']
                 product = create_product_from_variant(variant, @shopify_product)
               rescue StandardError
                 product = nil
               end
+              product.update_columns(custom_product_1:variant_title, custom_product_display_1:true) if variant_title.present? && product
             end
-
             product
           end
 
@@ -106,9 +107,10 @@ module Groovepacker
 
           def create_single_product(shopify_product)
             shopify_product['variants'].each do |variant|
-              variant_title = variant['title'] == 'Default Title' ? '' : " - #{variant['title']}"
-              variant['title'] = shopify_product['title'] + variant_title
+              variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
+              variant['title'] = @credential.import_variant_names ? shopify_product['title'] : shopify_product['title'] + variant_title
               product = create_product_from_variant(variant, shopify_product)
+              product.update_columns(custom_product_1:variant_title, custom_product_display_1:true) if variant_title.present? && @credential.import_variant_names
               product = begin
                             product.reload
                         rescue StandardError
