@@ -118,7 +118,7 @@ module ScanPack
       if code_type == 'REMOVE-ALL'
         @single_order.get_unscanned_items(limit: nil).each do |item|
           qty = remove_skippable_product(item)
-          @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username), @on_ex)
+          @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the REMOVE-ALL barcode", @current_user.try(:username), @on_ex)
         end
       elsif code_type == 'REMOVE'
         item = @single_order.get_unscanned_items(limit: nil).first
