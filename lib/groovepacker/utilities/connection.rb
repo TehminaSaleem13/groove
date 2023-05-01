@@ -17,8 +17,8 @@ module Connection
       connection_status = check_bc_connection(store, import_item)
     when 'Shopify'
       connection_status = check_shopify_connection(store, import_item)
-    when "Shippo"
-      connection_status =  check_sp_connection(store, import_item)
+    when 'Shippo'
+      connection_status = check_sp_connection(store, import_item)
     end
     connection_status
   end
