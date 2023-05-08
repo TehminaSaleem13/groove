@@ -155,6 +155,10 @@ module Groovepacker
               single_import_product_barcode = import_barcode('part_barcode', single_row)
               single_import_product.product_barcodes << single_import_product_barcode
             end
+            if single_import_product.product_kit_skuss.present?
+              single_import_product.product_kit_skuss.each { |product| add_kit_product(kit_product, product) }
+              return
+            end
             single_import_product.store_id = params[:store_id]
             single_import_product.store_product_id = 'csv_import_' + params[:store_id].to_s + '_' + SecureRandom.uuid + '_' + product_sku
             single_import_product.name = import_name('part_name', single_row, single_import_product)
@@ -166,6 +170,20 @@ module Groovepacker
               product_kit_part_sku.qty = single_row[mapping['part_qty'][:position]]
               product_kit_part_sku.packing_order = single_row[mapping['kit_part_scanning_sequence'][:position]].to_i if not_blank?('kit_part_scanning_sequence', single_row) && single_row[mapping['kit_part_scanning_sequence'][:position]].to_i != 0
               product_kit_part_sku.save
+            end
+          end
+
+          def add_kit_product(kit, item)
+            product_kit_sku = ProductKitSkus.find_by_option_product_id_and_product_id(item.option_product_id, kit.id)
+            if product_kit_sku.nil?
+              productkitsku = ProductKitSkus.new
+              productkitsku.option_product_id = item.option_product_id
+              productkitsku.qty = item.qty
+
+              kit.product_kit_skuss << productkitsku unless kit.product_kit_skuss.map(&:option_product_id).include?(productkitsku.option_product_id)
+              kit.save
+            else
+              product_kit_sku.update(qty: item.qty)
             end
           end
 

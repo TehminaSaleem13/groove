@@ -54,8 +54,8 @@ RSpec.describe StoresController, type: :controller do
       post :csv_do_import, params: { id: @store.id, rows: '2', sep: ',', other_sep: '0', delimiter: '"', fix_width: '0', fixed_width: '4', contains_unique_order_items: false, generate_barcode_from_sku: false, use_sku_as_product_name: false, import_action: doc[:map][:import_action], map: doc[:map][:map], controller: 'stores', action: 'csv_do_import', store_id: @store.id, name: doc[:name], type: 'kit', flag: 'file_upload' }
 
       expect(response.status).to eq(200)
-      expect(Product.count).to eq(6)
-      expect(Product.where(is_kit: 1).count).to eq(2)
+      expect(Product.count).to eq(7)
+      expect(Product.where(is_kit: 1).count).to eq(3)
     end
   end
 
