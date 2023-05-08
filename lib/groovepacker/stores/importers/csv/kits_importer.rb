@@ -144,10 +144,7 @@ module Groovepacker
             product_sku = single_row[mapping['part_sku'][:position]].strip
             list_product_sku = ProductSku.where(sku: product_sku)
             if list_product_sku.empty?
-              single_import_product = Product.new
-              single_import_product_sku = ProductSku.new
-              single_import_product_sku.sku = product_sku
-              single_import_product.product_skus << single_import_product_sku
+              single_import_product = create_and_add_product_sku(product_sku)
             else
               single_import_product = Product.find(list_product_sku.first.product_id)
             end
@@ -156,8 +153,7 @@ module Groovepacker
               single_import_product.product_barcodes << single_import_product_barcode
             end
             if single_import_product.product_kit_skuss.present?
-              single_import_product.product_kit_skuss.each { |product| add_kit_product(kit_product, product) }
-              return
+              return single_import_product.product_kit_skuss.each { |product| add_kit_product(kit_product, product) }
             end
             single_import_product.store_id = params[:store_id]
             single_import_product.store_product_id = 'csv_import_' + params[:store_id].to_s + '_' + SecureRandom.uuid + '_' + product_sku
@@ -171,6 +167,14 @@ module Groovepacker
               product_kit_part_sku.packing_order = single_row[mapping['kit_part_scanning_sequence'][:position]].to_i if not_blank?('kit_part_scanning_sequence', single_row) && single_row[mapping['kit_part_scanning_sequence'][:position]].to_i != 0
               product_kit_part_sku.save
             end
+          end
+
+          def create_and_add_product_sku(product_sku)
+            single_import_product = Product.new
+            single_import_product_sku = ProductSku.new
+            single_import_product_sku.sku = product_sku
+            single_import_product.product_skus << single_import_product_sku
+            single_import_product
           end
 
           def add_kit_product(kit, item)
