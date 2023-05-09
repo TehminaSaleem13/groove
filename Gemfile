@@ -30,7 +30,6 @@ group :development do
   gem 'binding_of_caller', '>= 0.6.8'
   # gem 'quiet_assets', '>= 1.0.1'
   gem 'webrick', '~> 1.3.1'
-  gem 'byebug'
 end
 
 group :development, :test do
@@ -40,6 +39,7 @@ group :development, :test do
   gem 'pry'
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
+  gem 'byebug'
   # gem 'rubocop-rails', require: false
   gem 'rspec-rails', '~> 3.5.0'
   gem 'rspec_junit_formatter', '~> 0.4.0.pre2'

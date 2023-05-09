@@ -52,17 +52,21 @@ module Groovepacker
             initialize_import_objects
             fetch_product(item)
             if @shopify_product.present?
-              variant = @shopify_product['variants'].select { |variant| variant['id'] == item['variant_id'] }.first
+              if !custom_shopify_item?(item)
+                variant = @shopify_product['variants'].select { |variant| variant['id'] == item['variant_id'] }.first
 
-              # If variant not found by id find by sku
-              variant = @shopify_product['variants'].select { |variant| variant['sku'] == item['sku'] }.first if variant.blank? && item['sku'].present?
+                # If variant not found by id find by sku
+                variant = @shopify_product['variants'].select { |variant| variant['sku'] == item['sku'] }.first if variant.blank? && item['sku'].present?
 
-              if variant.blank?
-                on_demand_logger = Logger.new("#{Rails.root}/log/shopify_missing_product_variant_import_#{Apartment::Tenant.current}.log")
-                log = { item: item, Time: Time.zone.now, shopify_product: @shopify_product }
-                on_demand_logger.info(log)
+                if variant.blank?
+                  on_demand_logger = Logger.new("#{Rails.root}/log/shopify_missing_product_variant_import_#{Apartment::Tenant.current}.log")
+                  log = { item: item, Time: Time.zone.now, shopify_product: @shopify_product }
+                  on_demand_logger.info(log)
+                end
+              elsif custom_shopify_item?(item)
+                variant = item
+                assign_attr_to_variant_for_custom_item(variant, item)
               end
-
               begin
                 variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
                 variant['title'] = @credential.import_variant_names ? item['title'] : item['name']
@@ -92,6 +96,8 @@ module Groovepacker
               on_demand_logger.info(log)
             end
 
+            return @shopify_product = item if custom_shopify_item?(item)
+
             @shopify_product = shopify_product['product']
           end
 
@@ -102,9 +108,14 @@ module Groovepacker
             @credential = handler[:credential]
             @store = @credential.try(:store)
             @client = handler[:store_handle]
-            @store_product_import = StoreProductImport.find_by_store_id(@store.id)
+            @store_product_import = StoreProductImport.find_by_store_id(@store&.id)
           end
 
+          def custom_shopify_item?(item)
+            item['fulfillable_quantity']&.positive? && !item['gift_card'] && item['product_id'].nil? &&
+              item['sku'].nil? && !item['product_exists'] && item['variant_id'].nil?
+          end
+          
           def create_single_product(shopify_product)
             shopify_product['variants'].each do |variant|
               variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
@@ -117,7 +128,10 @@ module Groovepacker
                           product
                           end
               product.update_columns(store_product_id: variant['id']) if variant['id'].present?
-              product.product_inventory_warehousess.first.update_attributes(available_inv: variant['inventory_quantity']) if @credential.import_inventory_qoh
+              if @credential.import_inventory_qoh
+                product.product_inventory_warehousess.first
+                       .update_attributes(available_inv: variant['inventory_quantity'])
+              end
               product.set_product_status
             end
           end
@@ -170,7 +184,7 @@ module Groovepacker
                 product.generate_numeric_barcode({}) if !variant['barcode'].present? && product.product_barcodes.blank? && @credential.generating_barcodes == 'generate_numeric_barcode'
               else
                 product = create_new_product_from_order(variant, ProductSku.get_temp_sku, shopify_product)
-                end
+              end
             end
             product
           end
@@ -217,13 +231,7 @@ module Groovepacker
             when 'generate_from_sku'
               product.product_barcodes.create(barcode: variant['sku']) if variant['sku'].present?
             when 'import_from_shopify'
-              barcode = variant['barcode'].present? ? variant['barcode'] : variant['sku']
-              barcode_created = product.product_barcodes.create(barcode: barcode) if barcode.present?
-              product.product_barcodes.new(barcode: barcode, permit_shared_barcodes: true).save if barcode.present? && (begin
-                                                                                                                            !barcode_created.reload.present?
-                                                                                                                        rescue StandardError
-                                                                                                                          true
-                                                                                                                          end) && @credential.permit_shared_barcodes
+              create_barcode_from_variant(product, variant)
             when 'do_not_generate'
               barcode_created = product.product_barcodes.create(barcode: variant['barcode']) if variant['barcode'].present?
               product.product_barcodes.new(barcode: variant['barcode'], permit_shared_barcodes: true).save if variant['barcode'].present? && (begin
@@ -233,13 +241,7 @@ module Groovepacker
                                                                                                                                                 end) && @credential.permit_shared_barcodes
             when 'generate_numeric_barcode'
               if variant['barcode'].present?
-                barcode = variant['barcode'].present? ? variant['barcode'] : variant['sku']
-                barcode_created = product.product_barcodes.create(barcode: barcode) if barcode.present?
-                product.product_barcodes.new(barcode: barcode, permit_shared_barcodes: true).save if barcode.present? && (begin
-                                                                                                                              !barcode_created.reload.present?
-                                                                                                                          rescue StandardError
-                                                                                                                            true
-                                                                                                                            end) && @credential.permit_shared_barcodes
+                create_barcode_from_variant(product, variant)
               else
                 product.generate_numeric_barcode({})
               end
@@ -263,7 +265,7 @@ module Groovepacker
           end
 
           def add_image(variant, product, shopify_product)
-            variant_image = shopify_product['images'].select { |image| image['id'] == variant['image_id'] }.first
+            variant_image = shopify_product['images']&.select { |image| image['id'] == variant['image_id'] }&.first
             variant_image ||= shopify_product['image']
             variant_image_src = begin
                                     variant_image['src']
@@ -271,6 +273,25 @@ module Groovepacker
                                   nil
                                   end
             product.product_images.create(image: variant_image_src)
+          end
+
+          def assign_attr_to_variant_for_custom_item(variant, item)
+            variant['sku'] = "C-" + item['id'].to_s
+            variant['barcode'] = variant['sku']
+            variant['weight'] = variant['grams']
+            variant['inventory_quantity'] = variant['quantity']
+            variant
+          end
+
+          def create_barcode_from_variant(product, variant)
+            barcode = variant['barcode'].present? ? variant['barcode'] : variant['sku']
+            barcode_created = product.product_barcodes.create(barcode: barcode) if barcode.present?
+            if barcode.present? && (begin !barcode_created.reload.present?
+                                    rescue StandardError
+                                      true
+                                    end) && @credential&.permit_shared_barcodes
+              product.product_barcodes.new(barcode: barcode, permit_shared_barcodes: true).save
+            end
           end
 
           def update_inventory(product, variant)
