@@ -225,7 +225,7 @@ class GeneralSetting < ActiveRecord::Base
     # time_diff -= 3600 if (Time.zone.now + time_diff.seconds).dst? && !Time.zone.now.dst?
     # time_diff += 3600 if !(Time.zone.now + time_diff.seconds).dst? && Time.zone.now.dst?
     time = time_diff.seconds.from_now
-    time -= 1.day if Time.current + 1.day < time
+    # time -= 1.day if Time.current + 1.day < time
     if time_diff > 0
       tenant = Apartment::Tenant.current
       if job_type == 'low_inventory_email'
