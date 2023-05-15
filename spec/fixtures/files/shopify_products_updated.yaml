@@ -23,7 +23,7 @@ products:
     position: 1
     inventory_policy: deny
     compare_at_price: '0.00'
-    fulfillment_service: manual
+    # fulfillment_service: manual
     inventory_management: shopify
     option1: Default Title
     option2: 

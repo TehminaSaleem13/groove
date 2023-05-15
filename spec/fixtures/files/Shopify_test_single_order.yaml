@@ -127,7 +127,7 @@ orders:
     presentment_money:
       amount: '26.96'
       currency_code: USD
-  total_price_usd: '26.96'
+  # total_price_usd: '26.96'
   total_shipping_price_set:
     shop_money:
       amount: '4.99'
@@ -236,20 +236,20 @@ orders:
     - id: 4857878788
       admin_graphql_api_id: gid://shopify/LineItem/4857878788
       fulfillable_quantity: 0
-      fulfillment_service: manual
+      # fulfillment_service: manual
       fulfillment_status: fulfilled
       gift_card: false
       grams: 454
       name: Chipwrecked Peanut Butter
-      origin_location:
-        id: 7878787878
-        country_code: US
-        province_code: IN
-        name: American Dream Nut Butter
-        address1: 4202 North EMS Boulevard
-        address2: Suite 120
-        city: Greenfield
-        zip: '46140'
+      # origin_location:
+      #   id: 7878787878
+      #   country_code: US
+      #   province_code: IN
+      #   name: American Dream Nut Butter
+      #   address1: 4202 North EMS Boulevard
+      #   address2: Suite 120
+      #   city: Greenfield
+      #   zip: '46140'
       price: '11.99'
       price_set:
         shop_money:
@@ -293,20 +293,20 @@ orders:
     - id: 10923336859838
       admin_graphql_api_id: gid://shopify/LineItem/10923336859838
       fulfillable_quantity: 0
-      fulfillment_service: manual
+      # fulfillment_service: manual
       fulfillment_status: fulfilled
       gift_card: false
       grams: 0
       name: Route Package Protection - $0.98
-      origin_location:
-        id: 7878787878
-        country_code: US
-        province_code: IN
-        name: American Dream Nut Butter
-        address1: 4202 North EMS Boulevard
-        address2: Suite 120
-        city: Greenfield
-        zip: '46140'
+      # origin_location:
+      #   id: 7878787878
+      #   country_code: US
+      #   province_code: IN
+      #   name: American Dream Nut Butter
+      #   address1: 4202 North EMS Boulevard
+      #   address2: Suite 120
+      #   city: Greenfield
+      #   zip: '46140'
       price: '0.98'
       price_set:
         shop_money:
@@ -351,20 +351,20 @@ orders:
   - id: 4857878788
     admin_graphql_api_id: gid://shopify/LineItem/4857878788
     fulfillable_quantity: 0
-    fulfillment_service: manual
+    # fulfillment_service: manual
     fulfillment_status: fulfilled
     gift_card: false
     grams: 454
     name: Chipwrecked Peanut Butter
-    origin_location:
-      id: 7878787878
-      country_code: US
-      province_code: IN
-      name: American Dream Nut Butter
-      address1: 4202 North EMS Boulevard
-      address2: Suite 120
-      city: Greenfield
-      zip: '46140'
+    # origin_location:
+    #   id: 7878787878
+    #   country_code: US
+    #   province_code: IN
+    #   name: American Dream Nut Butter
+    #   address1: 4202 North EMS Boulevard
+    #   address2: Suite 120
+    #   city: Greenfield
+    #   zip: '46140'
     price: '11.99'
     price_set:
       shop_money:
@@ -408,20 +408,20 @@ orders:
   - id: 10923336859838
     admin_graphql_api_id: gid://shopify/LineItem/10923336859838
     fulfillable_quantity: 0
-    fulfillment_service: manual
+    # fulfillment_service: manual
     fulfillment_status: fulfilled
     gift_card: false
     grams: 0
     name: Route Package Protection - $0.98
-    origin_location:
-      id: 7878787878
-      country_code: US
-      province_code: IN
-      name: American Dream Nut Butter
-      address1: 4202 North EMS Boulevard
-      address2: Suite 120
-      city: Greenfield
-      zip: '46140'
+    # origin_location:
+    #   id: 7878787878
+    #   country_code: US
+    #   province_code: IN
+    #   name: American Dream Nut Butter
+    #   address1: 4202 North EMS Boulevard
+    #   address2: Suite 120
+    #   city: Greenfield
+    #   zip: '46140'
     price: '0.98'
     price_set:
       shop_money:

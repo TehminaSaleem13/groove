@@ -27,7 +27,7 @@ orders:
   landing_site: 
   cancelled_at: 
   cancel_reason: 
-  total_price_usd: '10.00'
+  # total_price_usd: '10.00'
   checkout_token: 
   reference: 
   user_id: 51576045627
@@ -106,7 +106,7 @@ orders:
     sku: ShopifyProduct
     variant_title: 
     vendor: GPMARCH20
-    fulfillment_service: manual
+    # fulfillment_service: manual
     product_id: 5028822646843
     requires_shipping: true
     taxable: true
