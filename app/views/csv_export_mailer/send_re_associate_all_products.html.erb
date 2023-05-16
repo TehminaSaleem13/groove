@@ -1,0 +1,20 @@
+<div style="width: 100%; max-width: 600px; margin: 0 auto;">
+  <h3>Re-associate All Products for Shopify store is completed.</h3>
+
+  <% if @data[:not_found_skus].any? %>
+    <p>
+    Following SKU Products are not found in Shopify: <%= @data[:not_found_skus].join(', ') %>
+    </p>
+  <% end %>
+
+  <% if @data[:already_exists_barcodes].any? %>
+    <p>
+    Following Barcode Products are found in Shopify but associated with another Product in Groovepacker: <%= @data[:already_exists_barcodes].join(', ') %>
+    </p>
+  <% end %>
+
+  <p>
+  Thanks,<br>
+  Team Groovepacker
+  </p>
+</div>

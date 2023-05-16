@@ -83,6 +83,16 @@ class CsvExportMailer < ActionMailer::Base
     mail to: recipients, subject: "[#{tenant}] Fix Broken Images" if recipients.present?
   end
 
+  def send_re_associate_all_products(tenant, data = {})
+    @data = data
+    recipients = begin
+                   GeneralSetting.all.first.email_address_for_packer_notes.split(',')
+                 rescue StandardError
+                   []
+                 end
+    mail to: recipients, subject: "[#{tenant}] Re-associate All Products" if recipients.present?
+  end
+
   def send_s3_export_product_url(url, tenant)
     recipients = begin
                    GeneralSetting.all.first.email_address_for_packer_notes.split(',')
