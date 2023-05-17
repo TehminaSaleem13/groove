@@ -72,8 +72,8 @@ module ProductsService
     end
 
     def create_barcode(product, barcode)
-      product.product_barcodes.create(barcode: barcode, permit_shared_barcodes: true)
-      add_barcode_activity(product, barcode)
+      db_barcode = product.product_barcodes.create(barcode: barcode, permit_shared_barcodes: shopify_credential.permit_shared_barcodes)
+      add_barcode_activity(product, barcode) unless db_barcode.errors.any?
       handle_already_exists_barcode(barcode)
     end
 
