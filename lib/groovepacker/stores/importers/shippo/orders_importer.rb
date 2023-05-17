@@ -116,7 +116,7 @@ module Groovepacker
               #update shipping_amount and order weight
               shippo_order = update_shipping_amount_and_weight(shippo_order, order)
               shippo_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
-              shippo_order.last_modified = Time.zone.parse(order['to_address']['object_updated'])
+              shippo_order.last_modified = Time.zone.parse(order['to_address']['object_updated']) unless order['to_address'].nil?
               shippo_order.importer_id = @worker_id rescue nil
               shippo_order.import_item_id = @import_item.id rescue nil
               shippo_order.job_timestamp = Time.current.strftime("%Y-%m-%d %H:%M:%S.%L")
@@ -178,7 +178,7 @@ module Groovepacker
             end
 
             def update_shipping_amount_and_weight(shippo_order, order)
-              unless order["to_address"].empty?
+              unless order["to_address"].nil?
                 shippo_order.shipping_amount = order["shipping_cost"].to_f unless order["to_address"].nil?
               end
 

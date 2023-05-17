@@ -7,7 +7,7 @@ module Groovepacker
         last_import = shippo_credential.last_imported_at.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s rescue (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
         
         query = {"updated_at_min" => last_import, "limit" => 250}.as_json
-        response = HTTParty.get("https://api.goshippo.com/orders?results=100&hidden=false", query: query, headers: headers)
+        response = HTTParty.get("https://api.goshippo.com/orders?results=250&hidden=false", query: query, headers: headers)
         combined_response['results'] << response['results']
 
         combined_response['results'] = combined_response['results'].flatten
