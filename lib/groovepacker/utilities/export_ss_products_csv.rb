@@ -85,8 +85,8 @@ class ExportSsProductsCsv
     ProductsService::FixBrokenImages.call(tenant, params)
   end
 
-  def re_associate_all_products(tenant, params)
-    ProductsService::ReAssociateAllProducts.call(tenant, params)
+  def re_associate_all_products(**args)
+    ProductsService::ReAssociateAllProducts.call(**args)
   end
 
   def generate_csv(result, data, filename, products)

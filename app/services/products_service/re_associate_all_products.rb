@@ -2,11 +2,12 @@
 
 module ProductsService
   class ReAssociateAllProducts < ProductsService::Base
-    attr_accessor :tenant, :params, :shopify_credential, :result_data
+    attr_accessor :tenant, :params, :username, :shopify_credential, :result_data
 
-    def initialize(*args)
-      @tenant = args[0]
-      @params = args[1]
+    def initialize(**args)
+      @tenant = args[:tenant]
+      @params = args[:params]
+      @username = args[:username]
       @result_data = {
         already_exists_barcodes: [],
         not_found_skus: []
@@ -41,8 +42,8 @@ module ProductsService
         next unless shopify_product
 
         variant = find_matching_variant(product, shopify_product)
-        create_barcode(product, variant) if product.primary_barcode.nil?
-        update_product_association(product, shopify_product)
+        create_barcode(product, variant['barcode']) if product.primary_barcode.nil?
+        update_product(product, shopify_product)
       end
     end
 
@@ -70,20 +71,30 @@ module ProductsService
       shopify_product['variants'].find { |v| v['sku'].in?(product.product_skus.pluck(:sku)) }
     end
 
-    def create_barcode(product, variant)
-      created_barcode = product.product_barcodes.create(barcode: variant['barcode'])
-      handle_already_exists_barcode(variant['barcode']) if created_barcode.errors.any?
+    def create_barcode(product, barcode)
+      product.product_barcodes.create(barcode: barcode, permit_shared_barcodes: true)
+      add_barcode_activity(product, barcode)
+      handle_already_exists_barcode(barcode)
     end
 
-    def update_product_association(product, shopify_product)
+    def update_product(product, shopify_product)
       product.update(store_product_id: shopify_product['id'], store_id: shopify_credential.store_id)
+      product.set_product_status
     end
 
     def handle_not_found_sku(product)
       result_data[:not_found_skus] << product.primary_sku if product.primary_sku.present?
     end
 
+    def add_barcode_activity(product, barcode)
+      user_name = username ? "#{username} - " : ''
+      user_name += 'Re-associate all items with Shopify'
+      product.add_product_activity( "The barcode #{barcode} was added to this item", user_name)
+    end
+
     def handle_already_exists_barcode(barcode)
+      return unless ProductBarcode.where(barcode: barcode).many?
+
       result_data[:already_exists_barcodes] << barcode
     end
 

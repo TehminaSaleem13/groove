@@ -6,7 +6,7 @@ RSpec.describe ProductsService::ReAssociateAllProducts do
     let(:inventory_warehouse) { create(:inventory_warehouse, is_default: true) }
     let(:store) { create(:store, status: true, store_type: 'Shopify', inventory_warehouse: inventory_warehouse) }
     let(:params) { { tenant: tenant, store_id: store.id } }
-    let(:service) { described_class.new(tenant, params) }
+    let(:service) { described_class.new({ tenant: tenant, params: params } ) }
 
     before do
       Groovepacker::SeedTenant.new.seed

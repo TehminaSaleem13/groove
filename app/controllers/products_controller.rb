@@ -436,7 +436,7 @@ class ProductsController < ApplicationController
     result = {}
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
-    export_product.delay(priority: 95).re_associate_all_products(tenant, params)
+    export_product.delay(priority: 95, queue: "re_associate_all_products_#{tenant}").re_associate_all_products(tenant: tenant, params: params, username: current_user.name)
     result['status'] = true
     render json: result
   end
