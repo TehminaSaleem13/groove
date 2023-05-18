@@ -149,7 +149,8 @@ module Groovepacker
         {
           'X-Shopify-Access-Token' => shopify_credential.access_token,
           'Content-Type' => 'application/json',
-          'Accept' => 'application/json'
+          'Accept' => 'application/json',
+          'Content-Security-Policy' => 'frame-ancestors' 
         }
       end
     end
