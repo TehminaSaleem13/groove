@@ -3,6 +3,7 @@
 class GeneralSetting < ActiveRecord::Base
   include SettingsHelper
   include AhoyEvent
+  include EmailScheduling
   # attr_accessible :conf_req_on_notes_to_packer, :email_address_for_packer_notes,
   #                 :hold_orders_due_to_inventory,
   #                 :inventory_tracking, :low_inventory_alert_email,
@@ -240,7 +241,7 @@ class GeneralSetting < ActiveRecord::Base
         if inv_report_setting.should_inv_report(time)
           existing_jobs = Delayed::Job.where('queue LIKE ? and run_at >= ? and run_at <= ?', "%schedule_inventory_report_#{tenant}%", time.beginning_of_day, time.end_of_day)
           existing_jobs.destroy_all if existing_jobs.any?
-          InventoryReportMailer.delay(run_at: time.strftime('%H:%M:%S'), queue: "schedule_inventory_report_#{tenant}", priority: 95).auto_inventory_report(false, nil, nil, tenant)
+          InventoryReportMailer.delay(run_at: time, queue: "schedule_inventory_report_#{tenant}", priority: 95).auto_inventory_report(false, nil, nil, tenant)
           job_scheduled = true
         end
       elsif job_type == 'import_orders'
@@ -293,50 +294,50 @@ class GeneralSetting < ActiveRecord::Base
     job_scheduled
   end
 
-  def should_send_email_today
-    day = DateTime.now.in_time_zone.strftime('%A')
-    result = false
+  # def should_send_email_today
+  #   day = DateTime.now.in_time_zone.strftime('%A')
+  #   result = false
 
-    if day == 'Monday' && send_email_on_mon
-      result = true
-    elsif day == 'Tuesday' && send_email_on_tue
-      result = true
-    elsif day == 'Wednesday' && send_email_on_wed
-      result = true
-    elsif day == 'Thursday' && send_email_on_thurs
-      result = true
-    elsif day == 'Friday' && send_email_on_fri
-      result = true
-    elsif day == 'Saturday' && send_email_on_sat
-      result = true
-    elsif day == 'Sunday' && send_email_on_sun
-      result = true
-    end
+  #   if day == 'Monday' && send_email_on_mon
+  #     result = true
+  #   elsif day == 'Tuesday' && send_email_on_tue
+  #     result = true
+  #   elsif day == 'Wednesday' && send_email_on_wed
+  #     result = true
+  #   elsif day == 'Thursday' && send_email_on_thurs
+  #     result = true
+  #   elsif day == 'Friday' && send_email_on_fri
+  #     result = true
+  #   elsif day == 'Saturday' && send_email_on_sat
+  #     result = true
+  #   elsif day == 'Sunday' && send_email_on_sun
+  #     result = true
+  #   end
 
-    result
-  end
+  #   result
+  # end
 
-  def should_send_email(date)
-    day = date.strftime('%A')
-    result = false
+  # def should_send_email(date)
+  #   day = date.strftime('%A')
+  #   result = false
 
-    if day == 'Monday' && send_email_on_mon
-      result = true
-    elsif day == 'Tuesday' && send_email_on_tue
-      result = true
-    elsif day == 'Wednesday' && send_email_on_wed
-      result = true
-    elsif day == 'Thursday' && send_email_on_thurs
-      result = true
-    elsif day == 'Friday' && send_email_on_fri
-      result = true
-    elsif day == 'Saturday' && send_email_on_sat
-      result = true
-    elsif day == 'Sunday' && send_email_on_sun
-      result = true
-    end
-    result
-  end
+  #   if day == 'Monday' && send_email_on_mon
+  #     result = true
+  #   elsif day == 'Tuesday' && send_email_on_tue
+  #     result = true
+  #   elsif day == 'Wednesday' && send_email_on_wed
+  #     result = true
+  #   elsif day == 'Thursday' && send_email_on_thurs
+  #     result = true
+  #   elsif day == 'Friday' && send_email_on_fri
+  #     result = true
+  #   elsif day == 'Saturday' && send_email_on_sat
+  #     result = true
+  #   elsif day == 'Sunday' && send_email_on_sun
+  #     result = true
+  #   end
+  #   result
+  # end
 
   def per_tenant_settings
     current_tenant = Tenant.find_by_name(Apartment::Tenant.current)
