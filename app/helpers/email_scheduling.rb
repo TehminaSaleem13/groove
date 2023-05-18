@@ -1,23 +1,20 @@
-module EmailScheduling
-  def should_send_email(date)
-    day = date.strftime('%A')
-    result = false
+# frozen_string_literal: true
 
-    if day == 'Monday' && send_email_on_mon
-      result = true
-    elsif day == 'Tuesday' && send_email_on_tue
-      result = true
-    elsif day == 'Wednesday' && send_email_on_wed
-      result = true
-    elsif day == 'Thursday' && send_email_on_thurs
-      result = true
-    elsif day == 'Friday' && send_email_on_fri
-      result = true
-    elsif day == 'Saturday' && send_email_on_sat
-      result = true
-    elsif day == 'Sunday' && send_email_on_sun
-      result = true
-    end
-    result
+module EmailScheduling
+  WEEKDAYS = {
+    monday: 'mon',
+    tuesday: 'tue',
+    wednesday: 'wed',
+    thursday: 'thurs',
+    friday: 'fri',
+    saturday: 'sat',
+    sunday: 'sun'
+  }.freeze
+
+  def should_send_email(date)
+    day = date.strftime('%A').downcase.to_sym
+    send_email_on_day = "send_email_on_#{WEEKDAYS[day]}".to_sym
+
+    send(send_email_on_day)
   end
 end
