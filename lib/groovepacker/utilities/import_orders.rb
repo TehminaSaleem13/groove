@@ -150,6 +150,8 @@ class ImportOrders < Groovepacker::Utilities::Base
       should_schedule_job, time = schedule_import_orders(general_settings, date)
     when 'low_inventory_email'
       should_schedule_job, time = schedule_low_inventory_email(general_settings, date, should_schedule_job)
+    when 'inv_report'
+      should_schedule_job, time = schedule_inventory_report(general_settings, date, should_schedule_job)
     when 'export_order'
       should_schedule_job, time = schedule_export_order(export_settings, date, should_schedule_job)
     end
@@ -178,6 +180,18 @@ class ImportOrders < Groovepacker::Utilities::Base
       should_schedule_job = general_settings.should_send_email(date)
       time = general_settings.time_to_send_email
     end
+    [should_schedule_job, time]
+  end
+
+  def schedule_inventory_report(_general_settings, date, should_schedule_job, time = nil)
+    scheduled_reports = ProductInventoryReport.where(scheduled: true)
+    inventory_report_settings = InventoryReportsSetting.last
+
+    return [should_schedule_job, time] if scheduled_reports.blank? || !inventory_report_settings.report_email.present?
+
+    should_schedule_job = inventory_report_settings.should_send_email(date)
+    time = inventory_report_settings.time_to_send_report_email
+
     [should_schedule_job, time]
   end
 
