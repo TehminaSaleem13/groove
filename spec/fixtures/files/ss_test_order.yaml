@@ -184,6 +184,24 @@ orders:
     upc:
     createDate: '2020-09-11T04:44:24.09'
     modifyDate: '2020-09-11T04:44:24.09'
+  - orderItemId: 1148987886
+    lineItemKey:
+    sku: 
+    name: 'Coupon: Coupon'
+    imageUrl:
+    weight:
+    quantity: 1
+    unitPrice: 1.0
+    taxAmount:
+    shippingAmount:
+    warehouseLocation:
+    options: []
+    productId: 25108986
+    fulfillmentSku:
+    adjustment: false
+    upc:
+    createDate: '2020-09-11T04:42:37.517'
+    modifyDate: '2020-09-11T04:42:37.517'
   orderTotal: 0.0
   amountPaid: 0.0
   taxAmount: 0.0

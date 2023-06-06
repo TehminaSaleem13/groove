@@ -1143,6 +1143,7 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.text "presets"
     t.boolean "import_shipped_having_tracking", default: false
     t.boolean "import_discounts_option", default: false
+    t.boolean "set_coupons_to_intangible", default: false
   end
 
   create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

@@ -256,8 +256,7 @@ module Groovepacker
                                                  end
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
-
-              check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)
+              check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order, order)
               remove_gp_tags_from_ss(order)
             else
               delete_order_and_log_event(shipstation_order) if shipstation_order.persisted? && order['orderStatus'] == 'cancelled'
@@ -290,7 +289,7 @@ module Groovepacker
 
             @import_item.update_attributes(current_order_items: order['items'].length, current_order_imported_item: 0)
             order['items'].each do |item|
-              next if @credential.import_discounts_option && item['adjustment']
+              next if remove_coupon_codes?(item)
               product = product_importer_client.find_or_create_product(item)
               create_product_image
               import_order_item(item, shipstation_order, product)
@@ -298,6 +297,10 @@ module Groovepacker
             end
             shipstation_order.save
             @import_item.save
+          end
+
+          def remove_coupon_codes?(item)
+            @credential.import_discounts_option && item['adjustment'] && @credential.set_coupons_to_intangible
           end
 
           def create_product_image
@@ -537,10 +540,15 @@ module Groovepacker
             shipstation_order
           end
 
-          def update_order_activity_log(shipstation_order)
+          def update_order_activity_log(shipstation_order, order)
             shipstation_order.addactivity('Order Import', @credential.store.name + ' Import')
-            shipstation_order.order_items.each do |item|
-              update_activity_for_single_item(shipstation_order, item)
+            shipstation_order.order_items.each_with_index do |item, index|
+              intangible = order['items'][index]['adjustment'] ? true : false
+              if intangible == true && ( @credential.set_coupons_to_intangible || check_for_intangible_coupon )
+                shipstation_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added and set to Intangible.", "#{@credential.store.name} Import")
+              else
+                update_activity_for_single_item(shipstation_order, item)
+              end
             end
             shipstation_order.set_order_status
             update_import_result
@@ -552,9 +560,6 @@ module Groovepacker
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true
                 shipstation_order.addactivity("Intangible item with SKU #{order['items'][index]['sku']}  and Name #{order['items'][index]['name']} was replaced with GP Coupon.", "#{@credential.store.name} Import")
-
-                item.product.is_intangible = true
-                item.product.save
               end
               update_activity_for_single_item(shipstation_order, item) unless intangible
               # if order["items"][index]["name"] == item.product.name && order["items"][index]["sku"] == item.product.primary_sku

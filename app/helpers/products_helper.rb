@@ -101,11 +101,27 @@ module ProductsHelper
       next unless product.name.downcase.include?(string.downcase) ||
                   product.primary_sku.try(:downcase).try(:include?, string.downcase)
 
-      product = Product.readonly(false).find(product.id)
-      product.is_intangible = true
-      product.save
+      make_coupon_intangible(product.id)
       break
     end
+  end
+
+  def make_coupon_intangible(product_id)
+    Product.readonly(false).find(product_id).update(is_intangible: true)
+  end
+
+  def replace_coupon(product, sku)
+    coupan_product = Product.joins(:product_skus).where('product_skus.sku =  ?', 'GP Coupon').readonly(false).last
+    if coupan_product.nil?
+      coupan_product = Product.new
+      coupan_product.name = 'GP Coupon'
+      coupan_product.store_id = 1
+    end
+    coupan_product.is_intangible = true
+    coupan_product.status = 'active'
+    coupan_product.save
+    coupan_product.product_skus.create(sku: 'GP Coupon') if coupan_product.present?
+    coupan_product
   end
 
   def replace_product(product, sku)
@@ -115,16 +131,7 @@ module ProductsHelper
     intangible_strings.each do |string|
       next unless product.downcase.include?(string) || sku.downcase.include?(string)
 
-      coupan_product = Product.joins(:product_skus).where('product_skus.sku =  ?', 'GP Coupon').readonly(false).last
-      if coupan_product.nil?
-        coupan_product = Product.new
-        coupan_product.name = 'GP Coupon'
-        coupan_product.store_id = 1
-      end
-      coupan_product.is_intangible = true
-      coupan_product.status = 'active'
-      coupan_product.save
-      coupan_product.product_skus.create(sku: 'GP Coupon') if coupan_product.present?
+      coupan_product = replace_coupon(product, sku)
       break
     end
     coupan_product
@@ -133,6 +140,11 @@ module ProductsHelper
   def check_for_replace_product
     scan_pack_settings = ScanPackSetting.all.first
     scan_pack_settings.intangible_setting_enabled && scan_pack_settings.intangible_string.present? && scan_pack_settings.replace_gp_code
+  end
+
+  def check_for_intangible_coupon
+    scan_pack_settings = ScanPackSetting.all.first
+    scan_pack_settings.intangible_setting_enabled && scan_pack_settings.intangible_string.present? && !scan_pack_settings.replace_gp_code
   end
 
   def get_weight_format(weight_format)

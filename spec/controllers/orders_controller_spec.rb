@@ -356,9 +356,9 @@ RSpec.describe OrdersController, type: :controller do
       ss_store_credentials = ShipstationRestCredential.create(api_key: 'shipstationapiv2shipstationapiv2', api_secret: 'shipstationapiv2shipstationapiv2', store_id: ss_store.id, shall_import_awaiting_shipment: false, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: true, shall_import_pending_fulfillment: false, use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: true, allow_duplicate_order: true, tag_import_option: true, bulk_import: false, order_import_range_days: 30, import_tracking_info: true, import_shipped_having_tracking: true)
     end
 
-    it 'Import Orders' do
+    it 'Import Orders without aliasing' do
       ss_store = Store.where(store_type: 'ShipStation API 2').last
-
+      ScanPackSetting.first.update_attributes(replace_gp_code: false)
       expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
       allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:remove_gp_tags_from_ss).and_return(true)
@@ -370,7 +370,27 @@ RSpec.describe OrdersController, type: :controller do
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(2)
-      expect(Product.count).to eq(3)
+      expect(Product.count).to eq(4)
+
+      ss_import_item = ImportItem.find_by_store_id(ss_store.id)
+      expect(ss_import_item.status).to eq('completed')
+    end
+
+    it 'Import Orders' do
+      ss_store = Store.where(store_type: 'ShipStation API 2').last
+      ScanPackSetting.first.update_attributes(replace_gp_code: true)
+      expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
+      allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:remove_gp_tags_from_ss).and_return(true)
+      allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:should_fetch_shipments?).and_return(true)
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(2)
+      expect(Product.count).to eq(2)
 
       ss_import_item = ImportItem.find_by_store_id(ss_store.id)
       expect(ss_import_item.status).to eq('completed')

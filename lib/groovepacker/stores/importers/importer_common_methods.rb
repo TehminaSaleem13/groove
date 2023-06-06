@@ -10,12 +10,14 @@ module Groovepacker
                       create_product_with_temp_sku(r_product)
                     elsif ProductSku.where(sku: r_product['sku']).empty?
                       # if non-nil sku is not found
-                      create_new_product(r_product, r_product['sku'])
+                      create_new_product(r_product, r_product['sku'], r_product["adjustment"])
                     else
                       ProductSku.where(sku: r_product['sku']).first.product
                     end
           product.reload
-          make_product_intangible(product)
+          if ( @credential.set_coupons_to_intangible || check_for_intangible_coupon )
+            r_product["adjustment"] ? make_coupon_intangible(product.id) : make_product_intangible(product)
+          end
           product.set_product_status
           product
         end
@@ -25,7 +27,7 @@ module Groovepacker
           # if sku is nil or empty
           product = if product_is_nil
                       # and if product is not found by name then create the product
-                      create_new_product(r_product, ProductSku.get_temp_sku) # this method is defined in respective importer
+                      create_new_product(r_product, ProductSku.get_temp_sku, r_product["adjustment"]) # this method is defined in respective importer
                     else
                       # product exists add temp sku if it does not exist
                       add_sku_for_existing_product(r_product)
@@ -38,15 +40,15 @@ module Groovepacker
           product = if contains_temp_skus(products)
                       get_product_with_temp_skus(products)
                     else
-                      create_new_product(r_product, ProductSku.get_temp_sku) # this method is defined in respective importer
+                      create_new_product(r_product, ProductSku.get_temp_sku, r_product["adjustment"]) # this method is defined in respective importer
                         end
           product
         end
 
-        def create_new_product(item, sku)
+        def create_new_product(item, sku, is_coupon)
           # create and import product
           if check_for_replace_product
-            coupon_product = replace_product(item['name'], sku)
+            coupon_product = is_coupon ? replace_coupon(item['name'], sku) : replace_product(item['name'], sku)
             return coupon_product unless coupon_product.nil?
           end
           product = Product.create(name: item['name'], store: @credential.store, store_product_id: item['productId'])
