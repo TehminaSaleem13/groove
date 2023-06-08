@@ -149,12 +149,15 @@ module Groovepacker
       def import_shipworks(auth_token, request, status = 200)
         return status if @params[:auth_token].nil? || request.headers['HTTP_USER_AGENT'] != 'shipworks'
 
+        tenant = Apartment::Tenant.current
+        db_tenant = Tenant.find_by(name: tenant)
+        value = Hash.from_xml(request.body.read)
+        Groovepacker::LogglyLogger.log(request, value, 'shipworks_import', tenant) if db_tenant&.loggly_sw_imports
+
         begin
           # find store/credential by using the auth_token
           credential = ShipworksCredential.find_by_auth_token(auth_token)
-          tenant = Apartment::Tenant.current
-          value = Hash.from_xml(request.body.read)
-          if Tenant.where(name: tenant).last.is_delay == false
+          if db_tenant&.is_delay == false
             status = create_or_update_item(credential, status, value)
             Tenant.save_se_import_data("========Shipworks Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Value', value)
           else
