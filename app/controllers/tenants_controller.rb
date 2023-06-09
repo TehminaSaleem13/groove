@@ -183,8 +183,8 @@ class TenantsController < ApplicationController
     result = {}
     name = Tenant.find(params['tenant']).name
     Apartment::Tenant.switch! name
-    OrderImportSummary.update_all(status: 'cancelled')
-    ImportItem.update_all(status: 'cancelled')
+    OrderImportSummary.destroy_all
+    ImportItem.destroy_all
     result[:status] = true
     render json: result
   end
