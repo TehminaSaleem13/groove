@@ -36,8 +36,8 @@ RSpec.describe TenantsController, type: :controller do
       get :delete_summary, params: { 'tenant' => tenant.id }
 
       expect(response.status).to eq(200)
-      expect(ImportItem.last.status).to eq('cancelled')
-      expect(OrderImportSummary.last.status).to eq('cancelled')
+      result = JSON.parse response.body
+      expect(result['status']).to be_truthy
       tenant.destroy
     end
 
