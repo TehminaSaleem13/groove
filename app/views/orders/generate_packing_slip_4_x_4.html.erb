@@ -6327,7 +6327,7 @@
         <br>
 
         <div class="span4">
-          <label style="margin-top: 30px; margin-left: 0px; font-size: 35px;line-height: 42px; font-weight: 400px">Total Items:  <%= order_count %></label>
+          <label style="margin-top: 30px; margin-left: 0px; font-size: 35px;line-height: 42px; font-weight: 400px;display: none">Total Items:  <%= order_count %></label>
         </div>
         <div class="span8" style="margin-top: -130px;">
           <div style="width: 550px; margin-left: -135px; text-align: left;"> 
@@ -6342,28 +6342,23 @@
         </div>
       </div>
 
-      <div class="span12">
-          <span>
-            <span class="span2" style="font-weight: 700; font-size: 30px; margin-top: -10px; text-align: left;"><strong>Ship To:</strong></span>
-            <span class="span6" style="font-weight: 700; font-size: 40px; line-height: 36px; text-align: center;"><b><%= @order.firstname %> <%= @order.lastname %></b></span>
-          </span>
+      <div class="span12" style="margin-bottom: -40px">
+        <span>
+          <span class="span2" style="font-weight: 300; font-size: 32px; line-height: 32px; text-align: left;width: 42%;"><b><%= @order.tags %></b>
+        </span>
       </div>
 
       <div class="span12" style="border-collapse: collapse; font-size: 30px; width: 86%;">
-        <table style="margin-left:0px; margin-top: 15px; width: 85%;">
-          <thead>
-          <td colspan="2"> Item</td>
-          <td> Description</td>
-          <td>
-            <center> Qty</center>
-          </td>
-          </thead>
+        <span>
+          <span class="span6" style="font-weight: 900; font-size: 35px; line-height: 40px; height: 58px text-align: left; border-left: 1px solid black; padding-left: 2%; margin-left: 55%;"><b><%= @order.firstname %> <br> <%= @order.lastname %></b></span>
+        </span>
+        <table style="margin-left:0px; margin-top: 0px; width: 85%;">
 
           <% order_items.each do |order_item| %>
             <% unless order_item.product.is_intangible %>
               <tr>
                 <td colspan="2"><%= order_item.product.primary_sku %></td>
-                <td><%= order_item.product.name %></td>
+                <td style="max-width: 255px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= order_item.product.name %></td>
                 <td>
                   <center><%= order_item.qty %></center>
                 </td> 
@@ -6422,8 +6417,8 @@
           <br>
 
           <div class="span4">
-            <span style="font-size: 60px;"><%= box.name %></span>
-            <label style="margin-top: 30px; margin-left:0px; font-size: 35px;line-height: 42px; font-weight: 400px">Total Items:  <%= order_count %></label>
+            <span style="font-size: 40px;"><%= box.name %></span>
+            <label style="margin-top: 30px; margin-left:0px; font-size: 35px;line-height: 42px; font-weight: 400px; display: none">Total Items:  <%= order_count %></label>
           </div>
           <div class="span8" style="margin-top: -130px;">
             <div style="width: 550px; margin-left: -150px; text-align: left;"> 
@@ -6440,28 +6435,23 @@
         </div>
         
 
-        <div class="span12">
-            <span>
-              <span class="span2" style="font-weight: 700; font-size: 30px; margin-top: -10px; text-align: left;"><strong>Ship To:</strong></span>
-              <span class="span6" style="font-weight: 700; font-size: 40px; line-height: 36px; text-align: center;"><b> <%= @order.firstname %> <%= @order.lastname %></b></span>
-            </span>
+        <div class="span12" style="margin-bottom: -30px">
+          <span style="">
+            <span class="span2" style="font-weight: 300; font-size: 32px; line-height: 32px; text-align: left;width: 42%;"><b><%= @order.tags %></b>
+          </span>
         </div>
 
         <div class="span4" style="border-collapse: collapse; font-size: 30px; width: 86%;">
-          <table style="margin-left:0px; width: 83%;">
-            <thead>
-            <td colspan="2"> Item</td>
-            <td> Description</td>
-            <td>
-              <center> Qty</center>
-            </td>
-            </thead>
+          <span>
+            <span class="span6" style="font-weight: 900; font-size: 35px; line-height: 40px; height: 58px text-align: left; border-left: 1px solid black; padding-left: 2%; margin-left: 55%;"><b><%= @order.firstname %> <br> <%= @order.lastname %></b></span>
+          </span>
+          <table style="margin-left:0px; margin-top: 0px; width: 83%;">
 
             <% order_items.each do |order_item| %>
               <% unless order_item.product.is_intangible %>
                 <tr>
                   <td colspan="2"><%= order_item.product.primary_sku %></td>
-                  <td><%= order_item.product.name %></td>
+                  <td style="max-width: 255px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap;"><%= order_item.product.name %></td>
                   <td>
                     <% if order_item.product.is_kit? %>
                       <center><%= order_item.qty %></center>
@@ -6512,4 +6502,3 @@
 
 </body>
 </html>
-
