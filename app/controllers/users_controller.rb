@@ -11,7 +11,7 @@ class UsersController < ApplicationController
     #   format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role }
     #  #format.json { render json: user_info }
     # end
-    render json: @users.as_json(only: %i[id username active], methods: [:last_activity])
+    render json: @users.as_json(only: %i[id username active], include: { role: { only: [:id, :name] } }, methods: [:last_activity, :role])
   end
 
   def modify_plan
