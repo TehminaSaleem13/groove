@@ -3,14 +3,19 @@ module Groovepacker
     class Client < Base
       def orders(import_item = nil)
         combined_response = {}
-        combined_response['results'] = []
+        combined_response['orders'] = []
         last_import = shippo_credential.last_imported_at.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s rescue (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
-        
-        query = {"updated_at_min" => last_import, "limit" => 250}.as_json
-        response = HTTParty.get("https://api.goshippo.com/orders?results=250&hidden=false", query: query, headers: headers)
-        combined_response['results'] << response['results']
 
-        combined_response['results'] = combined_response['results'].flatten
+        response = HTTParty.get("https://api.goshippo.com/orders?page=1&results=25&start_date=#{last_import}", headers: headers)
+        combined_response['orders'] << response['results']
+        
+        while response['next'].present?
+          import_item&.touch
+          response = HTTParty.get(response['next'], headers: headers)
+          combined_response['orders'] << response['results']
+        end
+
+        combined_response['orders'] = combined_response['orders'].flatten
         combined_response
       end
 
