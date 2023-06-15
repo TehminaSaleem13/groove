@@ -21,10 +21,10 @@ module Groovepacker
 
       def get_ranged_orders(start_date, end_date)
         combined_response = {}
-        combined_response['results'] = []
+        combined_response['orders'] = []
 
         response = HTTParty.get("https://api.goshippo.com/orders?start_date=#{start_date.gsub(' ', 'T')}&end_date=#{end_date.gsub(' ', 'T')}", headers: headers)
-        combined_response['results'] = response['results'].flatten
+        combined_response['orders'] = response['results'].flatten
         combined_response
       end
 

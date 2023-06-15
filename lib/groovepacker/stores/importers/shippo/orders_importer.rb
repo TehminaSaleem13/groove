@@ -87,7 +87,7 @@ module Groovepacker
 
           def import_single_order(order)
             @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
-
+            
             update_import_count('success_updated') && return if skip_the_order?(order)
 
             order_in_gp_present = false
@@ -122,10 +122,15 @@ module Groovepacker
             shippo_order = update_shipping_amount_and_weight(shippo_order, order)
             shippo_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
             shippo_order.last_modified = Time.zone.parse(order['placed_at']) unless order['placed_at'].nil?
+            shippo_order.tracking_num = order_tracking_number(order)
             shippo_order.importer_id = @worker_id rescue nil
             shippo_order.import_item_id = @import_item.id rescue nil
             shippo_order.job_timestamp = Time.current.strftime("%Y-%m-%d %H:%M:%S.%L")
             return shippo_order
+          end
+
+          def order_tracking_number(order)
+            order['transactions'].select { |transaction| transaction['tracking_number'] != nil }.first.try(:[], 'tracking_number')
           end
 
           def import_order_items(shippo_order, order)
@@ -255,7 +260,7 @@ module Groovepacker
           def skip_the_order?(order)
             return false if @on_demand_import
 
-            return true if order['object_id'].nil?
+            @credential.import_shipped_having_tracking && order['order_status'] == 'SHIPPED' && !order_tracking_number(order).present?
           end
 
           def destroy_nil_import_items

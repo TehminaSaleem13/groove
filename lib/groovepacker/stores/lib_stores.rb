@@ -367,7 +367,7 @@ module Groovepacker
           @shippo.save
 		      new_record = true
 		    else
-          @shippo.update_attributes(api_key: params[:api_key], api_version: params[:api_version], generate_barcode_option: params[:generate_barcode_option], import_paid: params[:import_paid], import_awaitpay: params[:import_awaitpay], import_partially_fulfilled: params[:import_partially_fulfilled], import_shipped: params[:import_shipped], import_any: params[:import_any])
+          @shippo.update_attributes(api_key: params[:api_key], api_version: params[:api_version], generate_barcode_option: params[:generate_barcode_option], import_paid: params[:import_paid], import_awaitpay: params[:import_awaitpay], import_partially_fulfilled: params[:import_partially_fulfilled], import_shipped: params[:import_shipped], import_any: params[:import_any], import_shipped_having_tracking: params[:import_shipped_having_tracking])
         end
         @store.shippo_credential = @shippo
 		    begin
