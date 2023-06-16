@@ -60,7 +60,7 @@ module Groovepacker
           combined = { 'orders' => [] }
           if type == 'modified'
             created_date = (ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S')
-            date_val = order_import_range_days != 0 ? date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&createDateStart=#{created_date.gsub(' ', '%20')}" : "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&orderStatus=#{order_status}"
+            date_val = order_import_range_days != 0 ? date_val = "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}" : "&modifyDateStart=#{start_date}&modifyDateEnd=#{end_date}&orderStatus=#{order_status}"
           else
             date_val = "&orderDateStart=#{start_date}&orderDateEnd=#{end_date}"
           end
