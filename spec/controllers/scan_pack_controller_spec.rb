@@ -378,12 +378,12 @@ RSpec.describe ScanPackController, type: :controller do
         expect(result['error_messages']).to include('Order with tracking number 9600111298370613423837 cannot be found. It may not have been imported yet')
       end
 
-      it 'tracking number no match with suffix added' do
+      it 'tracking number match with suffix added' do
         get :scan_barcode, params: { input: '9400111298370613423837123', state: 'scanpack.rfo' }
 
         expect(response.status).to eq(200)
         result = JSON.parse(response.body)
-        expect(result['error_messages']).to include('Order with tracking number 9400111298370613423837123 cannot be found. It may not have been imported yet')
+        expect(result['data']['order']['increment_id']).to eq('T')
       end
     end
 
