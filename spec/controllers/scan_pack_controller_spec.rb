@@ -335,7 +335,7 @@ RSpec.describe ScanPackController, type: :controller do
 
         expect(response.status).to eq(200)
         result = JSON.parse(response.body)
-        expect(result['error_messages']).to include('Please provide a valid tracking number with 10 or more characters.')
+        expect(result['error_messages']).to include('Please provide a valid tracking number with 8 or more characters.')
       end
 
       it 'exact tracking number match' do

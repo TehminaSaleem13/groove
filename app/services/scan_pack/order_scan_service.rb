@@ -39,7 +39,7 @@ module ScanPack
     def valid_input?
       if @scan_by_tracking_num
         validity = @input.strip.length >= 10
-        msg = 'Please provide a valid tracking number with 10 or more characters.'
+        msg = 'Please provide a valid tracking number with 8 or more characters.'
       else
         validity = @input.present?
         msg = 'Please specify a barcode to scan the order'
