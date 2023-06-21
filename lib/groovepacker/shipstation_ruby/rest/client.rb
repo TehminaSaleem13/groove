@@ -288,11 +288,17 @@ module Groovepacker
         end
 
         def remove_tag_from_order(order_id, tag_id)
-          @service.query('/orders/removetag', { orderId: order_id, tagId: tag_id }, 'post')
+          response = @service.query('/orders/removetag', { orderId: order_id, tagId: tag_id }, 'post')
+          logs = { order_id: order_id, tag_id: tag_id, response: response.to_h }
+          Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'remove_tag_from_order', logs)
+          response
         end
 
         def add_tag_to_order(order_id, tag_id)
-          @service.query('/orders/addtag', { orderId: order_id, tagId: tag_id }, 'post')
+          response = @service.query('/orders/addtag', { orderId: order_id, tagId: tag_id }, 'post')
+          logs = { order_id: order_id, tag_id: tag_id, response: response }
+          Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'ss_add_tag_to_order', logs)
+          response
         end
 
         def inspect
