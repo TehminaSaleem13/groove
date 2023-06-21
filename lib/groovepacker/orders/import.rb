@@ -152,7 +152,7 @@ module Groovepacker
         tenant = Apartment::Tenant.current
         db_tenant = Tenant.find_by(name: tenant)
         value = Hash.from_xml(request.body.read)
-        Groovepacker::LogglyLogger.log(request, value, 'shipworks_import', tenant) if db_tenant&.loggly_sw_imports
+        Groovepacker::LogglyLogger.log_request(request, value, 'shipworks_import', tenant) if db_tenant&.loggly_sw_imports
 
         begin
           # find store/credential by using the auth_token

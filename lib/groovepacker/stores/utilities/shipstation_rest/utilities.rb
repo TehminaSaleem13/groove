@@ -16,11 +16,11 @@ module Groovepacker
             tags.each do |tag|
               if client.get_tag_id(tag) == -1
                 result[:verification_result] = false
-                result[:message] << ', ' if result[:message].present?
-                result[:message] << "#{tag} Tag not found "
+                result[:message] += ', ' if result[:message].present?
+                result[:message] += "#{tag} Tag not found "
               else
-                result[:message] << ', ' if result[:message].present?
-                result[:message] << "#{tag} Tag found "
+                result[:message] += ', ' if result[:message].present?
+                result[:message] += "#{tag} Tag found "
               end
             end
             # result[:message] =
