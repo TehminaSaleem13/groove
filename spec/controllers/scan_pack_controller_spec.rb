@@ -886,6 +886,13 @@ RSpec.describe ScanPackController, type: :controller do
         expect(response.status).to eq(200)
         expect(@order.reload.post_scanning_flag).to eq('Barcode')
       end
+
+      it 'Cue orders for Scan and Pack using Shipping Lables' do
+        ScanPackSetting.last.update(scan_by_shipping_label: true)
+
+        post :scan_barcode, params: { input: @order.increment_id, state: 'scanpack.rfo', id: @order.id, app: 'app'}
+        expect(response.status).to eq(200)
+      end
     end
   end
 
