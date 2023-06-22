@@ -282,6 +282,7 @@ module OrderConcern
   def find_order
     @orders_result = []
     @order = Order.find_by_id(params[:id])
+    return if @order.blank?
   end
 
   def initialize_result_obj
