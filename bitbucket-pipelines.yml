@@ -3,196 +3,6 @@ image: atlassian/default-image:3
 clone:
   depth: full
 
-options:
-  docker: true
-  size: 2x
-
-pipelines:
-  default:
-    - step:
-        name: Master Rails 5 Rspec
-        image: ruby:2.6.2
-        caches:
-          - bundler
-        services:
-          - mysql
-          - redis
-        script:
-          - bundle install --path vendor/bundle
-          - bundle binstubs --all
-          - RAILS_ENV=test bundle exec rails db:create db:migrate
-          - RAILS_ENV=test bundle exec rspec
-          - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-          - chmod +x ./cc-test-reporter
-          - ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.json
-          - ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
-          - pipe: sonarsource/sonarcloud-scan:1.2.1
-            variables:
-              EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
-              SONAR_TOKEN: ${SONAR_TOKEN}
-          - pipe: sonarsource/sonarcloud-quality-gate:0.1.3
-            variables:
-              EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
-              SONAR_TOKEN: ${SONAR_TOKEN}
-
-    - step:
-        name: Build (Backend & CSV)
-        trigger: manual
-        script:
-          - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          - unzip awscliv2.zip
-          - ./aws/install
-          - aws --version
-          - rm -rf *
-          - mkdir -p groove
-          - mkdir -p nodeserver
-          - mkdir -p gopacker
-          - mkdir -p groove-data-processor
-          - cd groove
-          - git clone -b master --single-branch git@bitbucket.org:groovepacker/groovepacker.git .
-          - cd ..
-          - git clone -b aws --single-branch git@bitbucket.org:groovepacker/nodeserver.git
-          - git clone git@bitbucket.org:groovepacker/groove-data-processor.git
-          - git clone git@bitbucket.org:groovepacker/gopacker.git
-          - mv nodeserver groove/
-          - mv gopacker groove/vendor/
-          - mv groove-data-processor groove/vendor/
-          - cd groove/
-          - ls -al
-          - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          - aws configure set default.region $AWS_DEFAULT_REGION
-          - aws s3 cp s3://groove-code-deploy/appspec.yml .
-          - aws s3 cp s3://groove-code-deploy/remove.sh .
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/nginx-restart nginx-restart
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/nginx.conf .
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/deploy.sh .
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/filebeat.yml .
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/cloudwatch_logs.conf .
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/.env.upgrade .env.production
-          - ls -al
-          - zip -r ../myapp.zip ./ -x '.git' -x 'tmp' -x 'log' -x 'groovepacker.tgz'
-        artifacts:
-          - myapp.zip
-
-    - step:
-        name: Build (Import)
-        script:
-          - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
-          - unzip awscliv2.zip
-          - ./aws/install
-          - aws --version
-          - rm -rf *
-          - mkdir -p groove
-          - mkdir -p nodeserver
-          - mkdir -p gopacker
-          - mkdir -p groove-data-processor
-          - cd groove
-          - git clone -b master --single-branch git@bitbucket.org:groovepacker/groovepacker.git .
-          - cd ..
-          - git clone -b aws --single-branch git@bitbucket.org:groovepacker/nodeserver.git
-          - git clone git@bitbucket.org:groovepacker/groove-data-processor.git
-          - git clone git@bitbucket.org:groovepacker/gopacker.git
-          - mv nodeserver groove/
-          - mv gopacker groove/vendor/
-          - mv groove-data-processor groove/vendor/
-          - cd groove/
-          - ls -al
-          - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
-          - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
-          - aws configure set default.region $AWS_DEFAULT_REGION
-          - aws s3 cp s3://groove-code-deploy/appspec.yml .
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/import import
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/remove-import.sh remove.sh
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/deploy-import.sh deploy.sh
-          - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/.env.upgrade .env.production
-          - ls -al
-          - zip -r ../myapp-import.zip ./ -x '.git' -x 'tmp' -x 'log' -x 'groovepacker.tgz'
-        artifacts:
-          - myapp-import.zip
-
-    - step:
-        name: Upload to S3 (Backend & CSV)
-        services:
-          - docker
-        script:
-          - pipe: atlassian/aws-code-deploy:0.2.10
-            variables:
-              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-              COMMAND: 'upload'
-              APPLICATION_NAME: groovepacker
-              S3_BUCKET: groove-deployments-cf
-              ZIP_FILE: 'myapp.zip'
-              DEBUG: 'true'
-
-    - step:
-        name: Upload to S3 (Import)
-        services:
-          - docker
-        script:
-          - pipe: atlassian/aws-code-deploy:0.2.10
-            variables:
-              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-              COMMAND: 'upload'
-              APPLICATION_NAME: groovepacker
-              S3_BUCKET: groove-deployments-imports-cf
-              ZIP_FILE: 'myapp-import.zip'
-              DEBUG: 'true'
-
-    - step:
-        name: Deploy with CodeDeploy on Production
-        deployment: production
-        services:
-        - docker
-        script:
-        - pipe: atlassian/aws-code-deploy:0.2.10
-          variables:
-            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-            AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-            COMMAND: 'deploy'
-            APPLICATION_NAME: groovepacker
-            DEPLOYMENT_GROUP: gp-new-production-backend
-            S3_BUCKET: groove-deployments-cf
-            IGNORE_APPLICATION_STOP_FAILURES: 'true'
-            FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
-            WAIT: 'true'
-            DEBUG: 'true'
-        - pipe: atlassian/aws-code-deploy:0.2.10
-          variables:
-            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-            AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-            COMMAND: 'deploy'
-            APPLICATION_NAME: groovepacker
-            DEPLOYMENT_GROUP: gp-new-production-elixer
-            S3_BUCKET: groove-deployments-cf
-            IGNORE_APPLICATION_STOP_FAILURES: 'true'
-            FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
-            WAIT: 'true'
-            DEBUG: 'true'
-        - pipe: atlassian/aws-code-deploy:0.2.10
-          variables:
-            AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
-            AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
-            AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
-            COMMAND: 'deploy'
-            APPLICATION_NAME: groovepacker
-            DEPLOYMENT_GROUP: gp-new-production-import
-            S3_BUCKET: groove-deployments-imports-cf
-            IGNORE_APPLICATION_STOP_FAILURES: 'true'
-            FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
-            WAIT: 'true'
-            DEBUG: 'true'
-        - pipe: rollbar/rollbar-notify:0.2.8
-          variables:
-            ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
-            ROLLBAR_ENVIRONMENT: 'production'
-
 definitions:
   caches:
     bundler: vendor/bundle
@@ -208,3 +18,197 @@ definitions:
         MYSQL_PASSWORD: password
     docker:
       memory: 4096
+
+
+options:
+  docker: true
+  size: 2x
+
+pipelines:
+  default:
+    - step:
+        name: Rails 5 Rspec
+        image: ruby:2.6.2
+        caches:
+          - bundler
+        services:
+          - mysql
+          - redis
+        script:
+          - bundle install --path vendor/bundle
+          - bundle binstubs --all
+          - RAILS_ENV=test bundle exec rails db:create db:migrate
+          - RAILS_ENV=test bundle exec rspec
+          - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+          - chmod +x ./cc-test-reporter
+          - ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.json
+          - ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
+          - pipe: sonarsource/sonarcloud-scan:1.4.0
+            variables:
+              EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
+              SONAR_TOKEN: ${SONAR_TOKEN}
+          - pipe: sonarsource/sonarcloud-quality-gate:0.1.6
+            variables:
+              EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
+              SONAR_TOKEN: ${SONAR_TOKEN}
+  branches:
+    master:
+      - step:
+          name: Ready for Deploy
+          script:
+            - echo "Run the next step to Deploy the Application"
+      - step:
+          name: Build (Backend & CSV)
+          trigger: manual
+          script:
+            - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            - unzip awscliv2.zip
+            - ./aws/install
+            - aws --version
+            - rm -rf *
+            - mkdir -p groove
+            - mkdir -p nodeserver
+            - mkdir -p gopacker
+            - mkdir -p groove-data-processor
+            - cd groove
+            - git clone -b master --single-branch git@bitbucket.org:groovepacker/groovepacker.git .
+            - cd ..
+            - git clone -b aws --single-branch git@bitbucket.org:groovepacker/nodeserver.git
+            - git clone git@bitbucket.org:groovepacker/groove-data-processor.git
+            - git clone git@bitbucket.org:groovepacker/gopacker.git
+            - mv nodeserver groove/
+            - mv gopacker groove/vendor/
+            - mv groove-data-processor groove/vendor/
+            - cd groove/
+            - ls -al
+            - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            - aws configure set default.region $AWS_DEFAULT_REGION
+            - aws s3 cp s3://groove-code-deploy/appspec.yml .
+            - aws s3 cp s3://groove-code-deploy/remove.sh .
+            - aws s3 cp s3://groove-code-deploy/qz_license/digital-certificate.txt config/qz_license/
+            - aws s3 cp s3://groove-code-deploy/qz_license/qz-private-key.pem config/qz_license/
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/nginx-restart nginx-restart
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/nginx.conf .
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/deploy.sh .
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/filebeat.yml .
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/cloudwatch_logs.conf .
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/.env.upgrade .env.production
+            - ls -al
+            - zip -r ../myapp.zip ./ -x '.git' -x 'tmp' -x 'log' -x 'groovepacker.tgz'
+          artifacts:
+            - myapp.zip
+      - step:
+          name: Build (Import)
+          script:
+            - curl "https://awscli.amazonaws.com/awscli-exe-linux-x86_64.zip" -o "awscliv2.zip"
+            - unzip awscliv2.zip
+            - ./aws/install
+            - aws --version
+            - rm -rf *
+            - mkdir -p groove
+            - mkdir -p nodeserver
+            - mkdir -p gopacker
+            - mkdir -p groove-data-processor
+            - cd groove
+            - git clone -b master --single-branch git@bitbucket.org:groovepacker/groovepacker.git .
+            - cd ..
+            - git clone -b aws --single-branch git@bitbucket.org:groovepacker/nodeserver.git
+            - git clone git@bitbucket.org:groovepacker/groove-data-processor.git
+            - git clone git@bitbucket.org:groovepacker/gopacker.git
+            - mv nodeserver groove/
+            - mv gopacker groove/vendor/
+            - mv groove-data-processor groove/vendor/
+            - cd groove/
+            - ls -al
+            - aws configure set aws_access_key_id $AWS_ACCESS_KEY_ID
+            - aws configure set aws_secret_access_key $AWS_SECRET_ACCESS_KEY
+            - aws configure set default.region $AWS_DEFAULT_REGION
+            - aws s3 cp s3://groove-code-deploy/appspec.yml .
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/import import
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/remove-import.sh remove.sh
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/deploy-import.sh deploy.sh
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production-upgrade/.env.upgrade .env.production
+            - ls -al
+            - zip -r ../myapp-import.zip ./ -x '.git' -x 'tmp' -x 'log' -x 'groovepacker.tgz'
+          artifacts:
+            - myapp-import.zip
+      - step:
+          name: Upload to S3 (Backend & CSV)
+          services:
+            - docker
+          script:
+            - pipe: atlassian/aws-code-deploy:1.2.0
+              variables:
+                AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+                AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+                AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+                COMMAND: 'upload'
+                APPLICATION_NAME: groovepacker
+                S3_BUCKET: groove-deployments-cf
+                ZIP_FILE: 'myapp.zip'
+                DEBUG: 'true'
+      - step:
+          name: Upload to S3 (Import)
+          services:
+            - docker
+          script:
+            - pipe: atlassian/aws-code-deploy:1.2.0
+              variables:
+                AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+                AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+                AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+                COMMAND: 'upload'
+                APPLICATION_NAME: groovepacker
+                S3_BUCKET: groove-deployments-imports-cf
+                ZIP_FILE: 'myapp-import.zip'
+                DEBUG: 'true'
+      - step:
+          name: Deploy with CodeDeploy on Production
+          deployment: production
+          services:
+          - docker
+          script:
+          - pipe: atlassian/aws-code-deploy:1.2.0
+            variables:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+              COMMAND: 'deploy'
+              APPLICATION_NAME: groovepacker
+              DEPLOYMENT_GROUP: gp-new-production-backend
+              S3_BUCKET: groove-deployments-cf
+              IGNORE_APPLICATION_STOP_FAILURES: 'true'
+              FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
+              WAIT: 'true'
+              DEBUG: 'true'
+          - pipe: atlassian/aws-code-deploy:1.2.0
+            variables:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+              COMMAND: 'deploy'
+              APPLICATION_NAME: groovepacker
+              DEPLOYMENT_GROUP: gp-new-production-elixer
+              S3_BUCKET: groove-deployments-cf
+              IGNORE_APPLICATION_STOP_FAILURES: 'true'
+              FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
+              WAIT: 'true'
+              DEBUG: 'true'
+          - pipe: atlassian/aws-code-deploy:1.2.0
+            variables:
+              AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
+              AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
+              AWS_DEFAULT_REGION: ${AWS_DEFAULT_REGION}
+              COMMAND: 'deploy'
+              APPLICATION_NAME: groovepacker
+              DEPLOYMENT_GROUP: gp-new-production-import
+              S3_BUCKET: groove-deployments-imports-cf
+              IGNORE_APPLICATION_STOP_FAILURES: 'true'
+              FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
+              WAIT: 'true'
+              DEBUG: 'true'
+          - pipe: rollbar/rollbar-notify:0.2.8
+            variables:
+              ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
+              ROLLBAR_ENVIRONMENT: 'production'

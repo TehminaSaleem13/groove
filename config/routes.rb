@@ -447,6 +447,13 @@ Groovepacks::Application.routes.draw do
     get 'health', to: 'health_check#index'
   end
 
+  resource :print, only: [] do
+    collection do
+      get '/qz_certificate' => 'print#qz_certificate'
+      post '/qz_sign' => 'print#qz_sign'
+    end
+  end
+
   resources :webhooks, only: [] do
     collection do
       post '/shop/redact' => 'webhooks#delete_shop'
