@@ -541,7 +541,8 @@ module Groovepacker
           end
 
           def update_order_activity_log(shipstation_order, order)
-            shipstation_order.addactivity('Order Import', @credential.store.name + ' Import')
+            activity_name = @import_single_order ? 'On Demand Order Import' : 'Order Import'
+            shipstation_order.addactivity(activity_name, @credential.store.name + ' Import')
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true && ( @credential.set_coupons_to_intangible || check_for_intangible_coupon )
@@ -555,7 +556,8 @@ module Groovepacker
           end
 
           def update_order_activity_log_for_gp_coupon(shipstation_order, order)
-            shipstation_order.addactivity('Order Import', @credential.store.name + ' Import')
+            activity_name = @import_single_order ? 'On Demand Order Import' : 'Order Import'
+            shipstation_order.addactivity(activity_name, @credential.store.name + ' Import')
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true
@@ -651,7 +653,7 @@ module Groovepacker
 
             @credential.import_shipped_having_tracking && order['orderStatus'] == 'shipped' && order_tracking_number(order, shipments_response).nil?
           end
-          
+
           def order_tracking_number(order, shipments_response)
             if order['orderStatus'] == 'shipped'
               tracking_info = begin
