@@ -307,6 +307,8 @@ class Store < ActiveRecord::Base
              shopify_credential
            when 'Shipstation API 2'
              shipstation_rest_credential
+           when 'Shippo'
+              shippo_credential
            end
   end
 end

@@ -20,6 +20,7 @@ RSpec.describe OrderImportSummariesController, type: :controller do
     let(:ss_store) { Store.create(name: 'Shipstation', status: true, store_type: 'Shipstation API 2', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:se_store) { Store.create(name: 'ShippingEasy', status: true, store_type: 'ShippingEasy', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:sp_store) { Store.create(name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
+    let(:shopify_store) { Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
@@ -31,6 +32,8 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       se_store.create_shipping_easy_credential(store_id: se_store.id, api_key: 'apikeyapikeyapikeyapikeyapikeyse', api_secret: 'apisecretapisecretapisecretapisecretapisecretapisecretapisecrets', import_ready_for_shipment: false, import_shipped: true, gen_barcode_from_sku: false, popup_shipping_label: false, ready_to_ship: true, import_upc: true, allow_duplicate_id: true)
 
       sp_store.create_shippo_credential(store_id: sp_store.id, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08')
+      
+      shopify_store.create_shopify_credential(store_id: shopify_store.id, shop_name: 'gpjune4', access_token: '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', shopify_status: 'open')
     end
 
     it 'gets last modified' do
@@ -44,6 +47,9 @@ RSpec.describe OrderImportSummariesController, type: :controller do
 
       # For SP
       get :get_last_modified, params: { store_id: sp_store.id }
+      expect(response.status).to eq(200)
+
+      get :get_last_modified, params: { store_id: shopify_store.id }
       expect(response.status).to eq(200)
     end
 

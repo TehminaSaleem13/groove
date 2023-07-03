@@ -418,10 +418,10 @@ module StoresHelper
         return result[:status] = false if response.nil? || response.blank?
 
         result[:status] = true
-        result_modifyDate = Time.zone.parse(response['to_address']["object_updated"])
-        result_createDate = Time.zone.parse(response['to_address']["object_created"])
+        result_modifyDate = Time.zone.parse(response['placed_at'])
+        result_createDate = Time.zone.parse(response['placed_at'])
 
-        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate)
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate, orderStatus: response['order_status']&.titleize)
       end
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
