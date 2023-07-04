@@ -252,6 +252,7 @@ module ProductsHelper
                     )
     product.product_skus.create(sku: item['sku'], product_id: product.id)
     product.generate_numeric_barcode({}) if @credential.generate_barcode_option == "generate_numeric_barcode"
+    product.generate_barcode({}) if @credential.generate_barcode_option == "generate_from_sku"
     product.set_product_status
     product
   end

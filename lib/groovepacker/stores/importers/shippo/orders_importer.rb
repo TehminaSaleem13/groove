@@ -24,7 +24,7 @@ module Groovepacker
               import_single_order(order) if order.present? && active_statuses.include?(order['order_status'])
             end
             Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
-            @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['placed_at'])) rescue nil if @import_item.status != 'cancelled'
+            @credential.update_attributes(last_imported_at: Time.zone.now) rescue nil if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end
@@ -143,7 +143,7 @@ module Groovepacker
               @import_item.update_attributes(current_order_imported_item: @import_item.current_order_imported_item+1)
 
               product = Product.find_by(name: item['title'])
-
+              
               if product.present?
                 order_item.product = product
                 shippo_order.order_items << order_item
