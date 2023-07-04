@@ -2,11 +2,11 @@
 
 module SettingsService
   class Restore < SettingsService::Base
-    attr_reader :current_user, :params, :products_to_check_later,
+    attr_reader :current_user_id, :current_user, :params, :products_to_check_later,
                 :result
 
-    def initialize(current_user: nil, params: nil, tenant: nil)
-      @current_user = current_user
+    def initialize(current_user_id: nil, params: nil, tenant: nil)
+      @current_user_id = current_user_id
       @params = params
       @tenant = tenant
       @products_to_check_later = []
@@ -18,6 +18,7 @@ module SettingsService
 
     def call
       Apartment::Tenant.switch! @tenant
+      @current_user = User.find(current_user_id)
       if current_user.can? 'restore_backups'
         process_restore if valid_params?
       else

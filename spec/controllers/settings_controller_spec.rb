@@ -180,4 +180,25 @@ RSpec.describe SettingsController, type: :controller do
       end
     end
   end
+
+  describe 'Restore Products' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!(tenant.to_s)
+      @tenant = Tenant.create(name: tenant.to_s)
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      allow(token1).to receive(:id).and_return(nil)
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Restore Products from file' do
+      request.accept = 'application/json'
+
+      post :restore, params: {file: fixture_file_upload('spec/fixtures/files/groove-export.zip')}
+      expect(response.status).to eq(200)
+    end
+  end
 end

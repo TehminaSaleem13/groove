@@ -3,7 +3,7 @@ products:
   :model: Product
   :map:
     ID: id
-    Name: name
+    Product Name: name
     store_product_id: store_product_id
     product_type: product_type
     Store ID: store_id
