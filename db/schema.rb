@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20230405173634) do
+ActiveRecord::Schema.define(version: 20230629053832) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -330,6 +330,7 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.string "new_time_zone", default: "Eastern Time (US & Canada)"
     t.boolean "truncate_order_number_in_packing_slip", default: false
     t.string "truncated_string", default: "-"
+    t.boolean "print_product_receiving_labels", default: false
   end
 
   create_table "generate_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -895,7 +896,7 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "status", default: "new"
-    t.text "packing_instructions"
+    t.string "packing_instructions", limit: 5000, collation: "utf8mb4_unicode_ci"
     t.boolean "packing_instructions_conf", default: false
     t.boolean "is_skippable", default: false
     t.integer "packing_placement", default: 50
@@ -1048,7 +1049,7 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.boolean "tracking_number_validation_enabled", default: false
     t.string "tracking_number_validation_prefixes"
     t.boolean "partial", default: false
-    t.string "partial_barcode", default: "PARTIAL"
+    t.string "partial_barcode", default: "REMOVE-ALL"
     t.boolean "scan_by_packing_slip_or_shipping_label", default: false
     t.boolean "remove_enabled", default: false
     t.string "remove_barcode", default: "REMOVE"
@@ -1091,6 +1092,22 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.boolean "large_popup", default: true
     t.boolean "multiple_lines_per_sku_accepted", default: false
     t.boolean "use_alternate_id_as_order_num", default: false
+  end
+
+  create_table "shippo_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.integer "store_id"
+    t.string "api_key"
+    t.string "api_version"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.datetime "last_imported_at"
+    t.string "generate_barcode_option", default: "do_not_generate"
+    t.boolean "import_paid", default: false
+    t.boolean "import_awaitpay", default: false
+    t.boolean "import_partially_fulfilled", default: false
+    t.boolean "import_shipped", default: false
+    t.boolean "import_any", default: false
+    t.boolean "import_shipped_having_tracking", default: false
   end
 
   create_table "shipstation_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1186,6 +1203,7 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.boolean "on_hold_status", default: false
     t.string "re_associate_shopify_products", default: "associate_items"
     t.boolean "import_variant_names", default: false
+    t.boolean "webhook_order_import", default: false
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1321,6 +1339,7 @@ ActiveRecord::Schema.define(version: 20230405173634) do
     t.boolean "uniq_shopify_import", default: false
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "show_external_logs_button", default: false
+    t.boolean "loggly_sw_imports", default: false
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
