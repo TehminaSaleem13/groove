@@ -122,7 +122,7 @@ module Groovepacker
             shippo_order = update_shipping_amount_and_weight(shippo_order, order)
             shippo_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
             shippo_order.last_modified = Time.zone.parse(order['placed_at']) unless order['placed_at'].nil?
-            shippo_order.tracking_num = order_tracking_number(order)
+            shippo_order.tracking_num = order_tracking_number(order) if @credential.import_shipped_having_tracking || @on_demand_import
             shippo_order.importer_id = @worker_id rescue nil
             shippo_order.import_item_id = @import_item.id rescue nil
             shippo_order.job_timestamp = Time.current.strftime("%Y-%m-%d %H:%M:%S.%L")
@@ -260,7 +260,7 @@ module Groovepacker
           def skip_the_order?(order)
             return false if @on_demand_import
 
-            @credential.import_shipped_having_tracking && order['order_status'] == 'SHIPPED' && !order_tracking_number(order).present?
+            @credential.import_shipped_having_tracking && !order_tracking_number(order).present?
           end
 
           def destroy_nil_import_items
