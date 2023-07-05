@@ -61,6 +61,8 @@ RSpec.describe OrdersController, type: :controller do
       order_import_summary = OrderImportSummary.create(user: User.first, status: 'completed', import_summary_type: 'import_orders', display_summary: false)
       ImportItem.create(status: 'not_started', store_id: @store.id, order_import_summary_id: order_import_summary.id, import_type: 'regular')
 
+      time_in_csv = '2020-07-31 08:49:02'
+
       request.accept = 'application/json'
       allow_any_instance_of(Groovepacker::Orders::Xml::Import).to receive(:check_count_is_equle?).and_return(true)
 
@@ -77,6 +79,7 @@ RSpec.describe OrdersController, type: :controller do
       post :import_xml, params: { xml: IO.read(Rails.root.join('spec/fixtures/files/order_import_aliased_xml.xml')).gsub('<storeId>4</storeId>', "<storeId>#{@store.id}</storeId>"), import_summary_id: order_import_summary.id, store_id: @store.id, file_name: 'csv_order_import', flag: false }
       expect(response.status).to eq(200)
 
+      expect(Order.first.order_placed_time.utc).to eq(Time.find_zone(GeneralSetting.new_time_zone).parse(time_in_csv).utc)
       expect(Order.all.count).to eq(1)
       expect(OrderItem.last.qty).to eq(12)
       expect(Product.all.count).to eq(1)
@@ -603,8 +606,8 @@ RSpec.describe OrdersController, type: :controller do
 
     it 'Show Order' do
       @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
-      store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true) 
-      ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id) 
+      store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true)
+      ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id)
       order = FactoryBot.create :order, store_id: @store.id
       params = {id: order.id}
 
@@ -614,11 +617,11 @@ RSpec.describe OrdersController, type: :controller do
 
     it 'Get Real Time Rates' do
       @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
-      store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true) 
-      ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id) 
+      store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true)
+      ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id)
       order = FactoryBot.create :order, store_id: @store.id
       params = { credential_id: ss_credential.id, carrier_code: "fedex", post_data: {weight: '10',fromPostalCode: '10005',toState: 'South Carolina',toCountry: 'US',toPostalCode: '25918-2743',confirmation_code: 'none'} }
-      
+
       post :get_realtime_rates, params: params
       expect(response.status).to eq(200)
     end
@@ -631,13 +634,13 @@ RSpec.describe OrdersController, type: :controller do
       post :record_exception, params: { id: order.id, reason: '' }
       expect(response.status).to eq(200)
     end
-    
+
     it 'Saved By Pass Log' do
       order = FactoryBot.create :order, store_id: @store.id
       product = FactoryBot.create(:product, name: 'PRODUCT1')
       product_sku = FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
       request.accept = 'application/json'
-      
+
       post :save_by_passed_log, params: { id: order.id, sku: product_sku.sku }
       expect(response.status).to eq (200)
     end

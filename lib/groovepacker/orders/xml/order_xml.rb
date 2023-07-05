@@ -140,7 +140,7 @@ module Groovepacker
         private
 
         def date(node, xpath)
-          node.xpath(xpath).text == '' ? nil : DateTime.parse(node.xpath(xpath).text)
+          node.xpath(xpath).text == '' ? nil : Time.zone.parse(node.xpath(xpath).text)
         rescue StandardError
           nil
         end
