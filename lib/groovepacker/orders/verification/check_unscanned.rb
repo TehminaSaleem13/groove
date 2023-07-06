@@ -17,7 +17,7 @@ module Groovepacker
 
           return true if Rails.env.test? || order.status == 'scanned'
 
-          webhook_url = 'https://hooks.slack.com/services/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?='
+          webhook_url = 'https://hooks.slack.com/services/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'
           HTTParty.post(webhook_url,
                         body: { text: "[#{tenant}] Scanned status change failed for Order [#{order.increment_id}] at [#{Time.current}]" }.to_json,
                         headers: { 'Content-Type' => 'application/json' })
