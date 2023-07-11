@@ -27,6 +27,12 @@ module Groovepacker
             build_handle
           ).range_import(start_date, end_date, type, current_user_id)
         end
+
+        def import_single_product(product)
+          Groovepacker::Stores::Importers::Shippo::ProductsImporter.new(
+            build_handle
+          ).import_single_product(product)
+        end
       end
     end
   end

@@ -242,18 +242,4 @@ module ProductsHelper
       Order.find_by_store_id_and_increment_id(@credential.store_id, order['orderNumber'])
     end
   end
-
-  def create_new_product(item)
-    product = Product.create(
-                    name: item['title'],
-                    store_product_id: item['object_id'],
-                    weight: item['weight'].to_f,
-                    store_id: @store.id
-                    )
-    product.product_skus.create(sku: item['sku'], product_id: product.id)
-    product.generate_numeric_barcode({}) if @credential.generate_barcode_option == "generate_numeric_barcode"
-    product.generate_barcode({}) if @credential.generate_barcode_option == "generate_from_sku"
-    product.set_product_status
-    product
-  end
 end

@@ -67,6 +67,10 @@ module Groovepacker
         handler.import_single_product(product)
       end
 
+      def import_shippo_single_product(product)
+        handler.import_single_product(product)
+      end
+
       def import_single_order_from(order_no)
         handler.import_single_order_from(order_no)
       end

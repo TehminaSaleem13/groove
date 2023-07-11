@@ -58,6 +58,12 @@ module Groovepacker
             status = @credential.get_active_statuses
           end
 
+          def shippo_context
+            handler = Groovepacker::Stores::Handlers::ShippoHandler.new(@store)
+            context = Groovepacker::Stores::Context.new(handler)
+            context
+          end
+
           def initialize_import_objects
             handler = self.get_handler
             @credential = handler[:credential]
@@ -122,7 +128,7 @@ module Groovepacker
             shippo_order = update_shipping_amount_and_weight(shippo_order, order)
             shippo_order.order_total = order["total_price"].to_f unless order["total_price"].nil?
             shippo_order.last_modified = Time.zone.parse(order['placed_at']) unless order['placed_at'].nil?
-            shippo_order.tracking_num = order_tracking_number(order) if @credential.import_shipped_having_tracking || @on_demand_import
+            shippo_order.tracking_num = order_tracking_number(order)
             shippo_order.importer_id = @worker_id rescue nil
             shippo_order.import_item_id = @import_item.id rescue nil
             shippo_order.job_timestamp = Time.current.strftime("%Y-%m-%d %H:%M:%S.%L")
@@ -134,25 +140,17 @@ module Groovepacker
           end
 
           def import_order_items(shippo_order, order)
-            return if order["line_items"].nil?
-            @import_item.current_order_items = order["line_items"].length
+            return if order['line_items'].nil?
+            @import_item.current_order_items = order['line_items'].length
             @import_item.current_order_imported_item = 0
             @import_item.save
-            order["line_items"].each do |item|
+            order['line_items'].each do |item|
               order_item = import_order_item(order_item, item)
-              @import_item.update_attributes(current_order_imported_item: @import_item.current_order_imported_item+1)
+              @import_item.update_attributes(current_order_imported_item: @import_item.current_order_imported_item + 1)
+              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sku'] }) || shippo_context.import_shippo_single_product(item)
+              insert_order_item(order_item, shippo_order, product)
 
-              product = Product.find_by(name: item['title'])
-              
-              if product.present?
-                order_item.product = product
-                shippo_order.order_items << order_item
-              else
-                product = create_new_product(item)
-                order_item.product = product
-                shippo_order.order_items << order_item
-              end
-              product.add_product_activity("Product Import","#{product.store.try(:name)}") if product.product_activities.first.nil?
+              product.add_product_activity('Product Import',"#{product.store.try(:name)}") if product.product_activities.blank?
             end
             shippo_order.save
             shippo_order
@@ -165,6 +163,12 @@ module Groovepacker
                     price: line_item["total_price"],
                     row_total: row_total
                     )
+          end
+
+          def insert_order_item(order_item, shippo_order, product)
+            order_item.product = product
+            shippo_order.order_items << order_item
+            shippo_order
           end
 
           def add_customer_info(shippo_order, order)
@@ -202,7 +206,7 @@ module Groovepacker
               @result[:success_imported] += 1
             else
               @result[:previous_imported] += 1
-              @import_item.update_attributes(:updated_orders_import => @import_item.updated_orders_import+1)
+              @import_item.update_attributes(:updated_orders_import => @import_item.updated_orders_import + 1)
             end
           end
 
