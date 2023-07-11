@@ -202,6 +202,8 @@ module Groovepacker
           end
 
           def import_single_order(order)
+            return if skip_the_order?(order)
+
             update_current_import_item(order)
             @org_ext_identifier = order['external_order_identifier']
             @ext_identifier = get_ext_identifier(order)
@@ -643,6 +645,16 @@ module Groovepacker
             @result[:messages].push(response['error']['message'])
             @import_item.message = response['error']['message']
             @import_item.save
+          end
+
+          def skip_the_order?(order)
+            # return false if @credential.import_shipped_having_tracking 
+
+            @credential.import_shipped_having_tracking && order['order_status'] == 'shipped' && order_tracking_number(order).nil?
+          end
+
+          def order_tracking_number(order)
+            order['shipments'].select { |shipment| shipment['tracking_number'] != nil }.first.try(:[], 'tracking_number')
           end
 
           def get_ext_identifier(order)

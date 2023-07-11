@@ -258,7 +258,7 @@ module Groovepacker
           end
 
           def skip_the_order?(order)
-            return false if @on_demand_import
+            # return false if @on_demand_import
 
             @credential.import_shipped_having_tracking && !order_tracking_number(order).present?
           end
