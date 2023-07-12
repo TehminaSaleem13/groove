@@ -351,11 +351,7 @@ module Groovepacker
             @import_item.update_attribute(:import_type, 'quick')
             quick_import_date = @credential.quick_import_last_modified_v2
             quick_import_date += 1.second if @credential.bulk_import && quick_import_date
-            self.import_from = if quick_import_date.blank? || (quick_import_date <= DateTime.now.in_time_zone - 15.days)
-                                 DateTime.now.in_time_zone - 1.days
-                               else
-                                 quick_import_date
-                               end
+            self.import_from = quick_import_date || (DateTime.now.in_time_zone - 1.days)
           end
 
           def set_import_date_from_store_cred
