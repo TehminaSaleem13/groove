@@ -27,7 +27,6 @@ orders:
   landing_site: 
   cancelled_at: 
   cancel_reason: 
-  # total_price_usd: '10.00'
   checkout_token: 
   reference: 
   user_id: 51576045627
@@ -182,17 +181,13 @@ orders:
     updated_at: '2020-09-11T07:29:45-04:00'
     first_name: Alpha
     last_name: Tester
-    orders_count: 42
     state: disabled
-    total_spent: '6805.17'
-    last_order_id: 2456830672955
     note: 
     verified_email: true
     multipass_identifier: 
     tax_exempt: false
     phone: 
     tags: ''
-    last_order_name: '#1117'
     currency: USD
     accepts_marketing_updated_at: '2020-04-23T06:12:52-04:00'
     marketing_opt_in_level: 

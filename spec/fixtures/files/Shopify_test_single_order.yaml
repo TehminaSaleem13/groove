@@ -127,7 +127,6 @@ orders:
     presentment_money:
       amount: '26.96'
       currency_code: USD
-  # total_price_usd: '26.96'
   total_shipping_price_set:
     shop_money:
       amount: '4.99'
@@ -171,17 +170,13 @@ orders:
     updated_at: '2021-12-15T19:17:39-05:00'
     first_name: Kapil
     last_name: Test
-    orders_count: 6
     state: enabled
-    total_spent: '177.74'
-    last_order_id: 545
     note:
     verified_email: false
     multipass_identifier:
     tax_exempt: false
     phone:
     tags: ''
-    last_order_name: '410382'
     currency: USD
     accepts_marketing_updated_at: '2021-05-10T21:19:20-04:00'
     marketing_opt_in_level:
@@ -241,15 +236,6 @@ orders:
       gift_card: false
       grams: 454
       name: Chipwrecked Peanut Butter
-      # origin_location:
-      #   id: 7878787878
-      #   country_code: US
-      #   province_code: IN
-      #   name: American Dream Nut Butter
-      #   address1: 4202 North EMS Boulevard
-      #   address2: Suite 120
-      #   city: Greenfield
-      #   zip: '46140'
       price: '11.99'
       price_set:
         shop_money:
@@ -298,15 +284,6 @@ orders:
       gift_card: false
       grams: 0
       name: Route Package Protection - $0.98
-      # origin_location:
-      #   id: 7878787878
-      #   country_code: US
-      #   province_code: IN
-      #   name: American Dream Nut Butter
-      #   address1: 4202 North EMS Boulevard
-      #   address2: Suite 120
-      #   city: Greenfield
-      #   zip: '46140'
       price: '0.98'
       price_set:
         shop_money:
@@ -356,15 +333,6 @@ orders:
     gift_card: false
     grams: 454
     name: Chipwrecked Peanut Butter
-    # origin_location:
-    #   id: 7878787878
-    #   country_code: US
-    #   province_code: IN
-    #   name: American Dream Nut Butter
-    #   address1: 4202 North EMS Boulevard
-    #   address2: Suite 120
-    #   city: Greenfield
-    #   zip: '46140'
     price: '11.99'
     price_set:
       shop_money:
@@ -413,15 +381,6 @@ orders:
     gift_card: false
     grams: 0
     name: Route Package Protection - $0.98
-    # origin_location:
-    #   id: 7878787878
-    #   country_code: US
-    #   province_code: IN
-    #   name: American Dream Nut Butter
-    #   address1: 4202 North EMS Boulevard
-    #   address2: Suite 120
-    #   city: Greenfield
-    #   zip: '46140'
     price: '0.98'
     price_set:
       shop_money:
