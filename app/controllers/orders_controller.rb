@@ -496,6 +496,8 @@ class OrdersController < ApplicationController
 
         data = {
           carrierCode: carrier['code'],
+          dimensions: params[:post_data][:dimensions].try(:permit!).try(:to_h),
+          toCity: params[:post_data][:toCity],
           weight: params[:post_data][:weight].try(:permit!).try(:to_h),
           fromPostalCode: params[:post_data][:fromPostalCode],
           toCountry: params[:post_data][:toCountry],
