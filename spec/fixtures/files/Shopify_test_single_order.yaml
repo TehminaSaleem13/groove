@@ -65,7 +65,7 @@ orders:
   email: rjtest@yopmail.com
   financial_status: paid
   fulfillment_status: fulfilled
-  gateway: shopify_payments
+  # gateway: shopify_payments
   landing_site: "/collections/shop?_kx=yTarcGIzo6-=.KjYTj4"
   landing_site_ref:
   location_id:
@@ -83,7 +83,7 @@ orders:
   phone:
   presentment_currency: USD
   processed_at: '2021-12-15T19:17:37-05:00'
-  processing_method: direct
+  # processing_method: direct
   reference:
   referring_site: ''
   source_identifier:
@@ -178,8 +178,6 @@ orders:
     phone:
     tags: ''
     currency: USD
-    accepts_marketing_updated_at: '2021-05-10T21:19:20-04:00'
-    marketing_opt_in_level:
     tax_exemptions: []
     admin_graphql_api_id: gid://shopify/Customer/5192060731582
     default_address:
@@ -421,12 +419,12 @@ orders:
           amount: '0.11'
           currency_code: USD
       discount_application_index: 0
-  payment_details:
-    credit_card_bin: '111111'
-    avs_result_code: Y
-    cvv_result_code:
-    credit_card_number: "•••• •••• •••• 3499"
-    credit_card_company: Visa
+  # payment_details:
+  #   credit_card_bin: '111111'
+  #   avs_result_code: Y
+  #   cvv_result_code:
+  #   credit_card_number: "•••• •••• •••• 3499"
+  #   credit_card_company: Visa
   refunds: []
   shipping_address:
     first_name: Kapil
@@ -444,30 +442,30 @@ orders:
     name: Kapil Test
     country_code: US
     province_code: LA
-  shipping_lines:
-  - id: 3605392883902
-    carrier_identifier:
-    code: Priority Shipping
-    delivery_category:
-    discounted_price: '4.99'
-    discounted_price_set:
-      shop_money:
-        amount: '4.99'
-        currency_code: USD
-      presentment_money:
-        amount: '4.99'
-        currency_code: USD
-    phone:
-    price: '4.99'
-    price_set:
-      shop_money:
-        amount: '4.99'
-        currency_code: USD
-      presentment_money:
-        amount: '4.99'
-        currency_code: USD
-    requested_fulfillment_service_id:
-    source: shopify
-    title: Priority Shipping
-    tax_lines: []
-    discount_allocations: []
+  # shipping_lines:
+  # - id: 3605392883902
+  #   carrier_identifier:
+  #   code: Priority Shipping
+  #   delivery_category:
+  #   discounted_price: '4.99'
+  #   discounted_price_set:
+  #     shop_money:
+  #       amount: '4.99'
+  #       currency_code: USD
+  #     presentment_money:
+  #       amount: '4.99'
+  #       currency_code: USD
+  #   phone:
+  #   price: '4.99'
+  #   price_set:
+  #     shop_money:
+  #       amount: '4.99'
+  #       currency_code: USD
+  #     presentment_money:
+  #       amount: '4.99'
+  #       currency_code: USD
+  #   requested_fulfillment_service_id:
+  #   source: shopify
+  #   title: Priority Shipping
+  #   tax_lines: []
+  #   discount_allocations: []

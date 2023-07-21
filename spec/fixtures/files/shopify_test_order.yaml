@@ -8,7 +8,7 @@ orders:
   number: 117
   note: Shopify Test Order
   token: 35d98748ee61c5f136950b5cea0af913
-  gateway: manual
+  # gateway: manual
   test: false
   total_price: '10.00'
   subtotal_price: '10.00'
@@ -46,7 +46,7 @@ orders:
   note_attributes: []
   payment_gateway_names:
   - manual
-  processing_method: manual
+  # processing_method: manual
   checkout_id: 
   source_name: shopify_draft_order
   fulfillment_status: 
@@ -189,8 +189,6 @@ orders:
     phone: 
     tags: ''
     currency: USD
-    accepts_marketing_updated_at: '2020-04-23T06:12:52-04:00'
-    marketing_opt_in_level: 
     tax_exemptions: []
     admin_graphql_api_id: gid://shopify/Customer/3135344312379
     default_address:

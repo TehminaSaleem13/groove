@@ -17,14 +17,16 @@ class WebhooksController < ApplicationController
     head :ok
   end
 
-  # private
+  private
 
-  # def verify_webhook
-  #   data = request.body.read.to_s
-  #   hmac_header = request.headers['HTTP_X_SHOPIFY_HMAC_SHA256']
-  #   digest = OpenSSL::Digest::Digest.new('sha256')
-  #   calculated_hmac = Base64.encode64(OpenSSL::HMAC.digest(digest, ENV['SHOPIFY_SHARED_SECRET'], data)).strip
-  #   head :unauthorized unless calculated_hmac == hmac_header
-  #   request.body.rewind
-  # end
+  def verify_webhook
+    data = request.body.read
+    hmac_header = request.headers['X-Shopify-Hmac-SHA256']
+    digest = OpenSSL::Digest.new('sha256')
+    calculated_hmac = Base64.strict_encode64(OpenSSL::HMAC.digest(digest, ENV['SHOPIFY_SHARED_SECRET'], data))
+
+    head :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(calculated_hmac, hmac_header)
+    request.body.rewind
+  end
+
 end
