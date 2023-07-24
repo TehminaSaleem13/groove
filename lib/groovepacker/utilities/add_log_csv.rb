@@ -159,9 +159,15 @@ class AddLogCsv
                       nil
                       end
           if customer.present?
+            subscription_data = customer.subscriptions.data.first
             last_stripe_amount = begin
-                                     (customer.subscriptions.data.first.plan.amount / 100)
-                                 rescue StandardError
+                                     if subscription_data.plan
+                                       subscription_data.plan.amount / 100
+                                     else
+                                      items_amount = subscription_data.items.sum { |subs_data| subs_data.plan.amount }
+                                      items_amount.positive? ? items_amount / 100 : 0
+                                     end
+                                  rescue StandardError
                                    0
                                    end
             billing_date = begin
