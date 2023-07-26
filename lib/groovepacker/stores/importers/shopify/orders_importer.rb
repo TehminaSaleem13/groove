@@ -196,8 +196,8 @@ module Groovepacker
             return shopify_order if order['customer'].nil?
 
             shopify_order.email = order['customer']['email']
-            shopify_order.lastname = order['shipping_address']['first_name']
-            shopify_order.firstname = order['shipping_address']['last_name']
+            shopify_order.firstname = order['shipping_address']['first_name']
+            shopify_order.lastname = order['shipping_address']['last_name']
             shopify_order
           end
 
