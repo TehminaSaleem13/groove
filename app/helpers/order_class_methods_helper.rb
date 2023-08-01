@@ -20,6 +20,11 @@ module OrderClassMethodsHelper
     GroovRealtime.emit('notification_ondemand_quickfix', result, :tenant)
   end
 
+  def emit_notification_for_range_import(user_id, store, initial_date, lro_date)
+    result = { 'status' => true, 'message' => "An import has not been run for #{initial_date.strftime('%Y-%m-%d')} days.The current import will include orders from the last #{lro_date.strftime('%Y-%m-%d')} days. To adjust the import range if needed.", 'user_id' => user_id.to_s, 'store_id' => store.id.to_i, 'store_type' => store.store_type.to_s }
+    GroovRealtime.emit('notification_range_import', result, :tenant)
+  end
+
   def emit_data_for_on_demand_import_v2(hash, order_no, user_id)
     if hash['orders'].blank?
       result = { 'status' => false, 'user_id' => user_id.to_s, 'message' => "Please verify that order #{order_no} is available in your order manager. They were not able to provide it on our request" }
