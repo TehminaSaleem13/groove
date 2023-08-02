@@ -4,11 +4,16 @@ module Groovepacker
       def orders(import_item = nil)
         combined_response = {}
         combined_response['orders'] = []
-        last_import = shippo_credential.last_imported_at.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s rescue (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
-
+        cred_last_imported = shippo_credential.last_imported_at
+        last_import = if cred_last_imported
+                        cred_last_imported.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
+                      else
+                        Order.emit_notification_for_default_import_date(import_item&.order_import_summary&.user_id, shippo_credential.store, nil, 10)
+                        (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
+                      end
         response = HTTParty.get("https://api.goshippo.com/orders?page=1&results=25&start_date=#{last_import}", headers: headers)
         combined_response['orders'] << response['results']
-        
+
         while response['next'].present?
           import_item&.touch
           response = HTTParty.get(response['next'], headers: headers)

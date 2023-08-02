@@ -7,9 +7,11 @@ module Groovepacker
         # page_index = 1
         combined_response = {}
         combined_response['orders'] = []
-        last_import = begin
-                        shopify_credential.last_imported_at.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
-                      rescue StandardError
+        cred_last_imported = shopify_credential.last_imported_at
+        last_import = if cred_last_imported
+                        cred_last_imported.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
+                      else
+                        Order.emit_notification_for_default_import_date(import_item&.order_import_summary&.user_id, shopify_credential.store, nil, 10)
                         (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
                       end
         fulfillment_status = shopify_credential.get_status
@@ -150,7 +152,7 @@ module Groovepacker
           'X-Shopify-Access-Token' => shopify_credential.access_token,
           'Content-Type' => 'application/json',
           'Accept' => 'application/json',
-          'Content-Security-Policy' => 'frame-ancestors' 
+          'Content-Security-Policy' => 'frame-ancestors'
         }
       end
     end

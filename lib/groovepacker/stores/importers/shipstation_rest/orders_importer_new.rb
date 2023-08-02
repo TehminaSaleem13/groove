@@ -348,19 +348,11 @@ module Groovepacker
           end
 
           def set_regular_quick_import_date
-            initial_date = DateTime.now.in_time_zone - 1.days
             @import_item.update_attribute(:import_type, 'quick')
             quick_import_date = @credential.quick_import_last_modified_v2
             quick_import_date += 1.second if @credential.bulk_import && quick_import_date
+            Order.emit_notification_for_default_import_date(@import_item.order_import_summary&.user_id, @store, nil, 1) if quick_import_date.nil?
             self.import_from = quick_import_date || (DateTime.now.in_time_zone - 1.days)
-            Order.emit_notification_for_range_import(@import_item.order_import_summary.user_id, @store, initial_date, quick_import_date) if check_import_after_long_time(quick_import_date)
-          end
-
-          def check_import_after_long_time(lro_date)
-            current_date = DateTime.now.in_time_zone&.to_date
-            date = lro_date&.to_date.blank? ? current_date : lro_date&.to_date
-            last_import_date = (current_date - date).to_i
-            result = last_import_date > 21 || last_import_date > 90
           end
 
           def set_import_date_from_store_cred

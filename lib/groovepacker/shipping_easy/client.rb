@@ -17,10 +17,13 @@ module Groovepacker
         combined_response = { 'orders' => [] }
         filters = { page: page_index, per_page: 200, status: statuses, last_updated_at: @last_imported_at&.utc, includes: 'products' }
         filters = filters.merge(api_key_and_secret)
-        last_import = begin
-                        start_time.present? ? start_time : @credential.last_imported_at
-                      rescue StandardError
-                        (DateTime.now.in_time_zone - 4.days)
+        last_import = if start_time.present?
+                        start_time
+                      elsif @credential&.last_imported_at
+                        @credential.last_imported_at
+                      else
+                        Order.emit_notification_for_default_import_date(import_item&.order_import_summary&.user_id, @credential.store, nil, 4)
+                        DateTime.now.in_time_zone - 4.days
                       end
 
         if import_item.import_type == 'deep'
