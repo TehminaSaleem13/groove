@@ -143,6 +143,9 @@ module Groovepacker
 
         def create_label_for_order(data)
           response = {}
+          default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').to_date
+          data['shipDate'] ||= default_ship_date
+          data['shipDate'] = data['shipDate'].to_date < default_ship_date ? default_ship_date.strftime('%a, %d %b %Y') : data['shipDate']
           data['testLabel'] = Tenant.find_by_name(Apartment::Tenant.current).try(:test_tenant_toggle) || Rails.env.development?
           begin
             response = @service.query('/orders/createlabelfororder', data, 'post', 'create_label')

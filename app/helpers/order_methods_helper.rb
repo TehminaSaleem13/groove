@@ -438,16 +438,24 @@ module OrderMethodsHelper
   def try_creating_label
     return { status: false } unless check_valid_label_data
 
+    default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').strftime('%a, %d %b %Y')
+    ship_date = if ss_label_data['shipDate'].present?
+                  shipping_date = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(ss_label_data['shipDate'].to_s).strftime('%a, %d %b %Y')
+                  shipping_date.to_date < default_ship_date.to_date ? default_ship_date : shipping_date
+                else
+                  default_ship_date
+                end
+
     post_data = {
       'orderId' => ss_label_data['orderId'],
       'carrierCode' => ss_label_data['carrierCode'],
       'serviceCode' => ss_label_data['serviceCode'],
       'confirmation' => ss_label_data['confirmation'],
-      'shipDate' => ss_label_data['shipDate'].present? ? Time.zone.parse(ss_label_data['shipDate']).strftime('%a, %d %b %Y') : Time.current.strftime('%a, %d %b %Y'),
+      'shipDate' => ship_date,
       'weight' => { 'value' => ss_label_data['weight']['value'], 'units' => ss_label_data['weight']['units'] }
     }
     post_data['dimensions'] = ss_label_data['dimensions'] if ss_label_data['dimensions'].present? && ss_label_data['dimensions']['units'].present? && ss_label_data['dimensions']['length'].present? && ss_label_data['dimensions']['width'].present? && ss_label_data['dimensions']['height'].present?
-    result = create_label(store.shipstation_rest_credential.id, post_data)
+    create_label(store.shipstation_rest_credential.id, post_data)
   end
 
   def check_valid_label_data
@@ -464,10 +472,7 @@ module OrderMethodsHelper
         file_name = "SS_Label_#{post_data['orderId']}.pdf"
         reader_file_path = Rails.root.join('public', 'pdfs', file_name)
         label_data = Base64.decode64(response['labelData'])
-        File.open(reader_file_path, 'wb') do |file|
-          file.puts label_data
-        end
-        GroovS3.create_pdf(Apartment::Tenant.current, file_name, File.open(reader_file_path).read)
+        GroovS3.create_pdf(Apartment::Tenant.current, file_name, label_data)
         result[:dimensions] = '4x6'
         result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
       else
