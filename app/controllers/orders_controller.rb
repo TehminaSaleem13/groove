@@ -307,7 +307,7 @@ class OrdersController < ApplicationController
   def order_items_export
     @result['filename'] = ''
     selected_orders = list_selected_orders(true)
-    if selected_orders.nil?
+    if selected_orders.blank?
       set_status_and_message(false, 'No orders selected', ['push'])
     else
       @result = gp_orders_export.order_items_export(selected_orders)

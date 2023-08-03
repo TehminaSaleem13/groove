@@ -40,31 +40,32 @@ module Groovepacker
       def add_single_item_in_items_list(order, single_item)
         product = single_item.product
         if product.is_kit == 0 || %w[single depends].include?(product.kit_parsing)
-          add_item_in_items_list(order, single_item, product)
+          add_item_in_items_list(order, single_item, product, 'order_item')
         end
 
         if product.is_kit == 1 && %w[individual depends].include?(product.kit_parsing)
-          product.product_kit_skuss.each do |kit_item|
-            add_item_in_items_list(order, single_item, kit_item, 'kit_item')
+          single_item.order_item_kit_products.each do |kit_item|
+            item = ProductKitSkus.find(kit_item.product_kit_skus_id)
+            add_item_in_items_list(order, single_item, item, 'kit_item', kit_item)
           end
         end
       end
 
-      def add_item_in_items_list(order, single_item, item, type = nil)
+      def add_item_in_items_list(order, single_item, item, type, kit_item = nil)
         @product = type == 'kit_item' ? item.option_product : item
         @item_quantity = type == 'kit_item' ? item.qty * single_item.qty : single_item.qty
 
         product_sku = @product.product_skus.order('product_skus.order ASC').first
         return if product_sku.nil?
 
-        create_single_row(order, product_sku, single_item)
+        create_single_row(order, product_sku, single_item, type, kit_item)
       end
 
-      def create_single_row(order, product_sku, single_item)
+      def create_single_row(order, product_sku, single_item, type, kit_item = nil)
         if @items_list.key?(product_sku.sku) && @general_settings.export_items == 'by_sku'
           @items_list[product_sku.sku][:quantity] = @items_list[product_sku.sku][:quantity] + @item_quantity
         else
-          single_row_list = @general_settings.export_items == 'standard_order_export' ? fetch_standard_single_row(order, product_sku, single_item) : fetch_single_row(order, product_sku)
+          single_row_list = @general_settings.export_items == 'standard_order_export' ? fetch_standard_single_row(order, product_sku, single_item, type, kit_item) : fetch_single_row(order, product_sku)
           push_item_row(single_row_list, product_sku)
         end
       end
@@ -88,7 +89,7 @@ module Groovepacker
         single_row_list
       end
 
-      def fetch_standard_single_row(order, product_sku, single_item)
+      def fetch_standard_single_row(order, product_sku, single_item, type, kit_item = nil)
         product_barcodes = @product.product_barcodes.order('product_barcodes.order ASC')
         single_row_list = order_export_row_map.dup
         single_row_list = single_row_list.merge(
@@ -111,9 +112,9 @@ module Groovepacker
           tags: order.tags,
           internal_notes: order.notes_internal,
           tracking_num: order.tracking_num,
-          scanned_count: single_item.scanned_qty,
-          unscanned_count: single_item.qty - single_item.scanned_qty,
-          removed_count: single_item.removed_qty
+          scanned_count: type == 'kit_item' ? kit_item.scanned_qty : single_item.scanned_qty,
+          unscanned_count: single_item.qty - (type == 'kit_item' ? kit_item.scanned_qty : single_item.scanned_qty),
+          removed_count: type == 'kit_item' ? 0 : single_item.removed_qty
         )
 
         if @current_workflow == 'product_first_scan_to_put_wall'
