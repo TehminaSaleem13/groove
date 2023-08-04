@@ -91,6 +91,7 @@ module Groovepacker
 
       def fetch_standard_single_row(order, product_sku, single_item, type, kit_item = nil)
         product_barcodes = @product.product_barcodes.order('product_barcodes.order ASC')
+        scanned_count = type == 'kit_item' ? kit_item.scanned_qty : single_item.scanned_qty
         single_row_list = order_export_row_map.dup
         single_row_list = single_row_list.merge(
           order_number: order.increment_id,
@@ -112,8 +113,8 @@ module Groovepacker
           tags: order.tags,
           internal_notes: order.notes_internal,
           tracking_num: order.tracking_num,
-          scanned_count: type == 'kit_item' ? kit_item.scanned_qty : single_item.scanned_qty,
-          unscanned_count: single_item.qty - (type == 'kit_item' ? kit_item.scanned_qty : single_item.scanned_qty),
+          scanned_count: scanned_count,
+          unscanned_count: single_item.qty - scanned_count,
           removed_count: type == 'kit_item' ? 0 : single_item.removed_qty
         )
 

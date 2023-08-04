@@ -41,6 +41,7 @@ module Groovepacker
               puts e
               next
             end
+            send_push_inventories_products_email
           end
 
           private
@@ -57,6 +58,10 @@ module Groovepacker
 
           def update_inv_on_shopify_for_sync_option(_product, attrs)
             @client.update_inventory(attrs)
+          end
+
+          def send_push_inventories_products_email
+            CsvExportMailer.send_push_pull_inventories_products(tenant, 'push_inv').deliver
           end
         end
       end
