@@ -445,13 +445,15 @@ module OrderMethodsHelper
                 else
                   default_ship_date
                 end
-
+                
     post_data = {
       'orderId' => ss_label_data['orderId'],
       'carrierCode' => ss_label_data['carrierCode'],
       'serviceCode' => ss_label_data['serviceCode'],
       'confirmation' => ss_label_data['confirmation'],
+      'packageCode' => ss_label_data['packageCode'],
       'shipDate' => ship_date,
+      'shipTo' => { 'street1'=> self.address_1, 'city'=> self.city, 'country'=> self.country, 'name'=> self.firstname + " " + self.lastname, 'postalCode'=> self.postcode, 'state'=> self.state },
       'weight' => { 'value' => ss_label_data['weight']['value'], 'units' => ss_label_data['weight']['units'] }
     }
     post_data['dimensions'] = ss_label_data['dimensions'] if ss_label_data['dimensions'].present? && ss_label_data['dimensions']['units'].present? && ss_label_data['dimensions']['length'].present? && ss_label_data['dimensions']['width'].present? && ss_label_data['dimensions']['height'].present?
@@ -467,6 +469,7 @@ module OrderMethodsHelper
       result = { status: true }
       ss_credential = ShipstationRestCredential.find(credential_id)
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+      post_data['shipFrom'] = {'street1'=> ss_credential.street1, 'city'=> ss_credential.city, 'country'=> ss_credential.country, 'name'=> ss_credential.full_name, 'postalCode'=> ss_credential.postcode, 'state'=> ss_credential.state}
       response = ss_client.create_label_for_order(post_data)
       if response['labelData'].present?
         file_name = "SS_Label_#{post_data['orderId']}.pdf"

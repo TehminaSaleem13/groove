@@ -148,7 +148,7 @@ module Groovepacker
           data['shipDate'] = data['shipDate'].to_date < default_ship_date ? default_ship_date.strftime('%a, %d %b %Y') : data['shipDate']
           data['testLabel'] = Tenant.find_by_name(Apartment::Tenant.current).try(:test_tenant_toggle) || Rails.env.development?
           begin
-            response = @service.query('/orders/createlabelfororder', data, 'post', 'create_label')
+            response = @service.query('/shipments/createlabel', data, 'post', 'create_label')
           rescue StandardError => e
             puts e
           end

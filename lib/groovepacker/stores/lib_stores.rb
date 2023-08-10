@@ -148,6 +148,12 @@ module Groovepacker
         @shipstation.import_shipped_having_tracking = params[:import_shipped_having_tracking].to_boolean
         @shipstation.remove_cancelled_orders = params[:remove_cancelled_orders].to_boolean
         @shipstation.postcode = params[:postcode] || ''
+        @shipstation.full_name = params[:full_name] || ''
+        @shipstation.street1 = params[:street1] || ''
+        @shipstation.street2 = params[:street2] || ''
+        @shipstation.city = params[:city] || ''
+        @shipstation.state = params[:state] || ''
+        @shipstation.country = params[:country] || ''
         @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'
         @shipstation.skip_ss_label_confirmation = params[:skip_ss_label_confirmation] unless params[:skip_ss_label_confirmation].nil?
         @store.shipstation_rest_credential = @shipstation
