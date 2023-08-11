@@ -6,7 +6,7 @@ module Groovepacker
       class Exception
         def initialize(user_id)
           @user_id = user_id
-          @exceptions_considered = %w[qty_related incorrect_item missing_item]
+          @exceptions_considered = %w[qty_related incorrect_item missing_item damaged_item special_instruction other]
           @results = []
           @exceptions = []
         end
