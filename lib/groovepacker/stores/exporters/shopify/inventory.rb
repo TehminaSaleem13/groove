@@ -53,7 +53,7 @@ module Groovepacker
           end
 
           def shopify_product_location
-            @shopify_product_location ||= @client.locations.first
+            @shopify_product_location ||= @client.locations.select { |loc| loc['active'] }.first
           end
 
           def update_inv_on_shopify_for_sync_option(_product, attrs)
