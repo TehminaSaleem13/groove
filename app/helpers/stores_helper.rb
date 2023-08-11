@@ -134,7 +134,7 @@ module StoresHelper
       @result['credentials'] = @store.get_store_credentials
       @result['mapping'] = CsvMapping.find_by_store_id(@store.id) if @store.store_type == 'CSV'
       @result['enabled_status'] = @store.shipstation_rest_credential.get_active_statuses.any? if @store.shipstation_rest_credential.present?
-      @result ['show_originating_store_id'] = Tenant.find_by!(name: Apartment::Tenant.current)&.show_originating_store_id
+      @result ['show_originating_store_id'] = Tenant.find_by(name: Apartment::Tenant.current)&.show_originating_store_id || false
       @result['origin_stores'] = @store.origin_stores
     else
       @result['status'] = false
