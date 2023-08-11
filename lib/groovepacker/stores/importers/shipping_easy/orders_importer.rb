@@ -447,6 +447,7 @@ module Groovepacker
                          nil
                          end
             custom_1 = @org_ext_identifier if custom_1.blank? && @credential.use_alternate_id_as_order_num
+            origin_store_identifier = order.dig('recipients')&.first.dig('original_order','store_id')
             shiping_easy_order.assign_attributes(increment_id: @ext_identifier,
                                                  store_order_id: order['id'],
                                                  order_placed_time: order['ordered_at'].to_datetime,
@@ -459,6 +460,7 @@ module Groovepacker
                                                  custom_field_two: custom_2,
                                                  customer_comments: order['notes'],
                                                  last_modified: order['updated_at'].to_datetime,
+                                                 origin_store_id: origin_store_identifier,
                                                  prime_order_id: order['prime_order_id'],
                                                  source_order_ids: order['source_order_ids'].to_a.join(','),
                                                  split_from_order_id: order['split_from_order_id'],

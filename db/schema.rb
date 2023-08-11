@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20230629053832) do
+ActiveRecord::Schema.define(version: 20230808224453) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -31,7 +31,7 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.integer "visit_id"
     t.integer "user_id"
     t.string "name"
-    t.text "properties"
+    t.text "properties", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.timestamp "time"
     t.boolean "version_2", default: false
     t.index ["name", "time"], name: "index_ahoy_events_on_name_and_time"
@@ -357,7 +357,7 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.integer "total", default: 0
     t.integer "completed", default: 0
     t.string "status", default: "scheduled"
-    t.string "current"
+    t.string "current", limit: 5000, collation: "utf8mb4_unicode_ci"
     t.text "messages"
     t.boolean "cancel", default: false
     t.datetime "created_at", null: false
@@ -379,7 +379,7 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.string "message", default: ""
     t.string "import_type", default: "regular"
     t.integer "days"
-    t.integer "updated_orders_import"
+    t.integer "updated_orders_import", default: 0
     t.text "import_error"
     t.integer "failed_count", default: 0
     t.string "importer_id"
@@ -739,12 +739,22 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.string "job_timestamp"
     t.string "tags"
     t.string "post_scanning_flag"
+    t.integer "origin_store_id"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
     t.index ["scanned_on"], name: "index_orders_on_scanned_on"
     t.index ["status"], name: "index_orders_on_status"
     t.index ["store_id"], name: "index_orders_on_store_id"
     t.index ["tracking_num"], name: "index_orders_on_tracking_num"
+  end
+
+  create_table "origin_stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.integer "store_id"
+    t.integer "origin_store_id"
+    t.string "recent_order_details"
+    t.string "store_name", limit: 20
+    t.index ["origin_store_id"], name: "index_origin_stores_on_origin_store_id"
+    t.index ["store_id"], name: "index_origin_stores_on_store_id"
   end
 
   create_table "packing_cams", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1092,6 +1102,7 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.boolean "large_popup", default: true
     t.boolean "multiple_lines_per_sku_accepted", default: false
     t.boolean "use_alternate_id_as_order_num", default: false
+    t.boolean "import_shipped_having_tracking", default: false
   end
 
   create_table "shippo_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1203,7 +1214,6 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.boolean "on_hold_status", default: false
     t.string "re_associate_shopify_products", default: "associate_items"
     t.boolean "import_variant_names", default: false
-    t.boolean "webhook_order_import", default: false
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1239,6 +1249,7 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.boolean "quick_fix", default: false
     t.boolean "troubleshooter_option", default: true
     t.boolean "order_cup_direct_shipping", default: false
+    t.boolean "display_origin_store_name", default: false
   end
 
   create_table "subscriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1340,6 +1351,7 @@ ActiveRecord::Schema.define(version: 20230629053832) do
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "show_external_logs_button", default: false
     t.boolean "loggly_sw_imports", default: false
+    t.boolean "show_originating_store_id", default: false
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

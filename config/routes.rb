@@ -87,6 +87,7 @@ Groovepacks::Application.routes.draw do
   post 'shipstation_rest_credentials/set_rate_visibility' => 'shipstation_rest_credentials#set_rate_visibility'
   post 'shipstation_rest_credentials/set_contracted_carriers' => 'shipstation_rest_credentials#set_contracted_carriers'
   post 'shipstation_rest_credentials/set_presets' => 'shipstation_rest_credentials#set_presets'
+  patch 'origin_stores/:origin_store_id', to: 'origin_stores#update', as: :update_origin_store
 
   # Packing Cam routes
   post 'package-details' => 'packing_cam#show'
