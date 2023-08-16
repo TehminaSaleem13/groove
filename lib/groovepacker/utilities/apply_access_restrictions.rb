@@ -23,7 +23,7 @@ class ApplyAccessRestrictions
     access_restrictions = AccessRestriction.order('created_at')
     @access_restriction = access_restrictions.last if access_restrictions.last
     if @access_restriction
-      AccessRestriction.create(num_users: @access_restriction.num_users, num_shipments: @access_restriction.num_shipments, num_import_sources: @access_restriction.num_import_sources).save
+      AccessRestriction.create(num_users: @access_restriction.num_users, num_shipments: @access_restriction.num_shipments, num_import_sources: @access_restriction.num_import_sources, allow_bc_inv_push: @access_restriction.allow_bc_inv_push, allow_mg_rest_inv_push: @access_restriction.allow_mg_rest_inv_push, allow_shopify_inv_push: @access_restriction.allow_shopify_inv_push, allow_teapplix_inv_push: @access_restriction.allow_teapplix_inv_push, allow_magento_soap_tracking_no_push: @access_restriction.allow_magento_soap_tracking_no_push).save
     else
       init = Groovepacker::Tenants::TenantInitialization.new
       init_access = init.access_limits(plan_id)

@@ -307,7 +307,7 @@ class OrdersController < ApplicationController
   def order_items_export
     @result['filename'] = ''
     selected_orders = list_selected_orders(true)
-    if selected_orders.nil?
+    if selected_orders.blank?
       set_status_and_message(false, 'No orders selected', ['push'])
     else
       @result = gp_orders_export.order_items_export(selected_orders)
@@ -571,16 +571,19 @@ class OrdersController < ApplicationController
   end
 
   def print_shipping_label
-    result = { status: true }
+    result = { status: false }
     begin
       order = Order.includes(:store).find(params[:id])
-      if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
-        result = order.try_creating_label
-        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
-        result[:error] = 'Insufficient data to create label' if !result[:status] && !result[:error_messages].present?
+      if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential&.use_api_create_label
+        try_creating_label = order.store.shipstation_rest_credential.skip_ss_label_confirmation
+        result = order.try_creating_label if try_creating_label
+        if try_creating_label == false || !result[:status]
+          result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
+          result[:error] = 'Insufficient/Invalid data to create label' if try_creating_label && !result[:error_messages].present?
+        end
       else
         result[:status] = false
-        result[:error] = 'Please Check Order Store Settings'
+        result[:error] = 'The order does not seems to be associated with Shipstation store'
       end
     rescue StandardError => e
       result[:status] = false

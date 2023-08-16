@@ -153,7 +153,7 @@ module Groovepacker
       end
 
       def delete_all_orders
-        %w[orders order_activities order_items order_serials packing_cams order_item_boxes order_item_kit_product_scan_times order_item_kit_products order_item_order_serial_product_lots order_item_scan_times order_shippings order_serials order_tags order_tags_orders order_exceptions].each do |table|
+        %w[orders order_activities order_items order_serials packing_cams order_item_boxes order_item_kit_product_scan_times order_item_kit_products order_item_order_serial_product_lots order_item_scan_times order_shippings order_serials order_tags order_tags_orders order_exceptions shipping_labels].each do |table|
           ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
         end
       end

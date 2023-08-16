@@ -7,9 +7,11 @@ module Groovepacker
         # page_index = 1
         combined_response = {}
         combined_response['orders'] = []
-        last_import = begin
-                        shopify_credential.last_imported_at.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
-                      rescue StandardError
+        cred_last_imported = shopify_credential.last_imported_at
+        last_import = if cred_last_imported
+                        cred_last_imported.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
+                      else
+                        Order.emit_notification_for_default_import_date(import_item&.order_import_summary&.user_id, shopify_credential.store, nil, 10)
                         (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
                       end
         fulfillment_status = shopify_credential.get_status
@@ -113,8 +115,17 @@ module Groovepacker
       end
 
       def update_inventory(attrs)
-        response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
-                                 body: attrs.to_json, headers: headers)
+        max_retries = 3
+        response = nil
+
+        max_retries.times do
+          response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
+                                   body: attrs.to_json, headers: headers)
+          return response if response.success? || response.code != 429
+
+          sleep(response.headers['Retry-After'].to_f)
+        end
+        response
       end
 
       def add_gp_scanned_tag(store_order_id, tag)
@@ -142,7 +153,9 @@ module Groovepacker
       def locations
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/locations.json",
                                 headers: headers)
-        response['locations'] || []
+        response['locations'].is_a?(Array) ? response['locations'] : []
+      rescue StandardError
+        []
       end
 
       def headers
@@ -150,7 +163,7 @@ module Groovepacker
           'X-Shopify-Access-Token' => shopify_credential.access_token,
           'Content-Type' => 'application/json',
           'Accept' => 'application/json',
-          'Content-Security-Policy' => 'frame-ancestors' 
+          'Content-Security-Policy' => 'frame-ancestors'
         }
       end
     end

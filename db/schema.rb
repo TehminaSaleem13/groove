@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20230808224453) do
+ActiveRecord::Schema.define(version: 20230815132856) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1105,6 +1105,14 @@ ActiveRecord::Schema.define(version: 20230808224453) do
     t.boolean "import_shipped_having_tracking", default: false
   end
 
+  create_table "shipping_labels", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.bigint "order_id"
+    t.bigint "shipment_id"
+    t.text "url"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "shippo_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.string "api_key"
@@ -1172,6 +1180,12 @@ ActiveRecord::Schema.define(version: 20230808224453) do
     t.boolean "import_shipped_having_tracking", default: false
     t.boolean "import_discounts_option", default: false
     t.boolean "set_coupons_to_intangible", default: false
+    t.string "full_name", default: ""
+    t.string "street1", default: ""
+    t.string "street2", default: ""
+    t.string "city", default: ""
+    t.string "state", default: ""
+    t.string "country", default: ""
   end
 
   create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1214,6 +1228,7 @@ ActiveRecord::Schema.define(version: 20230808224453) do
     t.boolean "on_hold_status", default: false
     t.string "re_associate_shopify_products", default: "associate_items"
     t.boolean "import_variant_names", default: false
+    t.bigint "default_location_id"
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

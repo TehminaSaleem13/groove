@@ -8,7 +8,7 @@ RSpec.describe StoresController, type: :controller do
     generalsetting = GeneralSetting.all.first
     generalsetting.update_column(:inventory_tracking, true)
     generalsetting.update_column(:hold_orders_due_to_inventory, true)
-    user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true)
+    user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true, add_edit_order_items: true)
     @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)
     access_restriction = FactoryBot.create(:access_restriction)
     inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
@@ -326,12 +326,29 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Push Inventory' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+      product = FactoryBot.create(:product, store_id: @store.id, store_product_id: '123456')
+      product1_inventory = product.product_inventory_warehousess.first
+      create(:sync_option, product_id: product.id, sync_with_shopify: true, shopify_product_variant_id: '1234')
       request.accept = 'application/json'
 
-      shopify_store = Store.where(store_type: 'Shopify').last
-
       get :push_store_inventory, params: { id: shopify_store.id }
+      result = JSON.parse(response.body)
       expect(response.status).to eq(200)
+      expect(result['status']).to eq(true)
+    end
+
+    it 'Pull Inventory' do
+      shopify_store = Store.where(store_type: 'Shopify').last
+      product = FactoryBot.create(:product, store_id: @store.id, store_product_id: '123456')
+      product1_inventory = product.product_inventory_warehousess.first
+      create(:sync_option, product_id: product.id, sync_with_shopify: true, shopify_product_variant_id: '1234')
+      request.accept = 'application/json'
+
+      get :pull_store_inventory, params: { id: shopify_store.id }
+      result = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(result['status']).to eq(true)
     end
 
     it 'Update Shopify Store' do

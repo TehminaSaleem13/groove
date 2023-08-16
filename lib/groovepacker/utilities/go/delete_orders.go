@@ -377,7 +377,7 @@ func delete_items(order_ids []string, db *sql.DB) {
 
 	table_names := []string{"order_item_kit_products",
 		"order_item_order_serial_product_lots",
-		"order_item_scan_times"}
+		"order_item_scan_times", "shipping_labels"}
 
 	for _, table_name := range table_names {
 		query := sq.

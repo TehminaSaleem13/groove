@@ -143,6 +143,9 @@ module Groovepacker
 
         def create_label_for_order(data)
           response = {}
+          default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').to_date
+          data['shipDate'] ||= default_ship_date
+          data['shipDate'] = data['shipDate'].to_date < default_ship_date ? default_ship_date.strftime('%a, %d %b %Y') : data['shipDate']
           data['testLabel'] = Tenant.find_by_name(Apartment::Tenant.current).try(:test_tenant_toggle) || Rails.env.development?
           begin
             response = @service.query('/orders/createlabelfororder', data, 'post', 'create_label')
@@ -210,6 +213,13 @@ module Groovepacker
           response = @service.query("/shipments?orderNumber=#{URI.encode(orderno)}", nil, 'get')
           response['shipments'].select { |shipment| shipment['orderNumber'] == orderno } if response['shipments'].present?
           Tenant.save_se_import_data("========Shipstation Shipments By Order Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response)
+          response['shipments']
+        end
+
+        def get_shipments_by_order_id(order_id)
+          response = @service.query("/shipments?orderId=#{URI.encode(order_id)}", nil, 'get')
+          response['shipments'].select { |shipment| shipment['orderId'] == order_id } if response['shipments'].present?
+          Tenant.save_se_import_data("========Shipstation Shipments By Order ID UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Id', order_id, '==Response', response)
           response['shipments']
         end
 

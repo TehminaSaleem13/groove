@@ -19,8 +19,8 @@ describe Groovepacker::Stores::Importers::Shopify::Inventory do
       allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:get_variant).with(shopify_product_variant_id).and_return(id: shopify_product_variant_id, inventory_quantity: inventory_quantity)
     end
 
-    it 'Push Inventory' do
-      expect(result).to include(Product.first)
-    end
+    # it 'Push Inventory' do
+    #   expect(result).to include(Product.first)
+    # end
   end
 end

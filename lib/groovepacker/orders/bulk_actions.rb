@@ -4,6 +4,7 @@ module Groovepacker
   module Orders
     class BulkActions
       include Groovepacker::Inventory::Helper
+      include Groovepacker::Orders::ResponseMessage
 
       def init_results
         @result = {}
@@ -35,7 +36,7 @@ module Groovepacker
             end
             check_bulk_action_completed_or_not(bulk_action)
           end
-        rescue StandardError
+        rescue StandardError => e
           bulk_action.update_attributes(status: 'failed', messages: ['Some error occurred'], current: '')
         end
         $redis.del("bulk_action_data_#{tenant}_#{bulk_actions_id}")
@@ -304,6 +305,7 @@ module Groovepacker
         OrderActivity.where(['order_id IN (?)', order_ids]).delete_all
         OrderException.where(['order_id IN (?)', order_ids]).delete_all
         OrderSerial.where(['order_id IN (?)', order_ids]).delete_all
+        ShippingLabel.where(['order_id IN (?)', order_ids]).delete_all
         OrderShipping.where(['order_id IN (?)', order_ids]).delete_all
         Tote.where(order_id: order_ids).update_all(order_id: nil)
       end

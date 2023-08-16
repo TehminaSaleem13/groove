@@ -351,6 +351,7 @@ module Groovepacker
             @import_item.update_attribute(:import_type, 'quick')
             quick_import_date = @credential.quick_import_last_modified_v2
             quick_import_date += 1.second if @credential.bulk_import && quick_import_date
+            Order.emit_notification_for_default_import_date(@import_item.order_import_summary&.user_id, @store, nil, 1) if quick_import_date.nil?
             self.import_from = quick_import_date || (DateTime.now.in_time_zone - 1.days)
           end
 

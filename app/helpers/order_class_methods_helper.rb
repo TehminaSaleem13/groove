@@ -20,6 +20,19 @@ module OrderClassMethodsHelper
     GroovRealtime.emit('notification_ondemand_quickfix', result, :tenant)
   end
 
+  def emit_notification_for_default_import_date(user_id, store, last_import_days, current_import_days)
+    return if user_id.blank? || store.blank? || current_import_days.blank?
+
+    message = if last_import_days.to_i.positive?
+                "An import has not been run for <b>#{last_import_days} days</b>. "
+              else
+                'It seems like this is the first time the import is started. '
+              end
+    message += "The current import for Store <i><b>#{store.name}</i></b> will include orders from the last <b>#{current_import_days} days</b>. Click <b><i>Continue</i></b> to adjust the import range if needed otherwise click <i><b>Cancel</i></b>."
+    result = { status: true, message: message, user_id: user_id, store_id: store.id, store_type: store.store_type }
+    GroovRealtime.emit('notification_default_import_date', result, :tenant)
+  end
+
   def emit_data_for_on_demand_import_v2(hash, order_no, user_id)
     if hash['orders'].blank?
       result = { 'status' => false, 'user_id' => user_id.to_s, 'message' => "Please verify that order #{order_no} is available in your order manager. They were not able to provide it on our request" }

@@ -271,9 +271,10 @@ module OrderConcern
     # add a user with name of nobody to display in the list
     dummy_user = User.new
     dummy_user.name = 'Nobody'
+    dummy_user.username = 'Nobody'
     dummy_user.id = 0
-    @result['order']['users'] = User.all
-    # @result['order']['users'].unshift(dummy_user)
+    @result['order']['users'] = User.all.to_a
+    @result['order']['users'].unshift(dummy_user)
 
     user = @result['order']['users'].select { |user| user.id == @order.packing_user_id }.first
     user.name = "#{user.name} (Packing User)" if user

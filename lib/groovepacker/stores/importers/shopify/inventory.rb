@@ -35,6 +35,7 @@ module Groovepacker
               puts e
               next
             end
+            send_pull_inventories_products_email
           end
 
           private
@@ -50,6 +51,10 @@ module Groovepacker
 
             inv_wh.quantity_on_hand = shopify_product_inv['inventory_quantity'].try(:to_i) + inv_wh.allocated_inv.to_i
             inv_wh.save!
+          end
+
+          def send_pull_inventories_products_email
+            CsvExportMailer.send_push_pull_inventories_products(tenant, 'pull_inv').deliver
           end
         end
       end

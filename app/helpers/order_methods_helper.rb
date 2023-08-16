@@ -355,7 +355,8 @@ module OrderMethodsHelper
       order_ss_label_data[:dimensions] = '4x6'
       return order_ss_label_data
     end
-
+    order_ss_label_data['shipping_labels'] = shipping_labels
+    order_ss_label_data['shipments'] = ss_client.get_shipments_by_order_id(store_order_id)
     order_ss_label_data['order_number'] = increment_id
     order_ss_label_data['credential_id'] = ss_rest_credential.id
     order_ss_label_data['skip_ss_label_confirmation'] = ss_rest_credential.skip_ss_label_confirmation
@@ -438,20 +439,30 @@ module OrderMethodsHelper
   def try_creating_label
     return { status: false } unless check_valid_label_data
 
+    default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').strftime('%a, %d %b %Y')
+    ship_date = if ss_label_data['shipDate'].present?
+                  shipping_date = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(ss_label_data['shipDate'].to_s).strftime('%a, %d %b %Y')
+                  shipping_date.to_date < default_ship_date.to_date ? default_ship_date : shipping_date
+                else
+                  default_ship_date
+                end
+
     post_data = {
       'orderId' => ss_label_data['orderId'],
       'carrierCode' => ss_label_data['carrierCode'],
       'serviceCode' => ss_label_data['serviceCode'],
       'confirmation' => ss_label_data['confirmation'],
-      'shipDate' => ss_label_data['shipDate'].present? ? Time.zone.parse(ss_label_data['shipDate']).strftime('%a, %d %b %Y') : Time.current.strftime('%a, %d %b %Y'),
+      'packageCode' => ss_label_data['packageCode'],
+      'shipDate' => ship_date,
+      'shipTo' => { 'street1'=> self.address_1, 'city'=> self.city, 'country'=> self.country, 'name'=> self.firstname + " " + self.lastname, 'postalCode'=> self.postcode, 'state'=> self.state },
       'weight' => { 'value' => ss_label_data['weight']['value'], 'units' => ss_label_data['weight']['units'] }
     }
     post_data['dimensions'] = ss_label_data['dimensions'] if ss_label_data['dimensions'].present? && ss_label_data['dimensions']['units'].present? && ss_label_data['dimensions']['length'].present? && ss_label_data['dimensions']['width'].present? && ss_label_data['dimensions']['height'].present?
-    result = create_label(store.shipstation_rest_credential.id, post_data)
+    create_label(store.shipstation_rest_credential.id, post_data)
   end
 
   def check_valid_label_data
-    ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present? && ss_label_data['weight']['WeightUnits'].present?
+    ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present?
   end
 
   def create_label(credential_id, post_data)
@@ -459,20 +470,19 @@ module OrderMethodsHelper
       result = { status: true }
       ss_credential = ShipstationRestCredential.find(credential_id)
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
+      post_data['shipFrom'] = {'street1'=> ss_credential.street1, 'city'=> ss_credential.city, 'country'=> ss_credential.country, 'name'=> ss_credential.full_name, 'postalCode'=> ss_credential.postcode, 'state'=> ss_credential.state}
       response = ss_client.create_label_for_order(post_data)
       if response['labelData'].present?
         file_name = "SS_Label_#{post_data['orderId']}.pdf"
-        reader_file_path = Rails.root.join('public', 'pdfs', file_name)
         label_data = Base64.decode64(response['labelData'])
-        File.open(reader_file_path, 'wb') do |file|
-          file.puts label_data
-        end
-        GroovS3.create_pdf(Apartment::Tenant.current, file_name, File.open(reader_file_path).read)
+        GroovS3.create_pdf(Apartment::Tenant.current, file_name, label_data)
         result[:dimensions] = '4x6'
-        result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
+        label_url = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
+        store_shipping_label_data(post_data['orderId'], label_url, response['shipmentId'])
+        result[:url] = label_url
       else
         result[:status] = false
-        result[:error_messages] = response.first(3).map { |res| res = res.join(': ') }.join('<br>')
+        result[:error_messages] = response.first(3).map { |res| res.join(': ') }.join('<br>')
       end
     rescue StandardError => e
       result[:status] = false
@@ -505,5 +515,12 @@ module OrderMethodsHelper
     return false if ex_app && !carrier_data['expanded']
 
     !!carrier_data['visible']
+  end
+
+  def store_shipping_label_data(store_order_id, url, shipment_id)
+    return if Tenant.find_by_name(Apartment::Tenant.current)&.test_tenant_toggle
+
+    associated_order = Order.find_by(store_order_id: store_order_id)
+    associated_order&.shipping_labels&.create(url: url, shipment_id: shipment_id)
   end
 end

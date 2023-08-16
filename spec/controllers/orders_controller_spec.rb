@@ -5,9 +5,9 @@ require 'rails_helper'
 RSpec.describe OrdersController, type: :controller do
   before do
     Groovepacker::SeedTenant.new.seed
-    generalsetting = GeneralSetting.all.first
-    generalsetting.update_column(:inventory_tracking, true)
-    generalsetting.update_column(:hold_orders_due_to_inventory, true)
+    @generalsetting = GeneralSetting.all.first
+    @generalsetting.update_column(:inventory_tracking, true)
+    @generalsetting.update_column(:hold_orders_due_to_inventory, true)
     user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true, add_edit_order_items: true)
     @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)
     access_restriction = FactoryBot.create(:access_restriction)
@@ -712,6 +712,54 @@ RSpec.describe OrdersController, type: :controller do
 
       expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
       expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
+    end
+  end
+
+  describe 'Order Items Export Report' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Order is selected' do
+      @generalsetting
+      order = FactoryBot.create :order, store_id: @store.id
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      kit = FactoryBot.create(:product, :with_sku_barcode, is_kit: 1, kit_parsing: 'individual', name: 'KIT1')
+      productkitsku = ProductKitSkus.create(product_id: kit.id, option_product_id: product.id, qty: 1)
+      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: kit.id, scanned_status: 'notscanned', scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'notscanned', scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      kit.product_kit_skuss << productkitsku
+      ProductSku.create(sku: 'PRODUCT90', purpose: nil, product_id: product.id, order: 0)
+      OrderItemKitProduct.create(order_item_id: order_item.id, product_kit_skus_id: productkitsku.id, scanned_status: "unscanned", scanned_qty: 0)
+
+      request.accept = 'application/json'
+      post :order_items_export, params:{'sort'=>'', 'order'=>'DESC', 'filter'=>'awaiting', 'search'=>'', 'select_all'=>false, 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'status'=>'', 'reallocate_inventory'=>false, 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>'true'} 
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['messages']).to eq(['Order export items is disabled.'])
+
+      @generalsetting.update_column(:export_items, 'standard_order_export')
+      post :order_items_export, params:{'sort'=>'', 'order'=>'DESC', 'filter'=>'awaiting', 'search'=>'', 'select_all'=>false, 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'status'=>'', 'reallocate_inventory'=>false, 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>'true'} 
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+
+    end
+
+    it 'Order is not selected' do
+
+      request.accept = 'application/json'
+
+      post :order_items_export, params:{'sort'=>'', 'order'=>'DESC', 'filter'=>'awaiting', 'search'=>'', 'select_all'=>false, 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'status'=>'', 'reallocate_inventory'=>false, 'orderArray'=>[{'id'=>''}], 'product_search_toggle'=>'true'} 
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(false)
+      expect(result['messages']).to eq(['No orders selected'])
     end
   end
 end
