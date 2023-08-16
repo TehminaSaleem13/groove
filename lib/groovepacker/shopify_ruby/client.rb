@@ -153,7 +153,9 @@ module Groovepacker
       def locations
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/locations.json",
                                 headers: headers)
-        response['locations'] || []
+        response['locations'].is_a?(Array) ? response['locations'] : []
+      rescue StandardError
+        []
       end
 
       def headers
