@@ -13,11 +13,11 @@ module Groovepacker
 
         def most_recent
           @exceptions = if @user_id.nil?
-                          OrderException.where(
+                          OrderException.includes(:user, :order).where(
                             'reason IN (?)', @exceptions_considered
                           ).order(created_at: :desc)
                         else
-                          OrderException.where(
+                          OrderException.includes(:user, :order).where(
                             user_id: @user_id
                           ).where(
                             'reason IN (?)', @exceptions_considered
@@ -32,11 +32,11 @@ module Groovepacker
 
         def by_frequency
           @exceptions = if @user_id.nil?
-                          OrderException.where(
+                          OrderException.includes(:user, :order).where(
                             'reason IN (?)', @exceptions_considered
                           )
                         else
-                          OrderException.where(user_id: @user_id).where(
+                          OrderException.includes(:user, :order).where(user_id: @user_id).where(
                             'reason IN (?)', @exceptions_considered
                           )
                         end
@@ -71,15 +71,15 @@ module Groovepacker
         end
 
         def access_data(exception, percentages)
-          order = Order.find(exception.order_id)
           {
             recorded_at: exception.created_at,
             description: exception.description.try(:strip),
             increment_id: exception.order.increment_id,
             order_id: exception.order_id,
             reason: exception.reason,
+            associated_user: exception.user && "#{exception.user.name} (#{exception.user.username})",
             frequency: percentages[exception.reason],
-            created_at: order.order_placed_time
+            created_at: exception.order.order_placed_time
           }
         end
 
