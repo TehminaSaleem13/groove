@@ -571,18 +571,18 @@ class OrdersController < ApplicationController
   end
 
   def print_shipping_label
-    result = { status: true }
+    result = { status: false }
     begin
       order = Order.includes(:store).find(params[:id])
-      if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
-        result = order.try_creating_label
+      if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential&.use_api_create_label
+        result = order.try_creating_label if order.store.shipstation_rest_credential&.skip_ss_label_confirmation
         unless result[:status]
           result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
-          result[:error] = 'Insufficient data to create label' if !result[:error_messages].present?
+          result[:error] = 'Insufficient/Invalid data to create label' if !result[:error_messages].present?
         end
       else
         result[:status] = false
-        result[:error] = 'Please Check Order Store Settings'
+        result[:error] = 'The order does not seems to be associated with Shipstation store'
       end
     rescue StandardError => e
       result[:status] = false
