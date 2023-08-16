@@ -401,8 +401,10 @@ module OrdersHelper
           # if single, then add order item to unscanned list
           unscanned_list.push(order_item.build_unscanned_single_item)
         when 'individual'
-          # else if individual then add all order items as children to unscanned list
-          unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
+          unless order_item.cached_product.is_intangible
+            # else if individual then add all order items as children to unscanned list
+            unscanned_list.push(order_item.build_unscanned_individual_kit(option_products))
+          end
         when 'depends'
           if order_item.kit_split
             unscanned_list.push(order_item.build_unscanned_individual_kit(option_products, true)) if order_item.kit_split_qty > order_item.kit_split_scanned_qty
