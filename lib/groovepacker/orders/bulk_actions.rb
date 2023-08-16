@@ -304,6 +304,7 @@ module Groovepacker
         OrderActivity.where(['order_id IN (?)', order_ids]).delete_all
         OrderException.where(['order_id IN (?)', order_ids]).delete_all
         OrderSerial.where(['order_id IN (?)', order_ids]).delete_all
+        ShippingLabel.where(['order_id IN (?)', order_ids]).delete_all
         OrderShipping.where(['order_id IN (?)', order_ids]).delete_all
         Tote.where(order_id: order_ids).update_all(order_id: nil)
       end

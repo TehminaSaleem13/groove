@@ -355,7 +355,8 @@ module OrderMethodsHelper
       order_ss_label_data[:dimensions] = '4x6'
       return order_ss_label_data
     end
-
+    order_ss_label_data['shipping_labels'] = shipping_labels
+    order_ss_label_data['shipments'] = ss_client.get_shipments_by_order_id(store_order_id)
     order_ss_label_data['order_number'] = increment_id
     order_ss_label_data['credential_id'] = ss_rest_credential.id
     order_ss_label_data['skip_ss_label_confirmation'] = ss_rest_credential.skip_ss_label_confirmation
@@ -445,7 +446,7 @@ module OrderMethodsHelper
                 else
                   default_ship_date
                 end
-                
+
     post_data = {
       'orderId' => ss_label_data['orderId'],
       'carrierCode' => ss_label_data['carrierCode'],
@@ -461,7 +462,7 @@ module OrderMethodsHelper
   end
 
   def check_valid_label_data
-    ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present? && ss_label_data['weight']['WeightUnits'].present?
+    ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present?
   end
 
   def create_label(credential_id, post_data)
@@ -473,14 +474,15 @@ module OrderMethodsHelper
       response = ss_client.create_label_for_order(post_data)
       if response['labelData'].present?
         file_name = "SS_Label_#{post_data['orderId']}.pdf"
-        reader_file_path = Rails.root.join('public', 'pdfs', file_name)
         label_data = Base64.decode64(response['labelData'])
         GroovS3.create_pdf(Apartment::Tenant.current, file_name, label_data)
         result[:dimensions] = '4x6'
-        result[:url] = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
+        label_url = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
+        store_shipping_label_data(post_data['orderId'], label_url, response['shipmentId'])
+        result[:url] = label_url
       else
         result[:status] = false
-        result[:error_messages] = response.first(3).map { |res| res = res.join(': ') }.join('<br>')
+        result[:error_messages] = response.first(3).map { |res| res.join(': ') }.join('<br>')
       end
     rescue StandardError => e
       result[:status] = false
@@ -513,5 +515,12 @@ module OrderMethodsHelper
     return false if ex_app && !carrier_data['expanded']
 
     !!carrier_data['visible']
+  end
+
+  def store_shipping_label_data(store_order_id, url, shipment_id)
+    return if Tenant.find_by_name(Apartment::Tenant.current)&.test_tenant_toggle
+
+    associated_order = Order.find_by(store_order_id: store_order_id)
+    associated_order&.shipping_labels&.create(url: url, shipment_id: shipment_id)
   end
 end

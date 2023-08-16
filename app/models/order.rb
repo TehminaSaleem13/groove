@@ -16,6 +16,7 @@ class Order < ActiveRecord::Base
   has_many :order_activities, dependent: :destroy
   has_many :order_serials, dependent: :destroy
   has_many :packing_cams, dependent: :destroy
+  has_many :shipping_labels, dependent: :destroy
   has_and_belongs_to_many :order_tags
   belongs_to :packing_user, class_name: 'User'
 
