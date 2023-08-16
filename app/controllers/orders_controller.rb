@@ -575,10 +575,11 @@ class OrdersController < ApplicationController
     begin
       order = Order.includes(:store).find(params[:id])
       if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential&.use_api_create_label
-        result = order.try_creating_label if order.store.shipstation_rest_credential.skip_ss_label_confirmation
-        unless result[:status]
+        try_creating_label = order.store.shipstation_rest_credential.skip_ss_label_confirmation
+        result = order.try_creating_label if try_creating_label
+        if try_creating_label == false || !result[:status]
           result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
-          result[:error] = 'Insufficient/Invalid data to create label' if order.store.shipstation_rest_credential.skip_ss_label_confirmation && !result[:error_messages].present?
+          result[:error] = 'Insufficient/Invalid data to create label' if try_creating_label && !result[:error_messages].present?
         end
       else
         result[:status] = false
