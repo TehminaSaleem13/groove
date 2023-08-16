@@ -115,8 +115,17 @@ module Groovepacker
       end
 
       def update_inventory(attrs)
-        response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
-                                 body: attrs.to_json, headers: headers)
+        max_retries = 3
+        response = nil
+
+        max_retries.times do
+          response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
+                                   body: attrs.to_json, headers: headers)
+          return response if response.success? || response.code != 429
+
+          sleep(response.headers['Retry-After'].to_f)
+        end
+        response
       end
 
       def add_gp_scanned_tag(store_order_id, tag)

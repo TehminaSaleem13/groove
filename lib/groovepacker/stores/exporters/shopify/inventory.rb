@@ -34,7 +34,7 @@ module Groovepacker
                 inventory_item_id: shopify_product_inv['inventory_item_id']
               }
 
-              sleep 0.5
+              # sleep 0.5
 
               update_inv_on_shopify_for_sync_option(product, attrs)
             rescue Exception => e
@@ -53,7 +53,12 @@ module Groovepacker
           end
 
           def shopify_product_location
-            @shopify_product_location ||= @client.locations.select { |loc| loc['active'] }.first
+            return @shopify_product_location if @shopify_product_location
+
+            location_id = @client.shopify_credential.default_location_id.to_i
+            locations = @client.locations
+            selected_location = locations.find { |loc| loc['id'] == location_id }
+            @shopify_product_location = selected_location || locations.first
           end
 
           def update_inv_on_shopify_for_sync_option(_product, attrs)
