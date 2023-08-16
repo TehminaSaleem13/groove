@@ -456,11 +456,11 @@ class Order < ActiveRecord::Base
   end
 
   def create_origin_store
-    if (ss_label_data.present? && ss_label_data['advancedOptions']['storeId']) || store.store_type == 'ShippingEasy'
+    if ss_label_data.present? || store.store_type == 'ShippingEasy'
       origin_store_id = if store.store_type == 'ShippingEasy'
                           self.origin_store_id
                        else
-                         ss_label_data['advancedOptions']['storeId']
+                        ss_label_data.dig('advancedOptions','storeId')
                        end
       
       recent_order_details =  "#{firstname} #{lastname}  - #{increment_id}"
@@ -468,9 +468,9 @@ class Order < ActiveRecord::Base
       if orig_store.present?
         orig_store.update!(recent_order_details: recent_order_details)
       else
-         orig_store = OriginStore.create!(store_id: store_id, origin_store_id: origin_store_id, recent_order_details: recent_order_details, store_name:"Store-#{origin_store_id}" )
+         orig_store = OriginStore.create!(store_id: store_id, origin_store_id: origin_store_id, recent_order_details: recent_order_details, store_name:"Store-#{origin_store_id}" ) if origin_store_id.present?
       end
-      update(origin_store_id: orig_store.id)
+      update(origin_store_id: orig_store&.id)
     end
   end
 end
