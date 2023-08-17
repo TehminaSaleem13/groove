@@ -249,7 +249,7 @@ module OrdersHelper
 
   def generate_order_hash(order, itemslength)
     store_name = if !order.store.nil?
-                   order.store.name
+                   order.store&.display_origin_store_name ? order.origin_store&.store_name : order.store&.name
                  else
                    ''
                  end
@@ -278,7 +278,11 @@ module OrdersHelper
   end
 
   def generate_order_hash_v2(order, itemslength)
-    store_name = !order.store.nil? ? order.store.name : ''
+    store_name = if !order.store.nil? 
+                   order.store&.display_origin_store_name ? order.origin_store&.store_name : order.store&.name
+                 else
+                   ''
+                 end 
     order_data = { 'id' => order.id,
                    'ordernum' => order.increment_id,
                    'itemslength' => itemslength }

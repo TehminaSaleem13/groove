@@ -2,6 +2,7 @@
 
 class Order < ActiveRecord::Base
   belongs_to :store
+  belongs_to :origin_store, optional: true
   # attr_accessible :customercomments, :status, :storename, :store_order_id, :store, :order_total
   # attr_accessible :address_1, :address_2, :city, :country, :customer_comments, :email, :firstname, :increment_id, :lastname,:method, :order_placed_time, :postcode, :price, :qty, :sku, :state, :store_id, :notes_internal, :notes_toPacker, :notes_fromPacker, :tracking_processed, :scanned_on, :tracking_num, :company, :packing_user_id, :status_reason, :non_hyphen_increment_id, :shipping_amount, :weight_oz, :custom_field_one, :custom_field_two, :traced_in_dashboard, :scanned_by_status_change, :status, :scan_start_time, :last_modified, :last_suggested_at, :prime_order_id, :split_from_order_id, :source_order_ids, :cloned_from_shipment_id
 
@@ -28,6 +29,8 @@ class Order < ActiveRecord::Base
   after_save :update_tracking_num_value
   after_save :delete_if_order_exist, unless: :check_for_duplicate
   after_save :perform_after_scanning_tasks
+  after_create :create_origin_store
+
   # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
   validates_uniqueness_of :increment_id, unless: :check_for_duplicate
 
@@ -450,5 +453,24 @@ class Order < ActiveRecord::Base
     add_gp_scanned_tag if store&.store_type == 'Shipstation API 2' && store&.shipstation_rest_credential&.add_gpscanned_tag
 
     add_gp_scanned_tag_in_shopify if store&.store_type == 'Shopify' && store&.shopify_credential&.add_gp_scanned_tag
+  end
+
+  def create_origin_store
+    if ss_label_data.present? || store.store_type == 'ShippingEasy'
+      origin_store_id = if store.store_type == 'ShippingEasy'
+                          self.origin_store_id
+                       else
+                        ss_label_data.dig('advancedOptions','storeId')
+                       end
+      
+      recent_order_details =  "#{firstname} #{lastname}  - #{increment_id}"
+      orig_store = OriginStore.find_by(origin_store_id: origin_store_id )
+      if orig_store.present?
+        orig_store.update!(recent_order_details: recent_order_details)
+      else
+         orig_store = OriginStore.create!(store_id: store_id, origin_store_id: origin_store_id, recent_order_details: recent_order_details, store_name:"Store-#{origin_store_id}" ) if origin_store_id.present?
+      end
+      update(origin_store_id: orig_store&.id)
+    end
   end
 end

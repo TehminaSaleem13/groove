@@ -739,12 +739,22 @@ ActiveRecord::Schema.define(version: 20230817070152) do
     t.string "job_timestamp"
     t.string "tags"
     t.string "post_scanning_flag"
+    t.integer "origin_store_id"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
     t.index ["scanned_on"], name: "index_orders_on_scanned_on"
     t.index ["status"], name: "index_orders_on_status"
     t.index ["store_id"], name: "index_orders_on_store_id"
     t.index ["tracking_num"], name: "index_orders_on_tracking_num"
+  end
+
+  create_table "origin_stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.integer "store_id"
+    t.integer "origin_store_id"
+    t.string "recent_order_details"
+    t.string "store_name", limit: 20
+    t.index ["origin_store_id"], name: "index_origin_stores_on_origin_store_id"
+    t.index ["store_id"], name: "index_origin_stores_on_store_id"
   end
 
   create_table "packing_cams", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1256,6 +1266,7 @@ ActiveRecord::Schema.define(version: 20230817070152) do
     t.boolean "quick_fix", default: false
     t.boolean "troubleshooter_option", default: true
     t.boolean "order_cup_direct_shipping", default: false
+    t.boolean "display_origin_store_name", default: false
   end
 
   create_table "subscriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1357,6 +1368,7 @@ ActiveRecord::Schema.define(version: 20230817070152) do
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "show_external_logs_button", default: false
     t.boolean "loggly_sw_imports", default: false
+    t.boolean "show_originating_store_id", default: false
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
