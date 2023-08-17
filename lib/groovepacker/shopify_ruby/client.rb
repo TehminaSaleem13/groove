@@ -115,7 +115,7 @@ module Groovepacker
       end
 
       def update_inventory(attrs)
-        max_retries = 3
+        max_retries = 5
         response = nil
 
         max_retries.times do
@@ -148,6 +148,14 @@ module Groovepacker
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders/#{store_order_id}.json",
                                  headers: headers)
         response['order'] || {}
+      end
+
+      def inventory_levels(location_id)
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels.json?location_ids=#{location_id}",
+                                 headers: headers)
+        response['inventory_levels'].is_a?(Array) ? response['inventory_levels'] : []
+      rescue StandardError
+        []
       end
 
       def locations

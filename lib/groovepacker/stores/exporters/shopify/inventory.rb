@@ -6,6 +6,7 @@ module Groovepacker
       module Shopify
         class Inventory < Groovepacker::Stores::Importers::Importer
           attr_accessor :tenant, :store_id
+          attr_reader :shopify_credential
 
           include ProductsHelper
           def initialize(tenant, store_id)
@@ -48,17 +49,14 @@ module Groovepacker
 
           def init_credential_and_client
             Apartment::Tenant.switch! tenant
-            shopify_credential = ShopifyCredential.find_by(store_id: store_id)
+            @shopify_credential = ShopifyCredential.find_by(store_id: store_id)
             @client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
           end
 
           def shopify_product_location
             return @shopify_product_location if @shopify_product_location
 
-            location_id = @client.shopify_credential.default_location_id.to_i
-            locations = @client.locations
-            selected_location = locations.find { |loc| loc['id'] == location_id }
-            @shopify_product_location = selected_location || locations.first
+            shopify_credential.push_inv_location
           end
 
           def update_inv_on_shopify_for_sync_option(_product, attrs)

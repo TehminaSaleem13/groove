@@ -36,4 +36,16 @@ class ShopifyCredential < ActiveRecord::Base
   rescue StandardError => e
     puts e.backtrace.join(', ')
   end
+
+  def push_inv_location
+    @push_inv_location ||= locations.find { |loc| loc['id'] == push_inv_location_id } || locations.first
+  end
+
+  def pull_inv_location
+    @pull_inv_location ||= locations.find { |loc| loc['id'] == pull_inv_location_id } || locations.first
+  end
+
+  def locations
+    @locations ||= Groovepacker::ShopifyRuby::Client.new(self).locations
+  end
 end

@@ -12,8 +12,7 @@ class AddDefaultLocationIdToShopifyCredential < ActiveRecord::Migration[5.1]
     return unless defined?(ShopifyCredential)
 
     ShopifyCredential.all.each do |shopify_credential|
-      client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
-      first_location = client.locations.first
+      first_location = shopify_credential.locations.first
 
       next unless first_location
 
