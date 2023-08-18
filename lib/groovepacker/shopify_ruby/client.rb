@@ -105,20 +105,21 @@ module Groovepacker
       end
 
       def get_variant(product_variant_id)
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}",
-                                headers: headers)
-        # unless sku.blank?
-        #  response["variants"] = response["variants"].select {|variant| variant["sku"]==sku} rescue {}
-        #  response = response["variants"].first || {}
-        # end
+        response = nil
+        loop do
+          response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}",
+                                  headers: headers)
+          return response.try(:[], 'variant') if response.success? || response.code != 429
+
+          sleep(response.headers['Retry-After'].to_f)
+        end
         response['variant'] || {}
       end
 
       def update_inventory(attrs)
-        max_retries = 5
         response = nil
-
-        max_retries.times do
+        loop do
+          puts attrs
           response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
                                    body: attrs.to_json, headers: headers)
           return response if response.success? || response.code != 429
