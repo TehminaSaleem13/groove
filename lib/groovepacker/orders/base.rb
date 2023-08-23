@@ -26,7 +26,7 @@ module Groovepacker
       end
 
       def supported_status_filters
-        %w[all awaiting onhold cancelled scanned serviceissue]
+        %w[all awaiting partially_scanned onhold cancelled scanned serviceissue]
       end
 
       def get(attribute, default_value)

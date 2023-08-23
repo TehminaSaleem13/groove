@@ -128,7 +128,8 @@ module Groovepacker
         # overrides
         sort_key = set_final_sort_key(sort_order, sort_key)
 
-        status_filter_text = " WHERE orders.status='" + status_filter + "'" unless status_filter == 'all'
+        status_filter_text = " WHERE orders.status='" + status_filter + "'" unless status_filter.in?(%w[all partially_scanned])
+        status_filter_text = " JOIN order_items ON order_items.order_id = orders.id WHERE orders.status='awaiting' AND order_items.scanned_qty != 0 " if status_filter == 'partially_scanned'
         # TODO: status filters to be implemented
         orders = get_sorted_orders(sort_key, sort_order, limit, offset, query_add, status_filter_text, status_filter)
         orders
@@ -143,6 +144,7 @@ module Groovepacker
           orders = Order.find_by_sql("SELECT orders.* FROM orders LEFT JOIN stores ON orders.store_id = stores.id #{status_filter_text} ORDER BY stores.name #{sort_order} #{query_add}")
           preloader(orders)
         elsif sort_key == 'itemslength'
+          status_filter_text = " WHERE orders.status='awaiting' AND order_items.scanned_qty != 0 " if status_filter == 'partially_scanned'
           orders = Order.find_by_sql("SELECT orders.*, sum(order_items.qty) AS count FROM orders LEFT JOIN order_items ON (order_items.order_id = orders.id) #{status_filter_text} GROUP BY orders.id ORDER BY count #{sort_order} #{query_add}")
           preloader(orders)
         elsif sort_key == 'tote'
@@ -151,7 +153,8 @@ module Groovepacker
         else
           orders = Order.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
           # orders = @params[:app] ? orders.not_locked_or_recent(@current_user.id) : orders
-          orders = orders.where(status: status_filter) unless status_filter == 'all'
+          orders = orders.where(status: status_filter) unless status_filter.in?(%w[all partially_scanned])
+          orders = orders.partially_scanned if status_filter == 'partially_scanned'
           orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
         end
         orders

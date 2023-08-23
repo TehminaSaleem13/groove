@@ -48,6 +48,9 @@ class Order < ActiveRecord::Base
   UNALLOCATE_STATUSES = ['cancelled'].freeze
   SOLD_STATUSES = ['scanned'].freeze
 
+  scope :awaiting, -> { where(status: 'awaiting') }
+  scope :partially_scanned, -> { awaiting.joins(:order_items).where.not(order_items: { scanned_qty: 0 }).distinct }
+
   def assign_increment_id
     return if increment_id.present?
 
@@ -462,7 +465,7 @@ class Order < ActiveRecord::Base
                        else
                         ss_label_data.dig('advancedOptions','storeId')
                        end
-      
+
       recent_order_details =  "#{firstname} #{lastname}  - #{increment_id}"
       orig_store = OriginStore.find_by(origin_store_id: origin_store_id )
       if orig_store.present?

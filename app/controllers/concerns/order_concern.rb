@@ -79,7 +79,7 @@ module OrderConcern
       count[single.status] = single.count
       all += single.count
     end
-    count = count.merge('all' => all, 'search' => 0)
+    count = count.merge('all' => all, partially_scanned: Order.partially_scanned.count, 'search' => 0)
   end
 
   def get__filtered_orders_count
@@ -90,7 +90,7 @@ module OrderConcern
       count[single.status] = single.count
       all += single.count
     end
-    count = count.merge('all' => all, 'search' => 0)
+    count = count.merge('all' => all, partially_scanned: Order.partially_scanned.count, 'search' => 0)
   end
 
   def cancel_packing(barcode)
