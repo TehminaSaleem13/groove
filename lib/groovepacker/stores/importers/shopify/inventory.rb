@@ -50,7 +50,7 @@ module Groovepacker
           def update_product_inv_for_sync_option(_product, shopify_product_inv, inv_wh)
             return unless @sync_optn.shopify_product_variant_id == shopify_product_inv['id']&.to_s
 
-            inv_wh.quantity_on_hand = inv_wh.allocated_inv.to_i + shopify_product_inv['inventory_quantity']&.to_i
+            inv_wh.quantity_on_hand = inv_wh.allocated_inv.to_i + shopify_product_inv['inventory_quantity'].to_i
             inv_wh.save!
           end
 
