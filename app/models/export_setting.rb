@@ -207,7 +207,6 @@ class ExportSetting < ActiveRecord::Base
     end
     single_row[:product_name] = product&.name
     single_row[:barcode] = product&.primary_barcode
-
     single_row[:primary_sku] = product&.primary_sku
     single_row[:item_sale_price] = order_item.price
     single_row[:scanned_count] = order_item.scanned_qty
@@ -219,9 +218,10 @@ class ExportSetting < ActiveRecord::Base
     kit_product_sku = ProductKitSkus.find_by(id: kit_product&.product_kit_skus_id)
     product_barcode = ProductBarcode.find_by(product_id: kit_product_sku&.option_product_id)
     product_sku = ProductSku.find_by(product_id: kit_product_sku&.option_product_id)
+    kit_product_name = Product.find_by(id: kit_product_sku&.option_product_id)
     
-    single_row[:kit_name] = product&.name
-  
+    single_row[:product_name] = product&.name
+    single_row[:kit_name] = kit_product_name&.name
     single_row[:primary_sku] = product_sku.sku
     single_row[:barcode] = product_barcode.barcode
     single_row[:scanned_count] = kit_product.scanned_qty
