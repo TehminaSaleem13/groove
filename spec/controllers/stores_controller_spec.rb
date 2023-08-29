@@ -326,6 +326,8 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Push Inventory' do
+      allow_any_instance_of(Groovepacker::Stores::Exporters::Shopify::Inventory).to receive(:push_inventories).and_return(true)
+
       shopify_store = Store.where(store_type: 'Shopify').last
       product = FactoryBot.create(:product, store_id: @store.id, store_product_id: '123456')
       product1_inventory = product.product_inventory_warehousess.first

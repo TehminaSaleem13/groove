@@ -1,0 +1,424 @@
+---
+http_interactions:
+- request:
+    method: get
+    uri: https://myteststore.myshopify.com/admin/api/2022-10/variants/12345678901234.json
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Shopify API Library v12.5.0 | Ruby 2.6.2
+      Accept:
+      - application/json
+      X-Shopify-Access-Token:
+      - shpat_1234567890987654321512345678754345
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Fri, 25 Aug 2023 08:39:31 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Sorting-Hat-Podid:
+      - '168'
+      X-Sorting-Hat-Shopid:
+      - '51183681705'
+      Vary:
+      - Accept-Encoding
+      Referrer-Policy:
+      - origin-when-cross-origin
+      X-Frame-Options:
+      - DENY
+      X-Shopid:
+      - '51183681705'
+      X-Shardid:
+      - '168'
+      X-Stats-Userid:
+      - ''
+      X-Stats-Apiclientid:
+      - '11218255873'
+      X-Stats-Apipermissionid:
+      - '401768120489'
+      X-Shopify-Api-Terms:
+      - By accessing or using the Shopify API you agree to the Shopify API License
+        and Terms of Use at https://www.shopify.com/legal/api-terms
+      X-Shopify-Api-Version:
+      - 2022-10
+      Http-X-Shopify-Shop-Api-Call-Limit:
+      - 1/40
+      X-Shopify-Shop-Api-Call-Limit:
+      - 1/40
+      X-Shopify-Api-Deprecated-Reason:
+      - https://shopify.dev/changelog/property-deprecations-in-the-admin-api-productvariant-resource
+      Strict-Transport-Security:
+      - max-age=7889238
+      Server-Timing:
+      - cfRequestDuration;dur=328.999996
+      - processing;dur=74
+      X-Shopify-Stage:
+      - production
+      Content-Security-Policy:
+      - 'default-src ''self'' data: blob: ''unsafe-inline'' ''unsafe-eval'' https://*
+        shopify-pos://*; block-all-mixed-content; child-src ''self'' https://* shopify-pos://*;
+        connect-src ''self'' wss://* https://*; frame-ancestors ''none''; img-src
+        ''self'' data: blob: https:; script-src https://cdn.shopify.com https://cdn.shopifycdn.net
+        https://checkout.shopifycs.com https://api.stripe.com https://mpsnare.iesnare.com
+        https://appcenter.intuit.com https://www.paypal.com https://js.braintreegateway.com
+        https://c.paypal.com https://maps.googleapis.com https://www.google-analytics.com
+        https://v.shopify.com ''self'' ''unsafe-inline'' ''unsafe-eval''; upgrade-insecure-requests;
+        report-uri /csp-report?source%5Baction%5D=show&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Fproduct_variants&source%5Bsection%5D=admin_api&source%5Buuid%5D=39026a5e-f93d-4f3b-b0a0-e3bf478d2b94'
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Xss-Protection:
+      - 1; mode=block; report=/xss-report?source%5Baction%5D=show&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Fproduct_variants&source%5Bsection%5D=admin_api&source%5Buuid%5D=39026a5e-f93d-4f3b-b0a0-e3bf478d2b94
+      X-Dc:
+      - gcp-asia-south1,gcp-us-east1,gcp-us-east1
+      X-Request-Id:
+      - 39026a5e-f93d-4f3b-b0a0-e3bf478d2b94
+      Cf-Cache-Status:
+      - DYNAMIC
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=kvxfzs3GEMyeT7NozXcJ3eQsGYXaS9%2FdukCqCMsSadsBPyedGQRBw5v7P6c%2FbatpAgEcGhQpoHeEg0OwqxFtELNnbHGBLTWD%2FQ5o%2BnJNZQ3A%2B%2BnBJqroLkSBQdXpHYDkd4E2RDL5Z8umZgoL4rI%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0.01,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Cf-Ray:
+      - 7fc286645ff385c5-BOM
+      Alt-Svc:
+      - h3=":443"; ma=86400
+    body:
+      encoding: ASCII-8BIT
+      string: '{"variant":{"id":12345678901234,"product_id":7776001523881,"title":"OS
+        \/ black","price":"70.00","sku":"AD-03-black-OS","position":1,"inventory_policy":"deny","compare_at_price":null,"fulfillment_service":"manual","inventory_management":"shopify","option1":"OS","option2":"black","option3":null,"created_at":"2023-08-14T04:56:08-04:00","updated_at":"2023-08-25T04:38:32-04:00","taxable":true,"barcode":null,"grams":0,"image_id":null,"weight":0.0,"weight_unit":"lb","inventory_item_id":45283447603369,"inventory_quantity":-2,"old_inventory_quantity":-2,"requires_shipping":true,"admin_graphql_api_id":"gid:\/\/shopify\/ProductVariant\/12345678901234"}}'
+  recorded_at: Fri, 25 Aug 2023 08:39:31 GMT
+- request:
+    method: get
+    uri: https://myteststore.myshopify.com/admin/api/2022-10/locations.json?limit=250
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Shopify API Library v12.5.0 | Ruby 2.6.2
+      Accept:
+      - application/json
+      X-Shopify-Access-Token:
+      - shpat_1234567890987654321512345678754345
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Fri, 25 Aug 2023 08:39:32 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Sorting-Hat-Podid:
+      - '168'
+      X-Sorting-Hat-Shopid:
+      - '51183681705'
+      Vary:
+      - Accept-Encoding
+      Referrer-Policy:
+      - origin-when-cross-origin
+      X-Frame-Options:
+      - DENY
+      X-Shopid:
+      - '51183681705'
+      X-Shardid:
+      - '168'
+      X-Stats-Userid:
+      - ''
+      X-Stats-Apiclientid:
+      - '11218255873'
+      X-Stats-Apipermissionid:
+      - '401768120489'
+      X-Shopify-Api-Terms:
+      - By accessing or using the Shopify API you agree to the Shopify API License
+        and Terms of Use at https://www.shopify.com/legal/api-terms
+      X-Shopify-Api-Version:
+      - 2022-10
+      Http-X-Shopify-Shop-Api-Call-Limit:
+      - 1/40
+      X-Shopify-Shop-Api-Call-Limit:
+      - 1/40
+      Strict-Transport-Security:
+      - max-age=7889238
+      Server-Timing:
+      - cfRequestDuration;dur=328.000069
+      - processing;dur=75
+      X-Shopify-Stage:
+      - production
+      Content-Security-Policy:
+      - 'default-src ''self'' data: blob: ''unsafe-inline'' ''unsafe-eval'' https://*
+        shopify-pos://*; block-all-mixed-content; child-src ''self'' https://* shopify-pos://*;
+        connect-src ''self'' wss://* https://*; frame-ancestors ''none''; img-src
+        ''self'' data: blob: https:; script-src https://cdn.shopify.com https://cdn.shopifycdn.net
+        https://checkout.shopifycs.com https://api.stripe.com https://mpsnare.iesnare.com
+        https://appcenter.intuit.com https://www.paypal.com https://js.braintreegateway.com
+        https://c.paypal.com https://maps.googleapis.com https://www.google-analytics.com
+        https://v.shopify.com ''self'' ''unsafe-inline'' ''unsafe-eval''; upgrade-insecure-requests;
+        report-uri /csp-report?source%5Baction%5D=index&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Fsettings%2Flocations&source%5Bsection%5D=admin_api&source%5Buuid%5D=ef1f7ae1-6a6b-4198-9e59-433627bfd1f8'
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Xss-Protection:
+      - 1; mode=block; report=/xss-report?source%5Baction%5D=index&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Fsettings%2Flocations&source%5Bsection%5D=admin_api&source%5Buuid%5D=ef1f7ae1-6a6b-4198-9e59-433627bfd1f8
+      X-Dc:
+      - gcp-asia-south1,gcp-us-east1,gcp-us-east1
+      X-Request-Id:
+      - ef1f7ae1-6a6b-4198-9e59-433627bfd1f8
+      Cf-Cache-Status:
+      - DYNAMIC
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=QTomVkdl0yhq0dyP%2Btndi84QKkn2oKThx6Yj5zrggbJvF%2BMtWC19es6t6lRpZTUPI9BwsxMs%2BiD6U04ZFUOk85tvE18JiLCTxgz5V%2F2nz%2FGPeMfJT%2F8cwH24aQ53KkvrQ%2FghGqvgUpWYHUkYdz4%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0.01,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Cf-Ray:
+      - 7fc2866789444710-BOM
+      Alt-Svc:
+      - h3=":443"; ma=86400
+    body:
+      encoding: ASCII-8BIT
+      string: '{"locations":[{"id":57741934761,"name":"7001 St Andrews Rd #302","address1":"7001
+        St Andrews Rd #302","address2":null,"city":"Columbia","zip":"29212","province":"South
+        Carolina","country":"US","phone":"","created_at":"2020-11-12T05:59:21-05:00","updated_at":"2020-11-12T05:59:29-05:00","country_code":"US","country_name":"United
+        States","province_code":"SC","legacy":false,"active":true,"admin_graphql_api_id":"gid:\/\/shopify\/Location\/57741934761","localized_country_name":"United
+        States","localized_province_name":"South Carolina"},{"id":68520083625,"name":"Alpha
+        Tester","address1":"7001 St Andrews Rd #302","address2":"","city":"Columbia","zip":"29212","province":"South
+        Carolina","country":"US","phone":"","created_at":"2023-08-11T10:31:08-04:00","updated_at":"2023-08-14T07:23:58-04:00","country_code":"US","country_name":"United
+        States","province_code":"SC","legacy":false,"active":true,"admin_graphql_api_id":"gid:\/\/shopify\/Location\/68520083625","localized_country_name":"United
+        States","localized_province_name":"South Carolina"}]}'
+  recorded_at: Fri, 25 Aug 2023 08:39:32 GMT
+- request:
+    method: get
+    uri: https://myteststore.myshopify.com/admin/api/2022-10/inventory_levels.json?limit=250&location_ids=57741934761
+    body:
+      encoding: US-ASCII
+      string: ''
+    headers:
+      User-Agent:
+      - Shopify API Library v12.5.0 | Ruby 2.6.2
+      Accept:
+      - application/json
+      X-Shopify-Access-Token:
+      - shpat_1234567890987654321512345678754345
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Fri, 25 Aug 2023 08:39:32 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Sorting-Hat-Podid:
+      - '168'
+      X-Sorting-Hat-Shopid:
+      - '51183681705'
+      Vary:
+      - Accept-Encoding
+      Referrer-Policy:
+      - origin-when-cross-origin
+      X-Frame-Options:
+      - DENY
+      X-Shopid:
+      - '51183681705'
+      X-Shardid:
+      - '168'
+      X-Stats-Userid:
+      - ''
+      X-Stats-Apiclientid:
+      - '11218255873'
+      X-Stats-Apipermissionid:
+      - '401768120489'
+      X-Shopify-Api-Terms:
+      - By accessing or using the Shopify API you agree to the Shopify API License
+        and Terms of Use at https://www.shopify.com/legal/api-terms
+      X-Shopify-Api-Version:
+      - 2022-10
+      Http-X-Shopify-Shop-Api-Call-Limit:
+      - 1/40
+      X-Shopify-Shop-Api-Call-Limit:
+      - 1/40
+      Strict-Transport-Security:
+      - max-age=7889238
+      Server-Timing:
+      - cfRequestDuration;dur=416.999817
+      - processing;dur=163
+      X-Shopify-Stage:
+      - production
+      Content-Security-Policy:
+      - 'default-src ''self'' data: blob: ''unsafe-inline'' ''unsafe-eval'' https://*
+        shopify-pos://*; block-all-mixed-content; child-src ''self'' https://* shopify-pos://*;
+        connect-src ''self'' wss://* https://*; frame-ancestors ''none''; img-src
+        ''self'' data: blob: https:; script-src https://cdn.shopify.com https://cdn.shopifycdn.net
+        https://checkout.shopifycs.com https://api.stripe.com https://mpsnare.iesnare.com
+        https://appcenter.intuit.com https://www.paypal.com https://js.braintreegateway.com
+        https://c.paypal.com https://maps.googleapis.com https://www.google-analytics.com
+        https://v.shopify.com ''self'' ''unsafe-inline'' ''unsafe-eval''; upgrade-insecure-requests;
+        report-uri /csp-report?source%5Baction%5D=index&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Finventory_levels&source%5Bsection%5D=admin_api&source%5Buuid%5D=e238b0d0-323f-4eaa-bea9-16185a9322cd'
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Xss-Protection:
+      - 1; mode=block; report=/xss-report?source%5Baction%5D=index&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Finventory_levels&source%5Bsection%5D=admin_api&source%5Buuid%5D=e238b0d0-323f-4eaa-bea9-16185a9322cd
+      X-Dc:
+      - gcp-asia-south1,gcp-us-east1,gcp-us-east1
+      X-Request-Id:
+      - e238b0d0-323f-4eaa-bea9-16185a9322cd
+      Cf-Cache-Status:
+      - DYNAMIC
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=KeSWyBsDPoFCf9jlOmKAv4NunwlD%2FpeB01ycA1lUro4nArH2jK5Gry%2BBx5Dbj0rmPaWavqFgxCsCE6c7vC6xLioZwPeVe5JHVWJYRlQsGaw88LlqfKejypbYgsL1qFfRk0g7QrQkH8usudBNuzo%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0.01,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Cf-Ray:
+      - 7fc2866c8d0e85e8-BOM
+      Alt-Svc:
+      - h3=":443"; ma=86400
+    body:
+      encoding: ASCII-8BIT
+      string: '{"inventory_levels":[{"inventory_item_id":45283442131113,"location_id":57741934761,"available":280,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442131113"},{"inventory_item_id":45283442163881,"location_id":57741934761,"available":282,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442163881"},{"inventory_item_id":45283442196649,"location_id":57741934761,"available":284,"updated_at":"2023-08-24T06:26:26-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442196649"},{"inventory_item_id":45283442262185,"location_id":57741934761,"available":202,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442262185"},{"inventory_item_id":45283442294953,"location_id":57741934761,"available":204,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442294953"},{"inventory_item_id":45283442327721,"location_id":57741934761,"available":206,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442327721"},{"inventory_item_id":45283442360489,"location_id":57741934761,"available":208,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442360489"},{"inventory_item_id":45283442393257,"location_id":57741934761,"available":210,"updated_at":"2023-08-24T06:26:26-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442393257"},{"inventory_item_id":45283442426025,"location_id":57741934761,"available":190,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442426025"},{"inventory_item_id":45283442458793,"location_id":57741934761,"available":192,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442458793"},{"inventory_item_id":45283442491561,"location_id":57741934761,"available":194,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442491561"},{"inventory_item_id":45283442524329,"location_id":57741934761,"available":196,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442524329"},{"inventory_item_id":45283442557097,"location_id":57741934761,"available":198,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442557097"},{"inventory_item_id":45283442589865,"location_id":57741934761,"available":200,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442589865"},{"inventory_item_id":45283442688169,"location_id":57741934761,"available":182,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442688169"},{"inventory_item_id":45283442720937,"location_id":57741934761,"available":184,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442720937"},{"inventory_item_id":45283442753705,"location_id":57741934761,"available":186,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442753705"},{"inventory_item_id":45283442786473,"location_id":57741934761,"available":188,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442786473"},{"inventory_item_id":45283442852009,"location_id":57741934761,"available":266,"updated_at":"2023-08-24T06:26:26-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442852009"},{"inventory_item_id":45283442884777,"location_id":57741934761,"available":268,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442884777"},{"inventory_item_id":45283442917545,"location_id":57741934761,"available":270,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442917545"},{"inventory_item_id":45283442950313,"location_id":57741934761,"available":272,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442950313"},{"inventory_item_id":45283442983081,"location_id":57741934761,"available":274,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283442983081"},{"inventory_item_id":45283443015849,"location_id":57741934761,"available":276,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443015849"},{"inventory_item_id":45283443048617,"location_id":57741934761,"available":278,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443048617"},{"inventory_item_id":45283443081385,"location_id":57741934761,"available":140,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443081385"},{"inventory_item_id":45283443114153,"location_id":57741934761,"available":142,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443114153"},{"inventory_item_id":45283443146921,"location_id":57741934761,"available":144,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443146921"},{"inventory_item_id":45283443245225,"location_id":57741934761,"available":24,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443245225"},{"inventory_item_id":45283443277993,"location_id":57741934761,"available":26,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443277993"},{"inventory_item_id":45283443310761,"location_id":57741934761,"available":28,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443310761"},{"inventory_item_id":45283443376297,"location_id":57741934761,"available":146,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443376297"},{"inventory_item_id":45283443409065,"location_id":57741934761,"available":148,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443409065"},{"inventory_item_id":45283443441833,"location_id":57741934761,"available":150,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443441833"},{"inventory_item_id":45283443474601,"location_id":57741934761,"available":152,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443474601"},{"inventory_item_id":45283443540137,"location_id":57741934761,"available":154,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443540137"},{"inventory_item_id":45283443572905,"location_id":57741934761,"available":156,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443572905"},{"inventory_item_id":45283443605673,"location_id":57741934761,"available":158,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443605673"},{"inventory_item_id":45283443638441,"location_id":57741934761,"available":160,"updated_at":"2023-08-24T06:26:22-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443638441"},{"inventory_item_id":45283443703977,"location_id":57741934761,"available":10,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443703977"},{"inventory_item_id":45283443736745,"location_id":57741934761,"available":12,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443736745"},{"inventory_item_id":45283443769513,"location_id":57741934761,"available":14,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443769513"},{"inventory_item_id":45283443802281,"location_id":57741934761,"available":16,"updated_at":"2023-08-24T06:26:22-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443802281"},{"inventory_item_id":45283443835049,"location_id":57741934761,"available":18,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443835049"},{"inventory_item_id":45283443867817,"location_id":57741934761,"available":20,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443867817"},{"inventory_item_id":45283443900585,"location_id":57741934761,"available":22,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443900585"},{"inventory_item_id":45283443966121,"location_id":57741934761,"available":224,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443966121"},{"inventory_item_id":45283443998889,"location_id":57741934761,"available":226,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283443998889"},{"inventory_item_id":45283444031657,"location_id":57741934761,"available":228,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444031657"},{"inventory_item_id":45283444064425,"location_id":57741934761,"available":230,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444064425"},{"inventory_item_id":45283444097193,"location_id":57741934761,"available":232,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444097193"},{"inventory_item_id":45283444162729,"location_id":57741934761,"available":246,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444162729"},{"inventory_item_id":45283444195497,"location_id":57741934761,"available":248,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444195497"},{"inventory_item_id":45283444228265,"location_id":57741934761,"available":250,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444228265"},{"inventory_item_id":45283444261033,"location_id":57741934761,"available":252,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444261033"},{"inventory_item_id":45283444293801,"location_id":57741934761,"available":254,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444293801"},{"inventory_item_id":45283444326569,"location_id":57741934761,"available":256,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444326569"},{"inventory_item_id":45283444359337,"location_id":57741934761,"available":258,"updated_at":"2023-08-24T06:26:26-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444359337"},{"inventory_item_id":45283444392105,"location_id":57741934761,"available":260,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444392105"},{"inventory_item_id":45283444424873,"location_id":57741934761,"available":262,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444424873"},{"inventory_item_id":45283444457641,"location_id":57741934761,"available":264,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444457641"},{"inventory_item_id":45283444490409,"location_id":57741934761,"available":234,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444490409"},{"inventory_item_id":45283444523177,"location_id":57741934761,"available":236,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444523177"},{"inventory_item_id":45283444555945,"location_id":57741934761,"available":238,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444555945"},{"inventory_item_id":45283444588713,"location_id":57741934761,"available":240,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444588713"},{"inventory_item_id":45283444621481,"location_id":57741934761,"available":242,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444621481"},{"inventory_item_id":45283444654249,"location_id":57741934761,"available":244,"updated_at":"2023-08-24T06:26:26-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444654249"},{"inventory_item_id":45283444752553,"location_id":57741934761,"available":212,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444752553"},{"inventory_item_id":45283444785321,"location_id":57741934761,"available":214,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444785321"},{"inventory_item_id":45283444818089,"location_id":57741934761,"available":216,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444818089"},{"inventory_item_id":45283444850857,"location_id":57741934761,"available":218,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444850857"},{"inventory_item_id":45283444883625,"location_id":57741934761,"available":220,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444883625"},{"inventory_item_id":45283444916393,"location_id":57741934761,"available":222,"updated_at":"2023-08-24T06:26:25-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444916393"},{"inventory_item_id":45283444981929,"location_id":57741934761,"available":162,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283444981929"},{"inventory_item_id":45283445014697,"location_id":57741934761,"available":164,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445014697"},{"inventory_item_id":45283445047465,"location_id":57741934761,"available":166,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445047465"},{"inventory_item_id":45283445080233,"location_id":57741934761,"available":168,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445080233"},{"inventory_item_id":45283445113001,"location_id":57741934761,"available":170,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445113001"},{"inventory_item_id":45283445145769,"location_id":57741934761,"available":172,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445145769"},{"inventory_item_id":45283445178537,"location_id":57741934761,"available":174,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445178537"},{"inventory_item_id":45283445211305,"location_id":57741934761,"available":176,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445211305"},{"inventory_item_id":45283445244073,"location_id":57741934761,"available":178,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445244073"},{"inventory_item_id":45283445276841,"location_id":57741934761,"available":128,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445276841"},{"inventory_item_id":45283445309609,"location_id":57741934761,"available":130,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445309609"},{"inventory_item_id":45283445342377,"location_id":57741934761,"available":132,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445342377"},{"inventory_item_id":45283445375145,"location_id":57741934761,"available":134,"updated_at":"2023-08-24T06:26:22-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445375145"},{"inventory_item_id":45283445440681,"location_id":57741934761,"available":98,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445440681"},{"inventory_item_id":45283445473449,"location_id":57741934761,"available":100,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445473449"},{"inventory_item_id":45283445506217,"location_id":57741934761,"available":102,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445506217"},{"inventory_item_id":45283445538985,"location_id":57741934761,"available":104,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445538985"},{"inventory_item_id":45283445571753,"location_id":57741934761,"available":106,"updated_at":"2023-08-24T06:26:22-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445571753"},{"inventory_item_id":45283445604521,"location_id":57741934761,"available":108,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445604521"},{"inventory_item_id":45283445637289,"location_id":57741934761,"available":110,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445637289"},{"inventory_item_id":45283445670057,"location_id":57741934761,"available":112,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445670057"},{"inventory_item_id":45283445735593,"location_id":57741934761,"available":114,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445735593"},{"inventory_item_id":45283445768361,"location_id":57741934761,"available":116,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445768361"},{"inventory_item_id":45283445801129,"location_id":57741934761,"available":118,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445801129"},{"inventory_item_id":45283445833897,"location_id":57741934761,"available":120,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445833897"},{"inventory_item_id":45283445866665,"location_id":57741934761,"available":122,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445866665"},{"inventory_item_id":45283445899433,"location_id":57741934761,"available":124,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445899433"},{"inventory_item_id":45283445964969,"location_id":57741934761,"available":76,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445964969"},{"inventory_item_id":45283445997737,"location_id":57741934761,"available":78,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283445997737"},{"inventory_item_id":45283446030505,"location_id":57741934761,"available":80,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446030505"},{"inventory_item_id":45283446063273,"location_id":57741934761,"available":82,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446063273"},{"inventory_item_id":45283446096041,"location_id":57741934761,"available":84,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446096041"},{"inventory_item_id":45283446128809,"location_id":57741934761,"available":86,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446128809"},{"inventory_item_id":45283446161577,"location_id":57741934761,"available":88,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446161577"},{"inventory_item_id":45283446194345,"location_id":57741934761,"available":90,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446194345"},{"inventory_item_id":45283446227113,"location_id":57741934761,"available":92,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446227113"},{"inventory_item_id":45283446259881,"location_id":57741934761,"available":94,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446259881"},{"inventory_item_id":45283446292649,"location_id":57741934761,"available":96,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446292649"},{"inventory_item_id":45283446325417,"location_id":57741934761,"available":44,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446325417"},{"inventory_item_id":45283446358185,"location_id":57741934761,"available":46,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446358185"},{"inventory_item_id":45283446390953,"location_id":57741934761,"available":48,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446390953"},{"inventory_item_id":45283446423721,"location_id":57741934761,"available":50,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446423721"},{"inventory_item_id":45283446456489,"location_id":57741934761,"available":52,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446456489"},{"inventory_item_id":45283446489257,"location_id":57741934761,"available":54,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446489257"},{"inventory_item_id":45283446522025,"location_id":57741934761,"available":56,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446522025"},{"inventory_item_id":45283446554793,"location_id":57741934761,"available":58,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446554793"},{"inventory_item_id":45283446587561,"location_id":57741934761,"available":60,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446587561"},{"inventory_item_id":45283446620329,"location_id":57741934761,"available":62,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446620329"},{"inventory_item_id":45283446653097,"location_id":57741934761,"available":64,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446653097"},{"inventory_item_id":45283446751401,"location_id":57741934761,"available":30,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446751401"},{"inventory_item_id":45283446784169,"location_id":57741934761,"available":32,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446784169"},{"inventory_item_id":45283446816937,"location_id":57741934761,"available":34,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446816937"},{"inventory_item_id":45283446849705,"location_id":57741934761,"available":36,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446849705"},{"inventory_item_id":45283446882473,"location_id":57741934761,"available":38,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446882473"},{"inventory_item_id":45283446915241,"location_id":57741934761,"available":40,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446915241"},{"inventory_item_id":45283446948009,"location_id":57741934761,"available":42,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446948009"},{"inventory_item_id":45283446980777,"location_id":57741934761,"available":66,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283446980777"},{"inventory_item_id":45283447013545,"location_id":57741934761,"available":68,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447013545"},{"inventory_item_id":45283447046313,"location_id":57741934761,"available":70,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447046313"},{"inventory_item_id":45283447079081,"location_id":57741934761,"available":72,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447079081"},{"inventory_item_id":45283447111849,"location_id":57741934761,"available":74,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447111849"},{"inventory_item_id":45283447177385,"location_id":57741934761,"available":136,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447177385"},{"inventory_item_id":45283447210153,"location_id":57741934761,"available":138,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447210153"},{"inventory_item_id":45283447275689,"location_id":57741934761,"available":10,"updated_at":"2023-08-25T04:20:02-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447275689"},{"inventory_item_id":45283447341225,"location_id":57741934761,"available":180,"updated_at":"2023-08-24T06:26:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447341225"},{"inventory_item_id":45283447373993,"location_id":57741934761,"available":126,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447373993"},{"inventory_item_id":45283447537833,"location_id":57741934761,"available":4,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447537833"},{"inventory_item_id":45283447570601,"location_id":57741934761,"available":6,"updated_at":"2023-08-24T06:26:21-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447570601"},{"inventory_item_id":45283447603369,"location_id":57741934761,"available":-8,"updated_at":"2023-08-25T04:38:31-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447603369"},{"inventory_item_id":45283447668905,"location_id":57741934761,"available":2,"updated_at":"2023-08-24T06:24:20-04:00","admin_graphql_api_id":"gid:\/\/shopify\/InventoryLevel\/92040954025?inventory_item_id=45283447668905"}]}'
+  recorded_at: Fri, 25 Aug 2023 08:39:33 GMT
+- request:
+    method: post
+    uri: https://myteststore.myshopify.com/admin/api/2023-01/graphql.json
+    body:
+      encoding: UTF-8
+      string: '{"query":"mutation inventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!)
+        {\n  inventoryAdjustQuantities(input: $input) {\n    userErrors {\n      field\n      message\n    }\n    inventoryAdjustmentGroup
+        {\n      createdAt\n      reason\n      changes {\n        name\n        delta\n      }\n    }\n  }\n}\n","variables":{"input":{"reason":"correction","name":"available","changes":[{"delta":8,"inventoryItemId":"gid://shopify/InventoryItem/45283447603369","locationId":"gid://shopify/Location/57741934761"}]}}}'
+    headers:
+      User-Agent:
+      - Shopify API Library v12.5.0 | Ruby 2.6.2
+      Accept:
+      - application/json
+      X-Shopify-Access-Token:
+      - shpat_1234567890987654321512345678754345
+      Content-Type:
+      - application/json
+      Accept-Encoding:
+      - gzip;q=1.0,deflate;q=0.6,identity;q=0.3
+  response:
+    status:
+      code: 200
+      message: OK
+    headers:
+      Date:
+      - Fri, 25 Aug 2023 08:39:33 GMT
+      Content-Type:
+      - application/json; charset=utf-8
+      Transfer-Encoding:
+      - chunked
+      Connection:
+      - keep-alive
+      X-Sorting-Hat-Podid:
+      - '168'
+      X-Sorting-Hat-Shopid:
+      - '51183681705'
+      Vary:
+      - Accept-Encoding
+      Referrer-Policy:
+      - origin-when-cross-origin
+      X-Frame-Options:
+      - DENY
+      X-Shopid:
+      - '51183681705'
+      X-Shardid:
+      - '168'
+      X-Stats-Userid:
+      - ''
+      X-Stats-Apiclientid:
+      - '11218255873'
+      X-Stats-Apipermissionid:
+      - '401768120489'
+      X-Shopify-Api-Terms:
+      - By accessing or using the Shopify API you agree to the Shopify API License
+        and Terms of Use at https://www.shopify.com/legal/api-terms
+      X-Shopify-Api-Version:
+      - 2023-01
+      Content-Language:
+      - en
+      Strict-Transport-Security:
+      - max-age=7889238
+      Server-Timing:
+      - cfRequestDuration;dur=625.999928
+      - processing;dur=302, graphql;desc="admin/mutation/other"
+      X-Shopify-Stage:
+      - production
+      Content-Security-Policy:
+      - 'default-src ''self'' data: blob: ''unsafe-inline'' ''unsafe-eval'' https://*
+        shopify-pos://*; block-all-mixed-content; child-src ''self'' https://* shopify-pos://*;
+        connect-src ''self'' wss://* https://*; frame-ancestors ''none''; img-src
+        ''self'' data: blob: https:; script-src https://cdn.shopify.com https://cdn.shopifycdn.net
+        https://checkout.shopifycs.com https://api.stripe.com https://mpsnare.iesnare.com
+        https://appcenter.intuit.com https://www.paypal.com https://js.braintreegateway.com
+        https://c.paypal.com https://maps.googleapis.com https://www.google-analytics.com
+        https://v.shopify.com ''self'' ''unsafe-inline'' ''unsafe-eval''; upgrade-insecure-requests;
+        report-uri /csp-report?source%5Baction%5D=query&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Fgraphql&source%5Bsection%5D=admin_api&source%5Buuid%5D=793b4bb4-60f5-47e3-92b0-26663eecb612'
+      X-Content-Type-Options:
+      - nosniff
+      X-Download-Options:
+      - noopen
+      X-Permitted-Cross-Domain-Policies:
+      - none
+      X-Xss-Protection:
+      - 1; mode=block; report=/xss-report?source%5Baction%5D=query&source%5Bapp%5D=Shopify&source%5Bcontroller%5D=admin%2Fgraphql&source%5Bsection%5D=admin_api&source%5Buuid%5D=793b4bb4-60f5-47e3-92b0-26663eecb612
+      X-Dc:
+      - gcp-asia-south1,gcp-us-east1,gcp-us-east1
+      X-Request-Id:
+      - 793b4bb4-60f5-47e3-92b0-26663eecb612
+      Cf-Cache-Status:
+      - DYNAMIC
+      Report-To:
+      - '{"endpoints":[{"url":"https:\/\/a.nel.cloudflare.com\/report\/v3?s=%2BOwza7QjxoEOH0C2b8SCKLiIo519RE9vKLdUUHT%2FiWLjNR%2F%2F3kPEce%2BF8puMLf18W5FaSsRllaAaj37HRVTyuYkPRFTh6arTNWxSrSw8WjRiGHAg6zRdaN3z4uFLqV19aGYNqzcB8co%2Bgx%2FRLEY%3D"}],"group":"cf-nel","max_age":604800}'
+      Nel:
+      - '{"success_fraction":0.01,"report_to":"cf-nel","max_age":604800}'
+      Server:
+      - cloudflare
+      Cf-Ray:
+      - 7fc28671388c3d3c-BOM
+      Alt-Svc:
+      - h3=":443"; ma=86400
+    body:
+      encoding: ASCII-8BIT
+      string: '{"data":{"inventoryAdjustQuantities":{"userErrors":[],"inventoryAdjustmentGroup":{"createdAt":"2023-08-25T08:39:33Z","reason":"correction","changes":[{"name":"available","delta":8},{"name":"on_hand","delta":8}]}}},"extensions":{"cost":{"requestedQueryCost":11,"actualQueryCost":11,"throttleStatus":{"maximumAvailable":1000.0,"currentlyAvailable":989,"restoreRate":50.0}}}}'
+  recorded_at: Fri, 25 Aug 2023 08:39:34 GMT
+recorded_with: VCR 6.1.0

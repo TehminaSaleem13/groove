@@ -17,31 +17,31 @@ module Groovepacker
           def push_inventories
             init_credential_and_client
 
-            products = Product.joins(:sync_option).where('sync_with_shopify=true and (shopify_product_variant_id IS NOT NULL or store_product_id IS NOT NULL)')
+            products = Product.joins(:sync_option).includes(:product_inventory_warehousess, :sync_option).where('sync_with_shopify=true and (shopify_product_variant_id IS NOT NULL or store_product_id IS NOT NULL)')
 
-            products.each do |product|
-              inv_wh = product.product_inventory_warehousess.last
-              inv_level = inv_wh&.available_inv.to_i
+            products.in_batches(of: 250) do |products_batch|
+              inventory_data_to_be_updated = []
 
-              @sync_optn = product.sync_option
-              next if @sync_optn.shopify_product_variant_id.blank?
+              products_batch.each do |product|
+                sync_optn = product.sync_option
+                next if sync_optn.shopify_product_variant_id.blank?
 
-              shopify_product_inv = @client.get_variant(@sync_optn.shopify_product_variant_id)
-              next if shopify_product_inv.blank?
+                inventory_item_id = inventory_item_id(sync_optn)
+                next if inventory_item_id.blank?
 
-              attrs = {
-                available: inv_level,
-                location_id: shopify_product_location['id'],
-                inventory_item_id: shopify_product_inv['inventory_item_id']
-              }
+                inventory_data_to_be_updated << {
+                  delta: delta(inventory_item_id, product),
+                  inventoryItemId: "gid://shopify/InventoryItem/#{inventory_item_id}",
+                  locationId: "gid://shopify/Location/#{shopify_product_inv_push_location['id']}"
+                }
+              rescue StandardError => e
+                puts e
+                next
+              end
 
-              # sleep 0.5
-
-              update_inv_on_shopify_for_sync_option(product, attrs)
-            rescue Exception => e
-              puts e
-              next
+              sync_inventory_with_shopify(inventory_data_to_be_updated)
             end
+
             send_push_inventories_products_email
           end
 
@@ -53,14 +53,68 @@ module Groovepacker
             @client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
           end
 
-          def shopify_product_location
-            return @shopify_product_location if @shopify_product_location
-
-            shopify_credential.push_inv_location
+          def shopify_product_inv_push_location
+            @shopify_product_inv_push_location ||= shopify_credential.push_inv_location
           end
 
-          def update_inv_on_shopify_for_sync_option(_product, attrs)
-            @client.update_inventory(attrs)
+          def shopify_inventory_items
+            @shopify_inventory_items ||= @client.inventory_levels(shopify_product_inv_push_location['id'])
+          end
+
+          def sync_inventory_with_shopify(inventory_data_to_be_updated)
+            query = <<~QUERY
+              mutation inventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!) {
+                inventoryAdjustQuantities(input: $input) {
+                  userErrors {
+                    field
+                    message
+                  }
+                  inventoryAdjustmentGroup {
+                    createdAt
+                    reason
+                    changes {
+                      name
+                      delta
+                    }
+                  }
+                }
+              }
+            QUERY
+
+            variables = {
+              input: {
+                reason: 'correction',
+                name: 'available',
+                changes: inventory_data_to_be_updated.as_json
+              }
+            }
+
+            response = @client.execute_grahpql_query(query: query, variables: variables)
+            puts response.inspect
+          end
+
+          def inventory_item_id(sync_option)
+            return sync_option.shopify_inventory_item_id if sync_option.shopify_inventory_item_id
+
+            shopify_product_inv = @client.get_variant(sync_option.shopify_product_variant_id)
+            sync_option.update(shopify_inventory_item_id: shopify_product_inv['inventory_item_id'])
+            sync_option.shopify_inventory_item_id
+          end
+
+          def delta(inventory_item_id, product)
+            inv_wh = product.product_inventory_warehousess.last
+            current_gp_inv = inv_wh&.available_inv.to_i
+            shopify_inventory_item = shopify_inventory_items.find { |item| item['inventory_item_id'].to_s == inventory_item_id } || {}
+            create_inventory(inventory_item_id) if shopify_inventory_item.blank?
+            current_gp_inv - shopify_inventory_item['available'].to_i
+          end
+
+          def create_inventory(inventory_item_id)
+            @client.update_inventory(
+              available: 0,
+              location_id: shopify_product_inv_push_location['id'],
+              inventory_item_id: inventory_item_id
+            )
           end
 
           def send_push_inventories_products_email

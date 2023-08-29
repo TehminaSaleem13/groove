@@ -45,6 +45,9 @@ group :development, :test do
   gem 'rspec_junit_formatter', '~> 0.4.0.pre2'
   gem 'rubocop-rspec', require: false
   gem 'rubycritic', require: false
+
+  gem 'vcr'
+  gem 'webmock'
 end
 
 group :test do

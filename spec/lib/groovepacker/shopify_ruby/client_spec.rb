@@ -10,23 +10,25 @@ RSpec.describe Groovepacker::ShopifyRuby::Client do
     subject(:inventory_levels) { client.inventory_levels(location_id) }
 
     let(:location_id) { 123 }
-    let(:inv_level1) { { id: 123, inventory_item_id: 123, available: 2 }.with_indifferent_access }
-    let(:inv_level2) { { id: 456, inventory_item_id: 456, available: 1 }.with_indifferent_access }
-
-    before do
-      allow(HTTParty).to receive(:get).and_return(http_response)
-    end
+    let(:inv_level1) { { id: 123, inventory_item_id: 123, available: 2 }.as_json }
+    let(:inv_level2) { { id: 456, inventory_item_id: 456, available: 1 }.as_json }
 
     context 'when success' do
-      let(:http_response) { { inventory_levels: [inv_level1, inv_level2] }.with_indifferent_access }
+      let(:http_response) { [inv_level1, inv_level2] }
+
+      before do
+        allow(ShopifyAPI::InventoryLevel).to receive(:all).and_return(http_response)
+      end
 
       it 'returns inventory_levels' do
-        expect(inventory_levels).to match_array(http_response[:inventory_levels])
+        expect(inventory_levels).to match_array(http_response)
       end
     end
 
     context 'when failure' do
-      let(:http_response) { { 'errors': 'Not Found' } }
+      before do
+        allow(ShopifyAPI::Location).to receive(:all).and_raise('http_response')
+      end
 
       it 'returns []' do
         expect(inventory_levels).to be_a(Array)
@@ -38,23 +40,25 @@ RSpec.describe Groovepacker::ShopifyRuby::Client do
   describe '#locations' do
     subject(:locations) { client.locations }
 
-    let(:location1) { { id: 123, name: 'LOC 1' }.with_indifferent_access }
-    let(:location2) { { id: 456, name: 'LOC 2' }.with_indifferent_access }
-
-    before do
-      allow(HTTParty).to receive(:get).and_return(http_response)
-    end
+    let(:location1) { { id: 123, name: 'LOC 1' }.as_json }
+    let(:location2) { { id: 456, name: 'LOC 2' }.as_json }
 
     context 'when success' do
-      let(:http_response) { { locations: [location1, location2] }.with_indifferent_access }
+      let(:http_response) { [location1, location2] }
+
+      before do
+        allow(ShopifyAPI::Location).to receive(:all).and_return(http_response)
+      end
 
       it 'returns locations' do
-        expect(locations).to match_array(http_response[:locations])
+        expect(locations).to match_array(http_response)
       end
     end
 
     context 'when failure' do
-      let(:http_response) { { 'errors': 'Not Found' } }
+      before do
+        allow(ShopifyAPI::Location).to receive(:all).and_raise('http_response')
+      end
 
       it 'returns []' do
         expect(locations).to be_a(Array)

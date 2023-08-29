@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20230817070152) do
+ActiveRecord::Schema.define(version: 20230823134827) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1312,6 +1312,7 @@ ActiveRecord::Schema.define(version: 20230817070152) do
     t.string "mg_rest_product_sku"
     t.boolean "sync_with_teapplix", default: false
     t.string "teapplix_product_sku"
+    t.string "shopify_inventory_item_id"
   end
 
   create_table "teapplix_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

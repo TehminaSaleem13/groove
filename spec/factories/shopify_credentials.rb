@@ -4,7 +4,7 @@
 
 FactoryBot.define do
   factory :shopify_credential do
-    shop_name { 'MyString' }
-    access_token { 'MyString' }
+    shop_name { 'myteststore' }
+    access_token { 'shpat_1234567890987654321512345678754345' }
   end
 end

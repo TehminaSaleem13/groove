@@ -3,6 +3,14 @@
 module Groovepacker
   module ShopifyRuby
     class Client < Base
+      SHOPIFY_API_LIMIT = 250
+
+      def graphql_client
+        ShopifyAPI::Clients::Graphql::Admin.new(
+          session: session, api_version: ENV['SHOPIFY_GRAPHQL_API_VERSION']
+        )
+      end
+
       def orders(import_item = nil)
         # page_index = 1
         combined_response = {}
@@ -24,7 +32,7 @@ module Groovepacker
         # end
 
         query = { 'updated_at_min' => last_import, 'limit' => 250 }.as_json
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
         combined_response['orders'] << response['orders']
 
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
@@ -39,13 +47,13 @@ module Groovepacker
         end
 
         combined_response['orders'] = combined_response['orders'].flatten
-        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
+        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
         combined_response
       end
 
       def get_single_order(order_number)
         query = { limit: 5 }.as_json
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/orders?name=#{order_number}", query: query, headers: headers)
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?name=#{order_number}", query: query, headers: headers)
         Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
         response
       end
@@ -76,7 +84,7 @@ module Groovepacker
         add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? "?updated_at_min=#{shopify_credential.product_last_import.strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : ''
         add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : '' unless add_url.present?
 
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/products#{add_url}",
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/products#{add_url}",
                                 query: query_opts,
                                 headers: headers)
         combined_response['products'] << response['products']
@@ -105,21 +113,13 @@ module Groovepacker
       end
 
       def get_variant(product_variant_id)
-        response = nil
-        loop do
-          response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/variants/#{product_variant_id}",
-                                  headers: headers)
-          return response.try(:[], 'variant') if response.success? || response.code != 429
-
-          sleep(response.headers['Retry-After'].to_f)
-        end
-        response['variant'] || {}
+        result = fetch_from_shopify { ShopifyAPI::Variant.find(session: session, id: product_variant_id) }
+        result.success? ? result.response.as_json : {}
       end
 
       def update_inventory(attrs)
         response = nil
         loop do
-          puts attrs
           response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
                                    body: attrs.to_json, headers: headers)
           return response if response.success? || response.code != 429
@@ -152,24 +152,77 @@ module Groovepacker
       end
 
       def inventory_levels(location_id)
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels.json?location_ids=#{location_id}",
-                                 headers: headers)
-        response['inventory_levels'].is_a?(Array) ? response['inventory_levels'] : []
-      rescue StandardError
-        []
+        fetch_collection_from_shopify('ShopifyAPI::InventoryLevel', location_ids: location_id)
       end
 
       def locations
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/locations.json",
-                                headers: headers)
-        response['locations'].is_a?(Array) ? response['locations'] : []
-      rescue StandardError
-        []
+        fetch_collection_from_shopify('ShopifyAPI::Location')
+      end
+
+      def execute_grahpql_query(query)
+        graphql_client.query(query)
+      end
+
+      private
+
+      def fetch_collection_from_shopify(collection_klass, query = {})
+        default_query = { session: session, limit: SHOPIFY_API_LIMIT }
+        page = 1
+        puts "Fetching Page #{page} of #{collection_klass} for [#{Apartment::Tenant.current}] Store ID #{shopify_credential.store_id} "
+        collection_response = fetch_from_shopify { collection_klass.constantize.send(:all, default_query.merge(query)) }
+        return [] unless collection_response.success?
+
+        while collection_klass.constantize.next_page_info
+          page += 1
+          puts "Fetching Page #{page} of #{collection_klass} for [#{Apartment::Tenant.current}] Store ID #{shopify_credential.store_id} "
+          result = fetch_from_shopify { collection_klass.constantize.send(:all, default_query.merge(page_info: collection_klass.constantize.next_page_info)) }
+          collection_response.response += result.response
+        end
+        collection_response.response.as_json
+      end
+
+      def fetch_from_shopify(&_block)
+        raise unless block_given?
+
+        result = Result.new
+        begin
+          response = yield
+          result.success!(response)
+        rescue ShopifyAPI::Errors::HttpResponseError => e
+          if e.response&.code == 429
+            sleep e.response.headers['retry-after']&.join.to_f
+            retry
+          end
+          Rails.logger.error("Shopify API HTTP error: #{e.message}")
+          Rails.logger.error("Response code: #{e.response&.code}")
+          result.failure!(e.message)
+        rescue StandardError => e
+          log_shopify_api_error(e)
+          result.failure!(e.message)
+        end
+        result
+      end
+
+      def session
+        @session ||= ShopifyAPI::Auth::Session.new(
+          shop: "#{shopify_credential&.shop_name}.myshopify.com",
+          access_token: shopify_credential&.access_token
+        )
+      end
+
+      def log_shopify_api_error(error)
+        Rails.logger.error("An error occurred: #{error.message}")
+        log = { tenant: Apartment::Tenant.current, session: session, time: Time.current.utc, error: error, backtrace: error.backtrace.first(3) }
+        shopify_error_logger.error(log)
+      end
+
+      def shopify_error_logger
+        @shopify_error_logger ||= Logger.new("#{Rails.root}/log/shopify_api_errors.log")
       end
 
       def headers
         {
-          'X-Shopify-Access-Token' => shopify_credential.access_token,
+          'X-Shopify-Access-Token' => shopify_credential&.access_token,
           'Content-Type' => 'application/json',
           'Accept' => 'application/json',
           'Content-Security-Policy' => 'frame-ancestors'

@@ -115,7 +115,7 @@ module Groovepacker
             item['fulfillable_quantity']&.positive? && !item['gift_card'] && item['product_id'].nil? &&
               item['sku'].nil? && !item['product_exists'] && item['variant_id'].nil?
           end
-          
+
           def create_single_product(shopify_product)
             shopify_product['variants'].each do |variant|
               variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
@@ -220,9 +220,9 @@ module Groovepacker
           def create_sync_option_for_product(product, variant)
             product_sync_option = product.sync_option
             if product_sync_option.nil?
-              product.create_sync_option(shopify_product_variant_id: variant['id'], sync_with_shopify: true)
+              product.create_sync_option(shopify_product_variant_id: variant['id'], shopify_inventory_item_id: variant['inventory_item_id'], sync_with_shopify: true)
             else
-              product_sync_option.update_attributes(shopify_product_variant_id: variant['id'], sync_with_shopify: true)
+              product_sync_option.update_attributes(shopify_product_variant_id: variant['id'], shopify_inventory_item_id: variant['inventory_item_id'], sync_with_shopify: true)
             end
           end
 

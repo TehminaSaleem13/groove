@@ -1,5 +1,8 @@
 # frozen_string_literal: true
 
+ENV['SHOPIFY_API_VERSION'] ||= '2022-10'
+ENV['SHOPIFY_GRAPHQL_API_VERSION'] ||= '2023-01'
+
 ShopifyAPI::Context.setup(
   api_key: ENV['SHOPIFY_API_KEY'],
   api_secret_key: ENV['SHOPIFY_SHARED_SECRET'],
@@ -8,5 +11,5 @@ ShopifyAPI::Context.setup(
   session_storage: ShopifyAPI::Auth::FileSessionStorage.new, # See more details below
   is_embedded: false, # Set to true if you are building an embedded app
   is_private: false, # Set to true if you are building a private app
-  api_version: '2022-10' # The version of the API you would like to use
+  api_version: ENV['SHOPIFY_API_VERSION'] # The version of the API you would like to use
 )

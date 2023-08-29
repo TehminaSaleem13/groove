@@ -52,7 +52,7 @@ class Product < ActiveRecord::Base
   has_many :product_kit_activities, dependent: :destroy
   has_many :product_lots
   has_and_belongs_to_many :product_inventory_reports, join_table: :products_product_inventory_reports
-  has_one :sync_option
+  has_one :sync_option, dependent: :destroy
   has_many :product_activities, dependent: :destroy
 
   after_save :check_inventory_warehouses

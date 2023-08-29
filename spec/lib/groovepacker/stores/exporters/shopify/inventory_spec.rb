@@ -3,24 +3,26 @@
 require 'rails_helper'
 
 describe Groovepacker::Stores::Exporters::Shopify::Inventory do
-  let(:inv_wh) { create(:inventory_warehouse, is_default: true) }
-  let(:store) { create(:store, inventory_warehouse_id: inv_wh.id, store_type: 'Shopify') }
+  subject { described_class.new(tenant.name, store.id) }
 
-  describe '#inventory' do
-    let(:params) { { select_all: true } }
-    let(:credential) { create(:shopify_credential, store: store) }
-    let(:result) { described_class.new(Apartment::Tenant.current, credential.store_id).push_inventories }
-    let(:shopify_product_variant_id) { '123123' }
+  let(:tenant) { create(:tenant, name: Apartment::Tenant.current) }
+  let(:shopify_credential) { build(:shopify_credential) }
+  let(:store) { create(:store, :shopify, shopify_credential: shopify_credential) }
 
+  describe '#push_inventories' do
     before do
+      shopify_product_variant_id = 12_345_678_901_234
       product = create(:product, :with_sku_barcode, store_id: store.id)
       create(:sync_option, product_id: product.id, sync_with_shopify: true, shopify_product_variant_id: shopify_product_variant_id)
-      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:get_variant).with(shopify_product_variant_id).and_return(inventory_item_id: shopify_product_variant_id)
-      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:locations).and_return([id: shopify_product_variant_id])
+      allow(CsvExportMailer).to receive(:send_push_pull_inventories_products).and_return(double(deliver: true))
     end
 
-    # it 'Push Inventory' do
-    #   expect(result).to include(Product.first)
-    # end
+    it 'triggers email' do
+      VCR.use_cassette('shopify/push_inventories') do
+        subject.push_inventories
+      end
+
+      expect(CsvExportMailer).to have_received(:send_push_pull_inventories_products)
+    end
   end
 end
