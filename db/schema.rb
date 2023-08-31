@@ -680,12 +680,12 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.integer "store_id"
     t.integer "qty"
     t.string "price"
-    t.string "firstname"
-    t.string "lastname"
+    t.string "firstname", limit: 500, collation: "utf8mb4_unicode_ci"
+    t.string "lastname", limit: 500, collation: "utf8mb4_unicode_ci"
     t.string "email"
     t.text "address_1"
     t.text "address_2"
-    t.string "city"
+    t.string "city", limit: 500, collation: "utf8mb4_unicode_ci"
     t.string "state"
     t.string "postcode"
     t.string "country"
@@ -732,7 +732,7 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.text "split_from_order_id"
     t.text "source_order_ids"
     t.string "cloned_from_shipment_id", default: ""
-    t.text "ss_label_data"
+    t.text "ss_label_data", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.string "importer_id"
     t.integer "clicked_scanned_qty"
     t.string "import_item_id"
@@ -751,8 +751,8 @@ ActiveRecord::Schema.define(version: 20230823134827) do
   create_table "origin_stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "store_id"
     t.integer "origin_store_id"
-    t.string "recent_order_details"
-    t.string "store_name", limit: 20
+    t.string "recent_order_details", limit: 500, collation: "utf8mb4_unicode_ci"
+    t.string "store_name", limit: 25
     t.index ["origin_store_id"], name: "index_origin_stores_on_origin_store_id"
     t.index ["store_id"], name: "index_origin_stores_on_store_id"
   end
