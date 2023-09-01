@@ -22,17 +22,17 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
   end
 
   def render_order_scan
-    order = Order.where(id: @id).last
+    @order = Order.find_by(id: @id)
     if @state == 'scanpack.rfp.no_tracking_info' && (@input == @current_user.confirmation_code || @input == '')
       if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Verify'
         @result['status'] = true
         @result['matched'] = false
-        order.set_order_to_scanned_state(@current_user.username)
+        @order.set_order_to_scanned_state(@current_user.username)
         @result['data']['order_complete'] = true
         @result['data']['next_state'] = 'scanpack.rfo'
-        order.save
+        @order.save
       else
-        order.update_columns(post_scanning_flag: 'Verify')
+        @order.update_columns(post_scanning_flag: 'Verify')
         apply_second_action
       end
     else
@@ -43,23 +43,22 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
   end
 
   def apply_second_action
-    order = Order.where(id: @id).last
     case @scanpack_settings_post_scanning_option_second
     when 'Record'
       @result['data']['next_state'] = 'scanpack.rfp.recording'
     when 'PackingSlip'
       do_set_order_scanned_state_and_result_data
-      generate_packing_slip(order)
+      generate_packing_slip(@order)
     when 'Barcode'
       do_set_order_scanned_state_and_result_data
-      generate_order_barcode_slip(order)
+      generate_order_barcode_slip(@order)
     else
       do_set_order_scanned_state_and_result_data
     end
   end
 
   def do_set_order_scanned_state_and_result_data
-    order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
   end
