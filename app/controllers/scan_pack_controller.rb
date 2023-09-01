@@ -295,7 +295,8 @@ class ScanPackController < ApplicationController
   end
 
   def verify_order_scanning
-    service = Groovepacker::Orders::Verification::CheckUnscanned.new(Apartment::Tenant.current, params[:id])
+    options = { order_id: params[:id], request_ip: request.remote_ip, current_user: current_user.username, app_url: params[:app_url] }
+    service = Groovepacker::Orders::Verification::CheckUnscanned.new(Apartment::Tenant.current, options)
     service.delay(run_at: 15.seconds.from_now, priority: 95).call
     head :ok
   end
