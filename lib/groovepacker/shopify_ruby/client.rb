@@ -163,6 +163,23 @@ module Groovepacker
         graphql_client.query(query)
       end
 
+      def register_webhook(attrs)
+        response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/webhooks.json",
+                                 body: attrs.to_json, headers: headers)
+                                 
+        response
+      end 
+
+      def list_webhooks
+       response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/webhooks.json", 
+                              headers: headers)
+      response['webhooks'] || []
+      end
+
+      def delete_webhook(webhook_id)
+        response =HTTParty.delete("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/2022-10/webhooks/#{webhook_id}.json", headers: headers)
+      end
+
       private
 
       def fetch_collection_from_shopify(collection_klass, query = {})
@@ -219,6 +236,7 @@ module Groovepacker
       def shopify_error_logger
         @shopify_error_logger ||= Logger.new("#{Rails.root}/log/shopify_api_errors.log")
       end
+
 
       def headers
         {

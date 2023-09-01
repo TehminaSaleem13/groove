@@ -1229,6 +1229,7 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.string "re_associate_shopify_products", default: "associate_items"
     t.boolean "import_variant_names", default: false
     t.bigint "push_inv_location_id"
+    t.boolean "webhook_order_import", default: false
     t.bigint "pull_inv_location_id"
     t.boolean "pull_combined_qoh", default: false
   end

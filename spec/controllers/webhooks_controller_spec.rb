@@ -1,26 +1,41 @@
-# frozen_string_literal: true
-
 require 'rails_helper'
 
 RSpec.describe WebhooksController, type: :controller do
-  context 'POST #delete_customer' do
-    it 'returns 200' do
-      post :delete_customer
-      expect(response.status).to eq 200
+  describe 'DELETE #delete_customer' do
+    it 'returns http success' do
+      delete :delete_customer
+      expect(response).to have_http_status(:success)
     end
   end
 
-  context 'POST #delete_shop' do
-    it 'returns 200' do
-      post :delete_shop
-      expect(response.status).to eq 200
+  describe 'DELETE #delete_shop' do
+    it 'returns http success' do
+      delete :delete_shop
+      expect(response).to have_http_status(:success)
     end
   end
 
-  context 'POST #show_customer' do
-    it 'returns 200' do
-      post :show_customer
-      expect(response.status).to eq 200
+  describe 'GET #show_customer' do
+    it 'returns http success' do
+      get :show_customer
+      expect(response).to have_http_status(:success)
     end
   end
+
+  describe 'POST #orders_create' do
+    it 'calls handle_and_enqueue_order_import and returns :ok status' do
+      expect(controller).to receive(:handle_and_enqueue_order_import)
+      post :orders_create
+      expect(response).to have_http_status(:success)
+    end
+  end
+
+  describe 'POST #orders_update' do
+    it 'calls handle_and_enqueue_order_import and returns :ok status' do
+      expect(controller).to receive(:handle_and_enqueue_order_import)
+      post :orders_update
+      expect(response).to have_http_status(:success)
+    end
+  end
+
 end

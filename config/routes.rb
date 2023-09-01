@@ -460,6 +460,8 @@ Groovepacks::Application.routes.draw do
       post '/shop/redact' => 'webhooks#delete_shop'
       post '/customers/redact' => 'webhooks#delete_customer'
       post '/customers/data_request' => 'webhooks#show_customer'
+      post '/orders_create' => 'webhooks#orders_create'
+      post '/orders_update' => 'webhooks#orders_update'
     end
   end
 
