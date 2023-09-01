@@ -6,6 +6,8 @@ module Groovepacker
       class CheckUnscanned
         attr_reader :tenant, :order_id, :request_ip, :current_user, :app_url
 
+        WEBHOOK_URL = ENV.fetch('VERIFY_UNSCANNED_SLACK_URL', 'https://hooks.slack.com/services/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')
+
         def initialize(tenant, options = {})
           @tenant = tenant
           @order_id = options[:order_id]
@@ -18,9 +20,7 @@ module Groovepacker
           Apartment::Tenant.switch! tenant
           order = Order.find(order_id)
 
-          return if Rails.env.test? || order.reload.status == 'scanned'
-
-          webhook_url = 'https://hooks.slack.com/services/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'
+          return if order.reload.status == 'scanned'
 
           body = {
             "blocks": [
@@ -41,7 +41,7 @@ module Groovepacker
             ]
           }
 
-          HTTParty.post(webhook_url,
+          HTTParty.post(WEBHOOK_URL,
                         body: body.to_json,
                         headers: { 'Content-Type' => 'application/json' })
         rescue StandardError => e

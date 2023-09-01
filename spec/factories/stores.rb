@@ -14,5 +14,11 @@ FactoryBot.define do
       store_type { 'Shopify' }
       shopify_credential
     end
+
+    trait :csv do
+      store_type { 'CSV' }
+      name { 'GP TEST - CSV' }
+      status { true }
+    end
   end
 end
