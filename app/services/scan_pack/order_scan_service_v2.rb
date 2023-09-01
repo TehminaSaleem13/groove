@@ -43,7 +43,7 @@ module ScanPack
       if (@scanpack_settings.scan_by_shipping_label || @scanpack_settings.scan_by_packing_slip_or_shipping_label) && !@order_by_number
         @orders = Order.includes(%i[store order_items]).where(tracking_num: @input).where('LENGTH(tracking_num) >= 8').order('LENGTH(tracking_num) DESC')
         @orders = Order.includes(%i[store order_items]).where('? LIKE CONCAT("%", tracking_num, "%") and LENGTH(tracking_num) >= 8', @input).order('LENGTH(tracking_num) DESC') if @orders.blank?
-        find_order if @orders.blank? 
+        find_order if @orders.blank?
       else
         find_order
       end
@@ -440,6 +440,7 @@ module ScanPack
         end
       when 'PackingSlip'
         @single_order_result['next_state'] = 'scanpack.rfo'
+        set_order_scanned_state_and_result_data
         generate_packing_slip(@single_order)
       when 'Barcode'
         set_order_scanned_state_and_result_data

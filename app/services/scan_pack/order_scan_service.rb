@@ -500,6 +500,7 @@ module ScanPack
         end
       when 'PackingSlip'
         @single_order_result['next_state'] = 'scanpack.rfo'
+        set_order_scanned_state_and_result_data
         generate_packing_slip(@single_order)
       when 'Barcode'
         set_order_scanned_state_and_result_data
