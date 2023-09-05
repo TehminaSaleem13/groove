@@ -37,9 +37,9 @@ class WebhooksController < ApplicationController
     end
 
     def handle_and_enqueue_order_import
-      uri =  request.env['REQUEST_URI']
+      uri =  request.headers['host']
       if uri.present?
-        subdomain = URI.parse(uri).host.split('.')[0] 
+        subdomain = uri&.split('.')[0] 
         store_name = request.headers['x-shopify-shop-domain'].split('.')[0]
         ImportOrdersJob.perform_later(store_name, subdomain, "regular", nil) if subdomain.present?
       end
