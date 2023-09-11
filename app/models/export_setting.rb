@@ -172,6 +172,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_number] = order.increment_id
     single_row[:order_status] = order.status
     single_row[:order_date] = order.order_placed_time
+    single_row[:store_name] = order&.store&.display_origin_store_name ? order.origin_store&.store_name : order.store&.name
     single_row[:scanned_date] = order.scanned_on&.strftime('%Y-%m-%d %I:%M:%S %p')
     single_row[:address1] = order.address_1
     single_row[:address2] = order.address_2
@@ -314,6 +315,7 @@ class ExportSetting < ActiveRecord::Base
       order_date: '',
       order_status: '',
       order_number: '',
+      store_name: '',
       scanned_qty: '',
       packing_user: '',
       scanned_date: '',
@@ -333,6 +335,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:order_number] = order.increment_id
     single_row[:order_status] = order.status
     single_row[:scanned_qty] = order.scanned_items_count
+    single_row[:store_name] = order&.store&.display_origin_store_name ? order.origin_store&.store_name : order.store&.name
     single_row[:order_date] = order.order_placed_time
     single_row[:scanned_date] = order.scanned_on&.strftime('%Y-%m-%d %I:%M:%S %p')
     single_row[:tracking_num] = order.tracking_num

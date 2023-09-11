@@ -2,6 +2,7 @@
 :order_date: order_date
 :order_number: order_number
 :order_status: order_status
+:store_name: store_name
 :scan_order: scan_order
 :barcode_with_lot: barcode_with_lot
 :barcode: barcode

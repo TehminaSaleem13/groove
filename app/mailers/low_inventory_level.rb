@@ -33,8 +33,10 @@ class LowInventoryLevel < ActionMailer::Base
   def generate_low_inv_export_data
     @products = []
     @general_setting = GeneralSetting.all.first
+    joined_orders = Order.includes(order_items: [{ order_item_kit_products: [:product_kit_skus] }, :product])
     @products_list.each do |product|
       product_hash = {}
+      pro_orders = joined_orders.where(order_items: { product: product }).or(joined_orders.where(order_items: { order_item_kit_products: { product_kit_skus: { option_product_id: product.id } } })).distinct
       product_hash['id'] = product.id
       product_hash['name'] = product.name
       product_hash['sku'] = if !product.product_skus.empty?
@@ -47,6 +49,7 @@ class LowInventoryLevel < ActionMailer::Base
                               else
                                 '-'
                               end
+      product_hash['store_name'] = product.get_store_name(pro_orders) 
       product_hash['warehouses'] = []
       low_inv_found = false
       product.product_inventory_warehousess.each do |wh|
@@ -118,13 +121,13 @@ class LowInventoryLevel < ActionMailer::Base
   end
 
   def generate_low_inv_export_csv
-    headers = ['Image', 'SKU', 'Product Name', 'Warehouse Name', 'Available/Threshold', 'Primary Location', 'Primary Location Qty', 'Secondary Location', 'Secondary Location Qty', 'Tertiary Location', 'Tertiary Location Qty']
+    headers = ['Image', 'SKU', 'Product Name', 'Store Name', 'Warehouse Name', 'Available/Threshold', 'Primary Location', 'Primary Location Qty', 'Secondary Location', 'Secondary Location Qty', 'Tertiary Location', 'Tertiary Location Qty']
 
     data = CSV.generate(headers: true) do |csv|
       csv << headers # .join(', ') + "\n"
       @products.each do |product|
         product['warehouses'].each  do |wh|
-          csv << [product['image'], product['sku'], product['name'], wh['name'], "#{wh['available_inv']}/#{wh['threshold']}", wh['primary_location'], wh['primary_location_qty'], wh['secondary_location'], wh['secondary_location_qty'], wh['tertiary_location'], wh['tertiary_location_qty']] # .join(', ') + "\n"
+          csv << [product['image'], product['sku'], product['name'], product['store_name'], wh['name'], "#{wh['available_inv']}/#{wh['threshold']}", wh['primary_location'], wh['primary_location_qty'], wh['secondary_location'], wh['secondary_location_qty'], wh['tertiary_location'], wh['tertiary_location_qty']] # .join(', ') + "\n"
         end
       end
     end

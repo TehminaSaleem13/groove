@@ -264,6 +264,14 @@ class Product < ActiveRecord::Base
     is_kit == 1
   end
 
+  def get_store_name(product_orders)
+    if product_orders.count > 0 && store&.display_origin_store_name
+       product_orders&.first&.origin_store&.store_name
+    else
+      store&.name
+    end
+   end
+
   # def get_total_avail_loc
   #   total_avail_loc = 0
   #   product_inventory_warehousess.each { |inv_wh| total_avail_loc += inv_wh.available_inv }
