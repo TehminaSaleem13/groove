@@ -331,6 +331,7 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.boolean "truncate_order_number_in_packing_slip", default: false
     t.string "truncated_string", default: "-"
     t.boolean "print_product_receiving_labels", default: false
+    t.boolean "is_haptics_option", default: false
   end
 
   create_table "generate_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
