@@ -78,7 +78,7 @@ module SettingsHelper
         pass_scan pass_scan_barcode add_next add_next_barcode
         return_to_orders scanning_sequence click_scan click_scan_barcode
         scanned scanned_barcode partial partial_barcode post_scanning_option_second
-        require_serial_lot valid_prefixes replace_gp_code single_item_order_complete_msg
+        require_serial_lot scan_all_option valid_prefixes replace_gp_code single_item_order_complete_msg
         single_item_order_complete_msg_time multi_item_order_complete_msg multi_item_order_complete_msg_time
         tote_identifier show_expanded_shipments tracking_number_validation_enabled
         tracking_number_validation_prefixes scan_by_packing_slip_or_shipping_label remove_enabled

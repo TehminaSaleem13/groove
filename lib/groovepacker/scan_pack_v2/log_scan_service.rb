@@ -70,13 +70,33 @@ module Groovepacker
               current_user, session, scn_params
             )
             serial_scan_obj.run
-          elsif scn_params[:event] == 'bulk_scan'
+          elsif scn_params[:event] == 'bulk_scan' || scn_params[:event] == 'scan_all_items'
             order_item = OrderItem.find_by(id: scn_params[:order_item_id])
-            if order_item && order_item.scanned_status != 'scanned'
-              order = order_item.order
-              order_item.update_attributes(scanned_status: 'scanned')
-              order.addactivity("#{order_item.product.name} scanned through Bulk Scan", current_user.try(:username))
-              order.set_order_to_scanned_state(current_user.try(:username)) unless order.has_unscanned_items
+            order = order_item.order
+            return unless order_item
+
+            if order_item.product.is_kit == 0
+              if order_item && order_item.scanned_status != 'scanned'
+                order_item.update(scanned_status: 'scanned')
+                order_item.update(scanned_qty: order_item.qty)
+                add_all_scan_logs(order, order_item, scn_params[:event], current_user, nil)
+                order.set_order_to_scanned_state(current_user.try(:username)) unless order.has_unscanned_items
+              end
+            else
+              product_kit_sku = order_item.product.product_kit_skuss.find_by_option_product_id(scn_params[:product_id])
+              order_item_kit_product = order_item.order_item_kit_products.find_by(product_kit_skus: product_kit_sku)
+              if order_item_kit_product && order_item_kit_product.scanned_status != 'scanned'
+                order_item_kit_product.update(scanned_status: 'scanned')
+                if order_item.order_item_kit_products.where.not(scanned_status: 'scanned').any?
+                  order_item.update(scanned_status: 'partially_scanned')
+                else
+                  order_item.update(scanned_status: 'scanned')
+                  order_item.update(scanned_qty: order_item.qty)
+                end
+                order_item_kit_product.update(scanned_qty: product_kit_sku.qty)
+                add_all_scan_logs(order, order_item, scn_params[:event], current_user, 'kit')
+                order.set_order_to_scanned_state(current_user.try(:username)) unless order.has_unscanned_items
+              end
             end
           end
         rescue StandardError => e
@@ -84,6 +104,16 @@ module Groovepacker
           log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(',') }
           on_demand_logger.info(log)
         end
+      end
+
+      def add_all_scan_logs(order, order_item, event, current_user, type = nil)
+        scan_type = event == 'bulk_scan' ? 'Bulk Scan' : 'Scan-All Option'
+        scan_description = "#{order_item.product.name} scanned through #{scan_type}"
+        scan_description += " from #{type}" if type == 'kit'
+
+        username = current_user.try(:username)
+
+        order.addactivity(scan_description, username)
       end
 
       private

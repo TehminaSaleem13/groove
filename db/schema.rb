@@ -1083,6 +1083,7 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.boolean "add_next", default: true
     t.string "add_next_barcode", default: "ADDNEXT"
     t.boolean "send_external_logs", default: false
+    t.boolean "scan_all_option", default: false
   end
 
   create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
