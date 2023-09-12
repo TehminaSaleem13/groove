@@ -22,20 +22,15 @@ module Groovepacker
 
           return if order.reload.status == 'scanned'
 
+          tenant_url = "#{ENV.fetch('PROTOCOL', 'http://')}#{Apartment::Tenant.current}.#{ENV.fetch('HOST_NAME', 'localpacker.com')}"
+          order_url = "#{tenant_url}/#/orders/all/1/#{order.id}"
           body = {
             "blocks": [
               {
                 "type": 'section',
                 "text": {
                   "type": 'mrkdwn',
-                  "text": "*[#{tenant}]* Scanned status change failed for Order *[#{order.increment_id}]* at [#{Time.current}]"
-                }
-              },
-              {
-                "type": 'section',
-                "text": {
-                  "type": 'mrkdwn',
-                  "text": "*Tenant:* #{tenant}\n*When:* #{Time.current}\n*Order:* #{order.increment_id} [#{order.id}]\n*User:* #{current_user || 'NA'}\n*IP:* #{request_ip || 'NA'}\n*App URL:* #{app_url || 'NA'}"
+                  "text": "[*<#{ tenant_url }|#{tenant}> | #{Rails.env.upcase}*] Scanned status change failed for Order [*<#{order_url} | #{order.increment_id}>*] at [*#{Time.current}*] on *#{app_url || 'NA'}* by *#{current_user || 'NA'}*"
                 }
               }
             ]
