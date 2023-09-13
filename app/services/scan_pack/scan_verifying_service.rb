@@ -2,7 +2,7 @@
 
 class ScanPack::ScanVerifyingService < ScanPack::Base
   def initialize(args)
-    @current_user, @input, @id = args
+    @current_user, @input, @on_ex, @id = args
     @result = {
       'status' => true,
       'matched' => false,
@@ -27,6 +27,8 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
       else
         set_error_messages('The order is not in awaiting state. Cannot scan the tracking number')
       end
+    else
+      scan_verifying
     end
     @result
   end
@@ -52,10 +54,10 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   end
 
   def do_if_tracking_number_eql_input
-    @order.addactivity("Shipping Label Verified: #{@order.tracking_num}", @current_user.username)
+    @order.addactivity("Shipping Label Verified: #{@order.tracking_num}", @current_user.username, @on_ex)
     @order.save
     if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Verify'
-      @order.set_order_to_scanned_state(@current_user.username)
+      @order.set_order_to_scanned_state(@current_user.username, @on_ex)
       @result['data'].merge!(
         'order_complete' => true,
         'next_state' => 'scanpack.rfo'
@@ -68,7 +70,7 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   def do_if_input_eql_confirmation_code
     if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Verify'
       @result['matched'] = false
-      @order.set_order_to_scanned_state(@current_user.username)
+      @order.set_order_to_scanned_state(@current_user.username, @on_ex)
       @result['data'].merge!(
         'order_complete' => true,
         'next_state' => 'scanpack.rfo'

@@ -22,7 +22,7 @@ module Groovepacker
           elsif scn_params[:event] == 'click_scan'
             scn_params = attach_temporary_barcode(scn_params)
             res = product_scan_v2(
-              scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id],scn_params[:on_ex],
+              scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id], scn_params[:on_ex],
               clicked: true, current_user: current_user, session: session
             )
             remove_temporary_barcode(params)
@@ -56,7 +56,7 @@ module Groovepacker
               render_order_scan_object.run
             else
               scan_verifying_object = ScanPack::ScanVerifyingService.new(
-                [current_user, scn_params[:input], scn_params[:id]]
+                [current_user, scn_params[:input], scn_params[:on_ex], scn_params[:id]]
               )
             end
             scan_verifying_object.run
