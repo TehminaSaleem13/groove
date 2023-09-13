@@ -2,7 +2,7 @@
 
 class ScanPack::ScanVerifyingService < ScanPack::Base
   def initialize(args)
-    @current_user, @input, @on_ex, @id = args
+    @current_user, @input, @id, @on_ex = args
     @result = {
       'status' => true,
       'matched' => false,
