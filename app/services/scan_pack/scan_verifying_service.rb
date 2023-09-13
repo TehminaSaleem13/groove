@@ -22,11 +22,18 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
     when @order.blank?
       set_error_messages('Could not find order with id: ' + @id.to_s)
     when @order.status != 'awaiting'
-      set_error_messages('The order is not in awaiting state. Cannot scan the tracking number')
-    else
-      scan_verifying
+      if check_intangible_for_order_items_product
+        scan_verifying
+      else
+        set_error_messages('The order is not in awaiting state. Cannot scan the tracking number')
+      end
     end
     @result
+  end
+
+  def check_intangible_for_order_items_product
+    order_items = @order.order_items.where(scanned_status: 'notscanned')
+    order_items.all? { |item| item.product&.is_intangible == true }
   end
 
   def scan_verifying
