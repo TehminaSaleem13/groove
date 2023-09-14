@@ -31,14 +31,16 @@ module Webhooks
             "webhook": {
               "address": "https://#{Apartment::Tenant.current}.groovepackerapi.com/webhooks/orders_create",
               "topic": 'orders/create',
-              "format": 'json'
+              "format": 'json',
+              "fields": ['id',"name"]
             }
           },
           {
             "webhook": {
               "address": "https://#{Apartment::Tenant.current}.groovepackerapi.com/webhooks/orders_update",
               "topic": 'orders/updated',
-              "format": 'json'
+              "format": 'json',
+              "fields": ['id',"name"]
             }
           }
         ]
