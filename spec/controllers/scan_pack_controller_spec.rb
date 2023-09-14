@@ -733,6 +733,21 @@ RSpec.describe ScanPackController, type: :controller do
       post :scan_pack_v2, params: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq('OK')
+      
+      post :scan_pack_v2, params: {data: [{id: nil, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: nil, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+      
+      order.update(status: 'awaiting')
+      post :scan_pack_v2, params: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+
+      order.update(status: 'onhold')
+      product2.update(is_intangible: false)
+      post :scan_pack_v2, params: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
     end    
 
     it 'Order Scanned Without Barcode' do

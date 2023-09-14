@@ -30,7 +30,7 @@ module Groovepacker
                 "type": 'section',
                 "text": {
                   "type": 'mrkdwn',
-                  "text": "[*<#{ tenant_url }|#{tenant}> | #{Rails.env.upcase}*] Scanned status change failed for Order [*<#{order_url} | #{order.increment_id}>*] at [*#{Time.current}*] on *#{app_url || 'NA'}* by *#{current_user || 'NA'}*"
+                  "text": "[*<#{ tenant_url }|#{tenant}> | #{Rails.env.upcase}*] Scanned status change failed for Order [*<#{order_url} | #{order.increment_id}>*] at [*#{Time.current}*] on #{app_url || 'NA'} by *#{current_user || 'NA'}*"
                 }
               }
             ]

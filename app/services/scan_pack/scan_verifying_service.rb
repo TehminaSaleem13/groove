@@ -34,7 +34,7 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   end
 
   def check_intangible_for_order_items_product
-    order_items = @order.order_items.where(scanned_status: 'notscanned')
+    order_items = @order.order_items.where(scanned_status: 'unscanned')
     order_items.all? { |item| item.product&.is_intangible == true }
   end
 
