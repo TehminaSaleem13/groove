@@ -42,6 +42,8 @@ class WebhooksController < ApplicationController
         subdomain = uri&.split('.')[0] 
         store_name = request.headers['x-shopify-shop-domain'].split('.')[0]
         ImportOrdersJob.perform_later(store_name, subdomain, "regular", nil) if subdomain.present?
+      else
+        Rollbar.error(request)
       end
       render json: {success: true}.to_json
     end
