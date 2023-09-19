@@ -93,12 +93,11 @@ module ScanPack
     end
 
     def generate_query(status)
-      input_without_special_char = ActiveRecord::Base.connection.quote(@input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) })
-      input_with_special_char = ActiveRecord::Base.connection.quote(@input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/, &:to_s) })
-      se_order_input = ActiveRecord::Base.connection.quote(input_without_special_char + ' (')
-      input_with_special_char_without_space = ActiveRecord::Base.connection.quote(input_with_special_char.gsub(/\s+/, ''))
+      input_without_special_char = @input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) }
+      input_with_special_char = @input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/, &:to_s) }
+      se_order_input = input_without_special_char + ' ('
+      input_with_special_char_without_space = input_with_special_char.gsub(/\s+/, '')
       input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, '')
-
       # id = @scanpack_settings.scan_by_hex_number ? 'store_order_id' : 'increment_id'
       # %(\
       #   (#{id} IN \(\
@@ -108,61 +107,45 @@ module ScanPack
       #     '#{input_without_special_char}', '\##{input_without_special_char}'\
       #   \)) and status IN #{status} and updated_at >= #{(Time.current-14.days).strftime("%Y-%m-%d")}
       # )
-      # if @se_shipment_handling_v2_present
-      #   # %(\
-      #   #   (#{@scan_by_id} LIKE '#{input_with_special_char}%' and \(\
-      #   #     orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
-      #   #   \))
-      #   # )
-      #   %(\
-      #     (#{@scan_by_id} IN \(\
-      #       #{input_with_special_char}, "\##{input_with_special_char}"\
-      #     \) or \
-      #     #{@scan_by_id} LIKE \(\
-      #       #{se_order_input}
-      #     \) or \
-      #     non_hyphen_increment_id IN \(\
-      #       #{input_without_special_char}, "\##{input_without_special_char}"\
-      #     \) or \
-      #       #{@scan_by_id} IN \(\
-      #       #{input_with_special_char_without_space}, "\##{input_with_special_char_without_space}"\
-      #     \) or \
-      #     non_hyphen_increment_id IN \(\
-      #       #{input_without_special_char_without_space}, "\##{input_without_special_char_without_space}"\
-      #     \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
-      #   )
-      # else
-      #   %(\
-      #     (#{@scan_by_id} IN \(\
-      #       #{input_with_special_char}, "\##{input_with_special_char}"\
-      #     \) or \
-      #     non_hyphen_increment_id IN \(\
-      #       #{input_without_special_char}, "\##{input_without_special_char}"\
-      #     \) or \
-      #       #{@scan_by_id} IN \(\
-      #       #{input_with_special_char_without_space}, "\##{input_with_special_char_without_space}"\
-      #     \) or \
-      #     non_hyphen_increment_id IN \(\
-      #       #{input_without_special_char_without_space}, "\##{input_without_special_char_without_space}"\
-      #     \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
-      #   )
-      # end
-
-      base_query = [
-        "#{@scan_by_id} IN (#{input_with_special_char}, \"##{input_with_special_char}\")",
-        "non_hyphen_increment_id IN (#{input_without_special_char}, \"##{input_without_special_char}\")",
-        "#{@scan_by_id} IN (#{input_with_special_char_without_space}, \"##{input_with_special_char_without_space}\")",
-        "non_hyphen_increment_id IN (#{input_without_special_char_without_space}, \"##{input_without_special_char_without_space}\")"
-      ]
-
-      final_query = if @se_shipment_handling_v2_present
-        base_query + ["#{@scan_by_id} LIKE #{se_order_input}"]
+      if @se_shipment_handling_v2_present
+        # %(\
+        #   (#{@scan_by_id} LIKE '#{input_with_special_char}%' and \(\
+        #     orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
+        #   \))
+        # )
+        %(\
+          (#{@scan_by_id} IN \(\
+            '#{input_with_special_char}', '\##{input_with_special_char}'\
+          \) or \
+          #{@scan_by_id} LIKE \(\
+            '#{se_order_input}%'
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char}', '\##{input_without_special_char}'\
+          \) or \
+            #{@scan_by_id} IN \(\
+            '#{input_with_special_char_without_space}', '\##{input_with_special_char_without_space}'\
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
+          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
+        )
       else
-        base_query
+        %(\
+          (#{@scan_by_id} IN \(\
+            '#{input_with_special_char}', '\##{input_with_special_char}'\
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char}', '\##{input_without_special_char}'\
+          \) or \
+            #{@scan_by_id} IN \(\
+            '#{input_with_special_char_without_space}', '\##{input_with_special_char_without_space}'\
+          \) or \
+          non_hyphen_increment_id IN \(\
+            '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
+          \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
+        )
       end
-
-      "(#{final_query.join(' OR ')}) AND orders.status IN #{status} AND orders.updated_at >= '#{(Time.current - 14.days).strftime('%Y-%m-%d')}'"
-
     end
 
     def get_single_order_with_result
