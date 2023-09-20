@@ -220,6 +220,12 @@ RSpec.describe ScanPackController, type: :controller do
       order = FactoryBot.create(:order, increment_id: '100', status: 'awaiting', store: @store)
       FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
 
+      order = FactoryBot.create(:order, increment_id: "#1'0-0", status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
+      order = FactoryBot.create(:order, increment_id: '#1-0"0', status: 'awaiting', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
       order = FactoryBot.create(:order, increment_id: '10', status: 'awaiting', tracking_num: '100', store: @store)
       FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
 
@@ -290,6 +296,22 @@ RSpec.describe ScanPackController, type: :controller do
         expect(response.status).to eq(200)
         result = JSON.parse(response.body)
         expect(result['data']['order']['increment_id']).to eq('100')
+      end
+
+      it 'hashtag with single quote and hyphen' do
+        get :scan_barcode, params: { input: "##1'0-0", state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq("#1'0-0")
+      end
+
+      it 'hashtag with double quote and hyphen' do
+        get :scan_barcode, params: { input: '#1-0"0', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('#1-0"0')
       end
 
       it 'hashtag and hyphen removal' do

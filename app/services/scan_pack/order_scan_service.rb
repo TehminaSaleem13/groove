@@ -94,7 +94,7 @@ module ScanPack
 
     def generate_query(status)
       input_without_special_char = ActiveRecord::Base.connection.quote(@input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) })
-      input_with_special_char = ActiveRecord::Base.connection.quote(@input.gsub(/^(\#)/, '').try { |a| a.gsub(/(\W)/, &:to_s) })
+      input_with_special_char = ActiveRecord::Base.connection.quote(@input.try { |a| a.gsub(/(\W)/, &:to_s) })
       se_order_input = ActiveRecord::Base.connection.quote(input_without_special_char + ' (')
       input_with_special_char_without_space = ActiveRecord::Base.connection.quote(input_with_special_char.gsub(/\s+/, ''))
       input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, '')
@@ -162,7 +162,6 @@ module ScanPack
       end
 
       "(#{final_query.join(' OR ')}) AND orders.status IN #{status} AND orders.updated_at >= '#{(Time.current - 14.days).strftime('%Y-%m-%d')}'"
-
     end
 
     def get_single_order_with_result
