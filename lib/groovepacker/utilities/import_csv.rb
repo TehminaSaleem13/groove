@@ -214,7 +214,7 @@ class ImportCsv
           end
           # File.delete(file_path)
           if params[:flag] == 'ftp_download' && result[:add_imported]
-            rename_ftp_file(store, result, response, params[:type])
+            result = rename_ftp_file(store, result, response, params[:type])
             ftp_csv_import = Groovepacker::Orders::Import.new
             params[:type] == 'product' ? Groovepacker::Products::Products.new.ftp_product_import(Apartment::Tenant.current) : ftp_csv_import.ftp_order_import(Apartment::Tenant.current)
             begin
