@@ -82,6 +82,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
   def remove_kit_product_item_from_order(item)
     @single_order.order_activities.last.try(:destroy)
     order_item_kit_product = OrderItemKitProduct.find(item['kit_product_id'])
+
     order_item_kit_product.process_item(nil, @current_user.username, 1, true, @on_ex)
     remove_kit_item_from_order(item)
   end

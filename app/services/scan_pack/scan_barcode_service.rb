@@ -161,12 +161,12 @@ module ScanPack
         output = if state_func == 'product_scan' && @params[:app]
                    send(
                      'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
-                     current_user: @current_user, session: @session
+                     current_user: @current_user, session: @session, product_id: @params[:product_id], kit_product_id: @params[:kit_product_id]
                    )
                  elsif state_func == 'product_scan'
                    send(
                      state_func, @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
-                     current_user: @current_user, session: @session
+                     current_user: @current_user, session: @session, product_id: @params[:product_id], kit_product_id: @params[:kit_product_id]
                    )
                  elsif state_func == 'order_scan' && @params[:app]
                    send(

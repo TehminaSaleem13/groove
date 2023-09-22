@@ -9,7 +9,8 @@ module ScanPack
     include ScanPack::Utilities::ProductScan::SingleProductType
 
     def initialize(args)
-      @current_user, @session, @input, @state, @id, @box_id, @on_ex, @typein_count, @type_scan = args
+      @current_user, @session, @input, @state, @id, @box_id, @on_ex, @typein_count, @type_scan, @extras = args
+      @extras ||= {}
       @result = {
         'status' => true, 'matched' => true, 'error_messages' => [],
         'success_messages' => [], 'notice_messages' => [],
@@ -121,9 +122,11 @@ module ScanPack
           @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the REMOVE-ALL barcode", @current_user.try(:username), @on_ex)
         end
       elsif code_type == 'REMOVE'
-        item = @single_order.get_unscanned_items(limit: nil).first
-        qty = item['product_type'] == 'individual' ? remove_kit_product_item_from_order(item['child_items'].first) : remove_skippable_product(item)
-        @single_order.addactivity("QTY #{qty} of SKU #{item['product_type'] == 'individual' ? item['child_items'].first['sku'] : item['sku']} was removed using the REMOVE barcode", @current_user.try(:username), @on_ex)
+        item = @on_ex.blank? ? @single_order.get_unscanned_items(limit: nil).first : @single_order.get_unscanned_items(limit: nil).find { |itm| itm['product_id'] == @extras[:product_id]}
+        child_item = @on_ex.blank? ? item['child_items'].first : item['child_items'].find{ |kit| kit['product_id'] == @extras[:kit_product_id]} if item['product_type'] == 'individual'
+
+        qty = item['product_type'] == 'individual' ? remove_kit_product_item_from_order(child_item) : remove_skippable_product(item)
+        @single_order.addactivity("QTY #{qty} of SKU #{item['product_type'] == 'individual' ? child_item['sku'] : item['sku']} was removed using the REMOVE barcode", @current_user.try(:username), @on_ex)
       end
       do_if_barcode_found
     end
