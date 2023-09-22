@@ -22,6 +22,7 @@ module Groovepacker
               product_import.store_id = params[:store_id]
             end
             product_import.status = 'processing_csv'
+            product_import.cancel = false
             product_import.success = @success
             product_import.current_sku = ''
             product_import.total = final_record.length
