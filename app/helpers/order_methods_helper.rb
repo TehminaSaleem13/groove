@@ -473,7 +473,7 @@ module OrderMethodsHelper
       post_data['shipFrom'] = {'street1'=> ss_credential.street1, 'city'=> ss_credential.city, 'country'=> ss_credential.country, 'name'=> ss_credential.full_name, 'postalCode'=> ss_credential.postcode, 'state'=> ss_credential.state}
       response = ss_client.create_label_for_order(post_data)
       if response['labelData'].present?
-        file_name = "SS_Label_#{post_data['orderId']}.pdf"
+        file_name = "SS_Label_#{post_data['orderId']}_#{Time.current.to_i.to_s}.pdf"
         label_data = Base64.decode64(response['labelData'])
         GroovS3.create_pdf(Apartment::Tenant.current, file_name, label_data)
         result[:dimensions] = '4x6'
