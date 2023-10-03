@@ -89,6 +89,7 @@ module Groovepacker
       def order_export_row_map
         export_row_map = {
           order_number: '',
+          store_name: '',
           order_date_time: '',
           sku: '',
           product_name: '',
