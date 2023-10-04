@@ -464,6 +464,15 @@ Groovepacks::Application.routes.draw do
       post '/orders_update' => 'webhooks#orders_update'
     end
   end
+  
+  resources :print_pdf_links do
+    collection do
+      get 'get_pdf_list'
+    end
+    member do
+      put 'update_is_printed'
+    end
+  end
 
   get '*path' => redirect('/')
   post '*path' => redirect('/')

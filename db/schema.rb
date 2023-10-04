@@ -771,6 +771,14 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.index ["user_id"], name: "index_packing_cams_on_user_id"
   end
 
+  create_table "print_pdf_links", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.text "url", limit: 4294967295
+    t.boolean "is_pdf_printed", default: false
+    t.string "pdf_name"
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
   create_table "printing_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "product_barcode_label_size", default: "3 x 1"
     t.datetime "created_at", null: false
