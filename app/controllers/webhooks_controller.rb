@@ -27,25 +27,24 @@ class WebhooksController < ApplicationController
 
   private
 
-    def verify_webhook
-      data = request.body.read
-      hmac_header = request.headers['X-Shopify-Hmac-SHA256']
-      digest = OpenSSL::Digest.new('sha256')
-      calculated_hmac = Base64.strict_encode64(OpenSSL::HMAC.digest(digest, ENV['SHOPIFY_SHARED_SECRET'], data))
-      head :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(calculated_hmac, hmac_header)
-      request.body.rewind
-    end
+  def verify_webhook
+    data = request.body.read
+    hmac_header = request.headers['X-Shopify-Hmac-SHA256']
+    digest = OpenSSL::Digest.new('sha256')
+    calculated_hmac = Base64.strict_encode64(OpenSSL::HMAC.digest(digest, ENV['SHOPIFY_SHARED_SECRET'], data))
+    head :unauthorized unless ActiveSupport::SecurityUtils.secure_compare(calculated_hmac, hmac_header)
+    request.body.rewind
+  end
 
-    def handle_and_enqueue_order_import
-      uri =  request.headers['host']
-      if uri.present?
-        subdomain = uri&.split('.')[0] 
-        store_name = request.headers['x-shopify-shop-domain'].split('.')[0]
-        ImportOrdersJob.perform_later(store_name, subdomain, "regular", nil) if subdomain.present?
-      else
-        Rollbar.error(request)
-      end
-      render json: {success: true}.to_json
+  def handle_and_enqueue_order_import
+    uri =  request.headers['host']
+    if uri.present?
+      subdomain = uri&.split('.')[0] 
+      store_name = request.headers['x-shopify-shop-domain'].split('.')[0]
+      ImportOrdersJob.perform_later(store_name, subdomain, params[:name]) if subdomain.present?
+    else
+      Rollbar.error(request)
     end
-  
+    render json: {success: true}.to_json
+  end
 end
