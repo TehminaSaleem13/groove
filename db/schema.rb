@@ -777,6 +777,8 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.string "pdf_name"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "height"
+    t.integer "width"
   end
 
   create_table "printing_settings", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

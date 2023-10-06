@@ -13,7 +13,8 @@ class PrintPdfLinksController < ApplicationController
         pdf_data = extract_pdf_data(uri)
         GroovS3.create_pdf(Apartment::Tenant.current, file_name, pdf_data)
         pdf_url = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
-        @pdf_link = PrintPdfLink.new(url: pdf_url, is_pdf_printed: false, pdf_name: item["name"])
+        @pdf_link = PrintPdfLink.new(url: pdf_url, is_pdf_printed: false, pdf_name: item["name"],
+                                     width: item["width"], height: item["height"])
       end
       
       if @pdf_link.save
@@ -64,7 +65,9 @@ class PrintPdfLinksController < ApplicationController
         product_hash = {'url' => pdf.url, 
         'is_pdf_printed' =>  pdf.is_pdf_printed,
         'pdf_name' => pdf.pdf_name,
-        'id' => pdf.id}
+        'id' => pdf.id,
+        'pdf_width' => pdf.width,
+        'pdf_height' => pdf.height}
         result.push(product_hash)
       end
       result
