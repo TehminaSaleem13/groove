@@ -37,14 +37,13 @@ class WebhooksController < ApplicationController
   end
 
   def handle_and_enqueue_order_import
-    uri =  request.headers['host']
-    if uri.present?
-      subdomain = uri&.split('.')[0] 
-      store_name = request.headers['x-shopify-shop-domain'].split('.')[0]
-      ImportOrdersJob.perform_later(store_name, subdomain, params[:name]) if subdomain.present?
+    store_name = request.headers['x-shopify-shop-domain']&.split('.').try(:[], 0)
+
+    if store_name
+      ImportOrdersJob.set(priority: 95, queue: "shopify_webhook_import_#{Apartment::Tenant.current}_#{params[:name]}").perform_later(store_name, Apartment::Tenant.current, params[:name])
     else
       Rollbar.error(request)
     end
-    render json: {success: true}.to_json
+    render json: { success: true }.to_json
   end
 end

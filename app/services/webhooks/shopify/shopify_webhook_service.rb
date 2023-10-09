@@ -29,7 +29,7 @@ module Webhooks
         attrs_list = [
           {
             "webhook": {
-              "address": "https://#{Apartment::Tenant.current}.groovepackerapi.com/webhooks/orders_create",
+              "address": "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/orders_create",
               "topic": 'orders/create',
               "format": 'json',
               "fields": ['id',"name"]
@@ -37,14 +37,14 @@ module Webhooks
           },
           {
             "webhook": {
-              "address": "https://#{Apartment::Tenant.current}.groovepackerapi.com/webhooks/orders_update",
+              "address": "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/orders_update",
               "topic": 'orders/updated',
               "format": 'json',
               "fields": ['id',"name"]
             }
           }
         ]
-        
+
         attrs_list.each { |attrs| @client.register_webhook(attrs) }
       end
 

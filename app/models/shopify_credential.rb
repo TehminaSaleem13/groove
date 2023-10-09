@@ -10,7 +10,7 @@ class ShopifyCredential < ActiveRecord::Base
 
   include AhoyEvent
   after_commit :log_events
-  after_save :activate_webhooks, :de_activate_webhooks
+  # after_save :activate_webhooks, :de_activate_webhooks
 
   serialize :temp_cookies, Hash
 
@@ -39,17 +39,17 @@ class ShopifyCredential < ActiveRecord::Base
     puts e.backtrace.join(', ')
   end
 
-  def activate_webhooks
-    return if !webhook_order_import_changed?(from: false, to: true) 
-    
-    Webhooks::Shopify::ShopifyWebhookService.new(self).activate_webhooks
-  end
+  # def activate_webhooks
+  #   return if !webhook_order_import_changed?(from: false, to: true)
 
-  def de_activate_webhooks
-    return unless webhook_order_import_changed?(from: true, to: false)
-    
-    Webhooks::Shopify::ShopifyWebhookService.new(self).de_activate_webhooks
-  end
+  #   Webhooks::Shopify::ShopifyWebhookService.new(self).activate_webhooks
+  # end
+
+  # def de_activate_webhooks
+  #   return unless webhook_order_import_changed?(from: true, to: false)
+
+  #   Webhooks::Shopify::ShopifyWebhookService.new(self).de_activate_webhooks
+  # end
 
   def push_inv_location
     @push_inv_location ||= locations.find { |loc| loc['id'] == push_inv_location_id } || locations.first

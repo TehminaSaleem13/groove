@@ -3,29 +3,23 @@ require 'rails_helper'
 RSpec.describe ImportOrdersJob do
 
   describe '#perform' do
-    let(:store_name) { 'gpmarch' }
-    let(:current_tenant) { 'gp55' }
+    let(:tenant) { create(:tenant, name: Apartment::Tenant.current) }
+    let(:tenant_name) { tenant.name }
+    let(:shopify_store) { create(:store, :shopify) }
     let(:order_number) { '12345' }
-    let(:inventory_warehouse) { create(:inventory_warehouse, is_default: true) }
-    let(:store) { create(:store, status: true, store_type: 'Shopify', inventory_warehouse: inventory_warehouse) }
-    let(:credential) { create(:shopify_credential, store: store, shop_name: 'gpmarch', access_token: 'shopifytestshopifytestshopifytestshopi', webhook_order_import: true) }
-    
+    let(:context) { instance_double('Groovepacker::Stores::Context') }
+    let(:shopify_credential) { shopify_store.shopify_credential }
+
     before do
-      allow(Apartment::Tenant).to receive(:switch!)
-      allow(ShopifyCredential).to receive(:find_by).with(shop_name: store_name).and_return(credential)
+      allow(Groovepacker::Stores::Context).to receive(:new).and_return(context)
+      shopify_credential.update(webhook_order_import: true)
+      allow(context).to receive(:import_single_order_from)
     end
 
-    context 'when current_tenant is not blank' do
-      before do
-        allow(Apartment::Tenant).to receive(:switch!)
-      end
-
-      context 'when ShopifyCredential is found' do
-        it 'creates an ImportItem and imports the order' do
-
-          importer = described_class.new(store_name, current_tenant, order_number)
-          expect(importer.send(:perform,store_name, current_tenant, order_number)).not_to be_nil
-        end
+    context 'when order should be imported' do
+      it 'initiates the import' do
+        described_class.new.perform(shopify_credential.shop_name, tenant_name, order_number)
+        expect(context).to have_received(:import_single_order_from).with(order_number)
       end
     end
   end
