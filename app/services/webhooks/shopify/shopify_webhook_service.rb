@@ -32,7 +32,7 @@ module Webhooks
               "address": "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/orders_create",
               "topic": 'orders/create',
               "format": 'json',
-              "fields": ['id',"name"]
+              "fields": %w[id name]
             }
           },
           {
@@ -40,7 +40,7 @@ module Webhooks
               "address": "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/orders_update",
               "topic": 'orders/updated',
               "format": 'json',
-              "fields": ['id',"name"]
+              "fields": %w[id name]
             }
           }
         ]

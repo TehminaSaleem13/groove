@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20230823134827) do
+ActiveRecord::Schema.define(version: 20231005072729) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1241,9 +1241,9 @@ ActiveRecord::Schema.define(version: 20230823134827) do
     t.string "re_associate_shopify_products", default: "associate_items"
     t.boolean "import_variant_names", default: false
     t.bigint "push_inv_location_id"
-    t.boolean "webhook_order_import", default: false
     t.bigint "pull_inv_location_id"
     t.boolean "pull_combined_qoh", default: false
+    t.boolean "webhook_order_import", default: false
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

@@ -102,27 +102,27 @@ RSpec.describe ShopifyCredential, type: :model do
     end
   end
 
-  # describe '#activate_webhooks' do
-  #   it 'calls activate_webhooks on ShopifyWebhookService' do
-  #     webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
-  #     allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
-  #     allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
+  describe '#activate_webhooks' do
+    it 'calls activate_webhooks on ShopifyWebhookService' do
+      webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
+      allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
+      allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
 
-  #     expect(webhook_service).to receive(:activate_webhooks)
+      expect(webhook_service).to receive(:activate_webhooks)
 
-  #     shopify_credential.activate_webhooks
-  #   end
-  # end
+      shopify_credential.activate_webhooks
+    end
+  end
 
-  # describe '#de_activate_webhooks' do
-  #   it 'calls de_activate_webhooks on ShopifyWebhookService' do
-  #     webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
-  #     allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
-  #     allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
+  describe '#de_activate_webhooks' do
+    it 'calls de_activate_webhooks on ShopifyWebhookService' do
+      webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
+      allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
+      allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
 
-  #     expect(webhook_service).to receive(:de_activate_webhooks)
+      expect(webhook_service).to receive(:de_activate_webhooks)
 
-  #     shopify_credential.de_activate_webhooks
-  #   end
-  # end
+      shopify_credential.de_activate_webhooks
+    end
+  end
 end

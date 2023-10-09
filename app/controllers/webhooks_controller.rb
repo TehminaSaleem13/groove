@@ -38,8 +38,9 @@ class WebhooksController < ApplicationController
 
   def handle_and_enqueue_order_import
     store_name = request.headers['x-shopify-shop-domain']&.split('.').try(:[], 0)
+    credential = ShopifyCredential.joins(:store).find_by(stores: { status: true }, shop_name: store_name)
 
-    if store_name
+    if credential&.webhook_order_import
       ImportOrdersJob.set(priority: 95, queue: "shopify_webhook_import_#{Apartment::Tenant.current}_#{params[:name]}").perform_later(store_name, Apartment::Tenant.current, params[:name])
     else
       Rollbar.error(request)
