@@ -126,6 +126,8 @@ class Store < ActiveRecord::Base
     if store_type == 'Shopify'
       @result['shopify_credentials'] = shopify_credential
       @result['shopify_locations'] = shopify_credential.locations
+      @result['shopify_create_order_hook_url'] = 'https://' + Apartment::Tenant.current + '.' + ENV['SITE_HOST'] + '/orders_create'
+      @result['shopify_update_order_hook_url'] = 'https://' + Apartment::Tenant.current + '.' + ENV['SITE_HOST'] + '/orders_update'
       if shopify_credential.access_token.in? [nil, 'null', 'undefined']
         shopify_handle = Groovepacker::ShopifyRuby::Utilities.new(shopify_credential)
         @result['shopify_permission_url'] = shopify_handle.permission_url(Apartment::Tenant.current)
