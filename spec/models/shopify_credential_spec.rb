@@ -40,27 +40,27 @@ RSpec.describe ShopifyCredential, type: :model do
   end
 
   describe 'Callbacks' do
-    # describe 'after_save' do
-    #   context 'when webhook_order_import changes from true to false' do
-    #     it 'calls de_activate_webhooks on ShopifyWebhookService' do
-    #       shopify_credential = create(:shopify_credential, webhook_order_import: true)
+    describe 'after_save' do
+      context 'when webhook_order_import changes from true to false' do
+        it 'calls de_activate_webhooks on ShopifyWebhookService' do
+          shopify_credential = create(:shopify_credential, webhook_order_import: true)
 
-    #       expect_any_instance_of(Webhooks::Shopify::ShopifyWebhookService).to receive(:de_activate_webhooks)
+          expect_any_instance_of(Webhooks::Shopify::ShopifyWebhookService).to receive(:de_activate_webhooks)
 
-    #       shopify_credential.update(webhook_order_import: false)
-    #     end
-    #   end
+          shopify_credential.update(webhook_order_import: false)
+        end
+      end
 
-    #   context 'when webhook_order_import changes from false to true' do
-    #     it 'calls activate_webhooks on ShopifyWebhookService' do
-    #       shopify_credential = create(:shopify_credential, webhook_order_import: false)
+      context 'when webhook_order_import changes from false to true' do
+        it 'calls activate_webhooks on ShopifyWebhookService' do
+          shopify_credential = create(:shopify_credential, webhook_order_import: false)
 
-    #       expect_any_instance_of(Webhooks::Shopify::ShopifyWebhookService).to receive(:activate_webhooks)
+          expect_any_instance_of(Webhooks::Shopify::ShopifyWebhookService).to receive(:activate_webhooks)
 
-    #       shopify_credential.update(webhook_order_import: true)
-    #     end
-    #   end
-    # end
+          shopify_credential.update(webhook_order_import: true)
+        end
+      end
+    end
 
     it 'triggers log_events' do
       expect(shopify_credential).to receive(:log_events)
