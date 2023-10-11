@@ -378,6 +378,7 @@ module OrderMethodsHelper
     order_ss_label_data['presets'] = ss_rest_credential.presets
     order_ss_label_data['weight'] = { 'value' => nil, 'units' => 'ounces', 'WeightUnits' => 1 } if order_ss_label_data['weight'].nil?
     order_ss_label_data['dimensions'] = { 'length' => nil, 'width' => nil, 'height' => nil, 'units' => 'cm' } if order_ss_label_data['dimensions'].nil?
+    order_ss_label_data['reprint_dimensions'] = '4x6'
     order_ss_label_data['available_carriers'].each do |carrier|
       carrier['visible'] = !(ss_rest_credential.disabled_carriers.include? carrier['code'])
       carrier['expanded'] = !(ss_rest_credential.contracted_carriers.include? carrier['code'])
