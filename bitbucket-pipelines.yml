@@ -229,7 +229,7 @@ pipelines:
               FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
               WAIT: 'true'
               DEBUG: 'true'
-          # - pipe: rollbar/rollbar-notify:0.2.8
-          #   variables:
-          #     ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
-          #     ROLLBAR_ENVIRONMENT: 'production'
+          - pipe: rollbar/rollbar-notify:0.2.8
+            variables:
+              ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
+              ROLLBAR_ENVIRONMENT: 'production'
