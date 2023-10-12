@@ -519,7 +519,7 @@ module OrderMethodsHelper
   end
 
   def store_shipping_label_data(store_order_id, url, shipment_id)
-    return if Tenant.find_by_name(Apartment::Tenant.current)&.test_tenant_toggle
+    return if shipment_id == -1
 
     associated_order = Order.find_by(store_order_id: store_order_id)
     associated_order&.shipping_labels&.create(url: url, shipment_id: shipment_id)
