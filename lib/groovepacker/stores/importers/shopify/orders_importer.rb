@@ -86,11 +86,9 @@ module Groovepacker
               update_import_count('success_updated') && return if is_scanned || (order_in_gp.last_modified == Time.zone.parse(order['updated_at']))
               order_in_gp.order_items.destroy_all
             else
-              order_in_gp = Order.new(increment_id: order['name'], store: @store)
+              order_in_gp = Order.create(increment_id: order['name'], store: @store, store_order_id: order['id'].to_s)
             end
-            Order.transaction do
-              import_order_and_items(order, order_in_gp)
-            end
+            import_order_and_items(order, order_in_gp)
             # #create order
             # shopify_order = Order.new(store: @store)
             # shopify_order = import_order(shopify_order, order)
