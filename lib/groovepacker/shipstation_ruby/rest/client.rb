@@ -155,6 +155,17 @@ module Groovepacker
           response
         end
 
+        def void_label(shipment_id)
+          response = {}
+          data['shipmentId'] = shipment_id
+          begin
+            response = @service.query('/shipments/voidlabel', data, 'post', 'create_label')
+          rescue StandardError => e
+            puts e
+          end
+          response
+        end
+
         def get_ss_label_rates(data)
           response = {}
           begin
