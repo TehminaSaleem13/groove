@@ -1,5 +1,6 @@
 # frozen_string_literal: true
 
+ENV['SHOPIFY_WEBHOOK_VERSION'] ||= '2023-10'
 ENV['SHOPIFY_API_VERSION'] ||= '2022-10'
 ENV['SHOPIFY_GRAPHQL_API_VERSION'] ||= '2023-01'
 
