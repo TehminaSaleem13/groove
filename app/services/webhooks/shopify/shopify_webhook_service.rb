@@ -9,8 +9,8 @@ module Webhooks
 
       def activate_webhooks
         hooks_address = @client.list_webhooks&.map { |hook| hook['address'] } || []
-        return if has_minimum_matching_address?(hooks_address, 2)
-       
+        return if has_minimum_matching_address?(hooks_address)
+
         register_default_webhooks
       end
 
@@ -24,8 +24,8 @@ module Webhooks
         [order_create_webhook, order_update_webhook]
       end
 
-      def has_minimum_matching_address?(hooks_address, min_count)
-        (webhook_address_list & hooks_address).size >= min_count
+      def has_minimum_matching_address?(hooks_address)
+        webhook_address_list.all? { |address| address.in? hooks_address }
       end
 
       def order_create_webhook
@@ -60,9 +60,8 @@ module Webhooks
       end
 
       def delete_matching_webhooks
-        @client.list_webhooks&.each do |webhook|
-          @client.delete_webhook(webhook['id']) if webhook_address_list.include?(webhook['address'])
-        end
+        webhooks = @client.list_webhooks&.select { |webhook| webhook_address_list.include?(webhook['address']) }
+        webhooks.each { |webhook| @client.delete_webhook(webhook['id']) }
       end
     end
   end
