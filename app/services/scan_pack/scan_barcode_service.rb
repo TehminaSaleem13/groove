@@ -21,8 +21,8 @@ module ScanPack
 
     def scan_barcode
       do_set_state_matcher
-      do_scan_now
       do_check_state_and_status_to_add_activity
+      do_scan_now
       if @result['data'].present? && @result['data']['order'].present? && !@params[:app]
         order = Order.find_by_increment_id(@result['data']['order']['increment_id'])
         @result['data']['order']['store_type'] = begin
