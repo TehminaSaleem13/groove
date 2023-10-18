@@ -106,10 +106,8 @@ module Groovepacker
       end
 
       def product(product_id)
-        response = HTTParty.get('https://' + shopify_credential.shop_name +
-                                  '.myshopify.com/admin/products/' + product_id.to_s,
-                                headers: headers)
-        response
+        result = fetch_from_shopify { ShopifyAPI::Product.find(session: session, id: product_id) }
+        result.success? ? result.response.as_json : {}
       end
 
       def get_variant(product_variant_id)

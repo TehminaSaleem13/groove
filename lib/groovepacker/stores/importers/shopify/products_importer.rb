@@ -51,8 +51,11 @@ module Groovepacker
           def import_single_product(item)
             initialize_import_objects
             fetch_product(item)
-            if @shopify_product.present?
-              if !custom_shopify_item?(item)
+            if @shopify_product.present? || not_associated_with_product?(item)
+              if custom_shopify_item?(item) || not_associated_with_product?(item)
+                variant = item
+                assign_attr_to_variant_for_custom_item(variant, item)
+              elsif !custom_shopify_item?(item)
                 variant = @shopify_product['variants'].select { |variant| variant['id'] == item['variant_id'] }.first
 
                 # If variant not found by id find by sku
@@ -63,25 +66,22 @@ module Groovepacker
                   log = { item: item, Time: Time.zone.now, shopify_product: @shopify_product }
                   on_demand_logger.info(log)
                 end
-              elsif custom_shopify_item?(item)
-                variant = item
-                assign_attr_to_variant_for_custom_item(variant, item)
               end
               begin
                 variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
                 variant['title'] = @credential.import_variant_names ? item['title'] : item['name']
                 product = create_product_from_variant(variant, @shopify_product)
-              rescue StandardError
+              rescue StandardError => e
                 product = nil
               end
-              product.update_columns(custom_product_1:variant_title, custom_product_display_1:true) if variant_title.present? && product
+              product.update_columns(custom_product_1: variant_title, custom_product_display_1: true) if variant_title.present? && product
             end
             product
           end
 
           def fetch_product(item)
             shopify_product = @client.product(item['product_id'])
-            if shopify_product['product'].blank?
+            if shopify_product.blank?
               loop_count = 0
               loop do
                 loop_count += 1
@@ -90,7 +90,7 @@ module Groovepacker
               end
             end
 
-            if shopify_product['product'].blank?
+            if shopify_product.blank?
               on_demand_logger = Logger.new("#{Rails.root}/log/shopify_product_import_#{Apartment::Tenant.current}.log")
               log = { item: item, Time: Time.zone.now, shopify_product: shopify_product }
               on_demand_logger.info(log)
@@ -98,7 +98,7 @@ module Groovepacker
 
             return @shopify_product = item if custom_shopify_item?(item)
 
-            @shopify_product = shopify_product['product']
+            @shopify_product = shopify_product || {}
           end
 
           private
@@ -112,8 +112,11 @@ module Groovepacker
           end
 
           def custom_shopify_item?(item)
-            item['fulfillable_quantity']&.positive? && !item['gift_card'] && item['product_id'].nil? &&
-              item['sku'].nil? && !item['product_exists'] && item['variant_id'].nil?
+            not_associated_with_product?(item) && item['sku'].nil? && item['fulfillable_quantity']&.positive?
+          end
+
+          def not_associated_with_product?(item)
+            !item['gift_card'] && item['product_id'].nil? && !item['product_exists'] && item['variant_id'].nil?
           end
 
           def create_single_product(shopify_product)

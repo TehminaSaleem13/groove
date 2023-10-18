@@ -1,73 +1,72 @@
 ---
-product:
-  id: 5028822646843
-  title: ShopifyProduct
-  body_html: Shopify Test Product
-  vendor: GPMARCH20
-  product_type: ''
+id: 5028822646843
+title: ShopifyProduct
+body_html: Shopify Test Product
+vendor: GPMARCH20
+product_type: ''
+created_at: '2020-09-11T07:17:40-04:00'
+handle: shopify-test-product
+updated_at: '2020-09-11T07:31:01-04:00'
+published_at: '2020-09-11T07:17:42-04:00'
+template_suffix: ''
+published_scope: web
+tags: ''
+admin_graphql_api_id: gid://shopify/Product/5028822646843
+variants:
+- id: 34184551530555
+  product_id: 5028822646843
+  title: Default Title
+  price: '10.00'
+  sku: ShopifyProduct
+  position: 1
+  inventory_policy: deny
+  compare_at_price: 
+  # fulfillment_service: manual
+  inventory_management: shopify
+  option1: Default Title
+  option2: 
+  option3: 
   created_at: '2020-09-11T07:17:40-04:00'
-  handle: shopify-test-product
-  updated_at: '2020-09-11T07:31:01-04:00'
-  published_at: '2020-09-11T07:17:42-04:00'
-  template_suffix: ''
-  published_scope: web
-  tags: ''
-  admin_graphql_api_id: gid://shopify/Product/5028822646843
-  variants:
-  - id: 34184551530555
-    product_id: 5028822646843
-    title: Default Title
-    price: '10.00'
-    sku: ShopifyProduct
-    position: 1
-    inventory_policy: deny
-    compare_at_price: 
-    # fulfillment_service: manual
-    inventory_management: shopify
-    option1: Default Title
-    option2: 
-    option3: 
-    created_at: '2020-09-11T07:17:40-04:00'
-    updated_at: '2020-09-11T07:29:50-04:00'
-    taxable: true
-    barcode: ShopifyProduct
-    grams: 227
-    image_id: 
-    weight: 0.5
-    weight_unit: lb
-    inventory_item_id: 35739568996411
-    inventory_quantity: 53
-    old_inventory_quantity: 53
-    requires_shipping: true
-    admin_graphql_api_id: gid://shopify/ProductVariant/34184551530555
-  options:
-  - id: 6471990542395
-    product_id: 5028822646843
-    name: Title
-    position: 1
-    values:
-    - Default Title
-  images:
-  - id: 16867173367867
-    product_id: 5028822646843
-    position: 1
-    created_at: '2020-09-11T07:17:41-04:00'
-    updated_at: '2020-09-11T07:17:41-04:00'
-    alt: 
-    width: 1000
-    height: 1773
-    src: https://cdn.shopify.com/s/files/1/0349/7135/3147/products/photo-1582117724767-7295b360983f.jpg?v=1599823061
-    variant_ids: []
-    admin_graphql_api_id: gid://shopify/ProductImage/16867173367867
-  image:
-    id: 16867173367867
-    product_id: 5028822646843
-    position: 1
-    created_at: '2020-09-11T07:17:41-04:00'
-    updated_at: '2020-09-11T07:17:41-04:00'
-    alt: 
-    width: 1000
-    height: 1773
-    src: https://cdn.shopify.com/s/files/1/0349/7135/3147/products/photo-1582117724767-7295b360983f.jpg?v=1599823061
-    variant_ids: []
-    admin_graphql_api_id: gid://shopify/ProductImage/16867173367867
+  updated_at: '2020-09-11T07:29:50-04:00'
+  taxable: true
+  barcode: ShopifyProduct
+  grams: 227
+  image_id: 
+  weight: 0.5
+  weight_unit: lb
+  inventory_item_id: 35739568996411
+  inventory_quantity: 53
+  old_inventory_quantity: 53
+  requires_shipping: true
+  admin_graphql_api_id: gid://shopify/ProductVariant/34184551530555
+options:
+- id: 6471990542395
+  product_id: 5028822646843
+  name: Title
+  position: 1
+  values:
+  - Default Title
+images:
+- id: 16867173367867
+  product_id: 5028822646843
+  position: 1
+  created_at: '2020-09-11T07:17:41-04:00'
+  updated_at: '2020-09-11T07:17:41-04:00'
+  alt: 
+  width: 1000
+  height: 1773
+  src: https://cdn.shopify.com/s/files/1/0349/7135/3147/products/photo-1582117724767-7295b360983f.jpg?v=1599823061
+  variant_ids: []
+  admin_graphql_api_id: gid://shopify/ProductImage/16867173367867
+image:
+  id: 16867173367867
+  product_id: 5028822646843
+  position: 1
+  created_at: '2020-09-11T07:17:41-04:00'
+  updated_at: '2020-09-11T07:17:41-04:00'
+  alt: 
+  width: 1000
+  height: 1773
+  src: https://cdn.shopify.com/s/files/1/0349/7135/3147/products/photo-1582117724767-7295b360983f.jpg?v=1599823061
+  variant_ids: []
+  admin_graphql_api_id: gid://shopify/ProductImage/16867173367867
