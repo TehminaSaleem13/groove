@@ -262,7 +262,7 @@ module OrderConcern
   def generate_barcode_for_packingslip
     GenerateBarcode.where('updated_at < ?', 24.hours.ago).delete_all
     generate_barcode = GenerateBarcode.generate_barcode_for(@orders, current_user)
-    delayed_job = GeneratePackingSlipPdf.delay(run_at: 1.seconds.from_now, queue: 'generate_packing_slip', priority: 95).generate_packing_slip_pdf(@orders, current_tenant, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes)
+    delayed_job = GeneratePackingSlipPdf.delay(run_at: 1.seconds.from_now, queue: 'generate_packing_slip', priority: 95).generate_packing_slip_pdf(@orders, current_tenant, @result, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes, @is_custom_pdf)
     generate_barcode.delayed_job_id = delayed_job.id
     generate_barcode.save
   end

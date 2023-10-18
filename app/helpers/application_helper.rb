@@ -91,6 +91,10 @@ module ApplicationHelper
     when '4 x 2'
       @page_height = '2'
       @page_width = '4'
+    when 'Custom 4 x 6'
+      @page_height = '6'
+      @page_width = '4'
+      @is_custom_pdf = true
     else
       @page_height = '11'
       @page_width = '8.5'

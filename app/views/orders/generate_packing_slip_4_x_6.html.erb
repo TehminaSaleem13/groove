@@ -6264,18 +6264,22 @@
     font-size: 30px;
     line-height: 40px;
     width: 900px;
+    border-collapse: collapse;
+
   }
 
   thead td {
-    border: solid 1px black;
+    border: none;
     font-size: 30px;
-    font-weight: bold;
   }
 
   td {
     vertical-align: top;
     padding: 5px;
-    border: 1px solid #000;
+  }
+
+  table, tr {
+    border: 1px solid;
   }
 
   hr {
@@ -6327,44 +6331,43 @@
         <br>
 
         <div class="span4">
-          <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
-          <br/><br/>
-          <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= order_count %></span>
+          <label style="font-size: 30px; width:110%; color: #000; padding-bottom: 15px;">Total Items:</label>
+          <span style="width:100%; font-size: 70px; margin-left:60px; text-align:center;"><%= order_count %></span>
         </div>
         <div class="span8" style="margin-top: -60px;">
           <div style="width: 750px; margin-left: -70px; text-align: center;"> 
             <% barcode_string = generate_order_barcode(@order.increment_id) %>
             <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
               <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
-            </div><br>
-            <div style= "text-align:center; white-space:nowrap; width: 730px; overflow:hidden; text-overflow: ellipsis;">
-              <p style= "font-size: 60px; text-align:center; width: 100%;"> <%= @order.increment_id %></p>
             </div>
           </div>
           <br>
         </div>
       </div>
-      <br>
 
+      <div class="row" style="display: flex; padding-right: 0px; justify-content: center; align-items: flex-start; gap: 8px; margin-left: 1%;">
+        <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: Inter; height: 64px"><%= GeneralSetting.first.custom_field_one %></span>
+        <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: Inter; margin-left: 2%"><%= GeneralSetting.first.custom_field_two %></span>
+      </div>
+        
       <div class="row">
-        <div class="span6">
+        <div class="span6" style="width: 450px">
             <span>
-              <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
-              <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%= @order.firstname %> <%= @order.lastname %>
+              <span class="span3" style="font-size: 28px; text-align: left; line-height: 35px; color: #000; font-family: Inter;"><%= @order.firstname %> <%= @order.lastname %>
                 <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
               </span>
             </span>
         </div>
         <% order_placed_time = @order.order_placed_time %>
         <% date = order_placed_time.to_s.split(" ")[0] %>
-        <div class="span6">
-          <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis;">
-            <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
-            <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
+
+        <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px">
+          <div class="row" style="white-space:nowrap; overflow:hidden; width:500px; text-overflow: ellipsis; margin-left: 7%;">
+            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: Inter;">Order #: <%= @order.increment_id.strip %></span>
           </div>
-          <div class="row">
-            <span class="span2" style="font-size: 25px; text-align: right;"><strong>Date</strong></span>
-            <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
+          <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis; margin-left: auto; margin-right: 0px">
+            <span class="span1" style="font-size: 25px; text-align: right;"></span>
+            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: Inter;"><%= date %></span>
           </div>
         </div>
         <!-- <div class="span2" style="text-align: right;">
@@ -6383,27 +6386,29 @@
       <br>
 
       <div class="span12">
-        <table width="100">
+        <table width="120">
           <thead>
           <td colspan="2"> Item</td>
           <td> Description</td>
-          <td style="white-space: nowrap;"> Pr Loc.</td>
-          <td>
+          <td style="white-space: nowrap;">Loc.</td>
+          <td style="font-weight: 400; color: #000; font-family: Inter;font-size: 35px;">
             <center> Qty</center>
           </td>
           </thead>
 
           <% order_items.each do |order_item| %>
             <% unless order_item.product.is_intangible %>
-              <tr>
-                <td colspan="2"><%= order_item.product.primary_sku %></td>
-                <td><%= order_item.product.name %></td>
-                <td>
-                  <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
-                    <%= warehouse.location_primary %>
-                  <% end %>
+              <tr>  
+                <td colspan="2" style="max-width: 200px; color: #000; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= order_item.product.primary_sku %></td>
+                  <td style="max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                  <%= order_item.product.name %>
+                  </td>
+                <td style="max-width: 100px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                    <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
+                      <%= warehouse.location_primary %>
+                    <% end %> 
                 </td>
-                <td>
+                <td style="color: #000; font-family: Inter;font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
                   <center><%= order_item.qty %></center>
                 </td> 
               </tr> 
@@ -6483,46 +6488,47 @@
         <div class="row">
           <br>
 
-          <div class="span4">
-            <span style="font-size: 80px;"><%= box.name %></span>
-            <label style="margin-top: 30px; margin-left: 30px; font-size: 30px;width:100%;">Total Items:</label>
-            <br/><br/>
-            <span style="width:100%;font-size: 160px; margin-left:60px; text-align:center;"><%= box.order_item_boxes.map(&:item_qty).sum rescue order_count %></span>
+          <div class="span2" style="margin-left: -40px;">
+            <label style="font-size: 25px; color: #000; padding-bottom: 15px;">Box:</label>
+            <span style="margin-left:50px; font-family: Inter; font-size: 60px; color: #000; text-align:center;"><%= @boxes.length %></span>
+          </div>
+          <div class="span3" style="margin-left: -40px;">
+            <label style="font-size: 25px; color: #000; padding-bottom: 15px;">Total Items:</label>
+            <span style="margin-left:50px; font-family: Inter; font-size: 60px; color: #000; text-align:center;"><%= box.order_item_boxes.map(&:item_qty).sum rescue order_count %></span>
           </div>
           <div class="span8" style="margin-top: -60px;">
           <div style="width: 750px; margin-left: -70px; text-align: center;"> 
             <% barcode_string = generate_order_barcode(@order.increment_id) %>
             <div style="margin-top: 30px;margin-bottom: 0px; margin-left: auto; margin-right: auto; padding-bottom: 0px; position:relative; height:150px; width:550px; overflow:hidden;">
               <div style="position:absolute; top:0; left:0; right: 0; margin: 0 auto; width: 550px;">&nbsp;<%= pdf_image_tag(barcode_string+".png", {:width => 550}) %></div>
-            </div><br>
-            <div style= "text-align:center; white-space:nowrap; width: 730px; overflow:hidden; text-overflow:ellipsis; ">
-              <p style= "font-size: 60px; text-align:center; width: 100%;"> <%= @order.increment_id %></p>
             </div>
           </div>
           <br>
         </div>
         </div>
-        <br>
+
+        <div class="row" style="display: flex; padding-right: 0px; justify-content: center; align-items: flex-start; gap: 8px; margin-left: 1%;">
+          <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: Inter; height: 64px"><%= GeneralSetting.first.custom_field_one %></span>
+          <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: Inter; margin-left: 2%"><%= GeneralSetting.first.custom_field_two %></span>
+        </div>
 
         <div class="row">
-          <div class="span6">
+          <div class="span6" style="width: 450px">
               <span>
-                <span class="span2" style="font-size: 25px; text-align: left;"><strong>Ship To:</strong></span>
-                <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px;"><%= @order.firstname %> <%= @order.lastname %>
+                <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px; color: #000; font-family: Inter;"><%= @order.firstname %> <%= @order.lastname %>
                   <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
                 </span>
               </span>
           </div>
           <% order_placed_time = @order.order_placed_time %>
           <% date = order_placed_time.to_s.split(" ")[0] %>
-          <div class="span6">
-            <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis;">
-              <span class="span2" style="font-size: 25px; text-align: right;"><strong>Order#</strong></span>
-              <span class="span4" style="font-size: 25px; text-align: left;"><%= @order.increment_id %></span>
+          <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px">
+            <div class="row" style="white-space:nowrap; overflow:hidden; width:500px; text-overflow: ellipsis; margin-left: 7%;">
+              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: Inter; width: 100px">Order #: <%= @order.increment_id.strip %> </span>
             </div>
-            <div class="row">
-              <span class="span2" style="font-size: 25px; text-align: right;"><strong>Date</strong></span>
-              <span class="span4" style="font-size: 25px; text-align: left;"><%= date %></span>
+            <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis; margin-left: auto; margin-right: 0px">
+              <span class="span1" style="font-size: 25px; text-align: right;"></span>
+              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: Inter;"><%= date %></span>
             </div>
           </div>
           <!-- <div class="span2" style="text-align: right;">
@@ -6541,34 +6547,32 @@
         <br>
 
         <div class="span12">
-          <table width="100">
+          <table width="120">
             <thead>
             <td colspan="2"> Item</td>
             <td> Description</td>
-            <td style="white-space: nowrap;"> Pr Loc.</td>
-            <td>
+            <td style="white-space: nowrap;">Loc.</td>
+            <td style="font-weight: 400; color: #000; font-family: Inter;font-size: 35px;">
               <center> Qty</center>
             </td>
             </thead>
 
             <% order_items.each do |order_item| %>
               <% unless order_item.product.is_intangible %>
-                <tr>
-                  <td colspan="2"><%= order_item.product.primary_sku %></td>
-                  <td><%= order_item.product.name %></td>
-                  <td>
-                    <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
-                      <%= warehouse.location_primary %>
-                    <% end %>
+                <tr>  
+                  <td colspan="2" style="max-width: 200px; color: #000; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;"><%= order_item.product.primary_sku %></td>
+                    <td style="max-width: 300px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                    <%= order_item.product.name %>
+                    </td>
+                  <td style="max-width: 100px; overflow: hidden; white-space: nowrap; text-overflow: ellipsis;">
+                      <% order_item.product.product_inventory_warehousess.each do |warehouse| %>
+                        <%= warehouse.location_primary %>
+                      <% end %> 
                   </td>
-                  <td>
-                    <% if order_item.product.is_kit? %>
-                      <center><%= order_item.qty %></center>
-                    <% else %>
-                      <center><%= order_item_scanned_qty(order_item, box) %></center>
-                    <% end %>
-                  </td>  
-                </tr>
+                  <td style="color: #000; font-family: Inter;font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
+                    <center><%= order_item.qty %></center>
+                  </td> 
+              </tr> 
               <% end %>
                <%if order_item.product.kit_parsing != 'single' && order_item.order_item_kit_products.any? && get_display_kit_parts %>
                   <% n = order_item.order_item_kit_products.count %>

@@ -554,6 +554,14 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    it 'Print Packing Slip Custom 4 x 6' do
+      order = FactoryBot.create :order, store_id: @store.id
+      @user = FactoryBot.create(:user, name: 'Tester',username: 'packing_slip_tester2', packing_slip_size: 'Custom 4 x 6')
+
+      post :generate_packing_slip, params: { orderArray: [{ id: order.id }] }
+      expect(response.status).to eq(200)
+    end
+
     it 'Print Packing Slip' do
       order = FactoryBot.create :order, store_id: @store.id
       @user = FactoryBot.create(:user, name: 'Tester',username: 'packing_slip_tester1', packing_slip_size: '8.5 x 11')
