@@ -21,8 +21,8 @@ module ScanPack
 
     def scan_barcode
       do_set_state_matcher
-      do_scan_now
       do_check_state_and_status_to_add_activity
+      do_scan_now
       if @result['data'].present? && @result['data']['order'].present? && !@params[:app]
         order = Order.find_by_increment_id(@result['data']['order']['increment_id'])
         @result['data']['order']['store_type'] = begin
@@ -110,7 +110,7 @@ module ScanPack
       if @params[:state] == 'scanpack.rfp.default' && @result['status'] == true
         item_sku = Product.includes(:order_items, :product_barcodes, :product_skus).where.not(order_items: { scanned_status: 'scanned' }).where(product_barcodes: { barcode: @params[:input] }, order_items: { order_id: @order.id }).first&.primary_sku
         item_sku = Product.find_by_id(@params['product_id']).primary_sku if item_sku.blank? && @params['product_id'].present?
-        item_sku ||= ProductKitSkus.joins(order_item_kit_products: { order_item: :order }).joins(option_product: :product_barcodes).find_by(product_barcodes: { barcode: @params[:input] }, order_items: { order_id: @order.id })&.option_product&.primary_sku
+        item_sku ||= ProductKitSkus.joins(order_item_kit_products: { order_item: :order }).joins(option_product: :product_barcodes).find_by(product_barcodes: { barcode: @params[:input] }, order_items: { order_id: @order.id })&.option_product&.primary_sku if item_sku.blank?
         add_activity_for_barcode(item_sku) if item_sku.present?
       end
     end
