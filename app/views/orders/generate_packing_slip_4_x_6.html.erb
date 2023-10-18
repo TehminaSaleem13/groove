@@ -6487,10 +6487,10 @@
 
         <div class="row">
           <br>
-
+          <% box_parts = box.name.split(' ') %>
           <div class="span2" style="margin-left: -40px;">
             <label style="font-size: 25px; color: #000; padding-bottom: 15px;">Box:</label>
-            <span style="margin-left:50px; font-family: Inter; font-size: 60px; color: #000; text-align:center;"><%= @boxes.length %></span>
+            <span style="margin-left:50px; font-family: Inter; font-size: 60px; color: #000; text-align:center;"><%= box_parts[1] %></span>
           </div>
           <div class="span3" style="margin-left: -40px;">
             <label style="font-size: 25px; color: #000; padding-bottom: 15px;">Total Items:</label>
