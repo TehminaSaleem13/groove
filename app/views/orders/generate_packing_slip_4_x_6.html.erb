@@ -6346,14 +6346,14 @@
       </div>
 
       <div class="row" style="display: flex; padding-right: 0px; justify-content: center; align-items: flex-start; gap: 8px; margin-left: 1%;">
-        <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: Inter; height: 64px"><%= GeneralSetting.first.custom_field_one %></span>
-        <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: Inter; margin-left: 2%"><%= GeneralSetting.first.custom_field_two %></span>
+        <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; height: 64px"><%= @order.custom_field_one %></span>
+        <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; margin-left: 2%"><%= @order.custom_field_two %></span>
       </div>
         
       <div class="row">
         <div class="span6" style="width: 450px">
             <span>
-              <span class="span3" style="font-size: 28px; text-align: left; line-height: 35px; color: #000; font-family: Inter;"><%= @order.firstname %> <%= @order.lastname %>
+              <span class="span3" style="font-size: 28px; text-align: left; line-height: 35px; color: #000; font-family: 'Inter';"><%= @order.firstname %> <%= @order.lastname %>
                 <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
               </span>
             </span>
@@ -6363,11 +6363,11 @@
 
         <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px">
           <div class="row" style="white-space:nowrap; overflow:hidden; width:500px; text-overflow: ellipsis; margin-left: 7%;">
-            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: Inter;">Order #: <%= @order.increment_id.strip %></span>
+            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: 'Inter';">Order #: <%= @order.increment_id.strip %></span>
           </div>
           <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis; margin-left: auto; margin-right: 0px">
             <span class="span1" style="font-size: 25px; text-align: right;"></span>
-            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: Inter;"><%= date %></span>
+            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: 'Inter';"><%= date %></span>
           </div>
         </div>
         <!-- <div class="span2" style="text-align: right;">
@@ -6391,7 +6391,7 @@
           <td colspan="2"> Item</td>
           <td> Description</td>
           <td style="white-space: nowrap;">Loc.</td>
-          <td style="font-weight: 400; color: #000; font-family: Inter;font-size: 35px;">
+          <td style="font-weight: 400; color: #000; font-family: 'Inter';font-size: 35px;">
             <center> Qty</center>
           </td>
           </thead>
@@ -6408,7 +6408,7 @@
                       <%= warehouse.location_primary %>
                     <% end %> 
                 </td>
-                <td style="color: #000; font-family: Inter;font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
+                <td style="color: #000; font-family: 'Inter';font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
                   <center><%= order_item.qty %></center>
                 </td> 
               </tr> 
@@ -6490,11 +6490,11 @@
           <% box_parts = box.name.split(' ') %>
           <div class="span2" style="margin-left: -40px;">
             <label style="font-size: 25px; color: #000; padding-bottom: 15px;">Box:</label>
-            <span style="margin-left:50px; font-family: Inter; font-size: 60px; color: #000; text-align:center;"><%= box_parts[1] %></span>
+            <span style="margin-left:50px; font-family: 'Inter'; font-size: 60px; color: #000; text-align:center;"><%= box_parts[1] %></span>
           </div>
           <div class="span3" style="margin-left: -40px;">
             <label style="font-size: 25px; color: #000; padding-bottom: 15px;">Total Items:</label>
-            <span style="margin-left:50px; font-family: Inter; font-size: 60px; color: #000; text-align:center;"><%= box.order_item_boxes.map(&:item_qty).sum rescue order_count %></span>
+            <span style="margin-left:50px; font-family: 'Inter'; font-size: 60px; color: #000; text-align:center;"><%= box.order_item_boxes.map(&:item_qty).sum rescue order_count %></span>
           </div>
           <div class="span8" style="margin-top: -60px;">
           <div style="width: 750px; margin-left: -70px; text-align: center;"> 
@@ -6508,14 +6508,14 @@
         </div>
 
         <div class="row" style="display: flex; padding-right: 0px; justify-content: center; align-items: flex-start; gap: 8px; margin-left: 1%;">
-          <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: Inter; height: 64px"><%= GeneralSetting.first.custom_field_one %></span>
-          <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: Inter; margin-left: 2%"><%= GeneralSetting.first.custom_field_two %></span>
+          <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; height: 64px"><%= @order.custom_field_one %></span>
+          <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; margin-left: 2%"><%= @order.custom_field_two %></span>
         </div>
 
         <div class="row">
           <div class="span6" style="width: 450px">
               <span>
-                <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px; color: #000; font-family: Inter;"><%= @order.firstname %> <%= @order.lastname %>
+                <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px; color: #000; font-family: 'Inter';"><%= @order.firstname %> <%= @order.lastname %>
                   <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
                 </span>
               </span>
@@ -6524,11 +6524,11 @@
           <% date = order_placed_time.to_s.split(" ")[0] %>
           <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px">
             <div class="row" style="white-space:nowrap; overflow:hidden; width:500px; text-overflow: ellipsis; margin-left: 7%;">
-              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: Inter; width: 100px">Order #: <%= @order.increment_id.strip %> </span>
+              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: 'Inter'; width: 100px">Order #: <%= @order.increment_id.strip %> </span>
             </div>
             <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis; margin-left: auto; margin-right: 0px">
               <span class="span1" style="font-size: 25px; text-align: right;"></span>
-              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: Inter;"><%= date %></span>
+              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: 'Inter';"><%= date %></span>
             </div>
           </div>
           <!-- <div class="span2" style="text-align: right;">
@@ -6552,7 +6552,7 @@
             <td colspan="2"> Item</td>
             <td> Description</td>
             <td style="white-space: nowrap;">Loc.</td>
-            <td style="font-weight: 400; color: #000; font-family: Inter;font-size: 35px;">
+            <td style="font-weight: 400; color: #000; font-family: 'Inter';font-size: 35px;">
               <center> Qty</center>
             </td>
             </thead>
@@ -6569,7 +6569,7 @@
                         <%= warehouse.location_primary %>
                       <% end %> 
                   </td>
-                  <td style="color: #000; font-family: Inter;font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
+                  <td style="color: #000; font-family: 'Inter';font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
                     <center><%= order_item.qty %></center>
                   </td> 
               </tr> 
