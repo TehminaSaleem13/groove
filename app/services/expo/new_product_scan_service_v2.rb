@@ -198,9 +198,9 @@ module Expo
     def do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
       barcode_found = false
       unscanned_items.each do |item|
-        if item['product_type'] == 'individual'
+        if item['product_type'] == 'individual' && !item['child_items'].empty?
           barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
-        elsif item['product_type'] == 'single'
+        elsif (item['product_type'] == 'single') || (item['product_type'] == 'individual' && item['child_items'].empty?)
           barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
         end
         break if barcode_found
