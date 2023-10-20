@@ -6354,8 +6354,13 @@
       <div class="row">
         <div class="span6" style="width: 450px">
             <span>
-              <span class="span3" style="font-size: 28px; text-align: left; line-height: 35px; color: #000; font-family: 'Inter';"><%= @order.firstname %> <%= @order.lastname %>
-                <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
+              <span class="span6" style="font-size: 28px; text-align: left; line-height: 35px; color: #000; font-family: 'Inter';">
+                <%= @order.firstname %> <%= @order.lastname %>
+                <br><%= @order.address_1 %> 
+                <% if @order.address_2.present? %>
+                  <br><%= @order.address_2 %>
+                <% end %>
+                <br><%= @order.city %> <%= @order.state %> <%= @order.postcode %>
               </span>
             </span>
         </div>
@@ -6516,10 +6521,14 @@
         <div class="row">
           <div class="span6" style="width: 450px">
               <span>
-                <span class="span3" style="font-size: 25px; text-align: left; line-height: 30px; color: #000; font-family: 'Inter';"><%= @order.firstname %> <%= @order.lastname %>
-                  <br><%= @order.address_1 %> <%= @order.city %><br><%= @order.state %> <%= @order.postcode %>
+                <span class="span6" style="font-size: 28px; text-align: left; line-height: 35px; color: #000; font-family: 'Inter';">
+                  <%= @order.firstname %> <%= @order.lastname %>
+                  <br><%= @order.address_1 %> 
+                  <% if @order.address_2.present? %>
+                    <br><%= @order.address_2 %>
+                  <% end %>
+                  <br><%= @order.city %> <%= @order.state %> <%= @order.postcode %>
                 </span>
-              </span>
           </div>
           <% order_placed_time = @order.order_placed_time %>
           <% date = order_placed_time.to_s.split(" ")[0] %>
