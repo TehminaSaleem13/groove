@@ -51,12 +51,13 @@ module Groovepacker
           else
             result[:order_increment_id] = order.increment_id
           end
+          scanned_items = order.order_items.joins(:product).where(products: { is_intangible: false })
           result[:item_count] = order.order_items.count
           # use updated_at value if scanned_on is nil
           result[:scanned_on] = order.scanned_on ||= order.updated_at
           result[:inaccurate_scan_count] = order.inaccurate_scan_count
           result[:packing_time] = order.total_scan_time
-          result[:scanned_item_count] = order.order_items.map(&:qty).sum
+          result[:scanned_item_count] = scanned_items.map(&:qty).sum
         end
 
         def bind_exception(order, result)
