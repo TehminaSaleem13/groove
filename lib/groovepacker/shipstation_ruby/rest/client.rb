@@ -231,6 +231,7 @@ module Groovepacker
           response = @service.query("/shipments?orderId=#{URI.encode(order_id)}", nil, 'get')
           response['shipments'].select { |shipment| shipment['orderId'] == order_id } if response['shipments'].present?
           Tenant.save_se_import_data("========Shipstation Shipments By Order ID UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Id', order_id, '==Response', response)
+          response['shipments'].map { |shipment| shipment['createDate'] = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(shipment['createDate']).to_time.in_time_zone }
           response['shipments']
         end
 
