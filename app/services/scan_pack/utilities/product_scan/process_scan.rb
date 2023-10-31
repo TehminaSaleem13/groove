@@ -54,7 +54,8 @@ module ScanPack::Utilities::ProductScan::ProcessScan
   def if_order_item
     box = Box.find_by_id(@box_id)
     if @single_order.id == box.order_id
-      order_item_box = OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id, product_id: @order_item.product_id).first
+      order_item_box =
+      OrderItemBox.where(order_item_id: @order_item.id, box_id: @box_id, product_id: @order_item.product_id).first
       if order_item_box
         order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
       else

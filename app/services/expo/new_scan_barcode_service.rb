@@ -121,7 +121,7 @@ module Expo
       @matcher[@params[:state]].each do |state_func|
         output = if state_func == 'product_scan' && @params[:app]
                    send(
-                     'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
+                     'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex], @params[:order_item_id],
                      current_user: @current_user, session: @session
                    )
                  elsif state_func == 'order_scan' && @params[:app]

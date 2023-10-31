@@ -282,7 +282,7 @@ module OrderMethodsHelper
     end
   end
 
-  def get_scanned_items(order_item_status: %w[scanned partially_scanned], limit: 10, offset: 0)
+  def get_scanned_items(order_item_status: %w[scanned partially_scanned], limit: 10, offset: 0, is_reload: false)
     scanned_list = []
     order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
       update_scanned_list(order_item, scanned_list)
@@ -302,7 +302,7 @@ module OrderMethodsHelper
         scanned_list.each do |single_scanned_item|
           next unless single_scanned_item['product_type'] == 'single'
 
-          next unless single_scanned_item['product_id'] == child_item['product_id']
+          next unless single_scanned_item['product_id'] == child_item['product_id'] && is_reload == false
 
           single_scanned_item['scanned_qty'] = single_scanned_item['scanned_qty'] +
                                                child_item['scanned_qty']

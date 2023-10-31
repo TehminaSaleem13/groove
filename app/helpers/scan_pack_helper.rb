@@ -41,11 +41,11 @@ module ScanPackHelper
     product_scan_object.run(options[:clicked], options[:serial_added])
   end
 
-  def product_scan_v2(input, state, id, box_id, on_ex , options = {})
+  def product_scan_v2(input, state, id, box_id, on_ex, order_item_id , options = {})
     product_scan_object = Expo::NewProductScanServiceV2.new(
       [
         options[:current_user], options[:session],
-        input, state, id, box_id, on_ex, options[:typein_count] || 1, options[:type_scan], options.slice(:product_id, :kit_product_id)
+        input, state, id, box_id, on_ex, order_item_id, options[:typein_count] || 1, options[:type_scan], options.slice(:product_id, :kit_product_id)
       ]
     )
     product_scan_object.run(options[:clicked], options[:serial_added])

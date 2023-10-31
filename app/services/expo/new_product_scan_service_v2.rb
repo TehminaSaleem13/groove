@@ -9,7 +9,7 @@ module Expo
     include ScanPack::Utilities::ProductScan::SingleProductType
 
     def initialize(args)
-      @current_user, @session, @input, @state, @id, @box_id, @on_ex, @typein_count, @type_scan = args
+      @current_user, @session, @input, @state, @id, @box_id, @on_ex, @order_item_id, @typein_count, @type_scan = args
       @result = {
         'status' => true, 'matched' => true, 'error_messages' => [],
         'success_messages' => [], 'notice_messages' => [],
@@ -161,9 +161,12 @@ module Expo
       # search if barcode exists
       if check_for_skip_settings(clean_input)
         barcode_found = check_for_skippable_item(unscanned_items.first)
-        barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if barcode_found
+        barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if barcode_found && @on_ex.blank?
+        do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked) if @on_ex.present?
+
       else
-        barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
+        barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if @on_ex.blank?
+        do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked) if @on_ex.present?
         barcode_found ||= do_if_barcode_not_found(clean_input, serial_added, clicked)
       end
 
@@ -204,6 +207,19 @@ module Expo
           barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
         end
         break if barcode_found
+      end
+      barcode_found
+    end
+
+    def do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked)
+      barcode_found = false
+      unscanned_items.each do |item|
+        if item['product_type'] == 'individual' && @order_item_id == item['order_item_id'] && !item['child_items'].empty?
+          barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
+        elsif (item['product_type'] == 'single' && @order_item_id == item['order_item_id']) ||
+              (item['product_type'] == 'individual' && item['child_items'].empty? && @order_item_id == item['order_item_id'])
+          barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
+        end
       end
       barcode_found
     end

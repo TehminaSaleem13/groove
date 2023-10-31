@@ -313,7 +313,7 @@ module OrdersHelper
         order: order.as_json
       }
     }
-    order_data[:scan_hash][:data][:order].merge!(unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil), multi_shipments: {})
+    order_data[:scan_hash][:data][:order].merge!(unscanned_items: order.get_unscanned_items(limit: nil), scanned_items: order.get_scanned_items(limit: nil, is_reload: true), multi_shipments: {})
     order_data[:scan_hash][:data][:order][:multi_shipments] = order.get_se_old_shipments(order_data[:scan_hash][:data][:order][:multi_shipments])
     order_data[:scan_hash][:data][:order][:activities] = []
     generate_agor = Expo::GenerateAgor.new(order_data)

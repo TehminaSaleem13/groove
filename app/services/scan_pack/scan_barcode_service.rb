@@ -161,7 +161,7 @@ module ScanPack
       @matcher[@params[:state]].each do |state_func|
         output = if state_func == 'product_scan' && @params[:app]
                    send(
-                     'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],
+                     'product_scan_v2', @params[:input], @params[:state], @params[:id], @params[:box_id], @params[:on_ex],  @params[:order_item_id],
                      current_user: @current_user, session: @session, product_id: @params[:product_id], kit_product_id: @params[:kit_product_id]
                    )
                  elsif state_func == 'product_scan'
