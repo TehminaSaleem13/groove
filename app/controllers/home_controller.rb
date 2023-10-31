@@ -27,6 +27,7 @@ class HomeController < ApplicationController
       user['is_active'] = current_user.active
       user['dashboard_switch'] = current_user.dashboard_switch
       user['confirmation_code'] = current_user.confirmation_code
+      user['all_users_confirmation_code'] = User.pluck(:confirmation_code)
     end
 
     respond_to do |format|

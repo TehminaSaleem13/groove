@@ -23,5 +23,11 @@ RSpec.describe HomeController, type: :controller do
       get :import_status
       expect(response.status).to eq(200)
     end
+
+    it 'Get User info' do
+      request.accept = 'application/json'
+      get :userinfo
+      expect(response.status).to eq(200)
+    end
   end
 end
