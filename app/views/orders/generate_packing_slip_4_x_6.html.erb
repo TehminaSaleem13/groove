@@ -6347,8 +6347,8 @@
       </div>
 
       <div class="row" style="display: flex; padding-right: 0px; justify-content: center; align-items: flex-start; gap: 8px; margin-left: 1%;">
-        <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; height: 64px"><%= @order.custom_field_one %></span>
-        <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; margin-left: 2%"><%= @order.custom_field_two %></span>
+        <span class="span6" style="font-size: 48px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; height: 64px; word-wrap: break-word;"><%= @order.custom_field_one %></span>
+        <span style="font-size: 48px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; margin-left: 2%; word-wrap: break-word;"><%= @order.custom_field_two %></span>
       </div>
         
       <div class="row">
@@ -6367,9 +6367,10 @@
         <% order_placed_time = @order.order_placed_time %>
         <% date = order_placed_time.to_s.split(" ")[0] %>
 
-        <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px">
-          <div class="row" style="white-space:nowrap; overflow:hidden; width:500px; text-overflow: ellipsis; margin-left: 7%;">
-            <span class="span2" style="font-size: 30px; text-align: right; color: #000; font-family: 'Inter';">Order #: <%= @order.increment_id.strip %></span>
+        <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px;">
+          <div class="row" style="white-space: normal; overflow: hidden; max-width: 560px; text-overflow: ellipsis; word-wrap: break-word; margin-left: 4%">
+            <span class="span6" style="font-size: 40px; color: #000; font-family: 'Inter';">
+            Order: <%= @order.increment_id.strip %></span>
           </div>
           <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis; margin-left: auto; margin-right: 0px">
             <span class="span1" style="font-size: 25px; text-align: right;"></span>
@@ -6514,8 +6515,8 @@
         </div>
 
         <div class="row" style="display: flex; padding-right: 0px; justify-content: center; align-items: flex-start; gap: 8px; margin-left: 1%;">
-          <span class="span6" style="font-size: 35px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; height: 64px"><%= @order.custom_field_one %></span>
-          <span style="font-size: 35px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; margin-left: 2%"><%= @order.custom_field_two %></span>
+          <span class="span6" style="font-size: 48px; text-align: left;  color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; height: 64px"><%= @order.custom_field_one %></span>
+          <span style="font-size: 48px; text-align: right; color: #000; font-weight: 400;line-height: normal; font-family: 'Inter'; margin-left: 2%"><%= @order.custom_field_two %></span>
         </div>
 
         <div class="row">
@@ -6533,8 +6534,9 @@
           <% order_placed_time = @order.order_placed_time %>
           <% date = order_placed_time.to_s.split(" ")[0] %>
           <div class="span6" style="border-left: 2px solid #B8B8B8; padding-top: 40px; margin-top: -50px; padding-bottom: 20px">
-            <div class="row" style="white-space:nowrap; overflow:hidden; width:500px; text-overflow: ellipsis; margin-left: 7%;">
-              <span class="span1" style="font-size: 30px; text-align: right; color: #000; font-family: 'Inter'; width: 100px">Order #: <%= @order.increment_id.strip %> </span>
+            <div class="row" style="white-space: normal; overflow: hidden; max-width: 560px; text-overflow: ellipsis; word-wrap: break-word; margin-left: 4%">
+            <span class="span6" style="font-size: 40px; color: #000; font-family: 'Inter';">
+              Order: <%= @order.increment_id.strip %></span>
             </div>
             <div class="row" style="white-space:nowrap; overflow:hidden; width:480px; text-overflow: ellipsis; margin-left: auto; margin-right: 0px">
               <span class="span1" style="font-size: 25px; text-align: right;"></span>
@@ -6580,7 +6582,11 @@
                       <% end %> 
                   </td>
                   <td style="color: #000; font-family: 'Inter';font-size: 35px;font-style: normal;font-weight: 400;line-height: normal;">
-                    <center><%= order_item.qty %></center>
+                    <% if order_item.product.is_kit? %>
+                      <center><%= order_item.qty %></center>
+                    <% else %>
+                      <center><%= order_item_scanned_qty(order_item, box) %></center>
+                    <% end %>
                   </td> 
               </tr> 
               <% end %>
