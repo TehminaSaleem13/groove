@@ -162,11 +162,10 @@ module Expo
       if check_for_skip_settings(clean_input)
         barcode_found = check_for_skippable_item(unscanned_items.first)
         barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if barcode_found && @on_ex.blank?
-        do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked) if @on_ex.present?
-
+        barcode_found = do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked) if @on_ex.present?
       else
         barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if @on_ex.blank?
-        do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked) if @on_ex.present?
+        barcode_found = do_set_barcode_found_flag_for_expo(unscanned_items, clean_input, serial_added, clicked) if @on_ex.present?
         barcode_found ||= do_if_barcode_not_found(clean_input, serial_added, clicked)
       end
 
