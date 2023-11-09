@@ -990,4 +990,20 @@ RSpec.describe ScanPackController, type: :controller do
       expect(response.status).to eq(200)
     end
   end
+
+  describe 'POST #scan_pack_bug_report' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+    it 'creates a bug report and renders a JSON response' do
+      post :scan_pack_bug_report, params: { logs: 'Some logs', other_param: 'Other data' }
+
+      expect(response).to have_http_status(:ok)
+      expect(response.content_type).to eq('application/json')
+
+    end
+  end
 end
