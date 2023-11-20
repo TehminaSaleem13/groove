@@ -503,5 +503,13 @@ RSpec.describe StoresController, type: :controller do
       get :amazon_fba, params: { store_id: am_store.id }
       expect(response.status).to eq(200)
     end
+
+    it 'Update Amazon Store' do
+      request.accept = 'application/json'
+
+      store = Store.where(store_type: 'Amazon').last
+      post :create_update_store, params: { id: store.id, store_type: store.store_type, status: true }
+      expect(response.status).to eq(200)
+    end
   end
 end

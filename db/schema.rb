@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20231005072729) do
+ActiveRecord::Schema.define(version: 20231110111736) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -40,8 +40,8 @@ ActiveRecord::Schema.define(version: 20231005072729) do
   end
 
   create_table "amazon_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
-    t.string "merchant_id", null: false
-    t.string "marketplace_id", null: false
+    t.string "merchant_id", default: ""
+    t.string "marketplace_id", default: ""
     t.bigint "store_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
@@ -1240,10 +1240,10 @@ ActiveRecord::Schema.define(version: 20231005072729) do
     t.boolean "on_hold_status", default: false
     t.string "re_associate_shopify_products", default: "associate_items"
     t.boolean "import_variant_names", default: false
+    t.boolean "webhook_order_import", default: false
     t.bigint "push_inv_location_id"
     t.bigint "pull_inv_location_id"
     t.boolean "pull_combined_qoh", default: false
-    t.boolean "webhook_order_import", default: false
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

@@ -3,7 +3,7 @@
 require 'rails_helper'
 
 RSpec.describe Groovepacker::Dashboard::Stats::AnalyticStatStream do
-	let(:store) { create(:store, :csv) }
+  let(:store) { create(:store, :csv) }
   let(:order_status) { 'scanned' }
   let(:order) { create(:order, increment_id: 'Test Order', status: order_status, store: store) }
 	let(:result) do 

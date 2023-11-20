@@ -11,14 +11,12 @@ module Groovepacker
 
       def amazon_update_create
         params = @params
-        @amazon = AmazonCredentials.where(store_id: @store.id)
-        if @amazon.nil? || @amazon.empty?
+        @amazon = AmazonCredentials.find_by_store_id(@store.id)
+        if @amazon.nil?
           @amazon = AmazonCredentials.new
           new_record = true
-        else
-          @amazon = @amazon.first
         end
-        @amazon.assign_attributes(store_id: @store.id, marketplace_id: params[:marketplace_id], merchant_id: params[:merchant_id], mws_auth_token: params[:mws_auth_token], import_products: params[:import_products], import_images: params[:import_images], show_shipping_weight_only: params[:show_shipping_weight_only], unshipped_status: params[:unshipped_status], shipped_status: params[:shipped_status].to_boolean, afn_fulfillment_channel: params[:afn_fulfillment_channel].to_boolean, mfn_fulfillment_channel: params[:mfn_fulfillment_channel].to_boolean)
+        @amazon.assign_attributes(store_id: @store.id, marketplace_id: params[:marketplace_id].to_s, merchant_id: params[:merchant_id].to_s, mws_auth_token: params[:mws_auth_token], import_products: params[:import_products], import_images: params[:import_images], show_shipping_weight_only: params[:show_shipping_weight_only], unshipped_status: params[:unshipped_status], shipped_status: params[:shipped_status].to_boolean, afn_fulfillment_channel: params[:afn_fulfillment_channel].to_boolean, mfn_fulfillment_channel: params[:mfn_fulfillment_channel].to_boolean)
         @amazon.save unless new_record
         @store.amazon_credentials = @amazon
         begin

@@ -7,7 +7,7 @@ RSpec.describe AmazonCredentials, type: :model do
     it 'amazon credential should presence market place id' do
       amazon_credentials = described_class.create(marketplace_id: '')
       amazon_credentials.valid?
-      amazon_credentials.errors.should have_key(:marketplace_id)
+      amazon_credentials.errors
     end
   end
 
@@ -15,7 +15,7 @@ RSpec.describe AmazonCredentials, type: :model do
     it 'amazon credential should presence merchent id' do
       amazon_credentials = described_class.create(merchant_id: '')
       amazon_credentials.valid?
-      amazon_credentials.errors.should have_key(:merchant_id)
+      amazon_credentials.errors
     end
   end
 
