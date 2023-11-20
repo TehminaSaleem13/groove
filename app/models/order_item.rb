@@ -207,6 +207,7 @@ class OrderItem < ActiveRecord::Base
       cached_order_item_kit_products.each do |kit_product|
         next unless !kit_product.cached_product_kit_skus.nil? &&
                     !kit_product.cached_product_kit_skus.product.nil? &&
+                    !kit_product.cached_product_kit_skus.option_product.is_intangible &&
                     kit_product.scanned_status != 'scanned'
 
         child_item = build_single_child_item(kit_product, depends_kit, option_products_array)

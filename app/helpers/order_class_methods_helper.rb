@@ -58,7 +58,8 @@ module OrderClassMethodsHelper
            .joins(:product, order_item_kit_products: [:product_kit_skus])
            .where(
              order_id: orders.map(&:id), products: { is_kit: 1, kit_parsing: %w[individual] }
-           )
+            )
+           .where.not(order_item_kit_products: { product_kit_skus: { option_product_id: Product.where(is_intangible: true).pluck(:id) } })
            .select([
                      'order_items.qty as order_item_qty', 'order_items.kit_split_qty',
                      'order_items.kit_split_scanned_qty', 'order_items.kit_split',

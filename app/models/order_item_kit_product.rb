@@ -35,7 +35,7 @@ class OrderItemKitProduct < ActiveRecord::Base
     # update order item status
     min = set_min_value
     set_order_item_scanned_qty(min)
-    set_order_item_scanned_statys
+    set_order_item_scanned_status
     order_item.save
   end
 
@@ -98,7 +98,7 @@ class OrderItemKitProduct < ActiveRecord::Base
   end
 
   def set_min_value
-    order_item_kit_products = order_item.reload.order_item_kit_products
+    order_item_kit_products = order_item.reload.order_item_kit_products.select { |i| !i&.cached_product_kit_skus.option_product.is_intangible }
     order_item_kit_product = order_item_kit_products.first
     product_kit_skus_qty = order_item_kit_product.cached_product_kit_skus.qty
     min = 1
@@ -120,7 +120,7 @@ class OrderItemKitProduct < ActiveRecord::Base
     end
   end
 
-  def set_order_item_scanned_statys
+  def set_order_item_scanned_status
     order_item.scanned_status = if order_item.scanned_qty != order_item.qty
                                   PARTIALLY_SCANNED_STATUS
                                 else
