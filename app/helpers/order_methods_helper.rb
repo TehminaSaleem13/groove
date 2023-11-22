@@ -331,7 +331,7 @@ module OrderMethodsHelper
 
     list = []
     order_item_boxes.flatten.each do |o|
-      next unless !o.kit_id.nil? && (order_item_kit_product = OrderItemKitProduct.find_by_id(o.kit_id))
+      next unless (order_item_kit_product = OrderItemKitProduct.find_by_id(o.kit_id))
 
       product_kit_sku = order_item_kit_product.product_kit_skus
       product = Product.find(product_kit_sku.option_product_id)
