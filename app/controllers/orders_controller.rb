@@ -505,6 +505,7 @@ class OrdersController < ApplicationController
           toPostalCode: params[:post_data][:toPostalCode],
           confirmation: params[:post_data][:confirmation]
         }
+        data = data.merge(residential: params[:post_data][:residential]) if carrier['code'] == 'ups'
         rates_response = ss_client.get_ss_label_rates(data.to_h)
         carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
         next unless rates_response.ok?

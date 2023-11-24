@@ -393,7 +393,7 @@ module OrderMethodsHelper
         confirmation: order_ss_label_data['confirmation']
       }
       data = data.merge(weight: order_ss_label_data['weight']) if order_ss_label_data['weight']
-
+      data = data.merge(residential:  order_ss_label_data['residential'].nil? ? true : order_ss_label_data['residential']) if carrier['code'] == 'ups'
       should_fetch_rates = should_show_carrier(params[:app], carrier, nil)
 
       rate_error = false

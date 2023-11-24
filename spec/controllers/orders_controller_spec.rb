@@ -632,7 +632,7 @@ RSpec.describe OrdersController, type: :controller do
       store = FactoryBot.create(:store,name: "ss_store", store_type: "Shipstation API 2",inventory_warehouse: @inv_wh, status: true)
       ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id)
       order = FactoryBot.create :order, store_id: @store.id
-      params = { credential_id: ss_credential.id, carrier_code: "fedex", post_data: {weight: '10',fromPostalCode: '10005',toState: 'South Carolina',toCountry: 'US',toPostalCode: '25918-2743',confirmation_code: 'none'} }
+      params = { credential_id: ss_credential.id, carrier_code: "", post_data: {weight: '10',fromPostalCode: '10005',toState: 'South Carolina',toCountry: 'US',toPostalCode: '25918-2743',confirmation_code: 'none'} }
 
       post :get_realtime_rates, params: params
       expect(response.status).to eq(200)
