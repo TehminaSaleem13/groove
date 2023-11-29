@@ -69,7 +69,7 @@ module Groovepacker
             serial_scan_obj = ScanPack::SerialScanService.new(
               current_user, session, scn_params
             )
-            serial_scan_obj.run
+            @result = serial_scan_obj.run
           elsif scn_params[:event] == 'bulk_scan' || scn_params[:event] == 'scan_all_items'
             order_item = OrderItem.find_by(id: scn_params[:order_item_id])
             order = order_item.order
@@ -104,6 +104,7 @@ module Groovepacker
           log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(',') }
           on_demand_logger.info(log)
         end
+        @result
       end
 
       def add_all_scan_logs(order, order_item, event, current_user, type = nil)

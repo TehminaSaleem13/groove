@@ -31,9 +31,9 @@ class ScanPackController < ApplicationController
         params[:data] = create_log_file_data(params, :data, 'expo_log_data')
         params[:delayed_log_process] = true
         session = session.present? ? session : nil
-        log_scn_obj.delay(run_at: 1.seconds.from_now, priority: 95).process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
+        @result = log_scn_obj.delay(run_at: 1.seconds.from_now, priority: 95).process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       else
-        log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
+        @result = log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       end
       # params[:data].each do |scn_params|
       #   begin
@@ -122,7 +122,11 @@ class ScanPackController < ApplicationController
     # log = { params: params, time: Time.current, params_json: params[:_json] }
     # on_demand_logger.info(log)
     # on_demand_logger.info('---------------------------------------------')
-    render json: { status: 'OK', timestamp: current_timestamp }
+    if(@result.present? && !@result['status'])
+      render json: @result, status: :internal_server_error
+    else
+      render json: { status: 'OK', timestamp: current_timestamp }
+    end
   end
 
   # takes order_id as input and resets scan status if it is partially scanned.
