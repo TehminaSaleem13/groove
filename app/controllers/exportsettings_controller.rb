@@ -70,6 +70,7 @@ class ExportsettingsController < ApplicationController
         @export_setting.daily_packed_export_type = params[:daily_packed_export_type] unless params[:daily_packed_export_type].nil?
         @export_setting.auto_ftp_export = params[:auto_ftp_export] unless params[:auto_ftp_export].nil?
         @export_setting.include_partially_scanned_orders = params[:include_partially_scanned_orders] unless params[:include_partially_scanned_orders].nil?
+        @export_setting.include_partially_scanned_orders_user_stats = params[:include_partially_scanned_orders_user_stats] unless params[:include_partially_scanned_orders_user_stats].nil?
         @export_setting.save
         update_ftp_creds(params) if params[:auto_ftp_export]
         @result['success_messages'].push('Export settings updated successfully.')

@@ -52,13 +52,14 @@ module Groovepacker
             result[:order_increment_id] = order.increment_id
           end
           scanned_order_items_without_kit = order.order_items.joins(:product).where(products: { is_intangible: false, is_kit: 0 })
-          scanned_order_item_kit_products = OrderItemKitProduct.joins(order_item: :order).where(orders: { id: order.id }).where(scanned_status: "scanned")
+          scanned_order_item_kit_products = OrderItemKitProduct.joins(order_item: :order).where(orders: { id: order.id })
           result[:item_count] = order.order_items.count
           # use updated_at value if scanned_on is nil
           result[:scanned_on] = order.scanned_on ||= order.updated_at
           result[:inaccurate_scan_count] = order.inaccurate_scan_count
           result[:packing_time] = order.total_scan_time
-          result[:scanned_item_count] = scanned_order_items_without_kit.map(&:qty).sum + scanned_order_item_kit_products.map(&:scanned_qty).sum
+          result[:status] = order.status
+          result[:scanned_item_count] = ExportSetting.first.include_partially_scanned_orders_user_stats ? 1 : scanned_order_items_without_kit.map(&:scanned_qty).sum + scanned_order_item_kit_products.map(&:scanned_qty).sum
         end
 
         def bind_exception(order, result)
@@ -97,7 +98,8 @@ module Groovepacker
             scanned_item_count: 0,
             exception_description: nil,
             exception_reason: nil,
-            exception_assoicated_user: 0
+            exception_assoicated_user: 0,
+            status: ''
           }
         end
       end

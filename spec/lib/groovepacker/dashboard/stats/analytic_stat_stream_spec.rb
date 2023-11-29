@@ -26,6 +26,7 @@ RSpec.describe Groovepacker::Dashboard::Stats::AnalyticStatStream do
 
 	describe '#bind_order_data' do
 		it 'send order data for user stat report' do
+      ExportSetting.create(include_partially_scanned_orders_user_stats: true)
 			subject.bind_order_data(order, result)
 			expect(result[:order_increment_id]).to eq('Test Order')
 			expect(result[:packing_user_id]).to eq(420)

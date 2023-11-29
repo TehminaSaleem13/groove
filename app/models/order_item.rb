@@ -287,6 +287,8 @@ class OrderItem < ActiveRecord::Base
                               PARTIALLY_SCANNED_STATUS
                             end
       save
+      tenant = Apartment::Tenant.current
+      SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, order.id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat && order.has_unscanned_items && ExportSetting.first.include_partially_scanned_orders_user_stats
     end
   end
 

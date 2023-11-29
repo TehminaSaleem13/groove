@@ -136,7 +136,7 @@ class Order < ActiveRecord::Base
     save
     update_access_restriction
     tenant = Apartment::Tenant.current
-    SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled', priority: 95).build_send_stream(tenant, id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
+    SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
   end
 
   def contains_zero_qty_order_item?
