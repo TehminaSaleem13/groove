@@ -106,7 +106,7 @@ RSpec.describe ShopifyCredential, type: :model do
     it 'calls activate_webhooks on ShopifyWebhookService' do
       webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
       allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
-      allow(shopify_credential).to receive(:saved_change_to_webhook_order_import?).and_return(true)
+      allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
 
       expect(webhook_service).to receive(:activate_webhooks)
 
@@ -118,7 +118,7 @@ RSpec.describe ShopifyCredential, type: :model do
     it 'calls de_activate_webhooks on ShopifyWebhookService' do
       webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
       allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
-      allow(shopify_credential).to receive(:saved_change_to_webhook_order_import?).and_return(true)
+      allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
 
       expect(webhook_service).to receive(:de_activate_webhooks)
 

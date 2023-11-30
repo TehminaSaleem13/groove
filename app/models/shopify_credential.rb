@@ -40,13 +40,13 @@ class ShopifyCredential < ActiveRecord::Base
   end
 
   def activate_webhooks
-    return if !saved_change_to_webhook_order_import?(from: false, to: true)
+    return if !webhook_order_import_changed?(from: false, to: true)
 
     Webhooks::Shopify::ShopifyWebhookService.new(self).activate_webhooks
   end
 
   def de_activate_webhooks
-    return unless saved_change_to_webhook_order_import?(from: true, to: false)
+    return unless webhook_order_import_changed?(from: true, to: false)
 
     Webhooks::Shopify::ShopifyWebhookService.new(self).de_activate_webhooks
   end

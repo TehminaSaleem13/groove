@@ -2,7 +2,7 @@
 
 source 'http://rubygems.org'
 
-gem 'rails', '5.2.6'
+gem 'rails', '5.1.7'
 
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
@@ -14,13 +14,15 @@ gem 'mysql2'
 group :assets do
   gem 'angular-ui-bootstrap-rails'
   gem 'angularjs-rails', '>= 1.2.18'
+  gem 'coffee-rails', '~> 4.2.2'
   gem 'fingerprintjs-rails'
   gem 'jquery-fileupload-rails'
   gem 'jquery-ui-rails'
-  gem 'mini_racer', '~> 0.4.0'
+  # gem 'mini_racer', '~> 0.2'
   gem 'momentjs-rails'
   gem 'sass-rails', '~> 5.0.7'
-  # gem 'therubyracer' # ,'~> 0.12.3', platform: :ruby
+  gem 'therubyracer' # ,'~> 0.12.3', platform: :ruby
+  gem 'uglifier', '>= 1.0.3'
 end
 
 group :development do
@@ -42,6 +44,8 @@ group :development, :test do
   gem 'rspec-rails', '~> 3.5.0'
   gem 'rspec_junit_formatter', '~> 0.4.0.pre2'
   gem 'rubocop-rspec', require: false
+  gem 'rubycritic', require: false
+
   gem 'vcr'
   gem 'webmock'
 end
@@ -123,5 +127,3 @@ gem 'wannabe_bool'
 gem 'whenever', require: false
 gem 'wicked_pdf', '>= 0.11'
 gem 'wkhtmltopdf-binary'
-gem 'loofah', '~>2.19.1'
-gem "terser", "~> 1.1"

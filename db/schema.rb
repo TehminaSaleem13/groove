@@ -753,7 +753,7 @@ ActiveRecord::Schema.define(version: 20231110111736) do
     t.integer "store_id"
     t.integer "origin_store_id"
     t.string "recent_order_details", limit: 500, collation: "utf8mb4_unicode_ci"
-    t.string "store_name", limit: 25, null: false
+    t.string "store_name", limit: 25
     t.index ["origin_store_id"], name: "index_origin_stores_on_origin_store_id"
     t.index ["store_id"], name: "index_origin_stores_on_store_id"
   end
