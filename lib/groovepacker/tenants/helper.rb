@@ -579,6 +579,7 @@ module Groovepacker
             begin
               if customer_subscription.items.count > 1
                 Stripe::SubscriptionItem.create(subscription: customer_subscription.id, plan: plan, prorate: true)
+                remove_existing_plans(customer_subscription, plan_id)
               else
                 Stripe::Subscription.update(customer_subscription.id, plan: plan, prorate: true)
               end
@@ -588,6 +589,23 @@ module Groovepacker
               @updated_in_stripe = false
             end
           end
+        end
+      end
+
+      def remove_existing_plans(subscription, active_plan_id)
+        return unless active_plan_id.match?(/#{Apartment::Tenant.current}-\d+/)
+
+        active_subscription_items = {}
+        subscription.refresh.items.data.each do |item|
+          active_subscription_items[item.id] = item.plan.id
+        end
+
+        items_to_remove = active_subscription_items.select do |_item_id, plan_id|
+          plan_id.match?(/#{Apartment::Tenant.current}-\d+/) && plan_id != active_plan_id
+        end
+
+        items_to_remove.keys.each do |item_id|
+          Stripe::SubscriptionItem.delete(item_id)
         end
       end
 
