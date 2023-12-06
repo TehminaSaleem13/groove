@@ -77,7 +77,7 @@ class TenantsController < ApplicationController
     toggle =  params['value']['toggle']
     amount =  params['value']['amount']
     db_price = begin
-                  tenant.price
+                  tenant.price.with_indifferent_access
                rescue StandardError
                  nil
                 end
