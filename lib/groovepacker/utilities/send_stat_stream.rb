@@ -29,7 +29,7 @@ class SendStatStream
 
   def duplicate_groovlytic_tenant(current_tenant, duplicate_name)
     HTTParty.post("#{ENV['GROOV_ANALYTIC_URL']}/tenants/duplicate",
-                  query: { current_tenant: "#{current_tenant}stat", duplicate_name: "#{duplicate_name}stat" },
+                  query: { current_tenant: "#{current_tenant}stat", duplicate_name: "#{duplicate_name}stat", time_zone: GeneralSetting.last&.new_time_zone },
                   headers: { 'Content-Type' => 'application/json', 'tenant' => current_tenant })
   end
 
@@ -42,12 +42,14 @@ class SendStatStream
   def update_missing_data(tenant)
     path = '/dashboard/process_missing_data'
     HTTParty.get("#{ENV['GROOV_ANALYTIC_URL']}#{path}",
+                 query: { time_zone: GeneralSetting.last&.new_time_zone },
                  headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
   end
 
   def update_stats(tenant)
     path = '/dashboard/run_stat_stream'
     HTTParty.get("#{ENV['GROOV_ANALYTIC_URL']}/#{path}",
+                 query: { time_zone: GeneralSetting.last&.new_time_zone },
                  headers: { 'Content-Type' => 'application/json', 'tenant' => tenant })
   end
 

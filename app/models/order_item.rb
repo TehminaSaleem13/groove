@@ -49,6 +49,7 @@ class OrderItem < ActiveRecord::Base
   def has_unscanned_kit_items
     result = false
     order_item_kit_products.each do |kit_product|
+      next if kit_product.cached_product_kit_skus.option_product.try(:is_intangible)
       if kit_product.scanned_status != SCANNED_STATUS
         result = true
         break

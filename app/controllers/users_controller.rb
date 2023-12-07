@@ -129,7 +129,7 @@ class UsersController < ApplicationController
       user.save
       begin
         HTTParty.post("#{ENV['GROOV_ANALYTIC_URL']}/users/update_username",
-                      query: { username: user.username, packing_user_id: user.id, active: user.active },
+                      query: { username: user.username, packing_user_id: user.id, active: user.active, time_zone: GeneralSetting.last&.new_time_zone },
                       headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
       rescue StandardError
         nil
