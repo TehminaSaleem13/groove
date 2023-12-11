@@ -128,6 +128,6 @@ class OrderItemKitProduct < ActiveRecord::Base
                                      end
     tenant = Apartment::Tenant.current
     order = Order.find_by_id(order_item.order_id)
-    SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, order.id) if order_item.has_unscanned_kit_items && !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat && ExportSetting.first.include_partially_scanned_orders_user_stats
+    SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, order.id) if (order_item.has_unscanned_kit_items || order.has_unscanned_items) && !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat && ExportSetting.first.include_partially_scanned_orders_user_stats
   end
 end
