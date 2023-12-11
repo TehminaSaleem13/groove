@@ -19,24 +19,29 @@ class UsersController < ApplicationController
     result['status'] = true
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
     @subscription = tenant.subscription
-    access_restriction = AccessRestriction.last
-    data = { users: params[:users], amount: params[:amount], is_annual: params[:is_annual] }
-    result['request_send'] = tenant.created_at > '2016-09-23 00:00:00' ? remove_user(data, access_restriction, tenant) : check_for_removal(data, access_restriction, tenant)
-    if params[:is_annual] == 'false' && params[:users].to_i > access_restriction.num_users && @subscription['interval'] != 'year'
-      ui_user = params[:users].to_i - access_restriction.num_users
-      access_restriction.update_attributes(added_through_ui: ui_user)
-      tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + tenant.activity_log.to_s
-      tenant.save!
-      StripeInvoiceEmail.add_user_notification(tenant, params[:users].to_i, access_restriction).deliver
-      access_restriction.update_attributes(num_users: params[:users])
-      set_subscription_info(params[:amount])
-      create_stripe_plan(tenant)
-    elsif params[:is_annual] == 'true'
-      StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount]).deliver
-      result['annual_request'] = true
-    elsif @subscription['interval'] == 'year' && params[:is_annual] == 'false' && params[:users].to_i != access_restriction.num_users
+    if @subscription.customer_subscription_id.present? && @subscription.stripe_customer_id.present?
+      access_restriction = AccessRestriction.last
+      data = { users: params[:users], amount: params[:amount], is_annual: params[:is_annual] }
+      result['request_send'] = tenant.created_at > '2016-09-23 00:00:00' ? remove_user(data, access_restriction, tenant) : check_for_removal(data, access_restriction, tenant)
+      if params[:is_annual] == 'false' && params[:users].to_i > access_restriction.num_users && @subscription['interval'] != 'year'
+        ui_user = params[:users].to_i - access_restriction.num_users
+        access_restriction.update_attributes(added_through_ui: ui_user)
+        tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + tenant.activity_log.to_s
+        tenant.save!
+        StripeInvoiceEmail.add_user_notification(tenant, params[:users].to_i, access_restriction).deliver
+        access_restriction.update_attributes(num_users: params[:users])
+        set_subscription_info(params[:amount])
+        create_stripe_plan(tenant)
+      elsif params[:is_annual] == 'true'
+        StripeInvoiceEmail.annual_plan(tenant, params[:users].to_i, params[:amount]).deliver
+        result['annual_request'] = true
+      elsif @subscription['interval'] == 'year' && params[:is_annual] == 'false' && params[:users].to_i != access_restriction.num_users
+        result['status'] = false
+        result['error_messages'] = "Can't Change Yearly Plan to Monthly"
+      end
+    else
       result['status'] = false
-      result['error_messages'] = "Can't Change Yearly Plan to Monthly"
+      result['error_messages'] = "Please contact GroovePacker support to add additional users"
     end
 
     respond_to do |format|
