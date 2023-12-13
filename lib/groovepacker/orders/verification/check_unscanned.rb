@@ -20,7 +20,7 @@ module Groovepacker
           Apartment::Tenant.switch! tenant
           order = Order.find(order_id)
 
-          return if order.reload.status == 'scanned'
+          return if order.reload.status == 'scanned' || order.order_activities.where(action: 'Order Scanning Complete').where('created_at > ?', 10.seconds.ago).exists?
 
           tenant_url = "#{ENV.fetch('PROTOCOL', 'http://')}#{Apartment::Tenant.current}.#{ENV.fetch('HOST_NAME', 'localpacker.com')}"
           order_url = "#{tenant_url}/#/orders/all/1/#{order.id}"
