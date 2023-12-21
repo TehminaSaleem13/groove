@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class OrderMailer < ActionMailer::Base
-  default from: 'app@groovepacker.com'
+  default from: ScanPackSetting.last&.email_reply.presence || 'app@groovepacker.com'
 
   def notify_packing_cam(order_id, tenant)
     Apartment::Tenant.switch! tenant

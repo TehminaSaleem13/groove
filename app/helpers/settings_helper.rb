@@ -84,7 +84,7 @@ module SettingsHelper
         tracking_number_validation_prefixes scan_by_packing_slip_or_shipping_label remove_enabled
         remove_barcode remove_skipped display_location2 display_location3 camera_option
         packing_option resolution packing_cam_enabled email_customer_option email_subject
-        email_insert_dropdown email_message customer_page_dropdown customer_page_message scanning_log
+        email_insert_dropdown email_message customer_page_dropdown customer_page_message scanning_log capture_image_option email_reply
       ]
     )
   end

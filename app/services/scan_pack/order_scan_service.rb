@@ -161,7 +161,7 @@ module ScanPack
         base_query
       end
 
-      "(#{final_query.join(' OR ')}) AND orders.status IN #{status} AND orders.updated_at >= '#{(Time.current - 14.days).strftime('%Y-%m-%d')}'"
+      "(#{final_query.join(' OR ')}) AND orders.status IN #{status} "
     end
 
     def get_single_order_with_result
