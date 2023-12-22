@@ -3,5 +3,8 @@
 <% protocol = Rails.env.development? ? 'http' : 'https' %>
 <% url = "#{protocol}://#{Apartment::Tenant.current}.#{host}/#/package-details/#{URI.encode(@order.email)}/#{URI.encode(@order.increment_id)}" %>
 <% message = @setting.email_message.to_s.gsub('[[ORDER-NUMBER]]', @order.increment_id).gsub('[[CUSTOMER-PAGE-URL]]', "<a href=\"[[CUSTOMER-PAGE-URL]]\">[[CUSTOMER-PAGE-URL]]</a></span><br></h4>").gsub('[[CUSTOMER-PAGE-URL]]', url) %>
-
+<% email_logo = ScanPackSetting.last&.email_logo %>
+<% if email_logo %>
+	<%= image_tag(email_logo, style: "display: block; margin: 0 auto;") %>
+<% end %>
 <%= message.html_safe %>
