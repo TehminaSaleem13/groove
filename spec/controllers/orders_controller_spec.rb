@@ -493,6 +493,15 @@ RSpec.describe OrdersController, type: :controller do
       expect(result['orders'].first['ordernum']).to eq('T')
       expect(result['orders'].first['tracking_num']).to eq('9400111298370613423837')
     end
+
+    it 'find order search without toggle' do
+      post :search, params: { search: '837', order: 'DESC', limit: 20, offset: 0, product_search_toggle: false }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['orders'].first['ordernum']).to eq('T')
+      expect(result['orders'].first['tracking_num']).to eq('9400111298370613423837')
+    end
   end
 
   describe 'Orders ' do
