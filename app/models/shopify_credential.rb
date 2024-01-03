@@ -10,7 +10,7 @@ class ShopifyCredential < ActiveRecord::Base
 
   include AhoyEvent
   after_commit :log_events
-  after_save :activate_webhooks, :de_activate_webhooks
+  after_save :de_activate_webhooks#, :activate_webhooks
 
   serialize :temp_cookies, Hash
 
