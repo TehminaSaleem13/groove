@@ -108,13 +108,21 @@ module ScanPack
       return unless @order
 
       if @params[:state] == 'scanpack.rfp.default' && @result['status'] == true
-        item_sku = Product.includes(:order_items, :product_barcodes, :product_skus).where.not(order_items: { scanned_status: 'scanned' }).where( order_items: { order_id: @order.id }, product_skus: {sku: @params[:SKU]}).first&.primary_sku
-        item_sku = Product.find_by_id(@params['product_id']).primary_sku if item_sku.blank? && @params['product_id'].present?
-        item_sku ||= ProductKitSkus.joins(order_item_kit_products: { order_item: :order }).joins(option_product: :product_barcodes).find_by(product_barcodes: { barcode: @params[:input] }, order_items: { order_id: @order.id })&.option_product&.primary_sku if item_sku.blank?
-        add_activity_for_barcode(item_sku) if item_sku.present?
+        add_activity_for_barcode(scanned_item_sku)
       end
     end
-
+    
+    def scanned_item_sku
+      item_sku = nil
+      item_sku = Product.find_by_id(@params['product_id'])&.primary_sku if @params['product_id'].present? && item_sku.blank?
+      @order.get_unscanned_items.each do |item|
+        item_sku = item['child_items']&.select{ |child| child['barcodes'].to_a.any? { |barcode| barcode['barcode'] == @params['input'] } }&.first.try(:[], 'sku') if item_sku.blank?
+        item_sku ||= item['sku'] if item['barcodes']&.any? { |barcode| barcode['barcode'] == @params['input'] }
+        break if item_sku
+      end unless item_sku
+      item_sku ||= ProductKitSkus.joins(order_item_kit_products: { order_item: :order }).joins(option_product: :product_barcodes).find_by(product_barcodes: { barcode: @params[:input] }, order_items: { order_id: @order.id })&.option_product&.primary_sku if item_sku.blank?
+      item_sku
+    end
 
     def update_activity(output)
       return unless @params[:state] == 'scanpack.rfp.default' && output['status'] == false && @order
