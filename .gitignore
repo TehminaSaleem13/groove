@@ -33,3 +33,5 @@ pids/
 #Ignore QZ License Files
 config/qz_license/digital-certificate.txt
 config/qz_license/qz-private-key.pem
+
+.ruby-gemset

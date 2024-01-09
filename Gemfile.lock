@@ -497,7 +497,6 @@ GEM
       actionmailer (>= 3.2)
       letter_opener (~> 1.0)
       railties (>= 3.2)
-    libv8 (3.16.14.19)
     listen (3.2.1)
       rb-fsevent (~> 0.10, >= 0.10.3)
       rb-inotify (~> 0.9, >= 0.9.10)
@@ -659,7 +658,6 @@ GEM
       private_attr (~> 1.1)
       rainbow (~> 2.0)
       unparser (~> 0.2.2)
-    ref (2.0.0)
     referer-parser (0.3.0)
     regexp_parser (1.7.0)
     regexp_property_values (1.0.0)
@@ -806,9 +804,6 @@ GEM
     stripe (5.30.0)
     test-unit (3.3.5)
       power_assert
-    therubyracer (0.12.3)
-      libv8 (~> 3.16.14.15)
-      ref
     thor (0.20.3)
     thread_safe (0.3.6)
     tilt (2.0.10)
@@ -957,7 +952,6 @@ DEPENDENCIES
   spring-commands-rspec
   stripe (>= 1.57.1)
   test-unit
-  therubyracer
   uglifier (>= 1.0.3)
   unf_ext (= 0.0.7.7)
   vcr

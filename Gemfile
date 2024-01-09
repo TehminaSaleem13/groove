@@ -7,6 +7,8 @@ gem 'rails', '5.1.7'
 # Bundle edge Rails instead:
 # gem 'rails', :git => 'git://github.com/rails/rails.git'
 
+ruby '2.6.2'
+
 gem 'mysql2'
 
 # Gems used only for assets and not required
@@ -21,7 +23,7 @@ group :assets do
   # gem 'mini_racer', '~> 0.2'
   gem 'momentjs-rails'
   gem 'sass-rails', '~> 5.0.7'
-  gem 'therubyracer' # ,'~> 0.12.3', platform: :ruby
+  # gem 'therubyracer' # ,'~> 0.12.3', platform: :ruby
   gem 'uglifier', '>= 1.0.3'
 end
 

@@ -28,7 +28,7 @@ pipelines:
   default:
     - step:
         name: Rails 5 Rspec
-        image: ruby:2.6.2
+        image: capsens/ruby-node-yarn:2.6.2
         caches:
           - bundler
         services:
@@ -55,7 +55,7 @@ pipelines:
     master:
       - step:
           name: Rails 5 Rspec
-          image: ruby:2.6.2
+          image: capsens/ruby-node-yarn:2.6.2
           caches:
             - bundler
           services:
