@@ -7,7 +7,7 @@ class PackingCam < ApplicationRecord
 
   validates_presence_of :url
 
-  after_create :notify_user
+  # after_create :notify_user
 
   def notify_user
     tenant = Tenant.find_by name: Apartment::Tenant.current

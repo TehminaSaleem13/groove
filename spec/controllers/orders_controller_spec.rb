@@ -547,6 +547,17 @@ RSpec.describe OrdersController, type: :controller do
       end
     end
 
+    it 'Send packing cam email' do
+      @tenant.update(packing_cam: true)
+      ScanPackSetting.last.update(packing_cam_enabled: true, email_customer_option: true)
+      order = FactoryBot.create :order, store_id: @store.id
+
+      post :send_packing_cam_email, params: { id: order.id }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+
     it 'Print Packing Slip 4 x 4' do
       order = FactoryBot.create :order, store_id: @store.id
       @user = FactoryBot.create(:user, name: 'Tester',username: 'packing_slip_tester1', packing_slip_size: '4 x 4')
