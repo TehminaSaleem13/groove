@@ -547,8 +547,7 @@ RSpec.describe ScanPackController, type: :controller do
 
       get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
-
-      get :scan_barcode, params: { id: order.id, input: 'SKIP', state: 'scanpack.rfp.default' }
+      get :scan_barcode, params: { id: order.id, input: 'SKIP', product_id: product1.id, state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
 
       expect(order.reload.get_items_count).to eq(6)
@@ -631,7 +630,7 @@ RSpec.describe ScanPackController, type: :controller do
       get :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
 
-      get :scan_barcode, params: { id: order.id, input: 'SKIP', state: 'scanpack.rfp.default' }
+      get :scan_barcode, params: { id: order.id, input: 'SKIP', product_id: product1.id, state: 'scanpack.rfp.default' }
       expect(response.status).to eq(200)
 
       expect(product1_inventory.reload.available_inv).to eq(8)

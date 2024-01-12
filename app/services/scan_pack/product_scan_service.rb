@@ -354,7 +354,7 @@ module ScanPack
       unscanned_items.each do |item|
         if item['product_type'] == 'individual' && !item['child_items'].empty?
           barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
-        elsif (item['product_type'] == 'single') || (item['product_type'] == 'individual' && item['child_items'].empty?) 
+        elsif ((item['product_type'] == 'single') || (item['product_type'] == 'individual' && item['child_items'].empty?)) && (@on_ex.blank? || clean_input == "SKIP" && @extras[:product_id].to_i == item["product_id"] || clean_input != "SKIP" )
           barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
         end
         break if barcode_found
