@@ -54,6 +54,7 @@ module StoresHelper
       @store.order_cup_direct_shipping = params[:order_cup_direct_shipping].to_boolean
       @store.display_origin_store_name = params[:display_origin_store_name].to_boolean
       @store.disable_packing_cam = params[:disable_packing_cam].to_boolean
+      @store.disable_packing_cam_email = params[:disable_packing_cam_email].to_boolean
       @store.save
     end
   end
