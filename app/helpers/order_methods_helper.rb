@@ -387,6 +387,7 @@ module OrderMethodsHelper
       data = {
         carrierCode: carrier['code'],
         fromPostalCode: order_ss_label_data['fromPostalCode'],
+        toCity: order_ss_label_data['toCity'],
         toCountry: country,
         toState: state,
         toPostalCode: postcode,
@@ -394,6 +395,7 @@ module OrderMethodsHelper
       }
       data = data.merge(weight: order_ss_label_data['weight']) if order_ss_label_data['weight']
       data = data.merge(residential:  order_ss_label_data['residential'].nil? ? true : order_ss_label_data['residential']) if carrier['code'] == 'ups'
+      data = data.merge(dimensions: order_ss_label_data['dimensions'])  if order_ss_label_data['dimensions'].present? && order_ss_label_data['dimensions']['units'].present? && order_ss_label_data['dimensions']['length'].present? && order_ss_label_data['dimensions']['width'].present? && order_ss_label_data['dimensions']['height'].present?
       should_fetch_rates = should_show_carrier(params[:app], carrier, nil)
 
       rate_error = false
