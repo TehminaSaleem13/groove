@@ -10,6 +10,8 @@ common: &defaults
   # - Default: 'info'
   # - Valid Options: debug, info, warn, error
   # log_level: debug
+  disabled_instruments:
+    - "NetHttp"
 
   # name: Application name in APM Web UI
   # - Default: the application names comes from the Rails or Sinatra class name
