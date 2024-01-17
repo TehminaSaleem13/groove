@@ -8,20 +8,24 @@ namespace :doo do
 
       Store.where(store_type: "CSV", status: true).each do |store|
         # FTP Older Order Deletion
-        begin
-          groove_ftp = FTP::FtpConnectionManager.get_instance(store)
-          puts groove_ftp.delete_older_files
-        rescue StandardError => e
-          puts 'Order Files Deletion Failed for  ' + tenant.name.to_s
-          puts e.message
+        if store.ftp_credential.use_ftp_import
+          begin
+            groove_ftp = FTP::FtpConnectionManager.get_instance(store)
+            puts groove_ftp.delete_older_files
+          rescue StandardError => e
+            puts 'Order Files Deletion Failed for  ' + tenant.name.to_s
+            puts e.message
+          end 
         end
         # FTP Older Product Deletion
-        begin
-          groove_ftp = FTP::FtpConnectionManager.get_instance(store, 'product')
-          puts groove_ftp.delete_older_files
-        rescue StandardError => e
-          puts 'Product Files Deletion Failed for  ' + tenant.name.to_s
-          puts e.message
+        if store.ftp_credential.use_product_ftp_import
+          begin
+            groove_ftp = FTP::FtpConnectionManager.get_instance(store, 'product')
+            puts groove_ftp.delete_older_files
+          rescue StandardError => e
+            puts 'Product Files Deletion Failed for  ' + tenant.name.to_s
+            puts e.message
+          end
         end
       end
     rescue Exception => e

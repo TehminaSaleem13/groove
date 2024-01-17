@@ -294,7 +294,9 @@ module FTP
       response = connect
       if response[:error_messages].empty? && response[:status] == true
         connection_obj = response[:connection_obj]
-        connection_obj.dir.glob(directory + '/imported', '*.csv') + connection_obj.dir.glob(directory + '/imported', '*.CSV').each do |file|
+        server_files = connection_obj.dir.glob(directory + '/imported', '*.csv')
+        server_files += connection_obj.dir.glob(directory + '/imported', '*.CSV')
+        server_files.each do |file|
           modified_time = Time.at(file.attributes.mtime)
           connection_obj.remove("/#{directory}/imported/#{file.name}") if modified_time < 90.days.ago
         end
