@@ -348,6 +348,7 @@ module OrderMethodsHelper
     direct_print_data = {}
     ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_rest_credential.api_key, ss_rest_credential.api_secret)
     general_settings = GeneralSetting.last
+    order = ss_client.get_order(ss_label_data["orderId"].to_s)
     direct_print_data = try_creating_label if !skip_trying && ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
     if direct_print_data[:status]
       order_ss_label_data['direct_printed'] = true
@@ -394,7 +395,7 @@ module OrderMethodsHelper
         confirmation: order_ss_label_data['confirmation']
       }
       data = data.merge(weight: order_ss_label_data['weight']) if order_ss_label_data['weight']
-      data = data.merge(residential:  order_ss_label_data['residential'].nil? ? true : order_ss_label_data['residential']) if carrier['code'] == 'ups'
+      data = data.merge(residential: order["shipTo"]["residential"])
       data = data.merge(dimensions: order_ss_label_data['dimensions'])  if order_ss_label_data['dimensions'].present? && order_ss_label_data['dimensions']['units'].present? && order_ss_label_data['dimensions']['length'].present? && order_ss_label_data['dimensions']['width'].present? && order_ss_label_data['dimensions']['height'].present?
       should_fetch_rates = should_show_carrier(params[:app], carrier, nil)
 
