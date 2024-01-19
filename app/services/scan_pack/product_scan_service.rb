@@ -302,7 +302,7 @@ module ScanPack
       unscanned_items = @single_order.get_unscanned_items(barcode: clean_input)
       # search if barcode exists
       if check_for_skip_settings(clean_input)
-        item = @on_ex.blank? ? unscanned_items.first : unscanned_items.find { |item| item["product_id"] == @extras[:product_id].to_i }
+        item = @on_ex.blank? || unscanned_items.first["child_items"].present? ? unscanned_items.first : unscanned_items.find { |item| item["product_id"] == @extras[:product_id].to_i }
         barcode_found = check_for_skippable_item(item)
         barcode_found = do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked) if barcode_found
       else
