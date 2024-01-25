@@ -359,6 +359,7 @@ module StoresHelper
   end
 
   def get_and_import_order(params, result, current_user)
+    same_order_found = false
     store = Store.find(params[:store_id])
     if store.present?
       result = { store_id: store.id, order_no: params[:order_no] }
@@ -427,9 +428,13 @@ module StoresHelper
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate, orderStatus: response['order_status']&.titleize)
       end
+      result[:ss_similar_order_found] = true if response.count > 1
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
-      ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}", priority: 95).import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
+      import_orders = ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}", priority: 95)
+      import_orders.import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
+      import_orders.import_missing_order(params) if params[:same_order_found]
+
       result[:store_type] = store.store_type
     end
     order_found = Order.where(increment_id: (params[:order_no]).to_s).last
