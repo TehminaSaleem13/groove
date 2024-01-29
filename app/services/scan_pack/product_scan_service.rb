@@ -353,7 +353,7 @@ module ScanPack
     def do_set_barcode_found_flag(unscanned_items, clean_input, serial_added, clicked)
       barcode_found = false
       unscanned_items.each do |item|
-        if item['product_type'] == 'individual' && !item['child_items'].empty? && ((@on_ex.blank? || clean_input == "SKIP" && item['child_items'].pluck('product_id').include?(@extras[:product_id].to_i)))
+        if item['product_type'] == 'individual' && !item['child_items'].empty? && ((@on_ex.blank? || clean_input == "SKIP" && item['child_items'].pluck('product_id').include?(@extras[:product_id].to_i) || clean_input != "SKIP"))
           barcode_found = do_if_product_type_is_individual([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
         elsif ((item['product_type'] == 'single') || (item['product_type'] == 'individual' && item['child_items'].empty?)) && (@on_ex.blank? || clean_input == "SKIP" && @extras[:product_id].to_i == item["product_id"] || clean_input != "SKIP" )
           barcode_found = do_if_product_type_is_single([item, clean_input, serial_added, clicked, barcode_found, @type_scan])
