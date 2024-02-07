@@ -34,7 +34,7 @@ class Order < ActiveRecord::Base
   # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
   validates_uniqueness_of :increment_id, unless: :check_for_duplicate
 
-  attr_accessor :scan_pack_v2
+  attr_accessor :scan_pack_v2, :pull_inv
 
   extend OrderClassMethodsHelper
   include ProductsHelper
@@ -301,7 +301,7 @@ class Order < ActiveRecord::Base
       Groovepacker::Inventory::Orders.allocate(self, true) if ALLOCATE_STATUSES.include?(final_status)
     elsif SOLD_STATUSES.include?(initial_status)
       if ALLOCATE_STATUSES.include?(final_status)
-        Groovepacker::Inventory::Orders.unsell(self)
+        perform_pull_inv_or_unsell
         if order_items.select { |o| o.product.is_intangible == false }.count == order_items.where(scanned_status: 'scanned').select { |o| o.product.is_intangible == false }.count
           user = User.find_by_id(GroovRealtime.current_user_id)
           reset_scanned_status(user)
@@ -310,6 +310,10 @@ class Order < ActiveRecord::Base
     end
     update_column(:reallocate_inventory, false)
     true
+  end
+
+  def perform_pull_inv_or_unsell
+    self.pull_inv == true ? Groovepacker::Inventory::Orders.allocate(self, false, true) : Groovepacker::Inventory::Orders.unsell(self)
   end
 
   def perform_pre_save_checks

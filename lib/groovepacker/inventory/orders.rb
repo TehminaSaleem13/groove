@@ -26,13 +26,13 @@ module Groovepacker
           result
         end
 
-        def allocate(order, status_match = false)
+        def allocate(order, status_match = false, update_pull_inv = false)
           return false unless inventory_tracking_enabled?
 
           result = true
           order.order_items.reload
           order.order_items.each do |order_item|
-            result &= allocate_item(order_item, status_match)
+            result &= allocate_item(order_item, status_match, update_pull_inv)
           end
           result
         end
@@ -64,11 +64,12 @@ module Groovepacker
           result
         end
 
-        def allocate_item(order_item, status_match = false)
+        def allocate_item(order_item, status_match = false, update_pull_inv = false)
           return false unless inventory_tracking_enabled?
-          return false if order_item.is_inventory_allocated? || order_item.is_inventory_sold?
+          return false if order_item.is_inventory_allocated? || order_item.is_inventory_sold? && !update_pull_inv
 
-          do_allocate_item(order_item, order_item.qty, OrderItem::ALLOCATED_INV_STATUS, status_match)
+          order_item_status = update_pull_inv == true ? OrderItem::SOLD_INV_STATUS : OrderItem::ALLOCATED_INV_STATUS
+          do_allocate_item(order_item, order_item.qty, order_item_status, status_match)
         end
 
         def deallocate_item(order_item, status_match = false)
@@ -81,7 +82,7 @@ module Groovepacker
         def process_sell_item(order_item, integer = 1, update_allocated = true)
           result = true
           multiplier = (integer * integer) / integer
-          if (multiplier == 1 && (order_item.is_inventory_allocated? ^ update_allocated)) || (multiplier == -1 && !order_item.is_inventory_sold?)
+          if ((multiplier == 1 && (order_item.is_inventory_allocated? ^ update_allocated)) || (multiplier == -1 && !order_item.is_inventory_sold?)) && (multiplier == 1 && !order_item.is_inventory_sold?)
             return false
           end
           return false unless order_item.is_not_ghost?

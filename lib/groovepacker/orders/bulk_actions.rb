@@ -64,12 +64,13 @@ module Groovepacker
       end
 
       def change_order_status(order, params, username)
+        pull_inv = params['pull_inv'] == true ? true : false
         return if permitted_to_status_change(order, params)
 
         non_scanning_states = { 'serviceissue' => 'Service Issue', 'onhold' => 'Action Required' }
         return if order.status.in?(non_scanning_states.keys) && params[:status].eql?('scanned')
         return if order_has_inactive_or_new_products(order, params)
-
+        order.pull_inv = pull_inv
         order_status = order.status
         order.status = params[:status]
         order.scanned_on = nil if params[:status] != 'scanned'
@@ -92,7 +93,8 @@ module Groovepacker
             end
             order.order_items.where('removed_qty != 0').update_all(removed_qty: 0)
           end
-          order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username)
+          on_ex = params['on_ex'] ? params['on_ex'] : nil
+          order.addactivity("Order Manually Moved To #{order.status.capitalize} Status", username, on_ex)
         end
         order.packing_user_id = User.find_by_username(username).try(:id)
         return if order.save
