@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240118100647) do
+ActiveRecord::Schema.define(version: 20231110111736) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -25,7 +25,6 @@ ActiveRecord::Schema.define(version: 20240118100647) do
     t.boolean "allow_teapplix_inv_push", default: false
     t.boolean "allow_magento_soap_tracking_no_push", default: false
     t.integer "added_through_ui", default: 0
-    t.boolean "allow_shopline_inv_push", default: false
   end
 
   create_table "ahoy_events", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -234,7 +233,6 @@ ActiveRecord::Schema.define(version: 20240118100647) do
     t.string "daily_packed_email"
     t.boolean "auto_ftp_export", default: false
     t.boolean "include_partially_scanned_orders", default: false
-    t.boolean "include_partially_scanned_orders_user_stats", default: false
   end
 
   create_table "ftp_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -443,13 +441,13 @@ ActiveRecord::Schema.define(version: 20240118100647) do
   end
 
   create_table "magento_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
-    t.string "host"
-    t.string "username"
+    t.string "host", null: false
+    t.string "username", null: false
     t.string "password", default: ""
     t.bigint "store_id", null: false
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "api_key", default: ""
+    t.string "api_key", default: "", null: false
     t.boolean "import_products", default: false, null: false
     t.boolean "import_images", default: false, null: false
     t.datetime "last_imported_at"
@@ -1096,8 +1094,6 @@ ActiveRecord::Schema.define(version: 20240118100647) do
     t.string "add_next_barcode", default: "ADDNEXT"
     t.boolean "send_external_logs", default: false
     t.boolean "scan_all_option", default: false
-    t.boolean "capture_image_option", default: true
-    t.string "email_reply"
   end
 
   create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1250,32 +1246,6 @@ ActiveRecord::Schema.define(version: 20240118100647) do
     t.boolean "pull_combined_qoh", default: false
   end
 
-  create_table "shopline_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
-    t.string "shop_name"
-    t.text "access_token"
-    t.integer "store_id"
-    t.datetime "last_imported_at"
-    t.string "shopline_status", default: "open"
-    t.boolean "import_inventory_qoh", default: false
-    t.boolean "import_updated_sku", default: false
-    t.string "updated_sku_handling", default: "add_to_existing"
-    t.string "generating_barcodes", default: "do_not_generate"
-    t.string "modified_barcode_handling", default: "add_to_existing"
-    t.boolean "shipped_status", default: false
-    t.boolean "unshipped_status", default: false
-    t.boolean "on_hold_status", default: false
-    t.boolean "partial_status", default: false
-    t.boolean "import_fulfilled_having_tracking", default: false
-    t.boolean "import_variant_names", default: false
-    t.bigint "push_inv_location_id"
-    t.bigint "pull_inv_location_id"
-    t.boolean "pull_combined_qoh", default: false
-    t.boolean "fix_all_product_images", default: false
-    t.datetime "product_last_import"
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
-  end
-
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "status"
     t.integer "success_imported", default: 0
@@ -1310,7 +1280,6 @@ ActiveRecord::Schema.define(version: 20240118100647) do
     t.boolean "troubleshooter_option", default: true
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "display_origin_store_name", default: false
-    t.boolean "disable_packing_cam", default: false
   end
 
   create_table "subscriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1357,9 +1326,6 @@ ActiveRecord::Schema.define(version: 20240118100647) do
     t.boolean "sync_with_teapplix", default: false
     t.string "teapplix_product_sku"
     t.string "shopify_inventory_item_id"
-    t.boolean "sync_with_shopline", default: false
-    t.string "shopline_product_variant_id"
-    t.string "shopline_inventory_item_id"
   end
 
   create_table "teapplix_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

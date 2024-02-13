@@ -37,7 +37,7 @@ RSpec.describe ProductBarcode, type: :model do
     let(:variant) { { 'barcode' => '1234567890', 'sku' => 'SKU-123' } }
 
     it 'creates barcode for product' do
-      importer = Groovepacker::Stores::Importers::ShopProductsImporter.new(store)
+      importer = Groovepacker::Stores::Importers::Shopify::ProductsImporter.new(store)
       importer.send(:create_barcode_from_variant, product, variant)
 
       expect(product.product_barcodes.count).to eq(1)
@@ -48,7 +48,7 @@ RSpec.describe ProductBarcode, type: :model do
       let!(:barcode) { create(:product_barcode, product: product, barcode: '1234567890') }
 
       it 'does not create duplicate barcode for product' do
-        importer = Groovepacker::Stores::Importers::ShopProductsImporter.new(store)
+        importer = Groovepacker::Stores::Importers::Shopify::ProductsImporter.new(store)
         importer.send(:create_barcode_from_variant, product, variant)
 
         expect(product.product_barcodes.count).to eq(1)

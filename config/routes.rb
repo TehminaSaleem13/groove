@@ -231,7 +231,6 @@ Groovepacks::Application.routes.draw do
       get 'get_order_details'
       get 'update_store_lro'
       post 'update_shopify_token'
-      post 'update_shopline_token'
       post 'fetch_label_related_data'
     end
     member do
@@ -253,7 +252,6 @@ Groovepacks::Application.routes.draw do
       get 'push_store_inventory'
       get 'check_imported_folder'
       post 'toggle_shopify_sync'
-      post 'toggle_shopline_sync'
     end
   end
 

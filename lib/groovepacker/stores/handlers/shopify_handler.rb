@@ -13,25 +13,25 @@ module Groovepacker
         end
 
         def import_orders
-          Groovepacker::Stores::Importers::ShopCommonMethods.new(
+          Groovepacker::Stores::Importers::Shopify::OrdersImporter.new(
             build_handle
           ).import
         end
 
         def import_single_order_from(order_no)
-          Groovepacker::Stores::Importers::ShopCommonMethods.new(
+          Groovepacker::Stores::Importers::Shopify::OrdersImporter.new(
             build_handle
           ).ondemand_import_single_order(order_no)
         end
 
         def import_products(product_import_type, product_import_range_days)
-          Groovepacker::Stores::Importers::ShopProductsImporter.new(
+          Groovepacker::Stores::Importers::Shopify::ProductsImporter.new(
             build_handle
           ).import(product_import_type, product_import_range_days)
         end
 
         def pull_inventory
-          Groovepacker::Stores::Importers::ShopInventoryImporter.new(
+          Groovepacker::Stores::Importers::Shopify::Inventory.new(
             build_handle
           ).pull_inventories
         end
@@ -43,7 +43,7 @@ module Groovepacker
         end
 
         def import_single_product(product)
-          Groovepacker::Stores::Importers::ShopProductsImporter.new(
+          Groovepacker::Stores::Importers::Shopify::ProductsImporter.new(
             build_handle
           ).import_single_product(product)
         end

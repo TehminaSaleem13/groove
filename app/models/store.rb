@@ -12,7 +12,6 @@ class Store < ActiveRecord::Base
   has_one :shipstation_rest_credential
   has_one :shipworks_credential
   has_one :shopify_credential
-  has_one :shopline_credential
   has_one :ftp_credential
   has_one :big_commerce_credential
   has_one :magento_rest_credential
@@ -133,10 +132,6 @@ class Store < ActiveRecord::Base
       end
       @result['status'] = true
     end
-    if store_type == 'Shopline'
-      @result['shopline_credentials'] = shopline_credential
-      @result['status'] = true
-    end
     if store_type == 'BigCommerce'
       @result['big_commerce_credentials'] = big_commerce_credential
       @result['bigcommerce_permission_url'] = ENV['BC_APP_URL']
@@ -159,7 +154,6 @@ class Store < ActiveRecord::Base
     @credentials = MagentoCredentials.where(store_id: id) if store_type == 'Magento'
     @credentials = ShipstationCredential.where(store_id: id) if store_type == 'Shipstation'
     @credentials = ShopifyCredential.where(store_id: id) if store_type == 'Shopify'
-    @credentials = ShoplineCredential.where(store_id: id) if store_type == 'Shopline'
     if !@credentials.nil? && !@credentials.empty?
       @result = false unless @credentials.first.destroy
     end

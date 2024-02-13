@@ -17,8 +17,6 @@ module Connection
       connection_status = check_bc_connection(store, import_item)
     when 'Shopify'
       connection_status = check_shopify_connection(store, import_item)
-    when 'Shopline'
-      connection_status = check_shopline_connection(store, import_item)
     when 'Shippo'
       connection_status = check_sp_connection(store, import_item)
     end
@@ -39,14 +37,6 @@ module Connection
     return true if shopify_credential.access_token
 
     import_item.update_attributes(status: 'failed', message: 'Not yet connected - Please click the Shopify icon and connect to your store')
-    false
-  end
-
-  def check_shopline_connection(store, import_item)
-    shopline_credential = ShoplineCredential.where(store_id: store.id).first
-    return true if shopline_credential.access_token
-
-    import_item.update_attributes(status: 'failed', message: 'Not yet connected - Please click the Shopline icon and connect to your store')
     false
   end
 

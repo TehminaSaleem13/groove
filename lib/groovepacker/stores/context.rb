@@ -11,13 +11,7 @@ module Groovepacker
         handler.import_products
       end
 
-      # for Shopify
       def import_shopify_products(product_import_type, product_import_range_days)
-        handler.import_products(product_import_type, product_import_range_days)
-      end
-
-      # for Shopline
-      def import_shopline_products(product_import_type, product_import_range_days)
         handler.import_products(product_import_type, product_import_range_days)
       end
 
@@ -69,8 +63,7 @@ module Groovepacker
         handler.import_teapplix_single_product(product)
       end
 
-      # for Shopline and Shopify
-      def import_shop_single_product(product)
+      def import_shopify_single_product(product)
         handler.import_single_product(product)
       end
 

@@ -2,7 +2,7 @@
 
 require 'rails_helper'
 
-describe Groovepacker::Stores::Importers::ShopInventoryImporter do
+describe Groovepacker::Stores::Importers::Shopify::Inventory do
   subject { described_class.new(tenant_name, shopify_store.id) }
 
   let(:tenant) { create(:tenant, name: Apartment::Tenant.current) }
@@ -74,7 +74,7 @@ describe Groovepacker::Stores::Importers::ShopInventoryImporter do
       end
 
       it 'returns inventory levels' do
-        expect(subject.send(:shopify_inventory_levels)).to match_array(inventory_levels)
+        expect(subject.send(:inventory_levels)).to match_array(inventory_levels)
       end
     end
 
