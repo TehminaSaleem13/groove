@@ -3,13 +3,13 @@
 module Groovepacker
   module Stores
     module Handlers
-      class ShopifyHandler < Handler
+      class ShoplineHandler < Handler
         def build_handle
-          shopify_credential = ShopifyCredential.where(store_id: store.id).first
+          shopline_credential = ShoplineCredential.where(store_id: store.id).first
 
-          client = Groovepacker::ShopifyRuby::Client.new(shopify_credential) unless shopify_credential.nil?
+          client = Groovepacker::ShoplineRuby::Client.new(shopline_credential) unless shopline_credential.nil?
 
-          make_handle(shopify_credential, client)
+          make_handle(shopline_credential, client)
         end
 
         def import_orders
@@ -37,7 +37,7 @@ module Groovepacker
         end
 
         def push_inventory
-          Groovepacker::Stores::Exporters::Shopify::Inventory.new(
+          Groovepacker::Stores::Exporters::Shopline::Inventory.new(
             build_handle
           ).push_inventories
         end

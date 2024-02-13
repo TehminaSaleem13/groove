@@ -310,6 +310,78 @@ RSpec.describe OrdersController, type: :controller do
     end
   end
 
+  describe 'Shopline Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last)
+      shopline_store_credentials = ShoplineCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopline_store.id, shopline_status: 'open', shipped_status: false, unshipped_status: false, partial_status: false, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false)
+    end
+
+    it 'Import Orders' do
+      shopline_store = Store.where(store_type: 'Shopline').last
+
+      expect_any_instance_of(Groovepacker::ShoplineRuby::Client).to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShoplineRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_product.yaml'))))
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      @tenant.uniq_shopify_import = true
+      @tenant.save
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
+
+      shopify_import_item = ImportItem.find_by_store_id(shopline_store.id)
+      expect(shopify_import_item.status).to eq('completed')
+    end
+
+    it 'Same Job Id Multiple Time Import Orders' do
+      shopline_store = Store.where(store_type: 'Shopline').last
+
+      expect_any_instance_of(Groovepacker::ShoplineRuby::Client).not_to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShoplineRuby::Client).not_to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_product.yaml'))))
+
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopline_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopline_import-2", job_count: 1)
+      @tenant.uniq_shopify_import = true
+      @tenant.save
+      sleep 3
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+    end
+
+    it 'Orders Import Job Created Just 3 Second Before.' do
+      shopline_store = Store.where(store_type: 'Shopline').last
+
+      expect_any_instance_of(Groovepacker::ShoplineRuby::Client).not_to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShoplineRuby::Client).not_to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_product.yaml'))))
+
+      request.accept = 'application/json'
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopline_import-2", job_count: 1)
+      UniqJobTable.create(worker_id: 'worker_' + SecureRandom.hex, job_timestamp: Time.current.strftime('%Y-%m-%d %H:%M:%S.%L'), job_id: "#{Apartment::Tenant.current}_shopline_import-2", job_count: 1)
+      @tenant.uniq_shopify_import = true
+      @tenant.save
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+    end
+  end
+
   describe 'Shippo Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
