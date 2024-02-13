@@ -450,12 +450,21 @@ Groovepacks::Application.routes.draw do
     get 'health', to: 'health_check#index'
   end
 
+  # External APIs authorized by Developer ApiKey
+  namespace :external do
+    resources :orders, only: [], defaults: { format: 'json' } do
+      post :retrieve, on: :collection
+    end
+  end
+
   resource :print, only: [] do
     collection do
       get '/qz_certificate' => 'print#qz_certificate'
       post '/qz_sign' => 'print#qz_sign'
     end
   end
+
+  resources :api_keys, only: %i[create destroy]
 
   resources :webhooks, only: [] do
     collection do
@@ -466,7 +475,7 @@ Groovepacks::Application.routes.draw do
       post '/orders_update' => 'webhooks#orders_update'
     end
   end
-  
+
   resources :print_pdf_links do
     collection do
       get 'get_pdf_list'

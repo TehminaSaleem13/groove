@@ -165,7 +165,6 @@ class SettingsController < ApplicationController
     @result['show_external_logs_button'] = current_tenant&.show_external_logs_button
     @result['show_originating_store_id'] = current_tenant&.show_originating_store_id
 
-
     if general_setting.present?
       @result['data']['settings'] = if params[:app]
                                       GeneralSetting.last.attributes.slice(*filter_general_settings)
@@ -173,6 +172,7 @@ class SettingsController < ApplicationController
                                       general_setting
                                     end
       @result['data']['settings'] = @result['data']['settings'].as_json.merge('packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"))
+      @result['data']['settings'] = @result['data']['settings'].as_json.merge(api_key: ApiKey.active)
     else
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
@@ -195,7 +195,7 @@ class SettingsController < ApplicationController
     @result = { 'status' => true, 'error_messages' => [], 'success_messages' => [], 'notice_messages' => [], 'data' => {} }
     scan_pack_setting = ScanPackSetting.all.first
     general_setting = GeneralSetting.all.first
-    
+
     if general_setting.present? && scan_pack_setting.present?
       @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
       @result['data']['general_setting'] = @result['data']['general_setting'].as_json.merge('packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"), 'time_zone_offset' => current_time_in_gp.formatted_offset).merge(GeneralSetting.last.per_tenant_settings)

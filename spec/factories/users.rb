@@ -4,7 +4,9 @@
 
 FactoryBot.define do
   factory :user do
-    username { 'admin' }
+    sequence :username do |n|
+      FactoryBot.create(:user, username: "user-#{n}-#{Time.current.to_i}")
+    end
     password { '12345678' }
     password_confirmation { '12345678' }
     confirmation_code { rand(10**10).to_s }

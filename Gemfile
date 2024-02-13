@@ -35,13 +35,13 @@ group :development do
 end
 
 group :development, :test do
+  gem 'byebug'
   gem 'factory_bot_rails'
   gem 'parallel_tests', '~> 2.29.1'
   gem 'protractor-rails'
   gem 'pry'
   gem 'rubocop', require: false
   gem 'rubocop-performance', require: false
-  gem 'byebug'
   # gem 'rubocop-rails', require: false
   gem 'rspec-rails', '~> 3.5.0'
   gem 'rspec_junit_formatter', '~> 0.4.0.pre2'
@@ -63,6 +63,7 @@ group :test do
   gem 'test-unit'
 end
 
+gem 'active_model_serializers'
 gem 'activerecord-import', '= 0.26.0'
 gem 'ahoy_matey', '~> 2.2.0'
 gem 'apartment', git: 'https://github.com/hcatlin/apartment'
@@ -109,7 +110,6 @@ gem 'pry-rails'
 gem 'rack-cors', require: 'rack/cors'
 gem 'redis-rails', '5.0.1'
 gem 'redis-session-store'
-gem 'scout_apm'
 gem 'rollbar'
 gem 'rubber'
 gem 'ruby-mws', git: 'https://github.com/kcpatel006/ruby-mws.git'
@@ -117,6 +117,7 @@ gem 'ruby_odata'
 gem 'rubyzip'
 gem 's3'
 gem 'savon'
+gem 'scout_apm'
 gem 'shipping_easy', '0.7.1'
 gem 'shopify_api', '~>12.2'
 gem 'simple_form', '4.0.0'
