@@ -1,6 +1,6 @@
 require 'rails_helper'
 
-RSpec.describe Groovepacker::Stores::Importers::Shopify::ProductsImporter do
+RSpec.describe Groovepacker::Stores::Importers::ShopProductsImporter do
   before do
     Groovepacker::SeedTenant.new.seed
     tenant = Apartment::Tenant.current
@@ -22,7 +22,7 @@ RSpec.describe Groovepacker::Stores::Importers::Shopify::ProductsImporter do
       end
     end
 
-    describe '#custom_shopify_item?' do
+    describe '#custom_shop_item?' do
       it 'returns true if item is a custom shopify item' do
         importer = described_class.new(store)
         item = {
@@ -33,7 +33,7 @@ RSpec.describe Groovepacker::Stores::Importers::Shopify::ProductsImporter do
           'product_exists' => false,
           'variant_id' => nil
         }
-        expect(importer.send(:custom_shopify_item?, item)).to be_truthy
+        expect(importer.send(:custom_shop_item?, item)).to be_truthy
       end
 
       it 'returns false if item is not a custom shopify item' do
@@ -46,7 +46,7 @@ RSpec.describe Groovepacker::Stores::Importers::Shopify::ProductsImporter do
           'product_exists' => true,
           'variant_id' => 456
         }
-        expect(importer.send(:custom_shopify_item?, item)).to be_falsey
+        expect(importer.send(:custom_shop_item?, item)).to be_falsey
       end
     end
 
@@ -66,7 +66,7 @@ RSpec.describe Groovepacker::Stores::Importers::Shopify::ProductsImporter do
       it 'does not assign attributes to variant for non-custom item' do
         importer = described_class.new(store)
         non_custom_item = { 'id' => '' }
-        variant = importer.send(:assign_attr_to_variant_for_custom_item, vari, non_custom_item) if !importer.send(:custom_shopify_item?, item)
+        variant = importer.send(:assign_attr_to_variant_for_custom_item, vari, non_custom_item) if !importer.send(:custom_shop_item?, item)
         expect(variant['sku']).to eq('C-')
         expect(variant['barcode']).to eq('C-')
         expect(variant['weight']).to eq(500)

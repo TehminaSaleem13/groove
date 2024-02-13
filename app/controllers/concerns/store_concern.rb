@@ -32,6 +32,13 @@ module StoreConcern
       $redis.set('store_id', @store.id)
       $redis.expire('tenant_name', 600)
       $redis.expire('store_id', 600)
+    when 'Shopline'
+      @result = init_store.shopline_update_create
+      current_tenant = Apartment::Tenant.current
+      $redis.set('tenant_name', current_tenant)
+      $redis.set('store_id', @store.id)
+      $redis.expire('tenant_name', 600)
+      $redis.expire('store_id', 600)
     # cookies[:tenant_name] = {:value => current_tenant , :domain => :all, :expires => Time.current+10.minutes}
     # cookies[:store_id] = {:value => @store.id , :domain => :all, :expires => Time.current+10.minutes}
     when 'BigCommerce'
@@ -307,6 +314,8 @@ module StoreConcern
       handler = Groovepacker::Stores::Handlers::MagentoRestHandler.new(@store)
     when 'Shopify'
       handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@store)
+    when 'Shopline'
+      handler = Groovepacker::Stores::Handlers::ShoplineHandler.new(@store)
     when 'Teapplix'
       handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@store)
     end
@@ -351,7 +360,18 @@ module StoreConcern
                                                              .delay(run_at: 1.seconds.from_now, queue: "push_inventory_#{tenant}", priority: 95)
                                                              .push_inventories
         when 'pull'
-          Groovepacker::Stores::Importers::Shopify::Inventory.new(tenant, @store.id)
+          Groovepacker::Stores::Importers::ShopInventoryImporter.new(tenant, @store.id)
+                                                             .delay(run_at: 1.seconds.from_now, queue: "pull_inventory_#{tenant}", priority: 95)
+                                                             .pull_inventories
+        end
+      elsif @store.store_type == 'Shopline'
+        case flag
+        when 'push'
+          Groovepacker::Stores::Exporters::Shopline::Inventory.new(tenant, @store.id)
+                                                             .delay(run_at: 1.seconds.from_now, queue: "push_inventory_#{tenant}", priority: 95)
+                                                             .push_inventories
+        when 'pull'
+          Groovepacker::Stores::Importers::ShopInventoryImporter.new(tenant, @store.id)
                                                              .delay(run_at: 1.seconds.from_now, queue: "pull_inventory_#{tenant}", priority: 95)
                                                              .pull_inventories
         end

@@ -238,6 +238,38 @@ module Groovepacker
         @result
       end
 
+      def shopline_update_create
+        params = @params
+        @shopline = ShoplineCredential.find_by_store_id(@store.id)
+        begin
+          params[:shop_name] = nil if params[:shop_name] == 'null'
+          params[:shop_name] = params[:shop_name].gsub(/[,()'".]+\z/, '') if params[:shop_name] != 'null' && params[:shop_name].present?
+          if @shopline.nil?
+            @store.shopline_credential = ShoplineCredential.new(shop_name: params[:shop_name])
+            new_record = true
+          else
+            @shopline.update_attributes(
+              shop_name: params[:shop_name], access_token: params[:access_token],
+              shopline_status: params[:shopline_status], on_hold_status: params[:on_hold_status],
+              shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b,
+              partial_status: params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling],
+              generating_barcodes: params[:generating_barcodes], import_inventory_qoh: params[:import_inventory_qoh],
+              import_updated_sku: params[:import_updated_sku], updated_sku_handling: params[:updated_sku_handling],
+              import_fulfilled_having_tracking: params[:import_fulfilled_having_tracking], fix_all_product_images: params[:fix_all_product_images],
+              push_inv_location_id: params[:push_inv_location_id], pull_inv_location_id: params[:pull_inv_location_id], pull_combined_qoh: params[:pull_combined_qoh]
+            )
+          end
+          @store.save
+        rescue ActiveRecord::RecordInvalid => e
+          @result['status'] = false
+          @result['messages'] = [@store.errors.full_messages, @store.shopline_credential.errors.full_messages]
+        rescue ActiveRecord::StatementInvalid => e
+          @result['status'] = false
+          @result['messages'] = [e.message]
+        end
+        @result
+      end
+
       def bigcommerce_update_create
         params = @params
         @bigcommerce = BigCommerceCredential.find_by_store_id(@store.id)

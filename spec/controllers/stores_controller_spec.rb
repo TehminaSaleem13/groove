@@ -385,6 +385,64 @@ RSpec.describe StoresController, type: :controller do
     end
   end
 
+  describe 'Shopline Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last, on_demand_import: true)
+      shopline_store_credentials = ShoplineCredential.create(store_id: shopline_store.id, access_token: 'accesstokenaccesstoken', shop_name: 'test_shopline')
+    end
+
+    it 'Pull Inventory' do
+      shopline_store = Store.where(store_type: 'Shopline').last
+      product = FactoryBot.create(:product, store_id: @store.id, store_product_id: '123456')
+      product1_inventory = product.product_inventory_warehousess.first
+      create(:sync_option, product_id: product.id, sync_with_shopline: true, shopline_product_variant_id: '1234')
+      request.accept = 'application/json'
+
+      get :pull_store_inventory, params: { id: shopline_store.id }
+      result = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(result['status']).to eq(true)
+    end
+
+    it 'Push Inventory' do
+      allow_any_instance_of(Groovepacker::Stores::Exporters::Shopline::Inventory).to receive(:push_inventories).and_return(true)
+
+      shopify_store = Store.where(store_type: 'Shopline').last
+      product = FactoryBot.create(:product, store_id: @store.id, store_product_id: '123456')
+      product1_inventory = product.product_inventory_warehousess.first
+      create(:sync_option, product_id: product.id, sync_with_shopline: true, shopline_product_variant_id: '1234')
+      request.accept = 'application/json'
+
+      get :push_store_inventory, params: { id: shopify_store.id }
+      result = JSON.parse(response.body)
+      expect(response.status).to eq(200)
+      expect(result['status']).to eq(true)
+    end
+
+    it 'Update Shopline Store' do
+      request.accept = 'application/json'
+
+      store = Store.where(store_type: 'Shopline').last
+      post :create_update_store, params: { id: store.id, shop_name: 'Shopline', store_type: store.store_type, add_gp_scanned_tag: false }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Toggle Sync Option' do
+      request.accept = 'application/json'
+
+      shopline_store = Store.where(store_type: 'Shopline').last
+
+      get :toggle_shopline_sync, params: { id: shopline_store.id, type: 'enable' }
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'Shippo Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

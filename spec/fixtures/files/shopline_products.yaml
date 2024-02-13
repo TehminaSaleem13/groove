@@ -1,0 +1,2182 @@
+---
+products:
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-48-48AM.png?w=1042&h=1610
+      alt: ''
+      id: '6315800542635590721'
+    body_html: <p></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-48-48AM.png?w=1042&h=1610
+        alt: ''
+        id: '6315800542635590721'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-49-16AM-a7a30338-ee58-4257-88ff-f32161fa2f1f.png?w=1038&h=1616
+        alt: ''
+        id: '6315800542652367882'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-49-36AM.png?w=1040&h=1610
+        alt: ''
+        id: '6315800542652367883'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-50-02AM.png?w=1036&h=1602
+        alt: ''
+        id: '6315800542652367884'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-50-23AM.png?w=1040&h=1610
+        alt: ''
+        id: '6315800542652367885'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-50-58AM.png?w=1038&h=1606
+        alt: ''
+        id: '6315800542652367886'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-51-31AM.png?w=1034&h=1612
+        alt: ''
+        id: '6315800542652367887'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-51-54AM.png?w=1036&h=1614
+        alt: ''
+        id: '6315800542652367888'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-52-10AM.png?w=1036&h=1614
+        alt: ''
+        id: '6315800542652367889'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-52-28AM.png?w=1038&h=1612
+        alt: ''
+        id: '6315800542652367890'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-52-43AM.png?w=1038&h=1612
+        alt: ''
+        id: '6315800542652367891'
+    created_at: '2024-02-01T14:19:16+05:00'
+    template_path: null
+    handle: aidb-cards
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800545089823809'
+        price: '0.00'
+        product_id: '16063158005434792105760780'
+        option3: null
+        option4: null
+        inventory_tracker: false
+        option1: null
+        id: '18063158005442845169610780'
+        option2: null
+        position: 1
+        sku: ''
+        barcode: ''
+    title: AIDB CARDS
+    tags: null
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:36+05:00'
+    vendor: Ship Happies™
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005434792105760780'
+    published_at: null
+    product_behavior: ''
+    product_category: null
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-16at7-43-15PM.png?w=578&h=456
+      alt: ''
+      id: '6315800546930389086'
+    body_html: <p></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-16at7-43-15PM.png?w=578&h=456
+        alt: ''
+        id: '6315800546930389086'
+    created_at: '2024-02-01T14:19:17+05:00'
+    template_path: null
+    handle: a-beautiful-day-bath-balm
+    variants:
+      - inventory_quantity: 11
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '2.83'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800549804219726'
+        price: '10.00'
+        product_id: '16063158005478245095450780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005483949348960780'
+        option2: null
+        position: 1
+        sku: MTB014W
+        barcode: SH_SC74
+    title: Beautiful Day Bath Balm
+    tags: Bath bomb,Earth
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:18+05:00'
+    vendor: Musee
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005478245095450780'
+    published_at: null
+    product_behavior: ''
+    product_category: Bath Bomb
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-16at7-38-16PM.png?w=568&h=471
+      alt: ''
+      id: '6315800551409905682'
+    body_html: >-
+      <meta charset="utf-8"><span data-mce-fragment="1">We don't want a lot for
+      Christmas, but we do want YOU (warm bath) with lots of smells and swirls
+      of color. Treat yourself to this relaxing holiday bath balm with a festive
+      treasure inside!</span>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-16at7-38-16PM.png?w=568&h=471
+        alt: ''
+        id: '6315800551409905682'
+    created_at: '2024-02-01T14:19:17+05:00'
+    template_path: null
+    handle: a-all-i-want-for-christmas-is-you-bath-balm
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '2.83'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800553595870552'
+        price: '8.00'
+        product_id: '16063158005520859224320780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005526227933510780'
+        option2: null
+        position: 1
+        sku: MBB092W
+        barcode: SH_SC73
+    title: All I Want for Christmas is You Bath Balm
+    tags: Bath bomb,Christmas
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:18+05:00'
+    vendor: Musee
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005520859224320780'
+    published_at: null
+    product_behavior: ''
+    product_category: Bath bomb
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/BestFriend.jpg?w=2048&h=2048
+      alt: ''
+      id: '6315800555134447715'
+    body_html: >-
+      <meta charset="utf-8"><span data-mce-fragment="1">Beautiful gift for your
+      best friend. Send your BFF something special! Add some sparkle to any
+      occasion. Rose flower hoop earrings Detail: 2" Material: Zinc, Brass, gold
+      and silver plated Lead Compliant, Nickel Free To prevent tarnish, please
+      avoid wet substance M</span><span data-mce-fragment="1">ade in South
+      Korea</span><br>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/BestFriend.jpg?w=2048&h=2048
+        alt: ''
+        id: '6315800555134447715'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at12-05-42PM.png?w=433&h=422
+        alt: ''
+        id: '6315800555134447716'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at12-05-56PM.png?w=430&h=399
+        alt: ''
+        id: '6315800555134447717'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-49-36AM.png?w=1040&h=1610
+        alt: ''
+        id: '6315800555134447718'
+    created_at: '2024-02-01T14:19:17+05:00'
+    template_path: null
+    handle: rose-flower-hoop-earrings
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800557806951771'
+        price: '29.95'
+        product_id: '16063158005559111277030780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005564647758410780'
+        option2: null
+        position: 1
+        sku: SH_LH02_HOOP
+        barcode: SH_LH02
+    title: Best Friend Little Happy - Hoop
+    tags: Earrings,Jewelry,little happies
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:20+05:00'
+    vendor: Avenue Zoe
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005559111277030780'
+    published_at: '2024-02-01T14:19:17+05:00'
+    product_behavior: ''
+    product_category: Jewelry
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/BestAunt.jpg?w=2048&h=2048
+      alt: ''
+      id: '6315800559295366201'
+    body_html: >-
+      <meta charset="utf-8"><span data-mce-fragment="1">Sparkle in the day and
+      night! Shine brightly! A special gift for a special Aunt. Moon and star
+      dangle earrings with crystal and rhinestone details Approx 1.5" Material
+      Zinc, Brass, gold and silver plated, crystal, rhinestones Lead Compliant,
+      Nickel Free To prevent tarnish, please avoid wet substance M</span><span
+      data-mce-fragment="1">ade in South Korea</span><br>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/BestAunt.jpg?w=2048&h=2048
+        alt: ''
+        id: '6315800559295366201'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at12-02-20PM.png?w=406&h=447
+        alt: ''
+        id: '6315800559295366202'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at12-02-33PM.png?w=430&h=419
+        alt: ''
+        id: '6315800559295366203'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-50-02AM.png?w=1036&h=1602
+        alt: ''
+        id: '6315800559295366204'
+    created_at: '2024-02-01T14:19:17+05:00'
+    template_path: null
+    handle: moon-and-star-crystal-dangle-earrings-2
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800561430830432'
+        price: '29.95'
+        product_id: '16063158005598537734930780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005603906444150780'
+        option2: null
+        position: 1
+        sku: SH_LH01_MOON
+        barcode: SH_LH01
+    title: Best Aunt Little Happy - Star and Moon Dangle
+    tags: Earrings,Jewelry,little happies
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:20+05:00'
+    vendor: Avenue Zoe
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005598537734930780'
+    published_at: '2024-02-01T14:19:17+05:00'
+    product_behavior: ''
+    product_category: Jewelry
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at11-06-56AM.png?w=502&h=437
+      alt: ''
+      id: '6315800563170903132'
+    body_html: >-
+      <meta charset="utf-8"><span data-mce-fragment="1">Conversation starters!
+      These party sippers are heart-shaped and full of fun. Complete your
+      holiday celebration with one of these heart with message drink holders.
+      Fun for you and your guests. Details: 2" x 5.5"x 5" Straw included. Pink.
+      Blue. Green. Red text.</span>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at11-06-56AM.png?w=502&h=437
+        alt: ''
+        id: '6315800563170903132'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-08at10-51-13AM.png?w=300&h=460
+        alt: ''
+        id: '6315800563170903133'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-08at10-50-55AM.png?w=352&h=472
+        alt: ''
+        id: '6315800563170903134'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-08at10-51-20AM.png?w=298&h=498
+        alt: ''
+        id: '6315800563170903135'
+    created_at: '2024-02-01T14:19:18+05:00'
+    template_path: null
+    handle: blush-assorted-sweet-talker-drink-tumblers
+    variants:
+      - inventory_quantity: 0
+        image:
+          src: >-
+            https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-08at10-50-55AM.png?w=352&h=472
+          alt: null
+          id: '6315800563170903134'
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: Hot Mess
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800566111673704'
+        price: '5.99'
+        product_id: '16063158005639474142230780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: Hot Mess
+        id: '18063158005645010623610780'
+        option2: null
+        position: 1
+        sku: 7904_HM
+        barcode: SH_DW02
+      - inventory_quantity: 0
+        image:
+          src: >-
+            https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-08at10-51-13AM.png?w=300&h=460
+          alt: null
+          id: '6315800563170903133'
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: Text Me
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800566111673703'
+        price: '5.99'
+        product_id: '16063158005639474142230780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: Text Me
+        id: '18063158005645010623670780'
+        option2: null
+        position: 2
+        sku: 7904_TX
+        barcode: SH_DW03
+      - inventory_quantity: 0
+        image:
+          src: >-
+            https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-08at10-51-20AM.png?w=298&h=498
+          alt: null
+          id: '6315800563170903135'
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: Friyay
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800566111673705'
+        price: '5.99'
+        product_id: '16063158005639474142230780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: Friyay
+        id: '18063158005645010623720780'
+        option2: null
+        position: 3
+        sku: 7904_FR
+        barcode: SH_DW04
+    title: Assorted Sweet Talker Drink Tumblers
+    tags: Heart,ValentinesDay
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:19+05:00'
+    vendor: Blush
+    subtitle: null
+    options:
+      - product_id: '16063158005639474142230780'
+        values:
+          - Hot Mess
+          - Text Me
+          - Friyay
+        values_images: {}
+        name: Style
+        id: '16163158005645010623630780'
+    spu: null
+    id: '16063158005639474142230780'
+    published_at: null
+    product_behavior: ''
+    product_category: Drinkware
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at10-56-31AM.png?w=458&h=438
+      alt: ''
+      id: '6315800567818191909'
+    body_html: >-
+      <p>Red, white and blue! These party sippers are star-shaped and full of
+      fun. Complete your holiday celebration with one of these star-studded
+      drink holders. Fun for you and your guests. Best for firework watching.
+      Details: 16oz Bpa free plastic. Straw included. Weight: 0.15 6" x 2" x
+      7".</p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-09-19at10-56-31AM.png?w=458&h=438
+        alt: ''
+        id: '6315800567818191909'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screen-Shot-2022-09-19-at-11-03-30-AM.png?w=371&h=486
+        alt: ''
+        id: '6315800567818191910'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screen-Shot-2022-09-19-at-11-03-40-AM.png?w=346&h=491
+        alt: ''
+        id: '6315800567818191911'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screen-Shot-2022-09-19-at-11-03-20-AM.png?w=353&h=475
+        alt: ''
+        id: '6315800567818191912'
+    created_at: '2024-02-01T14:19:18+05:00'
+    template_path: null
+    handle: blush-assorted-liberty-star-drink-tumblers
+    variants:
+      - inventory_quantity: 0
+        image:
+          src: >-
+            https://img.myshopline.com/image/store/1706779223743/Screen-Shot-2022-09-19-at-11-03-30-AM.png?w=371&h=486
+          alt: null
+          id: '6315800567818191910'
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: Blue
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800571228724602'
+        price: '5.99'
+        product_id: '16063158005684101537320780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: Blue
+        id: '18063158005690141335180780'
+        option2: null
+        position: 1
+        sku: Blush_8288Blue
+        barcode: SH_DW05
+      - inventory_quantity: 0
+        image:
+          src: >-
+            https://img.myshopline.com/image/store/1706779223743/Screen-Shot-2022-09-19-at-11-03-40-AM.png?w=346&h=491
+          alt: null
+          id: '6315800567818191911'
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: Red
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800571228724603'
+        price: '5.99'
+        product_id: '16063158005684101537320780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: Red
+        id: '18063158005690141335240780'
+        option2: null
+        position: 2
+        sku: Blush_8288Red
+        barcode: SH_DW06
+      - inventory_quantity: 0
+        image:
+          src: >-
+            https://img.myshopline.com/image/store/1706779223743/Screen-Shot-2022-09-19-at-11-03-20-AM.png?w=353&h=475
+          alt: null
+          id: '6315800567818191912'
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '0.20'
+        title: White
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800571228724601'
+        price: '5.99'
+        product_id: '16063158005684101537320780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: White
+        id: '18063158005690141335290780'
+        option2: null
+        position: 3
+        sku: Blush_8288White
+        barcode: SH_DW07
+    title: Assorted Liberty Star Drink Tumblers
+    tags: Blue,drink,Hannukah,NewYearsEve,Red,Versatile,White
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:19+05:00'
+    vendor: Blush
+    subtitle: null
+    options:
+      - product_id: '16063158005684101537320780'
+        values:
+          - Blue
+          - Red
+          - White
+        values_images: {}
+        name: Color
+        id: '16163158005690141335200780'
+    spu: null
+    id: '16063158005684101537320780'
+    published_at: null
+    product_behavior: ''
+    product_category: Drinkware
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-06-14at3-20-30PM.png?w=427&h=516
+      alt: ''
+      id: '6315800572817802268'
+    body_html: >-
+      <p><meta charset="utf-8"><span data-mce-fragment="1">Thoughtful card add
+      on to any teacher present. 3D red apple card. This sweet card is
+      guaranteed to earn good grades and put a smile on any teacher's face!
+      Simply peel back the honeycomb and press down to adhere. We love using
+      this card for teacher appreciation day or end-of-year teacher gifts!
+      Inside Message: Blank</span></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-06-14at3-20-30PM.png?w=427&h=516
+        alt: ''
+        id: '6315800572817802268'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-06-14at3-24-20PM.png?w=511&h=543
+        alt: ''
+        id: '6315800572834579508'
+    created_at: '2024-02-01T14:19:18+05:00'
+    template_path: null
+    handle: inklings-paperie-a-teacher
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '4.54'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800575389474180'
+        price: '6.00'
+        product_id: '16063158005734936502520780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005740472983880780'
+        option2: null
+        position: 1
+        sku: GCP043
+        barcode: SH_GC12
+    title: A+Teacher Greeting Card
+    tags: greeting card,teacher
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:19+05:00'
+    vendor: Inklings Paperie
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005734936502520780'
+    published_at: '2024-02-01T14:19:18+05:00'
+    product_behavior: ''
+    product_category: Greeting & Note Cards
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at12-04-26AM.png?w=1044&h=1320
+      alt: ''
+      id: '6315800576995329042'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1">Please note *<meta charset="utf-8">Product
+      placement and assortment of each birthday bag is based on availability.
+      Product assortment is subject to change based off of market trends. <meta
+      charset="utf-8">Recipients can expect to find one to four items in each
+      Birthday Happies bag of equal or greater value than the subscription
+      price. Subscriptions will be shipped as close to actual Birthday as
+      possible.</p>
+
+      <p data-mce-fragment="1"><meta charset="utf-8"><span
+      data-mce-fragment="1">Product assortment</span>s may include, but are not
+      limited to: </p>
+
+      <ul data-mce-fragment="1">
+
+      <li data-mce-fragment="1">Self-care (bath balms, shower steamers, facial
+      masks, etc.)</li>
+
+      <li data-mce-fragment="1">On-brand/trendy items (purses, keychains,
+      kitchen supplies)</li>
+
+      <li data-mce-fragment="1">Delightful snacks (popcorn, candy, drink and dip
+      mixes)</li>
+
+      <li data-mce-fragment="1">Candles</li>
+
+      <li data-mce-fragment="1">Jewelry<br data-mce-fragment="1">
+
+      </li>
+
+      <li data-mce-fragment="1">And so much more</li>
+
+      </ul>
+
+      <p data-mce-fragment="1">To visualize products that may be found in each
+      Birthday Happies subscription, please see our Holiday Happies, Celebration
+      Happies or follow us on Instagram/Facebook <a
+      href="https://www.instagram.com/shiphappies/" title="Ship Happies
+      Instagram" data-mce-fragment="1"
+      data-mce-href="https://www.instagram.com/shiphappies/">@shiphappies</a>.
+      Products will vary.</p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at12-04-26AM.png?w=1044&h=1320
+        alt: ''
+        id: '6315800576995329042'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-28-03PM-d3985f86-6f3f-41b4-a6d9-df9aff35f052.png?w=1278&h=1288
+        alt: ''
+        id: '6315800576995329043'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-52-10AM.png?w=1036&h=1614
+        alt: ''
+        id: '6315800576995329044'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-28-35PM-e5df10d4-ad67-48ca-9289-e2374692cdb2.png?w=928&h=958
+        alt: ''
+        id: '6315800576995329045'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-36-37PM-86aa846d-5458-4f8a-894a-d7e7dee8a673.png?w=1022&h=1010
+        alt: ''
+        id: '6315800576995329046'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at3-53-54PM-909e8bec-032d-4342-8668-9835657770d1.png?w=952&h=900
+        alt: ''
+        id: '6315800576995329047'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-11-58PM-8d4d4474-739e-4aed-b168-8a250cc7bc6c.png?w=1084&h=684
+        alt: ''
+        id: '6315800576995329048'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-07-35PM-6c804204-2b54-4895-a8d0-fdda0a64bd99.png?w=942&h=928
+        alt: ''
+        id: '6315800576995329049'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-10-24PM-e1c1c2db-2db1-4a4b-99be-dba10eff1098.png?w=956&h=990
+        alt: ''
+        id: '6315800577012106281'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-40-55PM-1c655fa4-c535-45a7-8edf-8a723f026301.png?w=854&h=810
+        alt: ''
+        id: '6315800577012106282'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-09-42PM-3ca55b42-00e3-4297-a058-c350d42ca20a.png?w=706&h=708
+        alt: ''
+        id: '6315800577012106283'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at3-51-02PM-625d44e0-97e5-401e-8a23-59c49cfbef22.png?w=1004&h=990
+        alt: ''
+        id: '6315800577012106284'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-16-18PM-fc1bfb30-2829-4f35-9cfd-8d9e676fd24a.png?w=898&h=686
+        alt: ''
+        id: '6315800577012106285'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at3-54-23PM-0e5bf87f-9916-4b2f-aa16-f05e645bef63.png?w=806&h=902
+        alt: ''
+        id: '6315800577012106286'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2023-04-18at12-28-45PM-3adcffae-17c0-43db-854a-052959a177c0.png?w=948&h=814
+        alt: ''
+        id: '6315800577012106287'
+    created_at: '2024-02-01T14:19:18+05:00'
+    template_path: null
+    handle: bag-9
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '1.00'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800579801881995'
+        price: '39.95'
+        product_id: '16063158005776711770610780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005782416024260780'
+        option2: null
+        position: 1
+        sku: SH_EH04
+        barcode: SH_EH04
+    title: April Orange Crush Birthday Gift Bag
+    tags: easter,Orange,spring,subscription
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:24+05:00'
+    vendor: Ship Happies
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005776711770610780'
+    published_at: '2024-02-01T14:19:19+05:00'
+    product_behavior: ''
+    product_category: Gift Bags
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at12-06-29AM.png?w=1018&h=1274
+      alt: ''
+      id: '6315800581592286242'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1">Please note *<meta charset="utf-8">Product
+      placement and assortment of each birthday bag is based on availability.
+      Product assortment is subject to change based off of market trends. <meta
+      charset="utf-8">Recipients can expect to find one to four items in each
+      Birthday Happies bag of equal or greater value than the subscription
+      price. Subscriptions will be shipped as close to actual Birthday as
+      possible.</p>
+
+      <p data-mce-fragment="1"><meta charset="utf-8"><span
+      data-mce-fragment="1">Product assortment</span>s may include, but are not
+      limited to: </p>
+
+      <ul data-mce-fragment="1">
+
+      <li data-mce-fragment="1">Self-care (bath balms, shower steamers, facial
+      masks, etc.)</li>
+
+      <li data-mce-fragment="1">On-brand/trendy items (purses, keychains,
+      kitchen supplies)</li>
+
+      <li data-mce-fragment="1">Delightful snacks (popcorn, candy, drink and dip
+      mixes)</li>
+
+      <li data-mce-fragment="1">Candles</li>
+
+      <li data-mce-fragment="1">Jewelry<br data-mce-fragment="1">
+
+      </li>
+
+      <li data-mce-fragment="1">And so much more</li>
+
+      </ul>
+
+      <p data-mce-fragment="1">To visualize products that may be found in each
+      Birthday Happies subscription, please see our Holiday Happies, Celebration
+      Happies or follow us on Instagram/Facebook <a title="Ship Happies
+      Instagram" href="https://www.instagram.com/shiphappies/"
+      data-mce-fragment="1"
+      data-mce-href="https://www.instagram.com/shiphappies/">@shiphappies</a>.
+      Products will vary.</p>
+
+      <ul data-mce-fragment="1"></ul>
+
+      <ul data-mce-fragment="1"></ul>
+
+      <ul data-mce-fragment="1"></ul>
+
+      <ul></ul>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at12-06-29AM.png?w=1018&h=1274
+        alt: ''
+        id: '6315800581592286242'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-28-03PM-d3985f86-6f3f-41b4-a6d9-df9aff35f052.png?w=1278&h=1288
+        alt: ''
+        id: '6315800581592286243'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-18at11-49-16AM-a7a30338-ee58-4257-88ff-f32161fa2f1f.png?w=1038&h=1616
+        alt: ''
+        id: '6315800581592286244'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-28-35PM-e5df10d4-ad67-48ca-9289-e2374692cdb2.png?w=928&h=958
+        alt: ''
+        id: '6315800581592286245'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-36-37PM-86aa846d-5458-4f8a-894a-d7e7dee8a673.png?w=1022&h=1010
+        alt: ''
+        id: '6315800581592286246'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at3-53-54PM-909e8bec-032d-4342-8668-9835657770d1.png?w=952&h=900
+        alt: ''
+        id: '6315800581592286247'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-11-58PM-8d4d4474-739e-4aed-b168-8a250cc7bc6c.png?w=1084&h=684
+        alt: ''
+        id: '6315800581592286248'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-07-35PM-6c804204-2b54-4895-a8d0-fdda0a64bd99.png?w=942&h=928
+        alt: ''
+        id: '6315800581609063462'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-10-24PM-e1c1c2db-2db1-4a4b-99be-dba10eff1098.png?w=956&h=990
+        alt: ''
+        id: '6315800581609063463'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at1-40-55PM-1c655fa4-c535-45a7-8edf-8a723f026301.png?w=854&h=810
+        alt: ''
+        id: '6315800581609063464'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-09-42PM-3ca55b42-00e3-4297-a058-c350d42ca20a.png?w=706&h=708
+        alt: ''
+        id: '6315800581609063465'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at3-51-02PM-625d44e0-97e5-401e-8a23-59c49cfbef22.png?w=1004&h=990
+        alt: ''
+        id: '6315800581609063466'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at2-16-18PM-fc1bfb30-2829-4f35-9cfd-8d9e676fd24a.png?w=898&h=686
+        alt: ''
+        id: '6315800581609063467'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-08-10at3-54-23PM-0e5bf87f-9916-4b2f-aa16-f05e645bef63.png?w=806&h=902
+        alt: ''
+        id: '6315800581609063468'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2023-04-18at12-28-45PM-3adcffae-17c0-43db-854a-052959a177c0.png?w=948&h=814
+        alt: ''
+        id: '6315800581609063469'
+    created_at: '2024-02-01T14:19:19+05:00'
+    template_path: null
+    handle: bag-1
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '1.00'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800584449172582'
+        price: '39.95'
+        product_id: '16063158005823687975830780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005829560001640780'
+        option2: null
+        position: 1
+        sku: SH_EH08
+        barcode: SH_EH08
+    title: August Aqua Wave Birthday Gift Bag
+    tags: Beach,Blue,subscription,Summer
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:37+05:00'
+    vendor: Ship Happies
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005823687975830780'
+    published_at: '2024-02-01T14:19:19+05:00'
+    product_behavior: ''
+    product_category: Gift Bags
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-13at12-34-50AM.png?w=90&h=84
+      alt: ''
+      id: '6315800587011158075'
+    body_html: >-
+      <meta charset="utf-8">Aid Through Trade Roll-On® Bracelet is a great gift
+      for loved ones. Bracelets full of bright colors. 7" handmade bracelet,
+      supports female artisans through fair trade, comfortable fit and perfect
+      for stacking. Bracelet length: 7 Inches Materials: Glass Beads Made in
+      Nepal
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-13at12-34-50AM.png?w=90&h=84
+        alt: ''
+        id: '6315800587011158075'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-13-07AM.png?w=548&h=472
+        alt: ''
+        id: '6315800587011158076'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-13-38AM.png?w=490&h=342
+        alt: ''
+        id: '6315800587027935273'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-14-11AM.png?w=436&h=310
+        alt: ''
+        id: '6315800587027935274'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-14-33AM.png?w=424&h=318
+        alt: ''
+        id: '6315800587027935275'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-15-01AM.png?w=354&h=264
+        alt: ''
+        id: '6315800587027935276'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-15-22AM.png?w=368&h=242
+        alt: ''
+        id: '6315800587027935277'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-11-13at9-15-52AM.png?w=350&h=218
+        alt: ''
+        id: '6315800587027935278'
+    created_at: '2024-02-01T14:19:19+05:00'
+    template_path: null
+    handle: copy-of-aid-through-trade-summer
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800590522524779'
+        price: '12.00'
+        product_id: '16063158005877375067430780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005883079321010780'
+        option2: null
+        position: 1
+        sku: B52-MULTI
+        barcode: SH_JWL07
+    title: Aid Through Trade Bracelet
+    tags: >-
+      Bracelet,Global Good,Green,Hot
+      Pink,Jewelry,Orange,Purple,Rainbow,Red,Turquoise,Versatile,Yellow
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:21+05:00'
+    vendor: Aid Through Trade
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005877375067430780'
+    published_at: null
+    product_behavior: ''
+    product_category: Jewelry
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-40-10PM-0631d864-6a2e-4ca2-a839-fab4a309334d.png?w=369&h=364
+      alt: ''
+      id: '6315800592296150031'
+    body_html: >-
+      <meta charset="utf-8"><span data-mce-fragment="1">Mom's are amazing! Happy
+      Mother's Day! Celebrate by gifting a charm necklace to someone to show how
+      much you appreciate her. Adorable jewelry on a cute message card makes for
+      a 2-in-1, ready-to-gift present. Necklaces vary in finish from sterling
+      silver to 14k gold-dipped charms on a simple box chain. </span>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-40-10PM-0631d864-6a2e-4ca2-a839-fab4a309334d.png?w=369&h=364
+        alt: ''
+        id: '6315800592296150031'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-40-37PM-f9648bad-a114-4b4f-b669-6d8cbf91fc7b.png?w=390&h=436
+        alt: ''
+        id: '6315800592296150032'
+    created_at: '2024-02-01T14:19:19+05:00'
+    template_path: null
+    handle: lucky-feather-amazing-mom-light-necklace
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800594616163728'
+        price: '29.95'
+        product_id: '16063158005929719981850780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005934920918890780'
+        option2: null
+        position: 1
+        sku: SPC.AST.AMAZINGMOMLT
+        barcode: SH_JWL013
+    title: Amazing Mom Light Necklace
+    tags: Jewelry,Mother's Day,Necklace,Pink
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:21+05:00'
+    vendor: Lucky Feather
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005929719981850780'
+    published_at: null
+    product_behavior: ''
+    product_category: Necklaces
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-40-02PM.png?w=349&h=358
+      alt: ''
+      id: '6315800596188295234'
+    body_html: >-
+      <meta charset="utf-8"><meta charset="utf-8"><span
+      data-mce-fragment="1">Mom's are amazing! Happy Mother's Day!</span><span
+      data-mce-fragment="1"> Celebrate by gifting a charm necklace to
+      s</span><span data-mce-fragment="1">omeone</span><span
+      data-mce-fragment="1"> to show how much you appreciate her. Adorable
+      jewelry on a cute message card makes for a 2-in-1, ready-to-gift present.
+      Necklaces vary in finish from sterling silver to 14k gold-dipped charms on
+      a simple box chain. </span><br>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-40-02PM.png?w=349&h=358
+        alt: ''
+        id: '6315800596188295234'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-40-37PM-f9648bad-a114-4b4f-b669-6d8cbf91fc7b.png?w=390&h=436
+        alt: ''
+        id: '6315800596188295235'
+    created_at: '2024-02-01T14:19:20+05:00'
+    template_path: null
+    handle: lucky-feather-amazing-mom-necklace
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800598592365682'
+        price: '29.95'
+        product_id: '16063158005968810895350780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158005974347366480780'
+        option2: null
+        position: 1
+        sku: SPC.AST.AMAZINGMOM
+        barcode: SH_JWL19
+    title: Amazing Mom Necklace
+    tags: Coral,Jewelry,Mother's Day,Necklace,Pink
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:21+05:00'
+    vendor: Lucky Feather
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158005968810895350780'
+    published_at: null
+    product_behavior: ''
+    product_category: Necklaces
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-23-55PM.png?w=345&h=345
+      alt: ''
+      id: '6315800600164664359'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1">Light as a feather with dainty gold-plated
+      feather studs. Wear them and know you are beautiful inside and out. Bring
+      light and happiness to your life. A true symbol of friendship and love.
+      Nickel-free for sensitive skin. Cute gift for someone special. Wear
+      everyday or for any occasion. </p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-23-55PM.png?w=345&h=345
+        alt: ''
+        id: '6315800600164664359'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-24-01PM.png?w=435&h=340
+        alt: ''
+        id: '6315800600164664360'
+    created_at: '2024-02-01T14:19:20+05:00'
+    template_path: null
+    handle: lucky-feather-beauty-earrings
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800602451123606'
+        price: '29.95'
+        product_id: '16063158006008405115090780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006013606052130780'
+        option2: null
+        position: 1
+        sku: NMGE.BUNDLE.BEAUTY
+        barcode: SH_JWL22
+    title: Beauty Earrings
+    tags: Earrings,Global Good,Gold,Jewelry,Pink
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:21+05:00'
+    vendor: Lucky Feather
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006008405115090780'
+    published_at: null
+    product_behavior: ''
+    product_category: Earrings
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-19-12PM.png?w=345&h=342
+      alt: ''
+      id: '6315800604241358888'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p>Balance out with dainty gold-plated triangle studs. Daily balance helps
+      life! Wear them and feel balanced. I<span>nspirational gifts
+      f</span><span>or all occasions. Bring light and happiness to your life. A
+      true symbol of friendship andlove. Precious gift for someone special.
+      Nickel-free for sensitive skin.</span></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-19-12PM.png?w=345&h=342
+        alt: ''
+        id: '6315800604241358888'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at11-19-18PM.png?w=370&h=323
+        alt: ''
+        id: '6315800604241358889'
+    created_at: '2024-02-01T14:19:20+05:00'
+    template_path: null
+    handle: lucky-feather-balanced-earrings
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800606477657219'
+        price: '29.95'
+        product_id: '16063158006048167117200780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006053535826400780'
+        option2: null
+        position: 1
+        sku: NMGE.BUNDLE.BALANCED
+        barcode: SH_JWL25
+    title: Balanced Earrings
+    tags: Earrings,Global Good,Gold,Jewelry,Orange
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:21+05:00'
+    vendor: Lucky Feather
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006048167117200780'
+    published_at: null
+    product_behavior: ''
+    product_category: Earrings
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-17at10-26-25PM.png?w=1072&h=986
+      alt: ''
+      id: '6315800608200950845'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1">Waterproof bandaid. Ultra thin and flexible
+      bandage that seals on all four sides to help keep germs and dirt out.
+      Details: 39pcs, Three nautical patterns and a few diamond shape sizes too.
+      Tin container is reusable &amp; recyclable! Free of common allergens: no
+      latex, sesame oil, gluten, silicone or animal products.</p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/Screenshot2023-04-17at10-26-25PM.png?w=1072&h=986
+        alt: ''
+        id: '6315800608200950845'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-12at10-39-26PM.png?w=538&h=410
+        alt: ''
+        id: '6315800608200950846'
+    created_at: '2024-02-01T14:19:20+05:00'
+    template_path: null
+    handle: welly-assorted-waterproof-bandages
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800610755845533'
+        price: '7.99'
+        product_id: '16063158006090949018210780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006096317727410780'
+        option2: null
+        position: 1
+        sku: WLY1006
+        barcode: SH_SC20
+    title: Assorted Waterproof Bandages
+    tags: Bandaid,Blue,Health,Orange
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:22+05:00'
+    vendor: Welly
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006090949018210780'
+    published_at: null
+    product_behavior: ''
+    product_category: Medical Tape & Bandages
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-11at3-38-49PM.png?w=555&h=545
+      alt: ''
+      id: '6315800612260868108'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1">Positive affirmation card deck full of morning
+      mantras. Select a card each day and let the message sink in over coffee or
+      commute. Read aloud and set your intention for the day. Love yourself
+      cards are helpful daily cards 3.25 x 4 inches; 30 hand-illustrated cards.
+      Written by Suzi Barrett and illustrated by Vicki Chu</p>
+
+      <ul data-mce-fragment="1"></ul>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-02-11at3-38-49PM.png?w=555&h=545
+        alt: ''
+        id: '6315800612260868108'
+    created_at: '2024-02-01T14:19:21+05:00'
+    template_path: null
+    handle: knock-knock-affirmators-morning-mantra
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800614966926754'
+        price: '10.00'
+        product_id: '16063158006130878792530780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006136918590360780'
+        option2: null
+        position: 1
+        sku: '10008'
+        barcode: SH_SC24
+    title: Affirmators Morning Mantra Book
+    tags: Books,Everyday Happies,Inspirational,Versatile
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:22+05:00'
+    vendor: Knock Knock
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006130878792530780'
+    published_at: null
+    product_behavior: ''
+    product_category: Notebooks & Notepads
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at7-55-13PM.png?w=435&h=417
+      alt: ''
+      id: '6315800616656667741'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1">Dare to dream! Amelia Earhart is remembered for
+      her courage, vision, and achievements in aviation and for women. Bath balm
+      to recharge and regroup. Ingredients-sodium bicarbonate, citric acid,
+      natural jojoba oil,jasmine essential oil, fragrance oil, and coloreze.
+      Surprise magnet inside. 8oz one time use</p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at7-55-13PM.png?w=435&h=417
+        alt: ''
+        id: '6315800616656667741'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at7-47-47PM-65305c10-3b9b-4e53-a0d0-3007cffa78ea.png?w=553&h=487
+        alt: ''
+        id: '6315800616656667742'
+    created_at: '2024-02-01T14:19:21+05:00'
+    template_path: null
+    handle: woman-of-change-amelia-earhart-bath-balm
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: '2.27'
+        title: null
+        inventory_policy: deny
+        weight_unit: g
+        inventory_item_id: '6315800619463222411'
+        price: '10.00'
+        product_id: '16063158006173157377080780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006178693858440780'
+        option2: null
+        position: 1
+        sku: MBB047W
+        barcode: SH_SC46
+    title: Amelia Earhart Bath Balm
+    tags: Bath bomb,Colorful,Everyday Happies,Holiday Happies,Humans,Versatile
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:22+05:00'
+    vendor: Musee
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006173157377080780'
+    published_at: null
+    product_behavior: ''
+    product_category: Health & Beauty
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at10-20-45AM.png?w=477&h=450
+      alt: ''
+      id: '6315800621136015445'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p>“Beach Please” Quick Dry Beach Towel is cute and functional. Towel with
+      bright happy colors, made of microfiber material that wicks away moisture
+      is a fast drying towel. Sand-free so you can easily shake away beach sand
+      for a grit-free drying experience after laying out on the beach, pool or
+      lake. Measures: 63” x 31”.</p>
+
+      <ul></ul>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at10-20-45AM.png?w=477&h=450
+        alt: ''
+        id: '6315800621136015445'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at10-20-58AM.png?w=410&h=520
+        alt: ''
+        id: '6315800621136015446'
+    created_at: '2024-02-01T14:19:21+05:00'
+    template_path: null
+    handle: katydid-beach-please-quick-dry-towel
+    variants:
+      - inventory_quantity: 8
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800623741412496'
+        price: '28.00'
+        product_id: '16063158006219798037880780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006225166747080780'
+        option2: null
+        position: 1
+        sku: QDT-1005
+        barcode: SH_ACC11
+    title: Beach Please Quick Dry Towel
+    tags: Beach,Beach Towel,Everyday Happies,Rainbow,Vacation
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:22+05:00'
+    vendor: Katydid
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006219798037880780'
+    published_at: null
+    product_behavior: ''
+    product_category: Beach Towels
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at9-34-11AM.png?w=610&h=559
+      alt: ''
+      id: '6315800625783304221'
+    body_html: >-
+      <p><meta charset="utf-8"><span data-mce-fragment="1">Unbreakable "Sipping
+      Beauty" glass for the pool, beach, lake or any weekend trip. <meta
+      charset="utf-8">Portable and lightweight this flexible colorful glass is
+      made with 100% food-grade silicone that is stain resistant and dishwasher
+      safe. Color Grapefruit Pink </span>BPA, PVC and phthalate-free. FDA
+      Approved. California Prop 65 Certified.</p>
+
+      <p> </p>
+
+      <p> </p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at9-34-11AM.png?w=610&h=559
+        alt: ''
+        id: '6315800625783304221'
+    created_at: '2024-02-01T14:19:21+05:00'
+    template_path: null
+    handle: darrah-and-company-beauty-wine-cup
+    variants:
+      - inventory_quantity: 9
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800628137041319'
+        price: '10.00'
+        product_id: '16063158006266103154290780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006271807407800780'
+        option2: null
+        position: 1
+        sku: '124910'
+        barcode: SH_DW21
+    title: Beauty Wine Cup
+    tags: Coral,Cup,Everyday Happies,Versatile
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:22+05:00'
+    vendor: About Face Designs
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006266103154290780'
+    published_at: null
+    product_behavior: ''
+    product_category: Wine Cup
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at9-26-08AM.png?w=571&h=560
+      alt: ''
+      id: '6315800629608509497'
+    body_html: >-
+      <p><meta charset="utf-8">Colorful and playful tea towels! A fun and
+      functional way to brighten up any kitchen. Fun-loving dishtowels make
+      great housewarming gifts for friends and family! Towels perfect for adding
+      extra spice to any place called home. Color YellowMachine wash cold.
+      Tumble dry low. Warm iron if needed Material 100% Cotton Linen<br></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at9-26-08AM.png?w=571&h=560
+        alt: ''
+        id: '6315800629608509497'
+    created_at: '2024-02-01T14:19:22+05:00'
+    template_path: null
+    handle: darrah-and-company-10-minutes-before-tea-towel
+    variants:
+      - inventory_quantity: 100
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800631878362263'
+        price: '10.00'
+        product_id: '16063158006303013029680780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006308213966710780'
+        option2: null
+        position: 1
+        sku: '188289'
+        barcode: SH_KTCH14
+    title: 10 Minutes Before Tea Towel
+    tags: Everyday Happies,Tea Towel,Versatile,Yellow
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:22+05:00'
+    vendor: About Face Designs
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006303013029680780'
+    published_at: null
+    product_behavior: ''
+    product_category: Tea Towel
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at9-09-17AM.png?w=592&h=567
+      alt: ''
+      id: '6315800633500992538'
+    body_html: >-
+      <p>Colorful and playful tea towels! A fun and functional way to brighten
+      up any kitchen. Fun-loving dishtowels make great housewarming gifts for
+      friends and family! Towels perfect for adding extra spice to any place
+      called home. Color Aqua Machine wash cold. Tumbledry low. Warm iron if
+      needed Material 100% Cotton Linen<br><meta charset="utf-8"></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-24at9-09-17AM.png?w=592&h=567
+        alt: ''
+        id: '6315800633500992538'
+    created_at: '2024-02-01T14:19:22+05:00'
+    template_path: null
+    handle: darrah-and-company-bacon-grease-tea-towel
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800635703567517'
+        price: '10.00'
+        product_id: '16063158006340090677210780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006345459386400780'
+        option2: null
+        position: 1
+        sku: '127414'
+        barcode: SH_KTCH17
+    title: Bacon Grease Tea Towel
+    tags: Aqua,Blue,Everyday Happies,Tea Towel,Versatile
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:23+05:00'
+    vendor: About Face Designs
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006340090677210780'
+    published_at: null
+    product_behavior: ''
+    product_category: Tea Towel
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-20at11-47-31PM.png?w=428&h=409
+      alt: ''
+      id: '6315800637426861145'
+    body_html: >-
+      <meta charset="utf-8">
+
+      <p data-mce-fragment="1"><span data-mce-fragment="1">Precious yellow
+      airplane ornament is perfect on your Christmas tree! Travel. Made by
+      artisans in Nepal, Asia using colorful sheep wool. </span>Dimensions: 2.5"
+      high x 5" long Materials: Sheep wool Country of Origin: Nepal</p>
+
+      <div data-mce-fragment="1"></div>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-20at11-47-31PM.png?w=428&h=409
+        alt: ''
+        id: '6315800637426861145'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-20at11-47-35PM.png?w=423&h=417
+        alt: ''
+        id: '6315800637426861146'
+    created_at: '2024-02-01T14:19:22+05:00'
+    template_path: null
+    handle: ornaments-4-orpahns-airplane-ornament-2
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800639981755827'
+        price: '12.99'
+        product_id: '16063158006381530400950780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006386899110150780'
+        option2: null
+        position: 1
+        sku: OFW-AIR
+        barcode: SH_ORN05
+    title: Airplane Holiday Ornament
+    tags: Airplane,Giving Back,Holiday Happies,Ornament,Yellow
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:23+05:00'
+    vendor: Ornaments 4 Orphans
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006381530400950780'
+    published_at: null
+    product_behavior: ''
+    product_category: Holiday Ornaments
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-20at11-43-06PM.png?w=395&h=389
+      alt: ''
+      id: '6315800641570833425'
+    body_html: >-
+      <meta charset="utf-8"><form
+      action="https://ornaments4orphans.org/cart/add" method="post"
+      data-mce-fragment="1">
+
+      <p><span>Taco Tuesday with guacamole! Cute avocado ornament is ready for
+      your Christmas tree. Handmade by artisans in Nepal, Asia using colorful
+      sheep wool. </span>Dimensions: 4.5" tall x 3" wide Materials: Sheep wool
+      Country of Origin: Nepal</p>
+
+      <div><span></span></div>
+
+      </form>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-20at11-43-06PM.png?w=395&h=389
+        alt: ''
+        id: '6315800641570833425'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-20at11-43-11PM.png?w=419&h=421
+        alt: ''
+        id: '6315800641587610707'
+    created_at: '2024-02-01T14:19:22+05:00'
+    template_path: null
+    handle: ornaments-4-orpahns-avocado-ornament
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800643924403369'
+        price: '12.99'
+        product_id: '16063158006420789086620780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006426493340140780'
+        option2: null
+        position: 1
+        sku: OFW-AVOMAN
+        barcode: SH_ORN06
+    title: Avocado Holiday Ornament
+    tags: Avocado,Giving Back,Green,Holiday Happies,Ornament,Taco
+    published_scope: null
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:23+05:00'
+    vendor: Ornaments 4 Orphans
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006420789086620780'
+    published_at: null
+    product_behavior: ''
+    product_category: Holiday Ornaments
+    status: draft
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-12-44PM.png?w=297&h=523
+      alt: ''
+      id: '6315800645681082441'
+    body_html: >-
+      <meta charset="utf-8"><meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8"> <meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8"> <meta charset="utf-8">
+
+      <p data-mce-fragment="1"><meta charset="utf-8"><span
+      data-mce-fragment="1">The best astrology Standard No. 2 pencils for
+      Sagittarius Birthdays November 22 - December 21 and gifts! Sagittarius are
+      known for being independent, open-minded, blunt, wanderers and
+      philosophers. Each of the 8 multi-colored pencils include cute sayings
+      perfect for gifting.</span></p>
+
+      <p data-mce-fragment="1"> </p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-12-44PM.png?w=297&h=523
+        alt: ''
+        id: '6315800645681082441'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-12-50PM.png?w=566&h=526
+        alt: ''
+        id: '6315800645681082442'
+    created_at: '2024-02-01T14:19:23+05:00'
+    template_path: null
+    handle: copy-of-astrology-pencil-scorpio
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800648538137774'
+        price: '12.95'
+        product_id: '16063158006464577620640780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006471120734960780'
+        option2: null
+        position: 1
+        sku: SAG-P
+        barcode: SH_OF10
+    title: Astrology Pencil - Sagittarius
+    tags: Birthday,Colorful,Pencils,Sagittarius
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:25+05:00'
+    vendor: Whiskey River
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006464577620640780'
+    published_at: '2024-02-01T14:19:23+05:00'
+    product_behavior: ''
+    product_category: Pens & Pencils
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-09-52PM.png?w=302&h=521
+      alt: ''
+      id: '6315800650076712979'
+    body_html: >-
+      <meta charset="utf-8"><meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8"> <meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8">
+
+      <p data-mce-fragment="1"><span data-mce-fragment="1">The best astrology
+      Standard No. 2pencil pack for Scorpio Birthdays October 23- November 21
+      and gifts! Scorpio traits include being passionate, obsessive, competitive
+      and are known to be suspicious and intense. Each of the 8 multi-colored
+      pencils include cute sayings perfect for gifting.</span></p>
+
+      <p data-mce-fragment="1"> </p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-09-52PM.png?w=302&h=521
+        alt: ''
+        id: '6315800650076712979'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-09-58PM.png?w=567&h=529
+        alt: ''
+        id: '6315800650076712980'
+    created_at: '2024-02-01T14:19:23+05:00'
+    template_path: null
+    handle: copy-of-astrology-pencil-libra
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800653487416497'
+        price: '12.95'
+        product_id: '16063158006506520660870780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006512224914390780'
+        option2: null
+        position: 1
+        sku: SCO-P
+        barcode: SH_OF11
+    title: Astrology Pencil - Scorpio
+    tags: Birthday,Colorful,Pencils,Scorpio
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:24+05:00'
+    vendor: Whiskey River
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006506520660870780'
+    published_at: '2024-02-01T14:19:23+05:00'
+    product_behavior: ''
+    product_category: Pens & Pencils
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-05-45PM.png?w=299&h=522
+      alt: ''
+      id: '6315800655261041760'
+    body_html: >-
+      <meta charset="utf-8"><meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8"> <meta charset="utf-8"> <meta charset="utf-8">
+
+      <p data-mce-fragment="1"><meta charset="utf-8"><span
+      data-mce-fragment="1">The best astrology Standard No. 2 pencil pack for
+      Libra Birthdays September 23 - October 22 and</span><span
+      data-mce-fragment="1"> gifts! Libras are </span><span
+      data-mce-fragment="1">diplomatic, people-pleaser and can be indecisive,
+      superficial and a flirt! Each of the 8 brightly multi-colored pencils
+      </span><span data-mce-fragment="1">include cute saying</span><span
+      data-mce-fragment="1">s perfect for gifting.</span> </p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-05-45PM.png?w=299&h=522
+        alt: ''
+        id: '6315800655261041760'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-05-51PM.png?w=566&h=529
+        alt: ''
+        id: '6315800655261041761'
+    created_at: '2024-02-01T14:19:23+05:00'
+    template_path: null
+    handle: copy-of-astrology-pencil-virgo
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800657379728830'
+        price: '12.95'
+        product_id: '16063158006557691169860780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006562892106900780'
+        option2: null
+        position: 1
+        sku: LIB-P
+        barcode: SH_OF12
+    title: Astrology Pencil - Libra
+    tags: Birthday,Colorful,Libra,Pencils
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:24+05:00'
+    vendor: Whiskey River
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006557691169860780'
+    published_at: '2024-02-01T14:19:23+05:00'
+    product_behavior: ''
+    product_category: Pens & Pencils
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-03-29PM.png?w=298&h=521
+      alt: ''
+      id: '6315800659035746320'
+    body_html: >-
+      <meta charset="utf-8"><meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8"> <meta charset="utf-8">
+
+      <p><meta charset="utf-8"><span data-mce-fragment="1">The best astrology
+      Standard No. 2 pencil pack for Virgo Birthdays August 23 - September 22
+      and fun gift ideas! Virgo are perfectionists and known to be methodical,
+      critical, self-involved and hyperactive. Each of the 8 brightly
+      multi-colored pencils include cute sayings perfect for gifting.</span></p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-03-29PM.png?w=298&h=521
+        alt: ''
+        id: '6315800659035746320'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-03-39PM.png?w=565&h=530
+        alt: ''
+        id: '6315800659035746321'
+    created_at: '2024-02-01T14:19:23+05:00'
+    template_path: null
+    handle: astrology-pencil-leo-1
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800661322376377'
+        price: '12.95'
+        product_id: '16063158006595775450370780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006601144159570780'
+        option2: null
+        position: 1
+        sku: VIR-P
+        barcode: SH_OF13
+    title: Astrology Pencil - Virgo
+    tags: Birthday,Colorful,Pencils,Virgo
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:24+05:00'
+    vendor: Whiskey River
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006595775450370780'
+    published_at: '2024-02-01T14:19:23+05:00'
+    product_behavior: ''
+    product_category: Pens & Pencils
+    status: active
+  - image:
+      src: >-
+        https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-00-13PM.png?w=295&h=524
+      alt: ''
+      id: '6315800663280550937'
+    body_html: >-
+      <meta charset="utf-8"><meta charset="utf-8"> <meta charset="utf-8"> <meta
+      charset="utf-8"> <meta charset="utf-8">
+
+      <p data-mce-fragment="1"><meta charset="utf-8"><span
+      data-mce-fragment="1">The best astrology Standard No. 2 pencils pack for
+      Leo Birthdays July 23- August 22 and</span><span data-mce-fragment="1">
+      gift ideas! Leo</span><span data-mce-fragment="1"> traits include being
+      charismatic, fun-loving, dramatic and are known to be talented and natural
+      leaders. Each of the 8 multi-colored pencils
+      </span><spandata-mce-fragment="1">include cute saying</span><span
+      data-mce-fragment="1">s perfect for gifting.</span></p>
+
+      <p data-mce-fragment="1"> </p>
+    images:
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-00-13PM.png?w=295&h=524
+        alt: ''
+        id: '6315800663280550937'
+      - src: >-
+          https://img.myshopline.com/image/store/1706779223743/ScreenShot2022-01-18at8-00-18PM.png?w=563&h=529
+        alt: ''
+        id: '6315800663280550938'
+    created_at: '2024-02-01T14:19:24+05:00'
+    template_path: null
+    handle: astrology-pencil-leo
+    variants:
+      - inventory_quantity: 0
+        image: null
+        required_shipping: true
+        compare_at_price: null
+        taxable: true
+        option5: null
+        weight: null
+        title: null
+        inventory_policy: deny
+        weight_unit: null
+        inventory_item_id: '6315800665499901390'
+        price: '12.95'
+        product_id: '16063158006638221807040780'
+        option3: null
+        option4: null
+        inventory_tracker: true
+        option1: null
+        id: '18063158006643422744080780'
+        option2: null
+        position: 1
+        sku: LEO-P
+        barcode: SH_OF14
+    title: Astrology Pencil - Leo
+    tags: Birthday,Colorful,Leo,Pencils
+    published_scope: web
+    product_type: NORMAL
+    updated_at: '2024-02-01T14:19:25+05:00'
+    vendor: Whiskey River
+    subtitle: null
+    options: []
+    spu: null
+    id: '16063158006638221807040780'
+    published_at: '2024-02-01T14:19:24+05:00'
+    product_behavior: ''
+    product_category: Pens & Pencils
+    status: active

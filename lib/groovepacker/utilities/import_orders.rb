@@ -347,7 +347,13 @@ class ImportOrders < Groovepacker::Utilities::Base
       store = Store.find store_id
       handler = get_handler_for_products(store)
       context = Groovepacker::Stores::Context.new(handler)
-      store.store_type == 'Shopify' ? context.import_shopify_products(product_import_type, product_import_range_days) : context.import_products
+      if store.store_type == 'Shopify'
+        context.import_shopify_products(product_import_type, product_import_range_days)
+      elsif store.store_type == 'Shopline'
+        context.import_shopline_products(product_import_type, product_import_range_days)
+      else
+        context.import_products
+      end
     end
   end
 
@@ -368,6 +374,8 @@ class ImportOrders < Groovepacker::Utilities::Base
       handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store)
     when 'Shopify'
       handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(store)
+    when 'Shopline'
+      handler = Groovepacker::Stores::Handlers::ShoplineHandler.new(store)
     when 'Teapplix'
       handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(store)
     when 'Amazon'

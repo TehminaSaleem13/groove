@@ -73,8 +73,9 @@ module ProductClassMethodsHelper
     GroovRealtime.emit('access_token_message', result, :tenant)
   end
 
-  def emit_message_for_shopify_running_imports
-    result = { message: 'Another Shopify import is in queue, Please wait for it to complete.' }
+  # Message for Shopline and Shopify import queue
+  def emit_message_for_shop_running_imports
+    result = { message: 'Another Shopify/Shopline import is in queue, Please wait for it to complete.' }
     GroovRealtime.emit('access_token_message', result, :user)
   end
 
