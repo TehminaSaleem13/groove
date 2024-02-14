@@ -51,8 +51,8 @@ module Groovepacker
       private
 
       def create_or_update_exception
-        @exception = @order.order_exception
-        @exception = assign_values_to_exception
+        @exception = @order.order_exception || @order.build_order_exception
+        @exception = assign_values_to_exception(@exception)
 
         if @exception.save
           username = begin
