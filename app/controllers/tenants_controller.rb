@@ -82,6 +82,7 @@ class TenantsController < ApplicationController
                  nil
                 end
     unless db_price.blank?
+      db_price[feature] ||= { stripe_id: '' }
       db_price[feature]['toggle'] = begin
                                       toggle
                                     rescue StandardError

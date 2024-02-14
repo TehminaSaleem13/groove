@@ -6,7 +6,7 @@ RSpec.describe External::OrdersController, type: :controller do
   let!(:api_key) { FactoryBot.create(:api_key) }
   let!(:inv_wh) { FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse') }
   let!(:store) { FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: inv_wh, status: true) }
-  let!(:tenant) { Tenant.create(name: Apartment::Tenant.current) }
+  let!(:tenant) { Tenant.create(name: Apartment::Tenant.current, enable_developer_tools: true) }
   let(:order) { FactoryBot.create :order, store_id: store.id }
 
   before do

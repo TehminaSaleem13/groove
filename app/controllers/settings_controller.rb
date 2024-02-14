@@ -164,7 +164,7 @@ class SettingsController < ApplicationController
     @result['ss_api_create_label'] = current_tenant&.ss_api_create_label
     @result['show_external_logs_button'] = current_tenant&.show_external_logs_button
     @result['show_originating_store_id'] = current_tenant&.show_originating_store_id
-
+    @result['enable_developer_tools'] = current_tenant&.enable_developer_tools
     if general_setting.present?
       @result['data']['settings'] = if params[:app]
                                       GeneralSetting.last.attributes.slice(*filter_general_settings)
@@ -178,8 +178,7 @@ class SettingsController < ApplicationController
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']
     end
 
-    printing_setting = PrintingSetting.all.last
-    printing_setting = PrintingSetting.create if printing_setting.nil?
+    printing_setting = PrintingSetting.last || PrintingSetting.create
     if printing_setting.present?
       @result['data']['settings'] = @result['data']['settings'].as_json.merge('product_barcode_label_size' => printing_setting.product_barcode_label_size)
     else
