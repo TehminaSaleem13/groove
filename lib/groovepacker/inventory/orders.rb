@@ -68,8 +68,7 @@ module Groovepacker
           return false unless inventory_tracking_enabled?
           return false if order_item.is_inventory_allocated? || order_item.is_inventory_sold? && !update_pull_inv
 
-          order_item_status = update_pull_inv == true ? OrderItem::SOLD_INV_STATUS : OrderItem::ALLOCATED_INV_STATUS
-          do_allocate_item(order_item, order_item.qty, order_item_status, status_match)
+          do_allocate_item(order_item, order_item.qty,OrderItem::ALLOCATED_INV_STATUS, status_match)
         end
 
         def deallocate_item(order_item, status_match = false)
