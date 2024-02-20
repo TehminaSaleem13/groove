@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240214075542) do
+ActiveRecord::Schema.define(version: 20240220074033) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -175,6 +175,8 @@ ActiveRecord::Schema.define(version: 20240214075542) do
     t.string "queue"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.string "signature"
+    t.text "args"
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 
@@ -1285,6 +1287,7 @@ ActiveRecord::Schema.define(version: 20240214075542) do
     t.datetime "product_last_import"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "permit_shared_barcodes", default: false
   end
 
   create_table "store_product_imports", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

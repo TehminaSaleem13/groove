@@ -69,7 +69,7 @@ module Groovepacker
         combined_response['products'] = []
 
         puts "======================Fetching Page #{page_index}======================"
-        query_opts = { 'limit' => 100 }.as_json
+        query_opts = { limit: 100 }.as_json
 
         add_url = product_import_type == 'new_updated' && shopline_credential.product_last_import ? "?updated_at_min=#{shopline_credential.product_last_import.strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : ''
         add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : '' unless add_url.present?
@@ -83,7 +83,7 @@ module Groovepacker
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
           page_index += 1
           puts "======================Fetching Page #{page_index}======================"
-          new_link = response.headers['link'].split(',').last.split(';').first.strip.chop.reverse.chop.reverse
+          new_link = response.headers['link'].split(',').first.split('\;').first.strip.chop.reverse.chop.reverse
           response = HTTParty.get(new_link, headers: headers)
           combined_response['products'] << response['products']
           combined_response['products'] = combined_response['products'].flatten
@@ -92,10 +92,11 @@ module Groovepacker
       end
 
       def product(product_id)
-        HTTParty.get(
+        response = HTTParty.get(
           "https://#{shopline_credential.shop_name}.myshopline.com/admin/openapi/#{ENV['SHOPLINE_API_VERSION']}/products/#{product_id}.json",
           headers: headers
         )
+        response['product'] || {}
       end
 
       def get_variant(product_variant_id)

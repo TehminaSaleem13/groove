@@ -397,6 +397,19 @@ RSpec.describe StoresController, type: :controller do
       shopline_store_credentials = ShoplineCredential.create(store_id: shopline_store.id, access_token: 'accesstokenaccesstoken', shop_name: 'test_shopline')
     end
 
+    it 'On Demand Import' do
+      allow_any_instance_of(Groovepacker::ShoplineRuby::Client).to receive(:get_single_order).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/Shopline_test_single_order.yaml'))))
+
+      request.accept = 'application/json'
+
+      shopline_store = Store.where(store_type: 'Shopline').last
+
+      get :get_order_details, params: { order_no: 'SHOPLINE-1001', store_id: shopline_store.id }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(res['status']).to be true
+    end
+
     it 'Pull Inventory' do
       shopline_store = Store.where(store_type: 'Shopline').last
       product = FactoryBot.create(:product, store_id: @store.id, store_product_id: '123456')

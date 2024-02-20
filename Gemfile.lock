@@ -900,7 +900,7 @@ DEPENDENCIES
   daemons
   database_cleaner (>= 0.9.1)
   delayed_job_active_record (~> 4)
-  delayed_job_prevent_duplicate (~> 0.1.4)
+  delayed_job_prevent_duplicate
   delayed_job_web
   devise
   doorkeeper (~> 5.0.0)

@@ -292,8 +292,12 @@ class ShopifyController < ApplicationController
 
   def disconnect
     store = Store.find(params[:id])
-    @shopify_credential = store.shopify_credential
-    if @shopify_credential.update_attributes(access_token: nil)
+    if store.store_type == 'Shopline'
+      @shop_credential = store.shopline_credential
+    else
+      @shop_credential = store.shopify_credential
+    end
+    if @shop_credential.update_attributes(access_token: nil)
       render status: 200, json: 'disconnected'
     else
       render status: 304, json: 'not disconnected'

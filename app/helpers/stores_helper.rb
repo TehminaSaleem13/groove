@@ -397,6 +397,20 @@ module StoresHelper
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
                       orderStatus: response['orders'].first['fulfillment_status']&.titleize)
+      elsif store.store_type == 'Shopline'
+        credential = store.shopline_credential
+        client = Groovepacker::ShoplineRuby::Client.new(credential)
+        response = client.get_single_order(params[:order_no])
+
+        return result[:status] = false if response['orders'].nil? || response['orders'].blank?
+
+        result[:status] = true
+        result_modifyDate = Time.zone.parse(response['orders'].first['updated_at'])
+        result_createDate = Time.zone.parse(response['orders'].first['created_at'])
+
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
+                      orderStatus: response['orders'].first['fulfillment_status']&.titleize)
+        result[:ss_similar_order_found] = true if response['orders'].count > 1
       elsif store.store_type == 'Shipstation API 2'
         credential = store.shipstation_rest_credential
         client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
@@ -428,7 +442,7 @@ module StoresHelper
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate, orderStatus: response['order_status']&.titleize)
       end
-      result[:ss_similar_order_found] = true if response.count > 1
+      result[:ss_similar_order_found] = true if store.store_type != 'Shopline' && response.count > 1
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
       import_orders = ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}", priority: 95)

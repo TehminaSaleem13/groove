@@ -249,6 +249,8 @@ module Groovepacker
             product.product_barcodes.create(barcode: variant['sku']) if variant['sku'].present?
           when 'import_from_shopify'
             create_barcode_from_variant(product, variant)
+          when 'import_from_shopline'
+            create_barcode_from_variant(product, variant)
           when 'do_not_generate'
             barcode_created = product.product_barcodes.create(barcode: variant['barcode']) if variant['barcode'].present?
             product.product_barcodes.new(barcode: variant['barcode'], permit_shared_barcodes: true).save if variant['barcode'].present? && (begin

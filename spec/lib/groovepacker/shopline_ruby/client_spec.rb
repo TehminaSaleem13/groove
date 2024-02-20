@@ -22,15 +22,16 @@ RSpec.describe Groovepacker::ShoplineRuby::Client do
 
   describe 'Products' do
     it 'retrieves a product against an ID from shopline store' do
-      product = client.product('18061957704037150323622600')
+      product = client.product('16061957704033459336032600')
 
-      expect(product).not_to be_nil
+      expect(product).to have_key('id')
+      expect(product['id']).not_to be_empty
     end
 
     it 'retrieves a variant against an ID from shopline store' do
       variant = client.get_variant('18061957704037150323622600')
 
-      expect(variant).not_to be_nil
+      expect(variant).to have_key('id')
     end
   end
 end
