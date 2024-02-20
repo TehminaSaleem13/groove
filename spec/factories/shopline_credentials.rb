@@ -1,6 +1,6 @@
 FactoryBot.define do
   factory :shopline_credential do
-    shop_name { 'groovepacking' }
-    access_token { 'eyJhbGciOiJIUzUxMiJ9.eyJhcHBLZXkiOiI2OGViZjY4YzQ3ZjZjYWU1MDMzMjE3ZWEwNDQzZWI5MWQ1ZmFhNzgyIiwic2VsbGVySWQiOiIyMDE3NjM2MzM2Iiwic3RvcmVJZCI6IjE3MDY3NzkyMjM3NDMiLCJ2ZXJzaW9uIjoiVjIiLCJkb21haW4iOiJodHRwczovL3NsLW9wZW4tc2cubXlzaG9wbGluZS5jb20iLCJ0aW1lc3RhbXAiOjE3MDY3NzkzMzQwMTksImlzcyI6Inlzb3VsIiwiZXhwIjoxODAxMzg3MzM0fQ.fqP1hHKQDOqn0KHiB3mLR0_Do3qNFNPSx9lFQJ6xL92I7kBjheTmGobSosndKQ3YlJjziGVoES8y8TOsGwjauA' }
+    shop_name { ENV['SHOPLINE_SAMPLE_SHOP_NAME'] }
+    access_token { ENV['SHOPLINE_SAMPLE_SHOP_ACCESS_KEY'] }
   end
 end

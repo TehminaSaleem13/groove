@@ -1,74 +1,51 @@
 ---
-id: '16063158007488155566820780'
-title: ADIDAS | CLASSIC BACKPACK
-body_html: >-
-  This women's backpack has a glam look, thanks to a faux-leather build with
-  an allover fur print. The front zip pocket keeps small things within reach,
-  while an interior divider reins in potential chaos.
-template_path: null
-handle: adidas-classic-backpack-2
-tags: adidas,backpack,egnition-sample-data
+id: '16061957704033459336032600'
+title: 'The Collection Snowboard: Hydrogen'
+body_html: ''
+created_at: '2023-11-10T22:00:03+08:00'
+template_path: templates/products/detail.json
+handle: the-collection-snowboard-hydrogen
+tags: Accessory,Sport,winter
 published_scope: web
 product_type: NORMAL
-created_at: '2024-02-01T14:19:29+05:00'
-updated_at: '2024-02-01T14:19:30+05:00'
-vendor: ADIDAS
+updated_at: '2024-02-15T00:43:19+08:00'
+vendor: Hydrogen Vendor
 subtitle: null
-spu: null
-published_at: '2024-02-01T14:19:29+05:00'
+options: []
+spu: ''
+published_at: '2023-11-10T22:00:03+08:00'
 product_behavior: ''
-product_category: ACCESSORIES
+product_category: null
 status: active
 variants:
-  - id: '18063158007493524276030780'
-    inventory_quantity: -1
+  - id: '18061957704037150323622600'
+    inventory_quantity: 59
     image: null
     compare_at_price: null
     taxable: true
     option5: null
-    weight: null
-    title: OS · black
+    weight: '0.00'
+    title: null
     inventory_policy: deny
     require_shipping: true
-    weight_unit: null
-    inventory_item_id: '6315800750661049929'
-    price: '70.00'
-    product_id: '16063158007488155566820780'
+    weight_unit: g
+    inventory_item_id: '6195770404620995649'
+    price: '600.00'
+    product_id: '16061957704033459336032600'
     option3: null
     option4: null
     inventory_tracker: true
-    option1: OS
-    option2: black
-    sku: AD-03-black-OS
+    option1: null
+    option2: null
+    sku: ''
     barcode: ''
-options:
-  - product_id: '16063158007488155566820780'
-    values:
-      - OS
-    values_images: {}
-    name: Size
-    id: '16163158007493524276050780'
-  - product_id: '16063158007488155566820780'
-    values:
-      - black
-    values_images: {}
-    name: Color
-    id: '16163158007493524276080780'
-images:
-  - src: >-
-      https://img.myshopline.com/image/store/1706779223743/85cc58608bf138a50036bcfe86a3a362.jpg?w=635&h=560
-    alt: ''
-    id: '6315800748206818350'
-  - src: >-
-      https://img.myshopline.com/image/store/1706779223743/8a029d2035bfb80e473361dfc08449be.jpg?w=635&h=560
-    alt: ''
-    id: '6315800748206818351'
-  - src: >-
-      https://img.myshopline.com/image/store/1706779223743/ad50775123e20f3d1af2bd07046b777d.jpg?w=635&h=560
-    alt: ''
-    id: '6315800748206818352'
 image:
   src: >-
-    https://img.myshopline.com/image/store/1706779223743/85cc58608bf138a50036bcfe86a3a362.jpg?w=635&h=560
-  alt: ''
-  id: '6315800748206818350'
+    https://img-va.myshopline.com/image/store/1699622004609/Main.jpg?w=1600&h=1600
+  alt: 'The Collection Snowboard: Hydrogen'
+  id: '6195770403073051741'
+images:
+  - src: >-
+      https://img-va.myshopline.com/image/store/1699622004609/Main.jpg?w=1600&h=1600
+    alt: 'The Collection Snowboard: Hydrogen'
+    id: '6195770403073051741'
