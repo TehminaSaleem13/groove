@@ -26,10 +26,10 @@ module Groovepacker
                                 rescue StandardError
                                   response['orders']
                                 end
-          response['orders'].each do |order|
-            import_item_fix
-            ImportItem.where(store_id: @store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
 
+          ImportItem.where(store_id: @store.id).where.not(id: @import_item).update_all(status: 'cancelled')
+
+          response['orders'].each do |order|
             break if import_should_be_cancelled
 
             import_single_order(order) if order.present?
