@@ -8,35 +8,48 @@ class DeleteOrders
   # queue 'delete orders'
   # priority 10
 
+  ORDER_ASSOCIATIONS = %w[OrderShipping OrderException OrderActivity OrderSerial PackingCam ShippingLabel Box].freeze
+  ORDER_ITEM_ASSOCIATIONS = %w[OrderItemBox OrderItemKitProduct OrderItemOrderSerialProductLot OrderItemScanTime].freeze
+
   def initialize(attrs = {})
     # @tenant = attrs[:tenant]
     # @delete_count = attrs[:delete_count]
   end
 
   def perform
-    database = Rails.configuration.database_configuration[Rails.env]['database']
+    # GROOV-3520(when tenant field orders_delete_days is set to 0 tenant orders not be deleted)
+    
+    tenants = Tenant.where.not(orders_delete_days: 0)
+    tenants.find_each.each do |tenant|
+      Apartment::Tenant.switch!(tenant.name)
+
+      delete_orders_for_tenant(tenant)
+      destroy_tenant_order_items
+    end
+
+    # database = Rails.configuration.database_configuration[Rails.env]['database']
     # unless @tenant.blank?
     #   tenant = Tenant.find_by_name(@tenant)
     #   system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database} #{@tenant.name} #{@delete_count}")
     #   destroy_order_items(@tenant)
     # else
-    tenants = begin
-                  Tenant.order(:name)
-              rescue StandardError
-                Tenant.all
-                end
-    system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
-    tenants.each { |tenant| destroy_order_items(tenant) }
+    # tenants = begin
+    #               Tenant.order(:name)
+    #           rescue StandardError
+    #             Tenant.all
+    #             end
+    # system("#{Rails.root}/lib/groovepacker/utilities/go/delete_orders #{database}")
+    # tenants.each { |tenant| destroy_order_items(tenant) }
     # end
   end
 
-  def destroy_order_items(tenant)
-    Apartment::Tenant.switch!(tenant.name)
-    OrderItem
-      .where(is_deleted: true)
-      .includes(:order)
-      .find_in_batches(batch_size: 1000) do |order_items|
-        order_items_ids = order_items.map(&:id)
+  # def destroy_order_items(tenant)
+  #   Apartment::Tenant.switch!(tenant.name)
+  #   OrderItem
+  #     .where(is_deleted: true)
+  #     .includes(:order)
+  #     .find_in_batches(batch_size: 1000) do |order_items|
+  #       order_items_ids = order_items.map(&:id)
 
         # Already deleted in go code
         # OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
@@ -44,12 +57,12 @@ class DeleteOrders
         # OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
 
         # Update inventory
-        order_items.map(&:delete_inventory)
+        # order_items.map(&:delete_inventory)
         #  Removed destroy, for avioding the callbacks
         # as child associations are already deleted
-        OrderItem.where(['id IN (?)', order_items_ids]).delete_all
-      end
-  end
+  #       OrderItem.where(['id IN (?)', order_items_ids]).delete_all
+  #     end
+  # end
 
   # def perform_for_single_tenant(tenant)
   #   begin
@@ -292,4 +305,72 @@ class DeleteOrders
   #   credentials["host"] = "localhost" if credentials["host"].blank?
   #   return credentials
   # end
+
+  private
+
+  def delete_orders_for_tenant(tenant)
+    orders_delete_days = tenant.orders_delete_days.days.ago.beginning_of_day
+    orders = scanned_orders + partially_scanned_orders + awaiting_and_onhold_orders(orders_delete_days)
+    orders_ids = orders.pluck(:id)
+
+    Rails.logger.info 'No Orders Found !!!' if orders.empty?
+
+    Order.where(['id IN (?)', orders_ids]).delete_all
+
+    Rails.logger.info "Orders Deleted: #{orders.count}"
+
+    update_totes_for_orders(orders_ids)
+    order_items_ids = add_deleted_flag_for_order_items(orders_ids)
+    destroy_order_associated_data(orders_ids)
+    destroy_order_items_associated_data(order_items_ids)
+  end
+
+  def destroy_order_associated_data(orders_ids)
+    ORDER_ASSOCIATIONS.each do |table|
+      data = table.constantize.where(order_id: orders_ids)
+      data.delete_all
+
+      Rails.logger.info "#{table} Deleted: #{data.count}"
+    end
+  end
+
+  def destroy_order_items_associated_data(order_items_ids)
+    ORDER_ITEM_ASSOCIATIONS.each do |table|
+      data = table.constantize.where(order_item_id: order_items_ids)
+      data.delete_all
+
+      Rails.logger.info "#{table} Deleted: #{data.count}"
+    end
+  end
+
+  def destroy_tenant_order_items
+    OrderItem.where(is_deleted: true).includes(:order).find_in_batches(batch_size: 1000) do |order_items|
+      order_items_ids = order_items.map(&:id)
+      order_items.map(&:delete_inventory)
+      OrderItem.where(['id IN (?)', order_items_ids]).delete_all
+    end
+  end
+
+  def update_totes_for_orders(orders_ids)
+    Tote.where(order_id: orders_ids).update_all(order_id: nil)
+  end
+
+  def scanned_orders
+    Order.where('updated_at < ?', 90.days.ago.beginning_of_day).where(status: 'scanned')
+  end
+
+  def partially_scanned_orders
+    Order.partially_scanned.where('orders.updated_at < ?', 90.days.ago.beginning_of_day)
+  end
+
+  def awaiting_and_onhold_orders(orders_delete_days)
+    orders = Order.where('orders.updated_at < ?', orders_delete_days)
+    orders.awaiting_without_partially_scanned.or(orders.where(status: 'onhold'))
+  end
+
+  def add_deleted_flag_for_order_items(orders_ids)
+    order_items = OrderItem.where(order_id: orders_ids)
+    order_items.update(is_deleted: true)
+    order_items.ids
+  end
 end
