@@ -66,4 +66,32 @@ RSpec.describe Groovepacker::ShopifyRuby::Client do
       end
     end
   end
+
+  describe '#access_scopes' do
+    subject(:access_scopes) { client.access_scopes }
+
+    let(:scope1) { 'TEST_SCOPE' }
+
+    context 'when success' do
+      let(:http_response) { [scope1] }
+
+      before do
+        allow(ShopifyAPI::AccessScope).to receive_message_chain(:all, :map).and_return(http_response)
+      end
+
+      it 'returns access scopes' do
+        expect(access_scopes).to match_array(http_response)
+      end
+    end
+
+    context 'when failure' do
+      before do
+        allow(ShopifyAPI::Location).to receive(:all).and_raise('Not Found')
+      end
+
+      it 'returns nil' do
+        expect(access_scopes).to be nil
+      end
+    end
+  end
 end

@@ -157,6 +157,12 @@ module Groovepacker
         fetch_collection_from_shopify('ShopifyAPI::Location')
       end
 
+      def access_scopes
+        ShopifyAPI::AccessScope.all(session: session).map(&:handle)
+      rescue StandardError => e
+        nil
+      end
+
       def execute_grahpql_query(query)
         graphql_client.query(query)
       end

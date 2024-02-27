@@ -7,6 +7,7 @@ RSpec.describe ShopifyCredential, type: :model do
   let(:pull_location_id) { 456 }
   let(:push_location) { { 'id' => push_location_id, 'name' => 'Push Location' } }
   let(:pull_location) { { 'id' => pull_location_id, 'name' => 'Pull Location' } }
+  let(:access_scopes) { ['TEST_SCOPE'] }
 
   let(:store) do
     create(
@@ -30,6 +31,7 @@ RSpec.describe ShopifyCredential, type: :model do
 
   before do
     allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:locations).and_return([push_location, pull_location])
+    allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:access_scopes).and_return(access_scopes)
   end
 
   describe 'Associations' do
@@ -99,6 +101,12 @@ RSpec.describe ShopifyCredential, type: :model do
   describe '#locations' do
     it 'returns locations' do
       expect(shopify_credential.locations).to match_array([push_location, pull_location])
+    end
+  end
+
+  describe '#access_scopes' do
+    it 'returns access scopes' do
+      expect(shopify_credential.access_scopes).to match_array(access_scopes)
     end
   end
 

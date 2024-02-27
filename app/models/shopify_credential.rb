@@ -60,6 +60,14 @@ class ShopifyCredential < ActiveRecord::Base
   end
 
   def locations
-    @locations ||= Groovepacker::ShopifyRuby::Client.new(self).locations
+    @locations ||= client.locations
+  end
+
+  def access_scopes
+    @access_scopes ||= client.access_scopes
+  end
+
+  def client
+    @client ||= Groovepacker::ShopifyRuby::Client.new(self)
   end
 end
