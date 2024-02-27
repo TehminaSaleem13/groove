@@ -262,7 +262,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_item.save
   end
 
-  def initiate_import_for(_store, import_item, handler)
+  def initiate_import_for(store, import_item, handler)
     import_item.update_attributes(status: 'in_progress')
     result = Groovepacker::Stores::Context.new(handler).import_orders
     new_import_item = import_item
@@ -382,5 +382,21 @@ class ImportOrders < Groovepacker::Utilities::Base
       handler = Groovepacker::Stores::Handlers::AmazonHandler.new(store)
     end
     handler
+  end
+
+  def import_shopify_orders_every_ten_mins
+    Tenant.order(:name).find_each.each do |tenant|
+      Apartment::Tenant.switch!(tenant.name)
+      stores = Store.where(status: true, store_type: 'Shopify')
+      stores.each do |store|
+        credential = store&.shopify_credential
+        
+        if credential&.webhook_order_import
+          import_item = ImportItem.find_or_create_by(store_id: store.id)
+          handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+          initiate_import_for(store, import_item, handler)
+        end
+      end
+    end
   end
 end
