@@ -31,14 +31,14 @@ module Groovepacker
         #   break if (response["orders"].blank? || response["orders"].count < 250)
         # end
 
-        puts "======================Fetching Page #{page_index}======================"
+        Rails.logger.info("======================Fetching Page #{page_index}======================")
         query = { 'updated_at_min' => last_import, 'limit' => 250 }.as_json
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
         combined_response['orders'] << response['orders']
 
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
           page_index += 1
-          puts "======================Fetching Page #{page_index}======================"
+          Rails.logger.info("======================Fetching Page #{page_index}======================")
           begin
             import_item&.touch
           rescue StandardError
