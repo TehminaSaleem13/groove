@@ -3,7 +3,7 @@
 module Groovepacker
   module Stores
     module Importers
-      class ShopCommonMethods < Importer
+      class ShopifyShoplineImporter < Importer
         include ProductsHelper
 
         def import
@@ -85,7 +85,7 @@ module Groovepacker
             update_import_count('success_updated') && return if is_scanned || (order_in_gp.last_modified == Time.zone.parse(order['updated_at']))
             order_in_gp.order_items.destroy_all
           else
-            order_in_gp = Order.create(increment_id: order['name'], store: @store, store_order_id: order['id'].to_s)
+            order_in_gp = Order.new(increment_id: order['name'], store: @store, store_order_id: order['id'].to_s, importer_id: @worker_id, import_item_id: @import_item.id)
           end
           import_order_and_items(order, order_in_gp)
           # #create order
@@ -133,16 +133,6 @@ module Groovepacker
           shop_order.order_total = order['total_price']&.to_f || order['current_total_price'].to_f
           shop_order.last_modified = Time.zone.parse(order['updated_at'])
           shop_order.tracking_num = get_tracking_number(order)
-          shop_order.importer_id = begin
-                                          @worker_id
-                                      rescue StandardError
-                                        nil
-                                        end
-          shop_order.import_item_id = begin
-                                              @import_item.id
-                                          rescue StandardError
-                                            nil
-                                            end
           shop_order.job_timestamp = Time.current.strftime('%Y-%m-%d %H:%M:%S.%L')
           shop_order
         end
@@ -280,7 +270,7 @@ module Groovepacker
         def import_order_and_items(order, order_in_gp)
           # create order
           shop_order = order_in_gp
-          shop_order.transaction do
+          Order.transaction do
             shop_order = import_order(shop_order, order)
             # import items in an order
             shop_order = import_order_items(shop_order, order)

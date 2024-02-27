@@ -13,13 +13,13 @@ module Groovepacker
         end
 
         def import_orders
-          Groovepacker::Stores::Importers::ShopCommonMethods.new(
+          Groovepacker::Stores::Importers::ShopifyShoplineImporter.new(
             build_handle
           ).import
         end
 
         def import_single_order_from(order_no)
-          Groovepacker::Stores::Importers::ShopCommonMethods.new(
+          Groovepacker::Stores::Importers::ShopifyShoplineImporter.new(
             build_handle
           ).ondemand_import_single_order(order_no)
         end

@@ -137,9 +137,10 @@ module Groovepacker
         end
 
         def import_should_be_cancelled
+          @import_item.reload
           @import_item.blank? || !@import_item.persisted? || @import_item.status == 'cancelled' || @import_item.status.nil? || (@import_item.importer_id && @import_item.importer_id != @worker_id)
         rescue StandardError
-          nil
+          true
         end
 
         protected
