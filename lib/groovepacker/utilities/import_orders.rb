@@ -383,4 +383,13 @@ class ImportOrders < Groovepacker::Utilities::Base
     end
     handler
   end
+
+  def import_shopify_orders(tenant_name, store_id)
+    Apartment::Tenant.switch!(tenant_name)
+
+    store = Store.find_by_id(store_id)
+    import_item = ImportItem.find_or_create_by(store_id: store_id)
+    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+    initiate_import_for(store, import_item, handler)
+  end
 end

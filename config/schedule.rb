@@ -90,6 +90,10 @@ every 60.minutes do
   rake 'doo:schedule_hourly_import'
 end
 
+every 10.minutes do
+  rake 'doo:import_shopify_orders'
+end
+
 every 1.day, at: '03:00 am' do
   rake 'doo:schedule_inventory_report'
 end

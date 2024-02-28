@@ -55,4 +55,25 @@ RSpec.describe ImportOrders do
       end
     end
   end
+
+  describe '#import_shopify_orders' do
+
+    before do
+      inv_wh = create(:inventory_warehouse, name: 'csv_inventory_warehouse')
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!(tenant.to_s)
+      @tenant = create(:tenant, name: tenant.to_s)
+      @shopify_store = create(:store, :shopify, status: true, inventory_warehouse: inv_wh) do |store|
+        store.shopify_credential.update(webhook_order_import: true)
+      end      
+    end
+
+    it 'imports Shopify orders for each tenant' do
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
+      
+      expect do
+        ImportOrders.new.import_shopify_orders(@tenant.name, @shopify_store.id)
+      end.to change(Order, :count).by(1)
+    end
+  end
 end

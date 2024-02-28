@@ -32,6 +32,8 @@ class Store < ActiveRecord::Base
 
   before_create :check_for_new_store
 
+  scope :shopify_active_stores, -> { where(status: true, store_type: 'Shopify') }
+
   def check_for_new_store
     self.class.can_create_new?
   end
