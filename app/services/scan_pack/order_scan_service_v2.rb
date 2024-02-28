@@ -146,9 +146,10 @@ module ScanPack
     end
 
     def do_if_single_order_not_present
-      message = if @scanpack_settings.scan_by_shipping_label || @scanpack_settings.scan_by_packing_slip
-                  'Order with tracking number ' + @input +
-                    ' cannot be found. It may not have been imported yet'
+      message = if @scanpack_settings.scan_by_shipping_label
+                  'The tracking number provided was not found. The corresponding order may not have been imported yet.'
+                elsif @scanpack_settings.scan_by_packing_slip
+                  'The order number provided was not found. The corresponding order may not have been imported yet.'
                 else
                   'Order with number ' + @input +
                     ' cannot be found. It may not have been imported yet'
