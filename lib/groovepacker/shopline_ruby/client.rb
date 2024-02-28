@@ -27,7 +27,8 @@ module Groovepacker
 
         query = {
           updated_at_min: last_import,
-          status: shopline_credential.shopline_status,
+          status: shopline_credential.shopline_status == 'archived' ? 'any' : shopline_credential.shopline_status,
+          hidden_order: shopline_credential.shopline_status == 'archived',
           fulfillment_status: fulfillment_status,
           limit: 100
         }.as_json
@@ -57,7 +58,7 @@ module Groovepacker
       end
 
       def get_single_order(order_number)
-        query = { limit: 5 }.as_json
+        query = { status: 'any', limit: 5 }.as_json
         response = HTTParty.get("https://#{shopline_credential.shop_name}.myshopline.com/admin/openapi/#{ENV['SHOPLINE_API_VERSION']}/orders.json?name=#{order_number}", query: query, headers: headers)
         Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
         response

@@ -21,6 +21,7 @@ RSpec.describe OrderImportSummariesController, type: :controller do
     let(:se_store) { Store.create(name: 'ShippingEasy', status: true, store_type: 'ShippingEasy', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:sp_store) { Store.create(name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:shopify_store) { Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
+    let(:shopline_store) { Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
@@ -34,6 +35,8 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       sp_store.create_shippo_credential(store_id: sp_store.id, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08')
       
       shopify_store.create_shopify_credential(store_id: shopify_store.id, shop_name: 'gpjune4', access_token: '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', shopify_status: 'open')
+
+      shopline_store.create_shopline_credential(store_id: shopline_store.id, shop_name: ENV['SHOPLINE_SAMPLE_SHOP_NAME'], access_token: ENV['SHOPLINE_SAMPLE_SHOP_ACCESS_KEY'], shopline_status: 'open')
     end
 
     it 'gets last modified' do
@@ -50,6 +53,9 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       expect(response.status).to eq(200)
 
       get :get_last_modified, params: { store_id: shopify_store.id }
+      expect(response.status).to eq(200)
+
+      get :get_last_modified, params: { store_id: shopline_store.id }
       expect(response.status).to eq(200)
     end
 

@@ -314,6 +314,8 @@ class Store < ActiveRecord::Base
              shipping_easy_credential
            when 'Shopify'
              shopify_credential
+           when 'Shopline'
+             shopline_credential
            when 'Shipstation API 2'
              shipstation_rest_credential
            when 'Shippo'

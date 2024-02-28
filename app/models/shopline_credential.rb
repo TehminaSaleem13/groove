@@ -19,10 +19,10 @@ class ShoplineCredential < ApplicationRecord
 
   def get_status
     val = ''
-    val = 'on_hold' if on_hold_status?
-    val = 'unshipped' if unshipped_status?
-    val = 'partial' if partial_status?
-    val = 'shipped' if shipped_status?
+    val += 'on_hold,' if on_hold_status?
+    val += 'unshipped,' if unshipped_status?
+    val += 'partial,' if partial_status?
+    val += 'shipped' if shipped_status?
     val
   end
 

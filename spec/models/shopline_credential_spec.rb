@@ -52,8 +52,8 @@ RSpec.describe ShoplineCredential, type: :model do
 
       status = shopline_credential.get_status
 
-      # shipped status has priority on unshipped
-      expect(status).to eq('shipped')
+      expect(status).to include('shipped')
+      expect(status).to include('unshipped')
     end
   end
 
