@@ -21,13 +21,18 @@ module Groovepacker
             return @result unless @import_item.present?
 
             @import_item.update_column(:importer_id, @worker_id)
-            response = @client.orders(@statuses, importing_time, @import_item)
+            response = @client.orders(@statuses, importing_time, @import_item)  
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)
             return @result if response['orders'].nil?
 
             @regular_import = true
+            @logs = { }
+            @logs['orders'] = []
+            tenant_name = Apartment::Tenant.current
+            @tenant = Tenant.find_by(name: tenant_name)
             import_orders_from_response(response, importing_time)
+            Groovepacker::LogglyLogger.log(@tenant&.name, 'Shippingeasy_import', @logs) if @tenant&.loggly_se_imports
             # @result[:total_imported] = response["orders"].uniq.length
             # update_import_item_obj_values
             # uniq_response = response["orders"].uniq rescue []
@@ -181,7 +186,7 @@ module Groovepacker
               ImportItem.where(store_id: @import_item.store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
 
               break if import_should_be_cancelled
-
+              @logs['orders'] << { order_number: get_ext_identifier(order), store_order_id: order['id'].to_s, tracking_num: order&.dig('shipments')&.first&.dig('tracking_number') } if order && @tenant&.loggly_se_imports && @regular_import
               import_single_order(order)
               # increase_import_count
               # sleep 0.5

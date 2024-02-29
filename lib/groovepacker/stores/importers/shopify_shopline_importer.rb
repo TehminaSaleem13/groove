@@ -29,12 +29,18 @@ module Groovepacker
 
           ImportItem.where(store_id: @store.id).where.not(id: @import_item).update_all(status: 'cancelled')
 
+          logs = { }
+          logs['orders'] = []
+          tenant_name = Apartment::Tenant.current
+          tenant = Tenant.find_by(name: tenant_name)
           response['orders'].each do |order|
             break if import_should_be_cancelled
 
+            logs['orders'] << { order_number: order['name'], store_order_id: order['id'].to_s, tracking_num: get_tracking_number(order) } if order && tenant&.loggly_shopify_imports
             import_single_order(order) if order.present?
           end
           Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
+          Groovepacker::LogglyLogger.log(tenant_name, 'Shopify_import', logs) if tenant&.loggly_shopify_imports      
           if @import_item.status != 'cancelled'
             begin
               @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at']))
