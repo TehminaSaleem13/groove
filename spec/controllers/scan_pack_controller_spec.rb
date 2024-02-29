@@ -241,7 +241,7 @@ RSpec.describe ScanPackController, type: :controller do
       order = FactoryBot.create(:order, increment_id: 'TRA', status: 'awaiting', tracking_num: '1234512345', store: @store)
       FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
     end
-
+    
     describe 'Scan Order Number' do
       before do
         inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
@@ -973,6 +973,26 @@ RSpec.describe ScanPackController, type: :controller do
         post :scan_barcode, params: { input: @order.increment_id, state: 'scanpack.rfo', id: @order.id }
         expect(response.status).to eq(200)
         expect(@order.reload.post_scanning_flag).to eq('Barcode')
+      end
+
+      it 'Error message should be visible' do
+        ScanPackSetting.last.update(scan_by_shipping_label: true)
+
+        post :scan_barcode, params: { input: 'dsadjsaldj', state: 'scanpack.rfo', id: @order.id, app: 'app'}
+        
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include("The tracking number provided was not found. The corresponding order may not have been imported yet.")
+      end
+
+      it 'Error message should be visible' do
+        ScanPackSetting.last.update(scan_by_packing_slip: true)
+
+        post :scan_barcode, params: { input: 'dsadjsaldj', state: 'scanpack.rfo', id: @order.id, app: 'app'}
+        
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['error_messages']).to include("The order number provided was not found. The corresponding order may not have been imported yet.")
       end
 
       it 'Cue orders for Scan and Pack using Shipping Lables' do
