@@ -93,8 +93,8 @@ module ScanPack
     end
 
     def generate_query(status)
-      input_without_special_char = ActiveRecord::Base.connection.quote(@input.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) })
-      input_with_special_char = ActiveRecord::Base.connection.quote(@input.try { |a| a.gsub(/(\W)/, &:to_s) })
+      input_without_special_char = ActiveRecord::Base.connection.quote(@input.downcase.gsub(/^(\#)|(\-*)/, '').try { |a| a.gsub(/(\W)/, &:to_s) })
+      input_with_special_char = ActiveRecord::Base.connection.quote(@input.downcase.try { |a| a.gsub(/(\W)/, &:to_s) })
       se_order_input = ActiveRecord::Base.connection.quote(input_without_special_char + ' (')
       input_with_special_char_without_space = ActiveRecord::Base.connection.quote(input_with_special_char.gsub(/\s+/, ''))
       input_without_special_char_without_space = input_without_special_char.gsub(/\s+/, '')
@@ -149,14 +149,14 @@ module ScanPack
       # end
 
       base_query = [
-        "#{@scan_by_id} IN (#{input_with_special_char}, \"##{input_with_special_char}\")",
-        "non_hyphen_increment_id IN (#{input_without_special_char}, \"##{input_without_special_char}\")",
-        "#{@scan_by_id} IN (#{input_with_special_char_without_space}, \"##{input_with_special_char_without_space}\")",
-        "non_hyphen_increment_id IN (#{input_without_special_char_without_space}, \"##{input_without_special_char_without_space}\")"
+        "lower(#{@scan_by_id}) IN (#{input_with_special_char}, \"##{input_with_special_char}\")",
+        "lower(non_hyphen_increment_id) IN (#{input_without_special_char}, \"##{input_without_special_char}\")",
+        "lower(#{@scan_by_id}) IN (#{input_with_special_char_without_space}, \"##{input_with_special_char_without_space}\")",
+        "lower(non_hyphen_increment_id) IN (#{input_without_special_char_without_space}, \"##{input_without_special_char_without_space}\")"
       ]
 
       final_query = if @se_shipment_handling_v2_present
-        base_query + ["#{@scan_by_id} LIKE #{se_order_input}"]
+        base_query + ["lower(#{@scan_by_id}) LIKE #{se_order_input}"]
       else
         base_query
       end
