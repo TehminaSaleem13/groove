@@ -27,12 +27,10 @@ module Groovepacker
             return @result if response['orders'].nil?
 
             @regular_import = true
-            @logs = { }
-            @logs['orders'] = []
             tenant_name = Apartment::Tenant.current
-            @tenant = Tenant.find_by(name: tenant_name)
+            tenant = Tenant.find_by(name: tenant_name)
+            logging_orders_response(response, tenant_name) if tenant&.loggly_se_imports
             import_orders_from_response(response, importing_time)
-            Groovepacker::LogglyLogger.log(@tenant&.name, 'Shippingeasy_import', @logs) if @tenant&.loggly_se_imports
             # @result[:total_imported] = response["orders"].uniq.length
             # update_import_item_obj_values
             # uniq_response = response["orders"].uniq rescue []
@@ -144,6 +142,18 @@ module Groovepacker
 
           private
 
+          def logging_orders_response(response, tenant_name)
+            logs = { }
+            logs['orders'] = response['orders'].map do |order|
+              {
+                order_number: order['external_order_identifier'],
+                store_order_id: order['id'].to_s,
+                tracking_num: order&.dig('shipments')&.first&.dig('tracking_number')
+              }
+            end
+            Groovepacker::LogglyLogger.log(tenant_name, 'Shippingeasy_import', logs)
+          end
+
           def import_orders_from_response(response, _importing_time)
             @result[:total_imported] = response['orders'].uniq.length
             update_import_item_obj_values
@@ -186,7 +196,6 @@ module Groovepacker
               ImportItem.where(store_id: @import_item.store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
 
               break if import_should_be_cancelled
-              @logs['orders'] << { order_number: get_ext_identifier(order), store_order_id: order['id'].to_s, tracking_num: order&.dig('shipments')&.first&.dig('tracking_number') } if order && @tenant&.loggly_se_imports && @regular_import
               import_single_order(order)
               # increase_import_count
               # sleep 0.5

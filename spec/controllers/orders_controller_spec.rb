@@ -147,6 +147,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import SE Shipment Handling V2 Orders' do
+      @tenant.update(loggly_se_imports: true)
       se_store = Store.where(store_type: 'ShippingEasy').last
 
       product = FactoryBot.create(:product, name: 'PRODUCT1')
@@ -251,6 +252,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders' do
+      @tenant.update(loggly_se_imports: true)
       shopify_store = Store.where(store_type: 'Shopify').last
 
       expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
