@@ -3,7 +3,9 @@
 Groovepacks::Application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
-  use_doorkeeper
+  use_doorkeeper do
+    controllers tokens: 'oauth/access_tokens'
+  end
   get 'subscriptions', to: 'subscriptions#new'
   get 'subscriptions_login', to: 'subscriptions#login'
   post 'subscriptions', to: 'subscriptions#new'
