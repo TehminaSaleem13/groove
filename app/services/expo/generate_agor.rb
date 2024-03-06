@@ -24,6 +24,8 @@ module Expo
       @order_data[:order_info] = filter_order_info
       @order_data[:scan_hash][:data][:order] = new_order
       # Additional Settings
+      tote = @db_order.tote
+      @order_data[:tote] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
       @order_data[:shipment_id] = @db_order.shipment_id
       @order_data[:store_type] = @db_order.store&.store_type
       @order_data[:store_id] = @db_order.store&.id
@@ -42,7 +44,7 @@ module Expo
     end
 
     def filter_order_info
-      @order_info.slice('id', 'store_name', 'notes', 'ordernum', 'order_date', 'itemslength', 'status', 'tracking_num', 'custom_field_one', 'custom_field_two', 'tags')
+      @order_info.slice('id', 'store_name', 'notes', 'ordernum', 'order_date', 'itemslength', 'status', 'tracking_num', 'custom_field_one', 'custom_field_two', 'tags','recipient', 'country', 'city', 'email')
     end
 
     def filter_scanned_items
