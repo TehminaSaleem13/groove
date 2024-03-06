@@ -560,6 +560,30 @@ RSpec.describe ProductsController, type: :controller do
     end
   end
 
+  describe 'Syncing' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      @shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last)
+    end
+
+    it 'sync with the shopline' do
+      request.accept = 'application/json'
+
+      product = FactoryBot.create(:product, :with_sku_barcode, store_id: @shopline_store.id, name: 'PRODUCT1')
+      put :sync_with, params: { tenant: Apartment::Tenant.current, id: product.id, shopline_product_variant_id: '123456789', sync_with_shopline: true, format: :json}
+
+      expect(response.status).to eq(200)
+      expect(product.sync_option).not_to be_nil
+      expect(product.sync_option.shopline_product_variant_id).to eq('123456789')
+      expect(product.sync_option.sync_with_shopline).to be(true)
+    end
+  end
+
   describe 'Print' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

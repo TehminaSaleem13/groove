@@ -70,12 +70,11 @@ module Groovepacker
         combined_response['products'] = []
 
         puts "======================Fetching Page #{page_index}======================"
-        query_opts = { limit: 100 }.as_json
+        updated_at_min = product_import_type == 'new_updated' && shopline_credential.product_last_import ? shopline_credential.product_last_import.strftime('%Y-%m-%dT%H:%M:%S%:z') : nil
+        updated_at_min = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? (DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime('%Y-%m-%dT%H:%M:%S%:z') : nil unless updated_at_min.present?
+        query_opts = { limit: 100, updated_at_min: updated_at_min }.as_json
 
-        add_url = product_import_type == 'new_updated' && shopline_credential.product_last_import ? "?updated_at_min=#{shopline_credential.product_last_import.strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : ''
-        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : '' unless add_url.present?
-
-        response = HTTParty.get("https://#{shopline_credential.shop_name}.myshopline.com/admin/openapi/#{ENV['SHOPLINE_API_VERSION']}/products/products.json#{add_url}",
+        response = HTTParty.get("https://#{shopline_credential.shop_name}.myshopline.com/admin/openapi/#{ENV['SHOPLINE_API_VERSION']}/products/products.json",
                                 query: query_opts,
                                 headers: headers)
         combined_response['products'] << response['products']

@@ -13,6 +13,8 @@ class SyncOption < ActiveRecord::Base
     sync_option.bc_product_sku = params['bc_product_sku'].try(:strip)
     sync_option.sync_with_shopify = params['sync_with_shopify']
     sync_option.shopify_product_variant_id = params['shopify_product_variant_id'].to_i != 0 ? params['shopify_product_variant_id'] : nil
+    sync_option.shopline_product_variant_id = params['shopline_product_variant_id'].to_i != 0 ? params['shopline_product_variant_id'] : nil
+    sync_option.sync_with_shopline = params['sync_with_shopline']
     sync_option.sync_with_mg_rest = params['sync_with_mg_rest']
     sync_option.mg_rest_product_sku = params['mg_rest_product_sku'].try(:strip)
     sync_option.mg_rest_product_id = params['mg_rest_product_id'].to_i != 0 ? params['mg_rest_product_id'] : nil
