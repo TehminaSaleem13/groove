@@ -31,7 +31,7 @@ module Groovepacker
 
           tenant_name = Apartment::Tenant.current
           tenant = Tenant.find_by(name: tenant_name)
-          logging_orders_response(response, tenant_name) if tenant&.loggly_se_imports      
+          logging_orders_response(response, tenant_name) if tenant&.loggly_shopify_imports      
           response['orders'].each do |order|
             break if import_should_be_cancelled
 
