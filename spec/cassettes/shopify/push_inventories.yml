@@ -52,7 +52,7 @@ http_interactions:
       - By accessing or using the Shopify API you agree to the Shopify API License
         and Terms of Use at https://www.shopify.com/legal/api-terms
       X-Shopify-Api-Version:
-      - 2022-10
+      - 2023-04
       Http-X-Shopify-Shop-Api-Call-Limit:
       - 1/40
       X-Shopify-Shop-Api-Call-Limit:
@@ -319,7 +319,7 @@ http_interactions:
   recorded_at: Fri, 25 Aug 2023 08:39:33 GMT
 - request:
     method: post
-    uri: https://myteststore.myshopify.com/admin/api/2023-01/graphql.json
+    uri: https://myteststore.myshopify.com/admin/api/2023-10/graphql.json
     body:
       encoding: UTF-8
       string: '{"query":"mutation inventoryAdjustQuantities($input: InventoryAdjustQuantitiesInput!)
