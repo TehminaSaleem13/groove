@@ -35,7 +35,7 @@ module Groovepacker
 
         Rails.logger.info("======================Fetching Page #{page_index}======================")
         query = { 'updated_at_min' => last_import, 'limit' => 250 }.as_json
-        query.merge('created_at_min' => created_at) unless cred_created_at == 0
+        query.merge!('created_at_min' => created_at) unless cred_created_at == 0
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
         combined_response['orders'] << response['orders']
 
