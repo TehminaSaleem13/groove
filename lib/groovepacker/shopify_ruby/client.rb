@@ -17,7 +17,7 @@ module Groovepacker
         combined_response['orders'] = []
         cred_last_imported = shopify_credential.last_imported_at
         cred_created_at = shopify_credential.order_import_range_days
-        created_at = (ActiveSupport::TimeZone['Eastern Time (US & Canada)'].parse(Time.zone.now.to_s) - cred_created_at.days).to_datetime.to_s if cred_created_at.present?
+        created_at = (ActiveSupport::TimeZone['Eastern Time (US & Canada)'].parse(Time.zone.now.to_s) - cred_created_at.days).to_datetime.to_s
         last_import = if cred_last_imported
                         cred_last_imported.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
                       else
@@ -34,7 +34,8 @@ module Groovepacker
         # end
 
         Rails.logger.info("======================Fetching Page #{page_index}======================")
-        query = { 'updated_at_min' => last_import, 'created_at_min' => created_at, 'limit' => 250 }.as_json
+        query = { 'updated_at_min' => last_import, 'limit' => 250 }.as_json
+        query.merge('created_at_min' => created_at) unless cred_created_at == 0
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
         combined_response['orders'] << response['orders']
 
