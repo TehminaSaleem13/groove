@@ -65,7 +65,7 @@ class OrdersController < ApplicationController
     # GroovRealtime::emit('test',{does:'it work for tenant '+Apartment::Tenant.current+'?'},:tenant)
     # GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
-    if params[:app]
+    if params[:app].present?
       @result['general_settings'] = GeneralSetting.last.attributes.slice(*filter_general_settings).merge(GeneralSetting.last.per_tenant_settings)
       @result['scan_pack_settings'] = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings)
       @result['orders_count'] = get__filtered_orders_count
