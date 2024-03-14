@@ -90,6 +90,9 @@ module ScanPack
           \) or \
           non_hyphen_increment_id IN \(\
             '#{input_without_special_char_without_space}', '\##{input_without_special_char_without_space}'\
+          \) or \
+          #{@scan_by_id.upcase} IN \(\
+            '#{input_without_special_char.upcase}', '\##{input_without_special_char.upcase}'\
           \)) and orders.status IN #{status} and orders.updated_at >= #{(Time.current - 14.days).strftime('%Y-%m-%d')}
         )
       else
