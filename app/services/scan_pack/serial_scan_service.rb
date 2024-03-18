@@ -74,7 +74,7 @@ module ScanPack
                            end
       # if !@params["scan_pack"]["is_scan"] && @params["scan_pack"]["ask"] && @params["scan_pack"]["ask_2"]
       if should_scan_serial
-        @order.addactivity("Product: \"#{@product.name}\" Serial scanned: \"#{@params[:serial]}\"", @current_user.name)
+        @order.addactivity("Product: \"#{@product.name}\" Serial scanned: \"#{@params[:serial]}\"", @current_user.name, @params['on_ex'])
       else
         do_product_scan(serial_added)
       end
@@ -165,7 +165,7 @@ module ScanPack
       end
       @order.addactivity(
         "Product: \"#{@product.name}\" Serial scanned: \"#{@params[:serial]}\"",
-        @current_user.name
+        @current_user.name, @params['on_ex']
       )
       if @params['clicked']
         @result = product_scan(@params[:barcode], 'scanpack.rfp.default', @params[:order_id], @params[:box_id], @params[:on_ex], clicked: @params[:clicked], serial_added: serial_added, current_user: @current_user, session: @session)

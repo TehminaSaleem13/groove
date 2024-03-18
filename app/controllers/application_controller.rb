@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
-  before_action :set_current_user_id
+  before_action :set_current_user_id, :check_request_from_gpx
   around_action :set_time_zone
   protect_from_forgery with: :null_session
 
@@ -76,6 +76,16 @@ class ApplicationController < ActionController::Base
   end
 
   private
+
+  def check_request_from_gpx
+    return if request.headers['HTTP_ON_GPX'].blank?
+
+    params['data'].each do |item|
+      item.merge!({ on_ex: request.headers['HTTP_ON_GPX'] })
+    end    
+  rescue => e
+
+  end
 
   def save_bc_auth_if_present
     bc_auth = cookies[:bc_auth]

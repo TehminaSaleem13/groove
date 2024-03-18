@@ -97,7 +97,7 @@ class ScanPack::ScanVerifyingService < ScanPack::Base
   end
 
   def do_set_order_scanned_state_and_result_data
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
   end

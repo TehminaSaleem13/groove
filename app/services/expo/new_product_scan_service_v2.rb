@@ -86,7 +86,7 @@ module Expo
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
             @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
-            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first['barcodes'].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
+            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{unscanned_items.first['barcodes'].map(&:barcode).first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin', @on_ex)
             @result['status'] &= false
             message = check_for_skip_settings(clean_input) ? "The currently suggested item does not have the \'Skippable\' option enabled" : 'Please scan items in the suggested order'
             @result['error_messages'].push(message)
@@ -99,7 +99,7 @@ module Expo
             do_if_single_order_has_unscanned_items(clean_input, serial_added, clicked)
           else
             @single_order.inaccurate_scan_count = @single_order.inaccurate_scan_count + 1
-            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin')
+            @single_order.addactivity("OUT OF SEQUENCE - Product with barcode: #{list.first} was suggested and barcode: #{clean_input} was scanned", @current_user&.username || 'gpadmin', @on_ex)
             @result['status'] &= false
             @result['error_messages'].push('Please scan items in the suggested order')
           end
@@ -228,24 +228,24 @@ module Expo
       if @multibarcode
         if @box_id.nil?
           if general_setting.multi_box_shipments?
-            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in Box 1", @current_user.username)
+            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in Box 1", @current_user.username, @on_ex)
           else
-            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity}", @current_user.username)
+            @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity}", @current_user.username, @on_ex)
           end
         else
           box = Box.find_by_id(@box_id)
-          @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username)
+          @single_order.addactivity("Multibarcode count of #{@typein_count} scanned for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username, @on_ex)
         end
       else
         if @box_id.nil?
           if general_setting.multi_box_shipments?
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in Box 1", @current_user.username, @on_ex) if @typein_count > 1 && !@scanpack_settings.order_verification
           else
-            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
+            @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity}", @current_user.username, @on_ex) if @typein_count > 1 && !@scanpack_settings.order_verification
           end
         else
           box = Box.find_by_id(@box_id)
-          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username) if @typein_count > 1 && !@scanpack_settings.order_verification
+          @single_order.addactivity("Type-In count of #{type_in_count} entered for product #{sku_for_activity} in #{box.try(:name)}", @current_user.username, @on_ex) if @typein_count > 1 && !@scanpack_settings.order_verification
         end
       end
     end

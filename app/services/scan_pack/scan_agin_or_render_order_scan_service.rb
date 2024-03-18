@@ -2,7 +2,7 @@
 
 class ScanPack::ScanAginOrRenderOrderScanService < ScanPack::Base
   def initialize(args)
-    @current_user, @input, @state, @id = args
+    @current_user, @input, @state, @id, @on_ex = args
     @result = {
       'status' => true,
       'matched' => false,
@@ -41,12 +41,12 @@ class ScanPack::ScanAginOrRenderOrderScanService < ScanPack::Base
   def do_if_confirmation_code_eql_input
     @result['status'] = true
     @result['matched'] = false
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @order.addactivity(
       'The correct shipping label was not verified at the time of packing.'\
       " Confirmation code for user #{@current_user.username} was scanned",
-      @current_user.username
+      @current_user.username, @on_ex
     )
     @result['data']['next_state'] = 'scanpack.rfo'
     @order.save
@@ -55,7 +55,7 @@ class ScanPack::ScanAginOrRenderOrderScanService < ScanPack::Base
   def do_if_input_eql_tracking_num
     @result['status'] = true
     @result['matched'] = true
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
     @order.save
@@ -64,7 +64,7 @@ class ScanPack::ScanAginOrRenderOrderScanService < ScanPack::Base
   def do_if_input_is_empty_and_strict_cc_false
     @result['status'] = true
     @result['matched'] = false
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
   end

@@ -5,15 +5,16 @@ module Groovepacker
     class LogScanService
       include ScanPackHelper
 
-      def process_logs(tenant, current_user_id, session = {}, params)
-        Apartment::Tenant.switch! tenant
+      def process_logs(tenant_name, current_user_id, session = {}, params)
+        Apartment::Tenant.switch! tenant_name
         @params = params
         session = session.present? ? session : {}
         current_user = User.find_by_id current_user_id
+        tenant = Tenant.find_by_name(tenant_name)
         @params[:data] = JSON.parse(Net::HTTP.get(URI.parse(params[:data]))).map(&:with_indifferent_access) if params[:delayed_log_process]
         (@params[:data] || []).each do |scn_params|
           # sleep 0.5
-
+          Groovepacker::LogglyLogger.log(tenant_name, 'GPX_Scanning_order', scn_params) if tenant&.loggly_gpx_order_scan && scn_params[:input] != 'RESTARTS'
           if scn_params[:event] == 'regular'
             scan_barcode_obj = ScanPack::ScanBarcodeService.new(
               current_user, session, scn_params
@@ -46,12 +47,12 @@ module Groovepacker
           elsif scn_params[:event] == 'verify'
             if scn_params[:state] == 'scanpack.rfp.no_tracking_info'
               render_order_scan_object = ScanPack::RenderOrderScanService.new(
-                [current_user, scn_params[:input], 'scanpack.rfp.no_tracking_info', scn_params[:id]]
+                [current_user, scn_params[:input], 'scanpack.rfp.no_tracking_info', scn_params[:id], scn_params[:on_ex]]
               )
               render_order_scan_object.run
             elsif scn_params[:state] == 'scanpack.rfp.no_match'
               render_order_scan_object = ScanPack::ScanAginOrRenderOrderScanService.new(
-                [current_user, scn_params[:input], 'scanpack.rfp.no_match', scn_params[:id]]
+                [current_user, scn_params[:input], 'scanpack.rfp.no_match', scn_params[:id], scn_params[:on_ex]]
               )
               render_order_scan_object.run
             else
@@ -62,7 +63,7 @@ module Groovepacker
             scan_verifying_object.run
           elsif scn_params[:event] == 'record'
             scan_recording_object = ScanPack::ScanRecordingService.new(
-              [current_user, scn_params[:input], scn_params[:id]]
+              [current_user, scn_params[:input], scn_params[:id], scn_params[:on_ex]]
             )
             scan_recording_object.run
           elsif scn_params[:event] == 'serial_scan'
@@ -74,13 +75,13 @@ module Groovepacker
             order_item = OrderItem.find_by(id: scn_params[:order_item_id])
             order = order_item.order
             return unless order_item
-
+            
             if order_item.product.is_kit == 0
               if order_item && order_item.scanned_status != 'scanned'
                 order_item.update(scanned_status: 'scanned')
                 order_item.update(scanned_qty: order_item.qty)
-                add_all_scan_logs(order, order_item, scn_params[:event], current_user, nil)
-                order.set_order_to_scanned_state(current_user.try(:username)) unless order.has_unscanned_items
+                add_all_scan_logs(order, order_item, scn_params, current_user, nil)
+                order.set_order_to_scanned_state(current_user.try(:username), scn_params[:on_ex]) unless order.has_unscanned_items
               end
             else
               product_kit_sku = order_item.product.product_kit_skuss.find_by_option_product_id(scn_params[:product_id])
@@ -94,27 +95,29 @@ module Groovepacker
                   order_item.update(scanned_qty: order_item.qty)
                 end
                 order_item_kit_product.update(scanned_qty: product_kit_sku.qty)
-                add_all_scan_logs(order, order_item, scn_params[:event], current_user, 'kit')
-                order.set_order_to_scanned_state(current_user.try(:username)) unless order.has_unscanned_items
+                add_all_scan_logs(order, order_item, scn_params, current_user, 'kit')
+                order.set_order_to_scanned_state(current_user.try(:username), scn_params[:on_ex]) unless order.has_unscanned_items
               end
             end
           end
         rescue StandardError => e
+          log = { tenant: tenant_name, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(',') }
+          Groovepacker::LogglyLogger.log(tenant_name, 'GPX_Scanning_order', log) if tenant&.loggly_gpx_order_scan
           on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-          log = { tenant: Apartment::Tenant.current, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(',') }
           on_demand_logger.info(log)
         end
         @result
       end
 
-      def add_all_scan_logs(order, order_item, event, current_user, type = nil)
-        scan_type = event == 'bulk_scan' ? 'Bulk Scan' : 'Scan-All Option'
+      def add_all_scan_logs(order, order_item, scn_params, current_user, type = nil)
+        
+        scan_type = scn_params[:event] == 'bulk_scan' ? 'Bulk Scan' : 'Scan-All Option'
         scan_description = "#{order_item.product.name} scanned through #{scan_type}"
         scan_description += " from #{type}" if type == 'kit'
 
         username = current_user.try(:username)
 
-        order.addactivity(scan_description, username)
+        order.addactivity(scan_description, username, scn_params[:on_ex])
       end
 
       private

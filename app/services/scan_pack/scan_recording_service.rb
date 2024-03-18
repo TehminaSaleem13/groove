@@ -2,7 +2,7 @@
 
 class ScanPack::ScanRecordingService < ScanPack::Base
   def initialize(args)
-    @current_user, @input, @id = args
+    @current_user, @input, @id, @on_ex = args
     @result = {
       'status' => true,
       'matched' => false,
@@ -52,7 +52,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
 
   def set_tracking_info
     @order.tracking_num = @input
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
     # update inventory when inventory warehouses is implemented.
@@ -66,8 +66,8 @@ class ScanPack::ScanRecordingService < ScanPack::Base
         @result['data']['next_state'] = 'scanpack.rfp.verifying'
       else
         @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-        @order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username)
-        end
+        @order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username, @on_ex)
+      end
     when 'PackingSlip'
       do_set_order_scanned_state_and_result_data
       generate_packing_slip(@order)
@@ -80,7 +80,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
   end
 
   def do_set_order_scanned_state_and_result_data
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
   end

@@ -24,7 +24,7 @@ module ScanPack::Utilities::ProductScan::Barcode
       item.qty += 1
       item.scanned_status = 'partially_scanned'
       item.save
-      @single_order.addactivity("Item with SKU: #{item.sku} Added", @current_user.username)
+      @single_order.addactivity("Item with SKU: #{item.sku} Added", @current_user.username, @on_ex)
       item_in_order = true
       process_scan(clicked, item, serial_added)
       break
@@ -39,7 +39,7 @@ module ScanPack::Utilities::ProductScan::Barcode
     order_item = order_items.first unless order_items.empty?
     unless order_item.nil?
       store_lot_number(order_item, serial_added)
-      @single_order.addactivity("Item with SKU: #{order_item.sku} Added", @current_user.username)
+      @single_order.addactivity("Item with SKU: #{order_item.sku} Added", @current_user.username, @on_ex)
       process_scan(clicked, order_item, serial_added)
     end
   end
@@ -66,7 +66,7 @@ module ScanPack::Utilities::ProductScan::Barcode
         @result['data']['next_state'] = 'scanpack.rfp.verifying'
       else
         @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-        @single_order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username)
+        @single_order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username, @on_ex)
       end
     when 'Record'
       @result['data']['next_state'] = 'scanpack.rfp.recording'
@@ -92,7 +92,7 @@ module ScanPack::Utilities::ProductScan::Barcode
   end
 
   def do_set_order_scanned_state_and_result_data
-    @single_order.set_order_to_scanned_state(@current_user.username)
+    @single_order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
   end
@@ -104,7 +104,7 @@ module ScanPack::Utilities::ProductScan::Barcode
         @result['data']['next_state'] = 'scanpack.rfp.verifying'
       else
         @result['data']['next_state'] = 'scanpack.rfp.no_tracking_info'
-        @single_order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username)
+        @single_order.addactivity('Tracking information was not imported with this order so the shipping label could not be verified ', @current_user.username, @on_ex)
         end
     when 'Record'
       @result['data']['next_state'] = 'scanpack.rfp.recording'

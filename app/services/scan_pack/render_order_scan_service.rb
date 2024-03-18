@@ -2,7 +2,7 @@
 
 class ScanPack::RenderOrderScanService < ScanPack::Base
   def initialize(args)
-    @current_user, @input, @state, @id = args
+    @current_user, @input, @state, @id, @on_ex = args
     @result = {
       'status' => true,
       'matched' => false,
@@ -27,7 +27,7 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
       if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Verify'
         @result['status'] = true
         @result['matched'] = false
-        @order.set_order_to_scanned_state(@current_user.username)
+        @order.set_order_to_scanned_state(@current_user.username, @on_ex)
         @result['data']['order_complete'] = true
         @result['data']['next_state'] = 'scanpack.rfo'
         @order.save
@@ -58,7 +58,7 @@ class ScanPack::RenderOrderScanService < ScanPack::Base
   end
 
   def do_set_order_scanned_state_and_result_data
-    @order.set_order_to_scanned_state(@current_user.username)
+    @order.set_order_to_scanned_state(@current_user.username, @on_ex)
     @result['data']['order_complete'] = true
     @result['data']['next_state'] = 'scanpack.rfo'
   end

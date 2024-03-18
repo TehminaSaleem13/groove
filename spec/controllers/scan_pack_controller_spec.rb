@@ -727,7 +727,7 @@ RSpec.describe ScanPackController, type: :controller do
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token, 'HTTP_ON_GPX' => 'on GPX' }
       @request.headers.merge! header
 
       ScanPackSetting.last.update(partial: true, remove_enabled: true)
@@ -783,6 +783,12 @@ RSpec.describe ScanPackController, type: :controller do
 
       post :scan_pack_v2, params: {data: [{ input: order.tracking_num, state: nil, event: "serial_scan", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
       expect(response.status).to eq(500)
+
+      ScanPackSetting.last.update(post_scanning_option_second: 'PackingSlip')
+      order.update(status: 'awaiting')
+      post :scan_pack_v2, params: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
     end    
 
     it 'Order Scanned Without Barcode' do
@@ -899,6 +905,19 @@ RSpec.describe ScanPackController, type: :controller do
       post :scan_pack_v2, params: { data: [{ state: 'scanpack.rfp.no_match', event: 'verify', id: @order.id, increment_id: @order.increment_id, input: @user.confirmation_code, name: Apartment::Tenant.current, time: DateTime.now.in_time_zone, updated_at: Time.current }] }
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq('OK')
+
+      post :scan_pack_v2, params: { data: [{ state: 'scanpack.rfp.no_match', event: 'verify', id: @order.id, increment_id: @order.increment_id, input: '', name: Apartment::Tenant.current, time: DateTime.now.in_time_zone, updated_at: Time.current }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+
+      @order.update(tracking_num: '123456')
+      post :scan_pack_v2, params: { data: [{ state: 'scanpack.rfp.no_match', event: 'verify', id: @order.id, increment_id: @order.increment_id, input: '123456', name: Apartment::Tenant.current, time: DateTime.now.in_time_zone, updated_at: Time.current }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+
+      ScanPackSetting.last.update(post_scanning_option_second: 'PackingSlip')
+      post :scan_pack_v2, params: { data: [{ state: 'scanpack.rfp.no_tracking_info', event: 'verify', id: @order.id, increment_id: @order.increment_id, input: @user.confirmation_code, name: Apartment::Tenant.current, time: DateTime.now.in_time_zone, updated_at: Time.current }] }
+      expect(response.status).to eq(200)
     end
 
     it 'Order Scanned Using Serial Scan' do
