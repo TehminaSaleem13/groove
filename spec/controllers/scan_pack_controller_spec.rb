@@ -229,6 +229,9 @@ RSpec.describe ScanPackController, type: :controller do
       order = FactoryBot.create(:order, increment_id: '10', status: 'awaiting', tracking_num: '100', store: @store)
       FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
 
+      order = FactoryBot.create(:order, increment_id: '#1001', status: 'awaiting', tracking_num: '100', store: @store)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
+
       order = FactoryBot.create(:order, increment_id: 'T', status: 'awaiting', tracking_num: '9400111298370613423837', store: @store)
       FactoryBot.create(:order_item, product_id: product.id, qty: 5, price: '10', row_total: '10', order: order, name: product.name)
 
@@ -312,6 +315,14 @@ RSpec.describe ScanPackController, type: :controller do
         expect(response.status).to eq(200)
         result = JSON.parse(response.body)
         expect(result['data']['order']['increment_id']).to eq('#1-0"0')
+      end
+
+      it 'without hashtag' do
+        get :scan_barcode, params: { input: '1001', state: 'scanpack.rfo' }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['data']['order']['increment_id']).to eq('#1001')
       end
 
       it 'hashtag and hyphen removal' do

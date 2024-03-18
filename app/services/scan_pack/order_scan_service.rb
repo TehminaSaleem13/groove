@@ -149,10 +149,10 @@ module ScanPack
       # end
 
       base_query = [
-        "lower(#{@scan_by_id}) IN (#{input_with_special_char}, \"##{input_with_special_char}\")",
-        "lower(non_hyphen_increment_id) IN (#{input_without_special_char}, \"##{input_without_special_char}\")",
-        "lower(#{@scan_by_id}) IN (#{input_with_special_char_without_space}, \"##{input_with_special_char_without_space}\")",
-        "lower(non_hyphen_increment_id) IN (#{input_without_special_char_without_space}, \"##{input_without_special_char_without_space}\")"
+        "lower(#{@scan_by_id}) IN (#{input_with_special_char}, #{input_with_special_char.sub("\'", "\'#")})",
+        "lower(non_hyphen_increment_id) IN (#{input_without_special_char}, #{input_without_special_char.sub("\'", "\'#")})",
+        "lower(#{@scan_by_id}) IN (#{input_with_special_char_without_space}, #{input_with_special_char_without_space.sub("\'", "\'#")})",
+        "lower(non_hyphen_increment_id) IN (#{input_without_special_char_without_space}, #{input_without_special_char_without_space.sub("\'", "\'#")})"
       ]
 
       final_query = if @se_shipment_handling_v2_present
