@@ -62,6 +62,7 @@ module ScanPack
           pending_order = Order.includes(%i[tote order_items]).where("orders.id IN (?) AND status = 'awaiting'", tote_set.totes.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? tote_set.totes.where(pending_order: false).pluck(:order_id).compact }.first
           if pending_order
             run_if_pending_order(pending_order, product)
+            @result[:unscanned_items] = pending_order.get_unscanned_items if params['app'].present?
           else
             # If there are no open orders requiring the item that was scanned we will alert the user: Sorry, no orders require that item.
             @result[:notice_messages] = 'Sorry, no orders can be found that require that item. Please check that all orders have been imported. If this is a new item that may not have the barcode saved you can search for the item by SKU in the products section and add it.'

@@ -83,10 +83,10 @@ RSpec.describe ScanPackController, type: :controller do
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
-      tote_set = ToteSet.create(name: 'T')
+      @tote_set = ToteSet.create(name: 'T')
 
-      Range.new(1, (tote_set.max_totes - tote_set.totes.count)).to_a.each do
-        tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1)
+      Range.new(1, (@tote_set.max_totes - @tote_set.totes.count)).to_a.each do
+        @tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1)
       end
       ScanPackSetting.last.update(post_scanning_option: 'Barcode')
     end
@@ -156,6 +156,22 @@ RSpec.describe ScanPackController, type: :controller do
       expect(result['status']).to be false
       expect(result['no_order']).to eq(true)
       expect(result['notice_messages']).to eq('The remaining orders that contain this item are not ready to be scanned. This is usually because one or more items in the order do not have a barcode assigned yet. You can find all products that require barcodes in the New Products List')
+    end
+
+    it 'Order In Awaiting Status Get Pending Order' do
+      tote = @tote_set.totes.first
+      tote.update(pending_order: true)
+      order4 = FactoryBot.create(:order, status: 'awaiting', store: @store, tote: tote)
+      FactoryBot.create(:order_item, product_id: @products['product_1'].id, qty: 1, price: '10', row_total: '10', order: order4, name: @products['product_1'].name)
+      FactoryBot.create(:order_item, product_id: @products['product_2'].id, qty: 2, price: '10', row_total: '10', order: order4, name: @products['product_2'].name)
+
+      post :product_first_scan, params: { input: 'ACTION', app: 'app' }
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to be false
+      expect(result['no_order']).to eq(false)
+      expect(order4.reload.tote.present? && order4.tote.pending_order == true).to be true
     end
 
     it 'Scan Complete' do
