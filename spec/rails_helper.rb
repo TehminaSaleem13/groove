@@ -6,6 +6,8 @@ require 'spec_helper'
 require File.expand_path('../config/environment', __dir__)
 require 'rspec/rails'
 require 'database_cleaner'
+require 'webmock/rspec'
+
 # Add additional requires below this line. Rails is not loaded until this point!
 
 # prevent Test::Unit's AutoRunner from executing during RSpec's rake task

@@ -173,6 +173,7 @@ class SettingsController < ApplicationController
                                     end
       @result['data']['settings'] = @result['data']['settings'].as_json.merge('packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"))
       @result['data']['settings'] = @result['data']['settings'].as_json.merge(api_key: ApiKey.active)
+      @result['data']['settings']['webhooks'] = GroovepackerWebhook.all
     else
       @result['status'] &= false
       @result['error_messages'] = ['No general settings available for the system. Contact administrator.']

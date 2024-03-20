@@ -60,6 +60,8 @@ RSpec.describe ScanPackController, type: :controller do
     end
 
     it 'Tracking Number Accepted' do
+      webhook = create(:groovepacker_webhook)
+      stub_request(:post, webhook.url).to_return(status: 200, body: '{"success": true}', headers: {})
       post :scan_barcode, params: { input: 'TRACKING', state: 'scanpack.rfp.default', id: Order.last.id, rem_qty: 1 }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)

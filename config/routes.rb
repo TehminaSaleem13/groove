@@ -468,6 +468,10 @@ Groovepacks::Application.routes.draw do
 
   resources :api_keys, only: %i[create destroy]
 
+  resources :groovepacker_webhooks, only: [:create, :update] do
+    delete 'delete_webhooks', on: :collection
+  end  
+
   resources :webhooks, only: [] do
     collection do
       post '/shop/redact' => 'webhooks#delete_shop'

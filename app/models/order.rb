@@ -138,6 +138,17 @@ class Order < ActiveRecord::Base
     update_access_restriction
     tenant = Apartment::Tenant.current
     SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
+    
+    scanned_order_webhooks = GroovepackerWebhook.scanned_order
+    scanned_order_webhooks.each do |webhook|
+      delay(run_at: 1.seconds.from_now, queue: 'order_scanned_webhook_' + tenant, priority: 95).trigger_scanned_order_webhook(webhook) if webhook.url.present?
+    end
+  end
+
+  def trigger_scanned_order_webhook(webhook)
+    order_data = External::OrderSerializer.new(self).serializable_hash
+    response = HTTParty.post(webhook.url, body: { data: order_data }) 
+    raise 'webhook error' if response.code != 200
   end
 
   def contains_zero_qty_order_item?
