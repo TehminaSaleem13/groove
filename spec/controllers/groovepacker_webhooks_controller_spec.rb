@@ -46,7 +46,7 @@ RSpec.describe GroovepackerWebhooksController, type: :controller do
         put :update, params: {id: webhook.id, webhook: { url: nil, secret_key: 'ggshhsjjs' } }
         expect(response.status).to eq(422)
         result = JSON.parse(response.body)
-        expect(result['url']).to eq(["can't be blank"])
+        expect(result['errors']['url']).to eq(["can't be blank"])
       end
     end
 

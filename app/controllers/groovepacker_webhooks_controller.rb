@@ -17,7 +17,7 @@ class GroovepackerWebhooksController < ApplicationController
     if @groovepacker_webhook.update(webhook_params)
       render json: { data: @groovepacker_webhook, message: 'Successfully Updated Webhook' }, status: :created
     else
-      render json: @groovepacker_webhook.errors, status: :unprocessable_entity
+      render json: { errors: @groovepacker_webhook.errors }, status: :unprocessable_entity
     end
   end
 
