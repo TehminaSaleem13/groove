@@ -9,7 +9,8 @@ module Webhooks
         @webhook = GroovepackerWebhook.find_by(id: webhook_id)
       end
 
-      def trigger_scanned_order_webhook
+      def trigger_scanned_order_webhook(tenant_name)
+        Apartment::Tenant.switch! tenant_name
         order_data = External::OrderSerializer.new(@order).serializable_hash
         response = HTTParty.post(@webhook.url, body: { data: order_data }) 
         raise 'webhook error' if response.code != 200
