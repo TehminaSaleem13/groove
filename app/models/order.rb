@@ -141,14 +141,9 @@ class Order < ActiveRecord::Base
     
     scanned_order_webhooks = GroovepackerWebhook.scanned_order
     scanned_order_webhooks.each do |webhook|
-      delay(run_at: 1.seconds.from_now, queue: 'order_scanned_webhook_' + tenant, priority: 95).trigger_scanned_order_webhook(webhook) if webhook.url.present?
+      wehook_order_service = Webhooks::Orders::OrderWebhookService.new(self, webhook)
+      wehook_order_service.delay(run_at: 1.seconds.from_now, queue: 'order_scanned_webhook_' + tenant, priority: 95).trigger_scanned_order_webhook if webhook.url.present?
     end
-  end
-
-  def trigger_scanned_order_webhook(webhook)
-    order_data = External::OrderSerializer.new(self).serializable_hash
-    response = HTTParty.post(webhook.url, body: { data: order_data }) 
-    raise 'webhook error' if response.code != 200
   end
 
   def contains_zero_qty_order_item?
