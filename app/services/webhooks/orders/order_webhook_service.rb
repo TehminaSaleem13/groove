@@ -3,9 +3,9 @@
 module Webhooks
   module Orders
     class OrderWebhookService
-      def initialize(order, webhook)
-        @order = order
-        @webhook = webhook
+      def initialize(order_id, webhook_id)
+        @order = Order.find_by(id: order_id)
+        @webhook = GroovepackerWebhook.find_by(id: webhook_id)
       end
 
       def trigger_scanned_order_webhook
