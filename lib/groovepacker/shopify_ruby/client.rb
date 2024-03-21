@@ -124,7 +124,7 @@ module Groovepacker
       def update_inventory(attrs)
         response = nil
         loop do
-          response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/inventory_levels/set.json",
+          response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/inventory_levels/set.json",
                                    body: attrs.to_json, headers: headers)
           return response if response.success? || response.code != 429
 
@@ -144,13 +144,13 @@ module Groovepacker
       end
 
       def update_order(store_order_id, attrs)
-        response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders/#{store_order_id}.json",
+        response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders/#{store_order_id}.json",
                                  body: attrs.to_json, headers: headers)
         response
       end
 
       def get_order(store_order_id)
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/orders/#{store_order_id}.json",
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders/#{store_order_id}.json",
                                  headers: headers)
         response['order'] || {}
       end
@@ -174,6 +174,8 @@ module Groovepacker
       end
 
       def register_webhook(attrs)
+        return
+        # TODO: Commenting this as it is not being used.
         response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks.json",
                                  body: attrs.to_json, headers: headers)
 
@@ -181,12 +183,16 @@ module Groovepacker
       end
 
       def list_webhooks
+        return []
+        # TODO: Commenting this as it is not being used.
        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks.json",
                               headers: headers)
       response['webhooks'] || []
       end
 
       def delete_webhook(webhook_id)
+        return
+        # TODO: Commenting this as it is not being used.
         response =HTTParty.delete("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks/#{webhook_id}.json", headers: headers)
       end
 
