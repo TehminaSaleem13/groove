@@ -3,10 +3,10 @@
 module Webhooks
   module Orders
     class OrderWebhookService
-      def initialize(order_id, webhook_id, tenant_name)
+      def initialize(order, webhook, tenant_name)
         Apartment::Tenant.switch! tenant_name
-        @order = Order.find_by(id: order_id)
-        @webhook = GroovepackerWebhook.find_by(id: webhook_id)
+        @order = order
+        @webhook = webhook
       end
 
       def trigger_scanned_order_webhook(tenant_name)

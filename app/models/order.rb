@@ -141,7 +141,7 @@ class Order < ActiveRecord::Base
     
     scanned_order_webhooks = GroovepackerWebhook.scanned_order
     scanned_order_webhooks.each do |webhook|
-      wehook_order_service = Webhooks::Orders::OrderWebhookService.new(id, webhook.id, tenant)
+      wehook_order_service = Webhooks::Orders::OrderWebhookService.new(self, webhook, tenant)
       wehook_order_service.delay(run_at: 1.seconds.from_now, queue: 'order_scanned_webhook_' + tenant, priority: 95).trigger_scanned_order_webhook(tenant) if webhook.url.present?
     end
   end
