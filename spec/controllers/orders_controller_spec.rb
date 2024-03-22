@@ -834,6 +834,53 @@ RSpec.describe OrdersController, type: :controller do
       expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
       expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
     end
+
+    it 'sorted and filtered data' do
+      order = Order.create(increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil, customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: 'BIKE', lastname: 'ACTIONGmbH', email: 'east@raceface.com', address_1: 'WEISKIRCHER STR. 102', address_2: nil, city: 'RODGAU', state: nil, postcode: '63110', country: 'GERMANY', method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: 'scanned', scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: 'C000209814B(Duplicate2)', note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: 'orders/2021-07-29-162759275061.xml', last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: '', ss_label_data: nil, importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
+      product1 = Product.create(store_product_id: '0', name: 'TRIGGER SS JERSEY-BLACK-M', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 1, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      product2 = Product.create(store_product_id: '1', name: 'TRIGGER SS JERSEY-BLACK-L', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      ProductKitSkus.create(product_id: product1.id, option_product_id: product2.id, qty: 1, packing_order: 50)
+      order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product1.id, scanned_status: 'notscanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      order_item =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product1.id, scanned_status: 'scanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+
+      request.accept = 'application/json'
+      filterValue = [
+        { name: 'OrderNumber', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Store', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Notes', operator: 'contains', type: 'string', value: '123'},
+        { name: 'OrderDate', operator: 'before', type: 'date', value: '12-2-2022'},
+        { name: 'Items', operator: 'inrange', type: 'number', value: {start: 1, end: 2}},
+        { name: 'Recipient', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting'},
+        { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123'},
+        { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123'},
+        { name: 'trackingNumber', operator: 'contains', type: 'string', value: '123'},
+        { name: 'country', operator: 'contains', type: 'string', value: '123'},
+        { name: 'city', operator: 'contains', type: 'string', value: '123'},
+        { name: 'email', operator: 'noContains', type: 'string', value: '123'},
+      ]
+      post :sorted_and_filtered_data, params: {
+        'filter' => 'all',
+        'shouldFilter' => 'true',
+        'sort' => '',
+        'order' => 'DESC',
+        'limit' => '20',
+        'offset' => '0',
+        'product_search_toggle' => 'undefined',
+        'app' => true,
+        'filters' => filterValue.to_json
+      }      
+      expect(response.status).to eq(200)
+
+      # expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
+      # expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
+
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1' }
+      expect(response.status).to eq(200)
+
+      expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
+      expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
+    end
   end
 
   describe 'Order Items Export Report' do

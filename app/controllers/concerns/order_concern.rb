@@ -71,15 +71,27 @@ module OrderConcern
     result_rows
   end
 
-  def get_orders_count
+
+  def get_counts(orders, statuses)
     count = {}
     all = 0
-    counts = Order.select('status,count(*) as count').where(status: %w[scanned cancelled onhold awaiting serviceissue]).group(:status)
+    orders = orders.constantize if orders = 'Order'
+    counts = orders.select('orders.status,count(*) as count').where(status: statuses).group(:status)
     counts.each do |single|
       count[single.status] = single.count
       all += single.count
     end
-    count = count.merge('all' => all, partially_scanned: Order.partially_scanned.count, 'search' => 0)
+    count.merge('all' => all, partially_scanned: Order.partially_scanned.count, 'search' => 0)
+  end
+  
+  def get_orders_count
+    statuses = %w[scanned cancelled onhold awaiting serviceissue]
+    get_counts('Order', statuses)
+  end
+  
+  def get_count_for_grid(orders)
+    statuses = %w[scanned awaiting]
+    get_counts(orders, statuses)
   end
 
   def get__filtered_orders_count

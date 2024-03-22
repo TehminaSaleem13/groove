@@ -108,6 +108,7 @@ Groovepacks::Application.routes.draw do
   resources :orders do
     collection do
       get 'search'
+      get 'sorted_and_filtered_data'
       get 'import_orders'
       get 'import_all'
       post 'generate_pick_list'

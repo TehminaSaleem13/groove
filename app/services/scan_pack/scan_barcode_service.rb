@@ -115,7 +115,7 @@ module ScanPack
     def scanned_item_sku
       item_sku = nil
       item_sku = Product.find_by_id(@params['product_id'])&.primary_sku if @params['product_id'].present? && item_sku.blank?
-      @order.get_unscanned_items(barcode: @params['input'], limit: nil).each do |item|
+      @order.get_unscanned_items(limit: nil).each do |item|
         item_sku = item['child_items']&.select{ |child| child['barcodes'].to_a.any? { |barcode| barcode['barcode'] == @params['input'] } }&.first.try(:[], 'sku') if item_sku.blank?
         item_sku ||= item['sku'] if item['barcodes']&.any? { |barcode| barcode['barcode'] == @params['input'] }
         break if item_sku

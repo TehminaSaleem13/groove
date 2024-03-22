@@ -75,6 +75,22 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+
+  def sorted_and_filtered_data
+    @result ||= {}
+    if params[:shouldFilter] == 'true'
+      @orders = filter_orders
+      @result['orders_count'] = get_count_for_grid(@orders)
+      @orders = gp_orders_module.do_get_filtered_orders(@orders) if @orders.present?
+    else
+      @orders = gp_orders_module.do_getorders
+      @result['orders_count'] = get_orders_count
+    end
+    @result['orders'] = make_orders_list(@orders)
+
+    render json: @result
+  end
+
   def duplicate_orders
     execute_groove_bulk_action('duplicate')
     render json: @result

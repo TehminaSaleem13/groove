@@ -116,7 +116,7 @@ module Groovepacker
         @result
       end
 
-      def do_getorders
+      def get_common_parameters
         sort_key = get('sort_key', 'updated_at')
         sort_order = get('sort_order', 'DESC')
         limit = get_limit_or_offset('limit') # Get passed in parameter variables if they are valid.
@@ -124,16 +124,30 @@ module Groovepacker
         status_filter = get('status_filter', 'awaiting')
         status_filter_text = ''
         query_add = get_query_limit_offset(limit, offset)
-
+      
         # overrides
         sort_key = set_final_sort_key(sort_order, sort_key)
-
+      
         status_filter_text = " WHERE orders.status='" + status_filter + "'" unless status_filter.in?(%w[all partially_scanned])
         status_filter_text = " JOIN order_items ON order_items.order_id = orders.id WHERE orders.status='awaiting' AND order_items.scanned_qty != 0 " if status_filter == 'partially_scanned'
-        # TODO: status filters to be implemented
+      
+        [sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add]
+      end
+      
+      def do_getorders
+        sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add = get_common_parameters
+      
         orders = get_sorted_orders(sort_key, sort_order, limit, offset, query_add, status_filter_text, status_filter)
         orders
       end
+      
+      def do_get_filtered_orders(orders)
+        sort_key, sort_order, limit, offset, status_filter = get_common_parameters
+      
+        orders = get_filtered_sorted_orders(sort_key, sort_order, limit, offset, status_filter, orders)
+        orders
+      end  
+
 
       private
 
@@ -157,6 +171,15 @@ module Groovepacker
           orders = orders.partially_scanned if status_filter == 'partially_scanned'
           orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
         end
+        orders
+      end
+
+      def get_filtered_sorted_orders(sort_key, sort_order, limit, offset, status_filter, filtered_orders)
+        orders = Order.where(id: filtered_orders.pluck(:id))
+        orders = orders.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
+        orders = orders.where(status: status_filter) unless status_filter.in?(%w[all partially_scanned])
+        orders = orders.partially_scanned if status_filter == 'partially_scanned'
+        orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
         orders
       end
 
