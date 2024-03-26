@@ -30,7 +30,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
 
   def scan_recording
     @result['data']['next_state'] = 'scanpack.rfp.recording'
-    if @order.status == 'awaiting'
+    if @order.status.in?(['awaiting', 'scanned'])
       # allow tracking id to be saved without special permissions
       if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Record'
         check_tracking_number_validation
@@ -41,7 +41,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
         apply_second_action
       end
     else
-      set_error_messages('The order is not in awaiting state. Cannot scan the tracking number')
+      set_error_messages('The order is not in awaiting or scanned state. Cannot scan the tracking number')
     end
   end
 

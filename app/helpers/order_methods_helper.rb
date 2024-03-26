@@ -217,9 +217,12 @@ module OrderMethodsHelper
 
       grouped_by_packing_placement.each_value do |array|
         sorted_array << array.sort_by do |x|
-          [
-            x['location'].to_s.chars.map { |c| c =~ /\W/ ? [0, c] : (c =~ /\d/ ? [1, c.to_i] : [2, c]) }
-          ]
+          location = x['location'].to_s
+          if location.empty?
+            [0, x['sku'][0].downcase]
+          else
+            [1, location.chars.map { |c| c =~ /\W/ ? [0, c] : (c =~ /\d/ ? [1, c.to_i] : [2, c]) }]
+          end
         end
       end
       list = sorted_array.flatten

@@ -476,7 +476,6 @@ module OrdersHelper
 
   def filter_orders
     filters = JSON.parse(params[:filters])
-    # binding.pry
     # Fetching orders from the database based on filters
     orders = []
     final_order = []
