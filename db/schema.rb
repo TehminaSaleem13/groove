@@ -643,6 +643,7 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.index ["inv_status", "scanned_status"], name: "index_order_items_on_inv_status_and_scanned_status"
     t.index ["is_deleted"], name: "index_order_items_on_is_deleted"
     t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["qty"], name: "index_order_items_on_qty"
   end
 
   create_table "order_serials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -762,6 +763,7 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.index ["status"], name: "index_orders_on_status"
     t.index ["store_id"], name: "index_orders_on_store_id"
     t.index ["tracking_num"], name: "index_orders_on_tracking_num"
+    t.index ["id"], name: "index_orders_on_id"
   end
 
   create_table "origin_stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

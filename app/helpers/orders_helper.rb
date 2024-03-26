@@ -572,6 +572,7 @@ module OrdersHelper
       final_order = orders
     end
   
+    final_order = final_order.where(status: params["filter"]) if params["filter"] != 'all'
     final_order
   end
   

@@ -91,7 +91,8 @@ module OrderConcern
   
   def get_count_for_grid(orders)
     statuses = %w[scanned awaiting]
-    get_counts(orders, statuses)
+    count = get_counts(orders, statuses)
+    count.merge!('filtered_count' => orders.length)
   end
 
   def get__filtered_orders_count
