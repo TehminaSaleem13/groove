@@ -30,6 +30,7 @@ class Order < ActiveRecord::Base
   after_save :delete_if_order_exist, unless: :check_for_duplicate
   after_save :perform_after_scanning_tasks
   after_create :create_origin_store
+  after_save :trigger_webhooks
 
   # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
   validates_uniqueness_of :increment_id, unless: :check_for_duplicate
@@ -138,12 +139,10 @@ class Order < ActiveRecord::Base
     update_access_restriction
     tenant = Apartment::Tenant.current
     SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
-    
-    scanned_order_webhooks = GroovepackerWebhook.scanned_order
-    scanned_order_webhooks.each do |webhook|
-      wehook_order_service = Webhooks::Orders::OrderWebhookService.new(id, webhook.id, tenant)
-      wehook_order_service.delay(run_at: 1.seconds.from_now, queue: 'order_scanned_webhook_' + tenant, priority: 95).trigger_scanned_order_webhook(tenant) if webhook.url.present?
-    end
+  end
+
+  def trigger_webhooks
+    Webhooks::Orders::OrderScanWebhookService.trigger_scanned_order_webhooks(id) if status_changed? && status == 'scanned'
   end
 
   def contains_zero_qty_order_item?
