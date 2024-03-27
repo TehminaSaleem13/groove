@@ -547,7 +547,11 @@ module OrdersHelper
           value = DateTime.strptime(value, "%m-%d-%Y") if value.is_a?(String)
           orders = all_orders.where("DATE(#{db_column_name}) #{operation_map[operator]} ?", value)
         else
-          orders = all_orders.where("#{db_column_name} #{operation_map[operator]} ?", value.downcase)
+          if value.is_a?(Array)
+            orders = all_orders.where("#{db_column_name} IN (?)", value.map(&:downcase))
+          else
+            orders = all_orders.where("#{db_column_name} #{operation_map[operator]} ?", value.downcase)
+          end
         end
       when 'startsWith', 'endsWith'
         if operator == 'startsWith'

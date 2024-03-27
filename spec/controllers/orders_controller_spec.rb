@@ -851,6 +851,7 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'OrderDate', operator: 'before', type: 'date', value: '12-2-2022'},
         { name: 'Items', operator: 'inrange', type: 'number', value: {start: 1, end: 2}},
         { name: 'Recipient', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting']},
         { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting'},
         { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123'},
         { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123'},
