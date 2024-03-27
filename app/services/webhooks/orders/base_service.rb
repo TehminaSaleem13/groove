@@ -17,12 +17,12 @@ module Webhooks
   
         def api_headers
           headers = {}
-          headers.merge!({ signature: generate_signature }) if @webhook.secret_key.present?
+          headers.merge!({ 'X-HMAC-SHA256': generate_signature }) if @webhook.secret_key.present?
           headers
         end
   
         def generate_signature
-          Hmac::Cryptor.new(@webhook.secret_key, @order_data.to_json).generate_signature
+          HmacEncryptor.new(@webhook.secret_key, @order_data.to_json).generate_signature
         end
       end
     end
