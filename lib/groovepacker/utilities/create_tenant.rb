@@ -35,7 +35,7 @@ class CreateTenant
 
   def apply_restrictions_and_seed(subscription)
     ApplyAccessRestrictions.new.delay(
-      run_at: 10.minutes.from_now,
+      run_at: 1.minutes.from_now,
       queue: "apply_access_restrictions_#{subscription.tenant_name}",
       priority: 95
     ).apply_access_restrictions(subscription.tenant_name)
