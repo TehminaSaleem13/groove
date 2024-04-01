@@ -52,6 +52,8 @@ module Groovepacker
             @result[:total_imported] = response['orders'].length
             initialize_import_item
             @regular_import_triggered = true if @result[:status] && @import_item.import_type == 'quick'
+            Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], @store, @import_item, shipments_response) if current_tenant_object&.loggly_shipstation_imports
+
             import_orders_from_response(response, shipments_response)
             destroy_nil_import_items
             Tenant.save_se_import_data("========Shipstation Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item)
@@ -256,6 +258,7 @@ module Groovepacker
                                                  end
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
+
               check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order, order)
               remove_gp_tags_from_ss(order)
             else
@@ -290,6 +293,7 @@ module Groovepacker
             @import_item.update_attributes(current_order_items: order['items'].length, current_order_imported_item: 0)
             order['items'].each do |item|
               next if remove_coupon_codes?(item)
+
               product = product_importer_client.find_or_create_product(item)
               create_product_image
               import_order_item(item, shipstation_order, product)
@@ -542,7 +546,7 @@ module Groovepacker
             shipstation_order.addactivity(activity_name, @credential.store.name + ' Import')
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
-              if intangible == true && ( @credential.set_coupons_to_intangible || check_for_intangible_coupon )
+              if intangible == true && (@credential.set_coupons_to_intangible || check_for_intangible_coupon)
                 shipstation_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added and set to Intangible.", "#{@credential.store.name} Import")
               else
                 update_activity_for_single_item(shipstation_order, item)

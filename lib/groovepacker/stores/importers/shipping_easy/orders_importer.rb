@@ -27,9 +27,8 @@ module Groovepacker
             return @result if response['orders'].nil?
 
             @regular_import = true
-            tenant_name = Apartment::Tenant.current
-            tenant = Tenant.find_by(name: tenant_name)
-            logging_orders_response(response, tenant_name) if tenant&.loggly_se_imports
+            Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], @import_item.store, @import_item) if current_tenant_object&.loggly_se_imports
+
             import_orders_from_response(response, importing_time)
             # @result[:total_imported] = response["orders"].uniq.length
             # update_import_item_obj_values
@@ -141,18 +140,6 @@ module Groovepacker
           end
 
           private
-
-          def logging_orders_response(response, tenant_name)
-            logs = { }
-            logs['orders'] = response['orders'].map do |order|
-              {
-                order_number: order['external_order_identifier'],
-                store_order_id: order['id'].to_s,
-                tracking_num: order&.dig('shipments')&.first&.dig('tracking_number')
-              }
-            end
-            Groovepacker::LogglyLogger.log(tenant_name, 'Shippingeasy_import', logs)
-          end
 
           def import_orders_from_response(response, _importing_time)
             @result[:total_imported] = response['orders'].uniq.length

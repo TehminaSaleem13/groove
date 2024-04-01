@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240228094720) do
+ActiveRecord::Schema.define(version: 20240328132358) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -376,6 +376,14 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.string "current", limit: 5000, collation: "utf8mb4_unicode_ci"
     t.text "messages"
     t.boolean "cancel", default: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+  end
+
+  create_table "groovepacker_webhooks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.string "secret_key"
+    t.string "url"
+    t.string "event"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
   end
@@ -757,13 +765,13 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.string "tags"
     t.string "post_scanning_flag"
     t.integer "origin_store_id"
+    t.index ["id"], name: "index_orders_on_id"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
     t.index ["scanned_on"], name: "index_orders_on_scanned_on"
     t.index ["status"], name: "index_orders_on_status"
     t.index ["store_id"], name: "index_orders_on_store_id"
     t.index ["tracking_num"], name: "index_orders_on_tracking_num"
-    t.index ["id"], name: "index_orders_on_id"
   end
 
   create_table "origin_stores", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1263,6 +1271,7 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.bigint "push_inv_location_id"
     t.bigint "pull_inv_location_id"
     t.boolean "pull_combined_qoh", default: false
+    t.integer "order_import_range_days", default: 30
   end
 
   create_table "shopline_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1327,6 +1336,12 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "display_origin_store_name", default: false
     t.boolean "disable_packing_cam", default: false
+  end
+
+  create_table "stripe_webhooks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.binary "event", limit: 16777215
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "subscriptions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1436,6 +1451,8 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.boolean "enable_developer_tools", default: false
     t.boolean "loggly_shopify_imports", default: false
     t.boolean "loggly_se_imports", default: false
+    t.boolean "loggly_gpx_order_scan", default: false
+    t.boolean "loggly_shipstation_imports", default: false
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1551,12 +1568,6 @@ ActiveRecord::Schema.define(version: 20240228094720) do
     t.timestamp "started_at"
     t.index ["user_id"], name: "index_visits_on_user_id"
     t.index ["visit_token"], name: "index_visits_on_visit_token", unique: true
-  end
-
-  create_table "webhooks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
-    t.binary "event", limit: 16777215
-    t.datetime "created_at", null: false
-    t.datetime "updated_at", null: false
   end
 
 end

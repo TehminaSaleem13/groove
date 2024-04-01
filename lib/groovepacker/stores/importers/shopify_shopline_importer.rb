@@ -28,10 +28,8 @@ module Groovepacker
                                 end
 
           ImportItem.where(store_id: @store.id).where.not(id: @import_item).update_all(status: 'cancelled')
+          Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], @store, @import_item) if current_tenant_object&.loggly_shopify_imports
 
-          tenant_name = Apartment::Tenant.current
-          tenant = Tenant.find_by(name: tenant_name)
-          logging_orders_response(response, tenant_name) if tenant&.loggly_shopify_imports      
           response['orders'].each do |order|
             break if import_should_be_cancelled
 
@@ -63,18 +61,6 @@ module Groovepacker
         end
 
         private
-
-        def logging_orders_response(response, tenant_name)
-          logs = { }
-          logs['orders'] = response['orders'].map do |order|
-            {
-              order_number: order['name'],
-              store_order_id: order['id'].to_s,
-              tracking_num: get_tracking_number(order)
-            }
-          end
-          Groovepacker::LogglyLogger.log(tenant_name, 'Shopify_import', logs)
-        end
 
         def initialize_import_objects
           handler = get_handler
