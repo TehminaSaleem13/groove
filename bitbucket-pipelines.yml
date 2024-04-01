@@ -233,3 +233,16 @@ pipelines:
             variables:
               ROLLBAR_ACCESS_TOKEN: ${ROLLBAR_ACCESS_TOKEN}
               ROLLBAR_ENVIRONMENT: 'production'
+      - step:
+          image: mcr.microsoft.com/playwright:v1.41.1-jammy
+          name: Running Playwright tests
+          script:
+            - rm -rf *
+            - git clone git@bitbucket.org:groovepacker/groovepackerautomation.git
+            - cd groovepackerautomation
+            - npm install
+            - npx playwright install-deps
+            - npm run legacy
+          artifacts:
+            paths:
+              - .bitbucket/pipelines/groovepackerautomation/playwright-report/**
