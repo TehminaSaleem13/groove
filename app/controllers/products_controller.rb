@@ -383,6 +383,12 @@ class ProductsController < ApplicationController
     render json: @result
   end
 
+  def convert_and_upload_image
+    product = Product.find(params[:id])
+    @result['uri']  = product.get_converted_image(params) || ""
+    render json: @result
+  end
+
   # input params[:id] gives product id params[:inv_wh_id] gives inventory warehouse id
   # params[:inventory_count] contains the inventory count from the recount
   # params[:method] this can contain two options: 'recount' or 'receive'

@@ -94,6 +94,31 @@ RSpec.describe ProductsController, type: :controller do
     end
   end
 
+  describe 'POST #convert_and_upload_image' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'with valid params' do
+      image_params = {
+        product_image: {
+          image: fixture_file_upload('app/themes/groove-tech/resources/images/accelerator.jpg', 'image/jpg'),
+          original_filename: 'accelerator.jpg'
+        }
+      }
+      product = FactoryBot.create(:product, store_id: @store.id)
+      product_sku = FactoryBot.create(:product_barcode, barcode: 'PRODUCT_SKU', product_id: product.id)
+      post :convert_and_upload_image, params: {id: product.id, base_64_img_upload: true}.merge(image_params)
+      expect(response).to have_http_status(:success)
+      json_response = JSON.parse(response.body)
+      expect(json_response).to have_key('uri')
+    end
+  end
+
   describe 'Product Aliasing' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

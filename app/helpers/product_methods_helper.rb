@@ -35,6 +35,13 @@ module ProductMethodsHelper
     image.save
   end
 
+  def get_converted_image(params)
+    current_tenant = Apartment::Tenant.current
+    file_name = create_image_from_req(params, current_tenant)
+    image = ENV['S3_BASE_URL'] + '/' + current_tenant + '/image/' + file_name
+    image
+  end
+
   def create_image_from_req(params, current_tenant)
     if params[:base_64_img_upload]
       image_content = Base64.decode64(params[:product_image][:image].to_s)

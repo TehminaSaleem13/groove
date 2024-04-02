@@ -190,6 +190,7 @@ Groovepacks::Application.routes.draw do
     end
     member do
       get 'generate_barcode_slip'
+      post 'convert_and_upload_image'
       put 'adjust_available_inventory'
       post 'add_image'
       post 'set_alias'
