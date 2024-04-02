@@ -142,9 +142,9 @@ module Groovepacker
       end
       
       def do_get_filtered_orders(orders)
-        sort_key, sort_order, limit, offset, status_filter = get_common_parameters
+        sort_key, sort_order, limit, offset = get_common_parameters
       
-        orders = get_filtered_sorted_orders(sort_key, sort_order, limit, offset, status_filter, orders)
+        orders = get_filtered_sorted_orders(sort_key, sort_order, limit, offset, orders)
         orders
       end  
 
@@ -174,11 +174,9 @@ module Groovepacker
         orders
       end
 
-      def get_filtered_sorted_orders(sort_key, sort_order, limit, offset, status_filter, filtered_orders)
+      def get_filtered_sorted_orders(sort_key, sort_order, limit, offset, filtered_orders)
         orders = Order.where(id: filtered_orders.pluck(:id))
         orders = orders.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
-        orders = orders.where(status: status_filter) unless status_filter.in?(%w[all partially_scanned])
-        orders = orders.partially_scanned if status_filter == 'partially_scanned'
         orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]
         orders
       end
