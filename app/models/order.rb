@@ -52,6 +52,7 @@ class Order < ActiveRecord::Base
   scope :awaiting, -> { where(status: 'awaiting') }
   scope :partially_scanned, -> { awaiting.joins(:order_items).where.not(order_items: { scanned_qty: 0 }).distinct }
   scope :awaiting_without_partially_scanned, -> { awaiting.where.not(id: partially_scanned.ids) }
+  scope :filtered_by_status, ->(statuses) { where(status: statuses) }
 
   def assign_increment_id
     return if increment_id.present?

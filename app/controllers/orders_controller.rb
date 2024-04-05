@@ -79,7 +79,9 @@ class OrdersController < ApplicationController
   def sorted_and_filtered_data
     @result ||= {}
     if params[:shouldFilter] == 'true'
-      @orders = filter_orders
+      filters = params[:filter].to_s.split(",").map(&:downcase)
+      @orders = Order.filtered_by_status(filters)
+      @orders = filter_orders(@orders)
       @result['orders_count'] = get_count_for_grid(@orders)
       @orders = gp_orders_module.do_get_filtered_orders(@orders) if @orders.present?
     else

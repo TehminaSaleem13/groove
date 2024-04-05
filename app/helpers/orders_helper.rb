@@ -474,10 +474,9 @@ module OrdersHelper
     end
   end
 
-  def filter_orders
+  def filter_orders(orders)
     filters = JSON.parse(params[:filters])
     # Fetching orders from the database based on filters
-    orders = []
     final_order = []
     column_mapping = {
       "OrderNumber" => "increment_id",
@@ -515,9 +514,9 @@ module OrdersHelper
       operator = filter["operator"]
       value = filter["value"]
       type = filter["type"]
-      next if value.blank?
+      next if value.blank? || attribute_name == 'Status'
       db_column_name = column_mapping[attribute_name]
-      all_orders = final_order.present? ? Order.where(id: final_order.pluck(:id)) : Order 
+      all_orders = final_order.present? ? Order.where(id: final_order.pluck(:id)) : orders 
   
       case operator
       when 'contains'
