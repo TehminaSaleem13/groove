@@ -137,7 +137,7 @@ module ScanPack
         order_no_input = @params['input']
         job = Delayed::Job.find_by_queue("on_demand_scan_#{Apartment::Tenant.current}_#{order_no_input}")
         if job.blank? || job.failed_at.present?
-          store = stores.where(status: true, store_type: ['Shipstation API 2', 'Shopify', 'ShippingEasy']).last
+          store = stores.where(status: true, store_type: ['Shipstation API 2', 'Shopify', 'Shopline', 'ShippingEasy']).last
           add_on_demand_import_to_delay(order_no_input, job, store)
         else
           @result['notice_messages'] = 'Still checking on this order.'

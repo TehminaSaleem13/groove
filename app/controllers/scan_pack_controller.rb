@@ -35,81 +35,6 @@ class ScanPackController < ApplicationController
       else
         @result = log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       end
-      # params[:data].each do |scn_params|
-      #   begin
-      #     if (scn_params[:event] == 'regular')
-      #       scan_barcode_obj = ScanPack::ScanBarcodeService.new(
-      #         current_user, session, scn_params
-      #       )
-      #       res = scan_barcode_obj.run
-      #     elsif (scn_params[:event] == 'click_scan')
-      #       res = product_scan(
-      #         scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id],
-      #         {
-      #           clicked: true, current_user: current_user, session: session
-      #         }
-      #       )
-      #     elsif (scn_params[:event] == 'type_scan')
-      #       res = product_scan(
-      #         scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id],
-      #         {
-      #           clicked: false, serial_added: false, typein_count: scn_params[:count].to_i,
-      #           current_user: current_user, session: session
-      #         }
-      #       )
-      #     elsif (scn_params[:event] == 'scanned')
-      #       order = Order.find(scn_params[:id])
-      #       if !order.nil?
-      #         order.order_items.update_all(scanned_status: 'scanned')
-      #         order.addactivity('Order is scanned through SCANNED barcode', current_user.try(:username))
-      #         order.set_order_to_scanned_state(current_user.try(:username))
-      #       end
-      #     elsif (scn_params[:event] == 'note')
-      #       ScanPack::AddNoteService.new(
-      #         current_user, session, { id: scn_params[:id], note: scn_params[:message], email: true }
-      #       ).run
-      #     elsif (scn_params[:event] == 'verify')
-      #       if scn_params[:state] == 'scanpack.rfp.no_tracking_info'
-      #         render_order_scan_object = ScanPack::RenderOrderScanService.new(
-      #           [current_user, scn_params[:input], 'scanpack.rfp.no_tracking_info', scn_params[:id]]
-      #         )
-      #         render_order_scan_object.run
-      #       elsif scn_params[:state] == 'scanpack.rfp.no_match'
-      #         render_order_scan_object = ScanPack::ScanAginOrRenderOrderScanService.new(
-      #           [current_user, scn_params[:input], 'scanpack.rfp.no_match', scn_params[:id]]
-      #         )
-      #         render_order_scan_object.run
-      #       else
-      #         scan_verifying_object = ScanPack::ScanVerifyingService.new(
-      #           [current_user, scn_params[:input], scn_params[:id]]
-      #         )
-      #       end
-      #       scan_verifying_object.run
-      #     elsif (scn_params[:event] == 'record')
-      #       scan_recording_object = ScanPack::ScanRecordingService.new(
-      #         [current_user, scn_params[:input], scn_params[:id]]
-      #       )
-      #       scan_recording_object.run
-      #     elsif (scn_params[:event] == 'serial_scan')
-      #       serial_scan_obj = ScanPack::SerialScanService.new(
-      #         current_user, session, scn_params
-      #       )
-      #       serial_scan_obj.run
-      #     elsif (scn_params[:event] == 'bulk_scan')
-      #       order_item = OrderItem.find_by(id: scn_params[:order_item_id])
-      #       if order_item && order_item.scanned_status != 'scanned'
-      #         order = order_item.order
-      #         order_item.update_attributes(scanned_status: 'scanned')
-      #         order.addactivity("#{order_item.product.name} scanned through Bulk Scan", current_user.try(:username))
-      #         order.set_order_to_scanned_state(current_user.try(:username)) unless order.has_unscanned_items
-      #       end
-      #     end
-      #   rescue => e
-      #     on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-      #     log = { tenant: Apartment::Tenant.current, params: params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(",") }
-      #     on_demand_logger.info(log)
-      #   end
-      # end
     end
 
     # Regular Scan
@@ -123,9 +48,14 @@ class ScanPackController < ApplicationController
     # on_demand_logger.info(log)
     # on_demand_logger.info('---------------------------------------------')
     if(@result.present? && !@result['status'])
+      if params[:data]&.first && params[:data].first[:id]
+        options = { order_id: params[:data].first[:id], current_user: current_user.name, app_url: params[:app_url] }
+        service = Groovepacker::SlackNotifications::OrderScanFailure.new(Apartment::Tenant.current, options)
+        service.delay(run_at: 15.seconds.from_now, priority: 95).call
+      end
       render json: @result, status: :internal_server_error
     else
-      render json: { status: 'OK', timestamp: current_timestamp }
+      render json: { response: @result, status: 'OK', timestamp: current_timestamp }
     end
   end
 

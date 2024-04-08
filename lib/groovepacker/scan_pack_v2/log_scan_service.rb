@@ -19,7 +19,7 @@ module Groovepacker
             scan_barcode_obj = ScanPack::ScanBarcodeService.new(
               current_user, session, scn_params
             )
-            res = scan_barcode_obj.run
+            @result = scan_barcode_obj.run
           elsif scn_params[:event] == 'click_scan'
             scn_params = attach_temporary_barcode(scn_params)
             res = product_scan_v2(
