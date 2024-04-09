@@ -859,9 +859,10 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'country', operator: 'contains', type: 'string', value: '123'},
         { name: 'city', operator: 'contains', type: 'string', value: '123'},
         { name: 'email', operator: 'noContains', type: 'string', value: '123'},
+        { name: 'tote', operator: 'noContains', type: 'string', value: '123'},
       ]
       post :sorted_and_filtered_data, params: {
-        'filter' => 'all',
+        'filter' => 'awaiting',
         'shouldFilter' => 'true',
         'sort' => '',
         'order' => 'DESC',
@@ -876,7 +877,7 @@ RSpec.describe OrdersController, type: :controller do
       # expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
       # expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
 
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1' }
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json }
       expect(response.status).to eq(200)
 
       expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)

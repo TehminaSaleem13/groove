@@ -52,7 +52,84 @@ class Order < ActiveRecord::Base
   scope :awaiting, -> { where(status: 'awaiting') }
   scope :partially_scanned, -> { awaiting.joins(:order_items).where.not(order_items: { scanned_qty: 0 }).distinct }
   scope :awaiting_without_partially_scanned, -> { awaiting.where.not(id: partially_scanned.ids) }
-  scope :filtered_by_status, ->(statuses) { where(status: statuses) }
+  scope :filtered_by_status, ->(statuses) {
+    return all if statuses.include?("all")
+    statuses.delete("partiallyscanned") if statuses.include?("partiallyscanned")
+    
+    statuses = [statuses] unless statuses.is_a?(Array)
+    where(status: statuses.map(&:to_s)) if statuses.present?
+  }
+  scope :get_partially_scanned, ->(statuses) {
+    return partially_scanned if statuses.include?("partiallyscanned")
+  }
+  scope :filter_all_status, ->(filters) { 
+    get_partially_scanned(filters).merge(filtered_by_status(filters))  
+  }
+  scope :filter_by_qty, ->(operator, value) {
+    includes(:order_items)
+     .select('orders.*, (SELECT SUM(order_items.qty) FROM order_items WHERE order_items.order_id = orders.id) AS count')
+     .having("count #{operator} ?", value) if value.present? && !value.is_a?(Hash)
+  }
+  scope :filter_by_increment_id, ->(operator, value) {
+    where("increment_id #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_notes_internal, ->(operator, value) {
+    where("notes_internal #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_recipient, ->(operator, value) {
+    where("CONCAT(firstname, '', lastname) #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_store, ->(operator, value) {
+    joins(:store).where("stores.name LIKE ?", value) if value.present?
+  }
+  scope :filter_by_custom_field_one, ->(operator, value) {
+    where("custom_field_one #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_custom_field_two, ->(operator, value) {
+    where("custom_field_two #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_tracking_num, ->(operator, value) {
+    where("tracking_num #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_country, ->(operator, value) {
+    where("country #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_city, ->(operator, value) {
+    where("city #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_email, ->(operator, value) {
+    where("email #{operator} ?", value) if value.present?
+  }
+  scope :filter_by_tote, ->(operator, value) {
+    joins(:tote).where("tote.name LIKE ?", value) if value.present?
+  }
+  scope :filter_by_date, ->(operator, value) {
+    value = DateTime.strptime(value, "%m-%d-%Y") if value.is_a?(String)
+    where("DATE(order_placed_time) #{operator} ?", value) if value.present?
+  }
+  scope :within_date_range, ->(date_range_object) {
+    if date_range_object.present? && date_range_object.is_a?(Hash)
+      start_date = date_range_object[:start_date]
+      end_date = date_range_object[:end_date]
+      
+      start_date = DateTime.strptime(start_date, "%m-%d-%Y") if start_date.is_a?(String) && start_date != ""
+      end_date = DateTime.strptime(end_date, "%m-%d-%Y") if end_date.is_a?(String) && end_date != ""
+      
+      where("order_placed_time >= ? AND order_placed_time <= ?", start_date, end_date) if start_date.present? && end_date.present?
+    end
+  }
+  scope :within_number_range, ->(number_range_object) {
+    if number_range_object.present? && number_range_object.is_a?(Hash)
+      start_value = number_range_object[:start_value]
+      end_value = number_range_object[:end_value]
+
+      joins(:order_items)
+      .select('orders.*, SUM(order_items.qty) AS count')
+        .group('orders.id')
+        .having("count >= CAST(? AS SIGNED) AND count <= CAST(? AS SIGNED)", start_value, end_value) if start_value.present? && end_value.present?
+    end
+  }
+
 
   def assign_increment_id
     return if increment_id.present?

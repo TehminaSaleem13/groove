@@ -78,16 +78,9 @@ class OrdersController < ApplicationController
 
   def sorted_and_filtered_data
     @result ||= {}
-    if params[:shouldFilter] == 'true'
-      filters = params[:filter].to_s.split(",").map(&:downcase)
-      @orders = Order.filtered_by_status(filters)
-      @orders = filter_orders(@orders)
-      @result['orders_count'] = get_count_for_grid(@orders)
-      @orders = gp_orders_module.do_get_filtered_orders(@orders) if @orders.present?
-    else
-      @orders = gp_orders_module.do_getorders
-      @result['orders_count'] = get_orders_count
-    end
+    @orders, filter_length = gp_orders_filter.filter_orders
+    @result['orders_count'] = get_orders_count
+    @result['orders_count'].merge!('filtered_count' => filter_length)
     @result['orders'] = make_orders_list(@orders)
 
     render json: @result

@@ -88,12 +88,6 @@ module OrderConcern
     statuses = %w[scanned cancelled onhold awaiting serviceissue]
     get_counts('Order', statuses)
   end
-  
-  def get_count_for_grid(orders)
-    statuses = %w[scanned awaiting]
-    count = get_counts(orders, statuses)
-    count.merge!('filtered_count' => orders.length)
-  end
 
   def get__filtered_orders_count
     count = {}
@@ -309,6 +303,10 @@ module OrderConcern
 
   def gp_orders_search
     Groovepacker::Orders::OrdersSearch.new(result: @result, params_attrs: params, current_user: current_user)
+  end
+
+  def gp_orders_filter
+    Groovepacker::Orders::OrdersFilter.new(result: @result, params_attrs: params, current_user: current_user)
   end
 
   def gp_orders_exception
