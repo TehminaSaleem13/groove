@@ -25,6 +25,8 @@ module StoreConcern
       @result = init_store.shipping_easy_update_create
     when 'Shipworks'
       @result = init_store.shipwork_update_create
+    when 'Veeqo'
+      @result = init_store.veeqo_update_create
     when 'Shopify'
       @result = init_store.shopify_update_create
       current_tenant = Apartment::Tenant.current

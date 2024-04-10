@@ -168,6 +168,39 @@ module Groovepacker
         @result
       end
 
+      def veeqo_update_create
+        params = @params
+        @veeqo = VeeqoCredential.where(store_id: @store.id)
+        if @veeqo.nil? || @veeqo.empty?
+          @veeqo = VeeqoCredential.new
+          new_record = true
+        else
+          @veeqo = @veeqo.first
+        end
+        @veeqo.api_key = params[:api_key]
+        @veeqo.shipped_status = params[:shipped_status].to_boolean
+        @veeqo.awaiting_fulfillment_status = params[:awaiting_fulfillment_status].to_boolean
+        @veeqo.awaiting_amazon_fulfillment_status = params[:awaiting_amazon_fulfillment_status].to_boolean
+        @veeqo.import_shipped_having_tracking = params[:import_shipped_having_tracking].to_boolean
+        @veeqo.gen_barcode_from_sku = params[:gen_barcode_from_sku].to_boolean
+        @veeqo.allow_duplicate_order = params[:allow_duplicate_order].to_boolean
+        @veeqo.shall_import_internal_notes = params[:shall_import_internal_notes].to_boolean
+        @veeqo.shall_import_customer_notes = params[:shall_import_customer_notes].to_boolean
+        @veeqo.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'
+        @store.veeqo_credential = @veeqo
+        begin
+          @store.save!
+          @veeqo.save unless new_record
+        rescue ActiveRecord::RecordInvalid => e
+          @result['status'] = false
+          @result['messages'] = [@store.errors.full_messages, @store.veeqo_credential.errors.full_messages]
+        rescue ActiveRecord::StatementInvalid => e
+          @result['status'] = false
+          @result['messages'] = [e.message]
+        end
+        @result
+      end
+
       def shipping_easy_update_create
         params = @params
         @shippingeasy = @store.shipping_easy_credential || @store.build_shipping_easy_credential

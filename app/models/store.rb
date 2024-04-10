@@ -19,6 +19,7 @@ class Store < ActiveRecord::Base
   has_one :shipping_easy_credential
   has_one :teapplix_credential
   has_one :shippo_credential
+  has_one :veeqo_credential
 
   belongs_to :inventory_warehouse
 
@@ -104,6 +105,13 @@ class Store < ActiveRecord::Base
       if !@credentials.nil? && !@credentials.empty?
         @result['shipstation_rest_credentials'] = @credentials.first
         @result['shipstation_rest_credentials'] = @result['shipstation_rest_credentials'].attributes.merge('gp_ready_tag_name' => @credentials.first.gp_ready_tag_name, 'gp_imported_tag_name' => @credentials.first.gp_imported_tag_name, 'gp_scanned_tag_name' => @credentials.first.gp_scanned_tag_name)
+        @result['status'] = true
+      end
+    end
+    if store_type == 'Veeqo'
+      @credentials = VeeqoCredential.where(store_id: id)
+      if @credentials.present?
+        @result['veeqo_credentials'] = @credentials.first
         @result['status'] = true
       end
     end
@@ -322,6 +330,8 @@ class Store < ActiveRecord::Base
              shipstation_rest_credential
            when 'Shippo'
               shippo_credential
+          when 'Veeqo'
+             veeqo_credential
            end
   end
 end

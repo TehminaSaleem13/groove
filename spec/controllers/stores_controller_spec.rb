@@ -11,8 +11,8 @@ RSpec.describe StoresController, type: :controller do
     user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true, add_edit_order_items: true)
     @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)
     access_restriction = FactoryBot.create(:access_restriction)
-    inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
-    @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: inv_wh, status: true)
+    @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
+    @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: @inv_wh, status: true)
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: @store.id)
   end
 
@@ -300,6 +300,24 @@ RSpec.describe StoresController, type: :controller do
     end
   end
 
+  describe 'Veeqo Store' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      @veeqo_store = create(:store, name: 'Veeqo test', status: true, store_type: 'Veeqo', inventory_warehouse: @inv_wh)
+      create(:veeqo_credential, store_id: @veeqo_store.id)
+    end
+
+    it 'Update Veeqo Store' do
+      post :create_update_store, params: { id: @veeqo_store.id, store_type: @veeqo_store.store_type, awaiting_fulfillment_status: false }
+      expect(response.status).to eq(200)
+    end
+  end
+
   describe 'Shopify Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 
@@ -487,14 +505,6 @@ RSpec.describe StoresController, type: :controller do
       expect(response.status).to eq(200)
     end
 
-    it 'Show Store' do
-      request.accept = 'application/json'
-      shippo_store = Store.where(store_type: 'Shippo').last
-
-      get :show, params: { id: shippo_store.id }
-      expect(response.status).to eq(200)
-    end
-
     it 'Shippo Store Settings for Failed Status' do
       request.accept = 'application/json'
       post :create_update_store, params: { store_type: 'Shippo', status: true, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08', generate_barcode_option: 'do_not_generate' }
@@ -510,15 +520,32 @@ RSpec.describe StoresController, type: :controller do
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
-      shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last, on_demand_import: true)
-      shopify_store_credentials = ShopifyCredential.create(store_id: shopify_store.id, shop_name: 'test_shop')
+      shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: @inv_wh, on_demand_import: true)
+      create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
+      shippo_store = create(:store, name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: @inv_wh, on_demand_import: true)
+      create(:shippo_credential, store_id: shippo_store.id, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08')
+      veeqo_store = create(:store, name: 'Veeqo test', status: true, store_type: 'Veeqo', inventory_warehouse: @inv_wh)
+      create(:veeqo_credential, store_id: veeqo_store.id)
     end
 
     it 'Show Shopify Store' do
-      request.accept = 'application/json'
       shopify_store = Store.where(store_type: 'Shopify').last
 
       get :show, params: { id: shopify_store.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Show Shippo Store' do
+      shippo_store = Store.where(store_type: 'Shippo').last
+
+      get :show, params: { id: shippo_store.id }
+      expect(response.status).to eq(200)
+    end
+
+    it 'Show Veeqo Store' do
+      veeqo_store = Store.where(store_type: 'Veeqo').last
+
+      get :show, params: { id: veeqo_store.id }
       expect(response.status).to eq(200)
     end
   end
