@@ -75,7 +75,7 @@ module OrderConcern
   def get_counts(orders, statuses)
     count = {}
     all = 0
-    orders = orders.constantize if orders = 'Order'
+    orders = orders.constantize if orders == 'Order'
     counts = orders.select('orders.status,count(*) as count').where(status: statuses).group(:status)
     counts.each do |single|
       count[single.status] = single.count

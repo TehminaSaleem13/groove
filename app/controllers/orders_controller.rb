@@ -318,10 +318,17 @@ class OrdersController < ApplicationController
   def order_items_export
     @result['filename'] = ''
     selected_orders = list_selected_orders(true)
+    tenant_name = Apartment::Tenant.current
     if selected_orders.blank?
       set_status_and_message(false, 'No orders selected', ['push'])
     else
-      @result = gp_orders_export.order_items_export(selected_orders)
+      if params['select_all']
+        gp_orders_export_obj = Groovepacker::Orders::Export.new
+        gp_orders_export_obj.delay(queue: "bulk_order_items_export_#{tenant_name}", priority: 95).order_items_export(tenant_name, selected_orders.ids, current_user.username)
+        @result['status'] = true
+      else
+        @result = gp_orders_export.order_items_export(tenant_name, selected_orders)
+      end
     end
     render json: @result
   end

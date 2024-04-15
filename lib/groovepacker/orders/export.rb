@@ -3,7 +3,8 @@
 module Groovepacker
   module Orders
     class Export < Groovepacker::Orders::Base
-      def order_items_export(selected_orders)
+      def order_items_export(tenant_name, selected_orders, username = nil)
+        Apartment::Tenant.switch!(tenant_name)
         @general_settings = GeneralSetting.all.first
         @current_workflow = Tenant.find_by_name(Apartment::Tenant.current).try(:scan_pack_workflow)
         if @general_settings.export_items == 'disabled'
@@ -11,7 +12,9 @@ module Groovepacker
           return @result
         end
 
-        @selected_orders = selected_orders
+        @request = selected_orders.class == Array ? true : false
+        @username = username
+        @selected_orders = @request ? search_orders_by_ids(selected_orders) : selected_orders
         @items_list = {}
         @increment = 0
         @filename = get_filename
@@ -23,6 +26,10 @@ module Groovepacker
       end
 
       private
+
+      def search_orders_by_ids(ids)
+        Order.where('id IN (?)', ids)
+      end
 
       def add_order_items_in_items_list
         @selected_orders.each do |order|
@@ -201,7 +208,18 @@ module Groovepacker
         #   new_row << "\n"
         #   csv << new_row
         # end
-        @result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
+        if @request
+          generate_url = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
+          g = GenerateBarcode.new(url: generate_url, status: 'completed', print_type: 'bulk_order_items')
+          g.user_id = begin
+                        User.where(username: @username).first.id
+                      rescue StandardError
+                        nil
+                      end
+          g.save
+        else
+          @result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
+        end
       end
     end
   end
