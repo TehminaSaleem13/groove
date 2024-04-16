@@ -48,17 +48,14 @@ class ScanPackController < ApplicationController
     # on_demand_logger.info(log)
     # on_demand_logger.info('---------------------------------------------')
     if(@result.present? && !@result['status'])
-      scan_status = 'scanning_failed'
+      if params[:data]&.first && params[:data].first[:id]
+        options = { order_id: params[:data].first[:id], current_user: current_user.name, app_url: params[:app_url] }
+        service = Groovepacker::SlackNotifications::OrderScanFailure.new(Apartment::Tenant.current, options)
+        service.delay(run_at: 15.seconds.from_now, priority: 95).call
+      end
       render json: { response: params[:data]&.first, status: :internal_server_error }
     else
-      scan_status = 'scanning_succeeded'
       render json: { response: params[:data]&.first, status: 'OK', timestamp: current_timestamp }
-    end
-
-    if params[:data]&.first && params[:data].first[:id]
-      options = { order_id: params[:data].first[:id], current_user: current_user.name, app_url: params[:app_url], scan_status: scan_status }
-      service = Groovepacker::SlackNotifications::OrderScanFailure.new(Apartment::Tenant.current, options)
-      service.delay(run_at: 15.seconds.from_now, priority: 95).call
     end
   end
 
