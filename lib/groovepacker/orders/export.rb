@@ -3,7 +3,7 @@
 module Groovepacker
   module Orders
     class Export < Groovepacker::Orders::Base
-      def order_items_export(tenant_name, selected_orders, username = nil)
+      def order_items_export(tenant_name, selected_orders, user_id = nil)
         Apartment::Tenant.switch!(tenant_name)
         @general_settings = GeneralSetting.all.first
         @current_workflow = Tenant.find_by_name(Apartment::Tenant.current).try(:scan_pack_workflow)
@@ -12,9 +12,9 @@ module Groovepacker
           return @result
         end
 
-        @request = selected_orders.class == Array ? true : false
-        @username = username
-        @selected_orders = @request ? search_orders_by_ids(selected_orders) : selected_orders
+        @request = user_id.present? ? true : false
+        @user_id = user_id
+        @selected_orders = @request ? get_orders(tenant_name) : selected_orders
         @items_list = {}
         @increment = 0
         @filename = get_filename
@@ -22,13 +22,15 @@ module Groovepacker
         add_order_items_in_items_list
         generate_csv_file
 
+        $redis.del("bulk_action_order_items_export_#{tenant_name}_#{user_id}") if @request
         @result
       end
 
       private
 
-      def search_orders_by_ids(ids)
-        Order.where('id IN (?)', ids)
+      def get_orders(tenant_name)
+        orders = $redis.get("bulk_action_order_items_export_#{tenant_name}_#{@user_id}")
+        Marshal.load(orders)
       end
 
       def add_order_items_in_items_list
@@ -212,7 +214,7 @@ module Groovepacker
           generate_url = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
           g = GenerateBarcode.new(url: generate_url, status: 'completed', print_type: 'bulk_order_items')
           g.user_id = begin
-                        User.where(username: @username).first.id
+                        @user_id
                       rescue StandardError
                         nil
                       end

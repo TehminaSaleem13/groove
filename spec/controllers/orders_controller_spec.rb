@@ -898,7 +898,7 @@ RSpec.describe OrdersController, type: :controller do
       @generalsetting
       order = FactoryBot.create :order, store_id: @store.id
       
-      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'true'}
+      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
@@ -918,7 +918,7 @@ RSpec.describe OrdersController, type: :controller do
       OrderItemKitProduct.create(order_item_id: order_item.id, product_kit_skus_id: productkitsku.id, scanned_status: "unscanned", scanned_qty: 0)
 
       @generalsetting.update_column(:export_items, 'standard_order_export')
-      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'true'} 
+      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false'} 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
@@ -938,14 +938,14 @@ RSpec.describe OrdersController, type: :controller do
       OrderItemKitProduct.create(order_item_id: order_item.id, product_kit_skus_id: productkitsku.id, scanned_status: "unscanned", scanned_qty: 0)
 
       @generalsetting.update_column(:export_items, 'standard_order_export')
-      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: true, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'true'} 
+      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: true, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false'} 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
     end
 
     it 'Order is not selected' do
-      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: ''}], product_search_toggle: 'true'}
+      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: ''}], product_search_toggle: 'false'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
