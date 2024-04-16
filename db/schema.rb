@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240328132358) do
+ActiveRecord::Schema.define(version: 20240403092435) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1537,6 +1537,23 @@ ActiveRecord::Schema.define(version: 20240328132358) do
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
+  end
+
+  create_table "veeqo_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.string "api_key"
+    t.integer "store_id"
+    t.datetime "last_imported_at"
+    t.boolean "shipped_status", default: false
+    t.boolean "awaiting_amazon_fulfillment_status", default: false
+    t.boolean "awaiting_fulfillment_status", default: false
+    t.boolean "import_shipped_having_tracking", default: false
+    t.boolean "gen_barcode_from_sku", default: false
+    t.boolean "allow_duplicate_order", default: false
+    t.boolean "shall_import_internal_notes", default: false
+    t.boolean "shall_import_customer_notes", default: false
+    t.integer "order_import_range_days", default: 30
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
   end
 
   create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

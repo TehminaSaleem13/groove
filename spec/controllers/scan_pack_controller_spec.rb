@@ -811,7 +811,7 @@ RSpec.describe ScanPackController, type: :controller do
       expect(JSON.parse(response.body)['status']).to eq('OK')
 
       post :scan_pack_v2, params: {data: [{ input: order.tracking_num, state: nil, event: "serial_scan", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app", scan_pack: {data: [{id: order.id, input: order.tracking_num, state: nil, event: "verify", updated_at: Time.current, increment_id: order.increment_id, on_ex: 'on GPX'}], app: "app"}}
-      expect(response.status).to eq(500)
+      expect(response.status).to eq(200)
 
       ScanPackSetting.last.update(post_scanning_option_second: 'PackingSlip')
       order.update(status: 'awaiting')

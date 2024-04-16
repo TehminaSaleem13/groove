@@ -5,7 +5,7 @@ module Groovepacker
     class SendMessage
       attr_reader :webhook_url, :message_body, :request_ip
 
-      def initialize(tenant, options = {})
+      def initialize(options = {})
         @webhook_url = options[:webhook_url]
         @message_body = options[:message_body]
         @request_ip = options[:request_ip]

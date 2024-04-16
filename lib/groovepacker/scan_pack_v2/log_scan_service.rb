@@ -22,7 +22,7 @@ module Groovepacker
             @result = scan_barcode_obj.run
           elsif scn_params[:event] == 'click_scan'
             scn_params = attach_temporary_barcode(scn_params)
-            res = product_scan_v2(
+            @result = product_scan_v2(
               scn_params[:input], 'scanpack.rfp.default', scn_params[:id], scn_params[:box_id], scn_params[:on_ex],
               scn_params[:order_item_id],clicked: true, current_user: current_user, session: session
             )
