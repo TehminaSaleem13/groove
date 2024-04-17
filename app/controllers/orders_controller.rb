@@ -78,8 +78,9 @@ class OrdersController < ApplicationController
 
   def sorted_and_filtered_data
     @result ||= {}
-    @orders, filter_length = gp_orders_filter.filter_orders
-    @result['orders_count'] = get_orders_count
+    @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
+    @orders, filter_length = gp_orders_filter.filter_orders(@searched_orders)
+    @result['orders_count'] = params[:search].present? ? get_filter_orders_count(@searched_orders["orders"]) : get_orders_count
     @result['orders_count'].merge!('filtered_count' => filter_length)
     @result['orders'] = make_orders_list(@orders)
 

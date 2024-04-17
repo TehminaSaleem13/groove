@@ -3,7 +3,7 @@
 module Groovepacker
   module Orders
     class OrdersSearch < Groovepacker::Orders::Base
-      def do_search(results_only = true)
+      def do_search(results_only = true, without_limit = false)
         sort_key = get('sort_key', 'updated_at')
         sort_order = get('sort_order', 'DESC')
         limit = get_limit_or_offset('limit') # Get passed in parameter variables if they are valid.
@@ -14,7 +14,11 @@ module Groovepacker
         exact_search = ActiveRecord::Base.connection.quote(@params[:search])
         base_query = get_base_query(search, exact_search, sort_key, sort_order)
         query_add = get_query_limit_offset(limit, offset)
-        result_rows = Order.find_by_sql(base_query + query_add)
+        result_rows = if without_limit
+                        Order.find_by_sql(base_query)
+                      else
+                        Order.find_by_sql(base_query + query_add)
+                      end
         ActiveRecord::Associations::Preloader.new.preload(result_rows, %i[order_items store order_tags])
         get_search_result(results_only, result_rows, base_query)
       end

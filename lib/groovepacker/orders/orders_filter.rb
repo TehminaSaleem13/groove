@@ -20,14 +20,18 @@ module Groovepacker
         'endsWith' => "LIKE"
       }.freeze
       
-      def filter_orders
+      def filter_orders(searched_orders)
         filters = JSON.parse(@params[:filters])
         limit = get_limit_or_offset('limit')
         offset = get_limit_or_offset('offset')
 
         filtered_filters = filters.reject { |filter| filter['name'] == 'Status' }
         filters = @params[:filter].to_s.split(",").map(&:downcase) if filters[3]["value"]
-        final_order = filtered_order(filtered_filters, filters).to_sql
+        search_orders_ids = searched_orders["orders"].pluck(:id) if searched_orders.present?
+        search_orders_ids = search_orders_ids.join(', ') if search_orders_ids.present?
+        search_query = filters.include?("all") && filtered_filters.pluck("value").all?(&:blank?) ? " WHERE id IN (#{search_orders_ids})" : " AND id IN (#{search_orders_ids})"
+        search_query = "" if search_orders_ids.blank?
+        final_order = (filtered_order(filtered_filters, filters).to_sql + search_query)
         filtered_count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM (#{final_order}) AS subquery").first[0]
         final_order = Order.find_by_sql(final_order + get_query_limit_offset(limit, offset))
 

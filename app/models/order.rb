@@ -61,11 +61,11 @@ class Order < ActiveRecord::Base
   }
   scope :filter_partially_scanned, ->(statuses) {
     includes(:order_items)
-    .where("EXISTS (SELECT 1 FROM order_items WHERE order_items.order_id = orders.id AND order_items.scanned_qty = 0)")
-    .where(status: "awaiting") if statuses.include?("partiallyscanned")
+    .where("EXISTS (SELECT 1 FROM order_items WHERE order_items.order_id = orders.id AND order_items.scanned_qty > 0)")
+    .where(status: "awaiting") if statuses.include?("partiallyscanned") && !statuses.include?("awaiting")
   }
-  scope :filter_all_status, ->(filters) { 
-    filter_partially_scanned(filters).merge(filtered_by_status(filters))  
+  scope :filter_all_status, ->(filters) {
+    filter_partially_scanned(filters).merge(Order.filtered_by_status(filters))  
   }
   scope :filter_by_qty, ->(operator, value) {
     includes(:order_items)

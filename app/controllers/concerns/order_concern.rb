@@ -89,6 +89,15 @@ module OrderConcern
     get_counts('Order', statuses)
   end
 
+  def get_filter_orders_count(orders)
+    orders = Order.where(id: orders.pluck(:id))
+    statuses = %w[scanned cancelled onhold awaiting serviceissue]
+    count = get_counts(orders, statuses)
+    filters = params[:filter].to_s.split(",").map(&:downcase)
+    count[:partially_scanned] = orders.partially_scanned.count
+    count
+  end
+
   def get__filtered_orders_count
     count = {}
     all = 0
