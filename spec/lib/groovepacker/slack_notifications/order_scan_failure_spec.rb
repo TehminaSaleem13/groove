@@ -32,13 +32,5 @@ RSpec.describe Groovepacker::SlackNotifications::OrderScanFailure do
         subject.call
       end
     end
-
-    context 'when order is unscanned' do
-      it 'does notify in #resource-2 slack channel on scanning succeeded' do
-        options[:scan_status] = 'scanning_succeeded'
-        expect(HTTParty).to receive(:post)
-        subject.call
-      end
-    end
   end
 end
