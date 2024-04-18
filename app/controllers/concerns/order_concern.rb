@@ -283,6 +283,15 @@ module OrderConcern
     generate_barcode.save
   end
 
+  def generate_order_items_export_report
+    tenant_name = Apartment::Tenant.current
+    generate_barcode = GenerateBarcode.generate_barcode_for(@selected_orders, current_user, 'bulk_order_items')
+    gp_orders_export_obj = Groovepacker::Orders::Export.new
+    delayed_job = gp_orders_export_obj.delay(queue: "bulk_order_items_export_#{tenant_name}", priority: 95).order_items_export(tenant_name, nil, generate_barcode.id)
+    generate_barcode.delayed_job_id = delayed_job.id
+    generate_barcode.save
+  end
+
   def add_a_nobody_user
     # add a user with name of nobody to display in the list
     dummy_user = User.new

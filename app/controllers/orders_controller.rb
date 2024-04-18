@@ -318,19 +318,17 @@ class OrdersController < ApplicationController
   # The method is called when Export Items link is clicked from Webclient.
   def order_items_export
     @result['filename'] = ''
-    selected_orders = list_selected_orders(true)
+    @selected_orders = list_selected_orders(true)
     tenant_name = Apartment::Tenant.current
-    if selected_orders.blank?
+
+    if @selected_orders.blank?
       set_status_and_message(false, 'No orders selected', ['push'])
+    elsif params['select_all']
+      $redis.set("bulk_action_order_items_export_#{tenant_name}_#{current_user.id}", Marshal.dump(@selected_orders))
+      generate_order_items_export_report
+      @result['status'] = true
     else
-      if params['select_all']
-        $redis.set("bulk_action_order_items_export_#{tenant_name}_#{current_user.id}", Marshal.dump(selected_orders))
-        gp_orders_export_obj = Groovepacker::Orders::Export.new
-        gp_orders_export_obj.delay(queue: "bulk_order_items_export_#{tenant_name}", priority: 95).order_items_export(tenant_name, nil, current_user.id)
-        @result['status'] = true
-      else
-        @result = gp_orders_export.order_items_export(tenant_name, selected_orders)
-      end
+      @result = gp_orders_export.order_items_export(tenant_name, @selected_orders)
     end
     render json: @result
   end

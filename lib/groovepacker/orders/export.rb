@@ -3,8 +3,9 @@
 module Groovepacker
   module Orders
     class Export < Groovepacker::Orders::Base
-      def order_items_export(tenant_name, selected_orders, user_id = nil)
+      def order_items_export(tenant_name, selected_orders, gen_barcode_id = nil)
         Apartment::Tenant.switch!(tenant_name)
+        @generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id) if gen_barcode_id.present?
         @general_settings = GeneralSetting.all.first
         @current_workflow = Tenant.find_by_name(Apartment::Tenant.current).try(:scan_pack_workflow)
         if @general_settings.export_items == 'disabled'
@@ -12,37 +13,63 @@ module Groovepacker
           return @result
         end
 
-        @request = user_id.present? ? true : false
-        @user_id = user_id
+        @request = gen_barcode_id.present? ? true : false
         @selected_orders = @request ? get_orders(tenant_name) : selected_orders
         @items_list = {}
         @increment = 0
         @filename = get_filename
 
-        add_order_items_in_items_list
+        @request ? add_order_items_in_items_list_with_delay_job : add_order_items_in_items_list
         generate_csv_file
 
-        $redis.del("bulk_action_order_items_export_#{tenant_name}_#{user_id}") if @request
+        $redis.del("bulk_action_order_items_export_#{tenant_name}_#{@generate_barcode.user_id}") if @request
         @result
       end
 
       private
 
       def get_orders(tenant_name)
-        orders = $redis.get("bulk_action_order_items_export_#{tenant_name}_#{@user_id}")
+        orders = $redis.get("bulk_action_order_items_export_#{tenant_name}_#{@generate_barcode.user_id}")
         Marshal.load(orders)
       end
 
-      def add_order_items_in_items_list
-        @selected_orders.each do |order|
-          @inv_warehouse_id = InventoryWarehouse.where(is_default: 1).first.id
-          unless order.store.nil? || order.store.inventory_warehouse.nil?
-            @inv_warehouse_id = order.store.inventory_warehouse_id
-          end
+      def add_order_items_in_items_list_with_delay_job
+        unless @generate_barcode.nil?
+          @generate_barcode.status = 'in_progress'
+          @generate_barcode.current_order_position = 0
+          @generate_barcode.total_orders = @selected_orders.length
+          @generate_barcode.next_order_increment_id = @selected_orders.first[:increment_id] unless @selected_orders.first.nil?
+          @generate_barcode.save
 
-          order.order_items.each do |single_item|
-            add_single_item_in_items_list(order, single_item) unless single_item.product.nil?
+          @selected_orders.each_with_index do |order, index|
+            @generate_barcode.reload
+            if @generate_barcode.cancel
+              @generate_barcode.status = 'cancelled'
+              @generate_barcode.save
+              return true
+            end
+            @generate_barcode.current_increment_id = order.increment_id
+            @generate_barcode.next_order_increment_id = @selected_orders[(index.to_i + 1)][:increment_id] unless index == (@selected_orders.length - 1)
+            @generate_barcode.current_order_position = (@generate_barcode.current_order_position.to_i + 1)
+            @generate_barcode.save
+
+            process_order_items(order)
           end
+        end
+      end
+
+      def add_order_items_in_items_list
+        @selected_orders.each { |order| process_order_items(order) }
+      end
+
+      def process_order_items(order)
+        @inv_warehouse_id = InventoryWarehouse.where(is_default: 1).first.id
+        unless order.store.nil? || order.store.inventory_warehouse.nil?
+          @inv_warehouse_id = order.store.inventory_warehouse_id
+        end
+
+        order.order_items.each do |single_item|
+          add_single_item_in_items_list(order, single_item) unless single_item.product.nil?
         end
       end
 
@@ -210,17 +237,15 @@ module Groovepacker
         #   new_row << "\n"
         #   csv << new_row
         # end
+
+        generate_url = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
         if @request
-          generate_url = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
-          g = GenerateBarcode.new(url: generate_url, status: 'completed', print_type: 'bulk_order_items')
-          g.user_id = begin
-                        @user_id
-                      rescue StandardError
-                        nil
-                      end
-          g.save
+          @generate_barcode.print_type = 'bulk_order_items'
+          @generate_barcode.url = generate_url
+          @generate_barcode.status = 'completed'
+          @generate_barcode.save
         else
-          @result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, @filename, csv).url.gsub('http:', 'https:')
+          @result['filename'] = generate_url
         end
       end
     end
