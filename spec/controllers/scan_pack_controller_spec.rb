@@ -978,6 +978,59 @@ RSpec.describe ScanPackController, type: :controller do
     end
   end
 
+  describe 'Order scanning Discrepancy' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token, 'HTTP_ON_GPX' => 'on GPX' }
+      @request.headers.merge! header
+
+      @order = Order.create(
+        increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil,
+        customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: 'BIKE',
+        lastname: 'ACTIONGmbH', email: 'east@raceface.com', address_1: 'WEISKIRCHER STR. 102',
+        address_2: nil, city: 'RODGAU', state: nil, postcode: '63110', country: 'GERMANY',
+        method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil,
+        tracking_processed: nil, status: 'scanned', scanned_on: Time.current, tracking_num: nil,
+        company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil,
+        order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil,
+        notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: 'C000209814B(Duplicate2)',
+        note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0,
+        scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current,
+        total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil,
+        custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false,
+        shipment_id: nil, already_scanned: true, import_s3_key: 'orders/2021-07-29-162759275061.xml',
+        last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil,
+        cloned_from_shipment_id: '', ss_label_data: nil, importer_id: nil, clicked_scanned_qty: 17,
+        import_item_id: nil, job_timestamp: nil
+      )
+      @order_data_params = {
+        data: [
+          {tenant: Apartment::Tenant.current, user_id: @user.id, order_id: @order.id, status: 0}
+        ],
+        app_url: "http://localhost:19006"
+      }
+    end
+
+    it 'does not detect the discrepancies for orders' do
+      @order.update(status: 'scanned')
+
+      post :detect_discrepancy, params: @order_data_params
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+    end
+
+    it 'does detect the discrepancies for orders' do
+      allow_any_instance_of(Groovepacker::SlackNotifications::OrderScanDiscrepancy).to receive(:delay).and_return(double.as_null_object)
+      @order.update(status: 'awaiting')
+
+      post :detect_discrepancy, params: @order_data_params
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('OK')
+    end
+  end
+
   describe 'Image Upload' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

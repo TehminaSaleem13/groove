@@ -37,29 +37,35 @@ class ScanPackController < ApplicationController
       end
     end
 
-    # Regular Scan
-    # => <ActionController::Parameters {"_json"=>{{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:50:17.140Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}], "controller"=>"scan_pack", "action"=>"scan_pack_v2", "scan_pack"=>{"_json"=>[{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:50:17.140Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}]}} permitted: false>
-
-    # Click Scan
-    # => <ActionController::Parameters {"_json"=>[{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:51:52.955Z", "state"=>"scanpack.rfp.default", "event"=>"click_scan"}, {"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:53:07.339Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}], "controller"=>"scan_pack", "action"=>"scan_pack_v2", "scan_pack"=>{"_json"=>[{"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:51:52.955Z", "state"=>"scanpack.rfp.default", "event"=>"click_scan"}, {"input"=>"g", "id"=>203801, "time"=>"2020-07-31T13:53:07.339Z", "state"=>"scanpack.rfp.default", "event"=>"regular"}]}} permitted: false>
-
-    # on_demand_logger = Logger.new("#{Rails.root}/log/log_scan_pack.log")
-    # log = { params: params, time: Time.current, params_json: params[:_json] }
-    # on_demand_logger.info(log)
-    # on_demand_logger.info('---------------------------------------------')
     if(@result.present? && !@result['status'])
-      # ----------------------------------------------
-      # Disable the slack notification for now
-      # ----------------------------------------------
-      # if params[:data]&.first && params[:data].first[:id]
-      #   options = { order_id: params[:data].first[:id], current_user: current_user.name, app_url: params[:app_url] }
-      #   service = Groovepacker::SlackNotifications::OrderScanFailure.new(Apartment::Tenant.current, options)
-      #   service.delay(run_at: 15.seconds.from_now, priority: 95).call
-      # end
       render json: { response: params[:data]&.first, status: :internal_server_error }
     else
       render json: { response: params[:data]&.first, status: 'OK', timestamp: current_timestamp }
     end
+  end
+
+  def detect_discrepancy
+    orders_data = params[:data]
+    @orders = Order.where(id: orders_data.pluck(:order_id))
+    @result = []
+
+    @orders.each do |order|
+      local_order = orders_data.find { |s| s[:order_id].to_s == order.id.to_s }
+      order_status_code = order.status == 'scanned' ? 0 : nil
+
+      if local_order && local_order[:status].to_s != order_status_code.to_s
+        options = { order_id: order.id, user_name: current_user.name, app_url: params[:app_url] }
+        service = Groovepacker::SlackNotifications::OrderScanDiscrepancy.new(Apartment::Tenant.current, options)
+        service.delay(run_at: 15.seconds.from_now, priority: 95).call
+        local_order[:discrepancy] = true
+        @result << local_order
+      else
+        local_order[:discrepancy] = false
+        @result << local_order
+      end
+    end
+
+    render json: { result: @result, status: 'OK' }
   end
 
   # takes order_id as input and resets scan status if it is partially scanned.
