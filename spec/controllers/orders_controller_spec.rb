@@ -421,6 +421,67 @@ RSpec.describe OrdersController, type: :controller do
     # end
   end
 
+  describe 'Veeqo Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      @veeqo_store = create(:store, :veeqo, inventory_warehouse: @inv_wh) do |store|
+        store.veeqo_credential.update( store_id: store.id, shall_import_customer_notes: true, shall_import_internal_notes: true, gen_barcode_from_sku: true, shipped_status: true, awaiting_amazon_fulfillment_status: true, awaiting_fulfillment_status: true, import_shipped_having_tracking: true)
+      end
+    end
+
+    it 'Import Orders' do
+      ScanPackSetting.first.update(replace_gp_code: true)
+      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(2)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('completed')
+    end
+
+    it 'Import Orders with Allow duplicate order' do
+      create(:order, increment_id: '1744', store_id: @veeqo_store.id)
+      @veeqo_store.veeqo_credential.update(allow_duplicate_order: true)
+      ScanPackSetting.first.update(replace_gp_code: true)
+      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(2)
+      expect(Product.count).to eq(2)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('completed')
+    end
+
+    it 'Import Orders When All Import Statuses Switch is disabled' do
+      @veeqo_store.veeqo_credential.update(shipped_status: false, awaiting_amazon_fulfillment_status: false, awaiting_fulfillment_status: false)
+      ScanPackSetting.first.update(replace_gp_code: true)
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('failed')
+    end
+  end
+
   describe 'Shipstation API 2 Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

@@ -41,6 +41,8 @@ module Groovepacker
           handler = Groovepacker::Stores::Handlers::BigCommerceHandler.new(store, import_item)
         when 'Teapplix'
           handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(store, import_item)
+        when 'Veeqo'
+          handler = Groovepacker::Stores::Handlers::VeeqoHandler.new(store, import_item)
         end
         handler
       end

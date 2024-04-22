@@ -242,4 +242,12 @@ module ProductsHelper
       Order.find_by_store_id_and_increment_id(@credential.store_id, order['orderNumber'])
     end
   end
+
+  def search_veeqo_order_in_db(order)
+    if @credential.allow_duplicate_order == true
+      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order['number'], order['id'])
+    else
+      Order.find_by_store_id_and_increment_id(@credential.store_id, order['number'])
+    end
+  end
 end

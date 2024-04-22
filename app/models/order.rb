@@ -140,7 +140,7 @@ class Order < ActiveRecord::Base
   end
 
   def check_for_duplicate
-    ((store.store_type == 'ShippingEasy' && store.shipping_easy_credential.allow_duplicate_id) || (store.store_type == 'Shipstation API 2' && store.shipstation_rest_credential.allow_duplicate_order))
+    ((store.store_type == 'ShippingEasy' && store.shipping_easy_credential.allow_duplicate_id) || (store.store_type == 'Shipstation API 2' && store.shipstation_rest_credential.allow_duplicate_order) || (store.store_type == 'Veeqo' && store.veeqo_credential.allow_duplicate_order))
   end
 
   def customer_name

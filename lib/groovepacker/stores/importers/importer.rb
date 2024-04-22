@@ -143,6 +143,33 @@ module Groovepacker
           true
         end
 
+        def veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
+          if order_in_gp.present?
+            order_in_gp_present = true
+            is_scanned = order_in_gp && (order_in_gp.status == 'scanned' || order_in_gp.status == 'cancelled' || order_in_gp.order_items.map(&:scanned_status).include?('partially_scanned') || order_in_gp.order_items.map(&:scanned_status).include?('scanned'))
+            # mark previously imported
+            update_import_count('success_updated') && return if is_scanned || (order_in_gp.last_modified == Time.zone.parse(order['updated_at']))
+            order_in_gp.order_items.destroy_all
+          else
+            order_in_gp = Order.new(increment_id: order['number'], store: @store, store_order_id: order['id'].to_s, importer_id: @worker_id, import_item_id: @import_item.id)
+          end
+          import_order_and_items(order, order_in_gp)
+          # increase successful import with 1 and save
+          order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
+          begin
+              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
+          rescue StandardError
+            nil
+            end
+        rescue StandardError => e
+          begin
+              log_import_error(e)
+          rescue StandardError
+            nil
+            end
+          update_import_count('success_imported')
+        end
+
         protected
 
         attr_accessor :handler

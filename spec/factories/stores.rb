@@ -20,6 +20,13 @@ FactoryBot.define do
       shopline_credential
     end
 
+    trait :veeqo do
+      name { 'Veeqo Test' }
+      status { true }
+      store_type { 'Veeqo' }
+      veeqo_credential
+    end
+
     trait :csv do
       store_type { 'CSV' }
       name { 'GP TEST - CSV' }

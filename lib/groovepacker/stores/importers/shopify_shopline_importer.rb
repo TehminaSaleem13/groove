@@ -79,44 +79,8 @@ module Groovepacker
 
           order_in_gp_present = false
           order_in_gp = Order.find_by_store_order_id(order['id'].to_s)
-          if order_in_gp
-            order_in_gp_present = true
-            is_scanned = order_in_gp && (order_in_gp.status == 'scanned' || order_in_gp.status == 'cancelled' || order_in_gp.order_items.map(&:scanned_status).include?('partially_scanned') || order_in_gp.order_items.map(&:scanned_status).include?('scanned'))
-            # mark previously imported
-            update_import_count('success_updated') && return if is_scanned || (order_in_gp.last_modified == Time.zone.parse(order['updated_at']))
-            order_in_gp.order_items.destroy_all
-          else
-            order_in_gp = Order.new(increment_id: order['name'], store: @store, store_order_id: order['id'].to_s, importer_id: @worker_id, import_item_id: @import_item.id)
-          end
-          import_order_and_items(order, order_in_gp)
-          # #create order
-          # shop_order = Order.new(store: @store)
-          # shop_order = import_order(shop_order, order)
-          # #import items in an order
-          # shop_order = import_order_items(shop_order, order)
-          # #update store
-          # shop_order.set_order_status
-          # #add order activities
-          # if check_for_replace_product
-          #   add_order_activities_for_gp_coupon(shop_order, order)
-          # else
-          #   add_order_activities(shop_order)
-          # end
 
-          # increase successful import with 1 and save
-          order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
-          begin
-              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
-          rescue StandardError
-            nil
-            end
-        rescue StandardError => e
-          begin
-              log_import_error(e)
-          rescue StandardError
-            nil
-            end
-          update_import_count('success_imported')
+          veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
         end
 
         def import_order(shop_order, order)

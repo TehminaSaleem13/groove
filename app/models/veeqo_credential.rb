@@ -12,4 +12,12 @@ class VeeqoCredential < ApplicationRecord
                     username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
     end
   end
+
+  def get_active_statuses
+    statuses = []
+    statuses.push('awaiting_fulfillment') if awaiting_fulfillment_status?
+    statuses.push('shipped') if shipped_status?
+    statuses.push('awaiting_amazon_fulfillment') if awaiting_amazon_fulfillment_status?
+    statuses
+  end
 end
