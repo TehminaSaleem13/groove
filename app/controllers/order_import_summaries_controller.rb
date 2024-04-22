@@ -119,7 +119,7 @@ class OrderImportSummariesController < ApplicationController
                                   rescue StandardError
                                     4.day.ago.strftime('%Y-%m-%d %H:%M:%S')
                                   end
-    elsif store_type.in? %w[Shopify Shopline Shippo]
+    elsif store_type.in? %w[Shopify Shopline Shippo Veeqo]
       result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue 1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
     else
       result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? 1.day.ago.strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')

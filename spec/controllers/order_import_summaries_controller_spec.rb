@@ -22,6 +22,7 @@ RSpec.describe OrderImportSummariesController, type: :controller do
     let(:sp_store) { Store.create(name: 'Shippo', status: true, store_type: 'Shippo', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:shopify_store) { Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
     let(:shopline_store) { Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true) }
+    let(:veeqo_store) { Store.create(name: 'Veeqo', status: true, store_type: 'Veeqo', inventory_warehouse: InventoryWarehouse.last, troubleshooter_option: true) }
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
@@ -37,6 +38,8 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       shopify_store.create_shopify_credential(store_id: shopify_store.id, shop_name: 'gpjune4', access_token: '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', shopify_status: 'open')
 
       shopline_store.create_shopline_credential(store_id: shopline_store.id, shop_name: ENV['SHOPLINE_SAMPLE_SHOP_NAME'], access_token: ENV['SHOPLINE_SAMPLE_SHOP_ACCESS_KEY'], shopline_status: 'open')
+      
+      veeqo_store.create_veeqo_credential(store_id: veeqo_store.id, api_key: 'scbjsdchshvcsjhhhb123124bhjbhj')
     end
 
     it 'gets last modified' do
@@ -56,6 +59,10 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       expect(response.status).to eq(200)
 
       get :get_last_modified, params: { store_id: shopline_store.id }
+      expect(response.status).to eq(200)
+
+      # For Veeqo
+      get :get_last_modified, params: { store_id: veeqo_store.id }
       expect(response.status).to eq(200)
     end
 
