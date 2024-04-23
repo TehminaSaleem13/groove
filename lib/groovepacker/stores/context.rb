@@ -74,6 +74,10 @@ module Groovepacker
         handler.import_single_product(product)
       end
 
+      def import_veeqo_single_product(product)
+        handler.import_single_product(product)
+      end
+
       def import_shippo_single_product(product)
         handler.import_single_product(product)
       end

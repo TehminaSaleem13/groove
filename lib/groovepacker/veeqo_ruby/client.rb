@@ -39,12 +39,20 @@ module Groovepacker
         combined_response
       end
 
-      # def get_single_order(order_number)
-      #   query = { limit: 5 }.as_json
-      #   response = HTTParty.get("https://api.veeqo.com/orders?updated_at_min=#{last_import}&page=#{page}&page_size=100", headers: headers)
-      #   Tenant.save_se_import_data("========Veeqo On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
-      #   response
-      # end
+      def get_single_order(order_number, import_item = nil)
+        combined_response = { 'orders' => [] }
+        response = HTTParty.get("https://api.veeqo.com/orders?query=#{order_number}&page=1&page_size=5", headers: headers)
+        combined_response['orders'] = response
+        combined_response['orders'] = (combined_response['orders'] || []).select { |ordr| ordr['number'] == order_number }
+
+        begin
+          import_item.update_attributes(status: 'completed', current_increment_id: order_number, updated_orders_import: combined_response['orders'].count)
+        rescue StandardError
+          nil
+        end
+        Tenant.save_se_import_data("========Veeqo On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', combined_response)
+        combined_response
+      end
 
       private
 

@@ -58,18 +58,21 @@ module Groovepacker
             end
           end
   
-          # def ondemand_import_single_order(order_number)
-          #   @on_demand_import = true
-          #   init_common_objects
-          #   response = @client.get_single_order(order_number)
-          #   order_response = response['orders']&.any? ? response['orders'].first : nil
-          #   import_single_order(order_response) if order_response
-          #   begin
-          #     @import_item.destroy
-          #   rescue StandardError
-          #     nil
-          #   end
-          # end
+          def ondemand_import_single_order(order_number)
+            @on_demand_import = true
+            init_common_objects
+            response = @client.get_single_order(order_number, @import_item)
+            response['orders'].each do |order|
+              import_single_order(order) if order.present?
+            end
+
+            begin
+              @import_item.destroy
+              destroy_nil_import_items
+            rescue StandardError
+              nil
+            end
+          end
   
           private
 
@@ -157,7 +160,7 @@ module Groovepacker
             order['line_items']&.each do |item|
               order_item = import_order_item(item)
               @import_item.update!(current_order_imported_item: @import_item.current_order_imported_item + 1)
-              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || shop_context.import_shop_single_product(item)
+              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || shop_context.import_veeqo_single_product(item)
               if product.present?
                 order_item.product = product
                 veeqo_order.order_items << order_item
@@ -276,7 +279,7 @@ module Groovepacker
           end
     
           def skip_the_order?(order)
-            # return false if @on_demand_import
+            return false if @on_demand_import
   
             import_shipped_having_tracking && order['status'] == 'shipped' #&& !get_tracking_number(order).present?
           end

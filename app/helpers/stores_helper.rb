@@ -429,6 +429,17 @@ module StoresHelper
                       gp_ready_status: response.last['tagIds'].nil? ? 'No' : (response.last['tagIds'].include?(48_826) ? 'Yes' : 'No'))
 
         result.merge!(return_range_dates_hash(store, response.last['orderNumber'], result_modifyDate, result_createDate))
+      elsif store.store_type == 'Veeqo'
+        credential = store.veeqo_credential
+        client = Groovepacker::VeeqoRuby::Client.new(credential)
+        order_res = client.get_single_order(params[:order_no])
+        response = order_res['orders']
+        return result[:status] = false if response.nil?
+
+        result[:status] = true
+        result_modifyDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['updated_at']).to_time
+        result_createDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['created_at']).to_time
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate, orderStatus: response.last['status'].titleize)
       elsif store.store_type == 'Shippo'
         credential = store.shippo_credential
         client = Groovepacker::ShippoRuby::Client.new(credential)

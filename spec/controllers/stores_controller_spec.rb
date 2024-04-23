@@ -270,7 +270,7 @@ RSpec.describe StoresController, type: :controller do
       @request.headers.merge! header
 
       @ship_store = Store.create(name: 'Shipstation', status: true, store_type: 'Shipstation API 2', inventory_warehouse: InventoryWarehouse.last, split_order: 'shipment_handling_v2', troubleshooter_option: true)
-      ship_store_credentials = ShipstationRestCredential.create(api_key: '14ccf1296c2043cb9076b90953b7ea9b', api_secret: 'e6fc8ff9f7a7411180d2960eb838e2ca', last_imported_at: nil, store_id: @ship_store.id, created_at: '2021-03-26 08:23:45', updated_at: '2021-05-10 07:57:55', shall_import_awaiting_shipment: true, shall_import_shipped: false, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: false, quick_import_last_modified: nil, use_chrome_extention: true, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: false, bulk_import: false, order_import_range_days: 14, quick_import_last_modified_v2: '2021-04-22 22:53:15', import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: '29212', label_shortcuts: {"d"=>"All 2", "s"=>"shipping address", "w"=>"weight", "control+b"=>"UPS® Ground", "shift+9"=>"USPS Priority Mail Intl - Flat Rate Padded Envelope", "1"=>"USPS Priority Mail - Flat Rate Envelope", "2"=>"USPS Priority Mail - Flat Rate Padded Envelope", "3"=>"USPS Priority Mail - Regional Rate Box B", "4"=>"USPS Priority Mail - Medium Flat Rate Box", "5"=>"USPS Priority Mail - Large Flat Rate Box", "6"=>"USPS Priority Mail - Package", "c"=>"confirmation", "alt+1"=>"All 5", "alt+2"=>"All 6", "o"=>"All 7"}, disabled_carriers: [], disabled_rates: {"stamps_com"=>[], nil=>nil}, skip_ss_label_confirmation: false, contracted_carriers: ["fedex", "dhl_express_worldwide"], presets: {"All 5"=>"5x5x5(cm)", "All 6"=>"6x6x6(cm)", "All 2"=>"2x2x2(cm)"})
+      ship_store_credentials = ShipstationRestCredential.create(api_key: '2bb5cee8ea47499c8a16288763c6dc56', api_secret: '4bd2fecf8f3d43e184d46e7505e11a02', last_imported_at: nil, store_id: @ship_store.id, created_at: '2021-03-26 08:23:45', updated_at: '2021-05-10 07:57:55', shall_import_awaiting_shipment: true, shall_import_shipped: false, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: false, shall_import_pending_fulfillment: false, quick_import_last_modified: nil, use_chrome_extention: true, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: false, allow_duplicate_order: false, tag_import_option: false, bulk_import: false, order_import_range_days: 14, quick_import_last_modified_v2: '2021-04-22 22:53:15', import_tracking_info: false, last_location_push: nil, use_api_create_label: true, postcode: '29212', label_shortcuts: {"d"=>"All 2", "s"=>"shipping address", "w"=>"weight", "control+b"=>"UPS® Ground", "shift+9"=>"USPS Priority Mail Intl - Flat Rate Padded Envelope", "1"=>"USPS Priority Mail - Flat Rate Envelope", "2"=>"USPS Priority Mail - Flat Rate Padded Envelope", "3"=>"USPS Priority Mail - Regional Rate Box B", "4"=>"USPS Priority Mail - Medium Flat Rate Box", "5"=>"USPS Priority Mail - Large Flat Rate Box", "6"=>"USPS Priority Mail - Package", "c"=>"confirmation", "alt+1"=>"All 5", "alt+2"=>"All 6", "o"=>"All 7"}, disabled_carriers: [], disabled_rates: {"stamps_com"=>[], nil=>nil}, skip_ss_label_confirmation: false, contracted_carriers: ["fedex", "dhl_express_worldwide"], presets: {"All 5"=>"5x5x5(cm)", "All 6"=>"6x6x6(cm)", "All 2"=>"2x2x2(cm)"})
     end
 
     it 'Verify Shipstation Tags' do
@@ -509,6 +509,31 @@ RSpec.describe StoresController, type: :controller do
       request.accept = 'application/json'
       post :create_update_store, params: { store_type: 'Shippo', status: true, api_key: 'shippo_test_6cf0a208229f428d9e913de45f83f849eb28d7d3', api_version: '2018-02-08', generate_barcode_option: 'do_not_generate' }
       expect(response.status).to eq(200)
+    end
+  end
+
+  describe 'Veeqo Imports' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      @veeqo_store = create(:store, :veeqo, inventory_warehouse: @inv_wh) do |store|
+        store.veeqo_credential.update( store_id: store.id, shall_import_customer_notes: true, shall_import_internal_notes: true, gen_barcode_from_sku: true, import_shipped_having_tracking: true)
+      end
+    end
+
+    it 'On Demand Import' do
+      allow_any_instance_of(Groovepacker::VeeqoRuby::Client).to receive(:get_single_order).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+
+      get :get_order_details, params: { order_no: '1744', store_id: @veeqo_store.id }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(2)
+      expect(res['status']).to be true
     end
   end
 

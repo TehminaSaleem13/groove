@@ -11,5 +11,11 @@ RSpec.describe Groovepacker::VeeqoRuby::Client do
       orders = client.orders(nil, 'awaiting_fulfillment')
       expect(orders.count).to be >=1
     end
+
+    it 'retrieves an order against an ID from veeqo store' do
+      order = client.get_single_order('1744')
+
+      expect(order).not_to be_nil
+    end
   end
 end
