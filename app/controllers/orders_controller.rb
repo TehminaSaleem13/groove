@@ -294,7 +294,9 @@ class OrdersController < ApplicationController
   def generate_all_packing_slip
     @public_ip = `curl http://checkip.amazonaws.com` unless Rails.env.development?
     if params[:select_all].blank?
-      @orders = params['filter'] == 'all' ? Order.all : Order.where(status: params['filter'])
+      filters = params[:filter].to_s.split(",") if params['filter'].include?(",")
+      @orders = Order.filter_all_status(filters) if filters.present?
+      @orders = params['filter'] == 'all' ? Order.all : Order.where(status: params['filter']) if @orders.blank?
       value = (params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status')
       @orders = value ? sort_order(params, @orders) : @orders
     else
@@ -602,7 +604,7 @@ class OrdersController < ApplicationController
         end
       else
         result[:status] = false
-        result[:error] = 'The order does not seems to be associated with Shipstation store'
+        result[:error] = 'The order does not seem to be associated with the Shipstation store.'
       end
     rescue StandardError => e
       result[:status] = false

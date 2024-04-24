@@ -705,6 +705,19 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    it 'Print all Packing Slip' do
+      order = FactoryBot.create :order, store_id: @store.id
+     
+      get :generate_all_packing_slip, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, product_search_toggle: 'false'}
+      expect(response.status).to eq(200)
+
+      get :generate_all_packing_slip, params:{sort: '', order: 'DESC', filter: 'awaiting,scanned', search: '', inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, product_search_toggle: 'false'}
+      expect(response.status).to eq(200)
+
+      get :generate_all_packing_slip, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', inverted: false, limit: 20, select_all: 'false', offset: 0, status: '', reallocate_inventory: false, product_search_toggle: 'false'}
+      expect(response.status).to eq(200)
+    end
+
     it 'Add item to order if product exists' do
       order = FactoryBot.create :order, store_id: @store.id
       product = FactoryBot.create(:product, name: 'PRODUCT1')
