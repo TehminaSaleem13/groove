@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240403092435) do
+ActiveRecord::Schema.define(version: 20240425065653) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -936,7 +936,7 @@ ActiveRecord::Schema.define(version: 20240403092435) do
 
   create_table "products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "store_product_id"
-    t.string "name", collation: "utf8mb4_unicode_ci"
+    t.string "name", limit: 5000, collation: "utf8mb4_unicode_ci"
     t.string "product_type"
     t.bigint "store_id", null: false
     t.datetime "created_at", null: false
@@ -1554,6 +1554,10 @@ ActiveRecord::Schema.define(version: 20240403092435) do
     t.integer "order_import_range_days", default: 30
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.boolean "import_tracking_info", default: true
+    t.boolean "remove_cancelled_orders", default: true
+    t.boolean "import_upc", default: true
+    t.boolean "set_coupons_to_intangible", default: true
   end
 
   create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

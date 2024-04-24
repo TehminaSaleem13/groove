@@ -36,7 +36,7 @@ class StoresController < ApplicationController
     result = { 'status' => true, 'messages' => [], 'has_credentials' => false }
     store = Store.find_by_id(params[:id])
     if store.present?
-      store.csv_beta = params['use_csv_beta']
+      # store.csv_beta = params['use_csv_beta'] #Enforce CSV Beta by Default
       store.save
     end
     # unless store.nil?

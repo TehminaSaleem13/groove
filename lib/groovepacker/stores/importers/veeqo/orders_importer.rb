@@ -96,7 +96,7 @@ module Groovepacker
           end
     
           def import_single_order(order)
-            @import_item.update_attributes(current_increment_id: order['id'], current_order_items: -1, current_order_imported_item: -1)
+            @import_item.update_attributes(current_increment_id: order['number'], current_order_items: -1, current_order_imported_item: -1)
             update_import_count('success_updated') && return if skip_the_order?(order)
   
             order_in_gp_present = false
@@ -225,41 +225,7 @@ module Groovepacker
               @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
             end
           end
-  
-          def update_order_activity_log(veeqo_order)
-            activity_name = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
-            veeqo_order.addactivity(activity_name, @credential.store.name + ' Import')
-            veeqo_order.order_items.each_with_index do |item, index|
-              intangible = false
-              if intangible == true && @credential.set_coupons_to_intangible
-                veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added and set to Intangible.", "#{@credential.store.name} Import")
-              else
-                update_activity_for_single_item(veeqo_order, item)
-              end
-            end
-          end
-  
-          def update_order_activity_log_for_gp_coupon(veeqo_order)
-            activity_name = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
-            veeqo_order.addactivity(activity_name, @credential.store.name + ' Import')
-            veeqo_order.order_items.each_with_index do |item, index|
-              intangible = false
-              if intangible == true
-                veeqo_order.addactivity("Intangible item with SKU #{order['items'][index]['sku']}  and Name #{order['items'][index]['name']} was replaced with GP Coupon.", "#{@credential.store.name} Import")
-              end
-              update_activity_for_single_item(veeqo_order, item) unless intangible
-            end
-          end
-
-          def update_activity_for_single_item(veeqo_order, item)
-            if item.qty.blank? || item.qty < 1
-              veeqo_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{@credential.store.name} Import")
-              item.destroy
-            elsif item.product.try(:primary_sku).present?
-              veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@credential.store.name} Import")
-            end
-          end
-  
+      
           def import_order_and_items(order, order_in_gp)
             # create order
             veeqo_order = order_in_gp
@@ -268,13 +234,21 @@ module Groovepacker
               # import items in an order
               veeqo_order = import_order_items(veeqo_order, order)
               # add order activities
-              if check_for_replace_product
-                update_order_activity_log_for_gp_coupon(veeqo_order)
-              else
-                update_order_activity_log(veeqo_order)
-              end
+              add_order_activities(veeqo_order, order)
               # update store
               veeqo_order.set_order_status
+            end
+          end
+
+          def add_order_activities(veeqo_order, order)
+            activity_name = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
+            veeqo_order.addactivity(activity_name, @credential.store.name + ' Import')
+            veeqo_order.order_items.each_with_index do |item, index|
+              if order['line_items'][index]['sellable']['full_title'] == item.product.name && order['line_items'][index]['sellable']['sku_code'] == item.product.primary_sku
+                next if item.product.nil? || item.product.primary_sku.nil?
+
+                veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import")
+              end
             end
           end
     
