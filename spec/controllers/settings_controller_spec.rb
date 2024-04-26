@@ -13,6 +13,7 @@ RSpec.describe SettingsController, type: :controller do
     access_restriction = FactoryBot.create(:access_restriction)
     inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
     @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: inv_wh, status: true)
+    @order = FactoryBot.create(:order, increment_id: 'ORDER1', status: 'awaiting', store: @store, prime_order_id: '1660160213', store_order_id: '1660160213')
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: @store.id)
   end
 
@@ -122,6 +123,29 @@ RSpec.describe SettingsController, type: :controller do
       @user.role.update(edit_scanning_prefs: true)
       request.accept = 'application/json'
       get :get_setting, params: { "app": true }
+      scan_pack_setting = ScanPackSetting.create
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(true)
+    end
+
+    it 'Serial export report should be working' do
+      tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!(tenant.to_s)
+      @tenant = Tenant.create(name: tenant.to_s)
+      @user.role.update(edit_general_prefs: true)
+      @user.role.update(edit_scanning_prefs: true)
+      @user.role.update(view_packing_ex: true)
+      request.accept = 'application/json'
+      binding.pry
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      OrderSerial.create(
+        order_id: @order.id,
+        product_id: product.id,
+        serial: "ABC123",
+        second_serial: "XYZ456",
+        updated_at: "Fri, 25 Apr 2024 08:03:37",
+      )
+      get :order_serials, params: { "app": true, "start": "Sun Jan 01 2023 16:08:35", "end": "Fri Apr 26 2024 16:08:35" }
       scan_pack_setting = ScanPackSetting.create
       expect(response.status).to eq(200)
       expect(JSON.parse(response.body)['status']).to eq(true)

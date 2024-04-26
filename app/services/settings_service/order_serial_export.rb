@@ -53,7 +53,7 @@ module SettingsService
           scan_order = update_scan_order_and_order_number(
             serial, order_number, scan_order
           )
-          generate_single_record(serial, single_row)
+          generate_single_record(serial, single_row, scan_order)
           csv << single_row.values
         end
       end
@@ -72,12 +72,11 @@ module SettingsService
       [order_number, scan_order]
     end
 
-    def generate_single_record(serial, single_row)
+    def generate_single_record(serial, single_row, scan_order)
       order = serial.order
       product = serial.product
       return if product.nil?
-
-      push_order_data(single_row, order)
+      push_order_data(single_row, order, scan_order)
       push_user_data(single_row, order, product)
       push_product_data(single_row, product, order, serial)
 
@@ -90,23 +89,17 @@ module SettingsService
                                      end
     end
 
-    def push_order_data(single_row, order)
-      single_row[:scan_order],
-      single_row[:order_number],
-      single_row[:order_date],
-      single_row[:scanned_date],
-      single_row[:address1],
-      single_row[:address2],
-      single_row[:city],
-      single_row[:state],
-      single_row[:zip],
-      single_row[:ordered_qty] = order.as_json(
-        only: %i[
-          scan_order increment_id order_placed_time scanned_on
-          address_1 address_2 city state postcode
-        ],
-        methods: :get_items_count
-      ).values
+    def push_order_data(single_row, order, scan_order)
+      single_row[:scan_order] = scan_order
+      single_row[:order_number] = order.increment_id
+      single_row[:order_date] = order.order_placed_time
+      single_row[:scanned_date] = order.scanned_on
+      single_row[:address1] = order.address_1
+      single_row[:address2] = order.address_2
+      single_row[:city] = order.city
+      single_row[:state] = order.state
+      single_row[:zip] = order.postcode
+      single_row[:ordered_qty] = order.get_items_count
     end
 
     def push_user_data(single_row, order, product)
