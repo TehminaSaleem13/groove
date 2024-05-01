@@ -111,19 +111,19 @@ module ProductsService
 
     def generate_base_query
       %(\
-        SELECT  products.id as id, products.name as name, \
-                products.type_scan_enabled as type_scan_enabled, \
-                products.base_sku as base_sku, \
-                products.click_scan_enabled as click_scan_enabled, \
-                products.status as status, products.custom_product_1 as custom_product_1, products.custom_product_2 as custom_product_2, products.custom_product_3 as custom_product_3, products.updated_at as updated_at, \
-                product_skus.sku as sku, product_barcodes.barcode as barcode, \
-                product_cats.category as cat, \
-                product_inventory_warehouses.location_primary, \
-                product_inventory_warehouses.location_secondary, \
-                product_inventory_warehouses.location_tertiary, \
-                product_inventory_warehouses.available_inv as qty, \
-                inventory_warehouses.name as location_name, \
-                stores.name as store_type, products.store_id as store_id \
+        SELECT  MAX(products.id) as id, MAX(products.name) as name, \
+                MAX(products.type_scan_enabled) as type_scan_enabled, \
+                MAX(products.base_sku) as base_sku, \
+                MAX(products.click_scan_enabled) as click_scan_enabled, \
+                MAX(products.status) as status, MAX(products.custom_product_1) as custom_product_1, MAX(products.custom_product_2) as custom_product_2, MAX(products.custom_product_3) as custom_product_3, MAX(products.updated_at) as updated_at, \
+                MAX(product_skus.sku) as sku, MAX(product_barcodes.barcode) as barcode, \
+                MAX(product_cats.category) as cat, \
+                MAX(product_inventory_warehouses.location_primary), \
+                MAX(product_inventory_warehouses.location_secondary), \
+                MAX(product_inventory_warehouses.location_tertiary), \
+                MAX(product_inventory_warehouses.available_inv) as qty, \
+                MAX(inventory_warehouses.name) as location_name, \
+                MAX(stores.name) as store_type, MAX(products.store_id) as store_id \
         FROM products \
           LEFT JOIN product_skus ON (products.id = product_skus.product_id) \
           \

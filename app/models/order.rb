@@ -222,7 +222,7 @@ class Order < ActiveRecord::Base
   end
 
   def trigger_webhooks
-    Webhooks::Orders::OrderScanWebhookService.trigger_scanned_order_webhooks(id) if status_changed? && status == 'scanned'
+    Webhooks::Orders::OrderScanWebhookService.trigger_scanned_order_webhooks(id) if saved_change_to_status? && status == 'scanned'
   end
 
   def contains_zero_qty_order_item?

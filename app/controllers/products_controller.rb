@@ -304,6 +304,18 @@ class ProductsController < ApplicationController
     @barcode_qty = params[:barcode_qty].to_i
     @barcode_qty = 1 if @barcode_qty == 0
     @barcode = params['barcode']
+    printing_setting = PrintingSetting.all.last
+    product_barcode_label_size = printing_setting.present? ? printing_setting.product_barcode_label_size : '3 x 1'
+
+    case product_barcode_label_size
+    when '1.5 x 1'
+      page_width = '1.5in'
+    when '2 x 1'
+      page_width = '2in'
+    when '3 x 1'
+      page_width = '3in'
+    end
+
     respond_to do |format|
       format.html
       format.pdf do
@@ -311,7 +323,7 @@ class ProductsController < ApplicationController
                template: 'products/generate_barcode_slip.html.erb',
                orientation: 'Portrait',
                page_height: '1in',
-               page_width: '3in',
+               page_width: page_width,
                margin: { top: '0', bottom: '0', left: '0', right: '0' }
       end
     end
