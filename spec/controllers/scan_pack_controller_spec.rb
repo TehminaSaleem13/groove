@@ -875,6 +875,12 @@ RSpec.describe ScanPackController, type: :controller do
       expect(JSON.parse(response.body)['status']).to eq('OK')
     end
 
+    it 'Scan order item using worng barcode' do
+      post :scan_pack_v2, params:{ data: [{input: 'worngbarcode', id: @order.id, order_item_id: @order_item.id, time: Time.current, rem_qty: 1, SKU: 'PRODUCT1', Log_count: '', product_name: @product1.name, name: Apartment::Tenant.current, state: "scanpack.rfp.default", event: "regular", updated_at: Time.current, increment_id: @order.increment_id}, { Log_count: '1', SKU: 'PRODUCT1', is_kit: true, qty_rem: 0, actionBarcode: false, event: 'regular', id: @order.id, increment_id: @order.increment_id, input: 'worngbarcode', name: Apartment::Tenant.current, order_item_id: @order_item.id, product_name: @product1.name, rem_qty: 1, time: Time.current, updated_at: Time.current, product_id: @product1.id }] }
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq('internal_server_error')
+    end
+
     it 'Order Scanned Using Click In Multibox Passing Without Box Id' do
       GeneralSetting.last.update(multi_box_shipments: true)
       ScanPackSetting.last.update(scanning_sequence: 'kit_packing_mode', partial: true, remove_enabled: true, enable_click_sku: true, scan_by_shipping_label: true, scan_by_packing_slip: false, scan_by_packing_slip_or_shipping_label: false, scanned: true, post_scanning_option: 'Record')

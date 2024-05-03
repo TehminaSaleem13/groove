@@ -126,9 +126,8 @@ module ScanPack
 
     def update_activity(output)
       return unless @params[:state] == 'scanpack.rfp.default' && output['status'] == false && @order
-
-      latest_activity = @order.order_activities.last
-      latest_activity.update_attribute(:action, "INVALID SCAN - #{latest_activity.action}")
+      
+      @order.addactivity("INVALID SCAN - Product with barcode: #{@params[:input]}", @current_user.username, @params[:on_ex])
     end
 
     def run_import_for_not_found_order
