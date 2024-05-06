@@ -20,6 +20,7 @@ module ScanPack
     end
 
     def scan_barcode
+      do_find_and_update_barcode_from_case_insensitive_input
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
       do_scan_now

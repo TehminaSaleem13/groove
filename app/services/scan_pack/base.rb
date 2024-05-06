@@ -338,5 +338,10 @@ module ScanPack
       end
       'increment_id'
     end
+
+    def do_find_and_update_barcode_from_case_insensitive_input
+      barcode = ProductBarcode.find_by('lower(barcode) = ?', @params[:input].downcase)
+      @params[:input] = barcode.barcode if barcode
+    end  
   end
 end
