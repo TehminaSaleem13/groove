@@ -7,6 +7,8 @@ module Groovepacker
       class Service
         attr_accessor :auth, :endpoint
 
+        DEFAULT_TRIAL_COUNT = 5
+
         def initialize(api_key, api_secret)
           raise ArgumentError unless api_key && api_secret
 
@@ -32,7 +34,7 @@ module Groovepacker
             else
               trial_count += 1
             end
-            break if trial_count >= 5
+            break if trial_count >= DEFAULT_TRIAL_COUNT
           end
           handle_exceptions(response)
           response
@@ -51,16 +53,16 @@ module Groovepacker
 
         def handle_response(response, trial_count)
           successful_response = false
-          if error_status_codes.include?(response.code) && trial_count == 4
+          if response.code == 401 || (error_status_codes.include?(response.code) && trial_count == (DEFAULT_TRIAL_COUNT - 1))
             handle_exceptions(response)
           elsif response.code == 504
-            sleep(5)
+            sleep(5) unless Rails.env.test?
           elsif response.code == 401
             query = @query
             end_point = @endpoint
             current_tenant = Apartment::Tenant.current
             ImportMailer.shipstation_unauthorized(response, query, headers, end_point).deliver if %w[morgan islandwatersports gunmagwarehouse warmyourfloor icracked].include?(current_tenant)
-            sleep(2)
+            sleep(2) unless Rails.env.test?
           else
             successful_response = true
           end
@@ -70,7 +72,7 @@ module Groovepacker
         def handle_request_exception(ex, socket_count)
           if socket_count <= 5
             # send email
-            sleep(5)
+            sleep(5) unless Rails.env.test?
           else
             # send email
             raise Exception, ex.message

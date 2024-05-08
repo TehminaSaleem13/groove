@@ -748,7 +748,7 @@ class StoresController < ApplicationController
       order = Order.find(params[:id])
       ss_label_data = order.ss_label_order_data(skip_trying: false, params: params)
       result[:ss_label_data] = ss_label_data
-    rescue StandardError => e
+    rescue Exception => e
       result[:status] = false
       result[:error] = e
     end
