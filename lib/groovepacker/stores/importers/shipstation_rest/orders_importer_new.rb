@@ -222,6 +222,7 @@ module Groovepacker
             @bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
             emit_data_for_range_or_quickfix
+
             response['orders'].each do |order|
               import_item_fix
               ImportItem.where(store_id: @store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
@@ -456,6 +457,14 @@ module Groovepacker
             Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
             shipstation_order = find_or_init_new_order(order)
             import_order_form_response(shipstation_order, order, shipments_response)
+            if order['tagIds'].present?
+              tags_list  = @client.get_all_tags_list
+              
+              order['tagIds'].each do |tag_id|
+                tag = tags_list.select { |tag| tag["tagId"] == tag_id }
+                shipstation_order.add_tag(tag.first) if tag.present?
+              end
+            end
             # @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
             @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
           rescue StandardError => e

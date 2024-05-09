@@ -253,6 +253,14 @@ module Groovepacker
           tagslist_by_name
         end
 
+        def get_all_tags_list
+          tagslist_by_name = {}
+          response = @service.query('/accounts/listtags', nil, 'get')
+          tags = response.parsed_response
+          
+          tags
+        end
+
         def get_tag_id(tag)
           response = @service.query('/accounts/listtags', nil, 'get')
           tags = response.parsed_response

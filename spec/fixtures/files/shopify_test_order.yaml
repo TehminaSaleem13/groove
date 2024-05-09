@@ -51,7 +51,7 @@ orders:
   source_name: shopify_draft_order
   fulfillment_status: 
   tax_lines: []
-  tags: ''
+  tags: 'test1, test2'
   contact_email: alphatester@yopmail.com
   order_status_url: https://gpmarch20.myshopify.com/34971353147/orders/35d98748ee61c5f136950b5cea0af913/authenticate?key=6117e63b9f6891ec0c6a4ee7e09ad77a
   presentment_currency: USD

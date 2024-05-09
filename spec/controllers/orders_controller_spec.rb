@@ -267,6 +267,8 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
       expect(Product.count).to eq(1)
+      expect(OrderTag.count).to be > (2)
+      expect(OrderTag.pluck(:name)).to include("test1", "test2")
 
       shopify_import_item = ImportItem.find_by_store_id(shopify_store.id)
       expect(shopify_import_item.status).to eq('completed')
@@ -521,6 +523,8 @@ RSpec.describe OrdersController, type: :controller do
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
       allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:remove_gp_tags_from_ss).and_return(true)
       allow_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:should_fetch_shipments?).and_return(true)
+      expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_all_tags_list).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_order_tags.yaml'))))
+
       request.accept = 'application/json'
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -529,6 +533,8 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
       expect(Order.count).to eq(2)
       expect(Product.count).to eq(2)
+      expect(OrderTag.count).to be > (1)
+      expect(OrderTag.pluck(:name)).to include("GP Imported")
 
       ss_import_item = ImportItem.find_by_store_id(ss_store.id)
       expect(ss_import_item.status).to eq('completed')

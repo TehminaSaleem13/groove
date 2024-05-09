@@ -167,7 +167,6 @@ module Groovepacker
       end
 
       def get_filtered_sorted_orders(sort_key, sort_order, limit, offset, filtered_orders)
-        # binding.pry
         # orders = Order.where(id: filtered_orders.pluck(:id))
         orders = filtered_orders.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
         orders = orders.limit(limit).offset(offset) unless @params[:select_all] || @params[:inverted]

@@ -326,17 +326,20 @@ class Order < ActiveRecord::Base
     update_columns(post_scanning_flag: nil, clicked_scanned_qty: 0)
   end
 
-  def addtag(tag_id)
+  def add_tag(imported_tag)
+    tag = OrderTag.find_or_create_by(source_id: imported_tag["tagId"].to_s, name: imported_tag["name"])
+    tag.groovepacker_id = tag.id
+    tag.color = imported_tag["color"] if imported_tag["color"].present?
+    add_order_tag(tag)
+  end
+  
+  def add_tag_from_shopify(imported_tags)
     result = false
-
-    tag = OrderTag.find(tag_id)
-
-    if !tag.nil? && (!order_tags.include? tag)
-      order_tags << tag
-      save
-      result = true
+    imported_tags.split(", ").each do |item|
+      tag = OrderTag.find_or_create_by(name: item, color: '#95BF47')
+      tag.groovepacker_id = tag.id
+      result ||= add_order_tag(tag)
     end
-
     result
   end
 
@@ -539,6 +542,16 @@ class Order < ActiveRecord::Base
   end
 
   private
+
+  def add_order_tag(tag)
+    if tag && !order_tags.include?(tag)
+      order_tags << tag
+      save
+      true
+    else
+      false
+    end
+  end
 
   def perform_after_scanning_tasks
     return unless saved_changes['status'].present? && status == 'scanned'

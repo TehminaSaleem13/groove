@@ -682,13 +682,15 @@ ActiveRecord::Schema.define(version: 20240425065653) do
     t.index ["order_id"], name: "index_order_shippings_on_order_id"
   end
 
-  create_table "order_tags", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
-    t.string "name", null: false
-    t.string "color", null: false
+  create_table "order_tags", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3" do |t|
+    t.string "name", limit: 25, null: false
+    t.string "color", default: "#B8B8B8", null: false
     t.string "mark_place", default: "0"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "predefined", default: false
+    t.string "groovepacker_id"
+    t.string "source_id"
   end
 
   create_table "order_tags_orders", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

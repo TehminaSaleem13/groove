@@ -154,6 +154,8 @@ module Groovepacker
             order_in_gp = Order.new(increment_id: order['number'], store: @store, store_order_id: order['id'].to_s, importer_id: @worker_id, import_item_id: @import_item.id)
           end
           import_order_and_items(order, order_in_gp)
+          order_in_gp.add_tag_from_shopify(order['tags']) if order['tags'].present? && @store.store_type == "Shopify"
+
           # increase successful import with 1 and save
           order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
           begin
