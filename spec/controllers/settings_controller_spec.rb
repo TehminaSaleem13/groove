@@ -136,7 +136,6 @@ RSpec.describe SettingsController, type: :controller do
       @user.role.update(edit_scanning_prefs: true)
       @user.role.update(view_packing_ex: true)
       request.accept = 'application/json'
-      binding.pry
       product = FactoryBot.create(:product, name: 'PRODUCT1')
       OrderSerial.create(
         order_id: @order.id,

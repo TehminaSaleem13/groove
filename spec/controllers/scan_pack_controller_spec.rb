@@ -627,6 +627,58 @@ RSpec.describe ScanPackController, type: :controller do
       expect(order.reload.get_items_count).to eq(6)
     end
 
+    it 'Scan Order should remove remaning qty when enter REMOVE Barcode (Kit)' do
+      product1 = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+
+      product2 = FactoryBot.create(:product)
+      product2.product_skus.create(sku: 'PRODUCT2')
+      product2.product_barcodes.new(barcode: 'PRODUCT1').save(validate: false)
+
+      kit = FactoryBot.create(:product, is_kit: 1, kit_parsing: 'individual')
+      kit.product_skus.create(sku: 'KIT-SKU')
+      kit.product_barcodes.create(barcode: 'KIT-BARCODE')
+      kit.product_kit_skuss.create(option_product_id: product2.id, qty: 5)
+
+      order = FactoryBot.create(:order, increment_id: 'ORDER-1', store: @store)
+      order_item = order.order_items.create(product_id: kit.id, qty: 1)
+
+      request.accept = 'application/json'
+      post :scan_barcode, params: { id: order.id, input: 'PRODUCT1', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order']['next_item']['qty_remaining']).to eq(4)
+
+      get :scan_barcode, params: { id: order.id, input: 'REMOVE', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+      kit_product = order_item.order_item_kit_products.first.product_kit_skus.reload
+      expect(kit_product.qty).to eq(4)   
+     end
+
+     it 'Scan Order using Remove Barcode (KIT)' do
+      product1 = FactoryBot.create(:product)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+
+      product2 = FactoryBot.create(:product)
+      product2.product_skus.create(sku: 'PRODUCT2')
+      product2.product_barcodes.new(barcode: 'PRODUCT1').save(validate: false)
+
+      kit = FactoryBot.create(:product, is_kit: 1, kit_parsing: 'individual')
+      kit.product_skus.create(sku: 'KIT-SKU')
+      kit.product_barcodes.create(barcode: 'KIT-BARCODE')
+      kit.product_kit_skuss.create(option_product_id: product2.id, qty: 5)
+
+      order = FactoryBot.create(:order, increment_id: 'ORDER-1', store: @store)
+      order_item = order.order_items.create(product_id: kit.id, qty: 1)
+
+      get :scan_barcode, params: { id: order.id, input: 'REMOVE', state: 'scanpack.rfp.default' }
+      expect(response.status).to eq(200)
+
+      expect(order.reload.get_items_count).to eq(0)
+    end
+
     it 'Retain Skipped Items' do
       ScanPackSetting.last.update_attributes(remove_skipped: false)
       @store.update_attributes(inventory_warehouse_id: InventoryWarehouse.first.id)

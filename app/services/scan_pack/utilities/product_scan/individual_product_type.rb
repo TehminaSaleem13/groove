@@ -136,9 +136,15 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
                                  nil
                                end
       end
-    order_item_kit_product&.destroy
-    order_item.destroy if order_item.order_item_kit_products.blank?
-    child_item['product_qty_in_kit']
+    kit_product = ProductKitSkus.find_by(id: order_item_kit_product.product_kit_skus_id)
+    if child_item['qty_remaining'] == kit_product['qty']
+      order_item_kit_product&.destroy
+      order_item.destroy if order_item.order_item_kit_products.blank?
+    else
+      kit_product&.qty = child_item['qty_remaining']
+      kit_product.save
+    end
+    child_item['qty_remaining']
   end
 
   def should_remove_kit_item?(clean_input, child_item_skippable)
