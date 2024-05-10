@@ -99,7 +99,7 @@ module Groovepacker
             end
           end
         rescue StandardError => e
-          log = { tenant: tenant_name, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(',') }
+          log = { tenant: tenant_name, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.first(5).join(',') }
           Groovepacker::LogglyLogger.log(tenant_name, 'GPX-order-scan-api-failure', log)
           scan_pack_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
           scan_pack_logger.info(log)
