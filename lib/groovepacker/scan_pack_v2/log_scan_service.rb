@@ -13,8 +13,6 @@ module Groovepacker
         tenant = Tenant.find_by_name(tenant_name)
         @params[:data] = JSON.parse(Net::HTTP.get(URI.parse(params[:data]))).map(&:with_indifferent_access) if params[:delayed_log_process]
         (@params[:data] || []).each do |scn_params|
-          # sleep 0.5
-          Groovepacker::LogglyLogger.log(tenant_name, 'GPX_Scanning_order', scn_params) if tenant&.loggly_gpx_order_scan && scn_params[:input] != 'RESTARTS'
           if scn_params[:event] == 'regular'
             scan_barcode_obj = ScanPack::ScanBarcodeService.new(
               current_user, session, scn_params
@@ -75,7 +73,7 @@ module Groovepacker
             order_item = OrderItem.find_by(id: scn_params[:order_item_id])
             order = order_item.order
             return unless order_item
-            
+
             if order_item.product.is_kit == 0
               if order_item && order_item.scanned_status != 'scanned'
                 order_item.update(scanned_status: 'scanned')
@@ -102,15 +100,14 @@ module Groovepacker
           end
         rescue StandardError => e
           log = { tenant: tenant_name, params: @params, scn_params: scn_params, error: e, time: Time.current.utc, backtrace: e.backtrace.join(',') }
-          Groovepacker::LogglyLogger.log(tenant_name, 'GPX_Scanning_order', log) if tenant&.loggly_gpx_order_scan
-          on_demand_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
-          on_demand_logger.info(log)
+          Groovepacker::LogglyLogger.log(tenant_name, 'GPX-order-scan-api-failure', log)
+          scan_pack_logger = Logger.new("#{Rails.root}/log/scan_pack_v2.log")
+          scan_pack_logger.info(log)
         end
         @result
       end
 
       def add_all_scan_logs(order, order_item, scn_params, current_user, type = nil)
-        
         scan_type = scn_params[:event] == 'bulk_scan' ? 'Bulk Scan' : 'Scan-All Option'
         scan_description = "#{order_item.product.name} scanned through #{scan_type}"
         scan_description += " from #{type}" if type == 'kit'

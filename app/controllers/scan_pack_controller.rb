@@ -33,7 +33,10 @@ class ScanPackController < ApplicationController
         session = session.present? ? session : nil
         @result = log_scn_obj.delay(run_at: 1.seconds.from_now, priority: 95).process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
       else
-        @result = log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, params.except(:scan_pack))
+        scan_pack_params = params.except(:scan_pack)
+        scan_pack_params.merge!(idx: Time.current.to_i)
+        Groovepacker::LogglyLogger.log(tenant.name, 'GPX-order-scan-api', { params: scan_pack_params })
+        @result = log_scn_obj.process_logs(tenant.name, current_user.try(:id), session, scan_pack_params)
       end
     end
 
@@ -52,7 +55,7 @@ class ScanPackController < ApplicationController
     @orders.each do |order|
       local_order = orders_data.find { |s| s[:order_id].to_s == order.id.to_s }
       order_status_code = order.status == 'scanned' ? 0 : nil
-      
+
       if local_order && local_order[:status].to_s != order_status_code.to_s
         options = { order_id: order.id, user_name: current_user.name, app_url: params[:app_url] }
         service = Groovepacker::SlackNotifications::OrderScanDiscrepancy.new(Apartment::Tenant.current, options)
