@@ -30,7 +30,7 @@ class ScanPack::ScanRecordingService < ScanPack::Base
 
   def scan_recording
     @result['data']['next_state'] = 'scanpack.rfp.recording'
-    if @order.status.in?(['awaiting', 'scanned'])
+    if @order.status.in?(['awaiting', 'scanned', 'onhold'])
       # allow tracking id to be saved without special permissions
       if @scanpack_settings_post_scanning_option_second == 'None' || @scanpack_settings_post_scanning_option_second == 'Record'
         check_tracking_number_validation
