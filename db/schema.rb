@@ -689,7 +689,7 @@ ActiveRecord::Schema.define(version: 20240424115059) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "predefined", default: false
-    t.string "groovepacker_id"
+    t.string "groovepacker_tag_origin"
     t.string "source_id"
   end
 

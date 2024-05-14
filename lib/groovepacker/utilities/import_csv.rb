@@ -133,6 +133,7 @@ class ImportCsv
       else
         if store.csv_beta && params[:type] == 'order' && !csv_file
           begin
+            params["order_placed_at"] = Time.now.strftime("%Y-%m-%dT%H:%M:%S.%LZ") if params["order_date_time_format"] == 'Default' && !params["order_placed_at"]
             ElixirApi::Processor::CSV::OrdersToXML.call('tenant' => tenant, 'params' => params)
           rescue Net::ReadTimeout
             nil

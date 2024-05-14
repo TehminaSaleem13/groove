@@ -328,7 +328,7 @@ class Order < ActiveRecord::Base
 
   def add_tag(imported_tag)
     tag = OrderTag.find_or_create_by(source_id: imported_tag["tagId"].to_s, name: imported_tag["name"])
-    tag.groovepacker_id = tag.id
+    tag.groovepacker_tag_origin = "STATION"
     tag.color = imported_tag["color"] if imported_tag["color"].present?
     add_order_tag(tag)
   end
@@ -337,7 +337,7 @@ class Order < ActiveRecord::Base
     result = false
     imported_tags.split(", ").each do |item|
       tag = OrderTag.find_or_create_by(name: item, color: '#95BF47')
-      tag.groovepacker_id = tag.id
+      tag.groovepacker_tag_origin = "SHOPIFY"
       result ||= add_order_tag(tag)
     end
     result
