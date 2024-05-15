@@ -178,9 +178,11 @@ module Groovepacker
           @veeqo = @veeqo.first
         end
         @veeqo.api_key = params[:api_key]
+        @veeqo.product_source_shopify_store_id = params[:product_source_shopify_store_id]
         @veeqo.shipped_status = params[:shipped_status].to_boolean
         @veeqo.awaiting_fulfillment_status = params[:awaiting_fulfillment_status].to_boolean
         @veeqo.awaiting_amazon_fulfillment_status = params[:awaiting_amazon_fulfillment_status].to_boolean
+        @veeqo.use_shopify_as_product_source_switch = params[:use_shopify_as_product_source_switch].to_boolean
         @veeqo.import_shipped_having_tracking = params[:import_shipped_having_tracking].to_boolean
         @veeqo.gen_barcode_from_sku = params[:gen_barcode_from_sku].to_boolean
         @veeqo.allow_duplicate_order = params[:allow_duplicate_order].to_boolean

@@ -48,6 +48,7 @@ module Groovepacker
   
               import_single_order(order) if order.present?
             end
+            send_sku_report_not_found if @result_data.count > 0
             Tenant.save_se_import_data("========Veeqo Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item.as_json)
             if @import_item.status != 'cancelled'
               begin
@@ -65,7 +66,7 @@ module Groovepacker
             response['orders'].each do |order|
               import_single_order(order) if order.present?
             end
-
+            send_sku_report_not_found if @result_data.count > 0
             begin
               @import_item.destroy
               destroy_nil_import_items
@@ -78,6 +79,10 @@ module Groovepacker
 
           def statuses
             @statuses ||= @credential.get_active_statuses
+          end
+
+          def check_shopify_as_a_product_source
+            @credential.use_shopify_as_product_source_switch && @credential.product_source_shopify_store_id.present?
           end
 
           def get_orders_response
@@ -132,7 +137,7 @@ module Groovepacker
             # add order shipping address using separate method
             veeqo_order = add_order_shipping_address(veeqo_order, order)
             # add notes
-            # veeqo_order = import_notes(veeqo_order, order)
+            veeqo_order = import_notes(veeqo_order, order)
             # update shipping_amount and order weight
             # veeqo_order = update_shipping_amount_and_weight(veeqo_order, order)
             veeqo_order.order_total = order['total_price']&.to_f
@@ -141,17 +146,17 @@ module Groovepacker
             veeqo_order
           end
 
-          # def import_notes(veeqo_order, order)
-          #   veeqo_order.notes_internal = order['notes'] if @credential.shall_import_internal_notes
-          #   veeqo_order.customer_comments = order['customer_note'] if @credential.shall_import_customer_notes
-          #   veeqo_order
-          # end
+          def import_notes(veeqo_order, order)
+            veeqo_order.notes_internal = order['employee_notes'].map { |note| note['text'] }.join(', ') if @credential.shall_import_internal_notes && order['employee_notes'].present?
+            veeqo_order.customer_comments = order.dig('customer_note', 'text') if @credential.shall_import_customer_notes && order['customer_note'].present?
+            veeqo_order
+          end
 
           def import_shipped_having_tracking
             @import_shipped_having_tracking ||= @credential.import_shipped_having_tracking
           end
   
-          def import_order_items(veeqo_order, order)
+          def import_veeqo_order_item(veeqo_order, order)
             return if order['line_items'].nil?
 
             @import_item.current_order_items = order['line_items'].length
@@ -160,7 +165,7 @@ module Groovepacker
             order['line_items']&.each do |item|
               order_item = import_order_item(item)
               @import_item.update!(current_order_imported_item: @import_item.current_order_imported_item + 1)
-              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || shop_context.import_veeqo_single_product(item)
+              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || import_order_items(item, order['number'])
               if product.present?
                 order_item.product = product
                 veeqo_order.order_items << order_item
@@ -170,8 +175,58 @@ module Groovepacker
                 on_demand_logger.info(log)
               end
             end
-            veeqo_order.save!
-            veeqo_order
+            
+            if veeqo_order.order_items.present?
+              veeqo_order.save!
+              veeqo_order
+            end
+          end
+
+          def import_order_items(item, order_number)
+            #Check Switch Use Shopify as Product Source
+            if check_shopify_as_a_product_source
+              fetch_product_from_shopify(item['sellable']['sku_code'], item, order_number)
+            else
+              veeqo_context.import_veeqo_single_product(item)
+            end
+          end
+
+          def fetch_product_from_shopify(sku, item, order_number)
+            query = <<~GRAPHQL
+              {
+                products(first: 1, query: "sku:#{sku}") {
+                  nodes {
+                    id
+                    title
+                  }
+                }
+              }
+            GRAPHQL
+
+            product_res = @shopify_client.execute_grahpql_query(query: query)
+            product = product_res.body.dig("data", "products", "nodes")&.first
+
+            if product.present?
+              id = product["id"].split("/").last
+              item["product_id"] = id
+              shopify_context.import_single_product_from_shopify_to_veeqo(item)
+            else
+              handle_not_found_sku(sku, order_number)
+              return
+            end
+          end
+
+          def handle_not_found_sku(product_sku, order_number)
+            pre_order = @result_data.find { |d| d[:order_number] == order_number }
+            if pre_order.present?
+               pre_order[:skus] << product_sku
+            else
+              @result_data << { order_number: order_number, skus: [product_sku] }
+            end
+          end
+
+          def send_sku_report_not_found
+            VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data, @shopify_credential.store).deliver
           end
   
           def import_order_item(line_item)
@@ -211,8 +266,15 @@ module Groovepacker
           #   veeqo_order
           # end
   
-          def shop_context
+          def veeqo_context
             handler = Groovepacker::Stores::Handlers::VeeqoHandler.new(@store)
+
+            Groovepacker::Stores::Context.new(handler)
+          end
+
+          def shopify_context
+            handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@shopify_credential.store)
+
             Groovepacker::Stores::Context.new(handler)
           end
   
@@ -232,7 +294,7 @@ module Groovepacker
             Order.transaction do
               veeqo_order = import_order(veeqo_order, order)
               # import items in an order
-              veeqo_order = import_order_items(veeqo_order, order)
+              veeqo_order = import_veeqo_order_item(veeqo_order, order) || return
               # add order activities
               add_order_activities(veeqo_order, order)
               # update store
@@ -244,9 +306,7 @@ module Groovepacker
             activity_name = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
             veeqo_order.addactivity(activity_name, @credential.store.name + ' Import')
             veeqo_order.order_items.each_with_index do |item, index|
-              if order['line_items'][index]['sellable']['full_title'] == item.product.name && order['line_items'][index]['sellable']['sku_code'] == item.product.primary_sku
-                next if item.product.nil? || item.product.primary_sku.nil?
-
+              if order['line_items'][index]['sellable']['sku_code'].in?(item.product.product_skus.pluck(:sku))
                 veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import")
               end
             end

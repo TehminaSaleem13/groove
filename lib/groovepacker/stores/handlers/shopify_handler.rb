@@ -47,6 +47,12 @@ module Groovepacker
             build_handle
           ).import_single_product(product)
         end
+
+        def import_single_product_for_veeqo(product)
+          Groovepacker::Stores::Importers::ShopProductsImporter.new(
+            build_handle
+          ).import_single_product_for_veeqo(product)
+        end
       end
     end
   end

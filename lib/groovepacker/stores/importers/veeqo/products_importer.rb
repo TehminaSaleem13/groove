@@ -70,23 +70,26 @@ module Groovepacker
             if products.blank?
               # if product is not found by name then create the product
               product = create_new_product_from_order(item, ProductSku.get_temp_sku)
+            else
+              # product exists add temp sku if it does not exist
+              if contains_temp_skus(products)
+                product = get_product_with_temp_skus(products)
+              else
+                product = create_new_product_from_order(item, ProductSku.get_temp_sku)
+              end
             end
             product
           end
   
           def create_new_product_from_order(item, sku)
             # create and import product
-            if check_for_replace_product
-              coupon_product = replace_product(item['sellable']['full_title'], sku)
-              return coupon_product unless coupon_product.nil?
-            end
             product = Product.create(name: item['sellable']['full_title'], store: @store,
                                       store_product_id: item['sellable']['product']['id'])
   
             product.add_product_activity('Product Import', product.store.try(:name).to_s)
             product.product_skus.create(sku: sku)
             # create barcode
-            create_barcode_from_item(product, item)
+            create_barcode_from_item(product, item, sku)
             # get image based on the variant id
             add_image(product, item)
             # update inventory level
@@ -94,7 +97,6 @@ module Groovepacker
             # get weight
             assign_weight(product, item)
             product.reload
-            make_product_intangible(product)
             product.update_product_status
             product
           end
@@ -121,9 +123,9 @@ module Groovepacker
             product.product_images.create(image: image_src)
           end
     
-          def create_barcode_from_item(product, item)
-            if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: item['sellable']['sku_code']).empty? && item['sellable']['sku_code'].present?
-              product.product_barcodes.create(barcode: item['sellable']['sku_code'])
+          def create_barcode_from_item(product, item, sku)
+            if @credential.gen_barcode_from_sku && ProductBarcode.where(barcode: sku).empty?
+              product.product_barcodes.create(barcode: sku)
             elsif @credential.import_upc && item['sellable']['upc_code'].present? && item['sellable']['upc_code'] != '0'
               product.product_barcodes.create(barcode: item['sellable']['upc_code'])
             end

@@ -110,6 +110,11 @@ module Groovepacker
           else
             @client = handler[:store_handle]
           end
+          if @store.store_type == 'Veeqo'
+            @result_data = []
+            @shopify_credential = ShopifyCredential.find_by(store_id: @credential.product_source_shopify_store_id)
+            @shopify_client = Groovepacker::ShopifyRuby::Client.new(@shopify_credential)
+          end
           @import_item = handler[:import_item]
           @result = build_result
           @worker_id = 'worker_' + SecureRandom.hex

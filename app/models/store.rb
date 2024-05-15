@@ -112,6 +112,7 @@ class Store < ActiveRecord::Base
       @credentials = VeeqoCredential.where(store_id: id)
       if @credentials.present?
         @result['veeqo_credentials'] = @credentials.first
+        @result['shopify_active_stores'] = Store.where(store_type: 'Shopify')
         @result['status'] = true
       end
     end

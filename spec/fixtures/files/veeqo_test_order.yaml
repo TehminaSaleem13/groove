@@ -44,7 +44,18 @@ orders:
   mergable_checksum: "928d9858eae8cd7d9dfaf53d9d7dec69579ff1fa654bd88108cbf442fb07f5af"
   merged_to_id: ""
   merged_order: "false"
-  employee_notes: 
+  employee_notes:
+  - id: 30243494
+    text: "test notes"
+    order_id: 331856255
+    created_at: '2024-04-23T10:20:07.940Z'
+    mentions:
+    - id: 109116
+      login: "GP"
+    created_by:
+      id: 106310
+      login: "Groove Packer"
+      email: "groovepacker+vq@gmail.com"
   tags: 
   - id: "6522028"
     name: "egnition-sample-data"
@@ -337,7 +348,10 @@ orders:
       verified: "true"
       location_found: "true"
     delivery_method: ""
-  customer_note: ""
+  customer_note:
+    id: 27562493
+    text: "test notes order 1744"
+    order_id: 331856255
   allocations: 
   - id: "246838519"
     updated_at: "2024-04-12T19:14:57.138Z"
@@ -699,104 +713,4 @@ orders:
         transit_outgoing_stock_level_at_all_warehouses: "0"
         transit_incoming_stock_level_at_all_warehouses: "0"
       weight: "0"
-  - id: "478488013"
-    price_per_unit: "0.1"
-    quantity: "1"
-    tax_rate: "0"
-    taxless_discount_per_unit: "0"
-    additional_options: ""
-    created_at: "2024-04-12T19:14:53.700Z"
-    updated_at: "2024-04-12T19:14:53.700Z"
-    remote_id: "13266718589081"
-    title: "VANS | AUTHENTIC | (MULTI EYELETS) | GRADIENT/CRIMSON - 5 / red"
-    sellable: 
-      allocated_stock_level_at_all_warehouses: "2"
-      id: "215558027"
-      type: "ProductVariant"
-      title: "5 / red"
-      sku_code: "VN-02-red-5"
-      upc_code: ""
-      model_number: ""
-      price: "99.95"
-      cost_price: "0"
-      min_reorder_level: "0"
-      quantity_to_reorder: "0"
-      created_by_id: "106310"
-      created_at: "2024-03-13T14:47:38.086Z"
-      updated_at: "2024-04-12T19:16:31.751Z"
-      deleted_at: ""
-      weight_grams: "0"
-      weight_unit: "oz"
-      product_title: "VANS | AUTHENTIC | (MULTI EYELETS) | GRADIENT/CRIMSON"
-      full_title: "VANS | AUTHENTIC | (MULTI EYELETS) | GRADIENT/CRIMSON 5 / red"
-      sellable_title: "5 / red"
-      profit: "99.95"
-      margin: "100"
-      tax_rate: "5"
-      estimated_delivery: ""
-      origin_country: ""
-      hs_tariff_number: ""
-      customs_description: ""
-      image_url: "https://thumbnails.veeqo.com/kRnSUBg2ZI_HpItwul3ORWkH1Rqz4gIeAWLvveBvM5M/rs:fit:1000:1000/aHR0cHM6Ly9jZG4u/c2hvcGlmeS5jb20v/cy9maWxlcy8xLzA0/MDMvNzU3NC82NzEz/L3Byb2R1Y3RzL2Q4/NDFmNzFlYTY4NDVi/ZjYwMDU0NTNlMTVh/MThjNjMyXzgxNmYw/ZTIxLWI2NTgtNDY5/Ny1hMDg3LWNlZTA5/OTdhZTU2ZC5qcGc_/dj0xNjk1NTkwMzgw"
-      product: 
-        id: "97755069"
-        title: "VANS | AUTHENTIC | (MULTI EYELETS) | GRADIENT/CRIMSON"
-        weight: "0"
-        origin_country: "US"
-        hs_tariff_number: ""
-        tax_rate: "0"
-        estimated_delivery: ""
-        deleted_at: ""
-        deleted_by_id: ""
-        description: "The forefather of the Vans family, the Vans Authentic was introduced in 1966 and nearly 4 decades later is still going strong, its popularity extending from the original fans - skaters and surfers to all sorts. The Vans Authentic is constructed from canvas and Vans' signature waffle outsole construction."
-        main_image_src: "https://thumbnails.veeqo.com/kRnSUBg2ZI_HpItwul3ORWkH1Rqz4gIeAWLvveBvM5M/rs:fit:1000:1000/aHR0cHM6Ly9jZG4u/c2hvcGlmeS5jb20v/cy9maWxlcy8xLzA0/MDMvNzU3NC82NzEz/L3Byb2R1Y3RzL2Q4/NDFmNzFlYTY4NDVi/ZjYwMDU0NTNlMTVh/MThjNjMyXzgxNmYw/ZTIxLWI2NTgtNDY5/Ny1hMDg3LWNlZTA5/OTdhZTU2ZC5qcGc_/dj0xNjk1NTkwMzgw"
-      reorders: 
-      stock_entries: 
-      - sellable_id: "215558027"
-        warehouse_id: "108477"
-        infinite: "false"
-        allocated_stock_level: "2"
-        stock_running_low: "false"
-        updated_at: "2024-04-12T19:14:57.051Z"
-        incoming_stock_level: "0"
-        transit_outgoing_stock_level: "0"
-        warehouse: 
-          id: "108477"
-          name: "My Location"
-          display_position: "9999"
-        physical_stock_level: "16"
-        available_stock_level: "14"
-        sellable_on_hand_value: "0"
-        transit_incoming_stock_level: "0"
-        location: ""
-      variant_option_specifics: 
-      - id: "231367354"
-        product_specific_id: "59701325"
-        product_property_id: "415717"
-        product_property_name: "Size"
-        value: "5"
-      - id: "231367353"
-        product_specific_id: "59701324"
-        product_property_id: "415716"
-        product_property_name: "Color"
-        value: "red"
-      variant_property_specifics: 
-      images: 
-      measurement_attributes: 
-        id: "242140102"
-        width: "0"
-        height: "0"
-        depth: "0"
-        dimensions_unit: "inches"
-      main_thumbnail_url: "https://thumbnails.veeqo.com/T7cOhSqxs0w33B6kjWkhRRe_MIDQqgvi1NQLnLLM5HE/rs:fit:150:150/aHR0cHM6Ly9jZG4u/c2hvcGlmeS5jb20v/cy9maWxlcy8xLzA0/MDMvNzU3NC82NzEz/L3Byb2R1Y3RzL2Q4/NDFmNzFlYTY4NDVi/ZjYwMDU0NTNlMTVh/MThjNjMyXzgxNmYw/ZTIxLWI2NTgtNDY5/Ny1hMDg3LWNlZTA5/OTdhZTU2ZC5qcGc_/dj0xNjk1NTkwMzgw"
-      available_stock_level_at_all_warehouses: "14"
-      stock_level_at_all_warehouses: "16"
-      inventory: 
-        infinite: "false"
-        physical_stock_level_at_all_warehouses: "16"
-        allocated_stock_level_at_all_warehouses: "2"
-        available_stock_level_at_all_warehouses: "14"
-        incoming_stock_level_at_all_warehouses: "0"
-        transit_outgoing_stock_level_at_all_warehouses: "0"
-        transit_incoming_stock_level_at_all_warehouses: "0"
-      weight: "0"
+      

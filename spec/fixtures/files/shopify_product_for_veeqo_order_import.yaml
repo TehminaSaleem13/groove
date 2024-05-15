@@ -1,0 +1,156 @@
+---
+title: VANS | AUTHENTIC | (MULTI EYELETS) | GRADIENT/CRIMSON
+body_html: The forefather of the Vans family, the Vans Authentic was introduced in
+  1966 and nearly 4 decades later is still going strong, its popularity extending
+  from the original fans - skaters and surfers to all sorts. The Vans Authentic is
+  constructed from canvas and Vans' signature waffle outsole construction.
+created_at: '2023-04-14T16:22:53-04:00'
+handle: vans-authentic-multi-eyelets-gradient-crimson
+id: 8215423844641
+images:
+- created_at: '2023-04-14T16:22:53-04:00'
+  height: 560
+  id: 41166188282145
+  position: 1
+  product_id: 8215423844641
+  src: https://cdn.shopify.com/s/files/1/0738/1352/4769/products/d841f71ea6845bf6005453e15a18c632.jpg?v=1681503773
+  updated_at: '2023-04-14T16:22:53-04:00'
+  variant_ids: []
+  width: 635
+  alt: 
+  admin_graphql_api_id: gid://shopify/ProductImage/41166188282145
+- created_at: '2023-04-14T16:22:53-04:00'
+  height: 560
+  id: 41166188314913
+  position: 2
+  product_id: 8215423844641
+  src: https://cdn.shopify.com/s/files/1/0738/1352/4769/products/3b606f0309eac2cc095a912eb26d7c73.jpg?v=1681503773
+  updated_at: '2023-04-14T16:22:53-04:00'
+  variant_ids: []
+  width: 635
+  alt: 
+  admin_graphql_api_id: gid://shopify/ProductImage/41166188314913
+- created_at: '2023-04-14T16:22:53-04:00'
+  height: 560
+  id: 41166188347681
+  position: 3
+  product_id: 8215423844641
+  src: https://cdn.shopify.com/s/files/1/0738/1352/4769/products/364ba59021acf686e6da73715e110f39.jpg?v=1681503773
+  updated_at: '2023-04-14T16:22:53-04:00'
+  variant_ids: []
+  width: 635
+  alt: 
+  admin_graphql_api_id: gid://shopify/ProductImage/41166188347681
+- created_at: '2023-04-14T16:22:53-04:00'
+  height: 560
+  id: 41166188380449
+  position: 4
+  product_id: 8215423844641
+  src: https://cdn.shopify.com/s/files/1/0738/1352/4769/products/be935fef3876ebfdd8e3f0760406d363.jpg?v=1681503773
+  updated_at: '2023-04-14T16:22:53-04:00'
+  variant_ids: []
+  width: 635
+  alt: 
+  admin_graphql_api_id: gid://shopify/ProductImage/41166188380449
+- created_at: '2023-04-14T16:22:53-04:00'
+  height: 560
+  id: 41166188413217
+  position: 5
+  product_id: 8215423844641
+  src: https://cdn.shopify.com/s/files/1/0738/1352/4769/products/240a66624494c29907de282b681e33e3.jpg?v=1681503773
+  updated_at: '2023-04-14T16:22:53-04:00'
+  variant_ids: []
+  width: 635
+  alt: 
+  admin_graphql_api_id: gid://shopify/ProductImage/41166188413217
+options:
+- id: 10426972274977
+  product_id: 8215423844641
+  name: Size
+  position: 1
+  values:
+  - '5'
+  - '6'
+  - '7'
+  - '8'
+  - '9'
+- id: 10426972307745
+  product_id: 8215423844641
+  name: Color
+  position: 2
+  values:
+  - red
+product_type: SHOES
+published_at: '2023-04-14T16:22:53-04:00'
+published_scope: web
+status: active
+tags: egnition-sample-data, men, summer, vans
+template_suffix: 
+updated_at: '2023-10-11T03:30:14-04:00'
+variants:
+- barcode: 
+  compare_at_price: 
+  created_at: '2023-04-14T16:22:53-04:00'
+  fulfillment_service: manual
+  grams: 0
+  id: 44950950183201
+  image_id: 
+  inventory_item_id: 46999791206689
+  inventory_management: shopify
+  inventory_policy: deny
+  inventory_quantity: 2
+  old_inventory_quantity: 2
+  position: 1
+  price: '99.95'
+  product_id: 8215423844641
+  requires_shipping: true
+  sku: AD-01-white-6
+  taxable: true
+  title: 5 / red
+  updated_at: '2023-10-27T18:29:13-04:00'
+  weight: 0
+  weight_unit: lb
+  option1: '5'
+  option2: red
+  option3: 
+  admin_graphql_api_id: gid://shopify/ProductVariant/44950950183201
+- barcode: 
+  compare_at_price: 
+  created_at: '2023-04-14T16:22:53-04:00'
+  fulfillment_service: manual
+  grams: 0
+  id: 44950950215969
+  image_id: 
+  inventory_item_id: 46999791239457
+  inventory_management: shopify
+  inventory_policy: deny
+  inventory_quantity: 10
+  old_inventory_quantity: 10
+  position: 2
+  price: '99.95'
+  product_id: 8215423844641
+  requires_shipping: true
+  sku: VN-02-red-6
+  taxable: true
+  title: 6 / red
+  updated_at: '2023-10-27T18:29:13-04:00'
+  weight: 0
+  weight_unit: lb
+  option1: '6'
+  option2: red
+  option3: 
+  admin_graphql_api_id: gid://shopify/ProductVariant/44950950215969
+vendor: VANS
+admin_graphql_api_id: gid://shopify/Product/8215423844641
+image:
+  id: 41166188282145
+  alt: 
+  position: 1
+  product_id: 8215423844641
+  created_at: '2023-04-14T16:22:53-04:00'
+  updated_at: '2023-04-14T16:22:53-04:00'
+  admin_graphql_api_id: gid://shopify/ProductImage/41166188282145
+  width: 635
+  height: 560
+  src: https://cdn.shopify.com/s/files/1/0738/1352/4769/products/d841f71ea6845bf6005453e15a18c632.jpg?v=1681503773
+  variant_ids: []

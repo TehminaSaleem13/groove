@@ -532,7 +532,7 @@ RSpec.describe StoresController, type: :controller do
       expect(response.status).to eq(200)
       res = JSON.parse(response.body)
       expect(Order.count).to eq(1)
-      expect(Product.count).to eq(2)
+      expect(Product.count).to eq(1)
       expect(res['status']).to be true
     end
   end

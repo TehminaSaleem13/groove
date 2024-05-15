@@ -1,0 +1,23 @@
+<div style="width: 100%; max-width: 600px; margin: 0 auto;">
+  <h2>Order and Product Imports for Veeqo store is completed.</h2>
+
+  <% if @data.any? %>
+    <h3>
+    Following SKU Products are not found in Shopify Store [<%= @shopify_store.name %>]:
+    </h3>
+    <h3>List of Orders and Skus</h3>
+  
+    <ul>
+      <% @data.each do |order| %>
+        <li>
+          Order Number: <%= order[:order_number] %>, SKUs: <%= order[:skus].inspect %>
+        </li>
+      <% end %>
+    </ul>
+  <% end %>
+
+  <p>
+  Thanks,<br>
+  Team Groovepacker
+  </p>
+</div>

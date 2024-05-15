@@ -425,6 +425,38 @@ RSpec.describe OrdersController, type: :controller do
 
   describe 'Veeqo Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+    let(:mock_response) do
+      instance_double(
+        "Response",
+        body: {
+          "data" => {
+            "products" => {
+              "nodes" => [
+                {
+                  "id" => "gid://shopify/Product/8215423844641",
+                  "title" => "VANS | AUTHENTIC | (MULTI EYELETS) | GRADIENT/CRIMSON"
+                }
+              ]
+            }
+          }
+        }
+      )
+    end
+    let(:mock_without_response) do
+      instance_double(
+        "Response",
+        body: {
+          "data" => {
+            "products" => {
+              "nodes" => [
+                {
+                }
+              ]
+            }
+          }
+        }
+      )
+    end
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
@@ -445,7 +477,7 @@ RSpec.describe OrdersController, type: :controller do
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
-      expect(Product.count).to eq(2)
+      expect(Product.count).to eq(1)
 
       veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
       expect(veeqo_import_item.status).to eq('completed')
@@ -462,7 +494,7 @@ RSpec.describe OrdersController, type: :controller do
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(2)
-      expect(Product.count).to eq(2)
+      expect(Product.count).to eq(1)
 
       veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
       expect(veeqo_import_item.status).to eq('completed')
@@ -481,6 +513,45 @@ RSpec.describe OrdersController, type: :controller do
 
       veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
       expect(veeqo_import_item.status).to eq('failed')
+    end
+
+    it 'Import Orders When Product Source as Shopify Store without mock response' do
+      shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: @inv_wh, on_demand_import: true)
+      create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
+      @veeqo_store.veeqo_credential.update(use_shopify_as_product_source_switch: true, product_source_shopify_store_id: shopify_store.id)
+
+      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_without_response)
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('completed')
+    end
+
+    it 'Import Orders When Product Source as Shopify Store with mock response' do
+      shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: @inv_wh, on_demand_import: true)
+      create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
+      @veeqo_store.veeqo_credential.update(use_shopify_as_product_source_switch: true, product_source_shopify_store_id: shopify_store.id)
+
+      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_response)
+      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_product_for_veeqo_order_import.yaml'))))
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('completed')
     end
   end
 

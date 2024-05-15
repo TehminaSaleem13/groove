@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240424115059) do
+ActiveRecord::Schema.define(version: 20240507083847) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -682,7 +682,7 @@ ActiveRecord::Schema.define(version: 20240424115059) do
     t.index ["order_id"], name: "index_order_shippings_on_order_id"
   end
 
-  create_table "order_tags", id: :integer, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb3" do |t|
+  create_table "order_tags", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "name", limit: 25, null: false
     t.string "color", default: "#B8B8B8", null: false
     t.string "mark_place", default: "0"
@@ -938,7 +938,7 @@ ActiveRecord::Schema.define(version: 20240424115059) do
 
   create_table "products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "store_product_id"
-    t.text "name", limit: 4294967295, collation: "utf8mb4_unicode_ci"
+    t.string "name", limit: 5000, collation: "utf8mb4_unicode_ci"
     t.string "product_type"
     t.bigint "store_id", null: false
     t.datetime "created_at", null: false
@@ -1560,6 +1560,8 @@ ActiveRecord::Schema.define(version: 20240424115059) do
     t.boolean "remove_cancelled_orders", default: true
     t.boolean "import_upc", default: true
     t.boolean "set_coupons_to_intangible", default: true
+    t.integer "product_source_shopify_store_id"
+    t.boolean "use_shopify_as_product_source_switch", default: false
   end
 
   create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

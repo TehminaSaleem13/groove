@@ -61,9 +61,7 @@ module Groovepacker
               variant = @shop_product['variants'].select { |variant| variant['sku'] == item['sku'] }.first if variant.blank? && item['sku'].present?
 
               if variant.blank?
-                on_demand_logger = Logger.new("#{Rails.root}/log/#{@store&.store_type&.downcase || "shop"}_missing_product_variant_import_#{Apartment::Tenant.current}.log")
-                log = { item: item, Time: Time.zone.now, shop_product: @shop_product }
-                on_demand_logger.info(log)
+                log_missing_variant(item)
               end
             end
             begin
@@ -78,7 +76,34 @@ module Groovepacker
           product
         end
 
-        def fetch_product(item)
+        def import_single_product_for_veeqo(item)
+          initialize_import_objects
+          fetch_product(item, true)
+          if @shop_product.present?
+            variant = @shop_product['variants'].select { |variant| variant['sku'] == item['sellable']['sku_code'] }.first
+
+            if variant.blank?
+              log_missing_variant(item)
+            end
+            begin
+              variant_title = variant['title'] == 'Default Title' ? '' : @credential.import_variant_names ? variant['title'] : " - #{variant['title']}"
+              variant['title'] = @credential.import_variant_names ? variant['title'] : @shop_product['title']
+              product = create_product_from_variant(variant, @shop_product)
+            rescue StandardError => e
+              product = nil
+            end
+            product.update_columns(custom_product_1: variant_title, custom_product_display_1: true) if variant_title.present? && product
+          end
+          product
+        end
+
+        def log_missing_variant(item)
+          on_demand_logger = Logger.new("#{Rails.root}/log/#{@store&.store_type&.downcase || 'shop'}_missing_product_variant_import_#{Apartment::Tenant.current}.log")
+          log = { item: item, Time: Time.zone.now, shop_product: @shop_product }
+          on_demand_logger.info(log)
+        end
+
+        def fetch_product(item, veeqo_product_import_flag = nil)
           shop_product = @client.product(item['product_id'])
           if shop_product.blank?
             loop_count = 0
@@ -94,8 +119,8 @@ module Groovepacker
             log = { item: item, Time: Time.zone.now, shop_product: shop_product }
             on_demand_logger.info(log)
           end
-
-          return @shop_product = item if custom_shop_item?(item)
+          check_import_flag = veeqo_product_import_flag.present? ? false : custom_shop_item?(item)
+          return @shop_product = item if check_import_flag
 
           @shop_product = shop_product || {}
         end
