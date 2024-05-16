@@ -14,4 +14,6 @@ Delayed::Worker.logger = Logger.new(File.join(Rails.root, 'log', 'dj.log'))
 #   end
 # end
 
+Delayed::Worker.sleep_delay = 14
+
 Delayed::Backend::ActiveRecord.configuration.reserve_sql_strategy = :default_sql
