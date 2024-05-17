@@ -445,7 +445,6 @@ module Groovepacker
             status_set_in_gp << 'Awaiting Shipment' if @credential.shall_import_awaiting_shipment
             status_set_in_gp << 'Pending Fulfillment' if @credential.shall_import_pending_fulfillment
             status_set_in_gp << 'Shipped' if @credential.shall_import_shipped
-            status_set_in_gp << 'Cancelled' if @credential.remove_cancelled_orders
             status_set_in_gp
           end
 
@@ -455,8 +454,10 @@ module Groovepacker
             @import_item.update_attributes(current_increment_id: order['orderNumber'], current_order_items: -1, current_order_imported_item: -1)
             # If a large number of orders are imported into SS at the same time via CSV, their OSLMT will be the same. During each regular import, we count how many consecutive orders have had the same timestamp. While this count is => to 25 we will set a flag to 1 If a non-matching OSLMT is imported or if the import fails in any way, the flag is reset to 0. When each import is run we will check this flag. If it is set to 1 at the start of the import we will adjust our LRO timestamp forward by 1 second and set the flag back to 0 ##### @bulk_ss_import #####
             Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
+            return if check_order_is_cancelled(order)
             shipstation_order = find_or_init_new_order(order)
             import_order_form_response(shipstation_order, order, shipments_response)
+
             if order['tagIds'].present?
               tags_list  = @client.get_all_tags_list
               
@@ -525,10 +526,15 @@ module Groovepacker
             @import_item.save
           end
 
+          def check_order_is_cancelled(order)
+            shipstation_order = search_order_in_db(order)
+            handle_cancelled_order(shipstation_order)
+          end
+
           def find_or_init_new_order(order)
             shipstation_order = search_order_in_db(order)
             @order_to_update = shipstation_order.present?
-            return if shipstation_order && (shipstation_order.status == 'scanned' || shipstation_order.status == 'cancelled' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
+            return if shipstation_order.present? && (shipstation_order.status == 'scanned' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
 
             if @import_item.import_type == 'quick' && shipstation_order
               shipstation_order.destroy

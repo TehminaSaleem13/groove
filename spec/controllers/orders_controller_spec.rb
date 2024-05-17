@@ -469,7 +469,6 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders' do
-      ScanPackSetting.first.update(replace_gp_code: true)
       expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -483,10 +482,26 @@ RSpec.describe OrdersController, type: :controller do
       expect(veeqo_import_item.status).to eq('completed')
     end
 
+    it 'Import Orders when cancelled order is already exist' do
+      create(:order, store_id: @veeqo_store.id, status: 'cancelled', increment_id: '1744')
+      
+      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('completed')
+    end
+
     it 'Import Orders with Allow duplicate order' do
       create(:order, increment_id: '1744', store_id: @veeqo_store.id)
       @veeqo_store.veeqo_credential.update(allow_duplicate_order: true)
-      ScanPackSetting.first.update(replace_gp_code: true)
+      
       expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -502,7 +517,6 @@ RSpec.describe OrdersController, type: :controller do
 
     it 'Import Orders When All Import Statuses Switch is disabled' do
       @veeqo_store.veeqo_credential.update(shipped_status: false, awaiting_amazon_fulfillment_status: false, awaiting_fulfillment_status: false)
-      ScanPackSetting.first.update(replace_gp_code: true)
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
@@ -522,7 +536,7 @@ RSpec.describe OrdersController, type: :controller do
 
       expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_without_response)
-
+      
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
@@ -563,12 +577,11 @@ RSpec.describe OrdersController, type: :controller do
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
-      ss_store = Store.create(name: 'Shipstation API 2', status: true, store_type: 'Shipstation API 2', inventory_warehouse: InventoryWarehouse.last, on_demand_import_v2: true, regular_import_v2: true, troubleshooter_option: true)
-      ss_store_credentials = ShipstationRestCredential.create(api_key: 'shipstationapiv2shipstationapiv2', api_secret: 'shipstationapiv2shipstationapiv2', store_id: ss_store.id, shall_import_awaiting_shipment: false, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: true, shall_import_pending_fulfillment: false, use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: true, allow_duplicate_order: true, tag_import_option: true, bulk_import: false, order_import_range_days: 30, import_tracking_info: true, import_shipped_having_tracking: true)
+      @ss_store = Store.create(name: 'Shipstation API 2', status: true, store_type: 'Shipstation API 2', inventory_warehouse: InventoryWarehouse.last, on_demand_import_v2: true, regular_import_v2: true, troubleshooter_option: true)
+      @ss_store_credential = ShipstationRestCredential.create(api_key: 'shipstationapiv2shipstationapiv2', api_secret: 'shipstationapiv2shipstationapiv2', store_id: @ss_store.id, shall_import_awaiting_shipment: false, shall_import_shipped: true, warehouse_location_update: false, shall_import_customer_notes: true, shall_import_internal_notes: true, regular_import_range: 3, gen_barcode_from_sku: true, shall_import_pending_fulfillment: false, use_chrome_extention: false, switch_back_button: false, auto_click_create_label: false, download_ss_image: false, return_to_order: false, import_upc: true, allow_duplicate_order: true, tag_import_option: true, bulk_import: false, order_import_range_days: 30, import_tracking_info: true, import_shipped_having_tracking: true)
     end
 
     it 'Import Orders without aliasing' do
-      ss_store = Store.where(store_type: 'ShipStation API 2').last
       ScanPackSetting.first.update_attributes(replace_gp_code: false)
       expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
@@ -583,12 +596,11 @@ RSpec.describe OrdersController, type: :controller do
       expect(Order.count).to eq(2)
       expect(Product.count).to eq(4)
 
-      ss_import_item = ImportItem.find_by_store_id(ss_store.id)
+      ss_import_item = ImportItem.find_by_store_id( @ss_store.id)
       expect(ss_import_item.status).to eq('completed')
     end
 
     it 'Import Orders' do
-      ss_store = Store.where(store_type: 'ShipStation API 2').last
       ScanPackSetting.first.update_attributes(replace_gp_code: true)
       expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
@@ -607,39 +619,36 @@ RSpec.describe OrdersController, type: :controller do
       expect(OrderTag.count).to be > (1)
       expect(OrderTag.pluck(:name)).to include("GP Imported")
 
-      ss_import_item = ImportItem.find_by_store_id(ss_store.id)
+      ss_import_item = ImportItem.find_by_store_id( @ss_store.id)
       expect(ss_import_item.status).to eq('completed')
     end
 
     it 'SS  Range Import' do
-      ss_store = Store.where(store_type: 'ShipStation API 2').last
       expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_order_response_from_ss).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
 
-      get :import_for_ss, params: { 'store_id' => ss_store.id, 'days' => '0', 'import_type' => 'range_import', 'import_date' => 'null', 'start_date' => DateTime.now.in_time_zone - 2.days, 'end_date' => DateTime.now.in_time_zone, 'order_date_type' => 'modified', 'order_id' => 'null' }
+      get :import_for_ss, params: { 'store_id' =>  @ss_store.id, 'days' => '0', 'import_type' => 'range_import', 'import_date' => 'null', 'start_date' => DateTime.now.in_time_zone - 2.days, 'end_date' => DateTime.now.in_time_zone, 'order_date_type' => 'modified', 'order_id' => 'null' }
       expect(response.status).to eq(200)
       expect(Order.count).to eq(2)
       expect(Product.count).to eq(2)
     end
 
     it 'SS Quick Import' do
-      ss_store = Store.where(store_type: 'ShipStation API 2').last
       expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_order_response_from_ss).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))
-      order = create(:order, increment_id: 'Test SS', store_id: ss_store.id)
+      order = create(:order, increment_id: 'Test SS', store_id: @ss_store.id)
 
-      get :import_for_ss, params: { 'store_id' => ss_store.id, 'days' => '0', 'import_type' => 'quickfix', 'import_date' => DateTime.now.in_time_zone, 'start_date' => 'null', 'end_date' => 'null', 'order_date_type' => 'null', 'order_id' => order.increment_id }
+      get :import_for_ss, params: { 'store_id' =>  @ss_store.id, 'days' => '0', 'import_type' => 'quickfix', 'import_date' => DateTime.now.in_time_zone, 'start_date' => 'null', 'end_date' => 'null', 'order_date_type' => 'null', 'order_id' => order.increment_id }
       expect(response.status).to eq(200)
       expect(Order.count).to eq(3)
       expect(Product.count).to eq(2)
     end
 
     it 'SS Import for single store shows import Cancelled' do
-      ss_store = Store.where(store_type: 'ShipStation API 2').last
-      ImportItem.create(status: 'in_progress', store: ss_store)
+      ImportItem.create(status: 'in_progress', store:  @ss_store)
 
       request.accept = 'application/json'
-      get :cancel_import, params: { 'store_id' => ss_store.id, 'order' => { 'store_id' => ss_store.id } }
+      get :cancel_import, params: { 'store_id' =>  @ss_store.id, 'order' => { 'store_id' =>  @ss_store.id } }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['error_messages']).to include('No imports are in progress')

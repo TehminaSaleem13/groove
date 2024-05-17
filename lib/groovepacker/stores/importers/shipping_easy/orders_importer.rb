@@ -208,6 +208,7 @@ module Groovepacker
             update_current_import_item(order)
             @org_ext_identifier = order['external_order_identifier']
             @ext_identifier = get_ext_identifier(order)
+            return if check_order_is_cancelled(order)
             if @split_order ||= @import_item.store.split_order.in?(%w[shipment_handling_v2 verify_separately verify_together])
               if order['shipments'].any?
                 if order['shipments'].count == 1
@@ -323,6 +324,11 @@ module Groovepacker
               nil
               end
             update_success_import_count
+          end
+
+          def check_order_is_cancelled(order)
+            shiping_easy_order = find_shipping_easy_order(order)
+            handle_cancelled_order(shiping_easy_order)
           end
 
           def find_shipping_easy_order(order)

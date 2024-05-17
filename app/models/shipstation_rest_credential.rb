@@ -140,7 +140,6 @@ class ShipstationRestCredential < ActiveRecord::Base
     statuses.push('awaiting_shipment') if shall_import_awaiting_shipment?
     statuses.push('shipped') if shall_import_shipped?
     statuses.push('pending_fulfillment') if shall_import_pending_fulfillment?
-    statuses.push('cancelled') if remove_cancelled_orders?
     statuses
   end
 end

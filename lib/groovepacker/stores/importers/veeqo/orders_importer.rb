@@ -106,7 +106,7 @@ module Groovepacker
   
             order_in_gp_present = false
             order_in_gp = search_veeqo_order_in_db(order)
-
+            return if handle_cancelled_order(order_in_gp)
             veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
           end
 
@@ -176,10 +176,9 @@ module Groovepacker
               end
             end
             
-            if veeqo_order.order_items.present?
-              veeqo_order.save!
-              veeqo_order
-            end
+            return unless veeqo_order.order_items.present?
+            veeqo_order.save!
+            veeqo_order
           end
 
           def import_order_items(item, order_number)
@@ -212,7 +211,6 @@ module Groovepacker
               shopify_context.import_single_product_from_shopify_to_veeqo(item)
             else
               handle_not_found_sku(sku, order_number)
-              return
             end
           end
 
@@ -223,6 +221,7 @@ module Groovepacker
             else
               @result_data << { order_number: order_number, skus: [product_sku] }
             end
+            false
           end
 
           def send_sku_report_not_found
@@ -244,7 +243,7 @@ module Groovepacker
           end
   
           def add_order_shipping_address(veeqo_order, order)
-            shipping_address = order['shipping_addresses']
+            shipping_address = order['customer']['shipping_addresses']&.first
             return veeqo_order if shipping_address.blank?
   
             veeqo_order.address_1 = shipping_address['address1']
@@ -294,7 +293,8 @@ module Groovepacker
             Order.transaction do
               veeqo_order = import_order(veeqo_order, order)
               # import items in an order
-              veeqo_order = import_veeqo_order_item(veeqo_order, order) || return
+              veeqo_order = import_veeqo_order_item(veeqo_order, order)
+              return unless veeqo_order.present?
               # add order activities
               add_order_activities(veeqo_order, order)
               # update store

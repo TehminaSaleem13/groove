@@ -120,6 +120,15 @@ module Groovepacker
           @worker_id = 'worker_' + SecureRandom.hex
         end
 
+        def handle_cancelled_order(gp_order)
+          return false unless gp_order.present? && gp_order.status == 'cancelled'
+          
+          if @credential.remove_cancelled_orders
+            gp_order.destroy
+          end
+          true
+        end
+
         def check_or_assign_import_item
           return unless ImportItem.find_by_id(@import_item.id).blank?
 
