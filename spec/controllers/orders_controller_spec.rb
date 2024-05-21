@@ -425,6 +425,10 @@ RSpec.describe OrdersController, type: :controller do
 
   describe 'Veeqo Imports' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+    let(:success) { 200 }
+    let(:parsed_response) { YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))) }
+    let(:response_headers) { { 'x-total-pages-count' => '2' } }
+    let(:veeqo_response) { instance_double(HTTParty::Response, success?: success, parsed_response: parsed_response, headers: response_headers) }
     let(:mock_response) do
       instance_double(
         "Response",
@@ -460,6 +464,7 @@ RSpec.describe OrdersController, type: :controller do
 
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
+      allow(HTTParty).to receive(:get).and_return(veeqo_response)
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
@@ -469,8 +474,6 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders' do
-      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
-
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
@@ -485,8 +488,6 @@ RSpec.describe OrdersController, type: :controller do
     it 'Import Orders when cancelled order is already exist' do
       create(:order, store_id: @veeqo_store.id, status: 'cancelled', increment_id: '1744')
       
-      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
-
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
@@ -502,8 +503,6 @@ RSpec.describe OrdersController, type: :controller do
       create(:order, increment_id: '1744', store_id: @veeqo_store.id)
       @veeqo_store.veeqo_credential.update(allow_duplicate_order: true)
       
-      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
-
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
@@ -534,7 +533,6 @@ RSpec.describe OrdersController, type: :controller do
       create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
       @veeqo_store.veeqo_credential.update(use_shopify_as_product_source_switch: true, product_source_shopify_store_id: shopify_store.id)
 
-      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_without_response)
       
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -553,7 +551,6 @@ RSpec.describe OrdersController, type: :controller do
       create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
       @veeqo_store.veeqo_credential.update(use_shopify_as_product_source_switch: true, product_source_shopify_store_id: shopify_store.id)
 
-      expect_any_instance_of(Groovepacker::Stores::Importers::Veeqo::OrdersImporter).to receive(:get_orders_response).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_response)
       expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_product_for_veeqo_order_import.yaml'))))
 

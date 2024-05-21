@@ -105,7 +105,7 @@ module Groovepacker
             update_import_count('success_updated') && return if skip_the_order?(order)
   
             order_in_gp_present = false
-            order_in_gp = search_veeqo_order_in_db(order)
+            order_in_gp = search_veeqo_order_in_db(set_order_number(order), order)
             return if handle_cancelled_order(order_in_gp)
             veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
           end
@@ -129,7 +129,7 @@ module Groovepacker
   
           def import_order(veeqo_order, order)
             # veeqo_order.tags = order['tags']
-            veeqo_order.increment_id = order['number']
+            veeqo_order.increment_id = set_order_number(order)
             veeqo_order.store_order_id = order['id'].to_s
             veeqo_order.order_placed_time = Time.zone.parse(order['created_at'])
             # add order custmor info using separate method
@@ -144,6 +144,10 @@ module Groovepacker
             veeqo_order.last_modified = Time.zone.parse(order['updated_at'])
             veeqo_order.job_timestamp = Time.current.strftime('%Y-%m-%d %H:%M:%S.%L')
             veeqo_order
+          end
+
+          def set_order_number(order)
+            @credential&.use_original_order_number ? order['number'] : order['id'].to_s
           end
 
           def import_notes(veeqo_order, order)
@@ -165,7 +169,7 @@ module Groovepacker
             order['line_items']&.each do |item|
               order_item = import_order_item(item)
               @import_item.update!(current_order_imported_item: @import_item.current_order_imported_item + 1)
-              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || import_order_items(item, order['number'])
+              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || import_order_items(item, set_order_number(order))
               if product.present?
                 order_item.product = product
                 veeqo_order.order_items << order_item
@@ -306,9 +310,7 @@ module Groovepacker
             activity_name = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
             veeqo_order.addactivity(activity_name, @credential.store.name + ' Import')
             veeqo_order.order_items.each_with_index do |item, index|
-              if order['line_items'][index]['sellable']['sku_code'].in?(item.product.product_skus.pluck(:sku))
-                veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@store.name} Import")
-              end
+              veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.sku} Added", "#{@store.name} Import")
             end
           end
     

@@ -434,7 +434,7 @@ module StoresHelper
         client = Groovepacker::VeeqoRuby::Client.new(credential)
         order_res = client.get_single_order(params[:order_no])
         response = order_res['orders']
-        return result[:status] = false if response.nil?
+        return result[:status] = false if response.empty? || response[0]['error_messages'] == "Not found"
 
         result[:status] = true
         result_modifyDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['updated_at']).to_time

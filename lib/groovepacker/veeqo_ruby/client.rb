@@ -41,9 +41,21 @@ module Groovepacker
 
       def get_single_order(order_number, import_item = nil)
         combined_response = { 'orders' => [] }
-        response = HTTParty.get("https://api.veeqo.com/orders?query=#{order_number}&page=1&page_size=5", headers: headers)
-        combined_response['orders'] = response
-        combined_response['orders'] = (combined_response['orders'] || []).select { |ordr| ordr['number'] == order_number }
+
+        if veeqo_credential.use_original_order_number
+          endpoint = "https://api.veeqo.com/orders?query=#{order_number}&page=1&page_size=5"
+        else
+          endpoint = "https://api.veeqo.com/orders/#{order_number}"
+        end
+
+        response = HTTParty.get(endpoint, headers: headers)
+        
+        if veeqo_credential.use_original_order_number
+          combined_response['orders'] = response
+          combined_response['orders'] = (combined_response['orders'] || []).select { |ord| ord['number'] == order_number }
+        else
+          combined_response['orders'] << response
+        end
 
         begin
           import_item.update_attributes(status: 'completed', current_increment_id: order_number, updated_orders_import: combined_response['orders'].count)

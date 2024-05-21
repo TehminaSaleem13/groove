@@ -525,10 +525,22 @@ RSpec.describe StoresController, type: :controller do
       end
     end
 
-    it 'On Demand Import' do
-      allow_any_instance_of(Groovepacker::VeeqoRuby::Client).to receive(:get_single_order).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
+    it 'On Demand Order Import with Order Number' do
+      allow(HTTParty).to receive(:get).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_order.yaml'))))
 
       get :get_order_details, params: { order_no: '1744', store_id: @veeqo_store.id }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
+      expect(res['status']).to be true
+    end
+
+    it 'On Demand Order Import with Veeqo Order Id' do
+      @veeqo_store.veeqo_credential.update(use_original_order_number: false)
+      allow(HTTParty).to receive(:get).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_single_order.yaml'))))
+
+      get :get_order_details, params: { order_no: '331856255', store_id: @veeqo_store.id }
       expect(response.status).to eq(200)
       res = JSON.parse(response.body)
       expect(Order.count).to eq(1)
