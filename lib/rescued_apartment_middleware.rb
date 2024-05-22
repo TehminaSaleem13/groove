@@ -6,6 +6,7 @@ module RescuedApartmentMiddleware
       env['SERVER_NAME'] = 'gp55.localpackerapi.com'
       env['REQUEST_URI'] = 'http://gp55.localpackerapi.com'
       env['HTTP_HOST'] = 'gp55.localpackerapi.com'
+      env['HTTP_X_FORWARDED_HOST'] = 'gp55.localpackerapi.com'
     end
 
     request = Rack::Request.new(env)

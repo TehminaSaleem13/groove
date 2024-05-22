@@ -77,6 +77,12 @@ module Groovepacker
           ).import_single_order(order_no, user_id, on_demand_quickfix, controller)
         end
 
+        def process_webhook_import_order(url)
+          Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew.new(
+            build_handle
+          ).process_webhook_import_order(url)
+        end
+
         def find_or_create_product(item)
           Groovepacker::Stores::Importers::ShipstationRest::OrderProductImporter.new(
             build_handle

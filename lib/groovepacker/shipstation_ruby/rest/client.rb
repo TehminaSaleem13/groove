@@ -125,6 +125,16 @@ module Groovepacker
           end
         end
 
+        def get_webhook_order(url, import_item)
+          response = @service.query("/orders?#{url}", nil, 'get')
+          begin
+            import_item.update_attributes(status: 'completed', current_increment_id: response['orders']&.first['orderNumber'], updated_orders_import: response['orders'].count)
+          rescue StandardError
+            nil
+          end
+          response
+        end
+
         def update_product_bin_locations(products)
           response = {}
           products.each do |product|

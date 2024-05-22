@@ -1,0 +1,129 @@
+---
+orders:
+- orderId: 727657309
+  orderNumber: SSTestOrder
+  orderKey: 97ea6464-6de9-51db-ad11-4162c9dadcdf
+  orderDate: '2020-09-11T04:42:37.0000000'
+  createDate: '2020-09-11T04:42:37.3930000'
+  modifyDate: '2020-09-11T04:43:35.7370000'
+  paymentDate: '2020-09-11T04:42:37.0000000'
+  shipByDate:
+  orderStatus: shipped
+  customerId: 418264273
+  customerUsername: alphatester@yopmail.com
+  customerEmail: alphatester@yopmail.com
+  billTo:
+    name: Alpha Tester
+    company:
+    street1: ''
+    street2:
+    street3:
+    city: ''
+    state:
+    postalCode: ''
+    country: '  '
+    phone: 111-111-1111
+    residential:
+    addressVerified:
+  shipTo:
+    name: Alpha Tester
+    company: GROOVEPACKER
+    street1: 110 COBBLESTONE CIR
+    street2: ''
+    street3:
+    city: NORTH LITTLE ROCK
+    state: AR
+    postalCode: 72116-3739
+    country: US
+    phone: 111-111-1111
+    residential: true
+    addressVerified: Address validated successfully
+  items:
+  - orderItemId: 1148846567
+    lineItemKey:
+    sku: P-WAXX-OFF
+    name: Waxx-Off
+    imageUrl:
+    weight:
+    quantity: 1
+    unitPrice: 1.0
+    taxAmount:
+    shippingAmount:
+    warehouseLocation:
+    options: []
+    productId: 25108976
+    fulfillmentSku:
+    adjustment: true
+    upc:
+    createDate: '2020-09-11T04:42:37.517'
+    modifyDate: '2020-09-11T04:42:37.517'
+  - orderItemId: 1148987456
+    lineItemKey:
+    sku: Coupon
+    name: 'Coupon: Coupon'
+    imageUrl:
+    weight:
+    quantity: 1
+    unitPrice: 1.0
+    taxAmount:
+    shippingAmount:
+    warehouseLocation:
+    options: []
+    productId: 25108986
+    fulfillmentSku:
+    adjustment: false
+    upc:
+    createDate: '2020-09-11T04:42:37.517'
+    modifyDate: '2020-09-11T04:42:37.517'
+  orderTotal: 1.0
+  amountPaid: 0.0
+  taxAmount: 0.0
+  shippingAmount: 0.0
+  customerNotes: Note From Buyer
+  internalNotes: Internal Note
+  gift: false
+  giftMessage: Gift Note
+  paymentMethod:
+  requestedShippingService:
+  carrierCode: stamps_com
+  serviceCode: usps_first_class_mail
+  packageCode: package
+  confirmation: none
+  shipDate: '2020-09-11'
+  holdUntilDate:
+  weight:
+    value: 12.0
+    units: ounces
+    WeightUnits: 1
+  dimensions:
+  insuranceOptions:
+    provider:
+    insureShipment: false
+    insuredValue: 0.0
+  internationalOptions:
+    contents:
+    customsItems:
+    nonDelivery:
+  advancedOptions:
+    warehouseId: 82982
+    nonMachinable: false
+    saturdayDelivery: false
+    containsAlcohol: false
+    mergedOrSplit: false
+    mergedIds: []
+    parentId:
+    storeId: 203151
+    customField1:
+    customField2:
+    customField3:
+    source:
+    billToParty: my_account
+    billToAccount:
+    billToPostalCode:
+    billToCountryCode:
+    billToMyOtherAccount: 84615
+  tagIds:
+  userId:
+  externallyFulfilled: false
+  externallyFulfilledBy:
+  labelMessages:

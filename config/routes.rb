@@ -463,6 +463,12 @@ Groovepacks::Application.routes.draw do
     end
   end
 
+  namespace :webhooks do
+    resources :shipstation, only: [], defaults: { format: 'json' } do
+      post ':credential_id/import', on: :collection, action: :import
+    end
+  end
+
   resource :print, only: [] do
     collection do
       get '/qz_certificate' => 'print#qz_certificate'
@@ -474,7 +480,7 @@ Groovepacks::Application.routes.draw do
 
   resources :groovepacker_webhooks, only: [:create, :update] do
     delete 'delete_webhooks', on: :collection
-  end  
+  end
 
   resources :webhooks, only: [] do
     collection do

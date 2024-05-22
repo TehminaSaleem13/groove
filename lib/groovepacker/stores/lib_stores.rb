@@ -154,6 +154,7 @@ module Groovepacker
         @shipstation.country = params[:country] || ''
         @shipstation.order_import_range_days = params[:order_import_range_days].to_i if params[:order_import_range_days].present? && params[:order_import_range_days] != 'undefined'
         @shipstation.skip_ss_label_confirmation = params[:skip_ss_label_confirmation] unless params[:skip_ss_label_confirmation].nil?
+        @shipstation.webhook_secret = params[:webhook_secret]
         @store.shipstation_rest_credential = @shipstation
         begin
           @store.save!

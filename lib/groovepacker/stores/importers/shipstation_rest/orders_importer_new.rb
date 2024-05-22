@@ -215,6 +215,18 @@ module Groovepacker
                                                                                                                                                                                                      end)
           end
 
+          def process_webhook_import_order(url)
+            @import_webhook_order = true
+            init_common_objects
+            initialize_import_item
+            @scan_settings = ScanPackSetting.last
+            response = @client.get_webhook_order(url, @import_item)
+            shipments_response = should_fetch_shipments? ? @client.get_shipments(import_from - 1.days) : []
+            import_orders_from_response(response, shipments_response)
+            @import_item.destroy
+            destroy_nil_import_items
+          end
+
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
             response['orders'] = response['orders'].sort_by { |order| Time.zone.parse(order['modifyDate']) } if response['orders'].present?
@@ -557,8 +569,8 @@ module Groovepacker
           end
 
           def update_order_activity_log(shipstation_order, order)
-            activity_name = @import_single_order ? 'On Demand Order Import' : 'Order Import'
-            shipstation_order.addactivity(activity_name, @credential.store.name + ' Import')
+            order_import_type = @import_single_order ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
+            shipstation_order.addactivity(order_import_type, @credential.store.name + ' Import')
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true && (@credential.set_coupons_to_intangible || check_for_intangible_coupon)
@@ -572,8 +584,8 @@ module Groovepacker
           end
 
           def update_order_activity_log_for_gp_coupon(shipstation_order, order)
-            activity_name = @import_single_order ? 'On Demand Order Import' : 'Order Import'
-            shipstation_order.addactivity(activity_name, @credential.store.name + ' Import')
+            order_import_type = @import_single_order ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
+            shipstation_order.addactivity(order_import_type, @credential.store.name + ' Import')
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true

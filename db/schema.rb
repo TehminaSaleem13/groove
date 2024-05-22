@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240507083847) do
+ActiveRecord::Schema.define(version: 20240521103811) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -939,7 +939,7 @@ ActiveRecord::Schema.define(version: 20240507083847) do
 
   create_table "products", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.string "store_product_id"
-    t.string "name", limit: 5000, collation: "utf8mb4_unicode_ci"
+    t.text "name", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.string "product_type"
     t.bigint "store_id", null: false
     t.datetime "created_at", null: false
@@ -1145,6 +1145,7 @@ ActiveRecord::Schema.define(version: 20240507083847) do
     t.boolean "multiple_lines_per_sku_accepted", default: false
     t.boolean "use_alternate_id_as_order_num", default: false
     t.boolean "import_shipped_having_tracking", default: false
+    t.boolean "remove_cancelled_orders", default: false
   end
 
   create_table "shipping_labels", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1228,6 +1229,7 @@ ActiveRecord::Schema.define(version: 20240507083847) do
     t.string "city", default: ""
     t.string "state", default: ""
     t.string "country", default: ""
+    t.string "webhook_secret", default: ""
   end
 
   create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1563,6 +1565,7 @@ ActiveRecord::Schema.define(version: 20240507083847) do
     t.boolean "set_coupons_to_intangible", default: true
     t.integer "product_source_shopify_store_id"
     t.boolean "use_shopify_as_product_source_switch", default: false
+    t.boolean "use_original_order_number", default: true
   end
 
   create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
