@@ -109,6 +109,13 @@ class ScanPackController < ApplicationController
     render json: add_note_obj.run
   end
 
+  def send_out_of_stock_mail
+    generate_report = ScanPack::MailOutOfStockService.new(
+      current_user, session, params
+    )
+    render json: generate_report.run
+  end
+
   def order_instruction
     # @result = Hash.new
     # @result['status'] = true

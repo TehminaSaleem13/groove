@@ -347,6 +347,7 @@ ActiveRecord::Schema.define(version: 20240507083847) do
     t.string "truncated_string", default: "-"
     t.boolean "print_product_receiving_labels", default: false
     t.boolean "is_haptics_option", default: false
+    t.string "email_address_for_report_out_of_stock", default: ""
   end
 
   create_table "generate_barcodes", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

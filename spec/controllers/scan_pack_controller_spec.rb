@@ -28,7 +28,6 @@ RSpec.describe ScanPackController, type: :controller do
 
   describe 'Check Tracking Number Validation' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
@@ -74,6 +73,49 @@ RSpec.describe ScanPackController, type: :controller do
       expect(result['status']).to be true
       expect(result['data']['next_state']).to eq('scanpack.rfo')
       expect(result['data']['order_complete']).to eq true
+    end
+  end
+
+  describe 'POST #send_out_of_stock_mail' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+    
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+
+      GeneralSetting.last.update(email_address_for_report_out_of_stock: 'kcpatel006@gmail.com')
+    end
+    
+    it 'Should send Mail for Out of Stock Report' do
+      order = FactoryBot.create(:order, increment_id: 'ORDER-1', status: 'awaiting', store: @store, tracking_num: 'ORDER-TRACKING-NUM')
+      product1 = FactoryBot.create(:product, is_skippable: true, store: @store)
+      FactoryBot.create(:product_sku, product: product1, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product: product1, barcode: 'PRODUCT1')
+      
+      product2 = FactoryBot.create(:product, store: @store)
+      
+      
+      FactoryBot.create(:product_sku, product: product2, sku: 'PRODUCT2')
+      FactoryBot.create(:product_barcode, product: product2, barcode: 'PRODUCT2')
+      product_barcode = ProductBarcode.create(product_id: product1.id, barcode: 'PRODUCT1', order: 0, lot_number: nil, packing_count: '1', is_multipack_barcode: true)
+      product_barcode1 = ProductBarcode.create(product_id: product2.id, barcode: 'PRODUCT2', order: 0, lot_number: nil, packing_count: '1', is_multipack_barcode: true)
+      ProductSku.create(sku: 'PRODUCT1', purpose: nil, product_id: product1.id, order: 0)
+      ProductSku.create(sku: 'PRODUCT2', purpose: nil, product_id: product2.id, order: 0)
+      ProductInventoryWarehouses.where(product_id:  product1.id).first.update(location_primary: '111')
+      ProductInventoryWarehouses.where(product_id:  product2.id).first.update(location_primary: '!AAA')
+      order_item1 =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product1.id, scanned_status: 'notscanned', scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      order_item2 =  OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product2.id, scanned_status: 'notscanned', scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+
+      post :send_out_of_stock_mail, params: {id: order.id, product_id: product1.id.to_i}
+      expect(response.status).to eq(200)
+
+      GeneralSetting.last.update(email_address_for_report_out_of_stock: '')
+      post :send_out_of_stock_mail, params: {id: order.id, product_id: product1.id.to_i}
+
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['error_messages']).to include("Email not found for stock report settings.")
     end
   end
 

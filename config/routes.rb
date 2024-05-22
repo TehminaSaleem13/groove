@@ -306,6 +306,7 @@ Groovepacks::Application.routes.draw do
       post 'type_scan'
       post 'confirmation_code'
       post 'add_note'
+      post 'send_out_of_stock_mail'
       post 'reset_order_scan'
       post 'get_shipment'
       post 'update_scanned'
