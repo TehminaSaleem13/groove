@@ -29,7 +29,10 @@ module OrderConcern
 
   def get_orders_list_for_selected(sort_by_order_number = false)
     @params = params
-    result =  if @params[:select_all] || @params[:inverted]
+    result =  if @params['filter'].present? && @params['filter'].include?(',') && @params[:select_all]
+                filters = @params['filter'].split(", ")
+                Order.filtered_by_status(filters)
+              elsif @params[:select_all] || @params[:inverted]
                 list_of_all_selected_or_inverted(sort_by_order_number)
               elsif @params[:orderArray].present?
                 list_of_orders_from_orderArray(sort_by_order_number)
