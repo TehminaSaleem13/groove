@@ -142,12 +142,19 @@ module Groovepacker
             # veeqo_order = update_shipping_amount_and_weight(veeqo_order, order)
             veeqo_order.order_total = order['total_price']&.to_f
             veeqo_order.last_modified = Time.zone.parse(order['updated_at'])
+            veeqo_order.tracking_num = get_tracking_number(order)
             veeqo_order.job_timestamp = Time.current.strftime('%Y-%m-%d %H:%M:%S.%L')
             veeqo_order
           end
 
           def set_order_number(order)
             @credential&.use_veeqo_order_id ? order['id'].to_s : order['number']
+          end
+
+          def get_tracking_number(order)
+            order.dig('allocations', 0, 'shipment', 'tracking_number', 'tracking_number')
+          rescue StandardError => e
+            nil
           end
 
           def import_notes(veeqo_order, order)
@@ -315,9 +322,9 @@ module Groovepacker
           end
     
           def skip_the_order?(order)
-            return false if @on_demand_import
+            # return false if @on_demand_import
   
-            import_shipped_having_tracking && order['status'] == 'shipped' #&& !get_tracking_number(order).present?
+            import_shipped_having_tracking && order['status'] == 'shipped' && get_tracking_number(order).nil?
           end
         end
       end
