@@ -42,19 +42,20 @@ module Groovepacker
       def get_single_order(order_number, import_item = nil)
         order_number_without_hash = order_number.sub('#', '')
         combined_response = { 'orders' => [] }
-        if veeqo_credential.use_original_order_number
-          endpoint = "https://api.veeqo.com/orders?query=#{order_number_without_hash}&page=1&page_size=5"
-        else
+        
+        if veeqo_credential.use_veeqo_order_id
           endpoint = "https://api.veeqo.com/orders/#{order_number_without_hash}"
+        else
+          endpoint = "https://api.veeqo.com/orders?query=#{order_number_without_hash}&page=1&page_size=5"
         end
 
         response = HTTParty.get(endpoint, headers: headers)
         
-        if veeqo_credential.use_original_order_number
+        if veeqo_credential.use_veeqo_order_id
+          combined_response['orders'] << response
+        else
           combined_response['orders'] = response
           combined_response['orders'] = (combined_response['orders'] || []).select { |ord| ord['number'] == order_number }
-        else
-          combined_response['orders'] << response
         end
 
         begin

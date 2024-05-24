@@ -147,7 +147,7 @@ module Groovepacker
           end
 
           def set_order_number(order)
-            @credential&.use_original_order_number ? order['number'] : order['id'].to_s
+            @credential&.use_veeqo_order_id ? order['id'].to_s : order['number']
           end
 
           def import_notes(veeqo_order, order)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240521103811) do
+ActiveRecord::Schema.define(version: 20240524094759) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1565,7 +1565,7 @@ ActiveRecord::Schema.define(version: 20240521103811) do
     t.boolean "set_coupons_to_intangible", default: true
     t.integer "product_source_shopify_store_id"
     t.boolean "use_shopify_as_product_source_switch", default: false
-    t.boolean "use_original_order_number", default: true
+    t.boolean "use_veeqo_order_id", default: false
   end
 
   create_table "visits", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

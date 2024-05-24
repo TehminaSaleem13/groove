@@ -180,7 +180,7 @@ module Groovepacker
         end
         @veeqo.api_key = params[:api_key]
         @veeqo.product_source_shopify_store_id = params[:product_source_shopify_store_id]
-        @veeqo.use_original_order_number = params[:use_original_order_number] unless params[:use_original_order_number].nil?
+        @veeqo.use_veeqo_order_id = params[:use_veeqo_order_id]
         @veeqo.shipped_status = params[:shipped_status].to_boolean
         @veeqo.awaiting_fulfillment_status = params[:awaiting_fulfillment_status].to_boolean
         @veeqo.awaiting_amazon_fulfillment_status = params[:awaiting_amazon_fulfillment_status].to_boolean

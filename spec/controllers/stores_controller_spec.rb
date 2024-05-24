@@ -537,7 +537,7 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'On Demand Order Import with Veeqo Order Id' do
-      @veeqo_store.veeqo_credential.update(use_original_order_number: false)
+      @veeqo_store.veeqo_credential.update(use_veeqo_order_id: true)
       allow(HTTParty).to receive(:get).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/veeqo_test_single_order.yaml'))))
 
       get :get_order_details, params: { order_no: '331856255', store_id: @veeqo_store.id }
