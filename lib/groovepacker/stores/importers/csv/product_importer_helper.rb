@@ -465,6 +465,7 @@ module Groovepacker
                                                     1
                                                     end
                   product_barcode.is_multipack_barcode = true
+                  product_barcode.permit_shared_barcodes = true
                   product_barcode.product_id = begin
                                                    product.id
                                                rescue StandardError
