@@ -21,6 +21,7 @@ module ScanPack
 
     def scan_barcode
       do_find_and_update_barcode_from_case_insensitive_input
+      do_find_and_remove_order_prefix_from_input
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
       do_scan_now
@@ -112,7 +113,7 @@ module ScanPack
         add_activity_for_barcode(scanned_item_sku)
       end
     end
-    
+
     def scanned_item_sku
       item_sku = nil
       item_sku = Product.find_by_id(@params['product_id'])&.primary_sku if @params['product_id'].present? && item_sku.blank?
@@ -127,7 +128,7 @@ module ScanPack
 
     def update_activity(output)
       return unless @params[:state] == 'scanpack.rfp.default' && output['status'] == false && @order
-      
+
       @order.addactivity("INVALID SCAN - Product with barcode: #{@params[:input]}", @current_user.username, @params[:on_ex])
     end
 

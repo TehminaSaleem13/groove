@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240524094759) do
+ActiveRecord::Schema.define(version: 20240527090555) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1124,6 +1124,8 @@ ActiveRecord::Schema.define(version: 20240524094759) do
     t.boolean "scan_all_option", default: false
     t.boolean "capture_image_option", default: true
     t.string "email_reply"
+    t.string "order_num_esc_str_removal", default: ""
+    t.boolean "order_num_esc_str_enabled", default: false
   end
 
   create_table "shipping_easy_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

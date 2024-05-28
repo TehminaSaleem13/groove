@@ -96,7 +96,7 @@ module ScanPack
         @page_height = '11'
         @page_width = '8.5'
       end
-  
+
       @size = @current_user.packing_slip_size
       @orientation = GeneralSetting.get_packing_slip_orientation
       # Earlier this was @result so it messed up with @result from the method.
@@ -342,6 +342,21 @@ module ScanPack
     def do_find_and_update_barcode_from_case_insensitive_input
       barcode = ProductBarcode.find_by('lower(barcode) = ?', @params[:input].downcase)
       @params[:input] = barcode.barcode if barcode
-    end  
+    end
+
+    def do_find_and_remove_order_prefix_from_input
+      return unless @params[:app]
+
+      scanpack_settings = ScanPackSetting.last
+      if scanpack_settings.order_num_esc_str_enabled && scanpack_settings.order_num_esc_str_removal.present?
+        prefixes_array = scanpack_settings.order_num_esc_str_removal.split(',')
+        prefixes_array.each do |prefix|
+          next unless @params[:input].start_with?(prefix)
+
+          @params[:input].sub!(prefix, '')
+          break
+        end
+      end
+    end
   end
 end

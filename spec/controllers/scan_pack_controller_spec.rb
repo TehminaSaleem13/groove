@@ -525,6 +525,21 @@ RSpec.describe ScanPackController, type: :controller do
         expect(result['data']['order']['increment_id']).to eq('TRA')
       end
     end
+
+    describe 'Order number prefix removal for gpx' do
+      before do
+        ScanPackSetting.last.update_attributes(order_num_esc_str_removal: "ORDERID-", order_num_esc_str_enabled: true)
+      end
+
+      it 'exact match on order number with both enabled' do
+        get :scan_barcode, params: { input: "ORDERID-100", state: "scanpack.rfo", id: nil, box_id: nil, store_order_id: nil, app: "app", scan_pack: {input: "ORDERID-100", state: "scanpack.rfo", id: nil, box_id: nil, store_order_id: nil, app: "app" } }
+
+        expect(response.status).to eq(200)
+        result = JSON.parse(response.body)
+        expect(result['status']).to eq(true)
+        expect(result['data']['order_num']).to eq('100')
+      end
+    end
   end
 
   describe 'Order Scan' do
