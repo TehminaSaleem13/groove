@@ -17,7 +17,7 @@ RSpec.describe OrderMethodsHelper do
     let(:store_order_id) { '123456789' }
     let(:store) { FactoryBot.create(:store, store_type: 'Shipstation API 2', name: 'Shipstation API 2', inventory_warehouse: inv_wh, status: true) }
     let!(:ss_credential) { FactoryBot.create(:shipstation_rest_credential, store: store) }
-    let(:order) { FactoryBot.create(:order, status: 'scanned', store: store, store_order_id: store_order_id, ss_label_data: ss_label_data) }
+    let(:order) { FactoryBot.create(:order, status: 'scanned', store: store, store_order_id: store_order_id, shipstation_label_data: FactoryBot.build(:shipstation_label_data, content: ss_label_data)) }
     let(:ss_label_data) do
       {
         'orderId' => store_order_id,

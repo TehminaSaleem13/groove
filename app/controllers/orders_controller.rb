@@ -582,8 +582,9 @@ class OrdersController < ApplicationController
       order.city = params[:ss_label_data][:shipping_address][:city] || ''
       order.postcode = params[:ss_label_data][:shipping_address][:postal_code] || ''
       order.country = params[:ss_label_data][:shipping_address][:country] || ''
-      order.ss_label_data = (order.ss_label_data || {}).merge(weight: params[:ss_label_data][:weight].to_unsafe_h, dimensions: params[:ss_label_data][:dimensions].to_unsafe_h)
-      order.save
+      ss_label_data = order.shipstation_label_data || order.build_shipstation_label_data
+      ss_label_data.content = (ss_label_data.content || {}).merge(weight: params[:ss_label_data][:weight].to_unsafe_h, dimensions: params[:ss_label_data][:dimensions].to_unsafe_h)
+      order.save && ss_label_data.save
     rescue StandardError
       result = { status: false }
     end

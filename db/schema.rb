@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240527090555) do
+ActiveRecord::Schema.define(version: 20240528055214) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -760,7 +760,6 @@ ActiveRecord::Schema.define(version: 20240527090555) do
     t.text "split_from_order_id"
     t.text "source_order_ids"
     t.string "cloned_from_shipment_id", default: ""
-    t.text "ss_label_data", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.string "importer_id"
     t.integer "clicked_scanned_qty"
     t.string "import_item_id"
@@ -1181,6 +1180,14 @@ ActiveRecord::Schema.define(version: 20240527090555) do
     t.datetime "updated_at", null: false
     t.integer "store_id"
     t.datetime "last_imported_at"
+  end
+
+  create_table "shipstation_label_data", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
+    t.text "content", limit: 4294967295, collation: "utf8mb4_unicode_ci"
+    t.bigint "order_id", null: false
+    t.datetime "created_at", null: false
+    t.datetime "updated_at", null: false
+    t.index ["order_id"], name: "index_shipstation_label_data_on_order_id"
   end
 
   create_table "shipstation_rest_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

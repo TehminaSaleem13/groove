@@ -14,6 +14,7 @@ class Order < ActiveRecord::Base
   has_one :order_shipping, dependent: :destroy
   has_one :tote, dependent: :nullify
   has_one :order_exception, dependent: :destroy
+  has_one :shipstation_label_data, dependent: :delete
   has_many :order_activities, dependent: :destroy
   has_many :order_serials, dependent: :destroy
   has_many :packing_cams, dependent: :destroy
@@ -55,7 +56,7 @@ class Order < ActiveRecord::Base
   scope :filtered_by_status, ->(statuses) {
     return all if statuses.include?("all")
     statuses.delete("partiallyscanned") if statuses.include?("partiallyscanned")
-    
+
     statuses = [statuses] unless statuses.is_a?(Array)
     where(status: statuses.map(&:to_s)) if statuses.present?
   }
@@ -65,7 +66,7 @@ class Order < ActiveRecord::Base
     .where(status: "awaiting") if statuses.include?("partiallyscanned") && !statuses.include?("awaiting")
   }
   scope :filter_all_status, ->(filters) {
-    filter_partially_scanned(filters).merge(Order.filtered_by_status(filters))  
+    filter_partially_scanned(filters).merge(Order.filtered_by_status(filters))
   }
   scope :filter_by_qty, ->(operator, value) {
     includes(:order_items)
@@ -113,10 +114,10 @@ class Order < ActiveRecord::Base
     if date_range_object.present? && date_range_object.is_a?(Hash)
       start_date = date_range_object[:start_date]
       end_date = date_range_object[:end_date]
-      
+
       start_date = DateTime.strptime(start_date, "%m-%d-%Y") if start_date.is_a?(String) && start_date != ""
       end_date = DateTime.strptime(end_date, "%m-%d-%Y") if end_date.is_a?(String) && end_date != ""
-      
+
       where("order_placed_time >= ? AND order_placed_time <= ?", start_date, end_date) if start_date.present? && end_date.present?
     end
   }
@@ -332,7 +333,7 @@ class Order < ActiveRecord::Base
     tag.color = imported_tag["color"] if imported_tag["color"].present?
     add_order_tag(tag)
   end
-  
+
   def add_tag_from_shopify(imported_tags)
     result = false
     imported_tags.split(", ").each do |item|
@@ -541,6 +542,10 @@ class Order < ActiveRecord::Base
     status == 'scanned'
   end
 
+  def label_data
+    shipstation_label_data&.content || {}
+  end
+
   private
 
   def add_order_tag(tag)
@@ -562,11 +567,11 @@ class Order < ActiveRecord::Base
   end
 
   def create_origin_store
-    if ss_label_data.present? || store.store_type == 'ShippingEasy'
+    if label_data.present? || store.store_type == 'ShippingEasy'
       origin_store_id = if store.store_type == 'ShippingEasy'
                           self.origin_store_id
                        else
-                        ss_label_data.dig('advancedOptions','storeId')
+                        label_data.dig('advancedOptions','storeId')
                        end
 
       recent_order_details =  "#{firstname} #{lastname}  - #{increment_id}"

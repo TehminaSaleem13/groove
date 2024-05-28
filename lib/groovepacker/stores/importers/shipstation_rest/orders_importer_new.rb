@@ -288,7 +288,7 @@ module Groovepacker
             shipstation_order.attributes = {  increment_id: order['orderNumber'], store_order_id: order['orderId'],
                                               order_placed_time: ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(order['orderDate']).to_time, email: order['customerEmail'],
                                               shipping_amount: order['shippingAmount'], order_total: order['amountPaid'] }
-            shipstation_order.ss_label_data = order.slice('orderId', 'carrierCode', 'serviceCode', 'packageCode', 'confirmation', 'shipDate', 'weight', 'dimensions', 'insuranceOptions', 'internationalOptions', 'advancedOptions')
+            shipstation_order.build_shipstation_label_data(content: order.slice('orderId', 'carrierCode', 'serviceCode', 'packageCode', 'confirmation', 'shipDate', 'weight', 'dimensions', 'insuranceOptions', 'internationalOptions', 'advancedOptions'))
             shipstation_order.last_modified = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(order['modifyDate']).to_time
             shipstation_order = init_shipping_address(shipstation_order, order) unless tenant.gdpr_shipstation
             shipstation_order = import_notes(shipstation_order, order)
@@ -472,7 +472,7 @@ module Groovepacker
 
             if order['tagIds'].present?
               tags_list  = @client.get_all_tags_list
-              
+
               order['tagIds'].each do |tag_id|
                 tag = tags_list.select { |tag| tag["tagId"] == tag_id }
                 shipstation_order.add_tag(tag.first) if tag.present?

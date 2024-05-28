@@ -351,11 +351,11 @@ module OrderMethodsHelper
 
   def ss_label_order_data(skip_trying: false, params: {})
     ss_rest_credential = store.shipstation_rest_credential
-    order_ss_label_data = ss_label_data || {}
+    order_ss_label_data = label_data || {}
     direct_print_data = {}
     ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_rest_credential.api_key, ss_rest_credential.api_secret)
     general_settings = GeneralSetting.last
-    order = ss_client.get_order(ss_label_data["orderId"].to_s)
+    order = ss_client.get_order(order_ss_label_data["orderId"].to_s)
     direct_print_data = try_creating_label if !skip_trying && ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
     if direct_print_data[:status]
       order_ss_label_data['direct_printed'] = true
@@ -451,29 +451,29 @@ module OrderMethodsHelper
     return { status: false } unless check_valid_label_data
 
     default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').strftime('%a, %d %b %Y')
-    ship_date = if ss_label_data['shipDate'].present?
-                  shipping_date = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(ss_label_data['shipDate'].to_s).strftime('%a, %d %b %Y')
+    ship_date = if label_data['shipDate'].present?
+                  shipping_date = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(label_data['shipDate'].to_s).strftime('%a, %d %b %Y')
                   shipping_date.to_date < default_ship_date.to_date ? default_ship_date : shipping_date
                 else
                   default_ship_date
                 end
 
     post_data = {
-      'orderId' => ss_label_data['orderId'],
-      'carrierCode' => ss_label_data['carrierCode'],
-      'serviceCode' => ss_label_data['serviceCode'],
-      'confirmation' => ss_label_data['confirmation'],
-      'packageCode' => ss_label_data['packageCode'],
+      'orderId' => label_data['orderId'],
+      'carrierCode' => label_data['carrierCode'],
+      'serviceCode' => label_data['serviceCode'],
+      'confirmation' => label_data['confirmation'],
+      'packageCode' => label_data['packageCode'],
       'shipDate' => ship_date,
       'shipTo' => { 'street1'=> self.address_1, 'city'=> self.city, 'country'=> self.country, 'name'=> self.firstname + " " + self.lastname, 'postalCode'=> self.postcode, 'state'=> self.state },
-      'weight' => { 'value' => ss_label_data['weight']['value'], 'units' => ss_label_data['weight']['units'] }
+      'weight' => { 'value' => label_data['weight']['value'], 'units' => label_data['weight']['units'] }
     }
-    post_data['dimensions'] = ss_label_data['dimensions'] if ss_label_data['dimensions'].present? && ss_label_data['dimensions']['units'].present? && ss_label_data['dimensions']['length'].present? && ss_label_data['dimensions']['width'].present? && ss_label_data['dimensions']['height'].present?
+    post_data['dimensions'] = label_data['dimensions'] if label_data['dimensions'].present? && label_data['dimensions']['units'].present? && label_data['dimensions']['length'].present? && label_data['dimensions']['width'].present? && label_data['dimensions']['height'].present?
     create_label(store.shipstation_rest_credential.id, post_data)
   end
 
   def check_valid_label_data
-    ss_label_data['orderId'].present? && ss_label_data['packageCode'].present? && ss_label_data['weight'].present? && ss_label_data['carrierCode'].present? && ss_label_data['serviceCode'].present? && ss_label_data['confirmation'].present? && ss_label_data['weight']['value'].present? && ss_label_data['weight']['units'].present?
+    label_data['orderId'].present? && label_data['packageCode'].present? && label_data['weight'].present? && label_data['carrierCode'].present? && label_data['serviceCode'].present? && label_data['confirmation'].present? && label_data['weight']['value'].present? && label_data['weight']['units'].present?
   end
 
   def create_label(credential_id, post_data)

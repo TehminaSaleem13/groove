@@ -8,7 +8,7 @@ class DeleteOrders
   # queue 'delete orders'
   # priority 10
 
-  ORDER_ASSOCIATIONS = %w[OrderShipping OrderException OrderActivity OrderSerial PackingCam ShippingLabel Box].freeze
+  ORDER_ASSOCIATIONS = %w[OrderShipping OrderException OrderActivity OrderSerial PackingCam ShippingLabel Box ShipstationLabelData].freeze
   ORDER_ITEM_ASSOCIATIONS = %w[OrderItemBox OrderItemKitProduct OrderItemOrderSerialProductLot OrderItemScanTime].freeze
 
   def initialize(attrs = {})
@@ -18,7 +18,7 @@ class DeleteOrders
 
   def perform
     # GROOV-3520(when tenant field orders_delete_days is set to 0 tenant orders not be deleted)
-    
+
     tenants = Tenant.where.not(orders_delete_days: 0)
     tenants.find_each.each do |tenant|
       Apartment::Tenant.switch!(tenant.name)
