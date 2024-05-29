@@ -29,7 +29,11 @@ module OrderConcern
 
   def get_orders_list_for_selected(sort_by_order_number = false)
     @params = params
-    result =  if @params['filter'].present? && @params['filter'].include?(',') && @params[:select_all]
+    result =  if @params['filter'].present? && @params['filters'].present? && @params[:select_all]
+                @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
+                @orders, filter_length = gp_orders_filter.filter_orders(@searched_orders, true);
+                @orders.flatten
+              elsif @params['filter'].present? && @params['filter'].include?(',') && @params[:select_all]
                 filters = @params['filter'].split(", ")
                 Order.filtered_by_status(filters)
               elsif @params[:select_all] || @params[:inverted]
