@@ -52,6 +52,7 @@ module Groovepacker
           # product_not_active = true
         end
         order.order_items.each do |order_item|
+          next unless order_item.product
           next if order_item.product.status.eql?('active')
 
           @result['status'] &= false
