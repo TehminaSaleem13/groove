@@ -51,15 +51,15 @@ class DeleteOrders
   #     .find_in_batches(batch_size: 1000) do |order_items|
   #       order_items_ids = order_items.map(&:id)
 
-        # Already deleted in go code
-        # OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
-        # OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
-        # OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
+  # Already deleted in go code
+  # OrderItemKitProduct.delete_all(['order_item_id IN (?)', order_items_ids])
+  # OrderItemOrderSerialProductLot.delete_all(['order_item_id IN (?)', order_items_ids])
+  # OrderItemScanTime.delete_all(['order_item_id IN (?)', order_items_ids])
 
-        # Update inventory
-        # order_items.map(&:delete_inventory)
-        #  Removed destroy, for avioding the callbacks
-        # as child associations are already deleted
+  # Update inventory
+  # order_items.map(&:delete_inventory)
+  #  Removed destroy, for avioding the callbacks
+  # as child associations are already deleted
   #       OrderItem.where(['id IN (?)', order_items_ids]).delete_all
   #     end
   # end
@@ -309,8 +309,16 @@ class DeleteOrders
   private
 
   def delete_orders_for_tenant(tenant)
-    orders_delete_days = tenant.orders_delete_days.days.ago.beginning_of_day
-    orders = scanned_orders + partially_scanned_orders + awaiting_and_onhold_orders(orders_delete_days)
+    orders_delete_days = tenant.orders_delete_days.to_i.days.ago.beginning_of_day
+    orders_delete_date = if orders_delete_days.future?
+      14.days.ago.beginning_of_day
+    elsif orders_delete_days < DateTime.parse('01-01-2010')
+      1.year.ago.beginning_of_day
+    else
+      orders_delete_days
+    end
+
+    orders = scanned_orders + partially_scanned_orders + awaiting_and_onhold_orders(orders_delete_date)
     orders_ids = orders.pluck(:id)
 
     Rails.logger.info 'No Orders Found !!!' if orders.empty?
@@ -363,8 +371,8 @@ class DeleteOrders
     Order.partially_scanned.where('orders.updated_at < ?', 90.days.ago.beginning_of_day)
   end
 
-  def awaiting_and_onhold_orders(orders_delete_days)
-    orders = Order.where('orders.updated_at < ?', orders_delete_days)
+  def awaiting_and_onhold_orders(orders_delete_date)
+    orders = Order.where('orders.updated_at < ?', orders_delete_date)
     orders.awaiting_without_partially_scanned.or(orders.where(status: 'onhold'))
   end
 
