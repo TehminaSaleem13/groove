@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240530082042) do
+ActiveRecord::Schema.define(version: 20240530101902) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -838,6 +838,7 @@ ActiveRecord::Schema.define(version: 20240530082042) do
     t.string "lot_number"
     t.integer "packing_count", default: 1
     t.boolean "is_multipack_barcode", default: false
+    t.index ["barcode"], name: "index_product_barcodes_on_barcode"
     t.index ["product_id"], name: "index_product_barcodes_on_product_id"
   end
 
