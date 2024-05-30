@@ -162,7 +162,7 @@ module Groovepacker
 
       def send_exception_data(order_id, tenant)
         stat_stream_obj = SendStatStream.new
-        stat_stream_obj.delay(run_at: 1.seconds.from_now, queue: "send_order_exception_#{@order.id}", priority: 95).send_order_exception(
+        stat_stream_obj.delay(run_at: 1.seconds.from_now, queue: "send_order_exception_#{tenant}_#{order_id}", priority: 95).send_order_exception(
           order_id, tenant
         )
       end
