@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240528055214) do
+ActiveRecord::Schema.define(version: 20240530082042) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -177,6 +177,7 @@ ActiveRecord::Schema.define(version: 20240528055214) do
     t.datetime "updated_at", null: false
     t.string "signature"
     t.text "args"
+    t.string "tenant"
     t.index ["priority", "run_at"], name: "delayed_jobs_priority"
   end
 

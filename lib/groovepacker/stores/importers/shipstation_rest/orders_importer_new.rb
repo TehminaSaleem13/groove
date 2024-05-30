@@ -221,8 +221,7 @@ module Groovepacker
             initialize_import_item
             @scan_settings = ScanPackSetting.last
             response = @client.get_webhook_order(url, @import_item)
-            shipments_response = should_fetch_shipments? ? @client.get_shipments(import_from - 1.days) : []
-            import_orders_from_response(response, shipments_response)
+            import_orders_from_response(response, [])
             @import_item.destroy
             destroy_nil_import_items
           end
