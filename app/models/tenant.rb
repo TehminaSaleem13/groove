@@ -1,7 +1,10 @@
 # frozen_string_literal: true
 
 class Tenant < ActiveRecord::Base
-  # attr_accessible :name, :duplicate_tenant_id, :initial_plan_id, :is_modified, :magento_tracking_push_enabled, :is_multi_box, :orders_delete_days, :api_call, :allow_rts, :last_import_store_type, :scan_pack_workflow, :store_order_respose_log, :delayed_inventory_update, :daily_packed_toggle, :direct_printing_options
+  store :settings, accessors: %i[mark_discrepancies_scanned], coder: JSON
+
+  after_initialize :initialize_default_settings, if: :new_record?
+
   validates :name, uniqueness: true
   has_one :subscription
   has_one :access_restriction
@@ -59,5 +62,11 @@ class Tenant < ActiveRecord::Base
       se_import_data << data
     end
     se_import_data
+  end
+
+  private
+
+  def initialize_default_settings
+    self.mark_discrepancies_scanned ||= true if mark_discrepancies_scanned.nil?
   end
 end

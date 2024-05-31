@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240530101902) do
+ActiveRecord::Schema.define(version: 20240531065417) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -1469,6 +1469,7 @@ ActiveRecord::Schema.define(version: 20240530101902) do
     t.boolean "loggly_se_imports", default: false
     t.boolean "loggly_gpx_order_scan", default: false
     t.boolean "loggly_shipstation_imports", default: false
+    t.text "settings"
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|

@@ -3,11 +3,12 @@
 require 'rails_helper'
 
 RSpec.describe Groovepacker::SlackNotifications::OrderScanDiscrepancy do
-  subject { described_class.new(tenant, options) }
+  subject { described_class.new(tenant.name, options) }
 
-  let(:tenant) { Apartment::Tenant.current }
+  let!(:tenant) { create(:tenant, name: Apartment::Tenant.current) }
+
   let(:store) { create(:store, :csv) }
-  let(:order_status) { 'scanned' }
+  let(:order_status) { 'awaiting' }
   let(:order) { create(:order, increment_id: 'Test Verify Order', status: order_status, store: store) }
   let(:options) do
     {
@@ -18,12 +19,16 @@ RSpec.describe Groovepacker::SlackNotifications::OrderScanDiscrepancy do
     }
   end
 
+  after do
+    tenant.destroy
+  end
+
   describe '#call' do
     before do
       allow(HTTParty).to receive(:post).and_return(true)
     end
 
-    context 'when order is scanned' do
+    context 'when order is not marked scanned' do
       it 'does notify in #resource-2 slack channel' do
         expect(HTTParty).to receive(:post)
         subject.call

@@ -56,7 +56,7 @@ class ScanPackController < ApplicationController
       local_order = orders_data.find { |s| s[:order_id].to_s == order.id.to_s }
       order_status_code = order.status == 'scanned' ? 0 : nil
 
-      if local_order && local_order[:status].to_s != order_status_code.to_s
+      if local_order && local_order[:status].to_s != order_status_code.to_s && !order.scanned?
         options = { order_id: order.id, user_name: current_user.name, app_url: params[:app_url] }
         service = Groovepacker::SlackNotifications::OrderScanDiscrepancy.new(Apartment::Tenant.current, options)
         service.delay(run_at: 15.seconds.from_now, priority: 95, queue: "detect_discrepancy_#{Apartment::Tenant.current}").call
