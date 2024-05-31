@@ -301,7 +301,7 @@ module Groovepacker
           end
 
           def find_or_init_new_order(order)
-            shipstation_order = search_order_in_db(order)
+            shipstation_order = search_order_in_db(order['orderNumber'], order['orderId'])
             @order_to_update = shipstation_order.present?
             return if shipstation_order && (shipstation_order.status == 'scanned' || shipstation_order.status == 'cancelled' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
 

@@ -235,17 +235,9 @@ module ProductsHelper
     bulk_action.update_attributes(status: 'failed', messages: e, current: '')
   end
 
-  def search_order_in_db(order)
+  def search_order_in_db(order_number, store_order_id)
     if @credential.allow_duplicate_order == true
-      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order['orderNumber'], order['orderId'])
-    else
-      Order.find_by_store_id_and_increment_id(@credential.store_id, order['orderNumber'])
-    end
-  end
-
-  def search_veeqo_order_in_db(order_number, order)
-    if @credential.allow_duplicate_order == true
-      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order_number, order['id'])
+      Order.find_by_store_id_and_increment_id_and_store_order_id(@credential.store_id, order_number, store_order_id)
     else
       Order.find_by_store_id_and_increment_id(@credential.store_id, order_number)
     end

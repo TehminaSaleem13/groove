@@ -122,7 +122,7 @@ module Groovepacker
 
         def handle_cancelled_order(gp_order)
           return false unless gp_order.present? && gp_order.status == 'cancelled'
-          
+
           if @credential.remove_cancelled_orders
             gp_order.destroy
           end

@@ -6,7 +6,7 @@ module Groovepacker
       module Veeqo
         class OrdersImporter < Importer
           include ProductsHelper
-  
+
           def import
             init_common_objects
             @import_item.update_attributes(updated_orders_import: 0)
@@ -28,24 +28,24 @@ module Groovepacker
               nil
             end
             return @result unless @import_item.present?
-  
+
             @import_item.update_column(:importer_id, @worker_id)
             response = get_orders_response
             @result[:total_imported] = response['orders'].nil? ? 0 : response['orders'].length
             initialize_import_item
             return @result if response['orders'].nil? || response['orders'].blank? || response['orders'].first.nil?
-  
+
             response['orders'] = begin
                                     response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) }
                                   rescue StandardError
                                     response['orders']
                                   end
-  
+
             ImportItem.where(store_id: @store.id).where.not(id: @import_item).update_all(status: 'cancelled')
-  
+
             response['orders'].each do |order|
               break if import_should_be_cancelled
-  
+
               import_single_order(order) if order.present?
             end
             send_sku_report_not_found if @result_data.count > 0
@@ -58,7 +58,7 @@ module Groovepacker
               end
             end
           end
-  
+
           def ondemand_import_single_order(order_number)
             @on_demand_import = true
             init_common_objects
@@ -74,7 +74,7 @@ module Groovepacker
               nil
             end
           end
-  
+
           private
 
           def statuses
@@ -99,13 +99,13 @@ module Groovepacker
             response['orders'] = response['orders'].blank? ? status_response['orders'] : (response['orders'] | status_response['orders'])
             response
           end
-    
+
           def import_single_order(order)
             @import_item.update_attributes(current_increment_id: order['number'], current_order_items: -1, current_order_imported_item: -1)
             update_import_count('success_updated') && return if skip_the_order?(order)
-  
+
             order_in_gp_present = false
-            order_in_gp = search_veeqo_order_in_db(set_order_number(order), order)
+            order_in_gp = search_order_in_db(set_order_number(order), order['id'])
             return if handle_cancelled_order(order_in_gp)
             veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
           end
@@ -126,7 +126,7 @@ module Groovepacker
             @import_item.message = 'All import statuses is disabled. Import skipped.'
             @import_item.save
           end
-  
+
           def import_order(veeqo_order, order)
             # veeqo_order.tags = order['tags']
             veeqo_order.increment_id = set_order_number(order)
@@ -166,7 +166,7 @@ module Groovepacker
           def import_shipped_having_tracking
             @import_shipped_having_tracking ||= @credential.import_shipped_having_tracking
           end
-  
+
           def import_veeqo_order_item(veeqo_order, order)
             return if order['line_items'].nil?
 
@@ -186,7 +186,7 @@ module Groovepacker
                 on_demand_logger.info(log)
               end
             end
-            
+
             return unless veeqo_order.order_items.present?
             veeqo_order.save!
             veeqo_order
@@ -238,25 +238,25 @@ module Groovepacker
           def send_sku_report_not_found
             VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data, @shopify_credential.store).deliver
           end
-  
+
           def import_order_item(line_item)
             row_total = line_item['sellable']['price'].to_f * line_item['quantity'].to_f
             OrderItem.new(qty: line_item['quantity'], price: line_item['sellable']['price'], row_total: row_total)
           end
-  
+
           def add_customer_info(veeqo_order, order)
             return veeqo_order if order['customer'].nil?
-  
+
             veeqo_order.email = order['customer']['email']
             veeqo_order.firstname = order['shipping_addresses'].try(:[], 'first_name')
             veeqo_order.lastname = order['shipping_addresses'].try(:[], 'last_name')
             veeqo_order
           end
-  
+
           def add_order_shipping_address(veeqo_order, order)
             shipping_address = order['customer']['shipping_addresses']&.first
             return veeqo_order if shipping_address.blank?
-  
+
             veeqo_order.address_1 = shipping_address['address1']
             veeqo_order.address_2 = shipping_address['address2']
             veeqo_order.city = shipping_address['city']
@@ -265,17 +265,17 @@ module Groovepacker
             veeqo_order.country = shipping_address['country']
             veeqo_order
           end
-  
+
           # def update_shipping_amount_and_weight(veeqo_order, order)
           #   unless order['shipping_lines'].empty?
           #     shipping = order['shipping_lines'].first
           #     veeqo_order.shipping_amount = shipping['price'].to_f unless shipping.nil?
           #   end
-  
+
           #   veeqo_order.weight_oz = (order['allocations'].first&.dig('total_weight').to_i * 0.035274) unless order['allocations'].first&.dig('total_weight').nil?
           #   veeqo_order
           # end
-  
+
           def veeqo_context
             handler = Groovepacker::Stores::Handlers::VeeqoHandler.new(@store)
 
@@ -287,7 +287,7 @@ module Groovepacker
 
             Groovepacker::Stores::Context.new(handler)
           end
-  
+
           def update_import_count(import_type = 'success_imported')
             if import_type == 'success_imported'
               @import_item.update_attributes(success_imported: @import_item.success_imported + 1)
@@ -297,7 +297,7 @@ module Groovepacker
               @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
             end
           end
-      
+
           def import_order_and_items(order, order_in_gp)
             # create order
             veeqo_order = order_in_gp
@@ -320,10 +320,10 @@ module Groovepacker
               veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.sku} Added", "#{@store.name} Import")
             end
           end
-    
+
           def skip_the_order?(order)
             # return false if @on_demand_import
-  
+
             import_shipped_having_tracking && order['status'] == 'shipped' && get_tracking_number(order).nil?
           end
         end

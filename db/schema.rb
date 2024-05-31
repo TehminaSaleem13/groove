@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240531065417) do
+ActiveRecord::Schema.define(version: 20240531102932) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -653,7 +653,9 @@ ActiveRecord::Schema.define(version: 20240531065417) do
     t.index ["inv_status", "scanned_status"], name: "index_order_items_on_inv_status_and_scanned_status"
     t.index ["is_deleted"], name: "index_order_items_on_is_deleted"
     t.index ["order_id"], name: "index_order_items_on_order_id"
+    t.index ["product_id"], name: "index_order_items_on_product_id"
     t.index ["qty"], name: "index_order_items_on_qty"
+    t.index ["scanned_status"], name: "index_order_items_on_scanned_status"
   end
 
   create_table "order_serials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -983,6 +985,7 @@ ActiveRecord::Schema.define(version: 20240531065417) do
     t.decimal "avg_cost", precision: 10, scale: 2
     t.string "count_group", limit: 1
     t.integer "restock_lead_time", default: 0
+    t.index ["status"], name: "index_products_on_status"
     t.index ["store_id"], name: "index_products_on_store_id"
   end
 
@@ -1352,6 +1355,7 @@ ActiveRecord::Schema.define(version: 20240531065417) do
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "display_origin_store_name", default: false
     t.boolean "disable_packing_cam", default: false
+    t.index ["name"], name: "index_stores_on_name"
   end
 
   create_table "stripe_webhooks", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
