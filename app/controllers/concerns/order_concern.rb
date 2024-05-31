@@ -33,6 +33,9 @@ module OrderConcern
                 @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
                 @orders, filter_length = gp_orders_filter.filter_orders(@searched_orders, true);
                 @orders.flatten
+                unselected_ids = params['unselected'].split(',').map(&:to_i) if params['unselected'].present?
+                @orders = @orders.reject { |order| unselected_ids.include?(order.id) } if unselected_ids.present?
+                @orders
               elsif @params['filter'].present? && @params['filter'].include?(',') && @params[:select_all]
                 filters = @params['filter'].split(", ")
                 Order.filtered_by_status(filters)

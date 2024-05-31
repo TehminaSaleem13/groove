@@ -968,6 +968,9 @@ RSpec.describe OrdersController, type: :controller do
 
       post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json }
       expect(response.status).to eq(200)
+
+      post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, 'unselected' => "C000209814-B(Duplicate-2)" }
+      expect(response.status).to eq(200)
     end
 
     it 'Change Order Status for GPX with Pull Inv' do
