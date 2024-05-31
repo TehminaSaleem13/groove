@@ -183,6 +183,8 @@ module Groovepacker
 
           def import_single_order(order_no, user_id, on_demand_quickfix, controller)
             @import_single_order = true
+            user_name = User.find_by_id(user_id)&.name if user_id
+            @ondemand_user_name = "(#{user_name})" if user_name
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
@@ -569,7 +571,7 @@ module Groovepacker
 
           def update_order_activity_log(shipstation_order, order)
             order_import_type = @import_single_order ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
-            shipstation_order.addactivity(order_import_type, @credential.store.name + ' Import')
+            shipstation_order.addactivity(order_import_type, @credential.store.name + " Import #{@ondemand_user_name}")
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true && (@credential.set_coupons_to_intangible || check_for_intangible_coupon)
@@ -584,7 +586,7 @@ module Groovepacker
 
           def update_order_activity_log_for_gp_coupon(shipstation_order, order)
             order_import_type = @import_single_order ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
-            shipstation_order.addactivity(order_import_type, @credential.store.name + ' Import')
+            shipstation_order.addactivity(order_import_type, @credential.store.name + " Import #{@ondemand_user_name}")
             shipstation_order.order_items.each_with_index do |item, index|
               intangible = order['items'][index]['adjustment'] ? true : false
               if intangible == true

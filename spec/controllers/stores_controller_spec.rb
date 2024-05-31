@@ -14,6 +14,9 @@ RSpec.describe StoresController, type: :controller do
     @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'csv_inventory_warehouse')
     @store = FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: @inv_wh, status: true)
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: @store.id)
+    tenant = Apartment::Tenant.current
+    Apartment::Tenant.switch!(tenant.to_s)
+    @tenant = Tenant.create(name: tenant.to_s)
   end
 
   describe 'CSV Import' do
@@ -274,7 +277,6 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Verify Shipstation Tags' do
-      request.accept = 'application/json'
       post :verify_tags, params: { id: @ship_store.id }
       expect(response.status).to eq(200)
       res = JSON.parse(response.body)
@@ -282,7 +284,6 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Shipstation Store Settings' do
-      request.accept = 'application/json'
       post :create_update_store, params: { 'file_path' => '', 'inventory_warehouse_id' => '1', 'is_fba' => 'false', 'product_ftp_import' => 'false', 'id' => @ship_store.id, 'name' => 'Shipstation Orders', 'status' => 'true', 'store_type' => 'Shipstation API 2', 'order_date' => 'null', 'created_at' => '2020-10-11T02:29:20.000Z', 'updated_at' => '2021-05-25T07:51:42.000Z', 'thank_you_message_to_customer' => 'null', 'auto_update_products' => 'false', 'update_inv' => 'false', 'on_demand_import' => 'false', 'fba_import' => 'false', 'csv_beta' => 'true', 'is_verify_separately' => 'null', 'split_order' => 'null', 'product_add' => 'null', 'product_export' => 'null', 'on_demand_import_v2' => 'true', 'regular_import_v2' => 'true', 'quick_fix' => 'true', 'troubleshooter_option' => 'true', 'allow_bc_inv_push' => 'false', 'allow_mg_rest_inv_push' => 'false', 'allow_shopify_inv_push' => 'false', 'allow_teapplix_inv_push' => 'false', 'allow_magento_soap_tracking_no_push' => 'false', 'use_chrome_extention' => 'false', 'use_api_create_label' => 'false', 'ss_api_create_label' => 'false', 'switch_back_button' => 'true', 'return_to_order' => 'false', 'auto_click_create_label' => 'false', 'api_key' => '7dfa40094387480992148bb501ed4f7d', 'api_secret' => '1924a70194f84d21bd37644e8b745ee5', 'shall_import_awaiting_shipment' => 'true', 'shall_import_shipped' => 'true', 'shall_import_pending_fulfillment' => 'true', 'shall_import_customer_notes' => 'false', 'shall_import_internal_notes' => 'true', 'hex_barcode' => 'undefined', 'regular_import_range' => '5', 'import_days' => '0,1,2,3,4,5,6', 'warehouse_location_update' => 'false', 'gp_ready_tag_name' => 'GP Ready', 'gp_imported_tag_name' => 'GP Imported', 'gen_barcode_from_sku' => 'true', 'import_upc' => 'true', 'allow_duplicate_order' => 'false', 'tag_import_option' => 'true', 'order_import_range_days' => '190', 'import_tracking_info' => 'true', 'postcode' => '', 'skip_ss_label_confirmation' => 'false', 'enabled_status' => 'true' }
       shipstation = ShipstationRestCredential.where(store_id: @ship_store.id)
       expect(response.status).to eq(200)
@@ -290,12 +291,23 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Fetch Label Related Data' do
-      request.accept = 'application/json'
       order = FactoryBot.create(:order, increment_id: "SS_3453", store_id: @ship_store.id, store_order_id: '1660160213', shipstation_label_data: FactoryBot.build(:shipstation_label_data, content: {"orderId"=>785164401, "carrierCode"=>"stamps_com", "serviceCode"=>"usps_first_class_mail", "packageCode"=>"package", "confirmation"=>"delivery", "shipDate"=>"2023-01-09", "weight"=>{"value"=>1.4, "units"=>"ounces", "WeightUnits"=>1}, "dimensions"=>nil, "insuranceOptions"=>{"provider"=>nil, "insureShipment"=>false, "insuredValue"=>0.0}, "internationalOptions"=>{"contents"=>"merchandise", "customsItems"=>nil, "nonDelivery"=>"return_to_sender"}, "advancedOptions"=> {"warehouseId"=>16188, "nonMachinable"=>false, "saturdayDelivery"=>false, "containsAlcohol"=>false, "mergedOrSplit"=>false, "mergedIds"=>[], "parentId"=>nil, "storeId"=>104291, "customField1"=>"153491951039-2338405566005", "customField2"=>"10051435535311", "customField3"=>"", "source"=>"ebay_v2", "billToParty"=>nil, "billToAccount"=>nil, "billToPostalCode"=>nil, "billToCountryCode"=>nil, "billToMyOtherAccount"=>nil}}))
 
       post :fetch_label_related_data, params: { id: order.id, "app"=>true}
       expect(response.status).to eq (200)
       res = JSON.parse(response.body)
+      expect(res['status']).to be true
+    end
+
+    it 'Shipstation On Demand Import' do
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_order_on_demand).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml'))))
+
+      get :get_order_details, params: { order_no: 'SSTestOrder', store_id: @ship_store.id }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
       expect(res['status']).to be true
     end
   end
