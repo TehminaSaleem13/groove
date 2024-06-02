@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240531102932) do
+ActiveRecord::Schema.define(version: 20240602112743) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -687,7 +687,7 @@ ActiveRecord::Schema.define(version: 20240531102932) do
   end
 
   create_table "order_tags", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
-    t.string "name", limit: 25, null: false
+    t.string "name", null: false
     t.string "color", default: "#B8B8B8", null: false
     t.string "mark_place", default: "0"
     t.datetime "created_at", null: false

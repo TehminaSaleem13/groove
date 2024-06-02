@@ -179,7 +179,8 @@ module Groovepacker
             end
         rescue StandardError => e
           begin
-              log_import_error(e)
+            Rollbar.error(e, e.message, Apartment::Tenant.current)
+            log_import_error(e)
           rescue StandardError
             nil
             end
