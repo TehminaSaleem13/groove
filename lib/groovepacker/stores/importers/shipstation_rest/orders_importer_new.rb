@@ -244,7 +244,9 @@ module Groovepacker
 
               begin
                 update_import_item_and_import_order(order, shipments_response)
+                @credential.update(quick_import_last_modified_v2: Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
               rescue Exception => e
+                Rollbar.error(e, e.message, Apartment::Tenant.current)
               end
               # break if Rails.env == "test"
               # sleep 0.3
@@ -479,8 +481,6 @@ module Groovepacker
                 shipstation_order.add_tag(tag.first) if tag.present?
               end
             end
-            # @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered && @store.regular_import_v2
-            @store.shipstation_rest_credential.update_attribute(:quick_import_last_modified_v2, Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
           rescue StandardError => e
             begin
                 log_import_error(e)

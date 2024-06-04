@@ -86,6 +86,7 @@ class StoresController < ApplicationController
         else
           cred.update_attributes(last_imported_at: new_lro)
         end
+        cred.track_changes(title: "#{cred.class.name} Changed", tenant: Apartment::Tenant.current, username: current_user.username, object_id: cred.id, changes: { lro: new_lro })
       end
     rescue StandardError => e
       result[:error] = e
