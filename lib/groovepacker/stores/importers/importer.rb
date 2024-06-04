@@ -172,11 +172,6 @@ module Groovepacker
 
           # increase successful import with 1 and save
           order_in_gp_present ? update_import_count('success_updated') : update_import_count('success_imported')
-          begin
-              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) unless @on_demand_import
-          rescue StandardError
-            nil
-            end
         rescue StandardError => e
           begin
             Rollbar.error(e, e.message, Apartment::Tenant.current)

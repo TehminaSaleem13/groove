@@ -22,6 +22,7 @@ module Groovepacker
 
               break if import_should_be_cancelled
               import_single_order(order) if order.present? && active_statuses.include?(order['order_status'])
+              @credential.update_attributes(last_imported_at: Time.zone.parse(order['placed_at']))
             end
             Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
             @credential.update_attributes(last_imported_at: Time.zone.now) rescue nil if @import_item.status != 'cancelled'
@@ -93,7 +94,7 @@ module Groovepacker
 
           def import_single_order(order)
             @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
-            
+
             update_import_count('success_updated') && return if skip_the_order?(order)
 
             order_in_gp_present = false
@@ -109,11 +110,10 @@ module Groovepacker
             end
 
             Order.transaction do
-              import_order_and_items(order, order_in_gp) 
+              import_order_and_items(order, order_in_gp)
             end
 
             update_import_count(order_in_gp_present ? 'success_updated' : 'success_imported')
-            @credential.update_attributes(last_imported_at: Time.zone.parse(order['placed_at'])) rescue nil
           end
 
           def import_order(shippo_order, order)
@@ -158,7 +158,7 @@ module Groovepacker
 
           def import_order_item(order_item, line_item)
             row_total = line_item["total_price"].to_f * line_item["quantity"]
-            order_item = OrderItem.new( 
+            order_item = OrderItem.new(
                     qty: line_item["quantity"],
                     price: line_item["total_price"],
                     row_total: row_total

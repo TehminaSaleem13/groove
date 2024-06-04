@@ -7,8 +7,9 @@ class VeeqoCredential < ApplicationRecord
   after_commit :log_events
 
   def log_events
-    if saved_changes.present? && saved_changes.keys != ['updated_at'] && saved_changes.keys != %w[updated_at last_imported_at]
-      track_changes(title: 'VeeqoCredential Changed', tenant: Apartment::Tenant.current,
+    object_changes = saved_changes.except(:last_imported_at, :updated_at, :created_at)
+    if object_changes.present?
+      track_changes(title: "#{self.class.name} Changed", tenant: Apartment::Tenant.current,
                     username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
     end
   end

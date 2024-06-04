@@ -23,7 +23,7 @@ class ShipstationRestCredential < ActiveRecord::Base
   def log_events
     object_changes = saved_changes.except(:quick_import_last_modified_v2, :updated_at, :created_at)
     if object_changes.present?
-      track_changes(title: 'ShipstationRestCredential Changed', tenant: Apartment::Tenant.current,
+      track_changes(title: "#{self.class.name} Changed", tenant: Apartment::Tenant.current,
                     username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
     end
   end

@@ -47,16 +47,10 @@ module Groovepacker
               break if import_should_be_cancelled
 
               import_single_order(order) if order.present?
+              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
             end
             send_sku_report_not_found if @result_data.count > 0
             Tenant.save_se_import_data("========Veeqo Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item.as_json)
-            if @import_item.status != 'cancelled'
-              begin
-                @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at']))
-              rescue StandardError
-                nil
-              end
-            end
           end
 
           def ondemand_import_single_order(order_number)

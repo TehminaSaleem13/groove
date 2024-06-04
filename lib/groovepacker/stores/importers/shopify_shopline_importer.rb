@@ -34,6 +34,7 @@ module Groovepacker
             break if import_should_be_cancelled
 
             import_single_order(order) if order.present?
+            @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
           end
           Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
           if @import_item.status != 'cancelled'
