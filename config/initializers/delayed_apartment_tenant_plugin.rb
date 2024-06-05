@@ -15,6 +15,9 @@ class DelayedApartmentTenantPlugin < Delayed::Plugin
       else
         block.call(worker, job, *args)
       end
+    rescue Apartment::TenantNotFound => e
+      Rails.logger.error "ERROR: Apartment Tenant not found: \"#{job.tenant}\" in #{Apartment::Tenant.current.inspect}"
+      job.destroy
     end
   end
 end

@@ -10,9 +10,14 @@ class Tenant < ActiveRecord::Base
   has_one :access_restriction
   serialize :price
   before_destroy :remove_subscriber_from_campaignmonitor
+  after_destroy :delete_delayed_jobs
 
   def remove_subscriber_from_campaignmonitor
     initialize_campaingmonitor.remove_subscriber_from_lists
+  end
+
+  def delete_delayed_jobs
+    Delayed::Job.where(tenant: name).delete_all
   end
 
   def initialize_campaingmonitor
