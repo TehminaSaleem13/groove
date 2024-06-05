@@ -164,7 +164,7 @@ module Groovepacker
         orders = $redis.get("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
         orders = Marshal.load(orders)
         order_increment_ids = orders.pluck(:increment_id)
-        add_delete_log(current_tenant, order_increment_ids, 'List of deleted orders', params)
+        add_delete_log(current_tenant, order_increment_ids, 'List of Deleted Orders (25)', params, order_increment_ids.count)
         order_ids = orders.pluck(:id)
         init_results
         bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
@@ -349,6 +349,20 @@ module Groovepacker
 
       def delete_boxes(order)
         Box.where(order_id: order.id).destroy_all
+      end
+
+      def add_delete_log(tenant, order_increment_ids, name, params, orders_count)
+        Ahoy::Event.version_2.create({
+          name: name,
+          properties: {
+            title: name,
+            tenant: tenant,
+            username: User.find_by_id(params[:user_id])&.username,
+            objects_involved: order_increment_ids.first(25),
+            objects_involved_count: orders_count
+          },
+          time: Time.current
+        }) rescue nil
       end
     end
   end

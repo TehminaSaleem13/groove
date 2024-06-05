@@ -622,4 +622,33 @@ RSpec.describe ProductsController, type: :controller do
       end
     end
   end
+
+  describe 'Bulk Product Operations' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    it 'Delete Bulk Product' do
+      order = create(:order, increment_id: 'Test-ORDER', status: 'awaiting', store: @store, prime_order_id: '1660160213', store_order_id: '1660160213')
+      product1 = create(:product, :with_sku_barcode, status: 'inactive', store_id: @store.id, name: 'Test1')
+      product2 = create(:product, :with_sku_barcode, status: 'inactive', store_id: @store.id, name: 'Test2')
+      product3 = create(:product, :with_sku_barcode, status: 'inactive', store_id: @store.id, name: 'Test3')
+      create(:order_item, product_id: product1.id, qty: 1, price: '10', row_total: '10', order: order, name: product1.name)
+      create(:order_item, product_id: product2.id, qty: 1, price: '10', row_total: '10', order: order, name: product2.name)
+      create(:order_item, product_id: product3.id, qty: 1, price: '10', row_total: '10', order: order, name: product3.name)
+
+      post :delete_product, params: {order: "DESC", filter: "inactive", select_all: false, inverted: false, is_kit: 0, limit: 20, offset: 0, productArray: [{id: product1.id}, {id: product2.id}, {id: product3.id}], product: {status: "", is_kit: 0}}
+      
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+      expect(OrderItem.count).to eq(0)
+      expect(Product.count).to eq(0)
+      expect(ProductBarcode.count).to eq(0)
+      expect(ProductSku.count).to eq(0)
+    end
+  end
 end

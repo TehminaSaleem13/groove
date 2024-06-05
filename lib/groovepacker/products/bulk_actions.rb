@@ -101,11 +101,8 @@ module Groovepacker
               order_items: [:order]
             )
 
-          product_names = products.first(25).map(&:name)
+          first_25_products = products.limit(25).collect { |product| product.primary_sku || product.primary_barcode || product.name }
           products_count = products.count
-          product_skus = products.map(&:primary_sku)
-          EventLog.create(data: { product_skus: product_skus }, message: 'The List of Deleted Products', user_id: User.find_by(username: username).id)
-
           products_kit_skus =
             ProductKitSkus.where(option_product_id: products.map(&:id))
                           .includes(product: :product_kit_skuss)
@@ -173,7 +170,19 @@ module Groovepacker
           total_elapsed_time = (Time.current - time_started).round(2)
           object_per_sec = total_elapsed_time * 60 / products_count
 
-          Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: product_names, elapsed_time: total_elapsed_time, object_per_sec: object_per_sec })
+          Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: first_25_products, elapsed_time: total_elapsed_time, object_per_sec: object_per_sec })
+
+          Ahoy::Event.version_2.create({
+            name: 'List of Deleted Products (25)',
+            properties: {
+              title: 'List of Deleted Products (25)',
+              tenant: Apartment::Tenant.current,
+              username: username,
+              objects_involved: first_25_products,
+              objects_involved_count: products_count
+            },
+            time: Time.current
+          }) rescue nil
         rescue Exception => e
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']
