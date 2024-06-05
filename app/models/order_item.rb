@@ -154,6 +154,7 @@ class OrderItem < ActiveRecord::Base
     child_item = {}
     option_product = find_option_product(option_products_array, kit_product)
     child_item = build_basic_item(option_product)
+    kit_product.cached_product_kit_skus.reload
     # overwrite scanned qty from basic build
     child_item['scanned_qty'] = kit_product.scanned_qty
     child_item['qty_remaining'] = if depends_kit

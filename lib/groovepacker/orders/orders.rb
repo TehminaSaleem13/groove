@@ -3,6 +3,8 @@
 module Groovepacker
   module Orders
     class Orders < Groovepacker::Orders::Base
+      include ScanPack::Utilities::ProductScan::SingleProductType
+      include ScanPack::Utilities::ProductScan::IndividualProductType
       def update_orders_list(order)
         unless accepted_data.key?(@params[:var])
           set_status_and_message(false, 'Unknown field', ['&', 'error_msg'])
@@ -82,6 +84,20 @@ module Groovepacker
 
         remove_item_if_not_scanned
         @result
+      end
+
+      def remove_item_qty_from_order
+        @orderitem = OrderItem.includes(%i[order product order_item_boxes order_item_kit_products order_item_boxes order_item_scan_times]).where(id: @params[:orderitem]).first
+        if @orderitem.blank?
+          set_status_and_message(false, 'Could not find order item', ['&', 'push'])
+          return @result
+        end
+        item = @orderitem.order.get_unscanned_items(limit: nil).find { |item| item["order_item_id"] == @params["orderitem"].first.to_i }
+        return unless item.present?
+        
+        @single_order = @orderitem.order
+        qty = item['product_type'] == 'individual' ? remove_kit_item_from_order(item['child_items'].first, true) : remove_skippable_product(item)
+        @orderitem.order.addactivity("QTY #{qty} of SKU #{@orderitem['product_type'] == 'individual' ? @orderitem['child_items'].first['sku'] : @orderitem['sku']} was removed using the REMOVE barcode", @current_user.try(:username))
       end
 
       def add_item_to_order

@@ -124,6 +124,7 @@ Groovepacks::Application.routes.draw do
       post 'save_by_passed_log'
       post 'rollback'
       post 'remove_item_from_order'
+      post 'remove_item_qty_from_order'
       post 'update_item_in_order'
       post 'import_shipworks'
       get 'import'

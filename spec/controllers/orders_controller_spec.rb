@@ -813,6 +813,35 @@ RSpec.describe OrdersController, type: :controller do
       expect(order.order_items.last.scanned_qty).to eq(1)
     end
 
+    it 'remove item qty from order for Kit' do
+      order = FactoryBot.create :order, store_id: @store.id
+      product = Product.create(store_product_id: '0', name: 'TRIGGER SS JERSEY-BLACK-M', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 1, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      product2 = Product.create(store_product_id: '1', name: 'TRIGGER SS JERSEY-BLACK-L', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      ProductKitSkus.create(product_id: product.id, option_product_id: product2.id, qty: 1, packing_order: 50)
+      
+      order_item = OrderItem.create(sku: nil, qty: 10, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'partially_scanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      kit = FactoryBot.create(:product, :with_sku_barcode, is_kit: 1, kit_parsing: 'individual', name: 'KIT1')
+      productkitsku = ProductKitSkus.create(product_id: kit.id, option_product_id: product.id, qty: 2)
+      kit.product_kit_skuss << productkitsku
+      ProductSku.create(sku: 'PRODUCT90', purpose: nil, product_id: product.id, order: 0)
+      order_item_kit_product = OrderItemKitProduct.create(order_item_id: order_item.id, product_kit_skus_id: productkitsku.id, scanned_status: "partially_scanned", scanned_qty: 1)
+
+      post :remove_item_qty_from_order, params: { orderitem: [order_item.id],  status: '' }
+      productkitsku.reload
+      expect(response.status).to eq(200)
+      expect(productkitsku.qty).to eq(1)
+    end
+
+
+    it 'remove item qty from order' do
+      order = FactoryBot.create :order, store_id: @store.id
+      product = FactoryBot.create(:product, name: 'PRODUCT1', product_type:"individual")
+      order_item = OrderItem.create(sku: nil, qty: 10, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'partially_scanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+
+      post :remove_item_qty_from_order, params: { orderitem: [order_item.id],  status: '' }
+      expect(response.status).to eq(200)
+    end
+
     it 'Add item to order if product is kit' do
       order = FactoryBot.create :order, store_id: @store.id
       product = FactoryBot.create(:product, name: 'PRODUCT1')

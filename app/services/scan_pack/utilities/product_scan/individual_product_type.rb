@@ -127,7 +127,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
     end
   end
 
-  def remove_kit_item_from_order(child_item)
+  def remove_kit_item_from_order(child_item, is_from_remove_button = false)
     order_item = OrderItem.where(id: child_item['order_item_id']).first
     if order_item
       order_item_kit_product = begin
@@ -141,8 +141,10 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
       order_item_kit_product&.destroy
       order_item.destroy if order_item.order_item_kit_products.blank?
     else
-      kit_product&.qty = child_item['qty_remaining']
-      kit_product.save
+      kit_product&.qty = is_from_remove_button ? child_item['scanned_qty'] : child_item['qty_remaining']
+      kit_item = kit_product.order_item_kit_products.find_by(scanned_status: "partially_scanned")&.cached_product_kit_skus
+      kit_item.qty = kit_product&.qty if is_from_remove_button
+      kit_item.save
     end
     child_item['qty_remaining']
   end

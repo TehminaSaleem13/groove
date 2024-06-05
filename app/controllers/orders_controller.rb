@@ -226,6 +226,12 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
+  def remove_item_qty_from_order
+    # setting status to false in concern if user is not permitted to 'add_edit_order_items' orders_items
+    @result = gp_orders_module.remove_item_qty_from_order if @result['status']
+    render json: @result
+  end
+
   def rollback
     if params[:single].nil?
       set_status_and_message(false, 'Order can not be nil', ['&', 'push'])
