@@ -20,8 +20,13 @@
 
     <div>
       <h2>Out of Stock Report</h2>
-      <p>Out of stock reported at <strong><%= @mail_data['location'] %></strong> on <strong><%= @mail_data['tenant_name'] %></strong> by <strong><%= @mail_data['sender'] %></strong> #OUTOFSTOCK</p>
-      
+      <p>
+        Out of stock reported
+        <% if @mail_data['location'].present? %>
+          at <strong><%= @mail_data['location'] %></strong>
+        <% end %>
+          on <strong><%= @mail_data['tenant_name'] %></strong> by <strong><%= @mail_data['sender'] %></strong> #OUTOFSTOCK
+      </p>      
       <p><strong>Product Name:</strong> <a href="https://<%= @mail_data['tenant_name'] %>.groovepacker.com/#/products/product/active/1/<%= @mail_data['product_id'] %>" style="color:#66A909;"><%= @mail_data['product_name'] %></a></p>
       <p><strong>SKU:</strong> <%= @mail_data['product_sku'] %></p>
       <p><strong>Quantity on Hand:</strong> <%= @mail_data['product_qty_on_hand'] %></p>

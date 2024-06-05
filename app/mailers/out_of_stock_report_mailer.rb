@@ -7,6 +7,6 @@ class OutOfStockReportMailer < ActionMailer::Base
     @mail_data = mail_settings
 
     mail to: mail_settings['email'],
-         subject: "Out of stock reported at #{mail_settings['location']} on #{mail_settings['tenant_name']} by #{mail_settings['sender']} #OUTOFSTOCK"
+         subject: "Out of stock reported #{mail_settings['location'].present? ? " at #{mail_settings['location']}" : ''} on #{mail_settings['tenant_name']} by #{mail_settings['sender']} #OUTOFSTOCK"
   end
 end
