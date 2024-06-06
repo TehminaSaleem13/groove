@@ -252,7 +252,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders' do
-      @tenant.update(loggly_se_imports: true)
+      @tenant.update(loggly_shopify_imports: true)
       shopify_store = Store.where(store_type: 'Shopify').last
 
       expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_test_order.yaml'))))
@@ -474,6 +474,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders' do
+      @tenant.update(loggly_veeqo_imports: true)
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
@@ -579,6 +580,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders without aliasing' do
+      @tenant.update(loggly_shipstation_imports: true)
       ScanPackSetting.first.update_attributes(replace_gp_code: false)
       expect_any_instance_of(Groovepacker::Stores::Importers::ShipstationRest::OrdersImporterNew).to receive(:fetch_response_from_shipstation).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_shipment_order.yaml'))))

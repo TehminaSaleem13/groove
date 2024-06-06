@@ -42,6 +42,7 @@ module Groovepacker
                                   end
 
             ImportItem.where(store_id: @store.id).where.not(id: @import_item).update_all(status: 'cancelled')
+            Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], @store, @import_item) if current_tenant_object&.loggly_veeqo_imports
 
             response['orders'].each do |order|
               break if import_should_be_cancelled
@@ -242,8 +243,8 @@ module Groovepacker
             return veeqo_order if order['customer'].nil?
 
             veeqo_order.email = order['customer']['email']
-            veeqo_order.firstname = order['shipping_addresses'].try(:[], 'first_name')
-            veeqo_order.lastname = order['shipping_addresses'].try(:[], 'last_name')
+            veeqo_order.firstname = order.dig('customer', 'shipping_addresses', 0, 'first_name')
+            veeqo_order.lastname = order.dig('customer', 'shipping_addresses', 0, 'last_name')
             veeqo_order
           end
 

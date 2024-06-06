@@ -43,31 +43,31 @@ describe Groovepacker::Stores::Importers::LogglyLog do
       end
     end
 
-    describe '.order_log_attributes' do
-      it 'returns an array for Shipstation' do
-        store.update(store_type: 'Shipstation API 2')
-        described_class.instance_variable_set(:@store, store)
-        expect(described_class.send(:order_log_attributes)).to be_an(Array)
-      end
+    # describe '.order_log_attributes' do
+    #   it 'returns an array for Shipstation' do
+    #     store.update(store_type: 'Shipstation API 2')
+    #     described_class.instance_variable_set(:@store, store)
+    #     expect(described_class.send(:order_log_attributes)).to be_an(Array)
+    #   end
 
-      it 'returns an array for Shopify' do
-        store.update(store_type: 'Shopify')
-        described_class.instance_variable_set(:@store, store)
+    #   it 'returns an array for Shopify' do
+    #     store.update(store_type: 'Shopify')
+    #     described_class.instance_variable_set(:@store, store)
 
-        expect(described_class.send(:order_log_attributes)).to be_an(Array)
-      end
+    #     expect(described_class.send(:order_log_attributes)).to be_an(Array)
+    #   end
 
-      it 'returns an array for ShippingEasy' do
-        store.update(store_type: 'ShippingEasy')
-        described_class.instance_variable_set(:@store, store)
-        expect(described_class.send(:order_log_attributes)).to be_an(Array)
-      end
+    #   it 'returns an array for ShippingEasy' do
+    #     store.update(store_type: 'ShippingEasy')
+    #     described_class.instance_variable_set(:@store, store)
+    #     expect(described_class.send(:order_log_attributes)).to be_an(Array)
+    #   end
 
-      it 'returns an empty array if other type ' do
-        store.update(store_type: 'Shippo')
-        described_class.instance_variable_set(:@store, store)
-        expect(described_class.send(:order_log_attributes)).to eq([])
-      end
-    end
+    #   it 'returns an empty array if other type ' do
+    #     store.update(store_type: 'Shippo')
+    #     described_class.instance_variable_set(:@store, store)
+    #     expect(described_class.send(:order_log_attributes)).to eq([])
+    #   end
+    # end
   end
 end

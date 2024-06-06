@@ -560,7 +560,7 @@
     recommended_shipping_options: ""
     preferred_shipment_options: ""
     matched_parcel_properties_criteria: ""
-    shipment: ""
+    shipment: {}
     warehouse: 
       address_line_1: "29464, Mount Pleasant, SC, USA"
       address_line_2: ""
