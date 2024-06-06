@@ -38,8 +38,7 @@ module Groovepacker
           def attributes_for_veeqo(orders)
             orders.map do |order|
               tracking_number = order&.dig('allocations', 0, 'shipment', 'tracking_number', 'tracking_number')
-              shipping_address = order&.dig('customer', 'shipping_addresses', 0)
-              
+
               {
                 order_number: order['number'],
                 status: order['status'],
@@ -49,14 +48,14 @@ module Groovepacker
                 tracking_num: tracking_number,
                 customer_details: {
                   email: order.dig('customer', 'email'),
-                  first_name: shipping_address.dig('first_name'),
-                  last_name: shipping_address.dig('last_name'),
-                  address1: shipping_address.dig('address1'),
-                  address2: shipping_address.dig('address2'),
-                  city: shipping_address.dig('city'),
-                  state: shipping_address.dig('state'),
-                  zip: shipping_address.dig('zip'),
-                  country: shipping_address.dig('country')
+                  first_name: order.dig('customer', 'shipping_addresses', 0, 'first_name'),
+                  last_name: order.dig('customer', 'shipping_addresses', 0, 'last_name'),
+                  address1: order.dig('customer', 'shipping_addresses', 0, 'address1'),
+                  address2: order.dig('customer', 'shipping_addresses', 0, 'address2'),
+                  city: order.dig('customer', 'shipping_addresses', 0, 'city'),
+                  state: order.dig('customer', 'shipping_addresses', 0, 'state'),
+                  zip: order.dig('customer', 'shipping_addresses', 0, 'zip'),
+                  country: order.dig('customer', 'shipping_addresses', 0, 'country')
                 },
                 customer_comments: order.dig('customer_note', 'text'),
                 line_items: veeqo_line_items(order['line_items'])
@@ -66,13 +65,12 @@ module Groovepacker
 
           def veeqo_line_items(line_items)
             line_items.map do |item|
-              sellable = item['sellable']
               {
-                product_title: sellable['full_title'],
-                sku: sellable['sku_code'],
-                barcode: sellable['upc_code'],
-                image_url: sellable['image_url'],
-                quantity_on_hand: sellable.dig('inventory', 'physical_stock_level_at_all_warehouses')
+                product_title: item.dig('sellable', 'full_title'),
+                sku: item.dig('sellable', 'sku_code'),
+                barcode: item.dig('sellable', 'upc_code'),
+                image_url: item.dig('sellable', 'image_url'),
+                quantity_on_hand: item.dig('sellable', 'inventory', 'physical_stock_level_at_all_warehouses')
               }
             end
           end
