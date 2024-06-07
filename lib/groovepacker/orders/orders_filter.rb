@@ -60,7 +60,7 @@ module Groovepacker
              .filter_by_city(OPERATORS_MAP[get_operator_from_filter(10, filtered_filters)], map_value(filtered_filters[10]["operator"], filtered_filters[10]["value"]))
              .filter_by_email(OPERATORS_MAP[get_operator_from_filter(11, filtered_filters)], map_value(filtered_filters[11]["operator"], filtered_filters[11]["value"]))
              .filter_by_tote(OPERATORS_MAP[get_operator_from_filter(12, filtered_filters)], map_value(filtered_filters[12]["operator"], filtered_filters[12]["value"]))
-             .within_date_range(date_range(filtered_filters))
+             .within_date_range(date_range(filtered_filters), filtered_filters[3]["operator"])
              .within_number_range(number_range(filtered_filters))
       end
 
@@ -89,7 +89,13 @@ module Groovepacker
           'contains' => "%#{value}%",
           'notContains' => "%#{value}%",
           'eq' => value,
-          'neq' => value, 
+          'afterOrOn' => value,
+          'beforeOrOn' => value,
+          'neq' => value,
+          'after' => value,
+          'before' => value,
+          'inrange' => value,
+          'notinrange' => value,
           'startsWith' => "#{value}%", 
           'endsWith' => "%#{value}"
         } 

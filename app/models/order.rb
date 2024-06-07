@@ -108,17 +108,21 @@ class Order < ActiveRecord::Base
   }
   scope :filter_by_date, ->(operator, value) {
     value = DateTime.strptime(value, "%m-%d-%Y") if value.is_a?(String)
-    where("DATE(order_placed_time) #{operator} ?", value) if value.present?
+    where("DATE(order_placed_time) #{operator} ?", value) if value.present? && operator.present?
   }
-  scope :within_date_range, ->(date_range_object) {
-    if date_range_object.present? && date_range_object.is_a?(Hash)
+
+  scope :within_date_range, ->(date_range_object, operator) {
+    if date_range_object.is_a?(Hash) && date_range_object[:start_date].present? && date_range_object[:end_date].present?
       start_date = date_range_object[:start_date]
       end_date = date_range_object[:end_date]
-
       start_date = DateTime.strptime(start_date, "%m-%d-%Y") if start_date.is_a?(String) && start_date != ""
       end_date = DateTime.strptime(end_date, "%m-%d-%Y") if end_date.is_a?(String) && end_date != ""
-
-      where("order_placed_time >= ? AND order_placed_time <= ?", start_date, end_date) if start_date.present? && end_date.present?
+      
+      if operator == 'inrange'
+        where("DATE(order_placed_time) >= ? AND DATE(order_placed_time) <= ?", start_date, end_date) if start_date.present? && end_date.present?    
+      elsif operator == 'notinrange'
+        where("DATE(order_placed_time) < ? OR DATE(order_placed_time) > ?", start_date, end_date) if start_date.present? && end_date.present?
+      end
     end
   }
   scope :within_number_range, ->(number_range_object) {
