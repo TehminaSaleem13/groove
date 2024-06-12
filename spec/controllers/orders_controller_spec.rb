@@ -515,19 +515,19 @@ RSpec.describe OrdersController, type: :controller do
       expect(veeqo_import_item.status).to eq('completed')
     end
 
-    it 'Import Orders When All Import Statuses Switch is disabled' do
-      @veeqo_store.veeqo_credential.update(shipped_status: false, awaiting_amazon_fulfillment_status: false, awaiting_fulfillment_status: false)
+    # it 'Import Orders When All Import Statuses Switch is disabled' do
+    #   @veeqo_store.veeqo_credential.update(shipped_status: false, awaiting_amazon_fulfillment_status: false, awaiting_fulfillment_status: false)
 
-      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+    #   $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
-      get :import_all
-      expect(response.status).to eq(200)
-      expect(Order.count).to eq(0)
-      expect(Product.count).to eq(0)
+    #   get :import_all
+    #   expect(response.status).to eq(200)
+    #   expect(Order.count).to eq(0)
+    #   expect(Product.count).to eq(0)
 
-      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
-      expect(veeqo_import_item.status).to eq('failed')
-    end
+    #   veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+    #   expect(veeqo_import_item.status).to eq('failed')
+    # end
 
     it 'Import Orders When Product Source as Shopify Store without mock response' do
       shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: @inv_wh, on_demand_import: true)

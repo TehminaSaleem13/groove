@@ -10,11 +10,7 @@ module Groovepacker
           def import
             init_common_objects
             @import_item.update_attributes(updated_orders_import: 0)
-            if statuses.empty?
-              set_status_and_msg_for_skipping_import
-            else
-              initialize_orders_import
-            end
+            initialize_orders_import
             update_orders_status
             destroy_nil_import_items
             @result
@@ -102,7 +98,17 @@ module Groovepacker
             order_in_gp_present = false
             order_in_gp = search_order_in_db(set_order_number(order), order['id'])
             return if handle_cancelled_order(order_in_gp)
+            return if handle_merged_order(order)
+            return if order['status'] == 'awaiting_stock'
             veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
+          end
+
+          def handle_merged_order(order)
+            return false unless order['merged_to_id'].present?
+
+            order = Order.where.not(status: 'scanned').where(store_id: @credential.store_id, store_order_id: order['id'])
+            order&.destroy_all
+            true
           end
 
           def destroy_nil_import_items
@@ -111,16 +117,16 @@ module Groovepacker
             nil
           end
 
-          def set_status_and_msg_for_skipping_import
-            Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank?
+          # def set_status_and_msg_for_skipping_import
+          #   Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank?
 
-            @result[:status] = false
-            @result[:messages].push(
-              'All import statuses is disabled. Import skipped.'
-            )
-            @import_item.message = 'All import statuses is disabled. Import skipped.'
-            @import_item.save
-          end
+          #   @result[:status] = false
+          #   @result[:messages].push(
+          #     'All import statuses is disabled. Import skipped.'
+          #   )
+          #   @import_item.message = 'All import statuses is disabled. Import skipped.'
+          #   @import_item.save
+          # end
 
           def import_order(veeqo_order, order)
             # veeqo_order.tags = order['tags']

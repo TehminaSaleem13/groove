@@ -19,6 +19,7 @@ class VeeqoCredential < ApplicationRecord
     statuses.push('awaiting_fulfillment') if awaiting_fulfillment_status?
     statuses.push('shipped') if shipped_status?
     statuses.push('awaiting_amazon_fulfillment') if awaiting_amazon_fulfillment_status?
+    statuses.push('awaiting_stock')
     statuses
   end
 end
