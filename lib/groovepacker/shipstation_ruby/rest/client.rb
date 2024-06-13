@@ -151,6 +151,18 @@ module Groovepacker
           response
         end
 
+        def pull_product_bin_locations(products)
+          updated = false
+          products.each do |product|
+            product_hash = @service.query("/products/#{product.store_product_id}", {}, 'get')
+            next unless product_hash['warehouseLocation'].present?
+
+            product.primary_warehouse.update(location_primary: product_hash['warehouseLocation'])
+            updated = true
+          end
+          updated
+        end
+
         def create_label_for_order(data)
           response = {}
           default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').to_date

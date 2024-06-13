@@ -39,6 +39,7 @@ Groovepacks::Application.routes.draw do
   get 'magento_rest/redirect' => 'magento_rest#redirect'
   get 'stores/export_active_products' => 'stores#export_active_products'
   get 'stores/bin_location_api_push' => 'stores#bin_location_api_push'
+  get 'stores/bin_location_api_pull' => 'stores#bin_location_api_pull'
   get 'stores/popup_shipping_label' => 'stores#popup_shipping_label'
   get 'stores/large_popup_shipping_label' => 'stores#large_popup_shipping_label'
   get 'stores/amazon_fba' => 'stores#amazon_fba'

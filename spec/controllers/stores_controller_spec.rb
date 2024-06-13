@@ -310,6 +310,17 @@ RSpec.describe StoresController, type: :controller do
       expect(Product.count).to eq(1)
       expect(res['status']).to be true
     end
+
+    it 'Shipstation Bin Location Pull' do
+      create(:product, :with_sku_barcode, status: 'active', store_id: @ship_store.id, name: 'Test1', store_product_id: '123456')
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_single_product.yaml'))))
+
+      get :bin_location_api_pull, params: { id: @ship_store.id }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(Product.last.primary_warehouse.location_primary).not_to be_nil
+      expect(res['status']).to be true
+    end
   end
 
   describe 'Veeqo Store' do

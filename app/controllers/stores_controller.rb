@@ -655,6 +655,12 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def bin_location_api_pull
+    result = { status: true }
+    ExportSsProductsCsv.new.delay(priority: 95).pull_and_update_ss_product_locations(Apartment::Tenant.current, params[:id])
+    render json: result
+  end
+
   def pull_store_inventory
     push_pull_inventory('pull')
     # @store = Store.find(params[:id])

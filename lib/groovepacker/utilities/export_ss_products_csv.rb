@@ -61,6 +61,20 @@ class ExportSsProductsCsv
     end
   end
 
+  def pull_and_update_ss_product_locations(tenant_name, store_id)
+    Apartment::Tenant.switch!(tenant_name)
+    begin
+      @store = Store.find(store_id)
+      @credential = ShipstationRestCredential.find_by_store_id(@store.id)
+      @client = Groovepacker::Stores::Handlers::ShipstationRestHandler.new(@store).build_handle[:store_handle]
+      products = Product.includes(product_inventory_warehousess: [:inventory_warehouse]).where('store_id = ? AND status = ? AND updated_at > ?', store_id, 'active', @credential.last_location_pull.present? ? @credential.last_location_pull : 10.year.ago)
+      response = @client.pull_product_bin_locations(products) if products.present?
+      @credential.update_attributes(last_location_pull: Time.zone.now) if response
+    rescue StandardError => e
+      puts e
+    end
+  end
+
   def export_broken_image(tenant, params)
     Apartment::Tenant.switch! tenant
     products = ProductsService::ListSelectedProducts.call(params, true)
