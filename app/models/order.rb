@@ -60,11 +60,28 @@ class Order < ActiveRecord::Base
     statuses = [statuses] unless statuses.is_a?(Array)
     where(status: statuses.map(&:to_s)) if statuses.present?
   }
+  
   scope :filter_partially_scanned, ->(statuses) {
     includes(:order_items)
     .where("EXISTS (SELECT 1 FROM order_items WHERE order_items.order_id = orders.id AND order_items.scanned_qty > 0)")
     .where(status: "awaiting") if statuses.include?("partiallyscanned") && !statuses.include?("awaiting")
   }
+  scope :filtered_sorted_orders, ->(sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add, params) {
+    return all if sort_key.blank?
+
+    case sort_key
+    when 'store_name'
+      joins(:store).order("stores.name #{sort_order}")
+    when 'itemslength'
+      includes(:order_items)
+      .select('orders.*, (SELECT SUM(order_items.qty) FROM order_items WHERE order_items.order_id = orders.id) AS count').group('orders.id').order("count #{sort_order}")
+    when 'tote'
+      joins(:tote).order("totes.name #{sort_order}")
+    else
+      includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
+    end
+  }
+  
   scope :filter_all_status, ->(filters) {
     filter_partially_scanned(filters).merge(Order.filtered_by_status(filters))
   }
@@ -125,10 +142,13 @@ class Order < ActiveRecord::Base
       end
     end
   }
-  scope :within_number_range, ->(number_range_object) {
+  scope :within_number_range, ->(number_range_object, sort_value) {
+    start_value = number_range_object[:start_value]
+    end_value = number_range_object[:end_value]
     if number_range_object.present? && number_range_object.is_a?(Hash)
-      start_value = number_range_object[:start_value]
-      end_value = number_range_object[:end_value]
+      if sort_value.present?
+        return having("count >= CAST(? AS SIGNED) AND count <= CAST(? AS SIGNED)", start_value, end_value) if start_value.present? && end_value.present?
+      end
 
       joins(:order_items)
       .select('orders.*, SUM(order_items.qty) AS count')

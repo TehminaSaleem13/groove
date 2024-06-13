@@ -46,7 +46,10 @@ module Groovepacker
       private
 
       def filtered_order(filtered_filters, filters)
-        Order.filter_all_status(filters)
+        sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add = get_parameters
+
+        Order.filtered_sorted_orders(@params[:sort], sort_order, limit, offset, status_filter, status_filter_text, query_add, @params)
+             .filter_all_status(filters)
              .filter_by_qty(OPERATORS_MAP[get_operator_from_filter(4, filtered_filters)], filtered_filters[4]["value"])
              .filter_by_increment_id(OPERATORS_MAP[get_operator_from_filter(0, filtered_filters)], map_value(filtered_filters[0]["operator"], filtered_filters[0]["value"]))
              .filter_by_store(OPERATORS_MAP[get_operator_from_filter(1, filtered_filters)], map_value(filtered_filters[1]["operator"], filtered_filters[1]["value"]))
@@ -61,7 +64,22 @@ module Groovepacker
              .filter_by_email(OPERATORS_MAP[get_operator_from_filter(11, filtered_filters)], map_value(filtered_filters[11]["operator"], filtered_filters[11]["value"]))
              .filter_by_tote(OPERATORS_MAP[get_operator_from_filter(12, filtered_filters)], map_value(filtered_filters[12]["operator"], filtered_filters[12]["value"]))
              .within_date_range(date_range(filtered_filters), filtered_filters[3]["operator"])
-             .within_number_range(number_range(filtered_filters))
+             .within_number_range(number_range(filtered_filters), @params[:sort])
+      end
+      
+      def get_parameters
+        sort_key = get('sort_key', 'updated_at')
+        sort_order = get('sort_order', 'DESC')
+        limit = get_limit_or_offset('limit')
+        offset = get_limit_or_offset('offset')
+        status_filter = get('status_filter', 'awaiting')
+        status_filter_text = ''
+        query_add = get_query_limit_offset(limit, offset)
+
+        status_filter_text = " WHERE orders.status='" + status_filter + "'" unless status_filter.in?(%w[all partially_scanned])
+        status_filter_text = " JOIN order_items ON order_items.order_id = orders.id WHERE orders.status='awaiting' AND order_items.scanned_qty != 0 " if status_filter == 'partially_scanned'
+
+        [sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add]
       end
 
       def date_range(filters)
