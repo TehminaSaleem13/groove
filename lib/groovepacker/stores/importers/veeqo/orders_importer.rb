@@ -27,26 +27,32 @@ module Groovepacker
 
             @import_item.update_column(:importer_id, @worker_id)
             response = get_orders_response
-            @result[:total_imported] = response['orders'].nil? ? 0 : response['orders'].length
-            initialize_import_item
-            return @result if response['orders'].nil? || response['orders'].blank? || response['orders'].first.nil?
 
-            response['orders'] = begin
-                                    response['orders'].sort_by { |h| Time.zone.parse(h['updated_at']) }
+            response_orders = response['orders'].select { |o| o['allocations'].count <= 1 }
+            multi_allocation_orders = response['orders'].select { |o| o['allocations'].count > 1 }
+            split_orders_by_allocation(response_orders, multi_allocation_orders) if multi_allocation_orders.present?
+
+            @result[:total_imported] = response_orders.nil? ? 0 : response_orders.length
+            initialize_import_item
+            return @result if response_orders.nil? || response_orders.blank? || response_orders.first.nil?
+
+            response_orders = begin
+                                    response_orders.sort_by { |h| Time.zone.parse(h['updated_at']) }
                                   rescue StandardError
-                                    response['orders']
+                                    response_orders
                                   end
 
             ImportItem.where(store_id: @store.id).where.not(id: @import_item).update_all(status: 'cancelled')
-            Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], @store, @import_item) if current_tenant_object&.loggly_veeqo_imports
+            Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response_orders, @store, @import_item) if current_tenant_object&.loggly_veeqo_imports
 
-            response['orders'].each do |order|
+            response_orders.each do |order|
               break if import_should_be_cancelled
 
               import_single_order(order) if order.present?
               @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
             end
-            send_sku_report_not_found if @result_data.count > 0
+            add_deleted_merged_orders_log
+            send_sku_report_not_found
             Tenant.save_se_import_data("========Veeqo Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item.as_json)
           end
 
@@ -54,10 +60,15 @@ module Groovepacker
             @on_demand_import = true
             init_common_objects
             response = @client.get_single_order(order_number, @import_item)
-            response['orders'].each do |order|
+            response_orders = response['orders'].select { |o| o['allocations'].count <= 1 }
+            multi_allocation_orders = response['orders'].select { |o| o['allocations'].count > 1 }
+            split_orders_by_allocation(response_orders, multi_allocation_orders) if multi_allocation_orders.present?
+
+            response_orders.each do |order|
               import_single_order(order) if order.present?
             end
-            send_sku_report_not_found if @result_data.count > 0
+            add_deleted_merged_orders_log
+            send_sku_report_not_found
             begin
               @import_item.destroy
               destroy_nil_import_items
@@ -66,7 +77,21 @@ module Groovepacker
             end
           end
 
+          def split_orders_by_allocation(response_orders, multi_allocation_orders)
+            multi_allocation_orders.each do |o|
+              o['allocations'].each do |a|
+                order_response = o.dup
+                order_response['allocations'] = [a]
+                response_orders << order_response 
+              end
+            end            
+          end
+
           private
+
+          def add_deleted_merged_orders_log
+            add_action_log('List of Deleted Orders', 'Veeqo Order Import - Merged Order', @deleted_merged_orders, @deleted_merged_orders.count) if @deleted_merged_orders.count > 0
+          end
 
           def statuses
             @statuses ||= @credential.get_active_statuses
@@ -96,19 +121,32 @@ module Groovepacker
             update_import_count('success_updated') && return if skip_the_order?(order)
 
             order_in_gp_present = false
-            order_in_gp = search_order_in_db(set_order_number(order), order['id'])
+            allocation_id = order['allocations'].dig(0, 'id')
+            order_in_gp = search_veeqo_order_in_db(set_order_number(order), order['id'], allocation_id)
             return if handle_cancelled_order(order_in_gp)
-            return if handle_merged_order(order)
+            return if handle_merged_order(order, allocation_id)
             return if order['status'] == 'awaiting_stock'
             veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
           end
 
-          def handle_merged_order(order)
+          def handle_merged_order(order, allocation_id = nil)
             return false unless order['merged_to_id'].present?
 
-            order = Order.where.not(status: 'scanned').where(store_id: @credential.store_id, store_order_id: order['id'])
-            order&.destroy_all
+            order = Order.where.not(status: 'scanned').find_by(store_id: @credential.store_id, store_order_id: order['id'], veeqo_allocation_id: allocation_id)
+
+            if order
+              @deleted_merged_orders << order.increment_id
+              order.destroy
+            end
             true
+          end
+
+          def search_veeqo_order_in_db(order_number, store_order_id, allocation_id = nil)
+            if @credential.allow_duplicate_order == true
+              Order.find_by_store_id_and_increment_id_and_store_order_id_and_veeqo_allocation_id(@credential.store_id, order_number, store_order_id, allocation_id)
+            else
+              Order.find_by_store_id_and_increment_id_and_veeqo_allocation_id(@credential.store_id, order_number, allocation_id)
+            end
           end
 
           def destroy_nil_import_items
@@ -132,6 +170,7 @@ module Groovepacker
             # veeqo_order.tags = order['tags']
             veeqo_order.increment_id = set_order_number(order)
             veeqo_order.store_order_id = order['id'].to_s
+            veeqo_order.veeqo_allocation_id = order['allocations'].dig(0, 'id')
             veeqo_order.order_placed_time = Time.zone.parse(order['created_at'])
             # add order custmor info using separate method
             veeqo_order = add_customer_info(veeqo_order, order)
@@ -169,12 +208,13 @@ module Groovepacker
           end
 
           def import_veeqo_order_item(veeqo_order, order)
-            return if order['line_items'].nil?
+            line_items = order['allocations'].dig(0, 'line_items') || order['line_items'] 
+            return if line_items.blank?
 
-            @import_item.current_order_items = order['line_items'].length
+            @import_item.current_order_items = line_items.length
             @import_item.current_order_imported_item = 0
             @import_item.save!
-            order['line_items']&.each do |item|
+            line_items.each do |item|
               order_item = import_order_item(item)
               @import_item.update!(current_order_imported_item: @import_item.current_order_imported_item + 1)
               product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || import_order_items(item, set_order_number(order))
@@ -237,7 +277,7 @@ module Groovepacker
           end
 
           def send_sku_report_not_found
-            VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data, @shopify_credential.store).deliver
+            VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data, @shopify_credential.store).deliver if check_shopify_as_a_product_source
           end
 
           def import_order_item(line_item)

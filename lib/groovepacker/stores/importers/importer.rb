@@ -112,6 +112,7 @@ module Groovepacker
           end
           if @store.store_type == 'Veeqo'
             @result_data = []
+            @deleted_merged_orders = []
             @shopify_credential = ShopifyCredential.find_by(store_id: @credential.product_source_shopify_store_id)
             @shopify_client = Groovepacker::ShopifyRuby::Client.new(@shopify_credential)
           end
@@ -180,6 +181,20 @@ module Groovepacker
             nil
             end
           update_import_count('success_imported')
+        end
+
+        def add_action_log(title, username, objects_involved, objects_involved_count)
+          Ahoy::Event.version_2.create({
+            name: title,
+            properties: {
+              title: title,
+              tenant: Apartment::Tenant.current,
+              username: username,
+              objects_involved: objects_involved,
+              objects_involved_count: objects_involved_count
+            },
+            time: Time.current
+          }) rescue nil
         end
 
         protected

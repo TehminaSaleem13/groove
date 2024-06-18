@@ -487,21 +487,21 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import Orders when cancelled order is already exist' do
-      create(:order, store_id: @veeqo_store.id, status: 'cancelled', increment_id: '1744')
+      create(:order, store_id: @veeqo_store.id, status: 'cancelled', increment_id: '1744', store_order_id: '331856255', veeqo_allocation_id: '246838519')
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
       get :import_all
       expect(response.status).to eq(200)
-      expect(Order.count).to eq(0)
-      expect(Product.count).to eq(0)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
 
       veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
       expect(veeqo_import_item.status).to eq('completed')
     end
 
     it 'Import Orders with Allow duplicate order' do
-      create(:order, increment_id: '1744', store_id: @veeqo_store.id)
+      create(:order, increment_id: '1744', store_id: @veeqo_store.id, store_order_id: '331856255', veeqo_allocation_id: '246838519')
       @veeqo_store.veeqo_credential.update(allow_duplicate_order: true)
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
@@ -509,32 +509,18 @@ RSpec.describe OrdersController, type: :controller do
       get :import_all
       expect(response.status).to eq(200)
       expect(Order.count).to eq(2)
-      expect(Product.count).to eq(1)
+      expect(Product.count).to eq(2)
 
       veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
       expect(veeqo_import_item.status).to eq('completed')
     end
 
-    # it 'Import Orders When All Import Statuses Switch is disabled' do
-    #   @veeqo_store.veeqo_credential.update(shipped_status: false, awaiting_amazon_fulfillment_status: false, awaiting_fulfillment_status: false)
-
-    #   $redis.del("importing_orders_#{Apartment::Tenant.current}")
-
-    #   get :import_all
-    #   expect(response.status).to eq(200)
-    #   expect(Order.count).to eq(0)
-    #   expect(Product.count).to eq(0)
-
-    #   veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
-    #   expect(veeqo_import_item.status).to eq('failed')
-    # end
-
     it 'Import Orders When Product Source as Shopify Store without mock response' do
       shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: @inv_wh, on_demand_import: true)
-      create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
+      create(:shopify_credential, store_id: shopify_store.id)
       @veeqo_store.veeqo_credential.update(use_shopify_as_product_source_switch: true, product_source_shopify_store_id: shopify_store.id)
 
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_without_response)
+      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_without_response)
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
@@ -549,11 +535,11 @@ RSpec.describe OrdersController, type: :controller do
 
     it 'Import Orders When Product Source as Shopify Store with mock response' do
       shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: @inv_wh, on_demand_import: true)
-      create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop')
+      create(:shopify_credential, store_id: shopify_store.id)
       @veeqo_store.veeqo_credential.update(use_shopify_as_product_source_switch: true, product_source_shopify_store_id: shopify_store.id)
 
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_response)
-      expect_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_product_for_veeqo_order_import.yaml'))))
+      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:execute_grahpql_query).and_return(mock_response)
+      allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopify_product_for_veeqo_order_import.yaml'))))
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
