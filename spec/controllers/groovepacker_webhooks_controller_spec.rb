@@ -3,20 +3,20 @@
 require 'rails_helper'
 
 RSpec.describe GroovepackerWebhooksController, type: :controller do
-  let!(:user_role) { create(:role, add_edit_stores: true, import_products: true) }
-  let!(:user) { create(:user, role: user_role) }
-  let!(:webhook) { create(:groovepacker_webhook) }
-
-  let!(:access_token) { create(:access_token, resource_owner_id: user.id) }
-  let!(:token) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: user.id) }
-
   before do
-    allow(controller).to receive(:doorkeeper_token) { token }
-    header = { 'Authorization' => 'Bearer ' +  access_token.token }
-    @request.headers.merge! header
+    user_role = create(:role, name: 'test_user', add_edit_stores: true, import_products: true)
+    @user = create(:user, role: user_role)
   end
 
   describe 'Webhook' do
+    let(:token) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+    let!(:webhook) { create(:groovepacker_webhook) }  
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token }
+      header = { 'Authorization' => 'Bearer ' + create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
 
     context 'POST #create' do
       it 'Create webhook with all attributes' do

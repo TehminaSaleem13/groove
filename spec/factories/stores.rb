@@ -32,5 +32,10 @@ FactoryBot.define do
       name { 'GP TEST - CSV' }
       status { true }
     end
+
+    trait :teapplix do
+      store_type { 'Teapplix' }
+      teapplix_credential
+    end
   end
 end

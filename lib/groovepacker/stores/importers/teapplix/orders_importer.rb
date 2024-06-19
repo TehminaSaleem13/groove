@@ -40,6 +40,7 @@ module Groovepacker
           end
 
           def import_single_order(order)
+            return if skip_the_order?(order)
             # Delete if order exists and is not scanned so modified order can be saved with new changes
             return unless delete_order_if_exists(order)
 
@@ -62,6 +63,7 @@ module Groovepacker
           end
 
           def import_order(teapplix_order, order)
+            teapplix_order.tracking_num = order['tracking']
             teapplix_order.increment_id = order['txn_id']
             teapplix_order.store_order_id = order['txn_id']
             teapplix_order.order_placed_time = order['date'].try(:to_datetime)
@@ -172,6 +174,10 @@ module Groovepacker
               return_val = existing_order ? false : true
               return return_val
             end
+          end
+
+          def skip_the_order?(order)
+            @credential.import_shipped_having_tracking && @credential.import_shipped && order['tracking'].nil?
           end
         end
       end

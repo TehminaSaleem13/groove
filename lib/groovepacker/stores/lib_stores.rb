@@ -342,6 +342,7 @@ module Groovepacker
         @teapplix.username = params[:username]
         @teapplix.password = params[:password]
         @teapplix.gen_barcode_from_sku = params[:gen_barcode_from_sku]
+        @teapplix.import_shipped_having_tracking = params[:import_shipped_having_tracking]
 
         if @teapplix.import_shipped != params[:import_shipped].to_b
           @teapplix.import_shipped = params[:import_shipped]
