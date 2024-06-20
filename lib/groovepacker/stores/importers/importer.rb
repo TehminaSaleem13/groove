@@ -113,6 +113,7 @@ module Groovepacker
           if @store.store_type == 'Veeqo'
             @result_data = []
             @deleted_merged_orders = []
+            @deleted_split_orders = []
             @shopify_credential = ShopifyCredential.find_by(store_id: @credential.product_source_shopify_store_id)
             @shopify_client = Groovepacker::ShopifyRuby::Client.new(@shopify_credential)
           end

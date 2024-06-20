@@ -177,7 +177,7 @@ module Groovepacker
           end
 
           def skip_the_order?(order)
-            @credential.import_shipped_having_tracking && @credential.import_shipped && order['tracking'].nil?
+            @credential.import_shipped_having_tracking && order['tracking'].nil?
           end
         end
       end

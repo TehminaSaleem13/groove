@@ -544,7 +544,7 @@ RSpec.describe StoresController, type: :controller do
       @request.headers.merge! header
 
       @veeqo_store = create(:store, :veeqo, inventory_warehouse: @inv_wh) do |store|
-        store.veeqo_credential.update( store_id: store.id, shall_import_customer_notes: true, shall_import_internal_notes: true, gen_barcode_from_sku: true, import_shipped_having_tracking: true)
+        store.veeqo_credential.update( store_id: store.id, shall_import_customer_notes: true, allow_duplicate_order: true, shall_import_internal_notes: true, gen_barcode_from_sku: true, import_shipped_having_tracking: true)
       end
     end
 
@@ -554,8 +554,8 @@ RSpec.describe StoresController, type: :controller do
       get :get_order_details, params: { order_no: '1744', store_id: @veeqo_store.id }
       expect(response.status).to eq(200)
       res = JSON.parse(response.body)
-      expect(Order.count).to eq(1)
-      expect(Product.count).to eq(1)
+      expect(Order.count).to eq(2)
+      expect(Product.count).to eq(2)
       expect(res['status']).to be true
     end
 

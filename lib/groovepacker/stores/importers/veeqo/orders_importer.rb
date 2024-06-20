@@ -30,7 +30,7 @@ module Groovepacker
 
             response_orders = response['orders'].select { |o| o['allocations'].count <= 1 }
             multi_allocation_orders = response['orders'].select { |o| o['allocations'].count > 1 }
-            split_orders_by_allocation(response_orders, multi_allocation_orders) if multi_allocation_orders.present?
+            split_orders_by_allocation(response_orders, multi_allocation_orders)
 
             @result[:total_imported] = response_orders.nil? ? 0 : response_orders.length
             initialize_import_item
@@ -51,7 +51,7 @@ module Groovepacker
               import_single_order(order) if order.present?
               @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
             end
-            add_deleted_merged_orders_log
+            add_deleted_merged_or_split_orders_log
             send_sku_report_not_found
             Tenant.save_se_import_data("========Veeqo Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item.as_json)
           end
@@ -62,12 +62,12 @@ module Groovepacker
             response = @client.get_single_order(order_number, @import_item)
             response_orders = response['orders'].select { |o| o['allocations'].count <= 1 }
             multi_allocation_orders = response['orders'].select { |o| o['allocations'].count > 1 }
-            split_orders_by_allocation(response_orders, multi_allocation_orders) if multi_allocation_orders.present?
+            split_orders_by_allocation(response_orders, multi_allocation_orders)
 
             response_orders.each do |order|
               import_single_order(order) if order.present?
             end
-            add_deleted_merged_orders_log
+            add_deleted_merged_or_split_orders_log
             send_sku_report_not_found
             begin
               @import_item.destroy
@@ -77,20 +77,26 @@ module Groovepacker
             end
           end
 
+          private
+
           def split_orders_by_allocation(response_orders, multi_allocation_orders)
-            multi_allocation_orders.each do |o|
-              o['allocations'].each do |a|
-                order_response = o.dup
-                order_response['allocations'] = [a]
-                response_orders << order_response 
+            if multi_allocation_orders.present? && @credential.allow_duplicate_order
+              multi_allocation_orders.each do |o|
+                o['allocations'].each do |a|
+                  order_response = o.dup
+                  order_response['allocations'] = [a]
+                  response_orders << order_response 
+                end
               end
             end            
           end
 
-          private
-
-          def add_deleted_merged_orders_log
-            add_action_log('List of Deleted Orders', 'Veeqo Order Import - Merged Order', @deleted_merged_orders, @deleted_merged_orders.count) if @deleted_merged_orders.count > 0
+          def add_deleted_merged_or_split_orders_log
+            if @deleted_merged_orders.count > 0
+              add_action_log('List of Deleted Orders', 'Veeqo Order Import - Merged Order', @deleted_merged_orders, @deleted_merged_orders.count)
+            elsif @deleted_split_orders.count > 0
+              add_action_log('List of Deleted Orders', 'Veeqo Order Import - Split Order', @deleted_split_orders, @deleted_split_orders.count)
+            end
           end
 
           def statuses
@@ -126,18 +132,35 @@ module Groovepacker
             return if handle_cancelled_order(order_in_gp)
             return if handle_merged_order(order, allocation_id)
             return if order['status'] == 'awaiting_stock'
+            handle_split_order(order)
             veeqo_shopify_order_import(order_in_gp_present, order_in_gp, order)
+          end
+
+          def handle_split_order(order)
+            handle_order_deletion(order, 'split_order')
           end
 
           def handle_merged_order(order, allocation_id = nil)
             return false unless order['merged_to_id'].present?
 
-            order = Order.where.not(status: 'scanned').find_by(store_id: @credential.store_id, store_order_id: order['id'], veeqo_allocation_id: allocation_id)
+            handle_order_deletion(order, 'merged_order', allocation_id)
+          end
 
-            if order
-              @deleted_merged_orders << order.increment_id
-              order.destroy
+          def handle_order_deletion(order, type, allocation_id = nil)
+            orders = Order.where.not(status: 'scanned')
+            order_record = case type
+                           when 'merged_order'
+                             orders.find_by(store_id: @credential.store_id, store_order_id: order['id'], veeqo_allocation_id: allocation_id)
+                           when 'split_order'
+                             orders.find_by(store_id: @credential.store_id, store_order_id: order['id'], veeqo_allocation_id: nil)
+                           end
+
+            if order_record && type == 'merged_order'
+              @deleted_merged_orders << order_record.increment_id
+            elsif order_record && type == 'split_order'
+              @deleted_split_orders << order_record.increment_id
             end
+            order_record&.destroy
             true
           end
 

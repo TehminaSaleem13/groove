@@ -469,7 +469,7 @@ RSpec.describe OrdersController, type: :controller do
       @request.headers.merge! header
 
       @veeqo_store = create(:store, :veeqo, inventory_warehouse: @inv_wh) do |store|
-        store.veeqo_credential.update( store_id: store.id, shall_import_customer_notes: true, shall_import_internal_notes: true, gen_barcode_from_sku: true, shipped_status: true, awaiting_amazon_fulfillment_status: true, awaiting_fulfillment_status: true, import_shipped_having_tracking: true)
+        store.veeqo_credential.update( store_id: store.id, shall_import_customer_notes: true, allow_duplicate_order: true, shall_import_internal_notes: true, gen_barcode_from_sku: true, shipped_status: true, awaiting_amazon_fulfillment_status: true, awaiting_fulfillment_status: true, import_shipped_having_tracking: true)
       end
     end
 
@@ -479,8 +479,8 @@ RSpec.describe OrdersController, type: :controller do
 
       get :import_all
       expect(response.status).to eq(200)
-      expect(Order.count).to eq(1)
-      expect(Product.count).to eq(1)
+      expect(Order.count).to eq(2)
+      expect(Product.count).to eq(2)
 
       veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
       expect(veeqo_import_item.status).to eq('completed')
@@ -502,7 +502,20 @@ RSpec.describe OrdersController, type: :controller do
 
     it 'Import Orders with Allow duplicate order' do
       create(:order, increment_id: '1744', store_id: @veeqo_store.id, store_order_id: '331856255', veeqo_allocation_id: '246838519')
-      @veeqo_store.veeqo_credential.update(allow_duplicate_order: true)
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(2)
+      expect(Product.count).to eq(2)
+
+      veeqo_import_item = ImportItem.find_by_store_id(@veeqo_store.id)
+      expect(veeqo_import_item.status).to eq('completed')
+    end
+
+    it 'Import Split Orders' do
+      create(:order, increment_id: '1744', store_id: @veeqo_store.id, store_order_id: '331856255', veeqo_allocation_id: nil)
 
       $redis.del("importing_orders_#{Apartment::Tenant.current}")
 
