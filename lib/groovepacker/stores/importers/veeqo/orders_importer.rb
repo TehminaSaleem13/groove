@@ -231,7 +231,8 @@ module Groovepacker
           end
 
           def import_veeqo_order_item(veeqo_order, order)
-            line_items = order['allocations'].dig(0, 'line_items') || order['line_items'] 
+            order_allocations = order['allocations'].dig(0, 'line_items')
+            line_items = order_allocations.present? ? order_allocations : order['line_items'] 
             return if line_items.blank?
 
             @import_item.current_order_items = line_items.length
