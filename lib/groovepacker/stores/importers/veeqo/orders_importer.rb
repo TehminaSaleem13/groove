@@ -94,7 +94,9 @@ module Groovepacker
           def add_deleted_merged_or_split_orders_log
             if @deleted_merged_orders.count > 0
               add_action_log('List of Deleted Orders', 'Veeqo Order Import - Merged Order', @deleted_merged_orders, @deleted_merged_orders.count)
-            elsif @deleted_split_orders.count > 0
+            end
+            
+            if @deleted_split_orders.count > 0
               add_action_log('List of Deleted Orders', 'Veeqo Order Import - Split Order', @deleted_split_orders, @deleted_split_orders.count)
             end
           end

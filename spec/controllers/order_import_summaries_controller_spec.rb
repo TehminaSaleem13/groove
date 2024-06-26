@@ -106,5 +106,14 @@ RSpec.describe OrderImportSummariesController, type: :controller do
       store = FactoryBot.create(:store, name: 'ma_store', store_type: 'Magento API 2', inventory_warehouse: inv_wh, status: true)
       get :fix_imported_at, params: {store_id: store.id}
     end
+
+    it 'Get Import Details without Import Item' do
+      inv_wh = create(:inventory_warehouse, name: 'sp_inventory_warehouse')
+      store = create(:store, name: 'sp_store', store_type: 'Shopify', inventory_warehouse: inv_wh, status: true)
+      
+      get :get_import_details, params: {store_id: store.id}
+      expect(response.status).to eq(200)
+      expect(JSON.parse(response.body)['status']).to eq(false)
+    end
   end
 end

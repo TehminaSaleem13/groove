@@ -62,6 +62,12 @@ class ImportItem < ActiveRecord::Base
       result[:total_imported] = current_import
       result[:remaining_items] = to_import - current_import
       result[:completed] = Order.last(2).first.try(:increment_id)
+      result[:processed_orders] = Order.last(3).pluck(:id, :increment_id, :updated_at, :status).map do |id, increment_id, updated_at, status|
+        { id: id, increment_id: increment_id, updated_at: updated_at, status: status }
+      end
+      result[:run_by] = self.order_import_summary&.user&.name
+      result[:import_start] = self.order_import_summary&.created_at
+      result[:import_end] = self.updated_at
       result[:in_progess] = current_increment_id
       time = Order.last.try(:updated_at) - created_at < 0 ? Time.zone.now - created_at : Order.last.try(:updated_at) - created_at
       if result[:total_imported] != 0

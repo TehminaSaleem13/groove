@@ -22,6 +22,7 @@ RSpec.describe Groovepacker::Stores::Importers::Veeqo::OrdersImporter do
         service.send(:init_common_objects)
         expect(service.send(:handle_merged_order, order_data)).to be true
         expect(Order.count).to eq(0)
+        service.send(:add_deleted_merged_or_split_orders_log)
       end
     end
   end
