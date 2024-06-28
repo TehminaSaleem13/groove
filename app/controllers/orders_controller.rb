@@ -2,6 +2,8 @@
 
 class OrdersController < ApplicationController
   before_action :groovepacker_authorize!
+  before_action :parse_params, only: [:check_orders_tags, :add_tags, :remove_tags]
+  before_action :set_orders, only: [:check_orders_tags, :add_tags, :remove_tags]
   include OrderConcern
   include ActionView::Helpers::NumberHelper
 
@@ -85,6 +87,62 @@ class OrdersController < ApplicationController
     @result['orders'] = make_orders_list(@orders)
 
     render json: @result
+  end
+
+  def check_orders_tags
+    tags = parse_tags(params[:tags])
+    order_ids = @orders.pluck(:id)
+    tag_names = tags.map { |tag| tag['name'] }
+
+    tag_counts = OrderTag.joins(:orders)
+                         .where(orders: { id: order_ids }, name: tag_names)
+                         .group(:name)
+                         .count
+
+    @result = {
+      tags: {
+        all_present: [],
+        partially_present: [],
+        not_present: []
+      }
+    }
+    tags.each do |tag|
+      tag_name = tag['name']
+      orders_with_tag_count = tag_counts[tag_name] || 0
+
+      if orders_with_tag_count == @orders.size
+        @result[:tags][:all_present] << tag_name
+      elsif orders_with_tag_count > 0
+        @result[:tags][:partially_present] << tag_name
+      else
+        @result[:tags][:not_present] << tag_name
+      end
+    end
+
+    render json: @result
+  end
+
+  def add_tags
+    tag_name = params[:tag_name]
+    if tag_name.present?
+      tags = OrderTag.where(name: tag_name)
+      OrderTagManager.new(tags.first.name, @orders).add_tags
+      render json: { success: 'Tags added successfully', status: true }
+    else
+      render json: { error: 'Tag name parameter is required' }, status: :bad_request
+    end
+  end
+
+  def remove_tags
+    tag_name = params[:tag_name]
+    
+    if tag_name.present?
+      tags = OrderTag.where(name: tag_name)
+      OrderTagManager.new(tags.first.name, @orders).remove_tags
+      render json: { success: 'Tags removed successfully', status: true} 
+    else
+      render json: { error: 'Tag name parameter is required' }, status: :bad_request
+    end
   end
 
   def duplicate_orders
@@ -668,4 +726,22 @@ class OrdersController < ApplicationController
       set_status_and_message(false, "You do not have enough permissions to #{activity}", %w[push error_messages])
     end
   end
+
+  def parse_params
+    params[:filters] = JSON.parse(params[:filters])
+    params[:select_all] = params[:select_all].to_b
+    params[:orderArray] = JSON.parse(params[:orderArray])
+  end
+
+  def set_orders
+    @orders = list_selected_orders
+  end
+
+  def parse_tags(tags_param)
+    JSON.parse(tags_param)
+  rescue JSON::ParserError => e
+    # Rails.logger.error "JSON parsing error: #{e.message}"
+    []
+  end
+
 end

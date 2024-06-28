@@ -110,6 +110,9 @@ Groovepacks::Application.routes.draw do
     collection do
       get 'search'
       get 'sorted_and_filtered_data'
+      get 'check_orders_tags'
+      post 'add_tags'
+      post 'remove_tags'
       get 'import_orders'
       get 'import_all'
       post 'generate_pick_list'
@@ -347,6 +350,12 @@ Groovepacks::Application.routes.draw do
   resources :product_kit_activities do
     member do
       put 'acknowledge'
+    end
+  end
+
+  resources :order_tags, only: [:index] do
+    collection do
+      get 'search'
     end
   end
 

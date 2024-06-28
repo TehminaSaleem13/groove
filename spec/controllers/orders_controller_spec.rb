@@ -1156,6 +1156,99 @@ RSpec.describe OrdersController, type: :controller do
     end
   end
 
+  describe '#check_orders_tags' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    filterValue = [
+        { name: 'OrderNumber', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Store', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Notes', operator: 'contains', type: 'string', value: '123'},
+        { name: 'OrderDate', operator: 'inrange', type: 'date', value: {start: '12-2-2022', end: '12-2-2022'}},
+        { name: 'Items', operator: 'inrange', type: 'number', value: {start: 1, end: 2}},
+        { name: 'Recipient', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting']},
+        { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting'},
+        { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123'},
+        { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123'},
+        { name: 'trackingNumber', operator: 'contains', type: 'string', value: '123'},
+        { name: 'country', operator: 'contains', type: 'string', value: '123'},
+        { name: 'city', operator: 'contains', type: 'string', value: '123'},
+        { name: 'email', operator: 'noContains', type: 'string', value: '123'},
+        { name: 'tote', operator: 'noContains', type: 'string', value: '123'},
+      ]
+    
+    emptyfilterValue = [
+        { name: 'OrderNumber', operator: 'contains', type: 'string', value: ''},
+        { name: 'Store', operator: 'contains', type: 'string', value: ''},
+        { name: 'Notes', operator: 'contains', type: 'string', value: ''},
+        { name: 'OrderDate', operator: 'inrange', type: 'date', value: {}},
+        { name: 'Items', operator: 'inrange', type: 'number', value: {}},
+        { name: 'Recipient', operator: 'contains', type: 'string', value: ''},
+        { name: 'Status', operator: 'eq', type: 'string', value: []},
+        { name: 'Status', operator: 'eq', type: 'string', value: ''},
+        { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: ''},
+        { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: ''},
+        { name: 'trackingNumber', operator: 'contains', type: 'string', value: ''},
+        { name: 'country', operator: 'contains', type: 'string', value: ''},
+        { name: 'city', operator: 'contains', type: 'string', value: ''},
+        { name: 'email', operator: 'noContains', type: 'string', value: ''},
+        { name: 'tote', operator: 'noContains', type: 'string', value: ''},
+      ]
+
+    tags = "[{\"id\":1,\"name\":\"Contains New\",\"color\":\"#FF0000\",\"mark_place\":\"0\",\"created_at\":\"2023-12-27T17:00:44.000-05:00\",\"updated_at\":\"2023-12-27T17:00:44.000-05:00\",\"predefined\":true,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":2,\"name\":\"Contains Inactive\",\"color\":\"#00FF00\",\"mark_place\":\"0\",\"created_at\":\"2023-12-27T17:00:44.000-05:00\",\"updated_at\":\"2023-12-27T17:00:44.000-05:00\",\"predefined\":true,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":3,\"name\":\"Manual Hold\",\"color\":\"#0000FF\",\"mark_place\":\"0\",\"created_at\":\"2023-12-27T17:00:44.000-05:00\",\"updated_at\":\"2023-12-27T17:00:44.000-05:00\",\"predefined\":true,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":4,\"name\":\"Simple Bundles - Bundle O\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-19T09:10:12.000-04:00\",\"updated_at\":\"2024-05-19T09:10:12.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":73,\"name\":\"Loox - Photo/Video Review\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-19T09:20:18.000-04:00\",\"updated_at\":\"2024-05-19T09:20:18.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":261,\"name\":\"contentcreator\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-21T21:10:11.000-04:00\",\"updated_at\":\"2024-05-21T21:10:11.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":262,\"name\":\"influencer\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-21T21:10:11.000-04:00\",\"updated_at\":\"2024-05-21T21:10:11.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":263,\"name\":\"Exchange\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-26T21:50:09.000-04:00\",\"updated_at\":\"2024-05-26T21:50:09.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":264,\"name\":\"Simple Bundles - Bundle Order\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-06-02T18:00:18.000-04:00\",\"updated_at\":\"2024-06-02T18:00:18.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":265,\"name\":\"Loox - Photo/Video Review Discount\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-06-02T20:00:22.000-04:00\",\"updated_at\":\"2024-06-02T20:00:22.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":266,\"name\":\"GP Imported\",\"color\":\"#008000\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:05:54.000-04:00\",\"updated_at\":\"2024-06-14T05:05:54.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"48785\"},{\"id\":267,\"name\":\"GP SCANNED\",\"color\":\"#B7B7B7\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:05:54.000-04:00\",\"updated_at\":\"2024-06-14T05:05:54.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"116428\"},{\"id\":268,\"name\":\"GPA-stickles\",\"color\":\"#FF9900\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:09:33.000-04:00\",\"updated_at\":\"2024-06-14T05:09:33.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"126725\"},{\"id\":269,\"name\":\"SSTAG-001\",\"color\":\"#00FFFF\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:18:17.000-04:00\",\"updated_at\":\"2024-06-14T05:18:17.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"128275\"},{\"id\":270,\"name\":\"SS-TAG-002\",\"color\":\"#FFFF00\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:18:17.000-04:00\",\"updated_at\":\"2024-06-14T05:18:17.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"128276\"},{\"id\":271,\"name\":\"SS-TAG-003\",\"color\":\"#FF00FF\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:18:17.000-04:00\",\"updated_at\":\"2024-06-14T05:18:17.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"128277\"}]"
+
+    let!(:tag1) { OrderTag.create(name: 'Tag1') }
+    let!(:tag2) { OrderTag.create(name: 'Tag2') }
+    let!(:tag3) { OrderTag.create(name: 'Tag3') }
+
+    it 'tag update should be working' do
+      @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+      store = FactoryBot.create(:store,name: "store", store_type: "system",inventory_warehouse: @inv_wh, status: true)
+      order =
+        Order.create(
+          increment_id: '9151',
+          order_placed_time: Time.current,
+          store_id: store.id,
+          firstname: 'BIKE',
+          lastname: 'ACTIONGmbH',
+          email: 'east@raceface.com',
+          address_1: 'WEISKIRCHER STR. 102',
+          city: 'RODGAU',
+          postcode: '63110',
+          country: 'GERMANY',
+          status: 'scanned',
+          scanned_on: Time.current,
+          packing_user_id: 2,
+          total_scan_time: 1720,
+          total_scan_count: 20,
+          packing_score: 14
+        )
+
+      orderArray = '[{"id":9151}, {"id":9152}, {"id":17938}, {"id":17964}, {"id":17983}, {"id":18238}]'
+
+      request.accept = 'application/json'
+      get :check_orders_tags, params: {filter: 'all', tags: tags, filters: filterValue.to_json, orderArray: orderArray, select_all: true }
+
+      expect(response).to have_http_status(:success)
+      result = JSON.parse(response.body)
+      expect(result['tags']['partially_present']).to be_empty
+
+      post :add_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+
+      post :remove_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
+  end
+
   describe 'Order Items Export Report' do
     let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
 

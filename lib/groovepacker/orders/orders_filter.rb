@@ -21,7 +21,7 @@ module Groovepacker
       }.freeze
       
       def filter_orders(searched_orders = "", is_from_update = false)
-        filters = JSON.parse(@params[:filters])
+        filters = JSON.parse(@params[:filters].is_a?(Array) ? @params[:filters].to_json : @params[:filters])
         limit = get_limit_or_offset('limit')
         offset = get_limit_or_offset('offset')
 
