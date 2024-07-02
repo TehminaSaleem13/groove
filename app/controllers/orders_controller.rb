@@ -90,6 +90,14 @@ class OrdersController < ApplicationController
   end
 
   def check_orders_tags
+    @result = {}
+    status = $redis.get("add_or_remove_tags_job")
+    if status == "in_progress" && params[:isFirstTime] == false
+      @result[:status] = "Job is still in progress"
+      return render json: @result
+    end
+
+
     tags = parse_tags(params[:tags])
     order_ids = @orders.pluck(:id)
     tag_names = tags.map { |tag| tag['name'] }

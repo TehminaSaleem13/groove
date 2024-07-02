@@ -12,10 +12,15 @@ class OrderTaggingJob < ActiveJob::Base
       tags.each do |tag|
         orders.each { |order| order.order_tags << tag }
       end
+      $redis.set("add_or_remove_tags_job", "completed")
     when 'remove'
       tags.each do |tag|
         orders.each { |order| order.order_tags.destroy(tag) }
       end
+      $redis.set("add_or_remove_tags_job", "completed")
     end
+  rescue StandardError => e
+    $redis.set("add_or_remove_tags_job", "failed")
+    raise e
   end
 end

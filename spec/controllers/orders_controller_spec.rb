@@ -1246,6 +1246,35 @@ RSpec.describe OrdersController, type: :controller do
       post :remove_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
+
+      102.times do |i|
+        Order.create(
+          increment_id: (9151 + i).to_s,
+          order_placed_time: Time.current,
+          store_id: store.id,
+          firstname: 'BIKE',
+          lastname: 'ACTIONGmbH',
+          email: "east+#{i}@raceface.com", # Unique email for each order
+          address_1: 'WEISKIRCHER STR. 102',
+          city: 'RODGAU',
+          postcode: '63110',
+          country: 'GERMANY',
+          status: 'scanned',
+          scanned_on: Time.current,
+          packing_user_id: 2,
+          total_scan_time: 1720,
+          total_scan_count: 20,
+          packing_score: 14
+        )
+      end
+
+      post :add_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+
+      post :remove_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
     end
   end
 
