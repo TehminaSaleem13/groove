@@ -128,6 +128,32 @@ class Order < ActiveRecord::Base
     where("DATE(order_placed_time) #{operator} ?", value) if value.present? && operator.present?
   }
 
+  scope :filter_by_last_days, ->(days) {
+    if days.present? && days != 'all_day'
+      case days
+      when "today"
+        where("order_placed_time >= ?", DateTime.now.beginning_of_day)
+      when "this_week"
+        where("order_placed_time >= ?", DateTime.now.beginning_of_week)
+      when "last_week"
+        where("order_placed_time >= ? AND order_placed_time < ?", DateTime.now.beginning_of_week - 1.week, DateTime.now.beginning_of_week)
+      when "this_month"
+        where("order_placed_time >= ?", DateTime.now.beginning_of_month)
+      when "last_month"
+        where("order_placed_time >= ? AND order_placed_time < ?", DateTime.now.beginning_of_month - 1.month, DateTime.now.beginning_of_month)
+      else
+        where("order_placed_time >= ?", DateTime.now - days.to_i.days)
+      end
+    end
+  }
+  scope :check_date_range, ->(date_range_str) {
+    date_range = JSON.parse(date_range_str) rescue {}
+    start_date = date_range["start_date"]
+    end_date = date_range["end_date"]
+
+    within_date_range({ start_date: start_date, end_date: end_date }, 'inrange')
+  }
+
   scope :within_date_range, ->(date_range_object, operator) {
     if date_range_object.is_a?(Hash) && date_range_object[:start_date].present? && date_range_object[:end_date].present?
       start_date = date_range_object[:start_date]

@@ -65,6 +65,8 @@ module Groovepacker
              .filter_by_tote(OPERATORS_MAP[get_operator_from_filter(12, filtered_filters)], map_value(filtered_filters[12]["operator"], filtered_filters[12]["value"]))
              .within_date_range(date_range(filtered_filters), filtered_filters[3]["operator"])
              .within_number_range(number_range(filtered_filters), @params[:sort])
+             .check_date_range(@params[:dateRange])
+             .filter_by_last_days(@params[:dateValue])
       end
       
       def get_parameters

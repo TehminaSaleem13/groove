@@ -1088,16 +1088,17 @@ RSpec.describe OrdersController, type: :controller do
         'offset' => '0',
         'product_search_toggle' => 'undefined',
         'app' => true,
-        'filters' => filterValue.to_json
+        'filters' => filterValue.to_json,
+        'dateValue' => 'today'
       }
       expect(response.status).to eq(200)
 
       # expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
       # expect(JSON.parse(response.body)['orders_count']['all']).to eq(1)
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, search: '123' }
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, search: '123',  'dateValue' => 'this_week' }
       expect(response.status).to eq(200)
 
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json }
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json,  'dateValue' => 'last_week'}
       expect(response.status).to eq(200)
 
       expect(JSON.parse(response.body)['orders_count']['scanned']).to eq(1)
@@ -1138,14 +1139,16 @@ RSpec.describe OrdersController, type: :controller do
         'offset' => '0',
         'product_search_toggle' => 'undefined',
         'app' => true,
-        'filters' => filterValue.to_json
+        'filters' => filterValue.to_json,
+        'dateValue' => 'this_month',
+        'dateRange' => {"start_date":"07-01-2024","end_date":"07-07-2024"}
       }
       expect(response.status).to eq(200)
      
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'itemslength', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json }
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'itemslength', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => 'last_month' }
       expect(response.status).to eq(200)
 
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'store_name', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json }
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'store_name', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => '7' }
       expect(response.status).to eq(200)
 
       post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'tote', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json }
