@@ -27,6 +27,7 @@ class HomeController < ApplicationController
       user['is_active'] = current_user.active
       user['dashboard_switch'] = current_user.dashboard_switch
       user['confirmation_code'] = current_user.confirmation_code
+      user['override_pass_scanning'] = current_user.override_pass_scanning
       scan_pack_setting = ScanPackSetting.last
       if scan_pack_setting.require_serial_lot && scan_pack_setting.valid_prefixes.present?
         user['all_users_confirmation_code'] = User.pluck(:confirmation_code)

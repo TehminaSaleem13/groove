@@ -1556,6 +1556,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.string "warehouse_postcode", default: ""
     t.string "packing_slip_size", default: "4 x 6"
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
+    t.boolean "override_pass_scanning", default: false
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
   end
