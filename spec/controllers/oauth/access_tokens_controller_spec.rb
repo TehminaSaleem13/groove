@@ -14,4 +14,18 @@ RSpec.describe Oauth::AccessTokensController, type: :controller do
       expect(Groovepacker::LogglyLogger).to have_received(:log).with(Apartment::Tenant.current, "GPS_user_session", logs)
     end
   end
+
+  describe 'POST #revoke' do
+    let(:token) { 'some_token' }
+
+    before do
+      allow($redis).to receive(:hdel)
+    end
+
+    it 'deletes the token from Redis' do
+      post :revoke, params: { token: token }
+
+      expect($redis).to have_received(:hdel).with('groovehacks:session', token)
+    end
+  end
 end
