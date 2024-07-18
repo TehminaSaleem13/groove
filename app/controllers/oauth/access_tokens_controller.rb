@@ -1,6 +1,12 @@
 class Oauth::AccessTokensController < Doorkeeper::TokensController
   after_action :log_auth, only: [:create]
 
+  def revoke
+    $redis.hdel('groovehacks:session', params[:token])
+
+    super
+  end
+
   private
 
   def log_auth
