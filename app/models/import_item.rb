@@ -86,7 +86,7 @@ class ImportItem < ActiveRecord::Base
                     end
       # last_update = last_update.nil? ? nil : last_update + time_zone
       result[:last_imported_data] = begin
-                                      Time.zone.parse(last_update)
+                                      Time.zone.parse(last_update.to_s)
                                     rescue StandardError
                                       nil
                                     end
