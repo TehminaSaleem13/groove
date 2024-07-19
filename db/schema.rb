@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240602112743) do
+ActiveRecord::Schema.define(version: 20240719213943) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -707,7 +707,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.string "increment_id"
     t.datetime "order_placed_time"
     t.string "sku"
-    t.string "customer_comments", limit: 191, collation: "utf8mb4_unicode_ci"
+    t.text "customer_comments", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.integer "store_id"
     t.integer "qty"
     t.string "price"
@@ -770,6 +770,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.string "tags"
     t.string "post_scanning_flag"
     t.integer "origin_store_id"
+    t.string "veeqo_allocation_id"
     t.index ["id"], name: "index_orders_on_id"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
@@ -821,7 +822,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.datetime "activitytime"
     t.bigint "product_id"
     t.bigint "user_id"
-    t.text "action", limit: 4294967295
+    t.text "action", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.string "username"
     t.string "activity_type"
     t.boolean "acknowledged", default: false
@@ -1244,6 +1245,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.string "state", default: ""
     t.string "country", default: ""
     t.string "webhook_secret", default: ""
+    t.datetime "last_location_pull"
   end
 
   create_table "shipworks_credentials", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1424,6 +1426,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.boolean "gen_barcode_from_sku", default: false
+    t.boolean "import_shipped_having_tracking", default: false
   end
 
   create_table "tenants", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1474,6 +1477,7 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.boolean "loggly_gpx_order_scan", default: false
     t.boolean "loggly_shipstation_imports", default: false
     t.text "settings"
+    t.boolean "loggly_veeqo_imports", default: false
   end
 
   create_table "tote_sets", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
@@ -1555,8 +1559,8 @@ ActiveRecord::Schema.define(version: 20240602112743) do
     t.boolean "dashboard_switch", default: false
     t.string "warehouse_postcode", default: ""
     t.string "packing_slip_size", default: "4 x 6"
-    t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.boolean "override_pass_scanning", default: false
+    t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
   end
