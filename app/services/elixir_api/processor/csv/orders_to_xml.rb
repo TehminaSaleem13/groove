@@ -62,13 +62,23 @@ module ElixirApi
             'db_user' => ENV['DB_USERNAME'],
             'db_password' => ENV['DB_PASSWORD'],
             'db_host' => ENV['DB_HOST'],
-            'db_port' => ENV['DB_PORT'] || 3306
+            'db_port' => ENV['DB_PORT'] || 3306,
+            'tenant_offset' => tenant_offset
             # 'database' => Rails.configuration.database_configuration[Rails.env]['database']
           }
         end
 
         def redis_key_for_elixir_pid
           "#{order_params['tenant']}_elixir_order_import_pid"
+        end
+
+        def tenant_offset
+          setting_time_zone = GeneralSetting.first.new_time_zone
+          return "+0000" unless setting_time_zone
+
+          time_zone = ActiveSupport::TimeZone.new(setting_time_zone)
+          current_time = Time.now.in_time_zone(time_zone)
+          current_time.formatted_offset.gsub(':', '')
         end
 
         def save_elixir_process_pid(response)
