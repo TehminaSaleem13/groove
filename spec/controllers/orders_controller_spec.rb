@@ -1294,7 +1294,7 @@ RSpec.describe OrdersController, type: :controller do
       @generalsetting
       order = FactoryBot.create :order, store_id: @store.id
 
-      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false'}
+      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false', export_type: ''}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(false)
@@ -1315,6 +1315,25 @@ RSpec.describe OrdersController, type: :controller do
 
       @generalsetting.update_column(:export_items, 'standard_order_export')
       post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false'}
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+      expect(result['filename']).to be_present
+    end
+
+    it 'Single order is selected with export type' do
+      @generalsetting
+      order = FactoryBot.create :order, store_id: @store.id
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      kit = FactoryBot.create(:product, :with_sku_barcode, is_kit: 1, kit_parsing: 'individual', name: 'KIT1')
+      productkitsku = ProductKitSkus.create(product_id: kit.id, option_product_id: product.id, qty: 1)
+      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: kit.id, scanned_status: 'notscanned', scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'notscanned', scanned_qty: 0, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      kit.product_kit_skuss << productkitsku
+      ProductSku.create(sku: 'PRODUCT90', purpose: nil, product_id: product.id, order: 0)
+      OrderItemKitProduct.create(order_item_id: order_item.id, product_kit_skus_id: productkitsku.id, scanned_status: "unscanned", scanned_qty: 0)
+
+      post :order_items_export, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'false', export_type: 'standard_order_export'}
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)

@@ -3,12 +3,13 @@
 module Groovepacker
   module Orders
     class Export < Groovepacker::Orders::Base
-      def order_items_export(tenant_name, selected_orders, gen_barcode_id = nil)
+      def order_items_export(tenant_name, selected_orders, gen_barcode_id = nil, export_type = nil)
         Apartment::Tenant.switch!(tenant_name)
         @generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id) if gen_barcode_id.present?
         @general_settings = GeneralSetting.all.first
+        @export_type = export_type
         @current_workflow = Tenant.find_by_name(Apartment::Tenant.current).try(:scan_pack_workflow)
-        if @general_settings.export_items == 'disabled'
+        if @general_settings.export_items == 'disabled' && @export_type.empty?
           set_status_and_message(false, 'Order export items is disabled.', ['push'])
           return @result
         end
@@ -94,7 +95,7 @@ module Groovepacker
         product_sku = @product.product_skus.order('product_skus.order ASC').first
         return if product_sku.nil?
 
-        create_single_row(order, product_sku, single_item, type, kit_item)
+        @export_type.present? ? create_row_with_type(order, product_sku, single_item, type, kit_item) : create_single_row(order, product_sku, single_item, type, kit_item)
       end
 
       def create_single_row(order, product_sku, single_item, type, kit_item = nil)
@@ -102,6 +103,15 @@ module Groovepacker
           @items_list[product_sku.sku][:quantity] = @items_list[product_sku.sku][:quantity] + @item_quantity
         else
           single_row_list = @general_settings.export_items == 'standard_order_export' ? fetch_standard_single_row(order, product_sku, single_item, type, kit_item) : fetch_single_row(order, product_sku)
+          push_item_row(single_row_list, product_sku)
+        end
+      end
+
+      def create_row_with_type(order, product_sku, single_item, type, kit_item = nil)
+        if @items_list.key?(product_sku.sku) && @export_type == 'by_sku'
+          @items_list[product_sku.sku][:quantity] = @items_list[product_sku.sku][:quantity] + @item_quantity
+        elsif @export_type == 'standard_order_export'
+          single_row_list = fetch_standard_single_row(order, product_sku, single_item, type, kit_item)
           push_item_row(single_row_list, product_sku)
         end
       end

@@ -402,7 +402,7 @@ class OrdersController < ApplicationController
       generate_order_items_export_report
       @result['status'] = true
     else
-      @result = gp_orders_export.order_items_export(tenant_name, @selected_orders)
+      @result = gp_orders_export.order_items_export(tenant_name, @selected_orders, nil, params['export_type'])
     end
     render json: @result
   end
