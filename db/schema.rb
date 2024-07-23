@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 20240719213943) do
+ActiveRecord::Schema.define(version: 20240723070641) do
 
   create_table "access_restrictions", force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
     t.integer "num_users", default: 0, null: false
@@ -633,7 +633,7 @@ ActiveRecord::Schema.define(version: 20240719213943) do
     t.bigint "order_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.string "name", default: "", null: false
+    t.text "name", limit: 4294967295, collation: "utf8mb4_unicode_ci"
     t.integer "product_id"
     t.string "scanned_status", default: "notscanned"
     t.integer "scanned_qty", default: 0
