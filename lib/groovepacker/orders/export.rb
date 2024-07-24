@@ -222,6 +222,7 @@ module Groovepacker
       # This mentod will generate CSV file and return the filename as S3 URL generated in get_csv_export method.
       def generate_csv_file
         export_rom_map = @general_settings.export_items == 'standard_order_export' ? order_export_row_map : row_map
+        export_rom_map = @export_type == 'standard_order_export' ? order_export_row_map : row_map if @export_type.present?
         csv = CSV.generate(headers: true) do |csv|
           csv << export_rom_map.keys
           @items_list.values.each do |line|
