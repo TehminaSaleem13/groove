@@ -110,8 +110,8 @@ module Groovepacker
       def create_row_with_type(order, product_sku, single_item, type, kit_item = nil)
         if @items_list.key?(product_sku.sku) && @export_type == 'by_sku'
           @items_list[product_sku.sku][:quantity] = @items_list[product_sku.sku][:quantity] + @item_quantity
-        elsif @export_type == 'standard_order_export'
-          single_row_list = fetch_standard_single_row(order, product_sku, single_item, type, kit_item)
+        else
+          single_row_list = @export_type == 'standard_order_export' ? fetch_standard_single_row(order, product_sku, single_item, type, kit_item) : fetch_single_row(order, product_sku)
           push_item_row(single_row_list, product_sku)
         end
       end
