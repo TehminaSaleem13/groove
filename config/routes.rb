@@ -353,11 +353,15 @@ Groovepacks::Application.routes.draw do
     end
   end
 
-  resources :order_tags, only: [:index] do
-    collection do
-      get 'search'
+  Rails.application.routes.draw do
+    resources :order_tags, only: [:index, :create, :update] do
+      collection do
+        get 'search'
+        post 'create_or_update'
+      end
     end
   end
+  
 
   resources :shopify do
     member do

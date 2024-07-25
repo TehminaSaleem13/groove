@@ -17,8 +17,6 @@ RSpec.describe OrderTagsController, type: :controller do
   let(:origin_store) { create(:origin_store, store: @store) }
 
   describe 'GET #index' do
-   
-
     before do
       allow(controller).to receive(:doorkeeper_token) { token1 }
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
@@ -64,6 +62,52 @@ RSpec.describe OrderTagsController, type: :controller do
         expect(response).to have_http_status(:bad_request)
         json_response = JSON.parse(response.body)
         expect(json_response['error']).to eq('Name parameter is required')
+      end
+    end
+  end
+
+  describe 'POST #create_or_update' do
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    context 'when creating a new order tag' do
+      it 'creates a new order tag and returns it' do
+        post :create_or_update, params: { order_id: { name: 'NewTag', color: 'Blue' } }
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response['name']).to eq('NewTag')
+        expect(json_response['color']).to eq('Blue')
+      end
+    end
+
+    context 'when updating an existing order tag' do
+      it 'updates the order tag and returns it' do
+        post :create_or_update, params: { order_id: { id: order_tag1.id, name: 'UpdatedTag', color: 'Red' } }
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response['name']).to eq('UpdatedTag')
+        expect(json_response['color']).to eq('Red')
+      end
+    end
+  end
+
+  describe 'PUT #update' do
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    context 'when updating an existing order tag' do
+      it 'updates the order tag and returns it' do
+        put :update, params: { id: order_tag1.id, order_id: { name: 'UpdatedTag', color: 'Red' } }
+        expect(response).to have_http_status(:ok)
+        json_response = JSON.parse(response.body)
+        expect(json_response['name']).to eq('UpdatedTag')
+        expect(json_response['color']).to eq('Red')
       end
     end
   end
