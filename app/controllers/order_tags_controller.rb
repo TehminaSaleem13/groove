@@ -19,7 +19,7 @@ class OrderTagsController < ApplicationController
   def create_or_update
     @order_tag = OrderTag.find_or_initialize_by(id: params["order_id"][:id])
     @order_tag.assign_attributes(order_tag_params)
-
+    
     if @order_tag.save
       render json: @order_tag, status: :ok
     else
@@ -44,6 +44,6 @@ class OrderTagsController < ApplicationController
   end
 
   def order_tag_params
-    params.require(:order_id).permit(:name, :color)
+    params.require(:order_id).permit(:name, :color, :isVisible)
   end
 end

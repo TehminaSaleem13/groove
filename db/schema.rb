@@ -695,6 +695,7 @@ ActiveRecord::Schema.define(version: 20240723070641) do
     t.boolean "predefined", default: false
     t.string "groovepacker_tag_origin"
     t.string "source_id"
+    t.boolean "isVisible", default: true
   end
 
   create_table "order_tags_orders", id: false, force: :cascade, options: "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci" do |t|
