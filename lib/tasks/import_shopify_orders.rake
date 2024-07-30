@@ -3,6 +3,10 @@
 namespace :doo do
   desc 'import shopify orders from each active store at every 10 mins'
   task import_shopify_orders: :environment do
+    return if $redis.get('import_shopify_orders_every_10_minutes')
+
+    $redis.set('import_shopify_orders_every_10_minutes', true)
+    $redis.expire('import_shopify_orders_every_10_minutes', 180)
     Tenant.order(:name).find_each.each do |tenant|
       Apartment::Tenant.switch!(tenant.name)
       next if OrderImportSummary.where(status: 'in_progress').present?
