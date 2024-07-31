@@ -355,16 +355,6 @@ module Groovepacker
             Groovepacker::Stores::Context.new(handler)
           end
 
-          def update_import_count(import_type = 'success_imported')
-            if import_type == 'success_imported'
-              @import_item.update_attributes(success_imported: @import_item.success_imported + 1)
-              @result[:success_imported] += 1
-            else
-              @result[:previous_imported] += 1
-              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
-            end
-          end
-
           def import_order_and_items(order, order_in_gp)
             # create order
             veeqo_order = order_in_gp

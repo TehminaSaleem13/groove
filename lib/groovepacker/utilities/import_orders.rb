@@ -390,6 +390,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     store = Store.find_by_id(store_id)
     import_item = ImportItem.find_or_create_by(store_id: store_id)
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+    $redis.set("webhook_import_started_#{tenant_name}", true)
     initiate_import_for(store, import_item, handler)
   end
 end

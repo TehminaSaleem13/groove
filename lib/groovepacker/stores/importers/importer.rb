@@ -184,6 +184,16 @@ module Groovepacker
           update_import_count('success_imported')
         end
 
+        def update_import_count(import_type = 'success_imported')
+          if import_type == 'success_imported'
+            @import_item.update_attributes(success_imported: @import_item.success_imported + 1)
+            @result[:success_imported] += 1
+          else
+            @result[:previous_imported] += 1
+            @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+          end
+        end
+
         def add_action_log(title, username, objects_involved, objects_involved_count)
           Ahoy::Event.version_2.create({
             name: title,

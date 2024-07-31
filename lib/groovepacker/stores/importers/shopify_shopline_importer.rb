@@ -7,6 +7,7 @@ module Groovepacker
         include ProductsHelper
 
         def import
+          @import_webhook_order = $redis.get("webhook_import_started_#{Apartment::Tenant.current}").to_b
           initialize_import_objects
           begin
             OrderImportSummary.top_summary.emit_data_to_user(true)
@@ -44,6 +45,7 @@ module Groovepacker
               nil
             end
           end
+          $redis.del("webhook_import_started_#{Apartment::Tenant.current}")
           update_orders_status
           @result
         end
@@ -187,18 +189,9 @@ module Groovepacker
           Groovepacker::Stores::Context.new(handler)
         end
 
-        def update_import_count(import_type = 'success_imported')
-          if import_type == 'success_imported'
-            @import_item.update_attributes(success_imported: @import_item.success_imported + 1)
-            @result[:success_imported] += 1
-          else
-            @result[:previous_imported] += 1
-            @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
-          end
-        end
-
         def add_order_activities(shop_order)
-          shop_order.addactivity('Order Import', @store.name + ' Import')
+          order_import_type = @on_demand_import ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
+          shop_order.addactivity(order_import_type, @store.name + ' Import')
           shop_order.order_items.each do |item|
             next if item.product.nil? || item.product.primary_sku.nil?
 
@@ -207,7 +200,8 @@ module Groovepacker
         end
 
         def add_order_activities_for_gp_coupon(shop_order, order)
-          shop_order.addactivity('Order Import', @store.name + ' Import')
+          order_import_type = @on_demand_import ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
+          shop_order.addactivity(order_import_type, @store.name + ' Import')
           shop_order.order_items.each_with_index do |item, index|
             if order['line_items'][index]['name'] == item.product.name && order['line_items'][index]['sku'] == item.product.primary_sku
               next if item.product.nil? || item.product.primary_sku.nil?
