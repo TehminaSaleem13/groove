@@ -99,6 +99,7 @@ module StoreConcern
                       end
        end
     end
+    @file_data.gsub!("\"\"", '')
     @file_data
   end
 
