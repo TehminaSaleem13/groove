@@ -211,6 +211,8 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Import SE On Demand Order Import' do
+      scan_pack_settings = ScanPackSetting.first
+      scan_pack_settings.update(intangible_setting_enabled: false)
       allow_any_instance_of(Groovepacker::ShippingEasy::Client).to receive(:get_single_order).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/se_same_sku_test.yaml'))))
       request.accept = 'application/json'
 
@@ -222,6 +224,7 @@ RSpec.describe StoresController, type: :controller do
       get :get_order_details, params: { order_no: '105908', store_id: se_store.id }
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
+      scan_pack_settings.update(intangible_setting_enabled: true)
     end
 
     it 'show error if required field not mapped' do

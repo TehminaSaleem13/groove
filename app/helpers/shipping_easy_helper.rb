@@ -76,6 +76,7 @@ module ShippingEasyHelper
   end
 
   def ondemand_import_single_order(order)
+    @on_demand_import = true
     init_common_objects
     response = @client.get_single_order(order)
     res = begin
