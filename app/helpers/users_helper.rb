@@ -441,4 +441,23 @@ module UsersHelper
       format.json { render json: result }
     end
   end
+
+  def fetch_invoices(subscription_id)
+    Rails.cache.fetch("#{subscription_id}-invoices", expires_in: 5.minutes) do
+      limit = 12
+      invoices = Stripe::Invoice.list({
+        subscription: subscription_id,
+        limit: limit
+      })
+
+      invoices.data.map do |invoice|
+        {
+          invoice_number: invoice.number,
+          customer_email: invoice.customer_email,
+          created: Time.zone.at(invoice.created).strftime("%d %b %Y, %H:%M"),
+          pdf_url: invoice.invoice_pdf
+        }
+      end
+    end
+  end
 end

@@ -284,6 +284,7 @@ Groovepacks::Application.routes.draw do
       get 'get_super_admin_email'
       get 'modify_plan'
       get 'get_subscription_info'
+      get 'invoices'
     end
     member do
       put 'create_role'

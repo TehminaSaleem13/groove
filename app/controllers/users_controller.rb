@@ -338,4 +338,19 @@ class UsersController < ApplicationController
     @custom_field_two_key = general_setting.custom_user_field_two
     @custom_field_two_value = @user.custom_field_two
   end
+
+  def invoices
+    result = {}
+    result['status'] = true
+    tenant = Tenant.find_by_name(Apartment::Tenant.current)
+    subscription = tenant.subscription
+    
+    if subscription.present?
+      result['invoice_data'] = fetch_invoices(subscription.customer_subscription_id)
+    else
+      result['status'] = false
+    end
+
+    render json: result
+  end
 end
