@@ -442,12 +442,12 @@ module UsersHelper
     end
   end
 
-  def fetch_invoices(subscription_id)
-    Rails.cache.fetch("#{subscription_id}-invoices", expires_in: 5.minutes) do
-      limit = 12
+  def fetch_invoices(customer_id)
+    Rails.cache.fetch("#{customer_id}-invoices", expires_in: 5.minutes) do
       invoices = Stripe::Invoice.list({
-        subscription: subscription_id,
-        limit: limit
+        customer: customer_id,
+        created: { gte: 1.year.ago.to_i },
+        limit: 30
       })
 
       invoices.data.map do |invoice|

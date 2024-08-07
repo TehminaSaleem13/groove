@@ -346,9 +346,15 @@ class UsersController < ApplicationController
     subscription = tenant.subscription
     
     if subscription.present?
-      result['invoice_data'] = fetch_invoices(subscription.customer_subscription_id)
+      begin
+        result['invoice_data'] = fetch_invoices(subscription.stripe_customer_id)
+      rescue => e
+        result['status'] = false
+        result['error'] = e.message
+      end
     else
       result['status'] = false
+      result['error'] = 'Subscription not found'
     end
 
     render json: result
