@@ -19,10 +19,10 @@ module Groovepacker
           ).import
         end
 
-        def import_single_order_from(order_no)
+        def import_single_order_from(order_no, user_id)
           Groovepacker::Stores::Importers::Veeqo::OrdersImporter.new(
             build_handle
-          ).ondemand_import_single_order(order_no)
+          ).ondemand_import_single_order(order_no, user_id)
         end
 
         def import_single_product(product)

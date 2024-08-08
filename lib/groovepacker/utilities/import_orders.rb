@@ -107,7 +107,7 @@ class ImportOrders < Groovepacker::Utilities::Base
       handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
       context = Groovepacker::Stores::Context.new(handler)
       if store.store_type.in? %w[ShippingEasy Shopify Shopline Shippo Veeqo]
-        context.import_single_order_from(params[:order_no])
+        context.import_single_order_from(params[:order_no], params[:current_user])
       else
         context.import_single_order_from_ss_rest(params[:order_no], params[:current_user], nil, params[:controller])
       end

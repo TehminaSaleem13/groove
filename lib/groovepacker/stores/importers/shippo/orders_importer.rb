@@ -44,8 +44,9 @@ module Groovepacker
             update_order_import_summary
           end
 
-          def ondemand_import_single_order(order_number)
+          def ondemand_import_single_order(order_number, user_id)
             @on_demand_import = true
+            @ondemand_user_name = ondemand_user(user_id)
             init_common_objects
             response = @client.get_single_order(order_number)
             order_response = response&.any? ? response : nil
@@ -211,7 +212,7 @@ module Groovepacker
           end
 
           def add_order_activities(shippo_order)
-            shippo_order.addactivity("Order Import", @store.name+" Import")
+            shippo_order.addactivity("Order Import", @store.name + " Import #{@ondemand_user_name}")
             shippo_order.order_items.each do |item|
               next if item.product.nil? || item.product.primary_sku.nil?
               shippo_order.addactivity("Item with SKU: "+item.product.primary_sku+" Added", @store.name+" Import")
@@ -219,7 +220,7 @@ module Groovepacker
           end
 
           def add_order_activities_for_gp_coupon(shippo_order, order)
-            shippo_order.addactivity("Order Import", @store.name+" Import")
+            shippo_order.addactivity("Order Import", @store.name + " Import #{@ondemand_user_name}")
             shippo_order.order_items.each_with_index do |item, index|
               if order["line_items"][index]["title"] == item.product.name &&  order["line_items"][index]["sku"] == item.product.primary_sku
                 next if item.product.nil? || item.product.primary_sku.nil?

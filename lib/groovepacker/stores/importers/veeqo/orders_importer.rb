@@ -56,8 +56,9 @@ module Groovepacker
             Tenant.save_se_import_data("========Veeqo Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item.as_json)
           end
 
-          def ondemand_import_single_order(order_number)
+          def ondemand_import_single_order(order_number, user_id)
             @on_demand_import = true
+            @ondemand_user_name = ondemand_user(user_id)
             init_common_objects
             response = @client.get_single_order(order_number, @import_item)
             response_orders = response['orders'].select { |o| o['allocations'].count <= 1 }
@@ -372,7 +373,7 @@ module Groovepacker
 
           def add_order_activities(veeqo_order, order)
             activity_name = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
-            veeqo_order.addactivity(activity_name, @credential.store.name + ' Import')
+            veeqo_order.addactivity(activity_name, @credential.store.name + " Import #{@ondemand_user_name}")
             veeqo_order.order_items.each_with_index do |item, index|
               veeqo_order.addactivity("QTY #{item.qty} of item with SKU: #{item.sku} Added", "#{@store.name} Import")
             end

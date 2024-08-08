@@ -39,7 +39,7 @@ module Groovepacker
             if store.store_type == 'Shipstation API 2'
               context.import_single_order_from_ss_rest(order_no, user_id, true)
             else
-              context.import_single_order_from(order_no)
+              context.import_single_order_from(order_no, user_id)
             end
             ImportItem.where(store_id: store.id, order_import_summary_id: nil).destroy_all
             # ImportItem.where("status IS NULL").destroy_all

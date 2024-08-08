@@ -86,8 +86,8 @@ module Groovepacker
         handler.import_single_product(product)
       end
 
-      def import_single_order_from(order_no)
-        handler.import_single_order_from(order_no)
+      def import_single_order_from(order_no, user_id)
+        handler.import_single_order_from(order_no, user_id)
       end
 
       def process_ss_webhook_import_order(url)

@@ -608,7 +608,7 @@ module Groovepacker
 
           def add_order_activity(shiping_easy_order)
             order_import_type = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
-            shiping_easy_order.addactivity(order_import_type, "#{@credential.store.name} Import")
+            shiping_easy_order.addactivity(order_import_type, "#{@credential.store.name} Import #{@ondemand_user_name}")
             shiping_easy_order.order_items.each do |item|
               primary_sku = item.product.try(:primary_sku)
               next if primary_sku.nil?
@@ -619,7 +619,7 @@ module Groovepacker
 
           def add_order_activity_for_gp_coupon(shiping_easy_order, params_item)
             order_import_type = @on_demand_import ? 'On Demand Order Import' : 'Order Import'
-            shiping_easy_order.addactivity(order_import_type, "#{@credential.store.name} Import")
+            shiping_easy_order.addactivity(order_import_type, "#{@credential.store.name} Import #{@ondemand_user_name}")
             shiping_easy_order.order_items.each_with_index do |item, index|
               product_name = params_item[index]['product'].nil? ? params_item[index]['item_name'].to_s : params_item[index]['product']['description'].to_s
               if product_name == item.product.name && params_item[index]['sku'] == item.product.primary_sku

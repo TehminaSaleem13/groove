@@ -75,8 +75,9 @@ module ShippingEasyHelper
     @import_summary.emit_data_to_user(true)
   end
 
-  def ondemand_import_single_order(order)
+  def ondemand_import_single_order(order, user_id)
     @on_demand_import = true
+    @ondemand_user_name = ondemand_user(user_id)
     init_common_objects
     response = @client.get_single_order(order)
     res = begin

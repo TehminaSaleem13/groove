@@ -183,8 +183,7 @@ module Groovepacker
 
           def import_single_order(order_no, user_id, on_demand_quickfix, controller)
             @import_single_order = true
-            user_name = User.find_by_id(user_id)&.name if user_id
-            @ondemand_user_name = "(#{user_name})" if user_name
+            @ondemand_user_name = ondemand_user(user_id)
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last

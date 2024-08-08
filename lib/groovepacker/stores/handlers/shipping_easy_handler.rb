@@ -18,10 +18,10 @@ module Groovepacker
           ).import
         end
 
-        def import_single_order_from(order_no)
+        def import_single_order_from(order_no, user_id)
           Groovepacker::Stores::Importers::ShippingEasy::OrdersImporter.new(
             build_handle
-          ).ondemand_import_single_order(order_no)
+          ).ondemand_import_single_order(order_no, user_id)
         end
 
         def range_import(start_date, end_date, type, current_user_id)

@@ -131,6 +131,12 @@ module Groovepacker
           true
         end
 
+        def ondemand_user(user_id)
+          return unless user_id 
+          user_name = User.find_by_id(user_id).name
+          "(#{user_name})" if user_name
+        end
+
         def check_or_assign_import_item
           return unless ImportItem.find_by_id(@import_item.id).blank?
 

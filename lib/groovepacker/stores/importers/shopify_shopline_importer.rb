@@ -50,8 +50,9 @@ module Groovepacker
           @result
         end
 
-        def ondemand_import_single_order(order_number)
+        def ondemand_import_single_order(order_number, user_id)
           @on_demand_import = true
+          @ondemand_user_name = ondemand_user(user_id)
           init_common_objects
           response = @client.get_single_order(order_number)
           order_response = response['orders']&.any? ? response['orders'].first : nil
@@ -191,7 +192,7 @@ module Groovepacker
 
         def add_order_activities(shop_order)
           order_import_type = @on_demand_import ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
-          shop_order.addactivity(order_import_type, @store.name + ' Import')
+          shop_order.addactivity(order_import_type, @store.name + " Import #{@ondemand_user_name}")
           shop_order.order_items.each do |item|
             next if item.product.nil? || item.product.primary_sku.nil?
 
@@ -201,7 +202,7 @@ module Groovepacker
 
         def add_order_activities_for_gp_coupon(shop_order, order)
           order_import_type = @on_demand_import ? 'On Demand Order Import' : (@import_webhook_order ? 'Webhook Order Import' : 'Order Import')
-          shop_order.addactivity(order_import_type, @store.name + ' Import')
+          shop_order.addactivity(order_import_type, @store.name + " Import #{@ondemand_user_name}")
           shop_order.order_items.each_with_index do |item, index|
             if order['line_items'][index]['name'] == item.product.name && order['line_items'][index]['sku'] == item.product.primary_sku
               next if item.product.nil? || item.product.primary_sku.nil?
