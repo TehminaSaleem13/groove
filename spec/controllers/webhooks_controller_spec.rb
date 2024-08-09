@@ -22,20 +22,20 @@ RSpec.describe WebhooksController, type: :controller do
     end
   end
 
-  describe 'POST #orders_create' do
-    it 'calls handle_and_enqueue_order_import and returns :ok status' do
-      expect(controller).to receive(:handle_and_enqueue_order_import)
-      post :orders_create
-      expect(response).to have_http_status(:success)
-    end
-  end
+  # describe 'POST #orders_create' do
+  #   it 'calls handle_and_enqueue_order_import and returns :ok status' do
+  #     expect(controller).to receive(:handle_and_enqueue_order_import)
+  #     post :orders_create
+  #     expect(response).to have_http_status(:success)
+  #   end
+  # end
 
-  describe 'POST #orders_update' do
-    it 'calls handle_and_enqueue_order_import and returns :ok status' do
-      expect(controller).to receive(:handle_and_enqueue_order_import)
-      post :orders_update
-      expect(response).to have_http_status(:success)
-    end
-  end
+  # describe 'POST #orders_update' do
+  #   it 'calls handle_and_enqueue_order_import and returns :ok status' do
+  #     expect(controller).to receive(:handle_and_enqueue_order_import)
+  #     post :orders_update
+  #     expect(response).to have_http_status(:success)
+  #   end
+  # end
 
 end

@@ -18,11 +18,12 @@ class WebhooksController < ApplicationController
   end
 
   def orders_create
-    handle_and_enqueue_order_import
+     # TODO: GROOV-3014 It is creating duplicates order via shopify webhook
+    # handle_and_enqueue_order_import
   end
 
   def orders_update
-    handle_and_enqueue_order_import
+    # handle_and_enqueue_order_import
   end
 
   private

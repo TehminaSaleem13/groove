@@ -513,6 +513,8 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Shippo On Demand Import' do
+      scan_pack_settings = ScanPackSetting.first
+      scan_pack_settings.update(intangible_setting_enabled: false)
       allow_any_instance_of(Groovepacker::ShippoRuby::Client).to receive(:get_single_order).and_return(YAML.load(IO.read(Rails.root.join("spec/fixtures/files/Shippo_test_single_order.yaml"))))
 
       request.accept = 'application/json'
@@ -522,6 +524,7 @@ RSpec.describe StoresController, type: :controller do
       get :get_order_details, params: { order_no: '2299714', store_id: shippo_store.id }
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
+      scan_pack_settings.update(intangible_setting_enabled: true)
     end
 
     it 'Shippo Store Settings' do
