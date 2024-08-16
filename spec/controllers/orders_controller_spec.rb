@@ -996,7 +996,7 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'tote', operator: 'noContains', type: 'string', value: '123'},
       ]
 
-      post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json }
+      post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, tags_name: 'Contains Inactive', filterIncludedTags: false }
       expect(response.status).to eq(200)
 
       post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, 'unselected' => "C000209814-B(Duplicate-2)" }

@@ -81,11 +81,14 @@ class OrdersController < ApplicationController
   def sorted_and_filtered_data
     @result ||= {}
     @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
-    @orders, filter_length = gp_orders_filter.filter_orders(@searched_orders)
+    @orders, filter_length, tags = gp_orders_filter.filter_orders(@searched_orders)
     @result['orders_count'] = params[:search].present? ? get_filter_orders_count(@searched_orders["orders"]) : get_orders_count
     @result['orders_count'].merge!('filtered_count' => filter_length)
     @result['orders'] = make_orders_list(@orders)
-
+    
+    # Calculate tag counts
+    @result['tags'] = tags
+  
     render json: @result
   end
 
@@ -98,7 +101,7 @@ class OrdersController < ApplicationController
     end
 
 
-    tags = parse_tags(params[:tags])
+    tags = OrderTag.all
     order_ids = @orders.pluck(:id)
     tag_names = tags.map { |tag| tag['name'] }
 
@@ -106,7 +109,6 @@ class OrdersController < ApplicationController
                          .where(orders: { id: order_ids }, name: tag_names)
                          .group(:name)
                          .count
-
     @result = {
       tags: {
         all_present: [],
@@ -118,7 +120,7 @@ class OrdersController < ApplicationController
       tag_name = tag['name']
       orders_with_tag_count = tag_counts[tag_name] || 0
 
-      if orders_with_tag_count == @orders.size
+      if orders_with_tag_count == @orders.size || orders_with_tag_count == @orders.size - 1 
         @result[:tags][:all_present] << tag_name
       elsif orders_with_tag_count > 0
         @result[:tags][:partially_present] << tag_name

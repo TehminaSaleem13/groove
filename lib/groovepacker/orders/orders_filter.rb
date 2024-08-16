@@ -32,18 +32,52 @@ module Groovepacker
         search_query = filters.include?("all") && filtered_filters.pluck("value").all?(&:blank?) ? " WHERE id IN (#{search_orders_ids})" : " AND id IN (#{search_orders_ids})"
         search_query = "" if search_orders_ids.blank?
         final_order = (filtered_order(filtered_filters, filters).to_sql + search_query)
+        results = ActiveRecord::Base.connection.execute("SELECT id FROM (#{final_order}) AS subquery")
+        data = results.map { |row| row }
         filtered_count = ActiveRecord::Base.connection.execute("SELECT COUNT(*) FROM (#{final_order}) AS subquery").first[0]
         if !is_from_update
           final_order = Order.find_by_sql(final_order + get_query_limit_offset(limit, offset))
         else
           final_order = Order.find_by_sql(final_order)
         end
+        tags = calculate_tags_count(data.flatten)
 
-        [final_order, filtered_count]
+        [final_order, filtered_count, tags]
       end
 
 
       private
+
+      def calculate_tags_count(data)
+        order_ids = Order.where(id: data)
+        tags = OrderTag.all.uniq
+        tag_names = tags.pluck(:name)
+
+        tags_in_orders = OrderTag.joins(:orders)
+        .where(orders: { id: order_ids }, name: tag_names)
+        .group(:name)
+        .pluck('order_tags.name, COUNT(orders.id) as order_count')
+
+        order_tags_hash = tags_in_orders.map do |name, count|
+          { name: name, order_count: count }
+        end
+        
+        total_order_count = order_ids.size
+        tags_not_present_counts = tag_names.uniq.each_with_object([]) do |tag_name, array|
+          orders_with_tag_count = tags_in_orders.find { |name, _| name == tag_name }&.last || 0
+        
+          count_not_present = total_order_count - orders_with_tag_count
+        
+          if count_not_present > 0
+            array << { name: tag_name, not_present_in_order_count: count_not_present }
+          end
+        end
+
+        {
+          present: order_tags_hash,
+          not_present: tags_not_present_counts
+        }
+      end
 
       def filtered_order(filtered_filters, filters)
         sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add = get_parameters
@@ -65,6 +99,8 @@ module Groovepacker
              .filter_by_tote(OPERATORS_MAP[get_operator_from_filter(12, filtered_filters)], map_value(filtered_filters[12]["operator"], filtered_filters[12]["value"]))
              .within_date_range(date_range(filtered_filters), filtered_filters[3]["operator"])
              .within_number_range(number_range(filtered_filters), @params[:sort])
+             .with_tags(@params[:tags_name], @params[:filterIncludedTags])
+             .without_tags(@params[:tags_name], @params[:filterIncludedTags])
              .check_date_range(@params[:dateRange])
              .filter_by_last_days(@params[:dateValue])
       end

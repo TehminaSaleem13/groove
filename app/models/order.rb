@@ -127,6 +127,13 @@ class Order < ActiveRecord::Base
     value = DateTime.strptime(value, "%m-%d-%Y") if value.is_a?(String)
     where("DATE(order_placed_time) #{operator} ?", value) if value.present? && operator.present?
   }
+  scope :with_tags, ->(tag_names, shouldFilterIncludeTags) {
+    joins(:order_tags).where(order_tags: { name: tag_names }).distinct if tag_names.present? && shouldFilterIncludeTags.to_b
+  }
+  scope :without_tags, ->(tag_names, shouldFilterIncludeTags) {
+    joins(:order_tags).where.not(order_tags: { name: tag_names }).distinct if tag_names.present? && !shouldFilterIncludeTags.to_b
+  }
+
 
   scope :filter_by_last_days, ->(days) {
     if days.present? && days != 'all_day'
