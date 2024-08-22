@@ -119,8 +119,7 @@ class OrdersController < ApplicationController
     tags.each do |tag|
       tag_name = tag['name']
       orders_with_tag_count = tag_counts[tag_name] || 0
-
-      if orders_with_tag_count == @orders.size || orders_with_tag_count == @orders.size - 1 
+      if orders_with_tag_count == @orders.size || (orders_with_tag_count > 0  && orders_with_tag_count == @orders.size - 1)
         @result[:tags][:all_present] << tag_name
       elsif orders_with_tag_count > 0
         @result[:tags][:partially_present] << tag_name
