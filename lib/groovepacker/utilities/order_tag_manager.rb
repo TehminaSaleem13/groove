@@ -14,7 +14,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
       if tag
         @orders.find_in_batches(batch_size: 1000) do |order_batch|
           order_ids = order_batch.pluck(:id)
-          if order_ids.size < 100
+          if order_ids.size < 1000
             perform_now(tag.id, order_ids, 'add')
           else
             OrderTaggingJob.perform_later(tag.id, order_ids, 'add')
@@ -36,7 +36,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
       if tags.any?
         @orders.find_in_batches(batch_size: 1000) do |order_batch|
           order_ids = order_batch.pluck(:id)
-          if order_ids.size < 100
+          if order_ids.size < 1000
             perform_now(tags.pluck(:id), order_ids, 'remove')
           else
             OrderTaggingJob.perform_later(tags.pluck(:id), order_ids, 'remove')
