@@ -227,7 +227,7 @@ class ExportSetting < ActiveRecord::Base
     single_row[:barcode] = product_barcode.barcode
     single_row[:scanned_count] = kit_product.scanned_qty
     single_row[:item_sale_price] = order_item.price
-    single_row[:ordered_qty] = kit_product_sku.qty
+    single_row[:ordered_qty] = kit_product.order_item.qty * kit_product_sku.qty
     single_row[:unscanned_count] = kit_product.order_item.qty - kit_product.scanned_qty
     single_row[:clicked_scanned_qty] = kit_product.clicked_qty
     single_row[:removed_count] = order_item.removed_qty
