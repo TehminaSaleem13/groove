@@ -1,7 +1,7 @@
-# lib/order_tag_manager.rb
-
 class OrderTagManager < Groovepacker::Utilities::Base
   include Connection
+
+  BATCH_SIZE = 1000
 
   def initialize(tag_name, orders)
     @tag_name = tag_name
@@ -12,15 +12,22 @@ class OrderTagManager < Groovepacker::Utilities::Base
     if @tag_name.present?
       tag = OrderTag.find_by(name: @tag_name)
       if tag
-        @orders.find_in_batches(batch_size: 1000) do |order_batch|
+        total_batches = (@orders.count.to_f / BATCH_SIZE).ceil
+
+        # Store the total number of batches in Redis
+        $redis.set("order_tagging_job:total_batches", total_batches)
+        $redis.set("order_tagging_job:completed_batches", 0)
+
+        @orders.find_in_batches(batch_size: BATCH_SIZE) do |order_batch|
           order_ids = order_batch.pluck(:id)
-          if order_ids.size < 1000
+          if order_ids.size < BATCH_SIZE
             perform_now(tag.id, order_ids, 'add')
           else
-            OrderTaggingJob.perform_later(tag.id, order_ids, 'add')
+            OrderTaggingJob.perform_now(tag.id, order_ids, 'add', total_batches)
           end
+
+          broadcast_progress(total_batches)
         end
-        $redis.set("add_or_remove_tags_job", "in_progress")
         { success: 'Tagging process started' }
       else
         { error: 'Tag not found' }
@@ -34,15 +41,22 @@ class OrderTagManager < Groovepacker::Utilities::Base
     if @tag_name.present?
       tags = OrderTag.where(name: @tag_name)
       if tags.any?
-        @orders.find_in_batches(batch_size: 1000) do |order_batch|
+        total_batches = (@orders.count.to_f / BATCH_SIZE).ceil
+
+        # Store the total number of batches in Redis
+        $redis.set("order_tagging_job:total_batches", total_batches)
+        $redis.set("order_tagging_job:completed_batches", 0)
+
+        @orders.find_in_batches(batch_size: BATCH_SIZE) do |order_batch|
           order_ids = order_batch.pluck(:id)
-          if order_ids.size < 1000
+          if order_ids.size < BATCH_SIZE
             perform_now(tags.pluck(:id), order_ids, 'remove')
           else
-            OrderTaggingJob.perform_later(tags.pluck(:id), order_ids, 'remove')
+            OrderTaggingJob.perform_now(tags.pluck(:id), order_ids, 'remove', total_batches)
           end
+
+          broadcast_progress(total_batches)
         end
-        $redis.set("add_or_remove_tags_job", "in_progress")
         { success: 'Untagging process started' }
       else
         { error: 'Tags not found' }
@@ -55,7 +69,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
   def perform_now(tag_ids, order_ids, operation)
     orders = Order.where(id: order_ids)
     tags = OrderTag.where(id: tag_ids)
-  
+
     case operation
     when 'add'
       tags.each do |tag|
@@ -66,5 +80,14 @@ class OrderTagManager < Groovepacker::Utilities::Base
         orders.each { |order| order.order_tags.destroy(tag) }
       end
     end
+  end
+
+  private
+
+  def broadcast_progress(total_batches)
+    completed_batches = $redis.get("order_tagging_job:completed_batches").to_i
+    progress = (completed_batches.to_f / total_batches * 100).to_i
+    progress = 0 if(progress > 74)
+    GroovRealtime.emit('pnotif', { type: 'groove_bulk_tags_actions', data: progress }, :tenant)
   end
 end
