@@ -180,6 +180,58 @@ module TenantsHelper
     result['tenant']['se_import_data'] = tenant.retrieve_se_import_data
   end
 
+  def admin_activity_logs
+    result = result_hash
+    @search = params[:search]
+    result['tenant'] = {}
+    offset = params[:offset].to_i || 0
+    limit = params[:limit].to_i || 20
+
+    if params[:id].present?
+      @tenant = find_tenant(params[:id])
+      Apartment::Tenant.switch!(@tenant.name)
+      result['tenant']['basicinfo'] = @tenant.attributes
+
+      if @search && @search != ''
+        get_search_activity_logs(offset, limit, result)
+      else
+        get_list_activity_logs(offset, limit, result)
+      end
+    end
+    result
+  end
+
+  def get_search_activity_logs(offset, limit, result)
+    ahoy_events = Ahoy::Event.version_2.where(
+                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.title'))) LIKE :query OR
+                     LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.username'))) LIKE :query OR
+                     LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.changes'))) LIKE :query",
+                    query: "%#{params[:search].downcase}%"
+                  )
+
+    result['tenant']['total_activity_log'] = ahoy_events.count
+    ahoy_event_records = ahoy_events.offset(offset).limit(limit).pluck(:time, :properties)
+    result['tenant']['activity_log_v2'] = selected_activity_log(ahoy_event_records)
+  end
+
+  def get_list_activity_logs(offset, limit, result)
+    ahoy_events = Ahoy::Event.version_2.where('time > ?', 7.days.ago)
+    result['tenant']['total_activity_log'] = ahoy_events.count
+    ahoy_event_records = ahoy_events.offset(offset).limit(limit).pluck(:time, :properties)
+    result['tenant']['activity_log_v2'] = selected_activity_log(ahoy_event_records)
+  end
+
+  def selected_activity_log(ahoy_event_records)
+    ahoy_event_records.map do |time, properties|
+      {
+        timestamp: Time.zone.at(time).strftime("%d %b %Y, %H:%M"),
+        event: properties['title'],
+        user: properties['username'],
+        saved_changes: properties['changes']
+      }
+    end    
+  end
+
   def list_selected_tenants
     tenants_list = params['_json']
     tenants = []

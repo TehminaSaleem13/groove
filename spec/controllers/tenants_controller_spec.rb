@@ -236,5 +236,27 @@ RSpec.describe TenantsController, type: :controller do
         tenant.destroy
       end
     end
+
+    it 'Get tenant activity logs' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+
+      get :list_activity_logs, params: { id: tenant.id, offset: '0', limit: '20', search: '' }
+      expect(response.status).to eq(200)
+      result = JSON.parse response.body
+      expect(result['status']).to eq(true)
+      tenant.destroy
+    end
+
+    it 'Get search activity logs' do
+      tenant = Apartment::Tenant.current
+      tenant = Tenant.create(name: tenant)
+
+      get :list_activity_logs, params: { id: tenant.id, offset: '0', limit: '20', search: 'General' }
+      expect(response.status).to eq(200)
+      result = JSON.parse response.body
+      expect(result['status']).to eq(true)
+      tenant.destroy
+    end
   end
 end

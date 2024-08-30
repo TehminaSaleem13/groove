@@ -409,6 +409,7 @@ Groovepacks::Application.routes.draw do
       post 'update_access_restrictions'
       post 'update_zero_subscription'
       post 'update_price_field'
+      get 'list_activity_logs'
     end
   end
 

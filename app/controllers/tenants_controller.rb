@@ -45,6 +45,12 @@ class TenantsController < ApplicationController
     update_list_plan_restriction('update_zero_subscription')
   end
 
+  def list_activity_logs
+    result = admin_activity_logs
+
+    render json: result
+  end
+
   def update_list_plan_restriction(type)
     current_tenant = Apartment::Tenant.current
     result = update_plan_ar(type)
