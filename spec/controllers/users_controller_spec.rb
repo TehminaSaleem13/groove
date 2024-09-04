@@ -39,6 +39,19 @@ RSpec.describe UsersController, type: :controller do
       @tenant.destroy
     end
 
+
+    it 'calls send_email_reset_instruction' do
+       tenant = Apartment::Tenant.current
+      Apartment::Tenant.switch!(tenant.to_s)
+      @tenant = Tenant.create(name: tenant.to_s)
+      Subscription.create(email: 'zzpeaceout@yahoo.com', tenant_name: tenant, amount: 0.162e6, stripe_user_token: 'tok_1J5QhF44KQj1OQ8CHwFNXxg6', status: 'completed', tenant_id: @tenant.id, stripe_transaction_identifier: 'txn_1J5QhM44KQj1OQ8C8gZjbT6E', created_at: '2021-06-23 07:40:31', updated_at: '2021-06-23 07:41:05', transaction_errors: nil, subscription_plan_id: 'an-gpproductionupgrade-150', customer_subscription_id: 'sub_JisSpfFXcFBc9d', stripe_customer_id: 'cus_JisS4jxhKbeuUc', is_active: true, password: 'password', user_name: 'test', coupon_id: nil, progress: 'transaction_complete', shopify_customer: false, all_charges_paid: false, interval: 'year', app_charge_id: nil, tenant_charge_id: nil, shopify_shop_name: nil, tenant_data: nil, shopify_payment_token: nil)
+      request.accept = 'application/json'
+
+      get :get_user_email, params: { 'users' => @user.id, 'amount' => '18576', 'is_annual' => 'false' }
+
+      expect(response.status).to eq(200)
+    end
+
     it 'User Modify Plan increase user' do
       tenant = Apartment::Tenant.current
       Apartment::Tenant.switch!(tenant.to_s)

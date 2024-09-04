@@ -133,6 +133,7 @@ class OrdersController < ApplicationController
   end
 
   def add_tags
+    $redis.set("order_tagging_job:cancel", false)
     tag_name = params[:tag_name]
     if tag_name.present?
       tags = OrderTag.where(name: tag_name)
@@ -144,6 +145,7 @@ class OrdersController < ApplicationController
   end
 
   def remove_tags
+    $redis.set("order_tagging_job:cancel", false)
     tag_name = params[:tag_name]
     
     if tag_name.present?
@@ -153,6 +155,16 @@ class OrdersController < ApplicationController
     else
       render json: { error: 'Tag name parameter is required' }, status: :bad_request
     end
+  end
+
+  def cancel_tagging_jobs
+    $redis.set("order_tagging_job:cancel", true)
+    $redis.del("order_tagging_job:total_batches")
+    $redis.del("order_tagging_job:completed_batches")
+
+    render json: { success: 'All ongoing tagging jobs have been cancelled' }
+  rescue => e
+    render json: { error: "Failed to cancel jobs: #{e.message}" }, status: :unprocessable_entity
   end
 
   def duplicate_orders

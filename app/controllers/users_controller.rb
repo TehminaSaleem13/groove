@@ -277,7 +277,7 @@ class UsersController < ApplicationController
     result[:code] = 0
     admin_email = (Role.find_by(name: 'Super Admin').try(:users) || []).pluck(:email).compact.first
     if user.nil?
-      result[:msg] = 'Not a Valid User'
+      result[:msg] = 'Unable to login. Please check your username'
     elsif (user.email.blank? || user.email.split('@')[1].blank?) && admin_email.blank?
       result[:msg] = 'Unfortunately you do not have a password recovery email address. Please contact a team leader who can reset your password.'
     else

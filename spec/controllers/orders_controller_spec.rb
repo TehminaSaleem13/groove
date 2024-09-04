@@ -908,6 +908,13 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    it 'cancel_tagging_jobs should be working' do
+      request.accept = 'application/json'
+
+      post :cancel_tagging_jobs
+      expect(response.status).to eq(200)
+    end
+
     it 'Saved By Pass Log' do
       order = FactoryBot.create :order, store_id: @store.id
       product = FactoryBot.create(:product, name: 'PRODUCT1')
@@ -1270,7 +1277,7 @@ RSpec.describe OrdersController, type: :controller do
           packing_score: 14
         )
       end
-
+      allow($redis).to receive(:get).and_return("true")
       post :add_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)

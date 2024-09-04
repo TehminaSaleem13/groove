@@ -112,6 +112,7 @@ Groovepacks::Application.routes.draw do
       get 'sorted_and_filtered_data'
       get 'check_orders_tags'
       post 'add_tags'
+      post 'cancel_tagging_jobs'
       post 'remove_tags'
       get 'import_orders'
       get 'import_all'

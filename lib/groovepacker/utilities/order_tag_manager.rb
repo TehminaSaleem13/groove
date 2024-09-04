@@ -19,6 +19,10 @@ class OrderTagManager < Groovepacker::Utilities::Base
         $redis.set("order_tagging_job:completed_batches", 0)
 
         @orders.find_in_batches(batch_size: BATCH_SIZE) do |order_batch|
+          if $redis.get("order_tagging_job:cancel") == "true"
+             GroovRealtime.emit('pnotif', { type: 'groove_bulk_tags_actions', data: 0 }, :tenant)
+            return { error: 'Tagging process canceled' }
+          end
           order_ids = order_batch.pluck(:id)
           if order_ids.size < BATCH_SIZE
             perform_now(tag.id, order_ids, 'add')
@@ -48,6 +52,10 @@ class OrderTagManager < Groovepacker::Utilities::Base
         $redis.set("order_tagging_job:completed_batches", 0)
 
         @orders.find_in_batches(batch_size: BATCH_SIZE) do |order_batch|
+          if $redis.get("order_tagging_job:cancel") == "true"
+             GroovRealtime.emit('pnotif', { type: 'groove_bulk_tags_actions', data: 0 }, :tenant)
+            return { error: 'Tagging process canceled' }
+          end
           order_ids = order_batch.pluck(:id)
           if order_ids.size < BATCH_SIZE
             perform_now(tags.pluck(:id), order_ids, 'remove')
@@ -87,7 +95,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
   def broadcast_progress(total_batches)
     completed_batches = $redis.get("order_tagging_job:completed_batches").to_i
     progress = (completed_batches.to_f / total_batches * 100).to_i
-    progress = 0 if(progress > 74)
+    progress = 0 if(completed_batches == total_batches - 1)
     GroovRealtime.emit('pnotif', { type: 'groove_bulk_tags_actions', data: progress }, :tenant)
   end
 end
