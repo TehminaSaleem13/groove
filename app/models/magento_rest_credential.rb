@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MagentoRestCredential < ActiveRecord::Base
+class MagentoRestCredential < ApplicationRecord
   # attr_accessible :api_key, :api_secret, :host, :import_categories, :import_images, :store_id, :access_token, :store_version, :gen_barcode_from_sku
   belongs_to :store
 

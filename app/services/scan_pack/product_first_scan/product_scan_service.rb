@@ -32,7 +32,8 @@ module ScanPack
         @tote ||= if params[:tote][:id].present?
                     Tote.find(params[:tote][:id])
                   else
-                    tote_params = params[:tote].slice(:id, :name, :number, :order_id, :tote_set_id, :pending_order).permit!
+                    tote_params = params[:tote].slice(:id, :name, :number, :order_id, :tote_set_id,
+                                                      :pending_order).permit!
                     Tote.create(tote_params)
                   end
       end
@@ -51,7 +52,8 @@ module ScanPack
 
       def set_wrong_tote
         @result[:status] = false
-        @result[:error_messages] = "Whoops! That’s the wrong #{tote_identifier}. Please scan the correct #{tote_identifier} and then add the item to it."
+        @result[:error_messages] =
+          "Whoops! That’s the wrong #{tote_identifier}. Please scan the correct #{tote_identifier} and then add the item to it."
       end
     end
   end

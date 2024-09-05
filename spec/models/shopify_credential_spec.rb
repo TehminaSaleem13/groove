@@ -23,14 +23,15 @@ RSpec.describe ShopifyCredential, type: :model do
     create(
       :shopify_credential,
       shop_name: 'shopify',
-      store: store,
+      store:,
       push_inv_location_id: push_location_id,
       pull_inv_location_id: pull_location_id
     )
   end
 
   before do
-    allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:locations).and_return([push_location, pull_location])
+    allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:locations).and_return([push_location,
+                                                                                                pull_location])
     allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:access_scopes).and_return(access_scopes)
   end
 
@@ -114,7 +115,7 @@ RSpec.describe ShopifyCredential, type: :model do
     it 'calls activate_webhooks on ShopifyWebhookService' do
       webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
       allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
-      allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
+      allow(shopify_credential).to receive(:saved_change_to_webhook_order_import?).and_return(true)
 
       expect(webhook_service).to receive(:activate_webhooks)
 
@@ -126,7 +127,7 @@ RSpec.describe ShopifyCredential, type: :model do
     it 'calls de_activate_webhooks on ShopifyWebhookService' do
       webhook_service = instance_double(Webhooks::Shopify::ShopifyWebhookService)
       allow(Webhooks::Shopify::ShopifyWebhookService).to receive(:new).with(shopify_credential).and_return(webhook_service)
-      allow(shopify_credential).to receive(:webhook_order_import_changed?).and_return(true)
+      allow(shopify_credential).to receive(:saved_change_to_webhook_order_import?).and_return(true)
 
       expect(webhook_service).to receive(:de_activate_webhooks)
 

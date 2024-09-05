@@ -1,7 +1,9 @@
 # frozen_string_literal: true
 
 class ShopifyController < ApplicationController
-  before_action :groovepacker_authorize!, except: %i[auth connection_auth callback connection_callback preferences help complete get_auth recurring_application_fee recurring_tenant_charges finalize_payment payment_failed invalid_request store_subscription_data get_store_data update_customer_plan]
+  before_action :groovepacker_authorize!,
+                except: %i[auth connection_auth callback connection_callback preferences help complete get_auth
+                           recurring_application_fee recurring_tenant_charges finalize_payment payment_failed invalid_request store_subscription_data get_store_data update_customer_plan]
   skip_before_action :verify_authenticity_token
   # {
   #  "code"=>"58a883f4bb36e4e953431549abff383c",
@@ -34,16 +36,16 @@ class ShopifyController < ApplicationController
       @store_id = $redis.get('store_id')
       Apartment::Tenant.switch!(@tenant_name)
       store = begin
-                Store.find(@store_id)
-              rescue StandardError
-                nil
-              end
+        Store.find(@store_id)
+      rescue StandardError
+        nil
+      end
       @shopify_credential = store.shopify_credential
       ShopifyAPI::Session.setup(api_key: ENV['SHOPIFY_API_KEY'], secret: ENV['SHOPIFY_SHARED_SECRET'])
       session = ShopifyAPI::Session.new(@shopify_credential.shop_name + '.myshopify.com')
       @result = false
       begin
-        @result = true if @shopify_credential.update_attributes(
+        @result = true if @shopify_credential.update(
           access_token: session.request_token(params.except(:id))
         )
         destroy_cookies
@@ -56,10 +58,10 @@ class ShopifyController < ApplicationController
 
   def update_plan(token, shop_name)
     price = begin
-              $redis.get("#{shop_name}_plan_id").split('-')[1].to_f
-            rescue StandardError
-              nil
-            end
+      $redis.get("#{shop_name}_plan_id").split('-')[1].to_f
+    rescue StandardError
+      nil
+    end
     tenant_name = $redis.get("#{shop_name}_tenant")
     Apartment::Tenant.switch! tenant_name
     ShopifyAPI::Session.setup(api_key: ENV['SHOPIFY_API_KEY'], secret: ENV['SHOPIFY_SHARED_SECRET'])
@@ -75,13 +77,12 @@ class ShopifyController < ApplicationController
       'terms' => '10 out of 2'
     }
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST'] == 'true'
-    if recurring_application_charge.save
-      # check_acitve_url(recurring_application_charge.confirmation_url)
-      if true # @result
-        redirect_to(recurring_application_charge.confirmation_url) && return
-      else
-        redirect_to finalize_payment_shopify_index_path
-      end
+    return unless recurring_application_charge.save
+    # check_acitve_url(recurring_application_charge.confirmation_url)
+    if true # @result
+      redirect_to(recurring_application_charge.confirmation_url) && return
+    else
+      redirect_to finalize_payment_shopify_index_path
     end
   end
 
@@ -99,13 +100,12 @@ class ShopifyController < ApplicationController
       # "return_url" => "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/recurring_tenant_charges?shop_name=#{shop_name}"
     }
     app_charges.test = true if ENV['SHOPIFY_BILLING_IN_TEST'] == 'true'
-    if app_charges.save
-      # check_acitve_url(app_charges.attributes["confirmation_url"])
-      if true # @result
-        redirect_to(app_charges.attributes['confirmation_url']) && return
-      else
-        redirect_to finalize_payment_shopify_index_path
-      end
+    return unless app_charges.save
+    # check_acitve_url(app_charges.attributes["confirmation_url"])
+    if true # @result
+      redirect_to(app_charges.attributes['confirmation_url']) && return
+    else
+      redirect_to finalize_payment_shopify_index_path
     end
   end
 
@@ -115,15 +115,15 @@ class ShopifyController < ApplicationController
     while i < 5
       i += 1
       resp = begin
-               HTTParty.get(confirmation_url)
-             rescue StandardError
-               nil
-             end
+        HTTParty.get(confirmation_url)
+      rescue StandardError
+        nil
+      end
       if resp && (resp.code == 200)
         @result = true
         break
       end
-      sleep 1
+      sleep 1 unless Rails.env.test?
     end
   end
 
@@ -140,10 +140,10 @@ class ShopifyController < ApplicationController
       redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/shopify/payment_failed"
     end
     price = begin
-              $redis.get("#{params['shop_name']}_plan_id").split('-')[1].to_f
-            rescue StandardError
-              0
-            end
+      $redis.get("#{params['shop_name']}_plan_id").split('-')[1].to_f
+    rescue StandardError
+      0
+    end
     $redis.set("#{params['shop_name']}_otf", params['charge_id']) # saf -> Recurring Shopify App Fee
     $redis.set("#{params['shop_name']}_ready_to_be_deployed", false)
     recurring_application_charge = ShopifyAPI::RecurringApplicationCharge.new
@@ -156,13 +156,13 @@ class ShopifyController < ApplicationController
       'terms' => '10 out of 2'
     }
     recurring_application_charge.test = true if ENV['SHOPIFY_BILLING_IN_TEST'] == 'true'
-    if recurring_application_charge.save
-      # check_acitve_url(recurring_application_charge.confirmation_url)
-      if true # @result
-        redirect_to recurring_application_charge.confirmation_url
-      else
-        redirect_to finalize_payment_shopify_index_path
-      end
+    return unless recurring_application_charge.save
+
+    # check_acitve_url(recurring_application_charge.confirmation_url)
+    if true # @result
+      redirect_to recurring_application_charge.confirmation_url
+    else
+      redirect_to finalize_payment_shopify_index_path
     end
   end
 
@@ -181,10 +181,10 @@ class ShopifyController < ApplicationController
     @tenant_fee.activate if @tenant_fee.status == 'accepted'
     existing_store = $redis.get("#{params['shop_name']}_existing_store")
     plan = begin
-             $redis.get("#{params['shop_name']}_plan_id").split('.')[0]
-           rescue StandardError
-             nil
-           end
+      $redis.get("#{params['shop_name']}_plan_id").split('.')[0]
+    rescue StandardError
+      nil
+    end
     redis_data_delete(params['shop_name'])
     $redis.set("#{params['shop_name']}_rtc", params['charge_id'])
     if existing_store.present?
@@ -193,8 +193,10 @@ class ShopifyController < ApplicationController
       subsc = Subscription.find_by_tenant_name(tenant.name)
       tenant_data = subsc.tenant_data.split('-')
       access_restriction = AccessRestriction.last
-      access_restriction.update_attributes(num_shipments: tenant_data[1], num_users: tenant_data[2], num_import_sources: tenant_data[3])
-      subsc.update_attributes(subscription_plan_id: plan, tenant_charge_id: params['charge_id'], shopify_payment_token: nil, tenant_data: nil, amount: tenant_data[0].to_f * 100)
+      access_restriction.update(num_shipments: tenant_data[1], num_users: tenant_data[2],
+                                num_import_sources: tenant_data[3])
+      subsc.update(subscription_plan_id: plan, tenant_charge_id: params['charge_id'], shopify_payment_token: nil,
+                   tenant_data: nil, amount: tenant_data[0].to_f * 100)
       if @tenant_fee.status == 'declined'
         redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/#/shopify/payment_failed"
         # render "payment_failed" and return
@@ -226,10 +228,10 @@ class ShopifyController < ApplicationController
     # redirect to admin page with the shopify and with groove-solo plan
     # get shop name
     @shop_name = begin
-                   get_shop_name(params[:shop])
-                 rescue StandardError
-                   nil
-                 end
+      get_shop_name(params[:shop])
+    rescue StandardError
+      nil
+    end
     $redis.set(@shop_name, params)
     # redirect_to subscriptions_path(plan_id: 'groove-solo', shopify: shop_name )
   end
@@ -242,7 +244,8 @@ class ShopifyController < ApplicationController
       @shopify_credential = store.shopify_credential
     end
 
-    auth_response = ShopifyAPI::Auth::Oauth.begin_auth(shop: params[:shop], redirect_path: '/shopify/connection_callback')
+    auth_response = ShopifyAPI::Auth::Oauth.begin_auth(shop: params[:shop],
+                                                       redirect_path: '/shopify/connection_callback')
 
     cookies[auth_response[:cookie].name] = {
       expires: auth_response[:cookie].expires,
@@ -251,11 +254,11 @@ class ShopifyController < ApplicationController
       value: auth_response[:cookie].value
     }
 
-    @shopify_credential&.update_attributes(temp_cookies: cookies.to_h)
+    @shopify_credential&.update(temp_cookies: cookies.to_h)
 
     redis_key = 'shopify_temp_cookies'
     $redis.set(redis_key, cookies.to_h)
-    $redis.expire(redis_key, 1.minutes.to_i)
+    $redis.expire(redis_key, 1.minute.to_i)
 
     redirect_to auth_response[:auth_route]
   end
@@ -265,42 +268,47 @@ class ShopifyController < ApplicationController
     store_id = $redis.get('store_id')
     Apartment::Tenant.switch!(tenant_name)
     store = begin
-              Store.find(store_id)
-            rescue StandardError
-              nil
-            end
+      Store.find(store_id)
+    rescue StandardError
+      nil
+    end
     shopify_credential = store&.shopify_credential
 
     auth_params = request.parameters.symbolize_keys.except(:controller, :action)
-    auth_cookies = shopify_credential&.temp_cookies || (eval $redis.get('shopify_temp_cookies') rescue {})
+    auth_cookies = shopify_credential&.temp_cookies || begin
+      eval $redis.get('shopify_temp_cookies')
+    rescue StandardError
+      {}
+    end
 
     auth_result = ShopifyAPI::Auth::Oauth.validate_auth_callback(
       cookies: auth_cookies,
       auth_query: ShopifyAPI::Auth::Oauth::AuthQuery.new(auth_params)
     )
 
-    shopify_credential&.update_attributes(access_token: auth_result[:session].access_token, temp_cookies: {})
+    shopify_credential&.update(access_token: auth_result[:session].access_token, temp_cookies: {})
 
     redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['FRONTEND_HOST']}/#/shopify/complete"
   rescue Exception => e
-    on_demand_logger = Logger.new("#{Rails.root}/log/shopify_connection.log")
+    on_demand_logger = Logger.new("#{Rails.root.join('log/shopify_connection.log')}")
     on_demand_logger.info('=========================================')
-    log = { tenant: Apartment::Tenant.current, params: request.parameters.symbolize_keys, error: e, tenant_name: tenant_name, store_id: store_id }
+    log = { tenant: Apartment::Tenant.current, params: request.parameters.symbolize_keys, error: e,
+            tenant_name:, store_id: }
     on_demand_logger.info(log)
     redirect_to "#{ENV['PROTOCOL']}admin.#{ENV['FRONTEND_HOST']}/#/shopify/failed"
   end
 
   def disconnect
     store = Store.find(params[:id])
-    if store.store_type == 'Shopline'
-      @shop_credential = store.shopline_credential
+    @shop_credential = if store.store_type == 'Shopline'
+                         store.shopline_credential
+                       else
+                         store.shopify_credential
+                       end
+    if @shop_credential.update(access_token: nil)
+      render status: :ok, json: 'disconnected'
     else
-      @shop_credential = store.shopify_credential
-    end
-    if @shop_credential.update_attributes(access_token: nil)
-      render status: 200, json: 'disconnected'
-    else
-      render status: 304, json: 'not disconnected'
+      render status: :not_modified, json: 'not disconnected'
     end
   end
 
@@ -341,16 +349,16 @@ class ShopifyController < ApplicationController
     end
     ShopifyAPI::Session.setup(api_key: ENV['SHOPIFY_API_KEY'], secret: ENV['SHOPIFY_SHARED_SECRET'])
     session = ShopifyAPI::Session.new("#{params['shop_name']}.myshopify.com")
-    scope = %w[read_products write_products read_orders write_orders read_all_orders read_fulfillments write_fulfillments]
+    scope = %w[read_products write_products read_orders write_orders read_all_orders read_fulfillments
+               write_fulfillments]
     # result[:permission_url] = session.create_permission_url(scope, "https://admin.#{ENV['SHOPIFY_REDIRECT_HOST']}/shopify/auth")
-    result[:permission_url] = session.create_permission_url(scope, "#{ENV['PROTOCOL']}admin.#{ENV['SITE_HOST']}/shopify/auth")
-    if @tenant.present?
-      return result[:permission_url]
-    else
-      $redis.del("#{params['shop_name']}_existing_store")
-      $redis.set("#{params['shop_name']}.myshopify.com_plan_id", params['name'])
-      render json: result
-    end
+    result[:permission_url] =
+      session.create_permission_url(scope, "#{ENV['PROTOCOL']}admin.#{ENV['SITE_HOST']}/shopify/auth")
+    return result[:permission_url] if @tenant.present?
+
+    $redis.del("#{params['shop_name']}_existing_store")
+    $redis.set("#{params['shop_name']}.myshopify.com_plan_id", params['name'])
+    render json: result
   end
 
   def store_subscription_data

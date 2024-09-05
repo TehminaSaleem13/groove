@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProductInventoryWarehouses < ActiveRecord::Base
+class ProductInventoryWarehouses < ApplicationRecord
   belongs_to :product
   # attr_accessible :qty, :alert, :location_primary, :location_secondary, :location_tertiary, :location_quaternary, :location_primary_qty, :location_secondary_qty, :location_tertiary_qty, :location_quaternary_qty, :available_inv, :allocated_inv, :inventory_warehouse_id
 

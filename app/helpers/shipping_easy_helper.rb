@@ -24,8 +24,8 @@ module ShippingEasyHelper
   end
 
   def update_order_import_summary
-    @import_item.update_attributes(status: 'completed') if @import_item.reload.status != 'cancelled'
-    @import_summary.update_attributes(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
+    @import_item.update(status: 'completed') if @import_item.reload.status != 'cancelled'
+    @import_summary.update(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
     @import_summary.emit_data_to_user(true)
   end
 
@@ -34,7 +34,7 @@ module ShippingEasyHelper
     ImportItem.where(store_id: @credential.store.id).where("status = 'cancelled' OR status = 'completed'").destroy_all
     @import_summary = OrderImportSummary.top_summary
     @import_summary ||= OrderImportSummary.create(user_id: user_id, status: 'not_started', display_summary: false)
-    @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'not_started')
+    @import_item.update(order_import_summary_id: @import_summary.id, status: 'not_started')
     @import_summary.emit_data_to_user(true)
   end
 
@@ -70,8 +70,8 @@ module ShippingEasyHelper
   end
 
   def emit_data_for_range_or_quickfix(order_count)
-    @import_summary.update_attributes(status: 'in_progress')
-    @import_item.update_attributes(status: 'in_progress', to_import: order_count)
+    @import_summary.update(status: 'in_progress')
+    @import_item.update(status: 'in_progress', to_import: order_count)
     @import_summary.emit_data_to_user(true)
   end
 
@@ -106,7 +106,7 @@ module ShippingEasyHelper
     @credential = handler[:credential]
     @client = handler[:store_handle]
     @import_item = handler[:import_item]
-    @import_item.update_attributes(updated_orders_import: 0)
+    @import_item.update(updated_orders_import: 0)
     @result = build_result
     @statuses = get_statuses
     @worker_id = 'worker_' + SecureRandom.hex
@@ -218,7 +218,7 @@ module ShippingEasyHelper
     else
       same_order = Order.where(increment_id: order['external_order_identifier'].strip).first
       if same_order
-        same_order.update_attributes(increment_id: same_order.increment_id + ' (' + same_order.store_order_id + ')') if same_order.store_order_id.present?
+        same_order.update(increment_id: same_order.increment_id + ' (' + same_order.store_order_id + ')') if same_order.store_order_id.present?
         order['external_order_identifier'] = order['external_order_identifier'] + ' (' + order['id'].to_s + ')'
       end
       order['external_order_identifier'] = order['external_order_identifier'] + ' (C)' if order['source_order_ids'].present?

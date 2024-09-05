@@ -1,12 +1,12 @@
 # frozen_string_literal: true
 
-class Subscription < ActiveRecord::Base
+class Subscription < ApplicationRecord
   # attr_accessible :email, :stripe_user_token, :tenant_name, :amount, :transaction_errors,
   #                 :subscription_plan_id, :status, :user_name, :password, :coupon_id,
   #                 :stripe_customer_id, :is_active, :tenant_id, :stripe_transaction_identifier,
   #                 :progress, :customer_subscription_id, :created_at, :updated_at, :interval,
   #                 :app_charge_id, :tenant_charge_id, :shopify_shop_name, :tenant_data, :shopify_payment_token
-  belongs_to :tenant
+  belongs_to :tenant, optional: true
   has_many :transactions
   include PaymentsHelper
 
@@ -14,12 +14,13 @@ class Subscription < ActiveRecord::Base
   before_save :check_value_of_customer_subscription
 
   def check_value_of_customer_subscription
-    self.customer_subscription_id = changes.values[0][0] if [nil, '', 'null', 'undefined'].include?(customer_subscription_id)
+    self.customer_subscription_id = changes.values[0][0] if [nil, '', 'null',
+                                                             'undefined'].include?(customer_subscription_id)
   end
 
   def save_with_payment(one_time_payment)
     if valid?
-      on_demand_logger = Logger.new("#{Rails.root}/log/subscription_logs.log")
+      on_demand_logger = Logger.new("#{Rails.root.join('log/subscription_logs.log')}")
       on_demand_logger.info('=========================================')
       log = { tenant: Apartment::Tenant.current, subscription: self }
       on_demand_logger.info(log)
@@ -29,8 +30,8 @@ class Subscription < ActiveRecord::Base
         one_time_payment = calculate_otp(coupon_id, one_time_payment.to_i)
       end
       unless shopify_customer
-        create_subscribed_plan_if_not_exist
-        customer = create_customer(one_time_payment)
+        plan = create_subscribed_plan_if_not_exist
+        customer = create_customer(one_time_payment, plan)
       end
 
       if customer
@@ -108,8 +109,11 @@ class Subscription < ActiveRecord::Base
   def create_tenant_and_transaction(customer = nil)
     if shopify_customer
       self.customer_subscription_id = nil
-    elsif customer.present? && customer.subscriptions.data.first
-      self.customer_subscription_id = customer.subscriptions.data.first.id
+    elsif customer.present?
+      stripe_subscription = Stripe::Subscription.list(customer:).first
+      return unless stripe_subscription
+
+      self.customer_subscription_id = stripe_subscription.id
     else
       return
     end
@@ -120,38 +124,37 @@ class Subscription < ActiveRecord::Base
     update_progress('transaction_complete')
   end
 
-  def create_customer(one_time_payment)
-    customer = Stripe::Customer.create(
+  def create_customer(one_time_payment, plan)
+    Stripe::Customer.create(
       card: stripe_user_token,
-      email: email,
-      plan: subscription_plan_id,
-      account_balance: one_time_payment
+      email:,
+      plan:,
+      balance: one_time_payment
     )
-    customer
   end
 
   def create_transaction(customer)
     transactions = Stripe::BalanceTransaction.list(limit: 1)
     @transaction = transactions.first
-    if @transaction
-      self.stripe_transaction_identifier = @transaction.id
-      @card_data = customer.cards.data.first
-      if @card_data
-        Transaction.create(
-          transaction_id: @transaction.id,
-          amount: amount,
-          card_type: @card_data.brand,
-          exp_month_of_card: @card_data.exp_month,
-          exp_year_of_card: @card_data.exp_year,
-          date_of_payment: Date.today,
-          subscription_id: id
-        )
-      end
-    end
+    return unless @transaction
+
+    self.stripe_transaction_identifier = @transaction.id
+    @card_data = Stripe::Customer.list_sources(customer.id, object: 'card').first
+    return unless @card_data
+
+    Transaction.create(
+      transaction_id: @transaction.id,
+      amount:,
+      card_type: @card_data.brand,
+      exp_month_of_card: @card_data.exp_month,
+      exp_year_of_card: @card_data.exp_year,
+      date_of_payment: Date.today,
+      subscription_id: id
+    )
   end
 
   def create_coupon(coupon_data)
-    coupon = Coupon.create(
+    Coupon.create(
       coupon_id: coupon_data.id,
       percent_off: coupon_data.percent_off,
       amount_off: coupon_data.amount_off,
@@ -161,7 +164,6 @@ class Subscription < ActiveRecord::Base
       times_redeemed: coupon_data.times_redeemed,
       is_valid: coupon_data.valid
     )
-    coupon
   end
 
   def update_status_and_send_email(e)

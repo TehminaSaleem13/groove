@@ -14,10 +14,11 @@ class ApplicationController < ActionController::Base
       @current_user = User.find(doorkeeper_token.resource_owner_id) if doorkeeper_token
       User.current = @current_user
       check_for_existing_logins(doorkeeper_token)
-      stored_session = JSON.generate('tenant' => Apartment::Tenant.current, 'user_id' => @current_user.try(:id), 'username' => @current_user.try(:username))
+      stored_session = JSON.generate('tenant' => Apartment::Tenant.current, 'user_id' => @current_user.try(:id),
+                                     'username' => @current_user.try(:username))
       $redis.hset('groovehacks:session', auth_header.gsub('Bearer ', ''), stored_session)
     else
-      render status: 401, json: 'Unauthorized Access'
+      render status: :unauthorized, json: 'Unauthorized Access'
     end
   end
 
@@ -34,24 +35,26 @@ class ApplicationController < ActionController::Base
     GroovRealtime.current_user_id = current_user ? current_user.id : 0
   end
 
-  def set_time_zone
-    Time.use_zone(GeneralSetting.new_time_zone) { yield }
+  def set_time_zone(&block)
+    Time.use_zone(GeneralSetting.new_time_zone, &block)
   end
 
   def after_sign_in_path_for(resource_or_scope)
     # store session to redis
-    if current_user
-      user = current_user
-      user.last_sign_in_at = DateTime.now.in_time_zone
-      user.save
-      save_bc_auth_if_present
-      # an unique MD5 key
-      cookies['_validation_token_key'] = Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")
-      # store session data or any authentication data you want here, generate to JSON data
-      stored_session = JSON.generate('tenant' => Apartment::Tenant.current, 'user_id' => current_user.id, 'username' => current_user.username)
-      $redis.hset('groovehacks:session', cookies['_validation_token_key'], stored_session)
-      session[:redirect_uri] || super(resource_or_scope)
-    end
+    return unless current_user
+
+    user = current_user
+    user.last_sign_in_at = DateTime.now.in_time_zone
+    user.save
+    save_bc_auth_if_present
+    # an unique MD5 key
+    cookies['_validation_token_key'] =
+      Digest::MD5.hexdigest("#{current_user.id}:#{session.to_json}:#{Apartment::Tenant.current}")
+    # store session data or any authentication data you want here, generate to JSON data
+    stored_session = JSON.generate('tenant' => Apartment::Tenant.current, 'user_id' => current_user.id,
+                                   'username' => current_user.username)
+    $redis.hset('groovehacks:session', cookies['_validation_token_key'], stored_session)
+    session[:redirect_uri] || super(resource_or_scope)
   end
 
   def after_sign_out_path_for(resource_or_scope)
@@ -82,30 +85,29 @@ class ApplicationController < ActionController::Base
 
     params['data'].each do |item|
       item.merge!({ on_ex: request.headers['HTTP_ON_GPX'] })
-    end    
-  rescue => e
-
+    end
+  rescue StandardError => e
   end
 
   def save_bc_auth_if_present
     bc_auth = cookies[:bc_auth]
-    unless bc_auth.blank?
-      access_token = begin
-                       bc_auth['access_token']
-                     rescue StandardError
-                       nil
-                     end
-      store_hash = begin
-                     bc_auth['context']
-                   rescue StandardError
-                     nil
-                   end
-      @store = Store.new
-      @store = @store.create_store_with_defaults('BigCommerce')
-      BigCommerceCredential.create(store_id: @store.id, access_token: access_token, store_hash: store_hash)
-      # cookies.delete(:bc_auth)
-      cookies[:bc_auth] = { value: nil, domain: :all, expires: Time.current + 2.seconds }
+    return if bc_auth.blank?
+
+    access_token = begin
+      bc_auth['access_token']
+    rescue StandardError
+      nil
     end
+    store_hash = begin
+      bc_auth['context']
+    rescue StandardError
+      nil
+    end
+    @store = Store.new
+    @store = @store.create_store_with_defaults('BigCommerce')
+    BigCommerceCredential.create(store_id: @store.id, access_token:, store_hash:)
+    # cookies.delete(:bc_auth)
+    cookies[:bc_auth] = { value: nil, domain: :all, expires: Time.current + 2.seconds }
   end
 
   def check_for_existing_logins(doorkeeper_token)
@@ -120,13 +122,12 @@ class ApplicationController < ActionController::Base
   def get_host_url
     url = ''
     current_tenant = Apartment::Tenant.current
-    url = if Rails.env == 'producttion'
-            "https://#{current_tenant}.groovepacker.com"
-          elsif Rails.env == 'staging'
-            "https://#{current_tenant}.barcodepacker.com"
-          else
-            "https://#{request.host}"
-          end
-    url
+    if Rails.env.producttion?
+      "https://#{current_tenant}.groovepacker.com"
+    elsif Rails.env.staging?
+      "https://#{current_tenant}.barcodepacker.com"
+    else
+      "https://#{request.host}"
+    end
   end
 end

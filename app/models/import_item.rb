@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class ImportItem < ActiveRecord::Base
-  belongs_to :order_import_summary
-  belongs_to :store
+class ImportItem < ApplicationRecord
+  belongs_to :order_import_summary ,optional: true
+  belongs_to :store, optional: true
   # attr_accessible :status, :store_id, :previous_imported,
   #                 :success_imported, :import_type, :store,
   #                 :current_increment_id, :current_order_items,

@@ -14,8 +14,7 @@ class GroovS3
 
     def save(object, data)
       object.content = data
-      save = object.save
-      save
+      object.save
     end
 
     # TODO: refactor csv, pdf, image into their own classes later
@@ -50,15 +49,13 @@ class GroovS3
     end
 
     def find_teapplix_csv(dir, name)
-      object = bucket.objects.find(dir + "/#{name}.csv")
-      object
+      bucket.objects.find(dir + "/#{name}.csv")
     rescue S3::Error::NoSuchKey => e
       nil
     end
 
     def find_csv(tenant, type, store_id)
-      object = bucket.objects.find(tenant + "/csv/#{type}.#{store_id}.csv")
-      object
+      bucket.objects.find(tenant + "/csv/#{type}.#{store_id}.csv")
     rescue S3::Error::NoSuchKey => e
       nil
     end
@@ -70,17 +67,14 @@ class GroovS3
     end
 
     def find_export_csv(tenant, file_name)
-      require 'aws-sdk'
-      begin
-        creds = Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET'])
-        s3 = Aws::S3::Resource.new(region: ENV['S3_BUCKET_REGION'], credentials: creds)
-        object = s3.bucket(ENV['S3_BUCKET_NAME']).object(tenant + "/export_csv/#{file_name}")
-        # object = self.bucket.objects.find(tenant+"/export_csv/#{file_name}")
-        put_url = object.presigned_url(:put, acl: 'public-read', expires_in: 3600 * 24)
-        return object.public_url
-      rescue Exception => e
-        return nil
-      end
+      creds = Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET'])
+      s3 = Aws::S3::Resource.new(region: ENV['S3_BUCKET_REGION'], credentials: creds)
+      object = s3.bucket(ENV['S3_BUCKET_NAME']).object(tenant + "/export_csv/#{file_name}")
+      # object = self.bucket.objects.find(tenant+"/export_csv/#{file_name}")
+      put_url = object.presigned_url(:put, acl: 'public-read', expires_in: 3600 * 24)
+      object.public_url
+    rescue Exception => e
+      nil
     end
 
     def create_order_backup(tenant, file_name, data)
@@ -95,8 +89,7 @@ class GroovS3
     end
 
     def find_order_xml(tenant, name)
-      object = bucket.objects.find(tenant + "/orders/#{name}.xml")
-      object
+      bucket.objects.find(tenant + "/orders/#{name}.xml")
     rescue S3::Error::NoSuchKey => e
       nil
     end
@@ -145,7 +138,6 @@ class GroovS3
 
     # This method will generate the URL for the export CSV files and also upload the generated file in S3.
     def get_csv_export(file_name)
-      require 'aws-sdk'
       s3 = Aws::S3::Resource.new(
         credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
         region: ENV['S3_BUCKET_REGION']
@@ -156,7 +148,6 @@ class GroovS3
     end
 
     def get_csv_export_exception(file_name)
-      require 'aws-sdk'
       s3 = Aws::S3::Resource.new(
         credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
         region: ENV['S3_BUCKET_REGION']

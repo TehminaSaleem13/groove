@@ -43,13 +43,13 @@ RSpec.describe ProductsController, type: :controller do
       product_sku = FactoryBot.create(:product_barcode, barcode: 'PRODUCT_SKU2', product_id: product.id)
       request.accept = 'application/json'
 
-      get :get_inventory_setting, params: { id: product.id}
+      get :get_inventory_setting, params: { id: product.id }
       expect(response.status).to eq(200)
     end
 
     it 'Update generic' do
       product = FactoryBot.create(:product, :with_sku_barcode, store_id: @store.id, name: 'PRODUCT3')
-      product_image = FactoryBot.create(:product_image, image: "MyString", product_id: product.id)
+      product_image = FactoryBot.create(:product_image, image: 'MyString', product_id: product.id)
       request.accept = 'application/json'
 
       post :update_generic, params: { id: product_image.id, flag: 1 }
@@ -89,7 +89,8 @@ RSpec.describe ProductsController, type: :controller do
       end
 
       it 'returns products matching the SKU' do
-        post :search, params: { search: 'testsearchproduct', sort: '', order: 'DESC', is_kit: '0', limit: '20', offset: '0' }
+        post :search,
+             params: { search: 'testsearchproduct', sort: '', order: 'DESC', is_kit: '0', limit: '20', offset: '0' }
         res = JSON.parse(response.body)
         expect(response.status).to eq(200)
         expect(res['status']).to eq(true)
@@ -97,7 +98,8 @@ RSpec.describe ProductsController, type: :controller do
       end
 
       it 'returns products matching the barcode' do
-        post :search, params: { search: 'testsearchproduct', sort: '', order: 'DESC', is_kit: '0', limit: '20', offset: '0' }
+        post :search,
+             params: { search: 'testsearchproduct', sort: '', order: 'DESC', is_kit: '0', limit: '20', offset: '0' }
         res = JSON.parse(response.body)
         expect(response.status).to eq(200)
         expect(res['status']).to eq(true)
@@ -105,7 +107,9 @@ RSpec.describe ProductsController, type: :controller do
       end
 
       it 'returns products matching the barcode when provided as a parameter' do
-        post :search, params: { search: 'xxlll', barcode: 'testsearchproduct', sort: '', order: 'DESC', is_kit: '0', limit: '20', offset: '0' }
+        post :search,
+             params: { search: 'xxlll', barcode: 'testsearchproduct', sort: '', order: 'DESC', is_kit: '0', limit: '20',
+                       offset: '0' }
         res = JSON.parse(response.body)
         expect(response.status).to eq(200)
         expect(res.count).to eq(1)
@@ -135,7 +139,8 @@ RSpec.describe ProductsController, type: :controller do
       expect(res['status']).to be false
       expect(res['show_alias_popup']).to be true
 
-      post :update_product_list, params: { id: @product2.id, var: 'barcode', value: 'PRODUCT_SKU', permit_same_barcode: true }
+      post :update_product_list,
+           params: { id: @product2.id, var: 'barcode', value: 'PRODUCT_SKU', permit_same_barcode: true }
       res = JSON.parse(response.body)
       expect(res['status']).to be true
     end
@@ -159,7 +164,7 @@ RSpec.describe ProductsController, type: :controller do
       }
       product = FactoryBot.create(:product, store_id: @store.id)
       product_sku = FactoryBot.create(:product_barcode, barcode: 'PRODUCT_SKU', product_id: product.id)
-      post :convert_and_upload_image, params: {id: product.id, base_64_img_upload: true}.merge(image_params)
+      post :convert_and_upload_image, params: { id: product.id, base_64_img_upload: true }.merge(image_params)
       expect(response).to have_http_status(:success)
       json_response = JSON.parse(response.body)
       expect(json_response).to have_key('uri')
@@ -177,8 +182,8 @@ RSpec.describe ProductsController, type: :controller do
 
     it 'Verify Order Item after product aliasing' do
       product = FactoryBot.create(:product)
-      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
-      FactoryBot.create(:product_barcode, product: product, barcode: 'PRODUCT1')
+      FactoryBot.create(:product_sku, product:, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product:, barcode: 'PRODUCT1')
 
       kit_product = FactoryBot.create(:product)
       FactoryBot.create(:product_sku, product: kit_product, sku: 'KITPRODUCT')
@@ -197,7 +202,8 @@ RSpec.describe ProductsController, type: :controller do
       kit.product_kit_skuss << productkitsku
 
       order = FactoryBot.create(:order, status: 'awaiting', store: @store)
-      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order, name: product.name)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order:,
+                                     name: product.name)
       request.accept = 'application/json'
 
       post :set_alias, params: { id: kit.id, product_alias_ids: [product.id] }
@@ -275,7 +281,8 @@ RSpec.describe ProductsController, type: :controller do
       FactoryBot.create(:product_barcode, barcode: 'TESTBARCODE', product_id: product.id)
 
       ProductInventoryReport.first.update(type: true)
-      InventoryReportsSetting.first_or_create(report_email: 'kcpatel006@gmail.com', start_time: 7.day.ago, end_time: Time.current)
+      InventoryReportsSetting.first_or_create(report_email: 'kcpatel006@gmail.com', start_time: 7.days.ago,
+                                              end_time: Time.current)
 
       get :generate_product_inventory_report, params: { report_ids: ProductInventoryReport.ids }
       expect(response.status).to eq(200)
@@ -373,13 +380,15 @@ RSpec.describe ProductsController, type: :controller do
       product_sku = FactoryBot.create(:product_sku, sku: 'PRODUCT_SKU', product_id: product.id)
 
       order = FactoryBot.create(:order, increment_id: 'ORDER', status: 'onhold', store: @store)
-      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order, name: product.name)
+      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order:,
+                                     name: product.name)
 
       request.accept = 'application/json'
 
       expect(order.status).to eq('onhold')
 
-      post :update_product_list, params: { id: product.id, var: 'barcode', value: 'PRODUCT_BARCODE', order_id: order.id }
+      post :update_product_list,
+           params: { id: product.id, var: 'barcode', value: 'PRODUCT_BARCODE', order_id: order.id }
       res = JSON.parse(response.body)
       expect(response.status).to eq(200)
       expect(res['status']).to be true
@@ -412,8 +421,10 @@ RSpec.describe ProductsController, type: :controller do
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
-      shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: InventoryWarehouse.last)
-      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test', access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false, import_inventory_qoh: true, import_updated_sku: true)
+      shopify_store = Store.create(name: 'Shopify', status: true, store_type: 'Shopify',
+                                   inventory_warehouse: InventoryWarehouse.last)
+      shopify_store_credentials = ShopifyCredential.create(shop_name: 'shopify_test',
+                                                           access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopify_store.id, shopify_status: 'open', shipped_status: true, unshipped_status: true, partial_status: true, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false, import_inventory_qoh: true, import_updated_sku: true)
     end
 
     it 'Refresh the entire catalog' do
@@ -423,7 +434,8 @@ RSpec.describe ProductsController, type: :controller do
       request.accept = 'application/json'
       expect(Product.count).to eq(0)
 
-      post :import_products, params: { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
+      post :import_products,
+           params: { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
       expect(response.status).to eq(200)
 
       expect(Product.count).to eq(36)
@@ -448,7 +460,8 @@ RSpec.describe ProductsController, type: :controller do
       StoreProductImport.create(store_id: shopify_store.id)
 
       request.accept = 'application/json'
-      post :import_products, params: { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
+      post :import_products,
+           params: { id: shopify_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
       expect(response.status).to eq(200)
     end
 
@@ -460,7 +473,7 @@ RSpec.describe ProductsController, type: :controller do
       request.accept = 'application/json'
 
       product = FactoryBot.create(:product, store_product_id: '32855512345091', name: 'ShopifyProductz')
-      FactoryBot.create(:product_sku, product: product, sku: 'SHOPIFYSKU')
+      FactoryBot.create(:product_sku, product:, sku: 'SHOPIFYSKU')
       expect(Product.count).to eq(1)
       expect(product.product_skus.count).to eq(1)
 
@@ -470,13 +483,13 @@ RSpec.describe ProductsController, type: :controller do
       expect(product.product_skus.count).to eq(2)
     end
 
-    it 'Re Associate Shopify Products'do
-      product = FactoryBot.create(:product, name: "Product1", store_product_id: nil)
+    it 'Re Associate Shopify Products' do
+      product = FactoryBot.create(:product, name: 'Product1', store_product_id: nil)
       shopify_store = Store.where(store_type: 'Shopify').last
       shopify_credential = shopify_store.shopify_credential
 
-      shopify_credential = shopify_credential.update(re_associate_shopify_products:'re_associate_items')
-      post :re_associate_all_products_with_shopify, params: { store_id: shopify_store.id}
+      shopify_credential = shopify_credential.update(re_associate_shopify_products: 're_associate_items')
+      post :re_associate_all_products_with_shopify, params: { store_id: shopify_store.id }
       expect(response.status).to eq(200)
     end
   end
@@ -489,7 +502,8 @@ RSpec.describe ProductsController, type: :controller do
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
-      shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last)
+      shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline',
+                                    inventory_warehouse: InventoryWarehouse.last)
       shopline_store_credentials = ShoplineCredential.create(
         shop_name: 'shopline_test', access_token: 'shoplinetestshoplinetestshoplinetestshopi',
         store_id: shopline_store.id, shopline_status: 'open', shipped_status: false, unshipped_status: false,
@@ -505,7 +519,8 @@ RSpec.describe ProductsController, type: :controller do
       request.accept = 'application/json'
       expect(Product.count).to eq(0)
 
-      post :import_products, params: { id: shopline_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
+      post :import_products,
+           params: { id: shopline_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
       expect(response.status).to eq(200)
 
       expect(Product.count).to eq(33)
@@ -530,7 +545,8 @@ RSpec.describe ProductsController, type: :controller do
       StoreProductImport.create(store_id: shopline_store.id)
 
       request.accept = 'application/json'
-      post :import_products, params: { id: shopline_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
+      post :import_products,
+           params: { id: shopline_store.id, product_import_range_days: '730', product_import_type: 'refresh_catalog' }
       expect(response.status).to eq(200)
     end
   end
@@ -543,14 +559,17 @@ RSpec.describe ProductsController, type: :controller do
       header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
       @request.headers.merge! header
 
-      @shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline', inventory_warehouse: InventoryWarehouse.last)
+      @shopline_store = Store.create(name: 'Shopline', status: true, store_type: 'Shopline',
+                                     inventory_warehouse: InventoryWarehouse.last)
     end
 
     it 'sync with the shopline' do
       request.accept = 'application/json'
 
       product = FactoryBot.create(:product, :with_sku_barcode, store_id: @shopline_store.id, name: 'PRODUCT1')
-      put :sync_with, params: { tenant: Apartment::Tenant.current, id: product.id, shopline_product_variant_id: '123456789', sync_with_shopline: true, format: :json}
+      put :sync_with,
+          params: { tenant: Apartment::Tenant.current, id: product.id, shopline_product_variant_id: '123456789',
+                    sync_with_shopline: true, format: :json }
 
       expect(response.status).to eq(200)
       expect(product.sync_option).not_to be_nil
@@ -579,23 +598,34 @@ RSpec.describe ProductsController, type: :controller do
 
     it 'Print Product Barcode Label' do
       print_setting = PrintingSetting.create(product_barcode_label_size: '3 x 1')
-      product = Product.create(store_product_id: '0', name: 'TRIGGER SS JERSEY-BLACK-M', product_type: '', store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
-      order = Order.create(increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil, customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: 'BIKE', lastname: 'ACTIONGmbH', email: 'east@raceface.com', address_1: 'WEISKIRCHER STR. 102', address_2: nil, city: 'RODGAU', state: nil, postcode: '63110', country: 'GERMANY', method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: 'scanned', scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: 'C000209814B(Duplicate2)', note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: 'orders/2021-07-29-162759275061.xml', last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: '', importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
-      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id, name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'notscanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
+      product = Product.create(store_product_id: '0', name: 'TRIGGER SS JERSEY-BLACK-M', product_type: '',
+                               store_id: @store.id, status: 'active', packing_instructions: nil, packing_instructions_conf: nil, is_skippable: true, packing_placement: 50, pack_time_adj: nil, kit_parsing: 'individual', is_kit: 0, disable_conf_req: false, total_avail_ext: 0, weight: 0.0, shipping_weight: 0.0, record_serial: false, type_scan_enabled: 'on', click_scan_enabled: 'on', weight_format: 'oz', add_to_any_order: false, base_sku: nil, is_intangible: false, product_receiving_instructions: nil, status_updated: false, is_inventory_product: false, second_record_serial: false, custom_product_1: '', custom_product_2: '', custom_product_3: '', custom_product_display_1: false, custom_product_display_2: false, custom_product_display_3: false, fnsku: nil, asin: nil, fba_upc: '821973374048', isbn: nil, ean: '0821973374048', supplier_sku: nil, avg_cost: 0.0, count_group: nil)
+      order = Order.create(increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil,
+                           customer_comments: nil, store_id: @store.id, qty: nil, price: nil, firstname: 'BIKE', lastname: 'ACTIONGmbH', email: 'east@raceface.com', address_1: 'WEISKIRCHER STR. 102', address_2: nil, city: 'RODGAU', state: nil, postcode: '63110', country: 'GERMANY', method: nil, notes_internal: nil, notes_toPacker: nil, notes_fromPacker: nil, tracking_processed: nil, status: 'scanned', scanned_on: Time.current, tracking_num: nil, company: nil, packing_user_id: 2, status_reason: nil, order_number: nil, seller_id: nil, order_status_id: nil, ship_name: nil, shipping_amount: 0.0, order_total: nil, notes_from_buyer: nil, weight_oz: nil, non_hyphen_increment_id: 'C000209814B(Duplicate2)', note_confirmation: false, store_order_id: nil, inaccurate_scan_count: 0, scan_start_time: Time.current, reallocate_inventory: false, last_suggested_at: Time.current, total_scan_time: 1720, total_scan_count: 20, packing_score: 14, custom_field_one: nil, custom_field_two: nil, traced_in_dashboard: false, scanned_by_status_change: false, shipment_id: nil, already_scanned: true, import_s3_key: 'orders/2021-07-29-162759275061.xml', last_modified: nil, prime_order_id: nil, split_from_order_id: nil, source_order_ids: nil, cloned_from_shipment_id: '', importer_id: nil, clicked_scanned_qty: 17, import_item_id: nil, job_timestamp: nil)
+      order_item = OrderItem.create(sku: nil, qty: 1, price: nil, row_total: 0, order_id: order.id,
+                                    name: 'TRIGGER SS JERSEY-BLACK-M', product_id: product.id, scanned_status: 'notscanned', scanned_qty: 1, kit_split: false, kit_split_qty: 0, kit_split_scanned_qty: 0, single_scanned_qty: 0, inv_status: 'unprocessed', inv_status_reason: '', clicked_qty: 1, is_barcode_printed: false, is_deleted: false, box_id: nil, skipped_qty: 0)
 
-      post :print_product_barcode_label, params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true, 'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
+      post :print_product_barcode_label,
+           params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true,
+                     'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
       expect(response.status).to eq(200)
 
       print_setting.update(product_barcode_label_size: '3 x 1')
-      post :print_product_barcode_label, params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true, 'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
+      post :print_product_barcode_label,
+           params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true,
+                     'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
       expect(response.status).to eq(200)
 
       print_setting.update(product_barcode_label_size: '2 x 1')
-      post :print_product_barcode_label, params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true, 'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
+      post :print_product_barcode_label,
+           params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true,
+                     'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
       expect(response.status).to eq(200)
 
       print_setting.update(product_barcode_label_size: '1.5 x 1')
-      post :print_product_barcode_label, params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true, 'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
+      post :print_product_barcode_label,
+           params: { 'sort' => '', 'order' => 'DESC', 'filter' => 'active', 'search' => '', 'select_all' => true,
+                     'inverted' => false, 'is_kit' => 0, 'limit' => 20, 'offset' => 0, 'setting' => '', 'status' => '', 'productArray' => [{ 'id' => order_item.id }], 'product' => { 'status' => '', 'is_kit' => 0 } }
       expect(response.status).to eq(200)
     end
 
@@ -633,16 +663,22 @@ RSpec.describe ProductsController, type: :controller do
     end
 
     it 'Delete Bulk Product' do
-      order = create(:order, increment_id: 'Test-ORDER', status: 'awaiting', store: @store, prime_order_id: '1660160213', store_order_id: '1660160213')
+      order = create(:order, increment_id: 'Test-ORDER', status: 'awaiting', store: @store,
+                             prime_order_id: '1660160213', store_order_id: '1660160213')
       product1 = create(:product, :with_sku_barcode, status: 'inactive', store_id: @store.id, name: 'Test1')
       product2 = create(:product, :with_sku_barcode, status: 'inactive', store_id: @store.id, name: 'Test2')
       product3 = create(:product, :with_sku_barcode, status: 'inactive', store_id: @store.id, name: 'Test3')
-      create(:order_item, product_id: product1.id, qty: 1, price: '10', row_total: '10', order: order, name: product1.name)
-      create(:order_item, product_id: product2.id, qty: 1, price: '10', row_total: '10', order: order, name: product2.name)
-      create(:order_item, product_id: product3.id, qty: 1, price: '10', row_total: '10', order: order, name: product3.name)
+      create(:order_item, product_id: product1.id, qty: 1, price: '10', row_total: '10', order:,
+                          name: product1.name)
+      create(:order_item, product_id: product2.id, qty: 1, price: '10', row_total: '10', order:,
+                          name: product2.name)
+      create(:order_item, product_id: product3.id, qty: 1, price: '10', row_total: '10', order:,
+                          name: product3.name)
 
-      post :delete_product, params: {order: "DESC", filter: "inactive", select_all: false, inverted: false, is_kit: 0, limit: 20, offset: 0, productArray: [{id: product1.id}, {id: product2.id}, {id: product3.id}], product: {status: "", is_kit: 0}}
-      
+      post :delete_product,
+           params: { order: 'DESC', filter: 'inactive', select_all: false, inverted: false, is_kit: 0, limit: 20, offset: 0,
+                     productArray: [{ id: product1.id }, { id: product2.id }, { id: product3.id }], product: { status: '', is_kit: 0 } }
+
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
       expect(OrderItem.count).to eq(0)

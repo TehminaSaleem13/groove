@@ -23,7 +23,7 @@ module Groovepacker
         init_results
         begin
           unless orders.empty?
-            bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
+            bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
             orders.each do |order|
               return if check_bulk_cancel(bulk_action)
 
@@ -37,7 +37,7 @@ module Groovepacker
             check_bulk_action_completed_or_not(bulk_action)
           end
         rescue StandardError => e
-          bulk_action.update_attributes(status: 'failed', messages: ['Some error occurred'], current: '')
+          bulk_action.update(status: 'failed', messages: ['Some error occurred'], current: '')
         end
         $redis.del("bulk_action_data_#{tenant}_#{bulk_actions_id}")
       end
@@ -84,13 +84,13 @@ module Groovepacker
             order_item.scanned_status = 'scanned'
             order_item.save
           end
-          Tote.find_by_order_id(order.id).update_attributes(order_id: nil, pending_order: false) if order.tote
+          Tote.find_by_order_id(order.id).update(order_id: nil, pending_order: false) if order.tote
         else
           order.save
           retain_items = !@remove_skipped && order_status == 'scanned' && params[:status] == 'awaiting'
           if retain_items
             order.order_items.where('skipped_qty != 0').each do |order_item|
-              order_item.update_attributes(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
+              order_item.update(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
             end
             order.order_items.where('removed_qty != 0').update_all(removed_qty: 0)
           end
@@ -151,9 +151,9 @@ module Groovepacker
         orders = Marshal.load(orders)
         order_ids = orders.pluck(:id)
         init_results
-        bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
+        bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
         orders.each { |order| order.reset_assigned_tote(user_id) }
-        bulk_action.update_attributes(completed: orders.count)
+        bulk_action.update(completed: orders.count)
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}")
       end
@@ -167,10 +167,10 @@ module Groovepacker
         add_delete_log(current_tenant, order_increment_ids, 'List of Deleted Orders (25)', params, order_increment_ids.count)
         order_ids = orders.pluck(:id)
         init_results
-        bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
+        bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
         # orders.each do |order|
         #   return if check_bulk_cancel(bulk_action)
-        #   bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
+        #   bulk_action.update(current: order.increment_id, completed: bulk_action.completed + 1)
         #   unless order.destroy
         #     @result['status'] = false
         #     @result['messages'].push('There was a problem deleting order '+ order.increment_id )
@@ -182,7 +182,7 @@ module Groovepacker
         destroy_order_items(order_ids, bulk_action)
         Order.where(['id IN (?)', order_ids]).delete_all
         destroy_orders_associations(order_ids)
-        bulk_action.update_attributes(completed: orders.count)
+        bulk_action.update(completed: orders.count)
 
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_delete_data_#{current_tenant}_#{bulkaction_id}")
@@ -194,7 +194,7 @@ module Groovepacker
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
         orders = $redis.get("bulk_action_duplicate_data_#{tenant}_#{bulk_actions_id}")
         orders = Marshal.load(orders)
-        bulk_action.update_attributes(total: orders.count, completed: 0, status: 'in_progress')
+        bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
         temp_increment_id = ''
         orders.each do |order|
           index = 1
@@ -206,7 +206,7 @@ module Groovepacker
             neworder.increment_id = temp_increment_id
             orderslist = Order.where(increment_id: temp_increment_id)
             index += 1
-            bulk_action.update_attributes(current: order.increment_id, completed: bulk_action.completed + 1)
+            bulk_action.update(current: order.increment_id, completed: bulk_action.completed + 1)
           end while orderslist.present?
           if neworder.try(:store).try(:store_type) == 'ShippingEasy'
             neworder.cloned_from_shipment_id = ''
@@ -235,7 +235,7 @@ module Groovepacker
       def check_bulk_action_completed_or_not(bulk_action)
         unless bulk_action.cancel?
           bulk_action.status = @result['status'] ? 'completed' : 'failed'
-          bulk_action.update_attributes(messages: @result['messages'], current: '')
+          bulk_action.update(messages: @result['messages'], current: '')
         end
       end
 
@@ -320,7 +320,7 @@ module Groovepacker
         if inventory_tracking_enabled?
           prev_attrs = bulk_action.slice('total', 'completed', 'identifier', 'activity', 'current', 'messages', 'status')
 
-          bulk_action.update_attributes(total: order_items.count, identifier: 'inventory_balance', activity: 'adjustment')
+          bulk_action.update(total: order_items.count, identifier: 'inventory_balance', activity: 'adjustment')
 
           order_items
             .find_in_batches(batch_size: 20) do |items|
@@ -329,12 +329,12 @@ module Groovepacker
             # Update inventory
             items.map(&:delete_inventory)
 
-            bulk_action.update_attributes(completed: bulk_action.completed + items.count)
+            bulk_action.update(completed: bulk_action.completed + items.count)
 
             delete_order_items(items_ids)
           end
 
-          bulk_action.update_attributes(prev_attrs)
+          bulk_action.update(prev_attrs)
         else
           delete_order_items(order_items.pluck(:id))
         end

@@ -145,7 +145,7 @@ module SettingsHelper
     if current_user.can? 'edit_scanning_prefs'
       params[:tote_identifier] = params[:tote_identifier].present? ? params[:tote_identifier] : 'Tote'
 
-      if scan_pack_setting.update_attributes(permit_scan_pack_setting_params)
+      if scan_pack_setting.update(permit_scan_pack_setting_params)
         update_tote_sets if params[:tote_sets]
         @result['success_messages'] = ['Settings updated successfully.']
       else
@@ -169,7 +169,7 @@ module SettingsHelper
       tote_set = ToteSet.find_by_id(params[:id])
       next unless tote_set.present?
 
-      tote_set.update_attributes(max_totes: set[:max_totes])
+      tote_set.update(max_totes: set[:max_totes])
       if tote_set.totes.count > tote_set.max_totes
         (tote_set.totes.order('number ASC').all - tote_set.totes.order('number ASC').first(tote_set.max_totes)).each(&:destroy)
       elsif tote_set.totes.count < tote_set.max_totes

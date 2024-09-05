@@ -4,7 +4,7 @@ module ProductsService
   class ReAssociateAllProducts < ProductsService::Base
     attr_accessor :tenant, :params, :username, :shopify_credential, :result_data
 
-    def initialize(**args)
+    def initialize(args)
       @tenant = args[:tenant]
       @params = args[:params]
       @username = args[:username]
@@ -72,7 +72,8 @@ module ProductsService
     end
 
     def create_barcode(product, barcode)
-      db_barcode = product.product_barcodes.create(barcode: barcode, permit_shared_barcodes: shopify_credential.permit_shared_barcodes)
+      db_barcode = product.product_barcodes.create(barcode:,
+                                                   permit_shared_barcodes: shopify_credential.permit_shared_barcodes)
       add_barcode_activity(product, barcode) unless db_barcode.errors.any?
       handle_already_exists_barcode(barcode)
     end
@@ -89,11 +90,11 @@ module ProductsService
     def add_barcode_activity(product, barcode)
       user_name = username ? "#{username} - " : ''
       user_name += 'Re-associate all items with Shopify'
-      product.add_product_activity( "The barcode #{barcode} was added to this item", user_name)
+      product.add_product_activity("The barcode #{barcode} was added to this item", user_name)
     end
 
     def handle_already_exists_barcode(barcode)
-      return unless ProductBarcode.where(barcode: barcode).many?
+      return unless ProductBarcode.where(barcode:).many?
 
       result_data[:already_exists_barcodes] << barcode
     end

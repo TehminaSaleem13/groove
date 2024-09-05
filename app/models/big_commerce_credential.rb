@@ -1,7 +1,7 @@
 # frozen_string_literal: true
 
-class BigCommerceCredential < ActiveRecord::Base
+class BigCommerceCredential < ApplicationRecord
   # attr_accessible :access_token, :shop_name, :store_hash, :store_id, :last_imported_at
 
-  belongs_to :store
+  belongs_to :store,  optional: true
 end

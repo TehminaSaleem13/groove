@@ -63,7 +63,7 @@ module Groovepacker
       def fix_corrupted_map(map)
         return map unless map.map.class == String
 
-        map.update_attributes(map: YAML.safe_load(map.map.gsub("!ruby/object:ActionController::Parameters\n  parameters: ", '').gsub("  permitted: false\n", '')))
+        map.update(map: YAML.safe_load(map.map.gsub("!ruby/object:ActionController::Parameters\n  parameters: ", '').gsub("  permitted: false\n", '')))
         map.reload
       rescue StandardError
         map
@@ -74,7 +74,7 @@ module Groovepacker
         return nil if order_import_summaries.empty?
 
         @order_import_summary = order_import_summaries.first
-        @order_import_summary.update_attributes(status: 'in_progress')
+        @order_import_summary.update(status: 'in_progress')
         @order_import_summary.reload
       end
 
@@ -105,10 +105,10 @@ module Groovepacker
                                    rescue StandardError
                                      nil
                        end) || 'GP App', object_id: ois.id)
-          ois.update_attributes(status: 'in_progress')
+          ois.update(status: 'in_progress')
           ois.import_items.each { |import_item| ImportOrders.new.import_orders_with_import_item(import_item, tenant) }
           ois.reload
-          ois.update_attributes(status: 'completed') unless ois.status == 'cancelled'
+          ois.update(status: 'completed') unless ois.status == 'cancelled'
         end
         GC.start
       end

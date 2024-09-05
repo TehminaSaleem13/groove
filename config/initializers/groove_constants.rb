@@ -7,6 +7,7 @@ class Engine < Rails::Engine
     GROOVE_THEME = theme_config_contents['default'].merge(
       theme_config_contents['active'] || {}
     ).symbolize_keys
-    app.config.assets.paths = Dir[Rails.root.join('app', 'themes', GROOVE_THEME[:identifier], '*')] + app.config.assets.paths
+    app.config.assets.paths = Dir[Rails.root.join('app', 'themes', GROOVE_THEME[:identifier],
+                                                  '*')] + app.config.assets.paths
   end
 end

@@ -63,8 +63,10 @@ class GeneratePackingSlipPdf
   def self.generate_pdf(order, page_height, page_width, orientation, pdf_path, header, boxes, is_custom_pdf)
     require 'wicked_pdf'
     ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
-    av = ActionView::Base.new
-    av.view_paths = ActionController::Base.view_paths
+    lookupcontext = ActionView::LookupContext.new([Rails.root.join('app/views')])
+    av = ActionView::Base.with_empty_template_cache.new(
+      lookupcontext, {}, nil
+    )
     av.class_eval do
       include Rails.application.routes.url_helpers
       include ApplicationHelper

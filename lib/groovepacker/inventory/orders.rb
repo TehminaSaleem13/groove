@@ -68,7 +68,7 @@ module Groovepacker
           return false unless inventory_tracking_enabled?
           return false if order_item.is_inventory_allocated? || order_item.is_inventory_sold? && !update_pull_inv
 
-          do_allocate_item(order_item, order_item.qty,OrderItem::ALLOCATED_INV_STATUS, status_match)
+          do_allocate_item(order_item, order_item.qty, OrderItem::ALLOCATED_INV_STATUS, status_match)
         end
 
         def deallocate_item(order_item, status_match = false)
@@ -86,7 +86,8 @@ module Groovepacker
           end
           return false unless order_item.is_not_ghost?
 
-          result &= Groovepacker::Inventory::Products.sell(order_item.product.base_product, multiplier * order_item.qty, order_item.order.store.inventory_warehouse_id, order_item.order.reallocate_inventory?, update_allocated)
+          result &= Groovepacker::Inventory::Products.sell(order_item.product.base_product,
+                                                           multiplier * order_item.qty, order_item.order.store.inventory_warehouse_id, order_item.order.reallocate_inventory?, update_allocated)
           if multiplier == 1
             order_item.update_column(:inv_status, OrderItem::SOLD_INV_STATUS)
           else
@@ -99,9 +100,11 @@ module Groovepacker
           return false unless inventory_tracking_enabled? && order_item.is_not_ghost?
 
           if Order::ALLOCATE_STATUSES.include?(order_item.order.status)
-            Groovepacker::Inventory::Products.allocate(kit_item.option_product, difference * order_item.qty, order_item.order.store.inventory_warehouse_id)
+            Groovepacker::Inventory::Products.allocate(kit_item.option_product, difference * order_item.qty,
+                                                       order_item.order.store.inventory_warehouse_id)
           elsif Order::SOLD_STATUSES.include?(order_item.order.status)
-            Groovepacker::Inventory::Products.sell(kit_item.option_product, difference * order_item.qty, order_item.order.store.inventory_warehouse_id, false, false)
+            Groovepacker::Inventory::Products.sell(kit_item.option_product, difference * order_item.qty,
+                                                   order_item.order.store.inventory_warehouse_id, false, false)
           end
         end
 
@@ -111,14 +114,15 @@ module Groovepacker
           return false unless inventory_tracking_enabled? && should_process_allocation?(order_item, status_match)
 
           result = true
-          result &= Groovepacker::Inventory::Products.allocate(order_item.product.base_product, qty, order_item.order.store.inventory_warehouse_id)
+          result &= Groovepacker::Inventory::Products.allocate(order_item.product.base_product, qty,
+                                                               order_item.order.store.inventory_warehouse_id)
           # Set on hold here when needed
           order_item.update_column(:inv_status, status) if status != order_item.inv_status
           result
         end
 
         def should_process_allocation?(order_item, status_match)
-          (order_item.is_not_ghost? && (Order::ALLOCATE_STATUSES.include?(order_item.order.status) || status_match))
+          order_item.is_not_ghost? && (Order::ALLOCATE_STATUSES.include?(order_item.order.status) || status_match)
         end
       end
     end

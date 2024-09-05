@@ -5,7 +5,7 @@ class ServiceInit
     self
   end
 
-  def self.call(*args)
-    new(*args).call
+  def self.call(*args, **kwargs)
+    new(*args, **kwargs).call
   end
 end

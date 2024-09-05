@@ -11,7 +11,7 @@ class OrdersController < ApplicationController
   def importorders
     if check_user_permissions('import_orders')
       @result, @import_result = gp_orders_import.execute_import
-      import_result_messages(@import_result) unless @import_result.blank?
+      import_result_messages(@import_result) if @import_result.present?
     end
     render json: @result
   end
@@ -25,10 +25,10 @@ class OrdersController < ApplicationController
   def update
     if current_user.can?('create_edit_notes')
       @order.notes_internal = begin
-                                params[:order]['notes_internal']
-                              rescue StandardError
-                                nil
-                              end
+        params[:order]['notes_internal']
+      rescue StandardError
+        nil
+      end
     else
       set_status_and_message(false, 'You do not have the permissions to edit notes', ['push'])
     end
@@ -37,16 +37,16 @@ class OrdersController < ApplicationController
     @result['messages'].push(@order.errors.full_messages) if @result['status'] && @order.save
 
     if begin
-          params[:app]
-       rescue StandardError
-         @params[:app]
-        end
+      params[:app]
+    rescue StandardError
+      @params[:app]
+    end
       orders_scanning_count = Order.multiple_orders_scanning_count(Order.where(id: @order.id))
       itemslength = begin
-                      orders_scanning_count[@order.id].values.sum
-                    rescue StandardError
-                      0
-                    end
+        orders_scanning_count[@order.id].values.sum
+      rescue StandardError
+        0
+      end
       @result['scan_pack_data'] = generate_order_hash_v2(@order, itemslength)
     end
 
@@ -68,7 +68,8 @@ class OrdersController < ApplicationController
     # GroovRealtime::emit('test',{does:'it work for global?'},:global)
     @result['orders'] = make_orders_list(@orders)
     if params[:app].present?
-      @result['general_settings'] = GeneralSetting.last.attributes.slice(*filter_general_settings).merge(GeneralSetting.last.per_tenant_settings)
+      @result['general_settings'] =
+        GeneralSetting.last.attributes.slice(*filter_general_settings).merge(GeneralSetting.last.per_tenant_settings)
       @result['scan_pack_settings'] = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings)
       @result['orders_count'] = get__filtered_orders_count
     else
@@ -77,7 +78,6 @@ class OrdersController < ApplicationController
     render json: @result
   end
 
-
   def sorted_and_filtered_data
     @result ||= {}
     @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
@@ -85,10 +85,10 @@ class OrdersController < ApplicationController
     @result['orders_count'] = params[:search].present? ? get_filter_orders_count(@searched_orders["orders"]) : get_orders_count
     @result['orders_count'].merge!('filtered_count' => filter_length)
     @result['orders'] = make_orders_list(@orders)
-    
+
     # Calculate tag counts
     @result['tags'] = tags
-  
+
     render json: @result
   end
 
@@ -147,11 +147,11 @@ class OrdersController < ApplicationController
   def remove_tags
     $redis.set("order_tagging_job:cancel", false)
     tag_name = params[:tag_name]
-    
+
     if tag_name.present?
       tags = OrderTag.where(name: tag_name)
       OrderTagManager.new(tags.first.name, @orders).remove_tags
-      render json: { success: 'Tags removed successfully', status: true} 
+      render json: { success: 'Tags removed successfully', status: true}
     else
       render json: { error: 'Tag name parameter is required' }, status: :bad_request
     end
@@ -236,7 +236,8 @@ class OrdersController < ApplicationController
       GrooveBulkActions.execute_groove_bulk_action('status_update', params, current_user, list_selected_orders)
       # list_selected_orders.each { |order| change_order_status(order) }
     else
-      set_status_and_message(false, 'You do not have enough permissions to change order status', %w[push error_messages])
+      set_status_and_message(false, 'You do not have enough permissions to change order status',
+                             %w[push error_messages])
     end
     render json: @result
   end
@@ -346,7 +347,9 @@ class OrdersController < ApplicationController
       gp_orders_module.generate_pick_list(list_selected_orders)
 
     file_name = 'pick_list_' + Time.current.strftime('%d_%b_%Y_%H_%M_%S_%p')
-    @result['data'] = { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list, 'pick_list_file_paths' => "/pdfs/#{file_name}.pdf" }
+    @result['data'] =
+      { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list,
+        'pick_list_file_paths' => "/pdfs/#{file_name}.pdf" }
     render_pdf(file_name)
     pdf_file = File.open(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"), 'rb')
     base_file_name = File.basename(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"))
@@ -380,14 +383,14 @@ class OrdersController < ApplicationController
   def generate_all_packing_slip
     @public_ip = `curl http://checkip.amazonaws.com` unless Rails.env.development?
     if params[:select_all].blank?
-      filters = params[:filter].to_s.split(",") if params['filter'].include?(",")
+      filters = params[:filter].to_s.split(',') if params['filter'].include?(',')
       @orders = Order.filter_all_status(filters) if filters.present?
       @orders = params['filter'] == 'all' ? Order.all : Order.where(status: params['filter']) if @orders.blank?
-      value = (params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status')
+      value = params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status'
       @orders = value ? sort_order(params, @orders) : @orders
     else
       @orders = gp_orders_search.do_search(false)
-      value = (params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status')
+      value = params['sort'] == 'custom_field_one' || params['sort'] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status'
       @orders = value ? sort_order(params, @orders['orders']) : @orders['orders']
     end
     @orders.map(&:increment_id).each { |increment_id| generate_order_barcode_for_html(increment_id) }
@@ -441,12 +444,15 @@ class OrdersController < ApplicationController
   end
 
   def import_for_ss
-    result = { error_messages: 'An Import is already in queue or running, please wait for it to complete!', status: false }
+    result = { error_messages: 'An Import is already in queue or running, please wait for it to complete!',
+               status: false }
     params[:tenant] = Apartment::Tenant.current
     params[:current_user_id] = current_user.id
     if no_running_imports(params[:store_id])
-      ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}", priority: 95).import_range_import(params)
-      result[:success_messages] = params[:import_type] == 'range_import' ? 'Range Import will start!' : 'Quickfix Import will start!'
+      ImportOrders.new.delay(queue: "start_range_import_#{Apartment::Tenant.current}",
+                             priority: 95).import_range_import(params)
+      result[:success_messages] =
+        params[:import_type] == 'range_import' ? 'Range Import will start!' : 'Quickfix Import will start!'
       result[:status] = true
     end
     render json: result
@@ -509,17 +515,18 @@ class OrdersController < ApplicationController
         store_id: params[:store_id]
       }
       ahoy.track('Order Import', properties, time: Time.current)
-      Ahoy::Event.create(version_2: true, time: Time.current, properties: properties)
+      Ahoy::Event.create(version_2: true, time: Time.current, properties:)
     end
     render json: @result
   end
 
   def cancel_all
     @result = {}
-    import_items = ImportItem.where(status: %w[in_progress not_started]).update_all(status: 'cancelled', message: 'cancel_all')
+    import_items = ImportItem.where(status: %w[in_progress not_started]).update_all(status: 'cancelled',
+                                                                                    message: 'cancel_all')
     top_summary = OrderImportSummary.top_summary
     if top_summary
-      top_summary.update_attributes(status: 'cancelled')
+      top_summary.update(status: 'cancelled')
       top_summary.emit_data_to_user(true)
     end
     OrderImportSummary.destroy_all
@@ -535,17 +542,18 @@ class OrdersController < ApplicationController
   end
 
   def run_orders_status_update
-    Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(@result, params, Apartment::Tenant.current)
+    Groovepacker::Orders::BulkActions.new.delay(priority: 95).update_bulk_orders_status(@result, params,
+                                                                                        Apartment::Tenant.current)
     render json: @result
   end
 
   def next_split_order
     original_id = params[:id]
     key = begin
-            params[:id].split(' (S')[0..(params[:id].split(' (S').length - 2)].join + ' (S%'
-          rescue StandardError
-            nil
-          end
+      params[:id].split(' (S')[0..(params[:id].split(' (S').length - 2)].join + ' (S%'
+    rescue StandardError
+      nil
+    end
     # key_array = params[:id].split("-")
     # if key_array.count == 1
     #   key = key_array.first
@@ -562,7 +570,8 @@ class OrdersController < ApplicationController
     #   end
     # end
     # order = Order.where("increment_id LIKE ? AND increment_id != ? AND status != ?", "#{key}%", original_id, "scanned").order("created_at asc").first
-    order = Order.where('increment_id LIKE ? AND increment_id != ? AND status != ?', key, original_id, 'scanned').order('created_at asc').first
+    order = Order.where('increment_id LIKE ? AND increment_id != ? AND status != ?', key, original_id,
+                        'scanned').order('created_at asc').first
     render json: order
   end
 
@@ -586,13 +595,15 @@ class OrdersController < ApplicationController
       ss_credential = ShipstationRestCredential.find(params[:credential_id])
       ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_credential.api_key, ss_credential.api_secret)
       ss_label_data['available_carriers'] = begin
-                                              JSON.parse(ss_client.list_carriers.body)
-                                            rescue StandardError
-                                              []
-                                            end
+        JSON.parse(ss_client.list_carriers.body)
+      rescue StandardError
+        []
+      end
       requested_carriers = params[:carrier_code].to_s.split(',').map(&:strip)
       if requested_carriers.any?
-        ss_label_data['available_carriers'] = ss_label_data['available_carriers'].select { |carrier| requested_carriers.include? carrier['code'] }
+        ss_label_data['available_carriers'] = ss_label_data['available_carriers'].select do |carrier|
+          requested_carriers.include? carrier['code']
+        end
       end
       ss_label_data['available_carriers'].each do |carrier|
         carrier['visible'] = !(ss_credential.disabled_carriers.include? carrier['code'])
@@ -613,30 +624,44 @@ class OrdersController < ApplicationController
         }
         data = data.merge(residential: params[:post_data][:residential]) if carrier['code'] == 'ups'
         rates_response = ss_client.get_ss_label_rates(data.to_h)
-        carrier['errors'] = rates_response.first(3).map { |res| res = res.join(': ') }.join('<br>') unless rates_response.ok?
+        unless rates_response.ok?
+          carrier['errors'] = rates_response.first(3).map do |res|
+            res = res.join(': ')
+          end.join('<br>')
+        end
         next unless rates_response.ok?
 
         carrier['rates'] = JSON.parse(rates_response.body)
-        carrier['services'] = JSON.parse(ss_client.list_services(carrier['code']).body) if carrier['code'] == 'stamps_com'
-        carrier['packages'] = JSON.parse(ss_client.list_packages(carrier['code']).body) if carrier['code'] == 'stamps_com'
+        if carrier['code'] == 'stamps_com'
+          carrier['services'] =
+            JSON.parse(ss_client.list_services(carrier['code']).body)
+        end
+        if carrier['code'] == 'stamps_com'
+          carrier['packages'] =
+            JSON.parse(ss_client.list_packages(carrier['code']).body)
+        end
         carrier['rates'].map { |r| r['carrierCode'] = carrier['code'] }
-        carrier['rates'].map { |r| r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2) }
+        carrier['rates'].map do |r|
+          r['cost'] = number_with_precision((r['shipmentCost'] + r['otherCost']), precision: 2)
+        end
         carrier['rates'].map do |r|
           r['visible'] = !(begin
-                            (ss_credential.disabled_rates[carrier['code']].include? r['serviceName'])
-                          rescue StandardError
-                            false
-                          end)
+            (ss_credential.disabled_rates[carrier['code']].include? r['serviceName'])
+          rescue StandardError
+            false
+          end)
         end
         carrier['rates'].sort_by! { |hsh| hsh['cost'].to_f }
         next unless carrier['code'] == 'stamps_com'
 
         carrier['rates'].each do |rate|
           rate['packageCode'] = begin
-                                  carrier['packages'].select { |h| h['name'] == rate['serviceName'].split(' - ').last }.first['code']
-                                rescue StandardError
-                                  nil
-                                end
+            carrier['packages'].select do |h|
+              h['name'] == rate['serviceName'].split(' - ').last
+            end.first['code']
+          rescue StandardError
+            nil
+          end
         end
       end
       result[:ss_label_data] = ss_label_data
@@ -669,7 +694,8 @@ class OrdersController < ApplicationController
       order.postcode = params[:ss_label_data][:shipping_address][:postal_code] || ''
       order.country = params[:ss_label_data][:shipping_address][:country] || ''
       ss_label_data = order.shipstation_label_data || order.build_shipstation_label_data
-      ss_label_data.content = (ss_label_data.content || {}).merge(weight: params[:ss_label_data][:weight].to_unsafe_h, dimensions: params[:ss_label_data][:dimensions].to_unsafe_h)
+      ss_label_data.content = (ss_label_data.content || {}).merge(weight: params[:ss_label_data][:weight].to_unsafe_h,
+                                                                  dimensions: params[:ss_label_data][:dimensions].to_unsafe_h)
       order.save && ss_label_data.save
     rescue StandardError
       result = { status: false }
@@ -686,8 +712,11 @@ class OrdersController < ApplicationController
         try_creating_label = order.store.shipstation_rest_credential.skip_ss_label_confirmation
         result = order.try_creating_label if try_creating_label
         if try_creating_label == false || !result[:status]
-          result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
-          result[:error] = 'Insufficient/Invalid data to create label' if try_creating_label && !result[:error_messages].present?
+          result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params:)
+          if try_creating_label && !result[:error_messages].present?
+            result[:error] =
+              'Insufficient/Invalid data to create label'
+          end
         end
       else
         result[:status] = false
@@ -727,7 +756,7 @@ class OrdersController < ApplicationController
     begin
       order = Order.includes(:store).find(params[:id])
       if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential.try(:use_api_create_label)
-        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params: params)
+        result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params:)
       else
         result[:status] = false
       end

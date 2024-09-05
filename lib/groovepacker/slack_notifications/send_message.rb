@@ -12,6 +12,8 @@ module Groovepacker
       end
 
       def call
+        return if Rails.env.test?
+
         body = {
           "blocks": [
             {

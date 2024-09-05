@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class Product < ActiveRecord::Base
+class Product < ApplicationRecord
   extend ProductClassMethodsHelper
   include ProductsHelper
   include ProductMethodsHelper
-  belongs_to :store
+  belongs_to :store, optional: true
 
   attr_accessor :create_sku, :create_barcode
 
@@ -93,7 +93,7 @@ class Product < ActiveRecord::Base
                        product_id: id, scanned_status: 'notscanned'
                      )
                               .includes(:order_item_kit_products, :product, order: [order_items: :product])
-    end
+                   end
 
     if status != 'inactive' || force_from_inactive_state
       result = true
@@ -104,9 +104,7 @@ class Product < ActiveRecord::Base
 
       result &= false if product_barcodes.empty?
 
-      unless base_sku.nil?
-        result &= false if base_product.status == 'inactive' || base_product.status == 'new'
-      end
+      result &= false if !base_sku.nil? && (base_product.status == 'inactive' || base_product.status == 'new')
 
       # if kit it should contain kit products as well
       if is_kit == 1
@@ -137,28 +135,26 @@ class Product < ActiveRecord::Base
       # unless self.status == original_status
       # for non kit products, update all kits product statuses where the
       # current product is an item of the kit
-      unless @order_items.blank?
-        if is_kit == 0
-          @kit_products =
-            if eager_loaded_obj[:kit_skus_if_kit_zero]
-              eager_loaded_obj[:kit_skus_if_kit_zero]
-                .select { |pkss| pkss.option_product_id == id }
-            else
-              ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
-            end
-
-          # To reduce individual product query fire on order items
-          multi_product_order_items =
-            OrderItem.where(product_id: @kit_products.map { |kp| kp.product.id }, scanned_status: 'notscanned')
-          # .includes(order: [order_items: [:product, :order_item_kit_products]])
-
-          # result_kit = true
-          @kit_products.each do |kit_product|
-            next unless kit_product.product.status != 'inactive'
-
-            kit_product.product.update_product_status(nil,
-                                                      multi_product_order_items: multi_product_order_items)
+      if @order_items.present? && (is_kit == 0)
+        @kit_products =
+          if eager_loaded_obj[:kit_skus_if_kit_zero]
+            eager_loaded_obj[:kit_skus_if_kit_zero]
+              .select { |pkss| pkss.option_product_id == id }
+          else
+            ProductKitSkus.where(option_product_id: id).includes(product: :product_kit_skuss)
           end
+
+        # To reduce individual product query fire on order items
+        multi_product_order_items =
+          OrderItem.where(product_id: @kit_products.map { |kp| kp.product.id }, scanned_status: 'notscanned')
+        # .includes(order: [order_items: [:product, :order_item_kit_products]])
+
+        # result_kit = true
+        @kit_products.each do |kit_product|
+          next unless kit_product.product.status != 'inactive'
+
+          kit_product.product.update_product_status(nil,
+                                                    multi_product_order_items:)
         end
       end
 
@@ -179,7 +175,7 @@ class Product < ActiveRecord::Base
         unless products.empty?
           products.each do |p|
             p.update_product_status(nil,
-                                    multi_product_order_items: multi_product_order_items)
+                                    multi_product_order_items:)
           end
         end
       end
@@ -266,11 +262,11 @@ class Product < ActiveRecord::Base
 
   def get_store_name(product_orders)
     if product_orders.count > 0 && store&.display_origin_store_name
-       product_orders&.first&.origin_store&.store_name
+      product_orders&.first&.origin_store&.store_name
     else
       store&.name
     end
-   end
+  end
 
   # def get_total_avail_loc
   #   total_avail_loc = 0
@@ -344,13 +340,13 @@ class Product < ActiveRecord::Base
     weight_gms = weight_type * 28.349523125
     case format
     when 'lb'
-      return (weight_type / 16).round(2)
+      (weight_type / 16).round(2)
     when 'oz'
-      return weight_type
+      weight_type
     when 'kg'
-      return (weight_gms / 1000).round(3)
+      (weight_gms / 1000).round(3)
     else
-      return weight_gms.round
+      weight_gms.round
     end
   end
 
@@ -395,7 +391,10 @@ class Product < ActiveRecord::Base
     primary = product_barcodes.new if primary.nil? || create_barcode
     primary.order = 0
     primary.barcode = value
-    errors.add(:base, "Barcode #{primary.barcode} already exists") unless permit_same_barcode ? primary.save(validate: false) : primary.save
+    return if permit_same_barcode ? primary.save(validate: false) : primary.save
+
+    errors.add(:base,
+               "Barcode #{primary.barcode} already exists")
   end
 
   # provides primary category if exists

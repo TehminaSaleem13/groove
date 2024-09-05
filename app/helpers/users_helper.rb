@@ -114,14 +114,14 @@ module UsersHelper
           tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} Request for User Remove: #{rm_user} user wants to remove from plan. \n" + tenant.activity_log.to_s
           tenant.save!
           StripeInvoiceEmail.remove_user_request_email(tenant, rm_user).deliver
-          access_restriction.update_attributes(added_through_ui: 0)
+          access_restriction.update(added_through_ui: 0)
         end
         ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
-        access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
+        access_restriction.update(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
         StripeInvoiceEmail.user_remove_notification(tenant, access_restriction, params[:users]).deliver
         tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + tenant.activity_log.to_s
         tenant.save!
-        access_restriction.update_attributes(num_users: params[:users])
+        access_restriction.update(num_users: params[:users])
         set_subscription_info(params[:amount])
         create_stripe_plan(tenant)
         return false
@@ -133,11 +133,11 @@ module UsersHelper
     if params[:users].to_i < access_restriction.num_users && params[:is_annual] == 'false'
       users = access_restriction.num_users - params[:users].to_i
       ui_users = access_restriction.added_through_ui - users if access_restriction.added_through_ui != 0
-      access_restriction.update_attributes(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
+      access_restriction.update(added_through_ui: ui_users) if access_restriction.added_through_ui != 0
       StripeInvoiceEmail.user_remove_notification(tenant, access_restriction, params[:users]).deliver
       tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} User Removed: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]} \n" + tenant.activity_log.to_s
       tenant.save!
-      access_restriction.update_attributes(num_users: params[:users])
+      access_restriction.update(num_users: params[:users])
       set_subscription_info(params[:amount])
       create_stripe_plan(tenant)
       false

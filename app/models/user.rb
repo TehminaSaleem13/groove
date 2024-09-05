@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class User < ActiveRecord::Base
+class User < ApplicationRecord
   include InventoryWarehouseHelper
   # Include default devise modules. Others available are:
   # :token_authenticatable, :confirmable,
@@ -10,14 +10,14 @@ class User < ActiveRecord::Base
 
   # Setup accessible (or protected) attributes for your model
   # attr_accessible :username, :password, :password_confirmation, :remember_me, :confirmation_code, :email
-  validates_presence_of :username, :confirmation_code
-  validates_uniqueness_of :username, case_sensitive: false
-  validates_uniqueness_of :confirmation_code
+  validates :username, :confirmation_code, presence: true
+  validates :username, uniqueness: { case_sensitive: false }
+  validates :confirmation_code, uniqueness: true
   validates :confirmation_code, length: { maximum: 25 }
 
   # attr_accessible :title, :body
-  belongs_to :inventory_warehouse
-  belongs_to :role
+  belongs_to :inventory_warehouse, optional: true
+  belongs_to :role, optional: true
   has_many :user_inventory_permissions, dependent: :destroy
   has_many :order_activities
   has_many :product_activities
@@ -56,11 +56,10 @@ class User < ActiveRecord::Base
   end
 
   def check_inventory_presence
-    if inventory_warehouse_id.nil?
-      unless InventoryWarehouse.where(is_default: true).first.nil?
-        self.inventory_warehouse_id = InventoryWarehouse.where(is_default: true).first.id
-      end
-    end
+    return unless inventory_warehouse_id.nil?
+    return if InventoryWarehouse.where(is_default: true).first.nil?
+
+    self.inventory_warehouse_id = InventoryWarehouse.where(is_default: true).first.id
   end
 
   def check_fix_permissions
@@ -70,23 +69,23 @@ class User < ActiveRecord::Base
   end
 
   def can?(permission)
-    unless role.nil?
-      if role.make_super_admin
-        # Super admin has all permissions
-        true
-      elsif %w[create_edit_notes change_order_status import_orders update_inventories].include?(permission)
-        # A user with add_edit_order_items permission can do anything with an order
-        (role.add_edit_order_items || role[permission])
-      else
-        role[permission]
-      end
+    return if role.nil?
+
+    if role.make_super_admin
+      # Super admin has all permissions
+      true
+    elsif %w[create_edit_notes change_order_status import_orders update_inventories].include?(permission)
+      # A user with add_edit_order_items permission can do anything with an order
+      role.add_edit_order_items || role[permission]
+    else
+      role[permission]
     end
   end
 
   def self.can_create_new?
-    unless AccessRestriction.order('created_at').last.nil?
-      where(active: true, is_deleted: false).count < AccessRestriction.last.num_users + 1
-    end
+    return if AccessRestriction.order('created_at').last.nil?
+
+    where(active: true, is_deleted: false).count < AccessRestriction.last.num_users + 1
   end
 
   def assign_confirmation_code
@@ -104,7 +103,6 @@ class User < ActiveRecord::Base
     product_change_time = last_product_activity.try(:updated_at)
     scan_time = order_change_time.to_i > product_change_time.to_i ? order_change_time : product_change_time
     login_time = last_sign_in_at
-    recent_activity = scan_time.to_i > login_time.to_i ? scan_time : login_time
-    recent_activity
+    scan_time.to_i > login_time.to_i ? scan_time : login_time
   end
 end

@@ -22,10 +22,10 @@ class StoresController < ApplicationController
   def amazon_fba
     result = {}
     store = begin
-              Store.find(params['store_id'])
-            rescue StandardError
-              nil
-            end
+      Store.find(params['store_id'])
+    rescue StandardError
+      nil
+    end
     store.fba_import = !store.fba_import
     store.save
     result['amazon_fba'] = store.fba_import
@@ -82,11 +82,12 @@ class StoresController < ApplicationController
       if cred
         new_lro = Time.zone.parse(DateTime.parse(params['lro_date']).strftime('%Y-%m-%d %H:%M:%S'))
         if store.store_type == 'Shipstation API 2'
-          cred.update_attributes(quick_import_last_modified_v2: new_lro)
+          cred.update(quick_import_last_modified_v2: new_lro)
         else
-          cred.update_attributes(last_imported_at: new_lro)
+          cred.update(last_imported_at: new_lro)
         end
-        cred.track_changes(title: "#{cred.class.name} Changed", tenant: Apartment::Tenant.current, username: current_user.username, object_id: cred.id, changes: { lro: new_lro })
+        cred.track_changes(title: "#{cred.class.name} Changed", tenant: Apartment::Tenant.current,
+                           username: current_user.username, object_id: cred.id, changes: { lro: new_lro })
       end
     rescue StandardError => e
       result[:error] = e
@@ -100,8 +101,14 @@ class StoresController < ApplicationController
     store = Store.find(params[:id])
     groove_ftp = FTP::FtpConnectionManager.get_instance(store, params[:type])
     result[:connection] = groove_ftp.retrieve
-    store.ftp_credential.update_attribute(:connection_established, true) if result[:connection][:status] && params[:type].nil?
-    store.ftp_credential.update_attribute(:product_ftp_connection_established, true) if result[:connection][:status] && params[:type] == 'product'
+    if result[:connection][:status] && params[:type].nil?
+      store.ftp_credential.update_attribute(:connection_established,
+                                            true)
+    end
+    if result[:connection][:status] && params[:type] == 'product'
+      store.ftp_credential.update_attribute(:product_ftp_connection_established,
+                                            true)
+    end
     # store.ftp_credential.connection_established = true
     # store.ftp_credential.save!
     render json: result
@@ -290,7 +297,7 @@ class StoresController < ApplicationController
                       else
                         result[type].join('<br>')
                       end
-      message_text += '<br>' unless result[type].blank?
+      message_text += '<br>' if result[type].present?
     end
     @result[:messages] = message_text
     @result[:status] = !message_text.present?
@@ -299,17 +306,17 @@ class StoresController < ApplicationController
   end
 
   def file_delete(file_path, type)
-    if File.exist? file_path
-      file_data = IO.read(file_path, 40_960)
-      if type == 'kit'
-        @result['kit']['data'] = file_data
-      elsif type == 'order'
-        @result['order']['data'] = file_data
-      elsif type == 'product'
-        @result['product']['data'] = file_data
-      end
-      File.delete(file_path)
+    return unless File.exist? file_path
+
+    file_data = IO.read(file_path, 40_960)
+    if type == 'kit'
+      @result['kit']['data'] = file_data
+    elsif type == 'order'
+      @result['order']['data'] = file_data
+    elsif type == 'product'
+      @result['product']['data'] = file_data
     end
+    File.delete(file_path)
   end
 
   def csv_do_import
@@ -369,7 +376,8 @@ class StoresController < ApplicationController
   def show
     @store = Store.find_by_id(params[:id])
     tenant = Tenant.find_by_name(Apartment::Tenant.current)
-    @result = { is_fba: tenant&.is_fba, ss_api_create_label: tenant&.ss_api_create_label, product_ftp_import: tenant&.product_ftp_import, order_cup_direct_shipping: tenant&.order_cup_direct_shipping, custom_product_fields: tenant&.custom_product_fields, packing_cam: tenant&.packing_cam }
+    @result = { is_fba: tenant&.is_fba, ss_api_create_label: tenant&.ss_api_create_label,
+                product_ftp_import: tenant&.product_ftp_import, order_cup_direct_shipping: tenant&.order_cup_direct_shipping, custom_product_fields: tenant&.custom_product_fields, packing_cam: tenant&.packing_cam }
     show_store
     render json: @result
   end
@@ -388,7 +396,7 @@ class StoresController < ApplicationController
     @store = Store.new
     @result = @store.get_ebay_signin_url
     # session[:ebay_session_id] = @result['ebay_sessionid']
-    $redis.set('ebay_session_id', @result['ebay_sessionid']) unless @result['ebay_sessionid'].blank?
+    $redis.set('ebay_session_id', @result['ebay_sessionid']) if @result['ebay_sessionid'].present?
     @result['current_tenant'] = Apartment::Tenant.current
     render json: @result
   end
@@ -440,7 +448,7 @@ class StoresController < ApplicationController
     url = URI.parse(url)
     @store = EbayCredentials.where(store_id: params[:id])
 
-    if !@store.nil? && !@store.empty?
+    if @store.present?
       ebay_token_update(url)
       # @store = @store.first
       # req = Net::HTTP::Post.new(url.path)
@@ -512,7 +520,7 @@ class StoresController < ApplicationController
     # messagetocustomer = params['messagetocustomer']
     tenant_name = params['tenantname']
     # redirect_to (URI::encode("https://#{tenant_name}.groovepacker.com:3001//") + "#" + URI::encode("/settings/showstores/ebay?ebaytkn=#{ebaytkn}&tknexp=#{tknexp}&username=#{username}&redirect=#{redirect}&editstatus=#{editstatus}&name=#{name}&status=#{status}&storetype=#{storetype}&storeid=#{storeid}&inventorywarehouseid=#{inventorywarehouseid}&importimages=#{importimages}&importproducts=#{importproducts}&messagetocustomer=#{messagetocustomer}&tenantname=#{tenant_name}") )
-    redirect_to URI.encode("https://#{tenant_name}.#{ENV['SITE_HOST']}/") + URI.encode("stores/#{storeid}/update_ebay_user_token")
+    redirect_to CGI.escape("https://#{tenant_name}.#{ENV['SITE_HOST']}/") + CGI.escape("stores/#{storeid}/update_ebay_user_token")
   end
 
   def let_store_be_created
@@ -615,7 +623,10 @@ class StoresController < ApplicationController
           single_row[:CustomsDescription] = ''
           single_row[:CustomsValue] = ''
           single_row[:CustomsTariffNo] = ''
-          single_row[:CustomsCountry] = product.order_items.first.order.country unless product.order_items.empty? || product.order_items.first.order.nil?
+          unless product.order_items.empty? || product.order_items.first.order.nil?
+            single_row[:CustomsCountry] =
+              product.order_items.first.order.country
+          end
           single_row[:ThumbnailUrl] = ''
           single_row[:UPC] = product.primary_barcode
           single_row[:FillSKU] = ''
@@ -639,7 +650,7 @@ class StoresController < ApplicationController
       public_url = GroovS3.get_csv_export_exception(filename)
     end
 
-    filename = { url: public_url, filename: filename }
+    filename = { url: public_url, filename: }
     render json: filename
 
     # tenant = Apartment::Tenant.current
@@ -657,7 +668,8 @@ class StoresController < ApplicationController
 
   def bin_location_api_pull
     result = { status: true }
-    ExportSsProductsCsv.new.delay(priority: 95).pull_and_update_ss_product_locations(Apartment::Tenant.current, params[:id])
+    ExportSsProductsCsv.new.delay(priority: 95).pull_and_update_ss_product_locations(Apartment::Tenant.current,
+                                                                                     params[:id])
     render json: result
   end
 
@@ -729,7 +741,7 @@ class StoresController < ApplicationController
     @result = { status: true }
     begin
       shopify_credential = Store.find(params[:id]).shopify_credential
-      shopify_credential.update_attributes(access_token: params[:token])
+      shopify_credential.update(access_token: params[:token])
     rescue StandardError => e
       @result[:status] = false
       @result[:error_messages] = e
@@ -741,7 +753,7 @@ class StoresController < ApplicationController
     @result = { status: true }
     begin
       shopline_credential = Store.find(params[:id]).shopline_credential
-      shopline_credential.update_attributes(access_token: params[:token])
+      shopline_credential.update(access_token: params[:token])
     rescue StandardError => e
       @result[:status] = false
       @result[:error_messages] = e
@@ -753,7 +765,7 @@ class StoresController < ApplicationController
     result = { status: true }
     begin
       order = Order.find(params[:id])
-      ss_label_data = order.ss_label_order_data(skip_trying: false, params: params)
+      ss_label_data = order.ss_label_order_data(skip_trying: false, params:)
       result[:ss_label_data] = ss_label_data
     rescue Exception => e
       result[:status] = false

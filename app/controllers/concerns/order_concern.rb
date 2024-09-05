@@ -381,7 +381,7 @@ module OrderConcern
       ImportItem.update_all(status: 'cancelled')
       items = ImportItem.joins(:store).where("stores.store_type='CSV' and (import_items.status='in_progress' OR import_items.status='not_started' OR import_items.status='failed')")
       begin
-        items.each { |item| item.update_attributes(status: 'cancelled') }
+        items.each { |item| item.update(status: 'cancelled') }
       rescue StandardError
         nil
       end

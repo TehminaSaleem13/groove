@@ -11,7 +11,7 @@ module Groovepacker
 
           def import
             init_common_objects
-            @import_item.update_attributes(updated_orders_import: 0)
+            @import_item.update(updated_orders_import: 0)
             set_import_date_and_type
             if statuses.empty? && gp_ready_tag_id == -1
               set_status_and_msg_for_skipping_import
@@ -67,7 +67,7 @@ module Groovepacker
             init_order_import_summary(user_id)
             Tenant.save_se_import_data("========Shipstation Range Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==User ID', user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), type, @import_item)
-            @import_item.update_attributes(to_import: response['orders'].count)
+            @import_item.update(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
@@ -86,7 +86,7 @@ module Groovepacker
             init_order_import_summary(user_id)
             Tenant.save_se_import_data("========Shipstation QF Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Import Date', import_date, '==Order Id', order_id, '==User ID', user_id)
             response = fetch_order_response_from_ss(start_date.gsub(' ', '%20'), end_date.gsub(' ', '%20'), 'modified', @import_item)
-            @import_item.update_attributes(to_import: response['orders'].count)
+            @import_item.update(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
             update_order_import_summary
@@ -98,15 +98,15 @@ module Groovepacker
             ImportItem.where(store_id: @store.id).where("status = 'cancelled' OR status = 'completed'").destroy_all
             @import_summary = OrderImportSummary.top_summary
             @import_summary ||= OrderImportSummary.create(user_id: user_id, status: 'not_started', display_summary: false)
-            @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'not_started')
+            @import_item.update(order_import_summary_id: @import_summary.id, status: 'not_started')
             @range_or_quickfix_started = true
             @import_summary.emit_data_to_user(true)
           end
 
           def update_order_import_summary
-            @import_item.update_attributes(status: 'completed') if @import_item.reload.status != 'cancelled'
+            @import_item.update(status: 'completed') if @import_item.reload.status != 'cancelled'
             destroy_nil_import_items
-            @import_summary.update_attributes(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
+            @import_summary.update(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
             @import_summary.emit_data_to_user(true)
           end
 
@@ -141,8 +141,8 @@ module Groovepacker
           def notify_and_reset_lro(store_orders)
             @regular_import_triggered = true
             Order.emit_notification_ondemand_quickfix(@notify_user_id) if @notify_regular_import
-            # @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
-            @credential.update_attributes(quick_import_last_modified_v2: nil) if store_orders.blank?
+            # @credential.update(quick_import_last_modified_v2: nil) if store_orders.blank? && @store.regular_import_v2
+            @credential.update(quick_import_last_modified_v2: nil) if store_orders.blank?
           end
 
           def get_qf_range_start_date
@@ -230,7 +230,7 @@ module Groovepacker
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
             response['orders'] = response['orders'].sort_by { |order| Time.zone.parse(order['modifyDate']) } if response['orders'].present?
-            @store.shipstation_rest_credential.update_attributes(bulk_import: false)
+            @store.shipstation_rest_credential.update(bulk_import: false)
             @bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
             emit_data_for_range_or_quickfix
@@ -278,7 +278,7 @@ module Groovepacker
               remove_gp_tags_from_ss(order)
             else
               delete_order_and_log_event(shipstation_order) if shipstation_order.persisted? && order['orderStatus'] == 'cancelled'
-              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              @import_item.update(updated_orders_import: @import_item.updated_orders_import + 1)
               @result[:previous_imported] = @result[:previous_imported] + 1
             end
           end
@@ -305,7 +305,7 @@ module Groovepacker
           def import_order_items(shipstation_order, order)
             return if order['items'].nil?
 
-            @import_item.update_attributes(current_order_items: order['items'].length, current_order_imported_item: 0)
+            @import_item.update(current_order_items: order['items'].length, current_order_imported_item: 0)
             order['items'].each do |item|
               next if remove_coupon_codes?(item)
 
@@ -449,7 +449,7 @@ module Groovepacker
 
           def emit_data_for_range_or_quickfix
             if @range_or_quickfix_started
-              @import_item.update_attributes(status: 'in_progress')
+              @import_item.update(status: 'in_progress')
               @import_summary.emit_data_to_user(true)
             end
           end
@@ -465,7 +465,7 @@ module Groovepacker
           def update_import_item_and_import_order(order, shipments_response)
             return if skip_the_order?(shipments_response, order)
 
-            @import_item.update_attributes(current_increment_id: order['orderNumber'], current_order_items: -1, current_order_imported_item: -1)
+            @import_item.update(current_increment_id: order['orderNumber'], current_order_items: -1, current_order_imported_item: -1)
             # If a large number of orders are imported into SS at the same time via CSV, their OSLMT will be the same. During each regular import, we count how many consecutive orders have had the same timestamp. While this count is => to 25 we will set a flag to 1 If a non-matching OSLMT is imported or if the import fails in any way, the flag is reset to 0. When each import is run we will check this flag. If it is set to 1 at the start of the import we will adjust our LRO timestamp forward by 1 second and set the flag back to 0 ##### @bulk_ss_import #####
             Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
             return if check_order_is_cancelled(order)
@@ -487,7 +487,7 @@ module Groovepacker
               nil
               end
             begin
-              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              @import_item.update(updated_orders_import: @import_item.updated_orders_import + 1)
             rescue StandardError
               nil
             end
@@ -611,10 +611,10 @@ module Groovepacker
           def update_import_result
             if @order_to_update
               @result[:previous_imported] = @result[:previous_imported] + 1
-              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              @import_item.update(updated_orders_import: @import_item.updated_orders_import + 1)
             else
               @result[:success_imported] = @result[:success_imported] + 1
-              @import_item.update_attributes(success_imported: @result[:success_imported])
+              @import_item.update(success_imported: @result[:success_imported])
             end
           end
 

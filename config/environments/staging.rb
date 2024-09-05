@@ -77,10 +77,10 @@ Groovepacks::Application.configure do
     openssl_verify_mode: 'none'
   }
 
-  $redis = Redis.new(host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i,
-                     password: ENV['REDIS_PASSWORD'])
+  redis_options = { host: ENV['REDIS_HOST'], port: ENV['REDIS_PORT'].to_i, password: ENV['REDIS_PASSWORD'], driver: :ruby }
+  $redis = Redis.new(redis_options)
 
-  config.cache_store = :redis_store, $redis.as_json['options'].merge(db: 15) # :memory_store, { size: 64.megabytes }
+  config.cache_store = :redis_cache_store, redis_options.merge(db: 15) # :memory_store, { size: 64.megabytes } #
 
   ENV['SHOPIFY_BILLING_IN_TEST'] = 'true'
 end

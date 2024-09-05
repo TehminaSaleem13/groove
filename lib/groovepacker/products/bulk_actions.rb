@@ -8,7 +8,7 @@ module Groovepacker
 
       def update_ordere_item_kit_product(tenant, product_id, product_kit_sku_id)
         Apartment::Tenant.switch! tenant
-        order_items = OrderItem.where(product_id: product_id)
+        order_items = OrderItem.where(product_id:)
         order_items.each do |order_item|
           order_item_kit_product = OrderItemKitProduct.where(order_item_id: order_item.id).map(&:product_kit_skus_id)
           is_kit_sku_notexist = order_item_kit_product.include?(product_kit_sku_id.to_i)
@@ -18,7 +18,9 @@ module Groovepacker
           order_item_kit_product = OrderItemKitProduct.new
           order_item_kit_product.product_kit_skus = ProductKitSkus.find(product_kit_sku_id)
           order_item_kit_product.order_item = order_item
-          order_item_kit_product.save unless OrderItemKitProduct.where(order_item_id: order_item.id).map(&:product_kit_skus_id).include?(product_kit_sku_id.to_i)
+          unless OrderItemKitProduct.where(order_item_id: order_item.id).map(&:product_kit_skus_id).include?(product_kit_sku_id.to_i)
+            order_item_kit_product.save
+          end
         end
       end
 
@@ -40,15 +42,15 @@ module Groovepacker
 
           eager_loaded_obj = Product.generate_eager_loaded_obj(products)
 
-          bulk_action.update_attributes(total: products.length, completed: 0, status: 'in_progress')
+          bulk_action.update(total: products.length, completed: 0, status: 'in_progress')
           (products || []).find_each(batch_size: 100) do |product|
             # product = Product.find(single_product['id'])
             bulk_action.reload
             if bulk_action.cancel?
-              bulk_action.update_attributes(status: 'cancelled')
+              bulk_action.update(status: 'cancelled')
               return true
             end
-            bulk_action.update_attributes(current: product.name)
+            bulk_action.update(current: product.name)
             current_status = product.status
             if product.status == params[:status]
               if product.status != 'inactive'
@@ -73,14 +75,14 @@ module Groovepacker
               result['status'] &= false
               result['messages'].push('There was a problem changing products status for ' + product.name)
             end
-            bulk_action.update_attributes(completed: bulk_action.completed + 1)
+            bulk_action.update(completed: bulk_action.completed + 1)
           end
           unless bulk_action.cancel?
             bulk_action_status = result['status'] ? 'completed' : 'failed'
-            bulk_action.update_attributes(status: bulk_action_status, messages: result['messages'], current: '')
+            bulk_action.update(status: bulk_action_status, messages: result['messages'], current: '')
           end
         rescue Exception => e
-          bulk_action.update_attributes(status: 'failed', messages: ['Some error occurred'], current: '')
+          bulk_action.update(status: 'failed', messages: ['Some error occurred'], current: '')
         end
       end
 
@@ -90,7 +92,8 @@ module Groovepacker
         result['messages'] = []
         result['status'] = true
         bulk_action = GrooveBulkActions.find(bulk_actions_id)
-        Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal Start', tenant: tenant, username: username })
+        Ahoy::Event.create(version_2: true, time: Time.current,
+                           properties: { title: 'Product Removal Start', tenant:, username: })
         time_started = Time.current
         begin
           products =
@@ -101,7 +104,9 @@ module Groovepacker
               order_items: [:order]
             )
 
-          first_25_products = products.limit(25).collect { |product| product.primary_sku || product.primary_barcode || product.name }
+          first_25_products = products.limit(25).collect do |product|
+            product.primary_sku || product.primary_barcode || product.name
+          end
           products_count = products.count
           products_kit_skus =
             ProductKitSkus.where(option_product_id: products.map(&:id))
@@ -124,26 +129,27 @@ module Groovepacker
             product.order_items.each do |order_item|
               next unless order_item.order.present?
 
-              if order_item.order.status != 'scanned' && order_item.order.status != 'cancelled'
-                unless order_item.order.nil?
-                  order_item.order.status = 'onhold'
-                  order_item.order.save
-                end
+              if order_item.order.status != 'scanned' && order_item.order.status != 'cancelled' && !order_item.order.nil?
+                order_item.order.status = 'onhold'
+                order_item.order.save
               end
-              order_item.order.addactivity("An item with Name #{product.name} and " + "SKU #{product.primary_sku} has been deleted", username, 'deleted_item') if order_item.order.present?
+              if order_item.order.present?
+                order_item.order.addactivity(
+                  "An item with Name #{product.name} and " + "SKU #{product.primary_sku} has been deleted", username, 'deleted_item'
+                )
+              end
               order_item.destroy
             end
 
             products_kit_skus
               .select { |pkss| pkss.option_product_id == product.id }
               .each do |product_kit_sku|
-
                 product_kit_sku.product.status = 'new'
                 product_kit_sku.product.save
                 product_kit_sku.product.product_kit_activities.create(
                   activity_message: "An item with Name #{product.name} and " \
                     "SKU #{product.primary_sku} has been deleted",
-                  username: username,
+                  username:,
                   activity_type: 'deleted_item'
                 )
                 product_kit_sku.destroy
@@ -170,19 +176,24 @@ module Groovepacker
           total_elapsed_time = (Time.current - time_started).round(2)
           object_per_sec = total_elapsed_time * 60 / products_count
 
-          Ahoy::Event.create(version_2: true, time: Time.current, properties: { title: 'Product Removal End', tenant: tenant, username: username, objects_involved_count: products_count, objects_involved: first_25_products, elapsed_time: total_elapsed_time, object_per_sec: object_per_sec })
+          Ahoy::Event.create(version_2: true, time: Time.current,
+                             properties: { title: 'Product Removal End', tenant:, username:, objects_involved_count: products_count, objects_involved: first_25_products, elapsed_time: total_elapsed_time, object_per_sec: })
 
-          Ahoy::Event.version_2.create({
-            name: 'List of Deleted Products (25)',
-            properties: {
-              title: 'List of Deleted Products (25)',
-              tenant: Apartment::Tenant.current,
-              username: username,
-              objects_involved: first_25_products,
-              objects_involved_count: products_count
-            },
-            time: Time.current
-          }) rescue nil
+          begin
+            Ahoy::Event.version_2.create({
+                                           name: 'List of Deleted Products (25)',
+                                           properties: {
+                                             title: 'List of Deleted Products (25)',
+                                             tenant: Apartment::Tenant.current,
+                                             username:,
+                                             objects_involved: first_25_products,
+                                             objects_involved_count: products_count
+                                           },
+                                           time: Time.current
+                                         })
+          rescue StandardError
+            nil
+          end
         rescue Exception => e
           bulk_action.status = 'failed'
           bulk_action.messages = ['Some error occurred']
@@ -224,7 +235,7 @@ module Groovepacker
               # TODO: duplicate sku, images, categories associated with product too.
               newproduct.name = product.name + ' ' + index.to_s
               productslist = Product.where(name: newproduct.name)
-            end while (!productslist.nil? && !productslist.empty?)
+            end while (productslist.present?)
 
             # copy barcodes
             product.product_barcodes.each do |barcode|
@@ -236,7 +247,7 @@ module Groovepacker
                 # TODO: duplicate sku, images, categories associated with product too.
                 newbarcode = barcode.barcode + ' ' + index.to_s
                 barcodeslist = ProductBarcode.where(barcode: newbarcode)
-              end while (!barcodeslist.nil? && !barcodeslist.empty?)
+              end while (barcodeslist.present?)
 
               newbarcode_item = ProductBarcode.new
               newbarcode_item.barcode = newbarcode
@@ -253,7 +264,7 @@ module Groovepacker
                 # TODO: duplicate sku, images, categories associated with product too.
                 newsku = sku.sku + ' ' + index.to_s
                 skuslist = ProductSku.where(sku: newsku)
-              end while (!skuslist.nil? && !skuslist.empty?)
+              end while (skuslist.present?)
 
               newsku_item = ProductSku.new
               newsku_item.sku = newsku
@@ -348,7 +359,7 @@ module Groovepacker
             bulk_action.current = ident.to_s.camelize
             bulk_action.completed = 0
             bulk_action.save!
-            sleep(1)
+            sleep(1) unless Rails.env.test?
             CSV.open("#{dir}/#{ident}.csv", 'w') do |csv|
               headers = []
               if ident == :products

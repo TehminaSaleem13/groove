@@ -19,11 +19,12 @@ module Groovepacker
               import_item_fix
               break if @import_item.status == 'cancelled' || @import_item.status.nil?
 
-              @import_item.update_attributes(current_increment_id: order['txn_id'], current_order_items: -1, current_order_imported_item: -1)
+              @import_item.update(current_increment_id: order['txn_id'], current_order_items: -1,
+                                  current_order_imported_item: -1)
               import_single_order(order)
-              sleep 0.5
+              sleep 0.5 unless Rails.env.test?
             end
-            @credential.update_attributes(last_imported_at: last_imported_date) if @import_item.status != 'cancelled'
+            @credential.update(last_imported_at: last_imported_date) if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end
@@ -35,7 +36,7 @@ module Groovepacker
             @credential = handler[:credential]
             @client = handler[:store_handle]
             @import_item = handler[:import_item]
-            @import_item.update_attributes(updated_orders_import: 0)
+            @import_item.update(updated_orders_import: 0)
             @result = build_result
           end
 
@@ -81,7 +82,7 @@ module Groovepacker
             return teapplix_order if order['items'].nil?
 
             # order["products"] = @client.order_products(order["products"]["url"])
-            @import_item.update_attributes(current_order_items: order['items'].length, current_order_imported_item: 0)
+            @import_item.update(current_order_items: order['items'].length, current_order_imported_item: 0)
             (order['items'] || []).each do |item|
               next if item['quantity'].to_i < 1
 
@@ -92,10 +93,10 @@ module Groovepacker
               # second parameter in below method call is to tell weather to import inv or not
               product = teapplix_context.import_teapplix_single_product(item)
               order_item.product = begin
-                                     product
-                                   rescue StandardError
-                                     nil
-                                   end
+                product
+              rescue StandardError
+                nil
+              end
               teapplix_order.order_items << order_item
             end
             teapplix_order.save
@@ -124,8 +125,7 @@ module Groovepacker
             name_array = customer_name.to_s.split(' ')
             last_name = name_array.last.to_s
             first_name = (name_array - [last_name]).join(' ')
-            name_array = [first_name, last_name]
-            name_array
+            [first_name, last_name]
           end
 
           def add_order_shipping_address(teapplix_order, order)
@@ -140,8 +140,7 @@ module Groovepacker
 
           def teapplix_context
             handler = Groovepacker::Stores::Handlers::TeapplixHandler.new(@credential.store)
-            context = Groovepacker::Stores::Context.new(handler)
-            context
+            Groovepacker::Stores::Context.new(handler)
           end
 
           def pull_inventory_for(teapplix_order)
@@ -154,10 +153,10 @@ module Groovepacker
             teapplix_order.addactivity('Order Import', @credential.store.name + ' Import')
             teapplix_order.order_items.each do |item|
               primary_sku = begin
-                              item.product.primary_sku
-                            rescue StandardError
-                              nil
-                            end
+                item.product.primary_sku
+              rescue StandardError
+                nil
+              end
               next if primary_sku.nil?
 
               teapplix_order.addactivity('Item with SKU: ' + primary_sku + ' Added', @credential.store.name + ' Import')
@@ -169,10 +168,10 @@ module Groovepacker
             if existing_order && existing_order.status != 'scanned'
               existing_order.destroy
               @order_to_update = true
-              return true
+              true
             else
-              return_val = existing_order ? false : true
-              return return_val
+              existing_order ? false : true
+
             end
           end
 

@@ -7,7 +7,7 @@ module Groovepacker
 
       def graphql_client
         ShopifyAPI::Clients::Graphql::Admin.new(
-          session: session, api_version: ENV['SHOPIFY_GRAPHQL_API_VERSION']
+          session:, api_version: ENV['SHOPIFY_GRAPHQL_API_VERSION']
         )
       end
 
@@ -21,7 +21,8 @@ module Groovepacker
         last_import = if cred_last_imported
                         cred_last_imported.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime.to_s
                       else
-                        Order.emit_notification_for_default_import_date(import_item&.order_import_summary&.user_id, shopify_credential.store, nil, 10)
+                        Order.emit_notification_for_default_import_date(import_item&.order_import_summary&.user_id,
+                                                                        shopify_credential.store, nil, 10)
                         (DateTime.now.utc.in_time_zone('Eastern Time (US & Canada)').to_datetime - 10.days).to_s
                       end
         fulfillment_status = shopify_credential.get_status
@@ -36,7 +37,9 @@ module Groovepacker
         Rails.logger.info("======================Fetching Page #{page_index}======================")
         query = { 'updated_at_min' => last_import, 'limit' => 250 }.as_json
         query.merge!('created_at_min' => created_at) unless cred_created_at == 0
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query: query, headers: headers)
+        response = HTTParty.get(
+          "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query:, headers:
+        )
         combined_response['orders'] << response['orders']
 
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
@@ -48,19 +51,24 @@ module Groovepacker
             nil
           end
           new_link = response.headers['link'].split(',').last.split(';').first.strip.chop.reverse.chop.reverse
-          response = HTTParty.get(new_link, headers: headers)
+          response = HTTParty.get(new_link, headers:)
           combined_response['orders'] << response['orders']
         end
 
         combined_response['orders'] = combined_response['orders'].flatten
-        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
+        Tenant.save_se_import_data("========Shopify Import Started UTC: #{Time.current.utc} TZ: #{Time.current}",
+                                   '==Query', query, '==URL', "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", '==Combined Response', combined_response)
         combined_response
       end
 
       def get_single_order(order_number)
         query = { limit: 5 }.as_json
-        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?name=#{order_number}", query: query, headers: headers)
-        Tenant.save_se_import_data("========Shopify On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response)
+        response = HTTParty.get(
+          "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?name=#{order_number}", query:, headers:
+        )
+        Tenant.save_se_import_data(
+          "========Shopify On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response
+        )
         response
       end
 
@@ -87,12 +95,26 @@ module Groovepacker
         puts "======================Fetching Page #{page_index}======================"
         query_opts = { 'limit' => 100 }.as_json
 
-        add_url = product_import_type == 'new_updated' && shopify_credential.product_last_import ? "?updated_at_min=#{shopify_credential.product_last_import.strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : ''
-        add_url = product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0 ? "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20')}" : '' unless add_url.present?
+        add_url = if product_import_type == 'new_updated' && shopify_credential.product_last_import
+                    "?updated_at_min=#{shopify_credential.product_last_import.strftime('%Y-%m-%d %H:%M:%S').gsub(
+                      ' ', '%20'
+                    )}"
+                  else
+                    ''
+                  end
+        unless add_url.present?
+          add_url = if product_import_type == 'refresh_catalog' && product_import_range_days.to_i > 0
+                      "?updated_at_min=#{(DateTime.now.in_time_zone - product_import_range_days.to_i.days).strftime('%Y-%m-%d %H:%M:%S').gsub(
+                        ' ', '%20'
+                      )}"
+                    else
+                      ''
+                    end
+        end
 
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/products#{add_url}",
                                 query: query_opts,
-                                headers: headers)
+                                headers:)
         combined_response['products'] << response['products']
         combined_response['products'] = combined_response['products'].flatten
 
@@ -100,7 +122,7 @@ module Groovepacker
           page_index += 1
           puts "======================Fetching Page #{page_index}======================"
           new_link = response.headers['link'].split(',').last.split(';').first.strip.chop.reverse.chop.reverse
-          response = HTTParty.get(new_link, headers: headers)
+          response = HTTParty.get(new_link, headers:)
           combined_response['products'] << response['products']
           combined_response['products'] = combined_response['products'].flatten
         end
@@ -112,12 +134,12 @@ module Groovepacker
       end
 
       def product(product_id)
-        result = fetch_from_shopify { ShopifyAPI::Product.find(session: session, id: product_id) }
+        result = fetch_from_shopify { ShopifyAPI::Product.find(session:, id: product_id) }
         result.success? ? result.response.as_json : {}
       end
 
       def get_variant(product_variant_id)
-        result = fetch_from_shopify { ShopifyAPI::Variant.find(session: session, id: product_variant_id) }
+        result = fetch_from_shopify { ShopifyAPI::Variant.find(session:, id: product_variant_id) }
         result.success? ? result.response.as_json : {}
       end
 
@@ -125,7 +147,7 @@ module Groovepacker
         response = nil
         loop do
           response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/inventory_levels/set.json",
-                                   body: attrs.to_json, headers: headers)
+                                   body: attrs.to_json, headers:)
           return response if response.success? || response.code != 429
 
           sleep(response.headers['Retry-After'].to_f)
@@ -136,22 +158,21 @@ module Groovepacker
       def add_gp_scanned_tag(store_order_id, tag)
         order = get_order(store_order_id)
         tags = order['tags'].split(', ').push(tag).uniq.join(', ')
-        attrs = { order: { id: store_order_id, tags: tags } }
+        attrs = { order: { id: store_order_id, tags: } }
 
-        sleep 0.5
+        sleep 0.5 unless Rails.env.test?
 
         update_order(store_order_id, attrs)
       end
 
       def update_order(store_order_id, attrs)
-        response = HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders/#{store_order_id}.json",
-                                 body: attrs.to_json, headers: headers)
-        response
+        HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders/#{store_order_id}.json",
+                     body: attrs.to_json, headers:)
       end
 
       def get_order(store_order_id)
         response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders/#{store_order_id}.json",
-                                 headers: headers)
+                                headers:)
         response['order'] || {}
       end
 
@@ -164,42 +185,42 @@ module Groovepacker
       end
 
       def access_scopes
-        ShopifyAPI::AccessScope.all(session: session).map(&:handle)
+        ShopifyAPI::AccessScope.all(session:).map(&:handle)
       rescue StandardError => e
         nil
       end
 
-      def execute_grahpql_query(query)
-        graphql_client.query(query)
+      def execute_grahpql_query(params)
+        graphql_client.query(**params)
       end
 
       def register_webhook(attrs)
         return
         # TODO: Commenting this as it is not being used.
-        response = HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks.json",
-                                 body: attrs.to_json, headers: headers)
-
-        response
+        HTTParty.post("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks.json",
+                      body: attrs.to_json, headers:)
       end
 
       def list_webhooks
         return []
         # TODO: Commenting this as it is not being used.
-       response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks.json",
-                              headers: headers)
-      response['webhooks'] || []
+        response = HTTParty.get("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks.json",
+                                headers:)
+        response['webhooks'] || []
       end
 
       def delete_webhook(webhook_id)
         return
         # TODO: Commenting this as it is not being used.
-        response =HTTParty.delete("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks/#{webhook_id}.json", headers: headers)
+        response = HTTParty.delete(
+          "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_WEBHOOK_VERSION']}/webhooks/#{webhook_id}.json", headers:
+        )
       end
 
       private
 
       def fetch_collection_from_shopify(collection_klass, query = {})
-        default_query = { session: session, limit: SHOPIFY_API_LIMIT }
+        default_query = { session:, limit: SHOPIFY_API_LIMIT }
         page = 1
         puts "Fetching Page #{page} of #{collection_klass} for [#{Apartment::Tenant.current}] Store ID #{shopify_credential.store_id} "
         collection_response = fetch_from_shopify { collection_klass.constantize.send(:all, default_query.merge(query)) }
@@ -208,7 +229,10 @@ module Groovepacker
         while collection_klass.constantize.next_page_info
           page += 1
           puts "Fetching Page #{page} of #{collection_klass} for [#{Apartment::Tenant.current}] Store ID #{shopify_credential.store_id} "
-          result = fetch_from_shopify { collection_klass.constantize.send(:all, default_query.merge(page_info: collection_klass.constantize.next_page_info)) }
+          result = fetch_from_shopify do
+            collection_klass.constantize.send(:all,
+                                              default_query.merge(page_info: collection_klass.constantize.next_page_info))
+          end
           collection_response.response += result.response
         end
         collection_response.response.as_json
@@ -245,14 +269,14 @@ module Groovepacker
 
       def log_shopify_api_error(error)
         Rails.logger.error("An error occurred: #{error.message}")
-        log = { tenant: Apartment::Tenant.current, session: session, time: Time.current.utc, error: error, backtrace: error.backtrace.first(3) }
+        log = { tenant: Apartment::Tenant.current, session:, time: Time.current.utc, error:,
+                backtrace: error.backtrace.first(3) }
         shopify_error_logger.error(log)
       end
 
       def shopify_error_logger
-        @shopify_error_logger ||= Logger.new("#{Rails.root}/log/shopify_api_errors.log")
+        @shopify_error_logger ||= Logger.new("#{Rails.root.join('log/shopify_api_errors.log')}")
       end
-
 
       def headers
         {

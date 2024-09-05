@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ShipstationCredential < ActiveRecord::Base
+class ShipstationCredential < ApplicationRecord
   # attr_accessible :username, :password, :store_id
   validates_presence_of :username, :password
 

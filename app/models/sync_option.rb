@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class SyncOption < ActiveRecord::Base
+class SyncOption < ApplicationRecord
   # attr_accessible :bc_product_id, :product_id, :bc_product_sku, :sync_with_bc, :mg_rest_product_id, :mg_rest_product_sku, :sync_with_mg_rest,
   #                 :sync_with_shopify, :shopify_product_variant_id, :sync_with_teapplix, :teapplix_product_sku
   belongs_to :product

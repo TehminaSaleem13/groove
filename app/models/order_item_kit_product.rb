@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrderItemKitProduct < ActiveRecord::Base
+class OrderItemKitProduct < ApplicationRecord
   belongs_to :order_item, touch: true
   belongs_to :product_kit_skus
   has_many :order_item_kit_product_scan_times

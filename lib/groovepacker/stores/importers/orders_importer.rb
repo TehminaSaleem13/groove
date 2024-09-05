@@ -19,7 +19,12 @@ module Groovepacker
           scan_pack_setting = ScanPackSetting.last
           stores = Store.where('status=? and store_type NOT IN (?)', true, %w[CSV system])
           ss_stores = stores.where("store_type='Shipstation API 2'")
-          other_stores = scan_pack_setting.scan_by_shipping_label ? [] : stores.where(store_type: %w[BigCommerce ShippingEasy Shopify Shippo])
+          other_stores = if scan_pack_setting.scan_by_shipping_label
+                           []
+                         else
+                           stores.where(store_type: %w[BigCommerce
+                                                       ShippingEasy Shopify Shippo])
+                         end
           # o_stores = stores.where("store_type!='Shipstation API 2'")
           [ss_stores, other_stores].each { |st| run_for_each_store(st, order_no, user_id) }
           # run_for_each_store(s_stores, order_no)
@@ -28,7 +33,7 @@ module Groovepacker
         private
 
         def run_for_each_store(stores, order_no, user_id)
-          order_no = URI.encode(order_no)
+          order_no = CGI.escape(order_no)
           stores.each do |store|
             break if check_order_exists(order_no)
             next unless store.on_demand_import || store.on_demand_import_v2

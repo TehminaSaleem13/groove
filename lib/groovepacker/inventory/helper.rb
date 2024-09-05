@@ -41,7 +41,8 @@ module Groovepacker
         if warehouse_id.nil?
           warehouse = product.base_product.primary_warehouse
         else
-          warehouse = ProductInventoryWarehouses.find_by_inventory_warehouse_id_and_product_id(warehouse_id, product.base_product.id)
+          warehouse = ProductInventoryWarehouses.find_by_inventory_warehouse_id_and_product_id(warehouse_id,
+                                                                                               product.base_product.id)
         end
         warehouse
       end

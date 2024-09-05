@@ -9,7 +9,7 @@ class ProductKitActivitiesController < ApplicationController
     result['messages'] = []
 
     activity = ProductKitActivity.find(params[:id])
-    unless activity.update_attributes(acknowledged: true)
+    unless activity.update(acknowledged: true)
       result['status'] = false
       result['messages'].push('There was an error while acknowledging activity.')
     end

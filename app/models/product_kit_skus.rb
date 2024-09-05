@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProductKitSkus < ActiveRecord::Base
+class ProductKitSkus < ApplicationRecord
   belongs_to :product
   # attr_accessible :sku, :option_product_id, :qty
   has_many :order_item_kit_products, dependent: :destroy

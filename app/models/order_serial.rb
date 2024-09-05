@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrderSerial < ActiveRecord::Base
+class OrderSerial < ApplicationRecord
   belongs_to :order
   belongs_to :product
   # attr_accessible :serial, :order_id, :product_id, :second_serial

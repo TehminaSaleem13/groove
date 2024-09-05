@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class MagentoCredentials < ActiveRecord::Base
+class MagentoCredentials < ApplicationRecord
   # attr_accessible :host, :password, :username, :api_key, :import_products, :import_images, :push_tracking_number, :status_to_update, :enable_status_update, :shall_import_fraud, :shall_import_complete, :shall_import_closed, :shall_import_pending, :shall_import_processing, :updated_patch
 
   # validates_presence_of :host, :username, :api_key
@@ -24,10 +24,10 @@ class MagentoCredentials < ActiveRecord::Base
     current_tenant = Apartment::Tenant.current
     tenant = Tenant.find_by_name(current_tenant)
     if enable_status_update && get_scheduled_jobs_for_status_update.blank?
-      tenant.update_attributes(magento_tracking_push_enabled: true)
+      tenant.update(magento_tracking_push_enabled: true)
       # MagentoSoapOrders.new(tenant: current_tenant).schedule!
     else
-      tenant.update_attributes(magento_tracking_push_enabled: false)
+      tenant.update(magento_tracking_push_enabled: false)
       # delete_magento_status_update_job
     end
   end

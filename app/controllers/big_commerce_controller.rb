@@ -71,7 +71,7 @@ class BigCommerceController < ApplicationController
 
   def disconnect
     store_credentials = @store.big_commerce_credential
-    if store_credentials.update_attributes(store_hash: nil, access_token: nil)
+    if store_credentials.update(store_hash: nil, access_token: nil)
       render status: 200, json: 'disconnected'
     else
       render status: 304, json: 'not disconnected'

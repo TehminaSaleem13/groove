@@ -50,16 +50,16 @@ module FTP
       result = build_result
       begin
         response = connect
-        on_demand_logger = Logger.new("#{Rails.root}/log/ftp_export_upload.log")
+        on_demand_logger = Logger.new("#{Rails.root.join('log/ftp_export_upload.log')}")
         if response[:error_messages].empty? && response[:status] == true
           connection_obj = response[:connection_obj]
           connection_obj.chdir(directory)
           begin
             data = begin
-                     Net::HTTP.get(URI.parse(url))
-                   rescue StandardError
-                     nil
-                   end
+              Net::HTTP.get(URI.parse(url))
+            rescue StandardError
+              nil
+            end
             File.open(filename, 'wb') { |f| f.write(data) }
             connection_obj.putbinaryfile(File.open(filename))
           rescue StandardError => e
@@ -115,7 +115,7 @@ module FTP
             # connection_obj.chdir("~/#{self.directory}")
             connection_obj.getbinaryfile(found_file.to_s, "ftp_files/#{current_tenant}/verification/#{file_name}")
 
-            file_path = "#{Rails.root}/ftp_files/#{current_tenant}/verification#{file_name}"
+            file_path = "#{Rails.root.join("ftp_files/#{current_tenant}/verification#{file_name}")}"
             result[:file_info][:file_path] = file_path
             result[:file_info][:ftp_file_name] = found_file
             connection_obj.close
@@ -264,7 +264,7 @@ module FTP
             # connection_obj.chdir("~/#{self.directory}")
             connection_obj.getbinaryfile(found_file.to_s, "ftp_files/#{current_tenant}/#{file_name}")
 
-            file_path = "#{Rails.root}/ftp_files/#{current_tenant}/#{file_name}"
+            file_path = "#{Rails.root.join("ftp_files/#{current_tenant}/#{file_name}")}"
             result[:file_info][:file_path] = file_path
             result[:file_info][:ftp_file_name] = found_file
             connection_obj.close
@@ -329,7 +329,7 @@ module FTP
         connection_obj = response[:connection_obj]
         connection_obj.chdir("/#{directory}/imported")
         connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV').each do |file|
-          modified_time = connection_obj.mtime(file) 
+          modified_time = connection_obj.mtime(file)
           connection_obj.delete("/#{directory}/imported/#{file}") if modified_time < 90.days.ago
         end
       else
@@ -337,7 +337,7 @@ module FTP
         response[:error_messages].each do |message|
           result[:error_messages].push(message)
         end
-        return result
+        result
       end
     end
 
@@ -347,10 +347,10 @@ module FTP
       file = nil
       connection_obj.chdir(directory)
       files = begin
-                connection_obj.nlst.select { |f| f.end_with?('.csv', '.CSV') }
-              rescue StandardError
-                []
-              end
+        connection_obj.nlst.select { |f| f.end_with?('.csv', '.CSV') }
+      rescue StandardError
+        []
+      end
       files = files.sort_by { |filename| connection_obj.mtime(filename) }
       files.each do |individual_file|
         unless '-imported'.in? individual_file
@@ -369,16 +369,14 @@ module FTP
       rescue Exception => e
         folder_found = false
       end
-      if folder_found == true
-        return true
-      else
-        begin
-          connection_obj.chdir(directory)
-          connection_obj.mkdir('imported')
-          return true
-        rescue Exception => e
-          return false
-        end
+      return true if folder_found == true
+
+      begin
+        connection_obj.chdir(directory)
+        connection_obj.mkdir('imported')
+        true
+      rescue Exception => e
+        false
       end
     end
 
@@ -389,10 +387,10 @@ module FTP
         files = connection_obj.nlst('*.csv') + connection_obj.nlst('*.CSV')
       rescue StandardError
         files = begin
-                  connection_obj.nlst('*.csv')
-                rescue StandardError
-                  connection_obj.nlst('*.CSV')
-                end
+          connection_obj.nlst('*.csv')
+        rescue StandardError
+          connection_obj.nlst('*.CSV')
+        end
       end
       files = files.sort_by { |filename| connection_obj.mtime(filename) }
       files.each do |individual_file|

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrderShipping < ActiveRecord::Base
+class OrderShipping < ApplicationRecord
   belongs_to :order
   # attr_accessible :city, :country, :description, :email, :firstname,
   #                 :lastname, :postcode, :region, :streetaddress1, :streetaddress2

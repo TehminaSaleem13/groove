@@ -50,7 +50,7 @@ module Groovepacker
           end
   
           def update_product_details_barcode(product, item)
-            product.update_attributes(name: item['sellable']['full_title'], store_product_id: item['sellable']['product']['id'])
+            product.update(name: item['sellable']['full_title'], store_product_id: item['sellable']['product']['id'])
             add_barcode_to_product(product, item) if item['sellable']['upc_code'].present? && product.product_barcodes.where(barcode: item['sellable']['upc_code']).blank?
           end
   

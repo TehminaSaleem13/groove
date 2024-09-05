@@ -120,7 +120,7 @@ module ScanPack::Utilities::ProductScan::IndividualProductType
     if @single_order.id == box.order_id
       order_item_box = OrderItemBox.where(order_item_id: item.id, box_id: @box_id, kit_id: kit_id, product_id: product_id).first
       if order_item_box
-        order_item_box.update_attributes(item_qty: order_item_box.item_qty + @typein_count)
+        order_item_box.update(item_qty: order_item_box.item_qty + @typein_count)
       else
         OrderItemBox.create(order_item_id: item.id, box_id: @box_id, item_qty: @typein_count, kit_id: kit_id, product_id: product_id)
       end

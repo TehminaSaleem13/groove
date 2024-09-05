@@ -199,7 +199,7 @@ module Groovepacker
               @order.save
               import_order_data(order_map, single_row, index)
               @order.addactivity('Order Import', "#{@order.store.name} Import") unless order_persisted
-              @order.update_attributes(increment_id: inc_id.to_s)
+              @order.update(increment_id: inc_id.to_s)
               @order.save
               @order = Order.find_by_increment_id(@order.increment_id)
               update_result(result, single_row) if result[:order_reimported] == false && !params[:only_for_tracking_num]

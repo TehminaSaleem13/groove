@@ -5,4 +5,8 @@
 #
 #   cities = City.create([{ name: 'Chicago' }, { name: 'Copenhagen' }])
 #   Mayor.create(name: 'Emanuel', city: cities.first)
-Groovepacker::SeedTenant.new.seed
+
+if Rails.env.development?
+  Apartment::Tenant.create('admintools')
+  Apartment::Tenant.switch('admintools') { Groovepacker::SeedTenant.new.seed }
+end

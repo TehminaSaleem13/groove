@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ExportSetting < ActiveRecord::Base
+class ExportSetting < ApplicationRecord
   include ExportData
   include AhoyEvent
 
@@ -220,7 +220,7 @@ class ExportSetting < ActiveRecord::Base
     product_barcode = ProductBarcode.find_by(product_id: kit_product_sku&.option_product_id)
     product_sku = ProductSku.find_by(product_id: kit_product_sku&.option_product_id)
     kit_product_name = Product.find_by(id: kit_product_sku&.option_product_id)
-    
+
     single_row[:product_name] = product&.name
     single_row[:kit_name] = kit_product_name&.name
     single_row[:primary_sku] = product_sku.sku

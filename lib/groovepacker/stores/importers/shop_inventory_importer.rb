@@ -34,9 +34,9 @@ module Groovepacker
 
             shop_product_inv = get_inventory(shop_product_variant_id)
 
-            sleep 0.5
+            sleep 0.5 unless Rails.env.test?
 
-            update_product_inv_for_sync_option(product, shop_product_inv, inv_wh) unless shop_product_inv.blank?
+            update_product_inv_for_sync_option(product, shop_product_inv, inv_wh) if shop_product_inv.present?
           rescue Exception => e
             puts e
             next
@@ -50,17 +50,17 @@ module Groovepacker
         def init_credential_and_client
           Apartment::Tenant.switch! tenant
           if @store_type == 'Shopline'
-            @shopline_credential = ShoplineCredential.find_by(store_id: store_id)
+            @shopline_credential = ShoplineCredential.find_by(store_id:)
             @client = Groovepacker::ShoplineRuby::Client.new(shopline_credential)
           else
-            @shopify_credential = ShopifyCredential.find_by(store_id: store_id)
+            @shopify_credential = ShopifyCredential.find_by(store_id:)
             @client = Groovepacker::ShopifyRuby::Client.new(shopify_credential)
           end
         end
 
         def update_product_inv_for_sync_option(_product, shop_product_inv, inv_wh)
           return if (@store_type == 'Shopify' && @sync_option.shopify_product_variant_id != shop_product_inv['id']&.to_s) ||
-            (@store_type == 'Shopline' && @sync_option.shopline_product_variant_id != shop_product_inv['id']&.to_s)
+                    (@store_type == 'Shopline' && @sync_option.shopline_product_variant_id != shop_product_inv['id']&.to_s)
 
           inv_wh.quantity_on_hand = inv_wh.allocated_inv.to_i + shop_product_inv['inventory_quantity'].to_i
           inv_wh.save!
@@ -76,11 +76,15 @@ module Groovepacker
           shop_credential = @store_type == 'Shopline' ? shopline_credential : shopify_credential
           return variant if shop_credential.pull_combined_qoh
 
-          if @store_type == 'Shopline'
-            inventory_level = shopline_inventory_levels(variant['inventory_item_id']).find { |inv_level| inv_level['inventory_item_id'] == variant['inventory_item_id'] }
-          else
-            inventory_level = shopify_inventory_levels.find { |inv_level| inv_level['inventory_item_id'] == variant['inventory_item_id'] }
-          end
+          inventory_level = if @store_type == 'Shopline'
+                              shopline_inventory_levels(variant['inventory_item_id']).find do |inv_level|
+                                inv_level['inventory_item_id'] == variant['inventory_item_id']
+                              end
+                            else
+                              shopify_inventory_levels.find do |inv_level|
+                                inv_level['inventory_item_id'] == variant['inventory_item_id']
+                              end
+                            end
 
           variant['inventory_quantity'] = inventory_level.try(:[], 'available')
           variant

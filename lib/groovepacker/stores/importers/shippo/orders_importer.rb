@@ -22,10 +22,10 @@ module Groovepacker
 
               break if import_should_be_cancelled
               import_single_order(order) if order.present? && active_statuses.include?(order['order_status'])
-              @credential.update_attributes(last_imported_at: Time.zone.parse(order['placed_at']))
+              @credential.update(last_imported_at: Time.zone.parse(order['placed_at']))
             end
             Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
-            @credential.update_attributes(last_imported_at: Time.zone.now) rescue nil if @import_item.status != 'cancelled'
+            @credential.update(last_imported_at: Time.zone.now) rescue nil if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end
@@ -37,7 +37,7 @@ module Groovepacker
             end_date = Time.zone.parse(end_date).strftime("%Y-%m-%d %H:%M:%S")
             init_order_import_summary(user_id)
             response = @client.get_ranged_orders(start_date, end_date)
-            @import_item.update_attributes(to_import: response['orders'].count)
+            @import_item.update(to_import: response['orders'].count)
             response["orders"].each do |order|
               import_single_order(order) if order.present? && active_statuses.include?(order['order_status'])
             end
@@ -81,20 +81,20 @@ module Groovepacker
             ImportItem.where(store_id: @store.id).where("status = 'cancelled' OR status = 'completed'").destroy_all
             @import_summary = OrderImportSummary.top_summary
             @import_summary = OrderImportSummary.create(user_id: user_id, status: 'not_started', display_summary: false) unless @import_summary
-            @import_item.update_attributes(order_import_summary_id: @import_summary.id, status: 'not_started')
+            @import_item.update(order_import_summary_id: @import_summary.id, status: 'not_started')
             @range_or_quickfix_started = true
             @import_summary.emit_data_to_user(true)
           end
 
           def update_order_import_summary
-            @import_item.update_attributes(status: 'completed') if @import_item.reload.status != 'cancelled'
+            @import_item.update(status: 'completed') if @import_item.reload.status != 'cancelled'
             destroy_nil_import_items
-            @import_summary.update_attributes(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
+            @import_summary.update(status: 'completed') if OrderImportSummary.joins(:import_items).where("import_items.status = 'in_progress' OR import_items.status = 'not_started'").blank?
             @import_summary.emit_data_to_user(true)
           end
 
           def import_single_order(order)
-            @import_item.update_attributes(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
+            @import_item.update(:current_increment_id => order["id"], :current_order_items => -1, :current_order_imported_item => -1)
 
             update_import_count('success_updated') && return if skip_the_order?(order)
 
@@ -147,7 +147,7 @@ module Groovepacker
             @import_item.save
             order['line_items'].each do |item|
               order_item = import_order_item(order_item, item)
-              @import_item.update_attributes(current_order_imported_item: @import_item.current_order_imported_item + 1)
+              @import_item.update(current_order_imported_item: @import_item.current_order_imported_item + 1)
               product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sku'] }) || shippo_context.import_shippo_single_product(item)
               insert_order_item(order_item, shippo_order, product)
 
@@ -203,11 +203,11 @@ module Groovepacker
 
           def update_import_count(import_type = 'success_imported')
             if import_type == 'success_imported'
-              @import_item.update_attributes(:success_imported => @import_item.success_imported+1)
+              @import_item.update(:success_imported => @import_item.success_imported+1)
               @result[:success_imported] += 1
             else
               @result[:previous_imported] += 1
-              @import_item.update_attributes(:updated_orders_import => @import_item.updated_orders_import + 1)
+              @import_item.update(:updated_orders_import => @import_item.updated_orders_import + 1)
             end
           end
 

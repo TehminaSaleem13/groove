@@ -5,7 +5,7 @@ module ScanPack
     module OrderScanHelper
       def run_if_single_item_order_found(order, product)
         order_item = order.order_items.where(product_id: product.id).first
-        order.update_attributes(last_suggested_at: DateTime.now.in_time_zone)
+        order.update(last_suggested_at: DateTime.now.in_time_zone)
         order_item.process_item(nil, current_user.username, 1, nil)
         order.addactivity("Product with barcode: #{input} and sku: #{order_item.product.primary_sku} scanned", current_user.name)
         order.set_order_to_scanned_state(current_user.username)
@@ -39,7 +39,7 @@ module ScanPack
         @result[:order_items_unscanned] = []
         @result[:order_items_partial_scanned] = []
         current_item = order.get_unscanned_items(limit: nil).select { |item| item['order_item_id'] == order_item.id }.first
-        tote.update_attributes(order_id: order.id, pending_order: true)
+        tote.update(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = begin
                                         (current_item['scanned_qty'] + 1)
                                       rescue StandardError
@@ -71,7 +71,7 @@ module ScanPack
         @result[:order_items_unscanned] = order.get_unscanned_items(limit: nil).select { |item| item['scanned_qty'] == 0 && item['order_item_id'] != order_item.id }
         @result[:order_items_partial_scanned] = order.get_unscanned_items(limit: nil).select { |item| item['scanned_qty'] != 0 && item['order_item_id'] != order_item.id }
         current_item = order.get_unscanned_items(limit: nil).select { |item| item['order_item_id'] == order_item.id }.first
-        tote.update_attributes(order_id: order.id, pending_order: true)
+        tote.update(order_id: order.id, pending_order: true)
         current_item['scanned_qty'] = begin
                                         current_item['scanned_qty'] + 1
                                       rescue StandardError
@@ -99,7 +99,7 @@ module ScanPack
         @result[:barcode_input] = input
         order.addactivity("Barcode #{input} was scanned for SKU #{@result[:barcode]} setting the order PENDING in #{@result[:tote_identifier]} #{available_tote.name}.", @current_user.name)
         @result[:status] = true
-        available_tote.update_attributes(order_id: order.id, pending_order: true)
+        available_tote.update(order_id: order.id, pending_order: true)
       end
 
       def run_if_pending_order(pending_order, product)

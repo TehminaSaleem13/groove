@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Tenant < ActiveRecord::Base
+class Tenant < ApplicationRecord
   store :settings, accessors: %i[mark_discrepancies_scanned], coder: JSON
 
   after_initialize :initialize_default_settings, if: :new_record?

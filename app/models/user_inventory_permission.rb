@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class UserInventoryPermission < ActiveRecord::Base
+class UserInventoryPermission < ApplicationRecord
   # attr_accessible :see, :edit, :user_id, :inventory_warehouse_id
 
   belongs_to :inventory_warehouse

@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class InventoryWarehouse < ActiveRecord::Base
+class InventoryWarehouse < ApplicationRecord
   include InventoryWarehouseHelper
   # attr_accessible :location, :name, :status, :is_default
 

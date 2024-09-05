@@ -6,7 +6,6 @@ FactoryBot.define do
   factory :order do
     increment_id { "ORDER-#{('a'..'z').to_a.sample(5).join}" }
     order_placed_time { '2013-09-03 23:21:02' }
-    store { nil }
     firstname { 'Shyam' }
     lastname { 'Visamsetty' }
     email { 'success@simulator.amazonses.com' }
@@ -18,5 +17,6 @@ FactoryBot.define do
     country { 'US' }
     status { 'awaiting' }
     scanned_on { '' }
+    store
   end
 end

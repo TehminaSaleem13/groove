@@ -71,7 +71,7 @@ module Groovepacker
             #   sleep 0.5
             # end
 
-            # @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
+            # @credential.update(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
             # update_orders_status
             # unless  @credential.allow_duplicate_id
             #   a = Order.group(:increment_id).having("count(*) >1").count.keys
@@ -188,7 +188,7 @@ module Groovepacker
               # sleep 0.5
             end
 
-            # @credential.update_attributes(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
+            # @credential.update(last_imported_at: importing_time) if @result[:status] && @import_item.status != 'cancelled'
             # update_orders_status
             Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
             unless @credential.allow_duplicate_id
@@ -316,7 +316,7 @@ module Groovepacker
             update_success_import_count
             update_multi_shipment_status(shiping_easy_order.prime_order_id)
             add_split_combined_activity(order, shiping_easy_order)
-            @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at'])) if @import_item.status != 'cancelled' && @regular_import
+            @credential.update(last_imported_at: Time.zone.parse(order['updated_at'])) if @import_item.status != 'cancelled' && @regular_import
           rescue StandardError => e
             begin
                 log_import_error(e)
@@ -555,7 +555,7 @@ module Groovepacker
           #   @credential = handler[:credential]
           #   @client = handler[:store_handle]
           #   @import_item = handler[:import_item]
-          #   @import_item.update_attributes(updated_orders_import: 0)
+          #   @import_item.update(updated_orders_import: 0)
           #   @result = self.build_result
           #   @statuses = get_statuses
           # end
@@ -569,7 +569,7 @@ module Groovepacker
           # end
 
           def update_import_item_obj_values
-            @import_item.update_attributes(current_increment_id: '', success_imported: 0, previous_imported: 0,
+            @import_item.update(current_increment_id: '', success_imported: 0, previous_imported: 0,
                                            current_order_items: -1, current_order_imported_item: -1, to_import: @result[:total_imported])
           end
 
@@ -584,7 +584,7 @@ module Groovepacker
           end
 
           def update_current_import_item(order)
-            @import_item.update_attributes(
+            @import_item.update(
               current_increment_id: order.try(:[], 'external_order_identifier'),
               current_order_items: -1,
               current_order_imported_item: -1
@@ -602,7 +602,7 @@ module Groovepacker
 
             @result[:status] = false
             @result[:messages].push('All import statuses disabled. Import skipped.')
-            @import_item.update_attributes(message: 'All import statuses disabled. Import skipped.')
+            @import_item.update(message: 'All import statuses disabled. Import skipped.')
             true
           end
 

@@ -5,7 +5,7 @@ module PaymentsHelper
     create_result_hash
     @result['cards'] = []
     customer = get_current_customer(current_tenant)
-    @result['cards'] = customer.cards if customer&.cards
+    @result['cards'] = Stripe::Customer.list_sources(customer.id, object: 'card') if customer
   end
 
   def add_card(card_info, current_tenant)
@@ -15,11 +15,11 @@ module PaymentsHelper
 
     begin
       token = create_token(card_info)
-      card = customer.cards.create(card: token.id)
+      card = Stripe::Customer.create_source(customer.id, { source: token.id })
       if card.cvc_check
-        if card.save
+        if Stripe::Customer.update_source(customer.id, card.id)
           # customer.default_card = card.id
-          customer.save
+          Stripe::Customer.update(customer.id)
         else
           update_result_fail('The card could not be created because of server problem')
         end
@@ -59,13 +59,14 @@ module PaymentsHelper
     create_result_hash
     @result['default_card'] = nil
     customer = get_current_customer(current_tenant)
-    @result['default_card'] = customer.default_card if customer&.default_card
+    @result['default_card'] = customer.default_source if customer&.default_source
   end
 
   def delete_a_card(card, current_tenant)
     create_result_hash
     customer = get_current_customer(current_tenant)
-    customer.cards.retrieve(card).delete if customer&.cards&.retrieve(card)
+    card = Stripe::Customer.retrieve_source(customer.id, card)
+    card.delete if card
   end
 
   def get_current_customer(current_tenant)
@@ -125,8 +126,8 @@ module PaymentsHelper
     @result['next_date'] = nil
     if subscription&.stripe_customer_id
       customer = get_stripe_customer(subscription.stripe_customer_id)
-      subscriptions_data = customer.subscriptions.data
-      @result['next_date'] = Time.at(subscriptions_data.first.current_period_end).to_datetime.strftime '%B %d %Y' unless subscriptions_data.empty?
+      stripe_subscription = Stripe::Subscription.list(customer:).first
+      @result['next_date'] = Time.at(stripe_subscription.current_period_end).to_datetime.strftime '%B %d %Y' if stripe_subscription
     end
     @result
   end
@@ -192,9 +193,11 @@ module PaymentsHelper
     Stripe::Plan.create(
       amount: amount,
       interval: interval,
-      name: name,
+      nickname: name,
       currency: currency,
-      id: id,
+      product: {
+        name: id
+      },
       trial_period_days: trial_period_days
     )
   end

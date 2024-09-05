@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProductCat < ActiveRecord::Base
+class ProductCat < ApplicationRecord
   belongs_to :product
   # attr_accessible :category
 

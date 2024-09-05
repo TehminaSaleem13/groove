@@ -29,7 +29,7 @@ module Groovepacker
             retain_items = !ScanPackSetting.last.remove_skipped && order_status == 'scanned' && @params[:value] == 'awaiting'
             if retain_items
               order.order_items.where('skipped_qty != 0').each do |order_item|
-                order_item.update_attributes(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
+                order_item.update(qty: order_item.qty + order_item.skipped_qty, skipped_qty: 0)
               end
             end
             order.scanned_by_status_change = false

@@ -2,8 +2,8 @@
 
 module SettingsService
   class OrderSerialExport < SettingsService::Base
-    attr_reader :current_user, :params, :result, :row_map, :serials
-    attr_writer :result
+    attr_accessor :result
+    attr_reader :current_user, :params, :row_map, :serials
 
     include SettingsService::Utils
 
@@ -58,7 +58,9 @@ module SettingsService
         end
       end
 
-      public_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'groove-order-serials', Time.current.to_s, data).url.gsub('http:', 'https:')
+      public_url = GroovS3.create_public_csv(Apartment::Tenant.current, 'groove-order-serials', Time.current.to_s, data).url.gsub(
+        'http:', 'https:'
+      )
       @result[:filename] = { url: public_url, filename: @result['filename'] }
     end
 
@@ -76,6 +78,7 @@ module SettingsService
       order = serial.order
       product = serial.product
       return if product.nil?
+
       push_order_data(single_row, order, scan_order)
       push_user_data(single_row, order, product)
       push_product_data(single_row, product, order, serial)

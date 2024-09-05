@@ -1,10 +1,10 @@
 # frozen_string_literal: true
 
-class Store < ActiveRecord::Base
+class Store < ApplicationRecord
   # attr_accessible :name, :order_date, :status, :store_type, :inventory_warehouse, :inventory_warehouse_id, :split_order, :troubleshooter_option, :on_demand_import_v2, :regular_import_v2
   has_many :orders
   has_many :products
-  has_many :origin_stores, foreign_key: :store_id
+  has_many :origin_stores
   has_one :magento_credentials
   has_one :ebay_credentials
   has_one :amazon_credentials
@@ -23,9 +23,9 @@ class Store < ActiveRecord::Base
 
   belongs_to :inventory_warehouse
 
-  validates_presence_of :name
-  validates_uniqueness_of :name
-  validates_presence_of :inventory_warehouse
+  validates :name, presence: true
+  validates :name, uniqueness: true
+  validates :inventory_warehouse, presence: true
 
   include StoresHelper
   include AhoyEvent
@@ -40,10 +40,10 @@ class Store < ActiveRecord::Base
   end
 
   def log_events
-    if saved_changes.present? && saved_changes.keys != ['updated_at']
-      track_changes(title: 'Store Settings Changed', tenant: Apartment::Tenant.current,
-                    username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
-    end
+    return unless saved_changes.present? && saved_changes.keys != ['updated_at']
+
+    track_changes(title: 'Store Settings Changed', tenant: Apartment::Tenant.current,
+                  username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
   end
 
   def ensure_warehouse?
@@ -59,7 +59,7 @@ class Store < ActiveRecord::Base
     @result['status'] = false
     if store_type == 'Amazon'
       @credentials = AmazonCredentials.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @result['amazon_credentials'] = @credentials.first
         @result['status'] = true
       end
@@ -67,14 +67,14 @@ class Store < ActiveRecord::Base
     if store_type == 'Ebay'
       @credentials = EbayCredentials.where(store_id: id)
 
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @result['ebay_credentials'] = @credentials.first
         @result['status'] = true
       end
     end
     if store_type == 'Magento'
       @credentials = MagentoCredentials.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @result['magento_credentials'] = @credentials.first
         @result['status'] = true
       end
@@ -88,23 +88,25 @@ class Store < ActiveRecord::Base
     end
     if store_type == 'Magento API 2'
       @credentials = MagentoRestCredential.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @result['magento_rest_credential'] = @credentials.first
         @result['status'] = true
       end
     end
     if store_type == 'Shipstation'
       @credentials = ShipstationCredential.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @result['shipstation_credentials'] = @credentials.first
         @result['status'] = true
       end
     end
     if store_type == 'Shipstation API 2'
       @credentials = ShipstationRestCredential.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @result['shipstation_rest_credentials'] = @credentials.first
-        @result['shipstation_rest_credentials'] = @result['shipstation_rest_credentials'].attributes.merge('gp_ready_tag_name' => @credentials.first.gp_ready_tag_name, 'gp_imported_tag_name' => @credentials.first.gp_imported_tag_name, 'gp_scanned_tag_name' => @credentials.first.gp_scanned_tag_name, 'webhook_endpoint' => "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/shipstation/#{@credentials.first.id}/import?secret=#{@credentials.first.webhook_secret}" )
+        @result['shipstation_rest_credentials'] =
+          @result['shipstation_rest_credentials'].attributes.merge('gp_ready_tag_name' => @credentials.first.gp_ready_tag_name,
+                                                                   'gp_imported_tag_name' => @credentials.first.gp_imported_tag_name, 'gp_scanned_tag_name' => @credentials.first.gp_scanned_tag_name, 'webhook_endpoint' => "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/shipstation/#{@credentials.first.id}/import?secret=#{@credentials.first.webhook_secret}")
         @result['status'] = true
       end
     end
@@ -125,14 +127,15 @@ class Store < ActiveRecord::Base
     end
     if store_type == 'Shipworks'
       @result['shipworks_credentials'] = shipworks_credential
-      @result['shipworks_hook_url'] = 'https://' + Apartment::Tenant.current + '.' + ENV['SITE_HOST'] + '/orders/import_shipworks?auth_token='
+      @result['shipworks_hook_url'] =
+        'https://' + Apartment::Tenant.current + '.' + ENV['SITE_HOST'] + '/orders/import_shipworks?auth_token='
       @result['status'] = true
     end
-    if self.store_type == 'Shippo'
-      @credentials = ShippoCredential.where(:store_id => self.id)
+    if store_type == 'Shippo'
+      @credentials = ShippoCredential.where(store_id: id)
       if !@credentials.nil? && @credentials.length > 0
         @result['shippo_credentials'] = @credentials.first
-        @result['status'] =true
+        @result['status'] = true
       end
     end
     if store_type == 'Shopify'
@@ -172,9 +175,7 @@ class Store < ActiveRecord::Base
     @credentials = ShipstationCredential.where(store_id: id) if store_type == 'Shipstation'
     @credentials = ShopifyCredential.where(store_id: id) if store_type == 'Shopify'
     @credentials = ShoplineCredential.where(store_id: id) if store_type == 'Shopline'
-    if !@credentials.nil? && !@credentials.empty?
-      @result = false unless @credentials.first.destroy
-    end
+    @result = false if @credentials.present? && !@credentials.first.destroy
     @result
   end
 
@@ -182,7 +183,7 @@ class Store < ActiveRecord::Base
     @result = true
     if store_type == 'Amazon'
       @credentials = AmazonCredentials.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @newcredentials = AmazonCredentials.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
@@ -191,7 +192,7 @@ class Store < ActiveRecord::Base
     end
     if store_type == 'Ebay'
       @credentials = EbayCredentials.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @newcredentials = EbayCredentials.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
@@ -200,7 +201,7 @@ class Store < ActiveRecord::Base
     end
     if store_type == 'Magento'
       @credentials = MagentoCredentials.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @newcredentials = MagentoCredentials.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
@@ -209,15 +210,15 @@ class Store < ActiveRecord::Base
     end
     if store_type == 'Shipstation'
       @credentials = ShipstationCredential.where(store_id: id)
-      if !@credentials.nil? && !@credentials.empty?
+      if @credentials.present?
         @newcredentials = ShipstationCredential.new
         @newcredentials = @credentials.first.dup
         @newcredentials.store_id = self.id
         @result = false unless @newcredentials.save
       end
     end
-    if store_type == 'Shipworks'
-      result = false unless ShipworksCredential.create(auth_token: SecureRandom.base64(16), store: self)
+    if store_type == 'Shipworks' && !ShipworksCredential.create(auth_token: SecureRandom.base64(16), store: self)
+      result = false
     end
     @result
   end
@@ -279,9 +280,11 @@ class Store < ActiveRecord::Base
     if ebaysession_resp['GetSessionIDResponse']['Ack'] == 'Success'
       session_id = ebaysession_resp['GetSessionIDResponse']['SessionID']
       if ENV['EBAY_SANDBOX_MODE'] == 'YES'
-        @result['ebay_signin_url'] = 'https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName=' + ENV['EBAY_RU_NAME'] + '&SessID=' + session_id
+        @result['ebay_signin_url'] =
+          'https://signin.sandbox.ebay.com/ws/eBayISAPI.dll?SignIn&RuName=' + ENV['EBAY_RU_NAME'] + '&SessID=' + session_id
       else
-        @result['ebay_signin_url'] = 'https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName=' + ENV['EBAY_RU_NAME'] + '&SessID=' + session_id
+        @result['ebay_signin_url'] =
+          'https://signin.ebay.com/ws/eBayISAPI.dll?SignIn&RuName=' + ENV['EBAY_RU_NAME'] + '&SessID=' + session_id
       end
       @result['ebay_signin_url_status'] = true
       @result['ebay_sessionid'] = session_id
@@ -293,9 +296,9 @@ class Store < ActiveRecord::Base
   end
 
   def self.can_create_new?
-    unless AccessRestriction.order('created_at').last.nil?
-      where("store_type != 'system'").count < AccessRestriction.order('created_at').last.num_import_sources
-    end
+    return if AccessRestriction.order('created_at').last.nil?
+
+    where("store_type != 'system'").count < AccessRestriction.order('created_at').last.num_import_sources
   end
 
   def create_store_with_defaults(store_type)
@@ -330,8 +333,8 @@ class Store < ActiveRecord::Base
            when 'Shipstation API 2'
              shipstation_rest_credential
            when 'Shippo'
-              shippo_credential
-          when 'Veeqo'
+             shippo_credential
+           when 'Veeqo'
              veeqo_credential
            end
   end

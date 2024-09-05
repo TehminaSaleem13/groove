@@ -169,7 +169,7 @@ class SubscriptionsController < ApplicationController
     shopify_credential = ShopifyCredential.create(shop_name: params[:shop_name], store_id: store_id, access_token: token)
     app_charge_id = $redis.get(params[:shop_name] + '.myshopify.com_otf')
     recurring_tenant_charge_id = $redis.get(params[:shop_name] + '.myshopify.com_rtc')
-    @subscription.update_attributes(app_charge_id: app_charge_id, tenant_charge_id: recurring_tenant_charge_id, shopify_shop_name: params[:shop_name])
+    @subscription.update(app_charge_id: app_charge_id, tenant_charge_id: recurring_tenant_charge_id, shopify_shop_name: params[:shop_name])
     $redis.del(params[:shop_name] + '.myshopify.com_ready_to_be_deployed')
     $redis.del(params[:shop_name] + '.myshopify.com_otf')
     $redis.del(params[:shop_name] + '.myshopify.com_rtc')

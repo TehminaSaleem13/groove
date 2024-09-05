@@ -5,6 +5,7 @@ module Groovepacker
     module Xml
       class Import
         attr_accessor :order
+
         include ProductsHelper
         def initialize(file_name, csv_name, flag)
           @order = Groovepacker::Orders::Xml::OrderXml.new(file_name)
@@ -31,14 +32,12 @@ module Groovepacker
           end
           @store = Store.find(@order.store_id) || order.store
 
-          unless order.try(:status) == 'scanned' || order.try(:order_items).map(&:scanned_status).include?('partially_scanned') || order.try(:order_items).map(&:scanned_status).include?('scanned')
-            if check_for_update || @check_new_order
-              %w[store_id firstname lastname email address_1 address_2
-                 city state country postcode order_placed_time tracking_num
-                 custom_field_one custom_field_two method order_total
-                 customer_comments tags notes_toPacker notes_fromPacker notes_internal price].each do |attr|
-                order[attr] = @order.send(attr)
-              end
+          if !(order.try(:status) == 'scanned' || order.try(:order_items).map(&:scanned_status).include?('partially_scanned') || order.try(:order_items).map(&:scanned_status).include?('scanned')) && (check_for_update || @check_new_order)
+            %w[store_id firstname lastname email address_1 address_2
+               city state country postcode order_placed_time tracking_num
+               custom_field_one custom_field_two method order_total
+               customer_comments tags notes_toPacker notes_fromPacker notes_internal price].each do |attr|
+              order[attr] = @order.send(attr)
             end
           end
 
@@ -48,7 +47,9 @@ module Groovepacker
           begin
             if order.save!
               if @current_tenant.in? %w[living unitedmedco toririchard]
-                order_item_dup = OrderItem.where('created_at >= ?', Time.current.beginning_of_day).select(:order_id).group(:order_id, :product_id).having('count(*) > 1').count
+                order_item_dup = OrderItem.where('created_at >= ?', Time.current.beginning_of_day).select(:order_id).group(
+                  :order_id, :product_id
+                ).having('count(*) > 1').count
                 unless order_item_dup.empty?
                   order_item_dup.each do |i|
                     item = OrderItem.where(order_id: i[0][0], product_id: i[0][1])
@@ -87,7 +88,7 @@ module Groovepacker
               order.generate_order_barcode_for_html(order.increment_id)
             end
           rescue Exception => e
-            logger = Logger.new("#{Rails.root}/log/error_log_order_save_on_csv_import_#{Apartment::Tenant.current}.log")
+            logger = Logger.new("#{Rails.root.join("log/error_log_order_save_on_csv_import_#{Apartment::Tenant.current}.log")}")
             logger.info("Order save Error ============#{e}")
             if Apartment::Tenant.current == 'living' || Apartment::Tenant.current == 'unitedmedco' || Apartment::Tenant.current == 'toririchard'
               a = Order.group(:increment_id).having('count(*) >1').count.keys
@@ -109,10 +110,12 @@ module Groovepacker
 
             intangible_strings.each do |string|
               action_intangible = Groovepacker::Products::ActionIntangible.new
-              if (product.name.downcase.include? string.downcase) || action_intangible.send(:sku_starts_with_intangible_string, product, string)
-                product.is_intangible = true
-                product.save
-              end
+              next unless (product.name.downcase.include? string.downcase) || action_intangible.send(
+                :sku_starts_with_intangible_string, product, string
+              )
+
+              product.is_intangible = true
+              product.save
             end
           end
           # update the importsummary if import summary is available
@@ -144,10 +147,10 @@ module Groovepacker
                     orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
                     begin
                       n = begin
-                            Order.where('created_at > ?', $redis.get("last_order_#{tenant}")).count
-                          rescue StandardError
-                            0
-                          end
+                        Order.where('created_at > ?', $redis.get("last_order_#{tenant}")).count
+                      rescue StandardError
+                        0
+                      end
                       @after_import_count = $redis.get("total_orders_#{tenant}").to_i + n
 
                       if orders.count == @after_import_count - $redis.get("total_orders_#{tenant}").to_i && $redis.get("new_order_#{tenant}").to_i != 0
@@ -157,7 +160,10 @@ module Groovepacker
                       new_orders_count = @after_import_count - $redis.get("total_orders_#{tenant}").to_i
                       $redis.set("new_order_#{tenant}", new_orders_count)
 
-                      $redis.set("skip_order_#{Apartment::Tenant.current}", import_item.updated_orders_import) if import_item.updated_orders_import != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
+                      if import_item.updated_orders_import != ($redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{Apartment::Tenant.current}").to_i)
+                        $redis.set("skip_order_#{Apartment::Tenant.current}",
+                                   import_item.updated_orders_import)
+                      end
 
                       if @ftp_flag == 'false'
                         @file_name = $redis.get("#{Apartment::Tenant.current}/original_file_name")
@@ -170,15 +176,18 @@ module Groovepacker
 
                     if @ftp_flag == 'true'
                       orders = $redis.smembers("#{Apartment::Tenant.current}_csv_array")
-                      order_ids = Order.where('increment_id in (?) and created_at >= ? and created_at <= ?', orders, Time.current.beginning_of_day, Time.current.end_of_day).pluck(:id)
-                      item_hash = OrderItem.where('order_id in (?)', order_ids).group(%i[order_id product_id]).having('count(*) > 1').count
+                      order_ids = Order.where('increment_id in (?) and created_at >= ? and created_at <= ?', orders,
+                                              Time.current.beginning_of_day, Time.current.end_of_day).pluck(:id)
+                      item_hash = OrderItem.where('order_id in (?)',
+                                                  order_ids).group(%i[order_id product_id]).having('count(*) > 1').count
                       ImportMailer.order_information(@file_name, item_hash).deliver if item_hash.present?
                       groove_ftp = FTP::FtpConnectionManager.get_instance(@store)
                       begin
                         if @after_import_count - $redis.get("new_order_#{tenant}").to_i == $redis.get("total_orders_#{tenant}").to_i || $redis.get("new_order_#{tenant}").to_i + $redis.get("update_order_#{tenant}").to_i + $redis.get("skip_order_#{tenant}").to_i == orders.count
                           response = groove_ftp.update(@file_name)
                         else
-                          ImportMailer.not_imported(@file_name, orders.count, $redis.get("new_order_#{tenant}").to_i, $redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count).deliver
+                          ImportMailer.not_imported(@file_name, orders.count, $redis.get("new_order_#{tenant}").to_i,
+                                                    $redis.get("update_order_#{tenant}").to_i, $redis.get("skip_order_#{tenant}").to_i, $redis.get("total_orders_#{tenant}").to_i, @after_import_count).deliver
                         end
                       rescue StandardError
                       end
@@ -236,15 +245,13 @@ module Groovepacker
               orderXML.order_items.each do |order_item_XML|
                 create_update_order_item(order, order_item_XML)
               end
-            else
+            elsif check_for_update
               # if order item exists in the current order but does not exist in XML order
               # then delete the order item
-              if check_for_update
-                delete_existing_order_items(order, orderXML)
+              delete_existing_order_items(order, orderXML)
 
-                orderXML.order_items.each do |order_item_XML|
-                  create_update_order_item(order, order_item_XML)
-                end
+              orderXML.order_items.each do |order_item_XML|
+                create_update_order_item(order, order_item_XML)
               end
             end
           end
@@ -281,60 +288,64 @@ module Groovepacker
         def create_update_order_item(order, order_item_XML)
           @gp_coupon_found = false
           first_sku = order_item_XML[:product][:skus].first
-          unless first_sku.nil?
-            product_sku = ProductSku.includes(product: :store).find_by_sku(first_sku)
-            if product_sku.nil?
-              # add product
-              if check_for_replace_product
-                coupon_product = replace_product(order_item_XML[:product][:name], first_sku)
-                if coupon_product.nil?
-                  product = Product.new
-                  product.store = @store
-                else
-                  product = coupon_product
-                  @gp_coupon_found = true
-                end
-              else
+          return if first_sku.nil?
+
+          product_sku = ProductSku.includes(product: :store).find_by_sku(first_sku)
+          if product_sku.nil?
+            # add product
+            if check_for_replace_product
+              coupon_product = replace_product(order_item_XML[:product][:name], first_sku)
+              if coupon_product.nil?
                 product = Product.new
                 product.store = @store
+              else
+                product = coupon_product
+                @gp_coupon_found = true
               end
             else
-              product = product_sku.product
+              product = Product.new
+              product.store = @store
             end
-            result = create_update_product(product, order_item_XML[:product])
-            product.set_product_status
-            if result[:status]
-              if order.order_items.where(product_id: product.id).empty?
-                order.order_items.create(sku: first_sku, qty: (order_item_XML[:qty] || 0),
-                                         product_id: product.id, price: order_item_XML[:price])
-                if check_for_replace_product && @gp_coupon_found == true
-                  order.addactivity("Intangible item with SKU #{order_item_XML[:product][:skus].first}  and Name #{order_item_XML[:product][:name]} was replaced with GP Coupon.", "#{@store.name} Import")
-                else
-                  order.addactivity("QTY #{order_item_XML[:qty] || 0} of item with SKU: #{product.primary_sku} Added",
-                                    "#{@store.name} Import")
-                end
-              else
-                order_item = order.order_items.where(product_id: product.id)
-                unless order_item.empty?
-                  order_item = order_item.first
-                  order_item.sku = first_sku
-                  tenant = Apartment::Tenant.current
-                  unless order_item_XML[:qty].to_i == order_item.qty && order_item.price == order_item_XML[:price]
-                    @update_count += 1 if check_for_update
-                  end
+          else
+            product = product_sku.product
+          end
+          result = create_update_product(product, order_item_XML[:product])
+          product.set_product_status
+          return unless result[:status]
 
-                  if check_for_update
-                    # Add qty if existing aliased item is found
-                    if @contains_aliased_items
-                      order.addactivity('Item with sku ' + product.primary_sku + " QTY increased by #{order_item_XML[:qty].to_i} (Aliased)", "#{@store.name} Import")
-                      order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty
-                    end
+          if order.order_items.where(product_id: product.id).empty?
+            order.order_items.create(sku: first_sku, qty: order_item_XML[:qty] || 0,
+                                     product_id: product.id, price: order_item_XML[:price])
+            if check_for_replace_product && @gp_coupon_found == true
+              order.addactivity(
+                "Intangible item with SKU #{order_item_XML[:product][:skus].first}  and Name #{order_item_XML[:product][:name]} was replaced with GP Coupon.", "#{@store.name} Import"
+              )
+            else
+              order.addactivity("QTY #{order_item_XML[:qty] || 0} of item with SKU: #{product.primary_sku} Added",
+                                "#{@store.name} Import")
+            end
+          else
+            order_item = order.order_items.where(product_id: product.id)
+            unless order_item.empty?
+              order_item = order_item.first
+              order_item.sku = first_sku
+              tenant = Apartment::Tenant.current
+              if !order_item_XML[:qty].to_i == order_item.qty && !order_item.price == order_item_XML[:price] && check_for_update
+                @update_count += 1
+              end
 
-                    order_item.qty = order_item_XML[:qty] || 0
-                    order_item.price = order_item_XML[:price]
-                    order_item.save
-                  end
+              if check_for_update
+                # Add qty if existing aliased item is found
+                if @contains_aliased_items
+                  order.addactivity(
+                    'Item with sku ' + product.primary_sku + " QTY increased by #{order_item_XML[:qty].to_i} (Aliased)", "#{@store.name} Import"
+                  )
+                  order_item_XML[:qty] = order_item_XML[:qty].to_i + order_item.qty
                 end
+
+                order_item.qty = order_item_XML[:qty] || 0
+                order_item.price = order_item_XML[:price]
+                order_item.save
               end
             end
           end
@@ -343,7 +354,7 @@ module Groovepacker
         def check_if_contains_aliased_products(order_items)
           existing_products = []
           order_items.map { |i| i[:product][:skus].first }.each do |sku|
-            existing_products << Product.joins(:product_skus).find_by(product_skus: { sku: sku })&.id
+            existing_products << Product.joins(:product_skus).find_by(product_skus: { sku: })&.id
           end
           # Check if an order contains same item more than once.
           @contains_aliased_items = existing_products.compact.uniq.size != existing_products.compact.size
@@ -368,7 +379,10 @@ module Groovepacker
 
           if product.save
             # images
-            product.add_product_activity('Product Import', product.store.try(:name).to_s) unless product.product_activities.any?
+            unless product.product_activities.any?
+              product.add_product_activity('Product Import',
+                                           product.store.try(:name).to_s)
+            end
             product_xml[:images].each do |product_image|
               if product.product_images.where(image: product_image).empty?
                 product.product_images.create(image: product_image)

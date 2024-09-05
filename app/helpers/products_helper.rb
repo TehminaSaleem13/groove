@@ -26,7 +26,7 @@ module ProductsHelper
     outputter.margin = 0
     blob = outputter.to_png # Raw PNG data
     image_name = Digest::MD5.hexdigest(barcode_string)
-    File.open("#{Rails.root}/public/images/#{image_name}.png",
+    File.open(Rails.root.join("public/images/#{image_name}.png"),
               'wb') do |f|
       f.write blob
     end
@@ -61,7 +61,8 @@ module ProductsHelper
     product_report = ProductInventoryReport.where(id: params[:data][:report_id]).first
     if product_report
       if params[:data][:select_toggle]
-        search_params = { search: params[:data][:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
+        search_params = { search: params[:data][:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0,
+                          limit: Product.count }
         product_ids = params[:data][:search].present? ? do_search(search_params).map(&:id) : Product.all.map(&:id)
       else
         product_ids = params[:data][:selected]
@@ -76,7 +77,8 @@ module ProductsHelper
     product_report = ProductInventoryReport.where(id: params[:data][:report_id]).first
     if product_report
       if params[:data][:select_toggle]
-        search_params = { search: params[:data][:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0, limit: Product.count }
+        search_params = { search: params[:data][:search], sort: '', order: 'DESC', is_kit: '-1', offset: 0,
+                          limit: Product.count }
         if params[:data][:search].present?
           product_ids = do_search(search_params).map(&:id)
           product_report.product_ids = product_report.product_ids - product_ids
@@ -148,11 +150,7 @@ module ProductsHelper
   end
 
   def get_weight_format(weight_format)
-    if weight_format.present?
-      weight_format
-    else
-      GeneralSetting.get_product_weight_format
-    end
+    weight_format.presence || GeneralSetting.get_product_weight_format
   end
 
   # def get_barcode_slip_template
@@ -185,7 +183,7 @@ module ProductsHelper
     report.type = data['type'] if id.present?
     report.product_ids = product_ids unless report.persisted?
     report_name = data['report_name'] || data['name']
-    report.name = report_name.present? ? report_name : 'Default Report'
+    report.name = (report_name.presence || 'Default Report')
     report.save
     @result['status'] = true
     @result
@@ -194,7 +192,8 @@ module ProductsHelper
   def fetch_order_response_from_ss(start_date, end_date, type, import_item = nil)
     response = { 'orders' => [] }
     statuses.each do |status|
-      status_response = @client.get_range_import_orders(start_date, end_date, type, @credential.order_import_range_days, status, import_item)
+      status_response = @client.get_range_import_orders(start_date, end_date, type,
+                                                        @credential.order_import_range_days, status, import_item)
       response = get_orders_from_union(response, status_response)
     end
     response
@@ -207,11 +206,17 @@ module ProductsHelper
     bulk_action_type = bulk_action.activity == 'order_product_barcode_label' ? 'order_items' : 'products'
     if bulk_action.activity == 'order_product_barcode_label'
       order_ids = begin
-                    params['ids'].split(',').reject(&:empty?)
-                  rescue StandardError
-                    nil
+        params['ids'].split(',').reject(&:empty?)
+      rescue StandardError
+        nil
+      end
+      all_items = if params[:ids] == 'all'
+                    params[:status] == 'all' ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten
+                  else
+                    Order.where(
+                      'id in (?)', order_ids
+                    ).includes(:order_items).map(&:order_items).flatten
                   end
-      all_items = params[:ids] == 'all' ? (params[:status] == 'all' ? Order.includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.where('id in (?)', order_ids).includes(:order_items).map(&:order_items).flatten
     else
       all_items = list_selected_products(params)
     end
@@ -219,20 +224,23 @@ module ProductsHelper
   end
 
   def process_barcode_generation(bulk_action, all_items, username, bulk_action_type, result)
-    bulk_action.update_attributes(status: 'in_progress', total: all_items.count)
+    bulk_action.update(status: 'in_progress', total: all_items.count)
     (all_items || []).in_groups_of(500, false) do |item_batch|
       bulk_action.reload
       if bulk_action.cancel?
-        bulk_action.update_attributes(status: 'cancelled')
+        bulk_action.update(status: 'cancelled')
         return true
       end
       last_batch = (all_items || []).in_groups_of(500, false).last == item_batch
       ScanPack::Base.new.bulk_barcodes_with_delay(item_batch, username, bulk_action_type, last_batch)
-      bulk_action.update_attributes(completed: all_items.find_index(item_batch.last) + 1)
+      bulk_action.update(completed: all_items.find_index(item_batch.last) + 1)
     end
-    bulk_action.update_attributes(status: result['status'] ? 'completed' : 'failed', messages: result['messages'], current: '') unless bulk_action.cancel?
+    unless bulk_action.cancel?
+      bulk_action.update(status: result['status'] ? 'completed' : 'failed', messages: result['messages'],
+                         current: '')
+    end
   rescue Exception => e
-    bulk_action.update_attributes(status: 'failed', messages: e, current: '')
+    bulk_action.update(status: 'failed', messages: e, current: '')
   end
 
   def search_order_in_db(order_number, store_order_id)

@@ -60,7 +60,8 @@ module Groovepacker
 
           result = true
           kit.product_kit_skuss.each do |kit_item|
-            result &= sell(kit_item.option_product, qty * kit_item.qty, warehouse_id, update_available, update_allocated)
+            result &= sell(kit_item.option_product, qty * kit_item.qty, warehouse_id, update_available,
+                           update_allocated)
           end
           result
         end

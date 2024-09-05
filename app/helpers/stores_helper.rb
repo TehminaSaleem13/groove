@@ -23,39 +23,41 @@ module StoresHelper
 
   def warehouse_name_or_id(flag)
     inventory_warehouses = InventoryWarehouse.where(is_default: 1)
-    unless inventory_warehouses.nil?
-      inventory_warehouse = inventory_warehouses.first
-      if flag == 'id'
-        default_warehouse_id = inventory_warehouse.id
-        return default_warehouse_id
-      elsif flag == 'name'
-        default_warehouse_name = inventory_warehouse.name
-        return default_warehouse_name
-      end
+    return if inventory_warehouses.nil?
+
+    inventory_warehouse = inventory_warehouses.first
+    if flag == 'id'
+      inventory_warehouse.id
+
+    elsif flag == 'name'
+      inventory_warehouse.name
+
     end
   end
 
   def init_store_data
     params[:name] = nil if params[:name] == 'undefined'
-    if params[:status].present?
-      @store.name = params[:name] || get_default_warehouse_name
-      @store.store_type = params[:store_type]
-      @store.status = params[:status]
-      @store.thank_you_message_to_customer = params[:thank_you_message_to_customer] unless params[:thank_you_message_to_customer] == 'null'
-      @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
-      @store.auto_update_products = params[:auto_update_products]
-      @store.on_demand_import = params[:on_demand_import].to_boolean
-      @store.update_inv = params[:update_inv]
-      @store.split_order = params[:split_order]
-      @store.on_demand_import_v2 = params[:on_demand_import_v2].to_boolean
-      @store.regular_import_v2 = params[:regular_import_v2].to_boolean
-      @store.quick_fix = params[:quick_fix].to_boolean
-      @store.troubleshooter_option = params[:troubleshooter_option].to_boolean
-      @store.order_cup_direct_shipping = params[:order_cup_direct_shipping].to_boolean
-      @store.display_origin_store_name = params[:display_origin_store_name].to_boolean
-      @store.disable_packing_cam = params[:disable_packing_cam].to_boolean
-      @store.save
+    return unless params[:status].present?
+
+    @store.name = params[:name] || get_default_warehouse_name
+    @store.store_type = params[:store_type]
+    @store.status = params[:status]
+    unless params[:thank_you_message_to_customer] == 'null'
+      @store.thank_you_message_to_customer = params[:thank_you_message_to_customer]
     end
+    @store.inventory_warehouse_id = params[:inventory_warehouse_id] || get_default_warehouse_id
+    @store.auto_update_products = params[:auto_update_products]
+    @store.on_demand_import = params[:on_demand_import].to_boolean
+    @store.update_inv = params[:update_inv]
+    @store.split_order = params[:split_order]
+    @store.on_demand_import_v2 = params[:on_demand_import_v2].to_boolean
+    @store.regular_import_v2 = params[:regular_import_v2].to_boolean
+    @store.quick_fix = params[:quick_fix].to_boolean
+    @store.troubleshooter_option = params[:troubleshooter_option].to_boolean
+    @store.order_cup_direct_shipping = params[:order_cup_direct_shipping].to_boolean
+    @store.display_origin_store_name = params[:display_origin_store_name].to_boolean
+    @store.disable_packing_cam = params[:disable_packing_cam].to_boolean
+    @store.save
   end
 
   def store_duplicate
@@ -72,7 +74,7 @@ module StoresHelper
             index += 1
             @newstore.name = @store.name + '(duplicate' + index.to_s + ')'
             @storeslist = Store.where(name: @newstore.name)
-          end while (!@storeslist.nil? && !@storeslist.empty?)
+          end while (@storeslist.present?)
           if !@newstore.save(validate: false) || !@newstore.dupauthentications(@store.id)
             @result['status'] = false
             @result['messages'] = @newstore.errors.full_messages
@@ -134,8 +136,12 @@ module StoresHelper
       @result['access_restrictions'] = access_restrictions
       @result['credentials'] = @store.get_store_credentials
       @result['mapping'] = CsvMapping.find_by_store_id(@store.id) if @store.store_type == 'CSV'
-      @result['enabled_status'] = @store.shipstation_rest_credential.get_active_statuses.any? if @store.shipstation_rest_credential.present?
-      @result ['show_originating_store_id'] = Tenant.find_by(name: Apartment::Tenant.current)&.show_originating_store_id || false
+      if @store.shipstation_rest_credential.present?
+        @result['enabled_status'] =
+          @store.shipstation_rest_credential.get_active_statuses.any?
+      end
+      @result ['show_originating_store_id'] =
+        Tenant.find_by(name: Apartment::Tenant.current)&.show_originating_store_id || false
       @result['origin_stores'] = @store.origin_stores
     else
       @result['status'] = false
@@ -182,7 +188,7 @@ module StoresHelper
   #   product_import = CsvProductImport.create(store_id: @store.id) if product_import.nil?
   #   import_csv = ImportCsv.new
   #   delayed_job = import_csv.delay(:run_at => 1.seconds.from_now).import Apartment::Tenant.current, data.to_s
-  #   product_import.update_attributes(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
+  #   product_import.update(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
   # end
 
   def csv_import
@@ -226,7 +232,8 @@ module StoresHelper
       groove_bulk_actions.save
       data[:bulk_action_id] = groove_bulk_actions.id
       import_csv = ImportCsv.new
-      import_csv.delay(run_at: 1.seconds.from_now, queue: "import_kit_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
+      import_csv.delay(run_at: 1.second.from_now, queue: "import_kit_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current,
+                                                                                                                                 data.to_s
       # import_csv.import(Apartment::Tenant.current, data.to_s)
     elsif params[:type] == 'product'
       product_import = CsvProductImport.find_by_store_id(@store.id)
@@ -237,9 +244,10 @@ module StoresHelper
       #   product_import.save
       # end
       import_csv = ImportCsv.new
-      delayed_job = import_csv.delay(run_at: 1.seconds.from_now, queue: "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
+      delayed_job = import_csv.delay(run_at: 1.second.from_now, queue: "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current,
+                                                                                                                                                    data.to_s
       # delayed_job = import_csv.import(Apartment::Tenant.current, data.to_s)
-      product_import.update_attributes(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
+      product_import.update(delayed_job_id: delayed_job.id, total: 0, success: 0, cancel: false, status: 'scheduled')
     end
     # Comment everything before this line till previous comment (i.e. the entire if block) when everything is moved to bulk actions
   end
@@ -247,7 +255,9 @@ module StoresHelper
   def order_csv_import(data)
     if OrderImportSummary.where(status: 'in_progress').empty?
       bulk_actions = Groovepacker::Orders::BulkActions.new
-      bulk_actions.delay(run_at: 1.seconds.from_now, queue: 'import_csv_orders', priority: 95).import_csv_orders(Apartment::Tenant.current, @store.id, data.to_s, current_user.id)
+      bulk_actions.delay(run_at: 1.second.from_now, queue: 'import_csv_orders', priority: 95).import_csv_orders(
+        Apartment::Tenant.current, @store.id, data.to_s, current_user.id
+      )
       # bulk_actions.import_csv_orders(Apartment::Tenant.current_tenant, @store.id, data.to_s, current_user.id)
     else
       @result['status'] = false
@@ -273,12 +283,12 @@ module StoresHelper
     end
     ebaytoken_resp = MultiXml.parse(res.body)
     @result['response'] = ebaytoken_resp
-    if ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
-      @store.auth_token = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
-      @store.productauth_token = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
-      @store.ebay_auth_expiration = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
-      @result['status'] = true if @store.save
-    end
+    return unless ebaytoken_resp['FetchTokenResponse']['Ack'] == 'Success'
+
+    @store.auth_token = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+    @store.productauth_token = ebaytoken_resp['FetchTokenResponse']['eBayAuthToken']
+    @store.ebay_auth_expiration = ebaytoken_resp['FetchTokenResponse']['HardExpirationTime']
+    @result['status'] = true if @store.save
   end
 
   def store_list_update
@@ -315,12 +325,15 @@ module StoresHelper
         @result['messages'] = 'You have reached the maximum limit of number of stores for your subscription.'
       end
     end
-    update_create_store unless params[:id].blank?
+    update_create_store if params[:id].present?
   end
 
   def update_create_store
     @store ||= Store.find(params[:id])
-    FtpCredential.create(use_ftp_import: false, store_id: @store.id) if params[:store_type] == 'CSV' && @store.ftp_credential.nil?
+    if params[:store_type] == 'CSV' && @store.ftp_credential.nil?
+      FtpCredential.create(use_ftp_import: false,
+                           store_id: @store.id)
+    end
     create_and_update_store
     begin
       @result['store_id'] = @store.id if !@store.nil? && @store.id.present?
@@ -352,10 +365,12 @@ module StoresHelper
     return unless OrderImportSummary.last
 
     OrderImportSummary.last.import_items.each do |import_item|
-      import_item.update_attributes(status: 'cancelled') if import_item.store_id == @store.id
+      import_item.update(status: 'cancelled') if import_item.store_id == @store.id
     end
     import_summary_status = OrderImportSummary.last.import_items.map(&:status).uniq
-    OrderImportSummary.last.update_attributes(status: 'cancelled') if import_summary_status.count == 1 && import_summary_status.include?('cancelled')
+    return unless import_summary_status.count == 1 && import_summary_status.include?('cancelled')
+
+    OrderImportSummary.last.update(status: 'cancelled')
   end
 
   def get_and_import_order(params, result, current_user)
@@ -379,7 +394,8 @@ module StoresHelper
         result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
                       orderStatus: response['orders'].last['order_status'].titleize)
 
-        result.merge!(return_range_dates_hash(store, response['orders'].last['external_order_identifier'], result_modifyDate, result_createDate))
+        result.merge!(return_range_dates_hash(store, response['orders'].last['external_order_identifier'],
+                                              result_modifyDate, result_createDate))
       elsif store.store_type == 'Shopify'
         credential = store.shopify_credential
         client = Groovepacker::ShopifyRuby::Client.new(credential)
@@ -426,20 +442,26 @@ module StoresHelper
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
                       orderStatus: response.last['orderStatus'].titleize,
-                      gp_ready_status: response.last['tagIds'].nil? ? 'No' : (response.last['tagIds'].include?(48_826) ? 'Yes' : 'No'))
+                      gp_ready_status: if response.last['tagIds'].nil?
+                                         'No'
+                                       else
+                                         (response.last['tagIds'].include?(48_826) ? 'Yes' : 'No')
+                                       end)
 
-        result.merge!(return_range_dates_hash(store, response.last['orderNumber'], result_modifyDate, result_createDate))
+        result.merge!(return_range_dates_hash(store, response.last['orderNumber'], result_modifyDate,
+                                              result_createDate))
       elsif store.store_type == 'Veeqo'
         credential = store.veeqo_credential
         client = Groovepacker::VeeqoRuby::Client.new(credential)
         order_res = client.get_single_order(params[:order_no])
         response = order_res['orders']
-        return result[:status] = false if response.empty? || response[0]['error_messages'] == "Not found"
+        return result[:status] = false if response.empty? || response[0]['error_messages'] == 'Not found'
 
         result[:status] = true
         result_modifyDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['updated_at']).to_time
         result_createDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['created_at']).to_time
-        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate, orderStatus: response.last['status'].titleize)
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
+                      orderStatus: response.last['status'].titleize)
       elsif store.store_type == 'Shippo'
         credential = store.shippo_credential
         client = Groovepacker::ShippoRuby::Client.new(credential)
@@ -451,7 +473,8 @@ module StoresHelper
         result_modifyDate = Time.zone.parse(response['placed_at'])
         result_createDate = Time.zone.parse(response['placed_at'])
 
-        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate, orderStatus: response['order_status']&.titleize)
+        result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
+                      orderStatus: response['order_status']&.titleize)
       end
       result[:ss_similar_order_found] = true if store.store_type != 'Shopline' && response.count > 1
       params[:current_user] = current_user.id
@@ -508,7 +531,11 @@ module StoresHelper
         !credential.quick_import_last_modified_v2.nil? ? credential.quick_import_last_modified_v2 : get_time_in_pst(1.day.ago)
       end
     elsif store.store_type == 'ShippingEasy'
-      store_orders_blank ? (credential.last_imported_at.nil? ? 1.day.ago : credential.last_imported_at) : 1.day.ago
+      if store_orders_blank
+        credential.last_imported_at.nil? ? 1.day.ago : credential.last_imported_at
+      else
+        1.day.ago
+      end
     end
   end
 
@@ -527,7 +554,9 @@ module StoresHelper
     altered_date = comparison_operator == '<' ? date - 1.minute : date + 1.minute
     sort_order = comparison_operator == '<' ? 'asc' : 'desc'
 
-    closest_date = Order.select('last_modified').where('store_id = ? AND increment_id != ?', store_id, order_id).where("last_modified #{comparison_operator} ?", altered_date).order("last_modified #{sort_order}").last.try(:last_modified)
+    closest_date = Order.select('last_modified').where('store_id = ? AND increment_id != ?', store_id, order_id).where(
+      "last_modified #{comparison_operator} ?", altered_date
+    ).order("last_modified #{sort_order}").last.try(:last_modified)
     return closest_date if closest_date.present?
 
     date

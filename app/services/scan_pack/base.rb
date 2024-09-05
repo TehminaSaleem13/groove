@@ -18,10 +18,20 @@ module ScanPack
       return unless item_sku
 
       if @params[:box_id].nil?
-        GeneralSetting.last.multi_box_shipments? ? @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.username, @params[:on_ex]) : @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.username, @params[:on_ex])
+        if GeneralSetting.last.multi_box_shipments?
+          @order.addactivity(
+            "Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in Box 1", @current_user.username, @params[:on_ex]
+          )
+        else
+          @order.addactivity(
+            "Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned", @current_user.username, @params[:on_ex]
+          )
+        end
       else
         box = Box.where(id: @params[:box_id]).last
-        @order.addactivity("Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.username, @params[:on_ex])
+        @order.addactivity(
+          "Product with barcode: #{@params[:input]} and sku: #{item_sku} scanned in #{box.try(:name)}", @current_user.username, @params[:on_ex]
+        )
       end
     end
 
@@ -35,14 +45,17 @@ module ScanPack
       Apartment::Tenant.switch! params[:tenant]
       order = Order.find(params[:scan_pack][:_json])
       store = order.store
-      magento_credential = MagentoCredentials.where(store_id: store.id).first unless MagentoCredentials.where(store_id: store.id).empty?
-      unless magento_credential.nil?
-        begin
-          data = { 'key' => 'Gr00_$p4ck3RPJ2004k1R4', 'order_id' => order.increment_id, 'tracking_id' => order.tracking_num }
-          x = Net::HTTP.post_form(URI.parse('https://www.shopakira.com/groovepacker'), data)
-        rescue Exception => e
-          Rollbar.error(e, e.message, Apartment::Tenant.current)
-        end
+      unless MagentoCredentials.where(store_id: store.id).empty?
+        magento_credential = MagentoCredentials.where(store_id: store.id).first
+      end
+      return if magento_credential.nil?
+
+      begin
+        data = { 'key' => 'Gr00_$p4ck3RPJ2004k1R4', 'order_id' => order.increment_id,
+                 'tracking_id' => order.tracking_num }
+        x = Net::HTTP.post_form(URI.parse('https://www.shopakira.com/groovepacker'), data)
+      rescue Exception => e
+        Rollbar.error(e, e.message, Apartment::Tenant.current)
       end
     end
 
@@ -119,7 +132,9 @@ module ScanPack
                                                                                             next_order_increment_id: orders.first && orders.first[:increment_id],
                                                                                             status: 'scheduled')
       @boxes ||= Box.where(order_id: orders.first[:id]).map(&:id)
-      delayed_job = GeneratePackingSlipPdf.delay(run_at: 1.seconds.from_now, queue: 'generate_packing_slip_pdf', priority: 95).generate_packing_slip_pdf(orders, Apartment::Tenant.current, @slip_data_hash, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes)
+      delayed_job = GeneratePackingSlipPdf.delay(run_at: 1.second.from_now, queue: 'generate_packing_slip_pdf', priority: 95).generate_packing_slip_pdf(
+        orders, Apartment::Tenant.current, @slip_data_hash, @page_height, @page_width, @orientation, @file_name, @size, @header, generate_barcode.id, @boxes
+      )
       generate_barcode.delayed_job_id = delayed_job.id
       generate_barcode.save
       @result['status'] = true
@@ -151,7 +166,8 @@ module ScanPack
       @tenant_name = Apartment::Tenant.current
       file_name = @tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}_order_number_#{order.increment_id}.pdf")
-      pdf_html = action_view.render template: 'orders/generate_order_barcode_slip.html.erb', layout: nil, locals: { :@order => order }
+      pdf_html = action_view.render template: 'orders/generate_order_barcode_slip', layout: nil,
+                                    locals: { :@order => order }
       doc_pdf = WickedPdf.new.pdf_from_string(
         pdf_html,
         inline: true,
@@ -172,8 +188,10 @@ module ScanPack
 
     def do_get_action_view_object_for_html_rendering
       ActionView::Base.send(:define_method, :protect_against_forgery?) { false }
-      action_view = ActionView::Base.new
-      action_view.view_paths = ActionController::Base.view_paths
+      lookupcontext = ActionView::LookupContext.new([Rails.root.join('app/views')])
+      action_view = ActionView::Base.with_empty_template_cache.new(
+        lookupcontext, {}, nil
+      )
       action_view.class_eval do
         include Rails.application.routes.url_helpers
         include ApplicationHelper
@@ -203,13 +221,13 @@ module ScanPack
       if type == 'order_items'
         g = GenerateBarcode.new(url: generate_url, status: 'completed', current_increment_id: 'bulk_barcode')
         g.user_id = begin
-                      User.where(username: username).first.id
-                    rescue StandardError
-                      nil
-                    end
+          User.where(username:).first.id
+        rescue StandardError
+          nil
+        end
         g.save
       else
-        GroovRealtime.emit('barcode_lable', { url: generate_url, last_batch: last_batch, username: username }, :tenant)
+        GroovRealtime.emit('barcode_lable', { url: generate_url, last_batch:, username: }, :tenant)
       end
     end
 
@@ -222,9 +240,10 @@ module ScanPack
       when 'order_items'
         pdf_template = 'products/bulk_barcode_generation.html.erb'
 
-        template_locals = { :@order_items => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip }
+        template_locals = { :@order_items => items, :@show_bin_locations => show_bin_locations,
+                            :@show_sku_in_barcodeslip => show_sku_in_barcodeslip }
         height_per_page = '1in'
-        reader_file_path = Rails.root.join('public', 'pdfs', 'bulk_barcode_generation.pdf')
+        reader_file_path = Rails.root.join('public/pdfs/bulk_barcode_generation.pdf')
       when 'products'
         printing_setting = PrintingSetting.all.last
         product_barcode_label_size = if printing_setting.present?
@@ -233,7 +252,8 @@ module ScanPack
                                        '3 x 1'
                                      end
         pdf_template = 'products/print_barcode_label.html.erb'
-        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations, :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => product_barcode_label_size }
+        template_locals = { :@products => items, :@show_bin_locations => show_bin_locations,
+                            :@show_sku_in_barcodeslip => show_sku_in_barcodeslip, :@product_barcode_label_size => product_barcode_label_size }
         height_per_page = '1in'
         reader_file_path = do_get_pdf_file_path(items.count.to_s)
       end
@@ -271,14 +291,18 @@ module ScanPack
       @tenant_name = Apartment::Tenant.current
       file_name = @tenant_name + Time.current.strftime('%d_%b_%Y_%I__%M_%p')
       pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-      pdf_html = action_view.render template: 'products/print_receiving_label.html.erb', layout: nil, locals: { :@products => @products }
+      pdf_html = action_view.render template: 'products/print_receiving_label', layout: nil,
+                                    locals: { :@products => @products }
       common(pdf_html, reader_file_path, '6in', '4in', top: '1', bottom: '0', left: '2', right: '2')
       base_file_name = File.basename(pdf_path)
       pdf_file = File.open(reader_file_path)
       GroovS3.create_pdf(@tenant_name, base_file_name, pdf_file.read)
       pdf_file.close
       url = ENV['S3_BASE_URL'] + '/' + @tenant_name + '/pdf/' + base_file_name
-      GroovRealtime.emit('print_lable', url, :tenant) if params['productArray'].count > 20 || params['select_all'] == true
+      if params['productArray'].count > 20 || params['select_all'] == true
+        GroovRealtime.emit('print_lable', url,
+                           :tenant)
+      end
       url
     end
 
@@ -318,21 +342,23 @@ module ScanPack
     end
 
     def find_products(products, val)
-      if val == :product_inventory_warehousess
-        new_products = Product.where(id: products).joins(val).where('product_inventory_warehouses.updated_at > ?', Time.current - 90.days).pluck(:id)
-      else
-        new_products = Product.where(id: products).joins(val).where("#{val}.updated_at > ?", Time.current - 90.days).pluck(:id)
-      end
+      new_products = if val == :product_inventory_warehousess
+                       Product.where(id: products).joins(val).where('product_inventory_warehouses.updated_at > ?',
+                                                                    Time.current - 90.days).pluck(:id)
+                     else
+                       Product.where(id: products).joins(val).where("#{val}.updated_at > ?",
+                                                                    Time.current - 90.days).pluck(:id)
+                     end
       products -= new_products
       products
     end
 
     def check_for_hex
       if (@input.starts_with? '^#^') && (begin
-                                           @input.split('^')[2].present?
-                                         rescue StandardError
-                                           nil
-                                         end)
+        @input.split('^')[2].present?
+      rescue StandardError
+        nil
+      end)
         @input = @input.split('^')[2].to_i(16).to_s
         return 'store_order_id'
       end
@@ -348,14 +374,14 @@ module ScanPack
       return unless @params[:app]
 
       scanpack_settings = ScanPackSetting.last
-      if scanpack_settings.order_num_esc_str_enabled && scanpack_settings.order_num_esc_str_removal.present?
-        prefixes_array = scanpack_settings.order_num_esc_str_removal.split(',')
-        prefixes_array.each do |prefix|
-          next unless @params[:input].start_with?(prefix)
+      return unless scanpack_settings.order_num_esc_str_enabled && scanpack_settings.order_num_esc_str_removal.present?
 
-          @params[:input].sub!(prefix, '')
-          break
-        end
+      prefixes_array = scanpack_settings.order_num_esc_str_removal.split(',')
+      prefixes_array.each do |prefix|
+        next unless @params[:input].start_with?(prefix)
+
+        @params[:input].sub!(prefix, '')
+        break
       end
     end
   end

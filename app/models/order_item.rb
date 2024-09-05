@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class OrderItem < ActiveRecord::Base
-  belongs_to :order
-  belongs_to :product
+class OrderItem < ApplicationRecord
+  belongs_to :order, optional: true
+  belongs_to :product, optional: true
   has_many :order_item_boxes, dependent: :destroy
   has_many :boxes, through: :order_item_boxes
 
@@ -37,7 +37,7 @@ class OrderItem < ActiveRecord::Base
   UNALLOCATED_INV_STATUS = 'unallocated'
   SOLD_INV_STATUS = 'sold'
 
-  #:scanned_status
+  # :scanned_status
   SCANNED_STATUS = 'scanned'
   UNSCANNED_STATUS = 'unscanned'
   PARTIALLY_SCANNED_STATUS = 'partially_scanned'
@@ -50,6 +50,7 @@ class OrderItem < ActiveRecord::Base
     result = false
     order_item_kit_products.each do |kit_product|
       next if kit_product.cached_product_kit_skus.option_product.try(:is_intangible)
+
       if kit_product.scanned_status != SCANNED_STATUS
         result = true
         break
@@ -109,10 +110,10 @@ class OrderItem < ActiveRecord::Base
     result['barcodes'] = sort_by_order[item.cached_product_barcodes]
     result['product_id'] = item.id
     product_inv_warehouses = begin
-                               item.product_inventory_warehousess[0]
-                             rescue StandardError
-                               nil
-                             end
+      item.product_inventory_warehousess[0]
+    rescue StandardError
+      nil
+    end
     result['location'] = product_inv_warehouses.try(:location_primary)
     result['location2'] = product_inv_warehouses.try(:location_secondary)
     result['location3'] = product_inv_warehouses.try(:location_tertiary)
@@ -254,43 +255,47 @@ class OrderItem < ActiveRecord::Base
 
   def process_item(clicked, username, typein_count = 1, box_id, on_ex)
     order_unscanned = false
-    if scanned_qty < qty
-      total_qty = 0
-      if product.kit_parsing == 'depends'
-        self.single_scanned_qty = single_scanned_qty + typein_count
-        set_clicked_quantity(clicked, product.primary_sku, username, box_id, on_ex)
-        self.scanned_qty = single_scanned_qty + kit_split_scanned_qty
-        total_qty = qty - kit_split_qty
-      else
-        self.scanned_qty = scanned_qty + typein_count
-        set_clicked_quantity(clicked, product.primary_sku, username, box_id, on_ex)
-        total_qty = qty - kit_split_qty
-      end
-      scan_time = order_item_scan_times.build(
-        scan_start: order.last_suggested_at, scan_end: DateTime.now.in_time_zone
+    return unless scanned_qty < qty
+
+    total_qty = 0
+    if product.kit_parsing == 'depends'
+      self.single_scanned_qty = single_scanned_qty + typein_count
+      set_clicked_quantity(clicked, product.primary_sku, username, box_id, on_ex)
+      self.scanned_qty = single_scanned_qty + kit_split_scanned_qty
+      total_qty = qty - kit_split_qty
+    else
+      self.scanned_qty = scanned_qty + typein_count
+      set_clicked_quantity(clicked, product.primary_sku, username, box_id, on_ex)
+      total_qty = qty - kit_split_qty
+    end
+    scan_time = order_item_scan_times.build(
+      scan_start: order.last_suggested_at, scan_end: DateTime.now.in_time_zone
+    )
+    scan_time.save
+    if typein_count > 1
+      avg_time = avg_time_per_item(username)
+      order.total_scan_time += if avg_time
+                                 (avg_time * typein_count).to_i
+                               else
+                                 (scan_time.scan_end - scan_time.scan_start).to_i * typein_count
+                               end
+    else
+      order.total_scan_time = order.total_scan_time +
+                              (scan_time.scan_end.to_i - scan_time.scan_start.to_i)
+    end
+    order.total_scan_count = order.total_scan_count + typein_count
+    order.save
+    self.scanned_status = if scanned_qty == qty
+                            SCANNED_STATUS
+                          else
+                            PARTIALLY_SCANNED_STATUS
+                          end
+    save
+    tenant = Apartment::Tenant.current
+    if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat && order.has_unscanned_items && ExportSetting.first.include_partially_scanned_orders_user_stats
+      SendStatStream.new.delay(run_at: 1.second.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(
+        tenant, order.id
       )
-      scan_time.save
-      if typein_count > 1
-        avg_time = avg_time_per_item(username)
-        order.total_scan_time += if avg_time
-                                   (avg_time * typein_count).to_i
-                                 else
-                                   (scan_time.scan_end - scan_time.scan_start).to_i * typein_count
-                                      end
-      else
-        order.total_scan_time = order.total_scan_time +
-                                (scan_time.scan_end.to_i - scan_time.scan_start.to_i)
-      end
-      order.total_scan_count = order.total_scan_count + typein_count
-      order.save
-      self.scanned_status = if scanned_qty == qty
-                              SCANNED_STATUS
-                            else
-                              PARTIALLY_SCANNED_STATUS
-                            end
-      save
-      tenant = Apartment::Tenant.current
-      SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(tenant, order.id) if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat && order.has_unscanned_items && ExportSetting.first.include_partially_scanned_orders_user_stats
     end
   end
 
@@ -317,9 +322,7 @@ class OrderItem < ActiveRecord::Base
 
   def remove_order_item_kit_products
     result = true
-    unless product.nil?
-      order_item_kit_products.each(&:destroy) if product.is_kit == 1
-    end
+    order_item_kit_products.each(&:destroy) if !product.nil? && (product.is_kit == 1)
     result
   end
 
@@ -381,7 +384,7 @@ class OrderItem < ActiveRecord::Base
 
   def get_barcode_with_lotnumber(barcode, lot_number)
     scanpack_settings = ScanPackSetting.all.first
-    return barcode + scanpack_settings.escape_string + lot_number unless scanpack_settings.escape_string.nil?
+    barcode + scanpack_settings.escape_string + lot_number unless scanpack_settings.escape_string.nil?
   end
 
   def delete_cache_for_associated_obj
@@ -394,18 +397,27 @@ class OrderItem < ActiveRecord::Base
 
   private
 
-  def set_clicked_quantity(clicked, sku, username, box_id,on_ex)
-    if clicked
-      self.clicked_qty = clicked_qty + 1
-      if box_id.blank?
-        if GeneralSetting.last.multi_box_shipments?
-          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option in Box 1', username, on_ex) unless ScanPackSetting.last.order_verification
-        else
-          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option', username, on_ex) unless ScanPackSetting.last.order_verification
+  def set_clicked_quantity(clicked, sku, username, box_id, on_ex)
+    return unless clicked
+
+    self.clicked_qty = clicked_qty + 1
+    if box_id.blank?
+      if GeneralSetting.last.multi_box_shipments?
+        unless ScanPackSetting.last.order_verification
+          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option in Box 1', username,
+                            on_ex)
         end
       else
-        box = Box.where(id: box_id).last
-        order.addactivity(QTY_OF_SKU + sku.to_s + " was passed with the Pass option in #{box.try(:name)}", username, on_ex) unless ScanPackSetting.last.order_verification
+        unless ScanPackSetting.last.order_verification
+          order.addactivity(QTY_OF_SKU + sku.to_s + ' was passed with the Pass option', username,
+                            on_ex)
+        end
+      end
+    else
+      box = Box.where(id: box_id).last
+      unless ScanPackSetting.last.order_verification
+        order.addactivity(QTY_OF_SKU + sku.to_s + " was passed with the Pass option in #{box.try(:name)}", username,
+                          on_ex)
       end
     end
   end

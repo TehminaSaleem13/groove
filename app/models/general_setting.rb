@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GeneralSetting < ActiveRecord::Base
+class GeneralSetting < ApplicationRecord
   include SettingsHelper
   include AhoyEvent
   include EmailScheduling

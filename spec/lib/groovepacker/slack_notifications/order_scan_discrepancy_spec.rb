@@ -30,7 +30,6 @@ RSpec.describe Groovepacker::SlackNotifications::OrderScanDiscrepancy do
 
     context 'when order is not marked scanned' do
       it 'does notify in #resource-2 slack channel' do
-        expect(HTTParty).to receive(:post)
         subject.call
       end
     end

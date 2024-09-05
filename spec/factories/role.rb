@@ -4,7 +4,7 @@
 
 FactoryBot.define do
   factory :role do
-    name { 'Scan & Pack User' }
+    sequence(:name) { |n| "user#{n}" }
     display { true }
     custom { false }
 

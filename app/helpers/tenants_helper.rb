@@ -48,7 +48,10 @@ module TenantsHelper
     result = result_hash
     @tenant = find_tenant(params[:id])
     if @tenant
-      @tenant.update_attributes(orders_delete_days: params['basicinfo']['orders_delete_days'], is_multi_box: params['basicinfo']['is_multi_box']) if params['basicinfo'].present?
+      if params['basicinfo'].present?
+        @tenant.update(orders_delete_days: params['basicinfo']['orders_delete_days'],
+                       is_multi_box: params['basicinfo']['is_multi_box'])
+      end
       helper = Groovepacker::Tenants::Helper.new
       case type
       when 'update_restriction'
@@ -58,7 +61,8 @@ module TenantsHelper
           subsc.tenant_data = "#{params['subscription_info']['amount']}-#{access['max_allowed']}-#{access['max_users']}-#{access['max_import_sources']}"
           subsc.shopify_payment_token = SecureRandom.hex # (0...20).map { ('a'..'z').to_a[rand(15)] }.join
           subsc.save
-          ShopifyMailer.recurring_payment(@tenant, "#{ENV['PROTOCOL']}#{@tenant.name}.#{ENV['HOST_NAME']}/shopify/update_customer_plan.json?one_time_token=#{subsc.shopify_payment_token}").deliver
+          ShopifyMailer.recurring_payment(@tenant,
+                                          "#{ENV['PROTOCOL']}#{@tenant.name}.#{ENV['HOST_NAME']}/shopify/update_customer_plan.json?one_time_token=#{subsc.shopify_payment_token}").deliver
         else
           result = helper.update_restrictions(@tenant, params)
         end
@@ -71,34 +75,36 @@ module TenantsHelper
         new_plan = "#{@tenant.name}-zero-plan"
         unless subsc.subscription_plan_id.include?('-zero-plan')
           time_diff = begin
-                        Time.current.to_datetime.mjd - DateTime.parse(subsc.created_at.strftime('%d-%m-%Y')).in_time_zone.to_datetime.mjd
-                      rescue StandardError
-                        30
-                      end
+            Time.current.to_datetime.mjd - DateTime.parse(subsc.created_at.strftime('%d-%m-%Y')).in_time_zone.to_datetime.mjd
+          rescue StandardError
+            30
+          end
           trial_period_days = time_diff >= 30 ? 0 : (30 - time_diff)
           stripe_subsc = Stripe::Customer.retrieve(subsc.stripe_customer_id).subscriptions
           if stripe_subsc.data.present?
             subsc_data = stripe_subsc['data'][0]
             trial_end = subsc_data.trial_end
             trial_period_days = begin
-                                  Time.zone.at(trial_end).to_datetime < Time.current ? 0 : DateTime.parse(Time.at(trial_end).strftime('%d-%m-%Y')).in_time_zone.to_datetime.mjd - Time.current.to_datetime.mjd
-                                rescue StandardError
-                                  0
-                                end
+              Time.zone.at(trial_end).to_datetime < Time.current ? 0 : DateTime.parse(Time.at(trial_end).strftime('%d-%m-%Y')).in_time_zone.to_datetime.mjd - Time.current.to_datetime.mjd
+            rescue StandardError
+              0
+            end
             subsc_data.delete
           end
           begin
-            Stripe::Plan.create(amount: 0, interval: 'month', name: new_plan.tr('-', ' ').capitalize, currency: 'usd', id: new_plan)
+            Stripe::Plan.create(amount: 0, interval: 'month', name: new_plan.tr('-', ' ').capitalize, currency: 'usd',
+                                id: new_plan)
           rescue StandardError
             nil
           end
-          new_subsc = stripe_subsc.create(plan: new_plan, trial_period_days: trial_period_days)
+          new_subsc = stripe_subsc.create(plan: new_plan, trial_period_days:)
           subsc.interval = 'month'
           subsc.customer_subscription_id = new_subsc.id
           subsc.subscription_plan_id = new_plan
           subsc.amount = 0
           subsc.save
-          @tenant.price = { 'bigCommerce_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'shopify_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'shopline_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'magento2_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'teapplix_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'product_activity_log_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'magento_soap_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'multi_box_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'amazon_fba_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'post_scanning_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'allow_Real_time_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'import_option_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'inventory_report_option_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'custom_product_fields_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'enable_developer_tools_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'high_sku_feature' => { 'toggle' => false, 'amount' => 50, 'stripe_id' => '' }, 'double_high_sku' => { 'toggle' => false, 'amount' => 100, 'stripe_id' => '' }, 'cust_maintenance_1' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'cust_maintenance_2' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'groovelytic_stat_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'product_ftp_import' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' } }
+          @tenant.price = { 'bigCommerce_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' },
+                            'shopify_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'shopline_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'magento2_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'teapplix_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'product_activity_log_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'magento_soap_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'multi_box_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'amazon_fba_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'post_scanning_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'allow_Real_time_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'import_option_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'inventory_report_option_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'custom_product_fields_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'enable_developer_tools_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'high_sku_feature' => { 'toggle' => false, 'amount' => 50, 'stripe_id' => '' }, 'double_high_sku' => { 'toggle' => false, 'amount' => 100, 'stripe_id' => '' }, 'cust_maintenance_1' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'cust_maintenance_2' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'groovelytic_stat_feature' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' }, 'product_ftp_import' => { 'toggle' => false, 'amount' => 30, 'stripe_id' => '' } }
           @tenant.save!
         end
       end
@@ -268,8 +274,8 @@ module TenantsHelper
       plan: plan_id,
       quantity: 1
     )
-    sleep 3
-    tenant_price =  tenant.price
+    sleep 3 unless Rails.env.test?
+    tenant_price = tenant.price
     tenant_price[feature]['stripe_id'] = response.id
     tenant.price = tenant_price
     tenant.save
@@ -288,14 +294,14 @@ module TenantsHelper
 
   def create_plan_for_feature(amount, interval, name, id)
     Stripe::Plan.create(
-      amount: amount,
-      interval: interval,
-      name: name,
+      amount:,
+      interval:,
+      name:,
       currency: 'usd',
-      id: id,
+      id:,
       trial_period_days: nil
     )
-    end
+  end
 
   def remove_plan_to_subscription(tenant, feature)
     db_price = tenant.price
@@ -304,7 +310,7 @@ module TenantsHelper
     if stripe_value.present?
       sub_item = Stripe::SubscriptionItem.retrieve(stripe_value)
       sub_plan = Stripe::Plan.retrieve(sub_item.plan.id)
-      sleep 3
+      sleep 3 unless Rails.env.test?
       if sub_item.present? && sub_item.plan.id.include?(feature)
         sub_item.delete
         sub_plan.delete

@@ -1,10 +1,9 @@
 # frozen_string_literal: true
 
-class OrderImportSummary < ActiveRecord::Base
+class OrderImportSummary < ApplicationRecord
   has_many :import_items
 
-  belongs_to :store
-  belongs_to :user
+  belongs_to :user, optional: true
 
   after_save :emit_data_to_user
 
@@ -28,7 +27,7 @@ class OrderImportSummary < ActiveRecord::Base
     result['import_items'] = []
     begin
       lines = CsvImportSummary.where('log_record IS NOT NULL and created_at > ?', Time.current - 30.days).last
-      result['summary'] = lines.log_record.gsub(/[,]/, '<br/>').gsub(/[{,}]/, '').gsub(/[:]/, '=>')
+      result['summary'] = lines.log_record.gsub(/,/, '<br/>').gsub(/[{,}]/, '').gsub(/:/, '=>')
     rescue StandardError
       result['summary'] = 'nil'
     end

@@ -14,8 +14,15 @@ RSpec.describe Box, type: :model do
   end
 
   describe Box do
-    box = described_class.create(name: 'productkit')
-    OrderItemBox.create(box_id: box.id)
+    let(:store) { create(:store) }
+    let!(:box) { described_class.create(name: 'productkit') }
+
+    before do
+      order = create(:order, store:)
+      product = create(:product, store:)
+
+      OrderItemBox.create(box_id: box.id, order_item: create(:order_item, order:, product:))
+    end
 
     it 'dependent destroy' do
       expect { box.destroy }.to change(OrderItemBox, :count).by(-1)

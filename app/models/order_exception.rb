@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrderException < ActiveRecord::Base
+class OrderException < ApplicationRecord
   belongs_to :order
   belongs_to :user
   # attr_accessible :description, :reason

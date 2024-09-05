@@ -7,12 +7,13 @@ module Groovepacker
         include ProductsHelper
         class OrdersImporter < Groovepacker::Stores::Importers::Importer
           attr_accessor :importing_time, :quick_importing_time, :import_from, :import_date_type
+
           include ProductsHelper
 
           def import
             # this method is initializing following objects: @credential, @client, @import_item, @result
             init_common_objects
-            @import_item.update_attributes(updated_orders_import: 0)
+            @import_item.update(updated_orders_import: 0)
             set_import_date_and_type
             if statuses.empty? && gp_ready_tag_id == -1
               set_status_and_msg_for_skipping_import
@@ -22,10 +23,10 @@ module Groovepacker
             update_orders_status
             destroy_nil_import_items
             ids = begin
-                    OrderItemKitProduct.select('MIN(id) as id').group('product_kit_skus_id, order_item_id').collect(&:id)
-                  rescue StandardError
-                    nil
-                  end
+              OrderItemKitProduct.select('MIN(id) as id').group('product_kit_skus_id, order_item_id').collect(&:id)
+            rescue StandardError
+              nil
+            end
             OrderItemKitProduct.where('id NOT IN (?)', ids).destroy_all
             @result
           end
@@ -33,14 +34,14 @@ module Groovepacker
           def initialize_orders_import
             response = get_orders_response
             response['orders'] = begin
-                                   response['orders'].sort_by { |h| h['orderDate'].split('-') }
-                                 rescue StandardError
-                                   response['orders']
-                                 end
+              response['orders'].sort_by { |h| h['orderDate'].split('-') }
+            rescue StandardError
+              response['orders']
+            end
             # response["orders"] = response["orders"].sort {|vn1, vn2| vn2["orderDate"] <=> vn1["orderDate"]} rescue response["orders"]
             return @result if response['orders'].blank?
 
-            shipments_response = @client.get_shipments(import_from - 1.days)
+            shipments_response = @client.get_shipments(import_from - 1.day)
             @result[:total_imported] = response['orders'].length
             initialize_import_item
             import_orders_from_response(response, shipments_response)
@@ -66,7 +67,9 @@ module Groovepacker
             initialize_import_item
             @scan_settings = ScanPackSetting.last
             response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
-            response, shipments_response = @client.get_order_by_tracking_number(order_no) if response['orders'].blank? && (@scan_settings.scan_by_shipping_label || @scan_settings.scan_by_packing_slip_or_shipping_label)
+            if response['orders'].blank? && (@scan_settings.scan_by_shipping_label || @scan_settings.scan_by_packing_slip_or_shipping_label)
+              response, shipments_response = @client.get_order_by_tracking_number(order_no)
+            end
             import_orders_from_response(response, shipments_response)
             Order.emit_data_for_on_demand_import(response, order_no)
             @import_item.destroy
@@ -75,21 +78,26 @@ module Groovepacker
 
           def import_orders_from_response(response, shipments_response)
             # check_or_assign_import_item
-            response['orders'] = response['orders'].sort_by { |order| Time.zone.parse(order['modifyDate']) } if response['orders'].present?
+            if response['orders'].present?
+              response['orders'] = response['orders'].sort_by do |order|
+                Time.zone.parse(order['modifyDate'])
+              end
+            end
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
             response['orders'].each do |order|
               import_item_fix
               break if @import_item.blank? || @import_item.try(:status) == 'cancelled' || @import_item&.status.nil?
 
               begin
-                @import_item.update_attributes(current_increment_id: order['orderNumber'], current_order_items: -1, current_order_imported_item: -1)
+                @import_item.update(current_increment_id: order['orderNumber'], current_order_items: -1,
+                                    current_order_imported_item: -1)
                 shipstation_order = find_or_init_new_order(order)
                 import_order_form_response(shipstation_order, order, shipments_response)
               rescue Exception => e
               end
-              break if Rails.env == 'test'
+              break if Rails.env.test?
 
-              sleep 0.3
+              sleep 0.3 unless Rails.env.test?
             end
             cred = @store.shipstation_rest_credential
             cred.download_ss_image = false
@@ -100,10 +108,12 @@ module Groovepacker
             if shipstation_order.present? && !shipstation_order.persisted?
               import_order(shipstation_order, order)
               tracking_info = begin
-                                (shipments_response || []).find { |shipment| shipment['orderId'] == order['orderId'] && shipment['voided'] == false } || {}
-                              rescue StandardError
-                                {}
-                              end
+                (shipments_response || []).find do |shipment|
+                  shipment['orderId'] == order['orderId'] && shipment['voided'] == false
+                end || {}
+              rescue StandardError
+                {}
+              end
               if tracking_info.blank?
                 response = @client.get_shipments_by_orderno(order['orderNumber'])
                 tracking_info = {}
@@ -128,10 +138,15 @@ module Groovepacker
               import_order_items(shipstation_order, order)
               return unless shipstation_order.save
 
-              check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order)
+              if check_for_replace_product
+                update_order_activity_log_for_gp_coupon(shipstation_order,
+                                                        order)
+              else
+                update_order_activity_log(shipstation_order)
+              end
               remove_gp_tags_from_ss(order)
             else
-              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              @import_item.update(updated_orders_import: @import_item.updated_orders_import + 1)
               @result[:previous_imported] = @result[:previous_imported] + 1
             end
           end
@@ -155,10 +170,12 @@ module Groovepacker
           def import_order_items(shipstation_order, order)
             return if order['items'].nil?
 
-            @import_item.update_attributes(current_order_items: order['items'].length, current_order_imported_item: 0)
+            @import_item.update(current_order_items: order['items'].length, current_order_imported_item: 0)
             order['items'].each do |item|
               product = product_importer_client.find_or_create_product(item)
-              product.product_images.create(image: item['imageUrl']) if @is_download_image && item['imageUrl'].present? && product.product_images.blank?
+              if @is_download_image && item['imageUrl'].present? && product.product_images.blank?
+                product.product_images.create(image: item['imageUrl'])
+              end
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
@@ -188,15 +205,15 @@ module Groovepacker
             case @import_item.import_type
             when 'deep'
               self.import_from = DateTime.now.in_time_zone - (begin
-                                                                  @import_item.days.to_i.days
-                                                              rescue StandardError
-                                                                1.days
-                                                                end)
+                @import_item.days.to_i.days
+              rescue StandardError
+                1.day
+              end)
             when 'regular', 'quick'
               set_regular_quick_import_date
             when 'tagged'
               @import_item.update_attribute(:import_type, 'tagged')
-              self.import_from = DateTime.now.in_time_zone - 1.weeks
+              self.import_from = DateTime.now.in_time_zone - 1.week
             else
               set_import_date_from_store_cred
             end
@@ -206,13 +223,13 @@ module Groovepacker
           def set_regular_quick_import_date
             @import_item.update_attribute(:import_type, 'quick')
             quick_import_date = @credential.quick_import_last_modified
-            self.import_from = quick_import_date.blank? ? DateTime.now.in_time_zone - 5.days : quick_import_date
+            self.import_from = (quick_import_date.presence || DateTime.now.in_time_zone - 5.days)
           end
 
           def set_import_date_from_store_cred
             @import_item.update_attribute(:import_type, 'regular')
             last_imported_at = @credential.last_imported_at
-            self.import_from = last_imported_at.blank? ? DateTime.now.in_time_zone - 1.weeks : last_imported_at - @credential.regular_import_range.days
+            self.import_from = last_imported_at.blank? ? DateTime.now.in_time_zone - 1.week : last_imported_at - @credential.regular_import_range.days
           end
 
           def set_import_date_type
@@ -252,10 +269,11 @@ module Groovepacker
 
           def get_orders_response
             response = { 'orders' => nil }
-            Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank? && !@credential.tag_import_option && @import_item.import_type != 'tagged'
+            if statuses.blank? && !@credential.tag_import_option && @import_item.import_type != 'tagged'
+              Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id)
+            end
             response = fetch_orders_if_import_type_is_not_tagged(response)
-            response = fetch_tagged_orders(response)
-            response
+            fetch_tagged_orders(response)
           end
 
           def fetch_orders_if_import_type_is_not_tagged(response)
@@ -282,12 +300,12 @@ module Groovepacker
               end
               ImportMailer.check_old_orders(Apartment::Tenant.current, value_1)
             end
-            response = get_orders_from_union(response, tagged_response)
-            response
+            get_orders_from_union(response, tagged_response)
           end
 
           def get_orders_from_union(response, tagged_or_status_response)
-            response['orders'] = response['orders'].blank? ? tagged_or_status_response['orders'] : (response['orders'] | tagged_or_status_response['orders'])
+            response['orders'] =
+              response['orders'].blank? ? tagged_or_status_response['orders'] : (response['orders'] | tagged_or_status_response['orders'])
             response
           end
 
@@ -303,7 +321,9 @@ module Groovepacker
           def find_or_init_new_order(order)
             shipstation_order = search_order_in_db(order['orderNumber'], order['orderId'])
             @order_to_update = shipstation_order.present?
-            return if shipstation_order && (shipstation_order.status == 'scanned' || shipstation_order.status == 'cancelled' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
+            if shipstation_order && (shipstation_order.status == 'scanned' || shipstation_order.status == 'cancelled' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
+              return
+            end
 
             if @import_item.import_type == 'quick' && shipstation_order
               shipstation_order.destroy
@@ -340,7 +360,9 @@ module Groovepacker
               if order['items'][index]['name'] == item.product.name && order['items'][index]['sku'] == item.product.primary_sku
                 update_activity_for_single_item(shipstation_order, item)
               else
-                shipstation_order.addactivity("Intangible item with SKU #{order['items'][index]['sku']}  and Name #{order['items'][index]['name']} was replaced with GP Coupon.", "#{@credential.store.name} Import")
+                shipstation_order.addactivity(
+                  "Intangible item with SKU #{order['items'][index]['sku']}  and Name #{order['items'][index]['name']} was replaced with GP Coupon.", "#{@credential.store.name} Import"
+                )
               end
             end
             shipstation_order.set_order_status
@@ -350,19 +372,21 @@ module Groovepacker
           def update_import_result
             if @order_to_update
               @result[:previous_imported] = @result[:previous_imported] + 1
-              @import_item.update_attributes(updated_orders_import: @import_item.updated_orders_import + 1)
+              @import_item.update(updated_orders_import: @import_item.updated_orders_import + 1)
             else
               @result[:success_imported] = @result[:success_imported] + 1
-              @import_item.update_attributes(success_imported: @result[:success_imported])
+              @import_item.update(success_imported: @result[:success_imported])
             end
           end
 
           def update_activity_for_single_item(shipstation_order, item)
             if item.qty.blank? || item.qty < 1
-              shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:", "#{@credential.store.name} Import")
+              shipstation_order.addactivity("Item with SKU: #{item.product.primary_sku} had QTY of 0 and was removed:",
+                                            "#{@credential.store.name} Import")
               item.destroy
             elsif item.product.try(:primary_sku).present?
-              shipstation_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added", "#{@credential.store.name} Import")
+              shipstation_order.addactivity("QTY #{item.qty} of item with SKU: #{item.product.primary_sku} Added",
+                                            "#{@credential.store.name} Import")
             end
           end
 

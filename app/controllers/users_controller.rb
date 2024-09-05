@@ -5,13 +5,16 @@ class UsersController < ApplicationController
   include UsersHelper
 
   def index
-    @users = User.includes(%i[role last_order_activity last_product_activity]).where('username != ? and is_deleted = ?', 'gpadmin', false)
+    @users = User.includes(%i[role last_order_activity last_product_activity]).where(
+      'username != ? and is_deleted = ?', 'gpadmin', false
+    )
     # respond_to do |format|
     #   format.html # show.html.erb
     #   format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role }
     #  #format.json { render json: user_info }
     # end
-    render json: @users.as_json(only: %i[id username active], include: { role: { only: [:id, :name] } }, methods: [:last_activity, :role])
+    render json: @users.as_json(only: %i[id username active], include: { role: { only: %i[id name] } },
+                                methods: %i[last_activity role])
   end
 
   def modify_plan
@@ -22,14 +25,21 @@ class UsersController < ApplicationController
     if @subscription.customer_subscription_id.present? && @subscription.stripe_customer_id.present?
       access_restriction = AccessRestriction.last
       data = { users: params[:users], amount: params[:amount], is_annual: params[:is_annual] }
-      result['request_send'] = tenant.created_at > '2016-09-23 00:00:00' ? remove_user(data, access_restriction, tenant) : check_for_removal(data, access_restriction, tenant)
+      result['request_send'] =
+        if tenant.created_at > '2016-09-23 00:00:00'
+          remove_user(data, access_restriction,
+                      tenant)
+        else
+          check_for_removal(data, access_restriction,
+                            tenant)
+        end
       if params[:is_annual] == 'false' && params[:users].to_i > access_restriction.num_users && @subscription['interval'] != 'year'
         ui_user = params[:users].to_i - access_restriction.num_users
-        access_restriction.update_attributes(added_through_ui: ui_user)
+        access_restriction.update(added_through_ui: ui_user)
         tenant.activity_log = "#{Time.current.strftime('%Y-%m-%d  %H:%M')} User added: From #{access_restriction.num_users} user plan to #{params[:users]} user and amount is #{params[:amount]}\n" + tenant.activity_log.to_s
         tenant.save!
         StripeInvoiceEmail.add_user_notification(tenant, params[:users].to_i, access_restriction).deliver
-        access_restriction.update_attributes(num_users: params[:users])
+        access_restriction.update(num_users: params[:users])
         set_subscription_info(params[:amount])
         create_stripe_plan(tenant)
       elsif params[:is_annual] == 'true'
@@ -41,7 +51,7 @@ class UsersController < ApplicationController
       end
     else
       result['status'] = false
-      result['error_messages'] = "Please contact GroovePacker support to add additional users"
+      result['error_messages'] = 'Please contact GroovePacker support to add additional users'
     end
 
     respond_to do |format|
@@ -90,18 +100,18 @@ class UsersController < ApplicationController
     packing_slip_obj = Groovepacker::PackingSlip::PdfMerger.new
     action_view = packing_slip_obj.do_get_action_view_object_for_html_rendering
     pdf_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-    pdf_html = action_view.render template: 'settings/action_barcodes.html.erb', layout: nil, locals: { :@action_code => @action_code }
+    pdf_html = action_view.render template: 'settings/action_barcodes.html.erb', layout: nil,
+                                  locals: { :@action_code => @action_code }
     doc_pdf = WickedPdf.new.pdf_from_string(
       pdf_html, inline: true, save_only: false,
                 orientation: 'Portrait', page_height: '1in', page_width: '3in',
                 margin: { top: '0', bottom: '0', left: '0', right: '0' }
     )
-    reader_file_path = Rails.root.join('public', 'pdfs', "#{file_name}.pdf")
-    File.open(reader_file_path, 'wb') do |file|
+    File.open(pdf_path, 'wb') do |file|
       file << doc_pdf
     end
     base_file_name = File.basename(pdf_path)
-    pdf_file = File.open(reader_file_path)
+    pdf_file = File.open(pdf_path)
     GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
     pdf_file.close
     generate_barcode = ENV['S3_BASE_URL'] + '/' + tenant_name + '/pdf/' + base_file_name
@@ -134,7 +144,8 @@ class UsersController < ApplicationController
       user.save
       begin
         HTTParty.post("#{ENV['GROOV_ANALYTIC_URL']}/users/update_username",
-                      query: { username: user.username, packing_user_id: user.id, active: user.active, time_zone: GeneralSetting.last&.new_time_zone },
+                      query: { username: user.username, packing_user_id: user.id, active: user.active,
+                               time_zone: GeneralSetting.last&.new_time_zone },
                       headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
       rescue StandardError
         nil
@@ -224,10 +235,10 @@ class UsersController < ApplicationController
 
   def show
     @user = if params[:confirmation_code].present?
-      User.find_by_confirmation_code(params[:confirmation_code])
-    else
-      User.find(params[:id])
-    end
+              User.find_by_confirmation_code(params[:confirmation_code])
+            else
+              User.find(params[:id])
+            end
     result = {}
 
     if !@user.nil?
@@ -279,7 +290,8 @@ class UsersController < ApplicationController
     if user.nil?
       result[:msg] = 'Unable to login. Please check your username'
     elsif (user.email.blank? || user.email.split('@')[1].blank?) && admin_email.blank?
-      result[:msg] = 'Unfortunately you do not have a password recovery email address. Please contact a team leader who can reset your password.'
+      result[:msg] =
+        'Unfortunately you do not have a password recovery email address. Please contact a team leader who can reset your password.'
     else
       send_email_reset_instruction(user, result, admin_email)
     end
@@ -296,7 +308,7 @@ class UsersController < ApplicationController
   def get_email
     user = User.find_by(username: params['username'])
     status = user.try(:role_id).in? [1, 2]
-    render json: { email: user.try(:email), status: status }
+    render json: { email: user.try(:email), status: }
   end
 
   def update_password

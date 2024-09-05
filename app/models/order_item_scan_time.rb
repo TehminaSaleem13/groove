@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrderItemScanTime < ActiveRecord::Base
+class OrderItemScanTime < ApplicationRecord
   # attr_accessible :order_item_id, :scan_end, :scan_start
   belongs_to :order_item
   #===========================================================================================

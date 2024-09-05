@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class Tote < ActiveRecord::Base
+class Tote < ApplicationRecord
   # attr_accessible :name, :order_id, :number, :pending_order
 
   belongs_to :order

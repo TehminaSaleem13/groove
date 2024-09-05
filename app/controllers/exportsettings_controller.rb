@@ -96,13 +96,13 @@ class ExportsettingsController < ApplicationController
     if current_user.can? 'view_packing_ex'
       if params[:start] && params[:end]
         export_setting = ExportSetting.first
-        export_setting.update_attributes(
+        export_setting.update(
           start_time: Time.parse(params[:start]),
           end_time: Time.parse(params[:end]),
           manual_export: true
         )
         # export_setting.export_data(Apartment::Tenant.current)
-        # export_setting.update_attributes(manual_export: false)
+        # export_setting.update(manual_export: false)
         ExportOrder.delay(priority: 95, queue: "manual_order_export_email_scheduled_#{Apartment::Tenant.current}").export(Apartment::Tenant.current)
       else
         update_false_status(result, 'We need a start and an end time')

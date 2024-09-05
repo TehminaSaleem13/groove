@@ -13,16 +13,16 @@ module Groovepacker
             last_imported_date = Time.current
 
             @result[:total_imported] = response['orders'].nil? ? 0 : response['orders'].length
-            @import_item.update_attributes(current_increment_id: '', success_imported: 0, previous_imported: 0, current_order_items: -1, current_order_imported_item: -1, to_import: @result[:total_imported])
+            @import_item.update(current_increment_id: '', success_imported: 0, previous_imported: 0, current_order_items: -1, current_order_imported_item: -1, to_import: @result[:total_imported])
 
             (response['orders'] || []).each do |order|
               import_item_fix
               break if @import_item.status == 'cancelled' || @import_item.status.nil?
 
-              @import_item.update_attributes(current_increment_id: order['id'], current_order_items: -1, current_order_imported_item: -1)
+              @import_item.update(current_increment_id: order['id'], current_order_items: -1, current_order_imported_item: -1)
               import_single_order(order)
             end
-            @credential.update_attributes(last_imported_at: last_imported_date) if @import_item.status != 'cancelled'
+            @credential.update(last_imported_at: last_imported_date) if @import_item.status != 'cancelled'
             update_orders_status
             @result
           end
@@ -45,7 +45,7 @@ module Groovepacker
             @credential = handler[:credential]
             @client = handler[:store_handle]
             @import_item = handler[:import_item]
-            @import_item.update_attributes(updated_orders_import: 0)
+            @import_item.update(updated_orders_import: 0)
             @result = build_result
           end
 
@@ -89,7 +89,7 @@ module Groovepacker
             return bigcommerce_order if order['products'].nil?
 
             order['products'] = @client.order_products(order['products']['url'])
-            @import_item.update_attributes(current_order_items: order['products'].length, current_order_imported_item: 0)
+            @import_item.update(current_order_items: order['products'].length, current_order_imported_item: 0)
 
             (order['products'] || []).each do |item|
               order_item = OrderItem.new

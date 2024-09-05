@@ -15,9 +15,9 @@ namespace :check do
         in_progress_items.each do |import_item|
           next unless (Time.current.to_i - import_item.updated_at.to_i) > 90
 
-          import_item.update_attributes(status: 'cancelled', message: 'Import Failed. Please try again.')
+          import_item.update(status: 'cancelled', message: 'Import Failed. Please try again.')
           begin
-            import_item.order_import_summary.update_attributes(status: 'cancelled')
+            import_item.order_import_summary.update(status: 'cancelled')
           rescue StandardError
             nil
           end

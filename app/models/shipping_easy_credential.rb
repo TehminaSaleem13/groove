@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ShippingEasyCredential < ActiveRecord::Base
+class ShippingEasyCredential < ApplicationRecord
   # attr_accessible :api_key, :api_secret, :gen_barcode_from_sku, :import_ready_for_shipment, :import_shipped, :last_imported_at, :ready_to_ship, :store_api_key, :import_upc, :allow_duplicate_id, :store_id, :popup_shipping_label
   before_save :check_if_null_or_undefined
 

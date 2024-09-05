@@ -31,7 +31,7 @@ class MagentoRestController < ApplicationController
   end
 
   def disconnect
-    @credential.update_attributes(access_token: nil)
+    @credential.update(access_token: nil)
     render json: @result
   end
 

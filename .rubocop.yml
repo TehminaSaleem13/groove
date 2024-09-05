@@ -1,6 +1,6 @@
-require: 
+require:
   - rubocop-performance
-  # - rubocop-rails
+  - rubocop-rails
   - rubocop-rspec
 
 AllCops:

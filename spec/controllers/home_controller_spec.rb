@@ -32,8 +32,8 @@ RSpec.describe HomeController, type: :controller do
 
     it 'Get User info with confirmation code and barcode' do
       product = FactoryBot.create(:product, name: 'PRODUCT1')
-      FactoryBot.create(:product_sku, product: product, sku: 'PRODUCT1')
-      FactoryBot.create(:product_barcode, product: product, barcode: 'testPRODUCT1')
+      FactoryBot.create(:product_sku, product:, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product:, barcode: 'testPRODUCT1')
       ScanPackSetting.last.update(require_serial_lot: true, valid_prefixes: 'test')
       request.accept = 'application/json'
       get :userinfo

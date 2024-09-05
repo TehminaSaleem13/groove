@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ScanPackSetting < ActiveRecord::Base
+class ScanPackSetting < ApplicationRecord
   include AhoyEvent
   # attr_accessible :ask_tracking_number, :enable_click_sku,
   #                 :enable_click_sku, :ask_tracking_number, :show_success_image,

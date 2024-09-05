@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class OrderTag < ActiveRecord::Base
+class OrderTag < ApplicationRecord
   # attr_accessible :color, :mark_place, :name, :predefined
   validates_uniqueness_of :name
 

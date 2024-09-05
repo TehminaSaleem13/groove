@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class EbayCredentials < ActiveRecord::Base
+class EbayCredentials < ApplicationRecord
   # attr_accessible :auth_token, :productauth_token, :import_products, :import_images, :ebay_auth_expiration, :shipped_status, :unshipped_status
   belongs_to :store
 

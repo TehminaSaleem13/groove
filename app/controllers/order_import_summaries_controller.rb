@@ -30,27 +30,31 @@ class OrderImportSummariesController < ApplicationController
       if store.store_type == 'CSV'
         data = prepare_csv_data(lines)
       else
-        headers = ['Time Stamp Tenant TZ', 'Time Stamp UTC', 'Type', 'Order Create Date', 'Order Modified Date', 'Order Status (the status in the OrderManager)', 'Order Status Settings in GP', 'Order Date Settings in GP']
+        headers = ['Time Stamp Tenant TZ', 'Time Stamp UTC', 'Type', 'Order Create Date', 'Order Modified Date',
+                   'Order Status (the status in the OrderManager)', 'Order Status Settings in GP', 'Order Date Settings in GP']
         data = CSV.generate do |csv|
           csv << headers if csv.count.eql? 0
           lines.each do |r|
             y = JSON.parse r
             if y['Tenant'] == @tenant_name && !y['Type'].nil?
-              csv << [y['Timestamp of the OD import (in tenants TZ)'], y['Timestamp of the OD import (UTC)'], y['Type'], y['Order Create Date'], y['Order Modified Date'], y['Order Status (the status in the OrderManager)'], y['Order Status Settings'], y['Order Date Settings']]
+              csv << [y['Timestamp of the OD import (in tenants TZ)'], y['Timestamp of the OD import (UTC)'],
+                      y['Type'], y['Order Create Date'], y['Order Modified Date'], y['Order Status (the status in the OrderManager)'], y['Order Status Settings'], y['Order Date Settings']]
             end
           end
         end
       end
-      url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary', Time.current.to_i, data).url.gsub('http:', 'https:')
-      render json: { url: url }
+      url = GroovS3.create_public_csv(@tenant_name, 'order_import_summary', Time.current.to_i, data).url.gsub('http:',
+                                                                                                              'https:')
+      render json: { url: }
     rescue Exception => e
       Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
   end
 
   def prepare_csv_data(lines)
-    headers = ['Time Stamp Tenant TZ', 'Time Stamp UTC', 'Filename', 'Tenant', ' Orders in file ', 'New_orders_imported', 'Existing orders updated', 'Existing orders skipped', 'Orders before import', 'Orders after import', 'Check E=F+G+H', ' Check J=F+I']
-    data = CSV.generate do |csv|
+    headers = ['Time Stamp Tenant TZ', 'Time Stamp UTC', 'Filename', 'Tenant', ' Orders in file ',
+               'New_orders_imported', 'Existing orders updated', 'Existing orders skipped', 'Orders before import', 'Orders after import', 'Check E=F+G+H', ' Check J=F+I']
+    CSV.generate do |csv|
       csv << headers if csv.count.eql? 0
       lines.each do |r|
         y = JSON.parse r
@@ -62,10 +66,10 @@ class OrderImportSummariesController < ApplicationController
         condition_for_check_2 = y['Orders_in_GroovePacker_after_import'] == y['New_orders_imported'] + y['Orders_in_GroovePacker_before_import']
         check_2 = condition_for_check_2 ? 'YES' : 'No'
 
-        csv << [y['Time_Stamp_Tenant_TZ'], y['Time_Stamp_UTC'], y['Name_of_imported_file'], y['Tenant'], y['Orders_in_file'], y['New_orders_imported',], y['Existing_orders_updated'], y['Existing_orders_skipped',], y['Orders_in_GroovePacker_before_import',], y['Orders_in_GroovePacker_after_import'], check_1.to_s, check_2.to_s]
+        csv << [y['Time_Stamp_Tenant_TZ'], y['Time_Stamp_UTC'], y['Name_of_imported_file'], y['Tenant'],
+                y['Orders_in_file'], y['New_orders_imported',], y['Existing_orders_updated'], y['Existing_orders_skipped',], y['Orders_in_GroovePacker_before_import',], y['Orders_in_GroovePacker_after_import'], check_1.to_s, check_2.to_s]
       end
     end
-    data
   end
 
   def fix_imported_at
@@ -115,14 +119,20 @@ class OrderImportSummariesController < ApplicationController
   def get_stores_last_import(result, store_type, cred, _store)
     if store_type == 'ShippingEasy'
       result[:last_imported_at] = begin
-                                    cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S')
-                                  rescue StandardError
-                                    4.day.ago.strftime('%Y-%m-%d %H:%M:%S')
-                                  end
+        cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S')
+      rescue StandardError
+        4.days.ago.strftime('%Y-%m-%d %H:%M:%S')
+      end
     elsif store_type.in? %w[Shopify Shopline Shippo Veeqo]
-      result[:last_imported_at] = cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S') rescue 1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
+      result[:last_imported_at] =
+        begin
+          cred.last_imported_at.strftime('%Y-%m-%d %H:%M:%S')
+        rescue StandardError
+          1.day.ago.strftime('%Y-%m-%d %H:%M:%S')
+        end
     else
-      result[:last_imported_at] = cred.quick_import_last_modified_v2.nil? ? 1.day.ago.strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
+      result[:last_imported_at] =
+        cred.quick_import_last_modified_v2.nil? ? 1.day.ago.strftime('%Y-%m-%d %H:%M:%S') : cred.quick_import_last_modified_v2.strftime('%Y-%m-%d %H:%M:%S')
     end
     result[:current_time] = Time.current.strftime('%Y-%m-%d %H:%M:%S')
   end

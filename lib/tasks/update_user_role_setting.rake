@@ -10,7 +10,7 @@ namespace :role do
         User.all.each do |user|
           next unless user.role.name != 'Scan & Pack User'
 
-          user.role.update_attributes(edit_shipping_settings: true,
+          user.role.update(edit_shipping_settings: true,
                                       edit_visible_services: true,
                                       add_edit_shortcuts: true,
                                       add_edit_dimension_presets: true)

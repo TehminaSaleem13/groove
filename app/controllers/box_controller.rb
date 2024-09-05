@@ -65,7 +65,7 @@ class BoxController < ApplicationController
       change_sequence(change_box_name)
     end
 
-    order.update_attributes(status: 'awaiting') if order.present? && order.status == 'scanned'
+    order.update(status: 'awaiting') if order.present? && order.status == 'scanned'
     render json: {}
   end
 

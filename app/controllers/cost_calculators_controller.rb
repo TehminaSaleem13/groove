@@ -18,7 +18,8 @@ class CostCalculatorsController < ApplicationController
       CostCalculatorMailer.send_cost_calculation(params).deliver
     end
     setting = GeneralSetting.last
-    setting.cost_calculator_url = '/cost_calculator?' + URI.encode(params.permit!.except('controller', 'action', 'cost_calculator', 'recipient_one', 'recipient_two', 'recipient_three', 'recipient_four', 'follow_up_email').to_query)
+    setting.cost_calculator_url = '/cost_calculator?' + CGI.escape(params.permit!.except('controller', 'action',
+                                                                                         'cost_calculator', 'recipient_one', 'recipient_two', 'recipient_three', 'recipient_four', 'follow_up_email').to_query)
     setting.save
     message = "Email Sent to #{recipient_one} #{recipient_two} #{recipient_three}"
     render json: { 'message' => message.gsub('undefined', ''), 'only_save' => params['only_save'] }

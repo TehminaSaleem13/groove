@@ -9,7 +9,7 @@ module Groovepacker
 
           def import
             init_common_objects
-            @import_item.update_attributes(updated_orders_import: 0)
+            @import_item.update(updated_orders_import: 0)
             initialize_orders_import
             update_orders_status
             destroy_nil_import_items
@@ -49,7 +49,7 @@ module Groovepacker
               break if import_should_be_cancelled
 
               import_single_order(order) if order.present?
-              @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
+              @credential.update(last_imported_at: Time.zone.parse(order['updated_at']))
             end
             add_deleted_merged_or_split_orders_log
             send_sku_report_not_found
@@ -86,17 +86,17 @@ module Groovepacker
                 o['allocations'].each do |a|
                   order_response = o.dup
                   order_response['allocations'] = [a]
-                  response_orders << order_response 
+                  response_orders << order_response
                 end
               end
-            end            
+            end
           end
 
           def add_deleted_merged_or_split_orders_log
             if @deleted_merged_orders.count > 0
               add_action_log('List of Deleted Orders', 'Veeqo Order Import - Merged Order', @deleted_merged_orders, @deleted_merged_orders.count)
             end
-            
+
             if @deleted_split_orders.count > 0
               add_action_log('List of Deleted Orders', 'Veeqo Order Import - Split Order', @deleted_split_orders, @deleted_split_orders.count)
             end
@@ -121,12 +121,14 @@ module Groovepacker
           end
 
           def get_orders_from_union(response, status_response)
-            response['orders'] = response['orders'].blank? ? status_response['orders'] : (response['orders'] | status_response['orders'])
+            response['orders'] =
+              response['orders'].blank? ? status_response['orders'] : (response['orders'] | status_response['orders'])
             response
           end
 
           def import_single_order(order)
-            @import_item.update_attributes(current_increment_id: order['number'], current_order_items: -1, current_order_imported_item: -1)
+            @import_item.update(current_increment_id: order['number'], current_order_items: -1,
+                                current_order_imported_item: -1)
             update_import_count('success_updated') && return if skip_the_order?(order)
 
             order_in_gp_present = false
@@ -224,8 +226,15 @@ module Groovepacker
           end
 
           def import_notes(veeqo_order, order)
-            veeqo_order.notes_internal = order['employee_notes'].map { |note| note['text'] }.join(', ') if @credential.shall_import_internal_notes && order['employee_notes'].present?
-            veeqo_order.customer_comments = order.dig('customer_note', 'text') if @credential.shall_import_customer_notes && order['customer_note'].present?
+            if @credential.shall_import_internal_notes && order['employee_notes'].present?
+              veeqo_order.notes_internal = order['employee_notes'].map do |note|
+                note['text']
+              end.join(', ')
+            end
+            if @credential.shall_import_customer_notes && order['customer_note'].present?
+              veeqo_order.customer_comments = order.dig('customer_note',
+                                                        'text')
+            end
             veeqo_order
           end
 
@@ -235,7 +244,7 @@ module Groovepacker
 
           def import_veeqo_order_item(veeqo_order, order)
             order_allocations = order['allocations'].dig(0, 'line_items')
-            line_items = order_allocations.present? ? order_allocations : order['line_items'] 
+            line_items = order_allocations.present? ? order_allocations : order['line_items']
             return if line_items.blank?
 
             @import_item.current_order_items = line_items.length
@@ -244,24 +253,28 @@ module Groovepacker
             line_items.each do |item|
               order_item = import_order_item(item)
               @import_item.update!(current_order_imported_item: @import_item.current_order_imported_item + 1)
-              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || import_order_items(item, set_order_number(order))
+              product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sellable']['sku_code'] }) || import_order_items(
+                item, set_order_number(order)
+              )
               if product.present?
                 order_item.product = product
                 veeqo_order.order_items << order_item
               else
-                on_demand_logger = Logger.new("#{Rails.root}/log/#{@store.store_type.downcase}_missing_product_import_order_item_#{Apartment::Tenant.current}.log")
-                log = { order_number: veeqo_order.increment_id, Time: Time.zone.now, shop_order_item: item, product: product }
+                on_demand_logger = Logger.new("#{Rails.root.join("log/#{@store.store_type.downcase}_missing_product_import_order_item_#{Apartment::Tenant.current}.log")}")
+                log = { order_number: veeqo_order.increment_id, Time: Time.zone.now, shop_order_item: item,
+                        product: }
                 on_demand_logger.info(log)
               end
             end
 
             return unless veeqo_order.order_items.present?
+
             veeqo_order.save!
             veeqo_order
           end
 
           def import_order_items(item, order_number)
-            #Check Switch Use Shopify as Product Source
+            # Check Switch Use Shopify as Product Source
             if check_shopify_as_a_product_source
               fetch_product_from_shopify(item['sellable']['sku_code'], item, order_number)
             else
@@ -281,12 +294,12 @@ module Groovepacker
               }
             GRAPHQL
 
-            product_res = @shopify_client.execute_grahpql_query(query: query)
-            product = product_res.body.dig("data", "products", "nodes")&.first
+            product_res = @shopify_client.execute_grahpql_query(query:)
+            product = product_res.body.dig('data', 'products', 'nodes')&.first
 
             if product.present?
-              id = product["id"].split("/").last
-              item["product_id"] = id
+              id = product['id'].split('/').last
+              item['product_id'] = id
               shopify_context.import_single_product_from_shopify_to_veeqo(item)
             else
               handle_not_found_sku(sku, order_number)
@@ -296,20 +309,21 @@ module Groovepacker
           def handle_not_found_sku(product_sku, order_number)
             pre_order = @result_data.find { |d| d[:order_number] == order_number }
             if pre_order.present?
-               pre_order[:skus] << product_sku
+              pre_order[:skus] << product_sku
             else
-              @result_data << { order_number: order_number, skus: [product_sku] }
+              @result_data << { order_number:, skus: [product_sku] }
             end
             false
           end
 
           def send_sku_report_not_found
-            VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data, @shopify_credential.store).deliver if check_shopify_as_a_product_source
+            VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data,
+                                                  @shopify_credential.store).deliver  if check_shopify_as_a_product_source
           end
 
           def import_order_item(line_item)
             row_total = line_item['sellable']['price'].to_f * line_item['quantity'].to_f
-            OrderItem.new(qty: line_item['quantity'], price: line_item['sellable']['price'], row_total: row_total)
+            OrderItem.new(qty: line_item['quantity'], price: line_item['sellable']['price'], row_total:)
           end
 
           def add_customer_info(veeqo_order, order)
@@ -364,6 +378,7 @@ module Groovepacker
               # import items in an order
               veeqo_order = import_veeqo_order_item(veeqo_order, order)
               return unless veeqo_order.present?
+
               # add order activities
               add_order_activities(veeqo_order, order)
               # update store

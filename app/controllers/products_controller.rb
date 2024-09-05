@@ -186,7 +186,7 @@ class ProductsController < ApplicationController
       render json: {}
     else
       url = scan_pack_object.print_label_with_delay(params)
-      render json: { url: url }
+      render json: { url: }
     end
   end
 
@@ -225,7 +225,7 @@ class ProductsController < ApplicationController
     if params[:search].blank?
       @result['status'] = false
       @result['message'] = 'Improper search string'
-    elsif !params[:barcode].blank?
+    elsif params[:barcode].present?
       @result = Product.joins(:product_barcodes).where("product_barcodes.barcode": params[:barcode])
     else
       @products = do_search(params, false)
@@ -259,7 +259,7 @@ class ProductsController < ApplicationController
   end
 
   def show
-    service_obj = ProductService::ProductInfo.new(params: params, current_user: current_user, result: @result)
+    service_obj = ProductService::ProductInfo.new(params:, current_user:, result: @result)
     @result = service_obj.get_product_info
 
     render json: @result
@@ -282,10 +282,10 @@ class ProductsController < ApplicationController
   def update
     @result = gp_products_module.update_product_attributes
     product_hash_scan_pack_v2(@params || params) if begin
-                                                                params[:app]
-                                                    rescue StandardError
-                                                      @params[:app]
-                                                              end
+      params[:app]
+    rescue StandardError
+      @params[:app]
+    end
     render json: @result
   end
 
@@ -296,10 +296,10 @@ class ProductsController < ApplicationController
     @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
     @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
     @item = begin
-              OrderItem.find(params[:item_id])
-            rescue StandardError
-              nil
-            end
+      OrderItem.find(params[:item_id])
+    rescue StandardError
+      nil
+    end
     @product = Product.find(params[:id])
     @barcode_qty = params[:barcode_qty].to_i
     @barcode_qty = 1 if @barcode_qty == 0
@@ -323,7 +323,7 @@ class ProductsController < ApplicationController
                template: 'products/generate_barcode_slip.html.erb',
                orientation: 'Portrait',
                page_height: '1in',
-               page_width: page_width,
+               page_width:,
                margin: { top: '0', bottom: '0', left: '0', right: '0' }
       end
     end
@@ -343,13 +343,25 @@ class ProductsController < ApplicationController
     require 'wicked_pdf'
     general_settings = GeneralSetting.last
     order_ids = begin
-                  params['ids'].split(',').reject(&:empty?)
-                rescue StandardError
-                  nil
-                end
+      params['ids'].split(',').reject(&:empty?)
+    rescue StandardError
+      nil
+    end
     @show_bin_locations = general_settings.try(:show_primary_bin_loc_in_barcodeslip)
     @show_sku_in_barcodeslip = general_settings.try(:show_sku_in_barcodeslip)
-    @order_items = params[:ids] == 'all' ? (params[:status] == 'all' ? Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).includes(:order_items).map(&:order_items).flatten : Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten) : Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).where('id in (?)', order_ids).map(&:order_items).flatten
+    @order_items = if params[:ids] == 'all'
+                     if params[:status] == 'all'
+                       Order.includes(order_items: [product: %i[
+                                        product_skus product_barcodes product_inventory_warehousess
+                                      ]]).includes(:order_items).map(&:order_items).flatten
+                     else
+                       Order.where(status: params[:status]).includes(:order_items).map(&:order_items).flatten
+                     end
+                   else
+                     Order.includes(order_items: [product: %i[product_skus product_barcodes product_inventory_warehousess]]).where(
+                       'id in (?)', order_ids
+                     ).map(&:order_items).flatten
+                   end
     respond_to do |format|
       format.html
       format.pdf do
@@ -397,7 +409,7 @@ class ProductsController < ApplicationController
 
   def convert_and_upload_image
     product = Product.find(params[:id])
-    @result['uri']  = product.get_converted_image(params) || ""
+    @result['uri'] = product.get_converted_image(params) || ''
     render json: @result
   end
 
@@ -454,7 +466,9 @@ class ProductsController < ApplicationController
     result = {}
     tenant = Apartment::Tenant.current
     export_product = ExportSsProductsCsv.new
-    export_product.delay(priority: 95, queue: "re_associate_all_products_#{tenant}").re_associate_all_products(tenant: tenant, params: params, username: current_user.name)
+    export_product.delay(priority: 95, queue: "re_associate_all_products_#{tenant}").re_associate_all_products(
+      tenant:, params:, username: current_user.name
+    )
     result['status'] = true
     render json: result
   end
@@ -484,13 +498,13 @@ class ProductsController < ApplicationController
 
   def get_inventory_setting
     setting = InventoryReportsSetting.last
-    setting = setting.blank? ? InventoryReportsSetting.create : setting
+    setting = setting.presence || InventoryReportsSetting.create
     @result['setting'] = JSON.parse(setting.to_json).merge(current_time: Time.current.strftime('%I:%M %p'))
     @result['inventory_report_toggle'] = begin
-                                           Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
-                                         rescue StandardError
-                                           nil
-                                         end
+      Tenant.find_by_name(Apartment::Tenant.current).inventory_report_toggle
+    rescue StandardError
+      nil
+    end
     @result['products'] = {}
     reports = ProductInventoryReport.includes([:products]).all
     reports.each_with_index do |report, index|
@@ -504,14 +518,13 @@ class ProductsController < ApplicationController
   end
 
   def get_item_count(report)
-    count = if report.name == 'All_Products_Report'
-              Product.count
-            elsif report.name == 'Active_Products_Report'
-              Product.where(status: 'active').count
-            else
-              report.products.count
-            end
-    count
+    if report.name == 'All_Products_Report'
+      Product.count
+    elsif report.name == 'Active_Products_Report'
+      Product.where(status: 'active').count
+    else
+      report.products.count
+    end
   end
 
   def update_inventory_settings
@@ -562,10 +575,10 @@ class ProductsController < ApplicationController
     images = ProductImage.where(image: image.try(:image))
     images.update_all(placeholder: params['flag'])
     image = begin
-              image.reload
-            rescue StandardError
-              image
-            end
+      image.reload
+    rescue StandardError
+      image
+    end
     @result['placeholder'] = image.placeholder
     render json: @result
   end
@@ -586,13 +599,14 @@ class ProductsController < ApplicationController
 
   def product_hash_scan_pack_v2(params)
     product = begin
-                Product.find_by_id(params[:basicinfo][:id])
-              rescue StandardError
-                nil
-              end
+      Product.find_by_id(params[:basicinfo][:id])
+    rescue StandardError
+      nil
+    end
     if product.is_kit? && product.kit_parsing != 'single'
       result = {}
-      result = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
+      result = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id',
+                                                              'box_id')
       result['product_type'] = product.kit_parsing
       result['child_items'] = []
       option_products_array = product.product_kit_skuss.map(&:option_product)
@@ -600,7 +614,8 @@ class ProductsController < ApplicationController
         child_item = {}
         product_kit_sku = ProductKitSkus.find_by(option_product_id: kit_product.id)
         option_product = option_products_array.find { |op| op.id == product_kit_sku.option_product_id }
-        child_item = OrderItem.new.build_basic_item(kit_product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
+        child_item = OrderItem.new.build_basic_item(kit_product).except('partially_scanned', 'updated_at',
+                                                                        'order_item_id', 'box_id')
         child_item['kit_packing_placement'] = product_kit_sku.packing_order
         child_item['kit_product_id'] = kit_product.id
         child_item['product_qty_in_kit'] = product_kit_sku.qty
@@ -609,12 +624,13 @@ class ProductsController < ApplicationController
       result['child_items'] = result['child_items'].sort_by { |hsh| hsh['kit_packing_placement'] }
       @result['scan_pack_product'] = result
     else
-      @result['scan_pack_product'] = OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
+      @result['scan_pack_product'] =
+        OrderItem.new.build_basic_item(product).except('partially_scanned', 'updated_at', 'order_item_id', 'box_id')
     end
   rescue StandardError => e
-    on_demand_logger = Logger.new("#{Rails.root}/log/product_hash_scan_pack_v2.log")
+    on_demand_logger = Logger.new("#{Rails.root.join('log/product_hash_scan_pack_v2.log')}")
     on_demand_logger.info('=========================================')
-    log = { tenant: Apartment::Tenant.current, params: params, result: @result, error: e }
+    log = { tenant: Apartment::Tenant.current, params:, result: @result, error: e }
     on_demand_logger.info(log)
   end
 end

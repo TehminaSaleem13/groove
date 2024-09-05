@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class ProductSku < ActiveRecord::Base
+class ProductSku < ApplicationRecord
   belongs_to :product
-  belongs_to :order_item
+  belongs_to :order_item, optional: true
   # attr_accessible :purpose, :sku
   validates_uniqueness_of :sku
 

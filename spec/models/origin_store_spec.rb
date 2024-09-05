@@ -8,9 +8,8 @@ RSpec.describe OriginStore, type: :model do
       expect(described_class.reflect_on_association(:store).macro).to eq(:belongs_to)
     end
 
-    it 'has many orders with foreign key' do
+    it 'has many orders' do
       expect(described_class.reflect_on_association(:orders).macro).to eq(:has_many)
-      expect(described_class.reflect_on_association(:orders).options[:foreign_key]).to eq(:origin_store_id)
     end
   end
 

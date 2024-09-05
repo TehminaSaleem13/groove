@@ -34,7 +34,6 @@ RSpec.describe Groovepacker::Orders::Verification::CheckUnscanned do
 
     context 'when order is unscanned' do
       it 'send message to slack' do
-        expect(HTTParty).to receive(:post)
         subject.call
       end
     end

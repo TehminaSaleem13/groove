@@ -35,12 +35,12 @@ module Groovepacker
             break if import_should_be_cancelled
 
             import_single_order(order) if order.present?
-            @credential.update_attributes(last_imported_at: Time.zone.parse(order['updated_at']))
+            @credential.update(last_imported_at: Time.zone.parse(order['updated_at']))
           end
           Tenant.save_se_import_data('==ImportItem', @import_item.as_json, '==OrderImportSumary', @import_item.try(:order_import_summary).try(:as_json))
           if @import_item.status != 'cancelled'
             begin
-              @credential.update_attributes(last_imported_at: Time.zone.parse(response['orders'].last['updated_at']))
+              @credential.update(last_imported_at: Time.zone.parse(response['orders'].last['updated_at']))
             rescue StandardError
               nil
             end
@@ -77,7 +77,7 @@ module Groovepacker
         end
 
         def import_single_order(order)
-          @import_item.update_attributes(current_increment_id: order['id'], current_order_items: -1, current_order_imported_item: -1)
+          @import_item.update(current_increment_id: order['id'], current_order_items: -1, current_order_imported_item: -1)
 
           update_import_count('success_updated') && return if skip_the_order?(order)
 

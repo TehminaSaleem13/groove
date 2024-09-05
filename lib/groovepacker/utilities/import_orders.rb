@@ -66,7 +66,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     @order_import_summary.reload
     return if @order_import_summary.status == 'cancelled'
 
-    @order_import_summary.update_attributes(status: 'completed')
+    @order_import_summary.update(status: 'completed')
   end
 
   # params should have hash of tenant, store, import_type = 'regular', user
@@ -226,9 +226,9 @@ class ImportOrders < Groovepacker::Utilities::Base
     return unless check_connection_for_csv_import(mapping, store, import_item)
 
     if store.csv_beta
-      import_item.order_import_summary.update_attributes(status: 'not_started', display_summary: false)
+      import_item.order_import_summary.update(status: 'not_started', display_summary: false)
     else
-      import_item.update_attributes(status: 'in_progress')
+      import_item.update(status: 'in_progress')
     end
     map = mapping.order_csv_map
     map.map[:map] = begin
@@ -250,7 +250,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     on_demand_logger = Logger.new("#{Rails.root}/log/import.log")
     on_demand_logger.info(result[:messages])
     update_status(import_item, result) if !store.csv_beta || result[:status] == false
-    import_item.update_attributes(message: result[:messages]) unless result[:status]
+    import_item.update(message: result[:messages]) unless result[:status]
   end
 
   def check_or_assign_import_item(import_item)
@@ -263,7 +263,7 @@ class ImportOrders < Groovepacker::Utilities::Base
   end
 
   def initiate_import_for(_store, import_item, handler)
-    import_item.update_attributes(status: 'in_progress')
+    import_item.update(status: 'in_progress')
     result = Groovepacker::Stores::Context.new(handler).import_orders
     new_import_item = import_item
     begin
@@ -283,7 +283,7 @@ class ImportOrders < Groovepacker::Utilities::Base
     return if import_item.status == 'cancelled'
 
     status = result[:status] ? 'completed' : 'failed'
-    import_item.update_attributes(status: status)
+    import_item.update(status: status)
     import_summary = OrderImportSummary.top_summary
     import_summary&.emit_data_to_user(true)
   end
@@ -293,14 +293,14 @@ class ImportOrders < Groovepacker::Utilities::Base
     import_item_message = "Import failed: #{e.message}" if e.message.strip != 'Error: 302'
     if import_item.store.store_type == 'Shipstation API 2' && e.message.include?('401')
       import_item_message = 'Authorization with Shipstation store failed. Please check your API credentials'
-      import_item.update_attributes(status: 'failed', message: import_item_message, import_error: import_item_message)
+      import_item.update(status: 'failed', message: import_item_message, import_error: import_item_message)
     else
       error = begin
                 ([e.message] << e.backtrace.first(3)).flatten.join(',')
               rescue StandardError
                 e
               end
-      import_item.update_attributes(status: 'failed', message: import_item_message, import_error: error)
+      import_item.update(status: 'failed', message: import_item_message, import_error: error)
       Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
     check_and_restart_import(e, import_item, tenant)

@@ -5,10 +5,10 @@ module Groovepacker
     class Products < Groovepacker::Products::Base
       def update_product_attributes
         @product = begin
-                     Product.find_by_id(@params[:basicinfo][:id])
-                   rescue StandardError
-                     nil
-                   end
+          Product.find_by_id(@params[:basicinfo][:id])
+        rescue StandardError
+          nil
+        end
 
         # @product.product_kit_skuss
         # flag =''
@@ -25,10 +25,10 @@ module Groovepacker
         @result['params'] = @params
         @result['exist_barcode'] = false
         multi_barcode = begin
-                          @params[:basicinfo][:multibarcode]
-                        rescue StandardError
-                          []
-                        end
+          @params[:basicinfo][:multibarcode]
+        rescue StandardError
+          []
+        end
         apply_loop(multi_barcode)
 
         if @product.blank?
@@ -43,8 +43,8 @@ module Groovepacker
         @product = update_product_and_associated_info
         @product.update_product_status
         reset_recent_order_items_cache
-        @result["params"][:skus] = @product.product_skus.map(&:serializable_hash)
-        @result["params"][:barcodes] = @product.product_barcodes.map(&:serializable_hash)
+        @result['params'][:skus] = @product.product_skus.map(&:serializable_hash)
+        @result['params'][:barcodes] = @product.product_barcodes.map(&:serializable_hash)
         @result
       end
 
@@ -52,13 +52,14 @@ module Groovepacker
         (multi_barcode.try(:values) || []).each do |barcode|
           multi = barcode
           barcode = begin
-                      ProductBarcode.find_by_id(multi[:id])
-                    rescue StandardError
-                      nil
-                    end
+            ProductBarcode.find_by_id(multi[:id])
+          rescue StandardError
+            nil
+          end
           if multi.present?
             if barcode.blank?
-              create_or_update_single_barcode({ barcode: multi[:barcode] }.with_indifferent_access, 0, 'new', @product.product_barcodes)
+              create_or_update_single_barcode({ barcode: multi[:barcode] }.with_indifferent_access, 0, 'new',
+                                              @product.product_barcodes)
               # if ProductBarcode.find_by_barcode(multi[:barcode]).present?
               #   @result["exist_barcode"] = true
               # else
@@ -77,21 +78,33 @@ module Groovepacker
       def create_product_export(params, result, tenant)
         Apartment::Tenant.switch! tenant
         products = ProductsService::ListSelectedProducts.call(params, include_association = true)
-        export_type = begin
-                         params[:product][:is_kit] == 1
-                      rescue StandardError
-                        nil
-                       end ? 'kits' : 'products'
+        export_type = if begin
+          params[:product][:is_kit] == 1
+        rescue StandardError
+          nil
+        end
+                        'kits'
+                      else
+                        'products'
+                      end
         result['filename'] = export_type + '-' + Time.current.to_s + '.csv'
-        CSV.open("#{Rails.root}/public/csv/#{result['filename']}", 'w') do |csv|
-          data = export_type == 'kits' ? ProductsHelper.kit_csv(products, csv) : ProductsHelper.products_csv(products, csv)
-          result['filename'] = GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url.gsub('http:', 'https:')
+        CSV.open("#{Rails.root.join("public/csv/#{result['filename']}")}", 'w') do |csv|
+          data = if export_type == 'kits'
+                   ProductsHelper.kit_csv(products,
+                                          csv)
+                 else
+                   ProductsHelper.products_csv(products, csv)
+                 end
+          result['filename'] =
+            GroovS3.create_export_csv(Apartment::Tenant.current, result['filename'], data).url.gsub('http:', 'https:')
         end
         CsvExportMailer.send_s3_export_product_url(result['filename'], Apartment::Tenant.current).deliver
       end
 
       def ftp_product_import(tenant)
-        stores = Store.joins(:ftp_credential).where('product_ftp_host IS NOT NULL and product_ftp_username IS NOT NULL and product_ftp_password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_product_ftp_import = ?', 'CSV', true)
+        stores = Store.joins(:ftp_credential).where(
+          'product_ftp_host IS NOT NULL and product_ftp_username IS NOT NULL and product_ftp_password IS NOT NULL and status=true and store_type = ? && ftp_credentials.use_product_ftp_import = ?', 'CSV', true
+        )
         stores.each do |store|
           params = {}
           mapping = CsvMapping.find_by_store_id(store.id)
@@ -99,14 +112,15 @@ module Groovepacker
 
           map = mapping.product_csv_map
           map.map[:map] = begin
-                            map.map[:map].class == ActionController::Parameters ? map.map[:map].permit!.to_h : map.map[:map]
-                          rescue StandardError
-                            nil
-                          end
+            map.map[:map].class == ActionController::Parameters ? map.map[:map].permit!.to_h : map.map[:map]
+          rescue StandardError
+            nil
+          end
           data = build_product_data(map, store)
           data[:tenant] = tenant
           data[:user_id] = User.find_by_name('gpadmin').try(:id)
-          ImportCsv.new.delay(run_at: 1.seconds.from_now, queue: "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current, data.to_s
+          ImportCsv.new.delay(run_at: 1.second.from_now, queue: "import_products_from_csv#{Apartment::Tenant.current}", priority: 95).import Apartment::Tenant.current,
+                                                                                                                                             data.to_s
         end
       end
 
@@ -133,9 +147,12 @@ module Groovepacker
       private
 
       def reset_recent_order_items_cache
-        @product.order_items.not_scanned.joins(:order).where('orders.last_suggested_at > ?', 2.minutes.ago).map(&:delete_cache_for_associated_obj)
+        @product.order_items.not_scanned.joins(:order).where('orders.last_suggested_at > ?',
+                                                             2.minutes.ago).map(&:delete_cache_for_associated_obj)
         # Reset Cache for Kit Items
-        OrderItem.not_scanned.joins(:order, order_item_kit_products: :product_kit_skus).where('orders.last_suggested_at > ?', 2.minutes.ago).where(order_item_kit_products: { product_kit_skus: { option_product_id: @product.id } }).map(&:delete_cache_for_associated_obj)
+        OrderItem.not_scanned.joins(:order, order_item_kit_products: :product_kit_skus).where(
+          'orders.last_suggested_at > ?', 2.minutes.ago
+        ).where(order_item_kit_products: { product_kit_skus: { option_product_id: @product.id } }).map(&:delete_cache_for_associated_obj)
       end
 
       def general_setting
@@ -146,11 +163,12 @@ module Groovepacker
         update_product_basic_info # Update Basic Info
         update_product_location # Update Location
         begin
-            update_inventory_info
+          update_inventory_info
         rescue StandardError
           nil
-          end # Update Inventory Info
-        updatelist(@product, 'status', @params[:basicinfo][:status]) unless @params[:basicinfo][:status].nil? # Update product status and also update the containing kit and orders
+        end # Update Inventory Info
+        # Update product status and also update the containing kit and orders
+        updatelist(@product, 'status', @params[:basicinfo][:status]) unless @params[:basicinfo][:status].nil?
         update_category_sku_barcode # Update product category, sku and barcode
         create_or_update_product_images # Update or update product images
         update_product_kit_skus # if product is a kit, update product_kit_skus
@@ -316,12 +334,14 @@ module Groovepacker
           return status
         when barcode['id'].present? && barcode['id'] != 'TEMP'
           db_barcode = product_barcodes.find { |_bar| _bar.id == barcode['id'].to_i }
-          if barcode['barcode'].present? && db_barcode && (@product.product_barcodes.where('id != ?', db_barcode.id).pluck(:barcode).include? barcode['barcode'])
+          if barcode['barcode'].present? && db_barcode && (@product.product_barcodes.where('id != ?',
+                                                                                           db_barcode.id).pluck(:barcode).include? barcode['barcode'])
             @result['status'] = false
             @result['message'] = "The Barcode \"#{barcode['barcode']}\" is already associated with this product"
             status = false
           else
-            status = @product.create_or_update_product_sku_or_barcode(barcode, index, nil, db_barcode, @current_user, 'barcode')
+            status = @product.create_or_update_product_sku_or_barcode(barcode, index, nil, db_barcode, @current_user,
+                                                                      'barcode')
           end
         when barcode['barcode'].present? && db_barcode.blank?
           # status = @product.create_or_update_productbarcode(barcode, index, 'new', @current_user)
@@ -330,10 +350,15 @@ module Groovepacker
           if barcode[:permit_same_barcode]
             status = @product.create_or_update_product_sku_or_barcode(barcode, index, 'new', @current_user, 'barcode')
           else
-            @result['current_product_data'] = { id: @product.id, name: @product.name, sku: @product.product_skus.map(&:sku).join(', '), barcode: @product.product_barcodes.map(&:barcode).join(', ') }
-            @result['alias_product_data'] = { id: db_barcode.product.id, name: db_barcode.product.name, sku: db_barcode.product.product_skus.map(&:sku).join(', '), barcode: db_barcode.product.product_barcodes.map(&:barcode).join(', ') }
+            @result['current_product_data'] =
+              { id: @product.id, name: @product.name, sku: @product.product_skus.map(&:sku).join(', '),
+                barcode: @product.product_barcodes.map(&:barcode).join(', ') }
+            @result['alias_product_data'] =
+              { id: db_barcode.product.id, name: db_barcode.product.name, sku: db_barcode.product.product_skus.map(&:sku).join(', '),
+                barcode: db_barcode.product.product_barcodes.map(&:barcode).join(', ') }
             @result['after_alias_product_data'] = @result['alias_product_data'].dup
-            @result['after_alias_product_data'][:sku] = (@result['alias_product_data'][:sku].split(', ') << @product.product_skus.map(&:sku)).flatten.compact.join(', ')
+            @result['after_alias_product_data'][:sku] =
+              (@result['alias_product_data'][:sku].split(', ') << @product.product_skus.map(&:sku)).flatten.compact.join(', ')
             @result['shared_bacode_products'] = ProductBarcode.get_shared_barcode_products(barcode['barcode'])
             @result['matching_barcode'] = barcode['barcode']
             @result['show_alias_popup'] = true
@@ -367,7 +392,7 @@ module Groovepacker
       def update_inventory_info
         return if @params[:inventory_warehouses].blank?
 
-        attr_array = get_inv_update_attributes
+        attr_array = get_inv_update
 
         @params[:inventory_warehouses].each do |inv_wh|
           update_single_warehouse_info(inv_wh, attr_array)
@@ -383,8 +408,9 @@ module Groovepacker
         product_location.save
       end
 
-      def get_inv_update_attributes
-        attr_array = %w[quantity_on_hand location_primary location_secondary location_tertiary location_quaternary location_primary_qty location_secondary_qty location_tertiary_qty location_quaternary_qty product_inv_alert_level product_inv_target_level allocated_inv]
+      def get_inv_update
+        attr_array = %w[quantity_on_hand location_primary location_secondary location_tertiary location_quaternary
+                        location_primary_qty location_secondary_qty location_tertiary_qty location_quaternary_qty product_inv_alert_level product_inv_target_level allocated_inv]
         attr_array += ['product_inv_alert'] if general_setting.low_inventory_alert_email
         attr_array
       end
@@ -393,18 +419,22 @@ module Groovepacker
         return @result if objects_array.blank?
 
         ids = begin
-                obj_params.map { |obj| obj['id'] }.compact.map(&:to_i)
-              rescue StandardError
-                []
-              end
+          obj_params.map { |obj| obj['id'] }.compact.map(&:to_i)
+        rescue StandardError
+          []
+        end
         objects_array.each do |object|
           found_obj = false
           found_obj = true if ids.include?(object.id)
-          found_obj = true if !found_obj && (ids.include? 'TEMP') && obj_params.select { |o| o[type] == object.send(type) }.any?
+          found_obj = true if !found_obj && (ids.include? 'TEMP') && obj_params.select do |o|
+                                o[type] == object.send(type)
+                              end.any?
           if found_obj == false && type == 'sku'
-            object.product.add_product_activity("The #{type} #{object.sku} was deleted from this item", @current_user.name)
+            object.product.add_product_activity("The #{type} #{object.sku} was deleted from this item",
+                                                @current_user.name)
           elsif found_obj == false && type == 'barcode'
-            object.product.add_product_activity("The #{type} #{object.barcode}  was deleted from this item", @current_user.name)
+            object.product.add_product_activity("The #{type} #{object.barcode}  was deleted from this item",
+                                                @current_user.name)
           end
 
           @result['status'] &= false if found_obj == false && !object.destroy
@@ -414,7 +444,11 @@ module Groovepacker
 
       def update_product_basic_info
         basic_info = @params[:basicinfo]
-        @product.add_product_activity("The Product Name of this item was changed from #{@product.name} to #{basic_info['name']} ", @current_user.username) if @product.name != basic_info['name']
+        if @product.name != basic_info['name']
+          @product.add_product_activity(
+            "The Product Name of this item was changed from #{@product.name} to #{basic_info['name']} ", @current_user.username
+          )
+        end
         unless @product.is_kit == basic_info['is_kit']
           type = basic_info['is_kit'] == 0 ? 'product' : 'kit'
           @product.add_product_activity("This item was changed to a #{type}", @current_user.name)
@@ -453,9 +487,13 @@ module Groovepacker
           product_location.inventory_warehouse_id = @current_user.inventory_warehouse_id
         end
 
-        unless @params[:inventory_warehouses].blank?
+        if @params[:inventory_warehouses].present?
           qua_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand]
-          @product.add_product_activity("The QOH of this item was changed from #{product_location.quantity_on_hand} to #{qua_on_hand} ", @current_user.name) if product_location.quantity_on_hand != qua_on_hand
+          if product_location.quantity_on_hand != qua_on_hand
+            @product.add_product_activity(
+              "The QOH of this item was changed from #{product_location.quantity_on_hand} to #{qua_on_hand} ", @current_user.name
+            )
+          end
           product_location.quantity_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand]
         end
         product_location.save

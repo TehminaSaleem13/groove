@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GenerateBarcode < ActiveRecord::Base
+class GenerateBarcode < ApplicationRecord
   # attr_accessible :status, :url, :user_id, :current_order_position, :total_orders,
   #                 :next_order_increment_id, :status, :current_increment_id, :print_type, :dimensions
   after_save :emit_data_to_user

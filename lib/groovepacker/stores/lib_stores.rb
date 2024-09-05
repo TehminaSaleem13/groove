@@ -239,7 +239,7 @@ module Groovepacker
             @store.shipworks_credential = ShipworksCredential.new(auth_token: Store.get_sucure_random_token, import_store_order_number: params[:import_store_order_number].to_boolean, shall_import_in_process: params[:shall_import_in_process].to_boolean, shall_import_new_order: params[:shall_import_new_order].to_boolean, shall_import_not_shipped: params[:shall_import_not_shipped].to_boolean, shall_import_shipped: params[:shall_import_shipped].to_boolean, shall_import_no_status: params[:shall_import_no_status].to_boolean, shall_import_ignore_local: params[:shall_import_ignore_local].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean)
             new_record = true
           else
-            @shipworks.update_attributes(import_store_order_number: params[:import_store_order_number].to_boolean, shall_import_in_process: params[:shall_import_in_process].to_boolean, shall_import_new_order: params[:shall_import_new_order].to_boolean, shall_import_not_shipped: params[:shall_import_not_shipped].to_boolean, shall_import_shipped: params[:shall_import_shipped].to_boolean, shall_import_no_status: params[:shall_import_no_status].to_boolean, shall_import_ignore_local: params[:shall_import_ignore_local].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean)
+            @shipworks.update(import_store_order_number: params[:import_store_order_number].to_boolean, shall_import_in_process: params[:shall_import_in_process].to_boolean, shall_import_new_order: params[:shall_import_new_order].to_boolean, shall_import_not_shipped: params[:shall_import_not_shipped].to_boolean, shall_import_shipped: params[:shall_import_shipped].to_boolean, shall_import_no_status: params[:shall_import_no_status].to_boolean, shall_import_ignore_local: params[:shall_import_ignore_local].to_boolean, gen_barcode_from_sku: params[:gen_barcode_from_sku].to_boolean)
           end
           @store.save
         rescue ActiveRecord::RecordInvalid => e
@@ -262,7 +262,7 @@ module Groovepacker
             @store.shopify_credential = ShopifyCredential.new(shop_name: params[:shop_name])
             new_record = true
           else
-            @shopify.update_attributes(shop_name: params[:shop_name], access_token: params[:access_token], shopify_status: params[:shopify_status], on_hold_status: params[:on_hold_status], shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b, partial_status: params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling], generating_barcodes: params[:generating_barcodes], import_inventory_qoh: params[:import_inventory_qoh],webhook_order_import: params[:webhook_order_import],import_variant_names: params[:import_variant_names],import_updated_sku: params[:import_updated_sku], updated_sku_handling: params[:updated_sku_handling], permit_shared_barcodes: params[:permit_shared_barcodes], import_fulfilled_having_tracking: params[:import_fulfilled_having_tracking], fix_all_product_images: params[:fix_all_product_images], add_gp_scanned_tag: params[:add_gp_scanned_tag], re_associate_shopify_products: params[:re_associate_shopify_products], push_inv_location_id: params[:push_inv_location_id], pull_inv_location_id: params[:pull_inv_location_id], pull_combined_qoh: params[:pull_combined_qoh], order_import_range_days: params[:order_import_range_days])
+            @shopify.update(shop_name: params[:shop_name], access_token: params[:access_token], shopify_status: params[:shopify_status], on_hold_status: params[:on_hold_status], shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b, partial_status: params[:partial_status].to_b, modified_barcode_handling: params[:modified_barcode_handling], generating_barcodes: params[:generating_barcodes], import_inventory_qoh: params[:import_inventory_qoh],webhook_order_import: params[:webhook_order_import],import_variant_names: params[:import_variant_names],import_updated_sku: params[:import_updated_sku], updated_sku_handling: params[:updated_sku_handling], permit_shared_barcodes: params[:permit_shared_barcodes], import_fulfilled_having_tracking: params[:import_fulfilled_having_tracking], fix_all_product_images: params[:fix_all_product_images], add_gp_scanned_tag: params[:add_gp_scanned_tag], re_associate_shopify_products: params[:re_associate_shopify_products], push_inv_location_id: params[:push_inv_location_id], pull_inv_location_id: params[:pull_inv_location_id], pull_combined_qoh: params[:pull_combined_qoh], order_import_range_days: params[:order_import_range_days])
           end
           @store.save
         rescue ActiveRecord::RecordInvalid => e
@@ -285,7 +285,7 @@ module Groovepacker
             @store.shopline_credential = ShoplineCredential.new(shop_name: params[:shop_name])
             new_record = true
           else
-            @shopline.update_attributes(
+            @shopline.update(
               shop_name: params[:shop_name], access_token: params[:access_token],
               shopline_status: params[:shopline_status], on_hold_status: params[:on_hold_status],
               shipped_status: params[:shipped_status].to_b, unshipped_status: params[:unshipped_status].to_b,
@@ -316,7 +316,7 @@ module Groovepacker
             @store.big_commerce_credential = BigCommerceCredential.new(shop_name: params[:shop_name])
             new_record = true
           else
-            @bigcommerce.update_attributes(shop_name: params[:shop_name])
+            @bigcommerce.update(shop_name: params[:shop_name])
           end
           @store.save
         rescue ActiveRecord::RecordInvalid => e
@@ -441,7 +441,7 @@ module Groovepacker
           @shippo.save
 		      new_record = true
 		    else
-          @shippo.update_attributes(api_key: params[:api_key], api_version: params[:api_version], generate_barcode_option: params[:generate_barcode_option], import_paid: params[:import_paid], import_awaitpay: params[:import_awaitpay], import_partially_fulfilled: params[:import_partially_fulfilled], import_shipped: params[:import_shipped], import_any: params[:import_any], import_shipped_having_tracking: params[:import_shipped_having_tracking])
+          @shippo.update(api_key: params[:api_key], api_version: params[:api_version], generate_barcode_option: params[:generate_barcode_option], import_paid: params[:import_paid], import_awaitpay: params[:import_awaitpay], import_partially_fulfilled: params[:import_partially_fulfilled], import_shipped: params[:import_shipped], import_any: params[:import_any], import_shipped_having_tracking: params[:import_shipped_having_tracking])
         end
         @store.shippo_credential = @shippo
 		    begin

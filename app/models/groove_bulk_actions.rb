@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class GrooveBulkActions < ActiveRecord::Base
+class GrooveBulkActions < ApplicationRecord
   after_save :emit_data_to_tenant
 
   # attr_accessible :identifier, :activity, :total, :completed, :status, :current, :messages, :cancel

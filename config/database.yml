@@ -11,49 +11,78 @@
 default: &default
   adapter: mysql2
   encoding: utf8mb4
+  pool: 5
 
 development:
-  <<: *default
-  reconnect: false
-  database: groovepacks_development
-  pool: 5
-  host: <%= ENV['DB_HOST'] %>
-  username: <%= ENV['DB_USERNAME'] %>
-  password: <%= ENV['DB_PASSWORD'] %>
-  # socket: /private/tmp/mysql.sock
+  write_database:
+    <<: *default
+    reconnect: false
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_development') %>
+    host: <%= ENV['DB_HOST'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+  read_database:
+    <<: *default
+    reconnect: false
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_development') %>
+    host: <%= ENV['DB_HOST_READING'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    replica: true
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  <<: *default
-  reconnect: false
-  database: groovepacks_test
-  pool: 5
-  host: <%= ENV['DB_HOST'] %>
-  username: <%= ENV['DB_USERNAME'] %>
-  password: <%= ENV['DB_PASSWORD'] %>
-  # socket: /private/tmp/mysql.sock
-  # socket: /var/run/mysqld/mysqld.sock # Disable this in local environments
+  write_database:
+    <<: *default
+    reconnect: false
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_test') %>
+    host: <%= ENV['DB_HOST'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+  read_database:
+    <<: *default
+    reconnect: false
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_test') %>
+    host: <%= ENV['DB_HOST'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
 
 production:
-  <<: *default
-  reconnect: true
-  database: groovepacks_production_split
-  pool: 5
-  host: <%= ENV['DB_HOST'] %>
-  username: <%= ENV['DB_USERNAME'] %>
-  password: <%= ENV['DB_PASSWORD'] %>
-  port: 3306
-  #socket: /var/run/mysqld/mysqld.sock
+  write_database:
+    <<: *default
+    reconnect: true
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_production_split') %>
+    host: <%= ENV['DB_HOST'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    port: 3306
+  read_database:
+    <<: *default
+    reconnect: true
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_production_split') %>
+    host: <%= ENV['DB_HOST_READING'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    port: 3306
+    replica: true
 
 staging:
-  <<: *default
-  reconnect: true
-  database: groovepacks_production
-  pool: 5
-  host: <%= ENV['DB_HOST'] %>
-  username: <%= ENV['DB_USERNAME'] %>
-  password: <%= ENV['DB_PASSWORD'] %>
-  port: 3306
-  #socket: /var/run/mysqld/mysqld.sock
+  write_database:
+    <<: *default
+    reconnect: true
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_staging') %>
+    host: <%= ENV['DB_HOST'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    port: 3306
+  read_database:
+    <<: *default
+    reconnect: true
+    database: <%= ENV.fetch('DB_NAME', 'groovepacks_staging') %>
+    host: <%= ENV['DB_HOST_READING'] %>
+    username: <%= ENV['DB_USERNAME'] %>
+    password: <%= ENV['DB_PASSWORD'] %>
+    port: 3306
+    replica: true

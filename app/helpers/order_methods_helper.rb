@@ -504,7 +504,7 @@ module OrderMethodsHelper
 
   def reset_assigned_tote(user_id)
     addactivity("Order manually cleared from #{ScanPackSetting.last.tote_identifier} #{tote.name}.", User.find_by_id(user_id).try(:name)) if tote
-    tote&.update_attributes(order_id: nil, pending_order: false)
+    tote&.update(order_id: nil, pending_order: false)
     reset_scanned_status(User.find_by_id(user_id))
   end
 

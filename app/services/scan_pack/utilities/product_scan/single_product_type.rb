@@ -39,7 +39,7 @@ module ScanPack::Utilities::ProductScan::SingleProductType
           # then we can remove that order_item from the order
           if @scanpack_settings.skip_code_enabled? && clean_input == @scanpack_settings.skip_code && item['skippable']
             qty = remove_skippable_product(item)
-            order_item.update_attributes(skipped_qty: qty) unless @scanpack_settings.remove_skipped
+            order_item.update(skipped_qty: qty) unless @scanpack_settings.remove_skipped
             @single_order.order_items.delete(order_item) if @scanpack_settings.remove_skipped && order_item.scanned_status != 'partially_scanned'
             @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was skipped using the SKIP barcode", @current_user.try(:username))
           else

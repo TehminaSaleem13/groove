@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class AccessRestriction < ActiveRecord::Base
+class AccessRestriction < ApplicationRecord
   # attr_accessible :tenant_id, :num_users, :num_shipments, :num_import_sources, :total_scanned_shipments, :added_through_ui
   include AhoyEvent
 
@@ -20,7 +20,7 @@ class AccessRestriction < ActiveRecord::Base
       track_changes(title: 'Access Restriction Settings Changed', tenant: Apartment::Tenant.current,
                     username: User.current.try(:username) || 'GP App', object_id: id, changes: saved_changes)
     end
-  end  
+  end
 
   def initialize_campaingmonitor
     current_tenant = Apartment::Tenant.current

@@ -1,4 +1,4 @@
 # frozen_string_literal: true
 
-class PrintingSetting < ActiveRecord::Base
+class PrintingSetting < ApplicationRecord
 end

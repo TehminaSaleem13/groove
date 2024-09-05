@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class ProductImage < ActiveRecord::Base
+class ProductImage < ApplicationRecord
   belongs_to :product
   # attr_accessible :image, :caption
 

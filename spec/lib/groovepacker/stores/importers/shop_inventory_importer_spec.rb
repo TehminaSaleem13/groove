@@ -14,6 +14,7 @@ describe Groovepacker::Stores::Importers::ShopInventoryImporter do
   let(:inventory_levels) { [inv_level1, inv_level2] }
 
   before do
+    Groovepacker::SeedTenant.new.seed
     subject.send :init_credential_and_client
   end
 
@@ -42,14 +43,17 @@ describe Groovepacker::Stores::Importers::ShopInventoryImporter do
       let(:product) { create(:product, :with_sku_barcode) }
 
       before do
-        create(:sync_option, product_id: product.id, sync_with_shopify: true, shopify_product_variant_id: shopify_product_variant_id)
+        create(:sync_option, product_id: product.id, sync_with_shopify: true,
+                             shopify_product_variant_id:)
         product.primary_warehouse.update(available_inv: current_inv_qty)
         allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:inventory_levels).and_return(inventory_levels)
         allow_any_instance_of(Groovepacker::ShopifyRuby::Client).to receive(:get_variant).and_return(variant)
       end
 
       it 'performs the inventory import from shopify' do
-        expect { subject.pull_inventories }.to change { product.reload.primary_warehouse.quantity_on_hand }.by(inv_qty_difference)
+        expect { subject.pull_inventories }.to change {
+                                                 product.reload.primary_warehouse.quantity_on_hand
+                                               }.by(inv_qty_difference)
       end
     end
   end

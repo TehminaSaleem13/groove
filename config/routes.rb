@@ -1,11 +1,13 @@
 # frozen_string_literal: true
 
-Groovepacks::Application.routes.draw do
+Rails.application.routes.draw do
   mount LetterOpenerWeb::Engine, at: '/letter_opener' if Rails.env.development?
 
+  # Doorkeeper
   use_doorkeeper do
     controllers tokens: 'oauth/access_tokens'
   end
+
   get 'subscriptions', to: 'subscriptions#new'
   get 'subscriptions_login', to: 'subscriptions#login'
   post 'subscriptions', to: 'subscriptions#new'
@@ -496,7 +498,7 @@ Groovepacks::Application.routes.draw do
 
   resources :api_keys, only: %i[create destroy]
 
-  resources :groovepacker_webhooks, only: [:create, :update] do
+  resources :groovepacker_webhooks, only: %i[create update] do
     delete 'delete_webhooks', on: :collection
   end
 

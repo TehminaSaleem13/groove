@@ -2,5 +2,7 @@
 
 FactoryBot.define do
   factory :tote do
+    order
+    tote_set
   end
 end

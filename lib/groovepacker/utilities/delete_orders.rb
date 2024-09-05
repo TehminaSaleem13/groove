@@ -8,7 +8,8 @@ class DeleteOrders
   # queue 'delete orders'
   # priority 10
 
-  ORDER_ASSOCIATIONS = %w[OrderShipping OrderException OrderActivity OrderSerial PackingCam ShippingLabel Box ShipstationLabelData].freeze
+  ORDER_ASSOCIATIONS = %w[OrderShipping OrderException OrderActivity OrderSerial PackingCam ShippingLabel Box
+                          ShipstationLabelData].freeze
   ORDER_ITEM_ASSOCIATIONS = %w[OrderItemBox OrderItemKitProduct OrderItemOrderSerialProductLot OrderItemScanTime].freeze
 
   def initialize(attrs = {})
@@ -311,12 +312,12 @@ class DeleteOrders
   def delete_orders_for_tenant(tenant)
     orders_delete_days = tenant.orders_delete_days.to_i.days.ago.beginning_of_day
     orders_delete_date = if orders_delete_days.future?
-      14.days.ago.beginning_of_day
-    elsif orders_delete_days < DateTime.parse('01-01-2010')
-      1.year.ago.beginning_of_day
-    else
-      orders_delete_days
-    end
+                           14.days.ago.beginning_of_day
+                         elsif orders_delete_days < DateTime.parse('01-01-2010')
+                           1.year.ago.beginning_of_day
+                         else
+                           orders_delete_days
+                         end
 
     orders = scanned_orders + partially_scanned_orders + awaiting_and_onhold_orders(orders_delete_date)
     orders_ids = orders.pluck(:id)

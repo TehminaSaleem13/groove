@@ -1,8 +1,8 @@
 # frozen_string_literal: true
 
-class OrderActivity < ActiveRecord::Base
+class OrderActivity < ApplicationRecord
   belongs_to :order
-  belongs_to :user
+  belongs_to :user, optional: true
   # attr_accessible :action, :activitytime, :acknowledged
   #===========================================================================================
   # please update the delete_orders library if adding before_destroy or after_destroy callback

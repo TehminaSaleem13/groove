@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-class CsvProductImport < ActiveRecord::Base
+class CsvProductImport < ApplicationRecord
   # attr_accessible :success, :store_id, :current_sku, :status, :total, :cancel, :delayed_job_id
   after_save :emit_data_to_user
 

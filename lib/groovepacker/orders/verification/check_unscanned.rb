@@ -20,12 +20,17 @@ module Groovepacker
           Apartment::Tenant.switch! tenant
           order = Order.find(order_id)
 
-          return if order.reload.status == 'scanned' || order.order_activities.where(action: 'Order Scanning Complete').where('created_at > ?', 10.seconds.ago).exists?
+          return if order.reload.status == 'scanned' || order.order_activities.where(action: 'Order Scanning Complete').where(
+            'created_at > ?', 10.seconds.ago
+          ).exists?
 
-          tenant_url = "#{ENV.fetch('PROTOCOL', 'http://')}#{Apartment::Tenant.current}.#{ENV.fetch('HOST_NAME', 'localpacker.com')}"
+          tenant_url = "#{ENV.fetch('PROTOCOL',
+                                    'http://')}#{Apartment::Tenant.current}.#{ENV.fetch('HOST_NAME',
+                                                                                        'localpacker.com')}"
           order_url = "#{tenant_url}/#/orders/all/1/#{order.id}"
-          message_body = "[*<#{ tenant_url }|#{tenant}> | #{Rails.env.upcase}*] Scanned status change failed for Order [*<#{order_url} | #{order.increment_id}>*] at [*#{Time.current}*] on #{app_url || 'NA'} by *#{current_user || 'NA'}*"
-          message_service = Groovepacker::SlackNotifications::SendMessage.new({webhook_url: WEBHOOK_URL, message_body: message_body, request_ip: request_ip})
+          message_body = "[*<#{tenant_url}|#{tenant}> | #{Rails.env.upcase}*] Scanned status change failed for Order [*<#{order_url} | #{order.increment_id}>*] at [*#{Time.current}*] on #{app_url || 'NA'} by *#{current_user || 'NA'}*"
+          message_service = Groovepacker::SlackNotifications::SendMessage.new({ webhook_url: WEBHOOK_URL,
+                                                                                message_body:, request_ip: })
           message_service.call
         rescue StandardError => e
           puts e.backtrace.join(', ')

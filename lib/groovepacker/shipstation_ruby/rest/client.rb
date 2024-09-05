@@ -20,27 +20,38 @@ module Groovepacker
           fetch_orders(status, start_date)
         end
 
-        def get_orders_v2(status, ord_placed_after, order_import_range_days, date_type = 'created_at', import_item = nil)
-          start_date = order_date_start(date_type, ord_placed_after.to_datetime.strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20'), order_import_range_days) unless ord_placed_after.nil?
+        def get_orders_v2(status, ord_placed_after, order_import_range_days, date_type = 'created_at',
+                          import_item = nil)
+          unless ord_placed_after.nil?
+            start_date = order_date_start(date_type,
+                                          ord_placed_after.to_datetime.strftime('%Y-%m-%d %H:%M:%S').gsub(' ', '%20'), order_import_range_days)
+          end
           fetch_orders(status, start_date, import_item)
         end
 
         def get_shipments(import_from, date_type = 'created_at', import_till = nil)
           shipments_after_last_import = []
-          shipments_date = import_till ? shipment_dates(date_type, ss_format(import_from), ss_format(import_till)) : shipment_dates(date_type, ss_format(import_from))
+          shipments_date = if import_till
+                             shipment_dates(date_type, ss_format(import_from),
+                                            ss_format(import_till))
+                           else
+                             shipment_dates(date_type,
+                                            ss_format(import_from))
+                           end
           page_index = 1
           while page_index
             response = @service.query("/shipments?page=#{page_index}&pageSize=200#{shipments_date}", nil, 'get')
             shipments_after_last_import = shipments_after_last_import.push(response['shipments']).flatten
             break if (begin
-                        response['shipments'].count
-                      rescue StandardError
-                        0
-                      end) < 200
+              response['shipments'].count
+            rescue StandardError
+              0
+            end) < 200
 
             page_index += 1
           end
-          Tenant.save_se_import_data("========Shipstation Shipments UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import_From', import_from, '==Date_Type', date_type, '==Import Till', import_till, '==Shipments Date', shipments_date, '==Shipments After Last Import', shipments_after_last_import)
+          Tenant.save_se_import_data("========Shipstation Shipments UTC: #{Time.current.utc} TZ: #{Time.current}",
+                                     '==Import_From', import_from, '==Date_Type', date_type, '==Import Till', import_till, '==Shipments Date', shipments_date, '==Shipments After Last Import', shipments_after_last_import)
           shipments_after_last_import
         end
 
@@ -50,13 +61,14 @@ module Groovepacker
             order_number_param = '&orderId=' + orderId.to_s
             Rails.logger.info "Getting shipment with order Id: #{orderId}"
             response = @service.query('/Shipments/List?' \
-              'page=1&pageSize=100' + URI.encode(order_number_param), nil, 'get')
+              'page=1&pageSize=100' + CGI.escape(order_number_param), nil, 'get')
             tracking_number = handle_shipment_response(response, orderId)
           end
           tracking_number
         end
 
-        def get_range_import_orders(start_date, end_date, type, order_import_range_days, order_status, import_item = nil)
+        def get_range_import_orders(start_date, end_date, type, order_import_range_days, order_status,
+                                    import_item = nil)
           combined = { 'orders' => [] }
           if type == 'modified'
             created_date = (ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S')
@@ -71,31 +83,36 @@ module Groovepacker
             rescue StandardError
               nil
             end
-            res = @service.query("/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC&orderStatus=#{order_status}", nil, 'get')
-            combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
+            res = @service.query(
+              "/Orders?page=#{page_index}&pageSize=150#{date_val}&sortBy=OrderDate&sortDir=DESC&orderStatus=#{order_status}", nil, 'get'
+            )
+            if res.parsed_response.present?
+              combined['orders'] =
+                union(combined['orders'], res.parsed_response['orders'])
+            end
             page_index += 1
-            Tenant.save_se_import_data("========Shipstation Range Import UTC: #{Time.current.utc} TZ: #{Time.current}", '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==Order Import Range Days', order_import_range_days, '==Order Status', order_status, '==Page Index', page_index, '==Date Value', date_val, '==Response', res)
+            Tenant.save_se_import_data("========Shipstation Range Import UTC: #{Time.current.utc} TZ: #{Time.current}",
+                                       '==Start Date', start_date, '==End Date', end_date, '==Type', type, '==Order Import Range Days', order_import_range_days, '==Order Status', order_status, '==Page Index', page_index, '==Date Value', date_val, '==Response', res)
             return combined if ((begin
-                                   res.parsed_response['orders'].length
-                                 rescue StandardError
-                                   nil
-                                 end) || 0) < 150
+              res.parsed_response['orders'].length
+            rescue StandardError
+              nil
+            end) || 0) < 150
           end
         end
 
         def get_order_value(orderno)
           response = @service.query("/orders?orderNumber=#{orderno}", nil, 'get')
           response['orders'] = (response['orders'] || []).select { |ordr| ordr['orderNumber'] == orderno }
-          Tenant.save_se_import_data("========Shipstation Order Value UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response)
-          if response['orders'].present?
-            return response['orders']
-          else
-            response = @service.query("/shipments?trackingNumber=#{orderno}", nil, 'get')
-            return nil if response['shipments'].blank?
+          Tenant.save_se_import_data("========Shipstation Order Value UTC: #{Time.current.utc} TZ: #{Time.current}",
+                                     '==Order Number', orderno, '==Response', response)
+          return response['orders'] if response['orders'].present?
 
-            shipment = response['shipments'].first
-            get_order_value(shipment['orderNumber'])
-          end
+          response = @service.query("/shipments?trackingNumber=#{orderno}", nil, 'get')
+          return nil if response['shipments'].blank?
+
+          shipment = response['shipments'].first
+          get_order_value(shipment['orderNumber'])
         end
 
         def get_order(orderId)
@@ -113,22 +130,24 @@ module Groovepacker
           end
           log_on_demand_order_import(orderno, response, using_tracking_number)
           begin
-            import_item.update_attributes(status: 'completed', current_increment_id: orderno, updated_orders_import: response['orders'].count)
+            import_item.update(status: 'completed', current_increment_id: orderno,
+                               updated_orders_import: response['orders'].count)
           rescue StandardError
             nil
           end
-          Tenant.save_se_import_data("========Shipstation Order On Demand UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==ImportItem', import_item, '==Using Tracking Number', using_tracking_number, '==Response', response)
-          if using_tracking_number
-            return response
-          else
-            return response, get_shipments_by_orderno(orderno)
-          end
+          Tenant.save_se_import_data(
+            "========Shipstation Order On Demand UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==ImportItem', import_item, '==Using Tracking Number', using_tracking_number, '==Response', response
+          )
+          return response if using_tracking_number
+
+          [response, get_shipments_by_orderno(orderno)]
         end
 
         def get_webhook_order(url, import_item)
           response = @service.query("/orders?#{url}", nil, 'get')
           begin
-            import_item.update_attributes(status: 'completed', current_increment_id: response['orders']&.first['orderNumber'], updated_orders_import: response['orders'].count)
+            import_item.update(status: 'completed', current_increment_id: response['orders']&.first&.[]('orderNumber'),
+                               updated_orders_import: response['orders'].count)
           rescue StandardError
             nil
           end
@@ -167,8 +186,10 @@ module Groovepacker
           response = {}
           default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').to_date
           data['shipDate'] ||= default_ship_date
-          data['shipDate'] = data['shipDate'].to_date < default_ship_date ? default_ship_date.strftime('%a, %d %b %Y') : data['shipDate']
-          data['testLabel'] = Tenant.find_by_name(Apartment::Tenant.current).try(:test_tenant_toggle) || Rails.env.development?
+          data['shipDate'] =
+            data['shipDate'].to_date < default_ship_date ? default_ship_date.strftime('%a, %d %b %Y') : data['shipDate']
+          data['testLabel'] =
+            Tenant.find_by_name(Apartment::Tenant.current).try(:test_tenant_toggle) || Rails.env.development?
           begin
             response = @service.query('/orders/createlabelfororder', data, 'post', 'create_label')
           rescue StandardError => e
@@ -231,7 +252,9 @@ module Groovepacker
         def get_order_by_tracking_number(tracking_number)
           on_demand_logger.info('********')
           response = @service.query("/shipments?trackingNumber=#{tracking_number}", nil, 'get')
-          Tenant.save_se_import_data("========Shipstation Order By Tracking Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Tracking Number', tracking_number, '==Response', response)
+          Tenant.save_se_import_data(
+            "========Shipstation Order By Tracking Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Tracking Number', tracking_number, '==Response', response
+          )
           return { 'orders' => [] } if response['shipments'].blank?
 
           shipment = response['shipments'].first
@@ -243,29 +266,40 @@ module Groovepacker
         end
 
         def get_shipments_by_orderno(orderno)
-          response = @service.query("/shipments?orderNumber=#{URI.encode(orderno)}", nil, 'get')
-          response['shipments'].select { |shipment| shipment['orderNumber'] == orderno } if response['shipments'].present?
-          Tenant.save_se_import_data("========Shipstation Shipments By Order Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response)
+          response = @service.query("/shipments?orderNumber=#{CGI.escape(orderno)}", nil, 'get')
+          if response['shipments'].present?
+            response['shipments'].select do |shipment|
+              shipment['orderNumber'] == orderno
+            end
+          end
+          Tenant.save_se_import_data(
+            "========Shipstation Shipments By Order Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response
+          )
           response['shipments']
         end
 
         def get_shipments_by_order_id(order_id)
-          response = @service.query("/shipments?orderId=#{URI.encode(order_id)}", nil, 'get')
+          response = @service.query("/shipments?orderId=#{CGI.escape(order_id)}", nil, 'get')
           response['shipments'].select { |shipment| shipment['orderId'] == order_id } if response['shipments'].present?
-          Tenant.save_se_import_data("========Shipstation Shipments By Order ID UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Id', order_id, '==Response', response)
-          response['shipments'].map { |shipment| shipment['createDate'] = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(shipment['createDate']).to_time.in_time_zone }
+          Tenant.save_se_import_data(
+            "========Shipstation Shipments By Order ID UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Id', order_id, '==Response', response
+          )
+          response['shipments'].map do |shipment|
+            shipment['createDate'] =
+              ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(shipment['createDate']).to_time.in_time_zone
+          end
           response['shipments']
         end
 
         def on_demand_logger
-          @costom_logger ||= Logger.new("#{Rails.root}/log/on_demand_import_#{Apartment::Tenant.current}.log")
+          @costom_logger ||= Logger.new("#{Rails.root.join("log/on_demand_import_#{Apartment::Tenant.current}.log")}")
         end
 
         def get_tags_list
           tagslist_by_name = {}
           response = @service.query('/accounts/listtags', nil, 'get')
           tags = response.parsed_response
-          unless tags.blank?
+          if tags.present?
             begin
               tags.each { |tag| tagslist_by_name[tag['name'].downcase] = tag['tagId'] }
             rescue StandardError
@@ -278,9 +312,7 @@ module Groovepacker
         def get_all_tags_list
           tagslist_by_name = {}
           response = @service.query('/accounts/listtags', nil, 'get')
-          tags = response.parsed_response
-          
-          tags
+          response.parsed_response
         end
 
         def get_tag_id(tag)
@@ -318,37 +350,41 @@ module Groovepacker
             rescue StandardError
               nil
             end
-            response = @service.query("/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, 'get')
+            response = @service.query(
+              "/orders/listbytag?orderStatus=#{status}&tagId=#{tag_id}&page=#{page_index}&pageSize=100", nil, 'get'
+            )
             begin
               orders += response['orders'] unless response['orders'].nil?
             rescue StandardError
               nil
             end
             total_pages = begin
-                            response.parsed_response['pages']
-                          rescue StandardError
-                            nil
-                          end
+              response.parsed_response['pages']
+            rescue StandardError
+              nil
+            end
             page_index += 1
-            Tenant.save_se_import_data("========Shipstation Tag Import UTC: #{Time.current.utc} TZ: #{Time.current}", '==Status', status, '==Tag ID', tag_id, '==Response', response, '==Page_index', page_index)
+            Tenant.save_se_import_data("========Shipstation Tag Import UTC: #{Time.current.utc} TZ: #{Time.current}",
+                                       '==Status', status, '==Tag ID', tag_id, '==Response', response, '==Page_index', page_index)
             return orders if page_index > total_pages.to_i
           end
         end
 
         def check_gpready_awating_order(tag_id)
-          response = @service.query("/orders/listbytag?orderStatus=awaiting_payment&tagId=#{tag_id}&page=1&pageSize=1", nil, 'get')
+          response = @service.query("/orders/listbytag?orderStatus=awaiting_payment&tagId=#{tag_id}&page=1&pageSize=1",
+                                    nil, 'get')
         end
 
         def remove_tag_from_order(order_id, tag_id)
           response = @service.query('/orders/removetag', { orderId: order_id, tagId: tag_id }, 'post')
-          logs = { order_id: order_id, tag_id: tag_id, response: response.to_h }
+          logs = { order_id:, tag_id:, response: response.to_h }
           Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'remove_tag_from_order', logs)
           response
         end
 
         def add_tag_to_order(order_id, tag_id)
           response = @service.query('/orders/addtag', { orderId: order_id, tagId: tag_id }, 'post')
-          logs = { order_id: order_id, tag_id: tag_id, response: response }
+          logs = { order_id:, tag_id:, response: }
           Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'ss_add_tag_to_order', logs)
           response
         end
@@ -370,14 +406,18 @@ module Groovepacker
             end
             res = @service.query('/Orders?orderStatus=' \
               "#{status}&page=#{page_index}&pageSize=150#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, 'get')
-            combined['orders'] = union(combined['orders'], res.parsed_response['orders']) if res.parsed_response.present?
+            if res.parsed_response.present?
+              combined['orders'] =
+                union(combined['orders'], res.parsed_response['orders'])
+            end
             page_index += 1
-            Tenant.save_se_import_data("========Shipstation Order Import UTC: #{Time.current.utc} TZ: #{Time.current}", '==Status', status, '==Start Date', start_date, '==Res', res, '==Page_index', page_index)
+            Tenant.save_se_import_data("========Shipstation Order Import UTC: #{Time.current.utc} TZ: #{Time.current}",
+                                       '==Status', status, '==Start Date', start_date, '==Res', res, '==Page_index', page_index)
             return combined if ((begin
-                                   res.parsed_response['orders'].length
-                                 rescue StandardError
-                                   nil
-                                 end) || 0) < 150
+              res.parsed_response['orders'].length
+            rescue StandardError
+              nil
+            end) || 0) < 150
           end
         end
 
@@ -386,10 +426,10 @@ module Groovepacker
           res = @service.query('/Orders?orderStatus=' \
               "#{status}&page=#{page_index}&pageSize=1#{start_date}&sortBy=OrderDate&sortDir=DESC", nil, 'get')
           (begin
-                    res['total'].to_i
-           rescue StandardError
-             0
-                  end)
+            res['total'].to_i
+          rescue StandardError
+            0
+          end)
         end
 
         def handle_shipment_response(response, orderId)
@@ -411,8 +451,16 @@ module Groovepacker
             "&orderDateStart=#{order_placed_after}"
           elsif %w[modified_at].include?(import_date_type)
             predicate = 'modifyDateStart'
-            created_date = (ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S') if order_import_range_days.present?
-            order_import_range_days.present? && order_import_range_days != 0 ? "&#{predicate}=#{order_placed_after}&createDateStart=#{created_date.gsub(' ', '%20')}" : "&#{predicate}=#{order_placed_after}"
+            if order_import_range_days.present?
+              created_date = (ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(Time.zone.now.to_s) - order_import_range_days.days).strftime('%Y-%m-%d %H:%M:%S')
+            end
+            if order_import_range_days.present? && order_import_range_days != 0
+              "&#{predicate}=#{order_placed_after}&createDateStart=#{created_date.gsub(
+                ' ', '%20'
+              )}"
+            else
+              "&#{predicate}=#{order_placed_after}"
+            end
           end
         end
 

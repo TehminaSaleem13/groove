@@ -20,7 +20,7 @@ module ProductsService
                  end
                else
                  params[:productArray]
-                end
+               end
 
       generate_result(result)
     end
@@ -37,7 +37,7 @@ module ProductsService
         end
       end
 
-      result_rows = result_rows.blank? ? [] : result_rows
+      result_rows = result_rows.presence || []
       p_ids = result_rows.map { |p| p['id'] }
       products = Product.where('id IN (?)', p_ids)
       preload_associations(products) if include_association
@@ -56,7 +56,7 @@ module ProductsService
     end
 
     def inverted_and_has_products?
-      params[:inverted].to_b && !params[:productArray].blank?
+      params[:inverted].to_b && params[:productArray].present?
     end
 
     def select_all_with_inverted?

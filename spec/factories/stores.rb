@@ -4,32 +4,31 @@
 
 FactoryBot.define do
   factory :store do
-    name { 'MyString' }
+    name { "MyString-#{Time.current.to_i}" }
     status { false }
     store_type { 'system' }
-    order_date { '2013-08-29' }
     inventory_warehouse
 
     trait :shopify do
       store_type { 'Shopify' }
-      shopify_credential
+      shopify_credential { build :shopify_credential }
     end
 
     trait :shopline do
       store_type { 'Shopline' }
-      shopline_credential
+      shopline_credential { build :shopline_credential }
     end
 
     trait :veeqo do
-      name { 'Veeqo Test' }
+      name { "Veeqo Test-#{Time.current.to_i}" }
       status { true }
       store_type { 'Veeqo' }
-      veeqo_credential
+      veeqo_credential { build :veeqo_credential }
     end
 
     trait :csv do
       store_type { 'CSV' }
-      name { 'GP TEST - CSV' }
+      name { "GP TEST - CSV-#{Time.current.to_i}" }
       status { true }
     end
 

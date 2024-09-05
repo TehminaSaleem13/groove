@@ -157,7 +157,7 @@ module Groovepacker
             product.update_columns(store_product_id: variant['id']) if variant['id'].present?
             if @credential.import_inventory_qoh
               product.product_inventory_warehousess.first
-                      .update_attributes(available_inv: variant['inventory_quantity'])
+                      .update(available_inv: variant['inventory_quantity'])
             end
             product.set_product_status
           end
@@ -182,7 +182,7 @@ module Groovepacker
         end
 
         def update_product_details_barcode(product, variant)
-          product.update_attributes(name: variant['title'], store_product_id: variant['id'])
+          product.update(name: variant['title'], store_product_id: variant['id'])
           add_barcode_to_product(product, variant) if variant['barcode'].present? && product.product_barcodes.where(barcode: variant['barcode']).blank?
           product.generate_numeric_barcode({}) if !variant['barcode'].present? && product.product_barcodes.blank? && @credential.generating_barcodes == 'generate_numeric_barcode'
         end
@@ -264,7 +264,7 @@ module Groovepacker
           if product_sync_option.nil?
             product.create_sync_option(sync_option_params)
           else
-            product_sync_option.update_attributes(sync_option_params)
+            product_sync_option.update(sync_option_params)
           end
         end
 

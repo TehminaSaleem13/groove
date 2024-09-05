@@ -59,7 +59,7 @@ module Groovepacker
         end
 
         begin
-          import_item.update_attributes(status: 'completed', current_increment_id: order_number, updated_orders_import: combined_response['orders'].count)
+          import_item.update(status: 'completed', current_increment_id: order_number, updated_orders_import: combined_response['orders'].count)
         rescue StandardError
           nil
         end
