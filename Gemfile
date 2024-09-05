@@ -107,11 +107,22 @@ gem 'shipping_easy', '>= 0.7.1'
 gem 'shopify_api', '> 12.2'
 gem 'simple_form', '>= 4.0.0'
 gem 'soap2r', git: 'https://github.com/navaratan-tech/soap4r.git'
+
+# Payments
 gem 'stripe', '>= 1.57.1'
+
 # This obscure dependency is locked here because of our older Ubuntu servers. If you get a modern operating system, (post 2019) then you can remove this
 gem 'unf_ext'
 gem 'wannabe_bool'
+
+# Cron Jobs
 gem 'whenever', require: false
+
+# PDF Generation
 gem 'wicked_pdf', '>= 0.11'
 gem 'wkhtmltopdf-binary'
-gem 'net-ftp', '~> 0.3.6'
+
+# FTP/SFTP
+gem 'net-ftp', '~> 0.3'
+gem 'net-sftp', '~> 4.0'
+gem 'net-ssh', '~> 7.2'
