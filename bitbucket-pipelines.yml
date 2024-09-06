@@ -156,7 +156,7 @@ pipelines:
           services:
             - docker
           script:
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -171,7 +171,7 @@ pipelines:
           services:
             - docker
           script:
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -188,7 +188,7 @@ pipelines:
           services:
             - docker
           script:
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -201,7 +201,7 @@ pipelines:
                 FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
                 WAIT: 'true'
                 DEBUG: 'true'
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -214,7 +214,7 @@ pipelines:
                 FILE_EXISTS_BEHAVIOR: 'OVERWRITE'
                 WAIT: 'true'
                 DEBUG: 'true'
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -351,7 +351,7 @@ pipelines:
           services:
             - docker
           script:
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -366,7 +366,7 @@ pipelines:
           services:
             - docker
           script:
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -383,7 +383,7 @@ pipelines:
           services:
             - docker
           script:
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -396,7 +396,7 @@ pipelines:
                 FILE_EXISTS_BEHAVIOR: OVERWRITE
                 WAIT: 'true'
                 DEBUG: 'true'
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
@@ -409,7 +409,7 @@ pipelines:
                 FILE_EXISTS_BEHAVIOR: OVERWRITE
                 WAIT: 'true'
                 DEBUG: 'true'
-            - pipe: atlassian/aws-code-deploy:1.2.0
+            - pipe: atlassian/aws-code-deploy:1.5.1
               variables:
                 AWS_ACCESS_KEY_ID: ${AWS_ACCESS_KEY_ID}
                 AWS_SECRET_ACCESS_KEY: ${AWS_SECRET_ACCESS_KEY}
