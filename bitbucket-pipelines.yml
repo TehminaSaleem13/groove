@@ -27,8 +27,8 @@ options:
 pipelines:
   default:
     - step:
-        name: Rails 5 Rspec
-        image: capsens/ruby-node-yarn:2.6.2
+        name: Rspec
+        image: cimg/ruby:3.1.5-node
         caches:
           - bundler
         services:
