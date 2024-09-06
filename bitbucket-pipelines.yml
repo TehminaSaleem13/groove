@@ -7,8 +7,6 @@ definitions:
   caches:
     bundler: vendor/bundle
   services:
-    redis:
-      image: redis:3.2
     mysql:
       image: mysql:5.7
       environment:
@@ -18,7 +16,6 @@ definitions:
         MYSQL_PASSWORD: password
     docker:
       memory: 4096
-
 
 options:
   docker: true
@@ -33,7 +30,6 @@ pipelines:
           - bundler
         services:
           - mysql
-          - redis
         script:
           - bundle install --path vendor/bundle
           - bundle binstubs --all
@@ -64,7 +60,6 @@ pipelines:
       #       - bundler
       #     services:
       #       - mysql
-      #       - redis
       #     script:
       #       - bundle install --path vendor/bundle
       #       - bundle binstubs --all
@@ -261,7 +256,6 @@ pipelines:
             - bundler
           services:
             - mysql
-            - redis
           script:
             - bundle install --path vendor/bundle
             - bundle binstubs --all
