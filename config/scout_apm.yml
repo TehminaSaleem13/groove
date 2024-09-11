@@ -38,4 +38,4 @@ test:
 staging:
   <<: *defaults
   auto_instruments: true
-  # monitor: false
+  monitor: false
