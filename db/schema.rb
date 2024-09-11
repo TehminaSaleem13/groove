@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_07_26_113055) do
+ActiveRecord::Schema.define(version: 2024_09_09_124851) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1247,6 +1247,8 @@ ActiveRecord::Schema.define(version: 2024_07_26_113055) do
     t.string "country", default: ""
     t.string "webhook_secret", default: ""
     t.datetime "last_location_pull"
+    t.integer "product_source_shopify_store_id"
+    t.boolean "use_shopify_as_product_source_switch", default: false
   end
 
   create_table "shipworks_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

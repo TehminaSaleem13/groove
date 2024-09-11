@@ -48,10 +48,10 @@ module Groovepacker
           ).import_single_product(product)
         end
 
-        def import_single_product_for_veeqo(product)
+        def import_single_shopify_product_as_source(product, sku)
           Groovepacker::Stores::Importers::ShopProductsImporter.new(
             build_handle
-          ).import_single_product_for_veeqo(product)
+          ).import_single_shopify_product_as_source(product, sku)
         end
       end
     end

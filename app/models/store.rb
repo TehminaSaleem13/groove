@@ -104,9 +104,9 @@ class Store < ApplicationRecord
       @credentials = ShipstationRestCredential.where(store_id: id)
       if @credentials.present?
         @result['shipstation_rest_credentials'] = @credentials.first
-        @result['shipstation_rest_credentials'] =
-          @result['shipstation_rest_credentials'].attributes.merge('gp_ready_tag_name' => @credentials.first.gp_ready_tag_name,
-                                                                   'gp_imported_tag_name' => @credentials.first.gp_imported_tag_name, 'gp_scanned_tag_name' => @credentials.first.gp_scanned_tag_name, 'webhook_endpoint' => "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/shipstation/#{@credentials.first.id}/import?secret=#{@credentials.first.webhook_secret}")
+        @result['shopify_active_stores'] = Store.where(store_type: 'Shopify')
+        @result['shipstation_rest_credentials'] = @result['shipstation_rest_credentials'].attributes.merge('gp_ready_tag_name' => @credentials.first.gp_ready_tag_name,
+                                                                                                            'gp_imported_tag_name' => @credentials.first.gp_imported_tag_name, 'gp_scanned_tag_name' => @credentials.first.gp_scanned_tag_name, 'webhook_endpoint' => "https://#{Apartment::Tenant.current}.#{ENV['SITE_HOST']}/webhooks/shipstation/#{@credentials.first.id}/import?secret=#{@credentials.first.webhook_secret}")
         @result['status'] = true
       end
     end

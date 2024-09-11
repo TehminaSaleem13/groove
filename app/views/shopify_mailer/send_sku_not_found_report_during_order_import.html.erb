@@ -1,9 +1,9 @@
 <div style="width: 100%; max-width: 600px; margin: 0 auto;">
-  <h2>Order and Product Imports for Veeqo store is completed.</h2>
+  <h2>Order Imports for <%= @import_store.store_type %> store is completed.</h2>
 
   <% if @data.any? %>
-    <h3>
-    Following SKU Products are not found in Shopify Store [<%= @shopify_store.name %>]:
+    <h3> 
+    The following product SKUs were not found in the Shopify store (<%= @shopify_store.name %>) for the given orders:
     </h3>
     <h3>List of Orders and Skus</h3>
   

@@ -76,11 +76,11 @@ module Groovepacker
           product
         end
 
-        def import_single_product_for_veeqo(item)
+        def import_single_shopify_product_as_source(item, sku)
           initialize_import_objects
           fetch_product(item, true)
           if @shop_product.present?
-            variant = @shop_product['variants'].select { |variant| variant['sku'] == item['sellable']['sku_code'] }.first
+            variant = @shop_product['variants'].select { |variant| variant['sku'] == sku }.first
 
             if variant.blank?
               log_missing_variant(item)
@@ -103,7 +103,7 @@ module Groovepacker
           on_demand_logger.info(log)
         end
 
-        def fetch_product(item, veeqo_product_import_flag = nil)
+        def fetch_product(item, product_import_flag = nil)
           shop_product = @client.product(item['product_id'])
           if shop_product.blank?
             loop_count = 0
@@ -119,7 +119,7 @@ module Groovepacker
             log = { item: item, Time: Time.zone.now, shop_product: shop_product }
             on_demand_logger.info(log)
           end
-          check_import_flag = veeqo_product_import_flag.present? ? false : custom_shop_item?(item)
+          check_import_flag = product_import_flag.present? ? false : custom_shop_item?(item)
           return @shop_product = item if check_import_flag
 
           @shop_product = shop_product || {}

@@ -103,13 +103,15 @@ module Groovepacker
           handler = get_handler
           @credential = handler[:credential]
           @store = @credential.store
+
           if @store.store_type == 'Amazon'
             @mws = handler[:store_handle][:main_handle]
             @alt_mws = handler[:store_handle][:alternate_handle]
           else
             @client = handler[:store_handle]
           end
-          if @store.store_type == 'Veeqo'
+
+          if @store.store_type == 'Veeqo' || @store.store_type == 'Shipstation API 2'
             @result_data = []
             @deleted_merged_orders = []
             @deleted_split_orders = []
@@ -119,6 +121,55 @@ module Groovepacker
           @import_item = handler[:import_item]
           @result = build_result
           @worker_id = 'worker_' + SecureRandom.hex
+        end
+
+        def check_shopify_as_a_product_source
+          @credential.use_shopify_as_product_source_switch && @credential.product_source_shopify_store_id.present?
+        end
+
+        def fetch_and_import_shopify_product(sku, item, order_number)
+          query = <<~GRAPHQL
+            {
+              products(first: 1, query: "sku:#{sku}") {
+                nodes {
+                  id
+                  title
+                }
+              }
+            }
+          GRAPHQL
+          
+          product_res = @shopify_client.execute_grahpql_query(query: query)
+          shopify_product = product_res.body.dig("data", "products", "nodes")&.first
+
+          product = if shopify_product.present?
+                      id = shopify_product["id"].split("/").last
+                      item["product_id"] = id
+                      shopify_context.import_single_shopify_product_as_source(item, sku)
+                    else
+                      handle_not_found_sku(sku, order_number)
+                    end
+        end
+
+        def handle_not_found_sku(product_sku, order_number)
+          pre_order = @result_data.find { |d| d[:order_number] == order_number }
+
+          if pre_order.present?
+             pre_order[:skus] << product_sku
+          else
+            @result_data << { order_number: order_number, skus: [product_sku] }
+          end
+          false
+        end
+
+        def shopify_context
+          handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@shopify_credential.store)
+
+          Groovepacker::Stores::Context.new(handler)
+        end
+
+        def send_sku_not_found_report_during_order_import
+          ShopifyMailer.send_sku_not_found_report_during_order_import(Apartment::Tenant.current, @result_data, @shopify_credential.store, @credential.store).deliver if check_shopify_as_a_product_source
         end
 
         def handle_cancelled_order(gp_order)

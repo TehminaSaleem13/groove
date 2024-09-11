@@ -52,7 +52,7 @@ module Groovepacker
               @credential.update(last_imported_at: Time.zone.parse(order['updated_at']))
             end
             add_deleted_merged_or_split_orders_log
-            send_sku_report_not_found
+            send_sku_not_found_report_during_order_import
             Tenant.save_se_import_data("========Veeqo Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item.as_json)
           end
 
@@ -69,7 +69,7 @@ module Groovepacker
               import_single_order(order) if order.present?
             end
             add_deleted_merged_or_split_orders_log
-            send_sku_report_not_found
+            send_sku_not_found_report_during_order_import
             begin
               @import_item.destroy
               destroy_nil_import_items
@@ -104,10 +104,6 @@ module Groovepacker
 
           def statuses
             @statuses ||= @credential.get_active_statuses
-          end
-
-          def check_shopify_as_a_product_source
-            @credential.use_shopify_as_product_source_switch && @credential.product_source_shopify_store_id.present?
           end
 
           def get_orders_response
@@ -274,51 +270,11 @@ module Groovepacker
           end
 
           def import_order_items(item, order_number)
-            # Check Switch Use Shopify as Product Source
             if check_shopify_as_a_product_source
-              fetch_product_from_shopify(item['sellable']['sku_code'], item, order_number)
+              fetch_and_import_shopify_product(item['sellable']['sku_code'], item, order_number)
             else
               veeqo_context.import_veeqo_single_product(item)
             end
-          end
-
-          def fetch_product_from_shopify(sku, item, order_number)
-            query = <<~GRAPHQL
-              {
-                products(first: 1, query: "sku:#{sku}") {
-                  nodes {
-                    id
-                    title
-                  }
-                }
-              }
-            GRAPHQL
-
-            product_res = @shopify_client.execute_grahpql_query(query:)
-            product = product_res.body.dig('data', 'products', 'nodes')&.first
-
-            if product.present?
-              id = product['id'].split('/').last
-              item['product_id'] = id
-              shopify_context.import_single_product_from_shopify_to_veeqo(item)
-            else
-              handle_not_found_sku(sku, order_number)
-            end
-          end
-
-          def handle_not_found_sku(product_sku, order_number)
-            pre_order = @result_data.find { |d| d[:order_number] == order_number }
-            if pre_order.present?
-              pre_order[:skus] << product_sku
-            else
-              @result_data << { order_number:, skus: [product_sku] }
-            end
-            false
-          end
-
-          def send_sku_report_not_found
-            VeeqoMailer.send_sku_report_not_found(Apartment::Tenant.current, @result_data,
-                                                  @shopify_credential.store).deliver  if check_shopify_as_a_product_source
           end
 
           def import_order_item(line_item)
@@ -360,12 +316,6 @@ module Groovepacker
 
           def veeqo_context
             handler = Groovepacker::Stores::Handlers::VeeqoHandler.new(@store)
-
-            Groovepacker::Stores::Context.new(handler)
-          end
-
-          def shopify_context
-            handler = Groovepacker::Stores::Handlers::ShopifyHandler.new(@shopify_credential.store)
 
             Groovepacker::Stores::Context.new(handler)
           end

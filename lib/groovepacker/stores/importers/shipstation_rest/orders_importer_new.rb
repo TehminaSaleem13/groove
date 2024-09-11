@@ -55,6 +55,7 @@ module Groovepacker
             Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], @store, @import_item, shipments_response) if current_tenant_object&.loggly_shipstation_imports
 
             import_orders_from_response(response, shipments_response)
+            send_sku_not_found_report_during_order_import
             destroy_nil_import_items
             Tenant.save_se_import_data("========Shipstation Regular Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
@@ -70,6 +71,7 @@ module Groovepacker
             @import_item.update(to_import: response['orders'].count)
             shipments_response = should_fetch_shipments? ? @client.get_shipments(start_date, nil, end_date) : []
             import_orders_from_response(response, shipments_response)
+            send_sku_not_found_report_during_order_import
             update_order_import_summary
             Tenant.save_se_import_data("========Shipstation Range Import Finished UTC: #{Time.current.utc} TZ: #{Time.current}", '==Import Item', @import_item)
           end
@@ -190,6 +192,7 @@ module Groovepacker
             response, shipments_response = @client.get_order_on_demand(order_no, @import_item)
             response, shipments_response = @client.get_order_by_tracking_number(order_no) if response['orders'].blank? && (@scan_settings.scan_by_shipping_label || @scan_settings.scan_by_packing_slip_or_shipping_label)
             import_orders_from_response(response, shipments_response)
+            send_sku_not_found_report_during_order_import
             Order.emit_data_for_on_demand_import_v2(response, order_no, user_id) if controller != 'stores'
             # od_tz = @import_item.created_at + GeneralSetting.last.time_zone.to_i
             od_tz = @import_item.created_at
@@ -272,6 +275,8 @@ module Groovepacker
                                                    nil
                                                  end
               import_order_items(shipstation_order, order)
+
+              return unless shipstation_order.order_items.present?
               return unless shipstation_order.save
 
               check_for_replace_product ? update_order_activity_log_for_gp_coupon(shipstation_order, order) : update_order_activity_log(shipstation_order, order)
@@ -281,6 +286,7 @@ module Groovepacker
               @import_item.update(updated_orders_import: @import_item.updated_orders_import + 1)
               @result[:previous_imported] = @result[:previous_imported] + 1
             end
+            shipstation_order
           end
 
           def import_order(shipstation_order, order)
@@ -299,22 +305,25 @@ module Groovepacker
                                           rescue StandardError
                                             nil
                                           end
-            shipstation_order.save
           end
 
           def import_order_items(shipstation_order, order)
             return if order['items'].nil?
-
             @import_item.update(current_order_items: order['items'].length, current_order_imported_item: 0)
+            
             order['items'].each do |item|
-              next if remove_coupon_codes?(item)
+              if check_shopify_as_a_product_source
+                product = Product.joins(:product_skus).find_by(product_skus: { sku: item['sku'] }) || fetch_and_import_shopify_product(item['sku'], item, shipstation_order.increment_id)
+                next unless product
+              else
+                next if remove_coupon_codes?(item)
 
-              product = product_importer_client.find_or_create_product(item)
-              create_product_image
+                product = product_importer_client.find_or_create_product(item)
+                create_product_image
+              end
               import_order_item(item, shipstation_order, product)
               @import_item.current_order_imported_item = @import_item.current_order_imported_item + 1
             end
-            shipstation_order.save
             @import_item.save
           end
 
@@ -470,7 +479,8 @@ module Groovepacker
             Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
             return if check_order_is_cancelled(order)
             shipstation_order = find_or_init_new_order(order)
-            import_order_form_response(shipstation_order, order, shipments_response)
+
+            return unless import_order_form_response(shipstation_order, order, shipments_response)
 
             if order['tagIds'].present?
               tags_list  = @client.get_all_tags_list
