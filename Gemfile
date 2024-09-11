@@ -126,3 +126,6 @@ gem 'wkhtmltopdf-binary'
 gem 'net-ftp', '~> 0.3'
 gem 'net-sftp', '~> 4.0'
 gem 'net-ssh', '~> 7.2'
+
+# Parser Gem for Scout APM
+gem 'parser', '~> 3.3'
