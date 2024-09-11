@@ -9,13 +9,14 @@ common: &defaults
   # log_level: Verboseness of logs.
   # - Default: 'info'
   # - Valid Options: debug, info, warn, error
-  # log_level: debug
+  log_level: debug
+
   disabled_instruments:
     - "NetHttp"
 
   # name: Application name in APM Web UI
   # - Default: the application names comes from the Rails or Sinatra class name
-  name: GroovePacker (Upgrade)
+  name: GroovePacker [<%= Rails.env.titleize %>]
 
   # monitor: Enable Scout APM or not
   # - Default: none
