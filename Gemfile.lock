@@ -815,7 +815,7 @@ GEM
       nokogiri (>= 1.8.1)
       nori (~> 2.4)
       wasabi (>= 3.7, < 6)
-    scout_apm (5.3.8)
+    scout_apm (5.4.0)
       parser
     securerandom (0.3.1)
     sexp_processor (4.17.1)
