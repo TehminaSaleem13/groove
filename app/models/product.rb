@@ -198,13 +198,13 @@ class Product < ApplicationRecord
   def process_order_item
     obj = self
     obj.update_column(:status_updated, true)
-    updated_products = Product.where(status_updated: true)
-    orders = Order.eager_load(:order_items).where('order_items.product_id IN (?)', updated_products.map(&:id))
-    return if orders.empty?
+    updated_products_ids = Product.where(status_updated: true).ids
+    orders_count = Order.joins(:order_items).where('order_items.product_id IN (?)', updated_products_ids).count
+    return unless orders_count.positive?
 
     action = GrooveBulkActions.where(identifier: 'order', activity: 'status_update', status: 'pending').first
     action = GrooveBulkActions.new(identifier: 'order', activity: 'status_update', status: 'pending') if action.blank?
-    action.total = orders.count
+    action.total = orders_count
     action.save
   end
 
