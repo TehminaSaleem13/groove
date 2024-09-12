@@ -1,0 +1,153 @@
+---
+"(GMT-12:00) International Date Line West (Etc/GMT+12)": International Date Line West
+"(GMT-11:00) American Samoa (Pacific/Pago_Pago)": American Samoa
+"(GMT-11:00) Midway Island (Pacific/Midway)": Midway Island
+"(GMT-10:00) Hawaii (Pacific/Honolulu)": Hawaii
+"(GMT-08:00) Alaska (America/Juneau)": Alaska
+"(GMT-07:00) Pacific Time (US & Canada) (America/Los_Angeles)": Pacific Time (US &
+  Canada)
+"(GMT-07:00) Tijuana (America/Tijuana)": Tijuana
+"(GMT-07:00) Arizona (America/Phoenix)": Arizona
+"(GMT-07:00) Mazatlan (America/Mazatlan)": Mazatlan
+"(GMT-06:00) Mountain Time (US & Canada) (America/Denver)": Mountain Time (US & Canada)
+"(GMT-06:00) Central America (America/Guatemala)": Central America
+"(GMT-05:00) Central Time (US & Canada) (America/Chicago)": Central Time (US & Canada)
+"(GMT-06:00) Chihuahua (America/Chihuahua)": Chihuahua
+"(GMT-06:00) Guadalajara (America/Mexico_City)": Guadalajara
+"(GMT-06:00) Mexico City (America/Mexico_City)": Mexico City
+"(GMT-06:00) Monterrey (America/Monterrey)": Monterrey
+"(GMT-06:00) Saskatchewan (America/Regina)": Saskatchewan
+"(GMT-05:00) Bogota (America/Bogota)": Bogota
+"(GMT-04:00) Eastern Time (US & Canada) (America/New_York)": Eastern Time (US & Canada)
+"(GMT-04:00) Indiana (East) (America/Indiana/Indianapolis)": Indiana (East)
+"(GMT-05:00) Lima (America/Lima)": Lima
+"(GMT-05:00) Quito (America/Lima)": Quito
+"(GMT-03:00) Atlantic Time (Canada) (America/Halifax)": Atlantic Time (Canada)
+"(GMT-04:00) Caracas (America/Caracas)": Caracas
+"(GMT-04:00) Georgetown (America/Guyana)": Georgetown
+"(GMT-04:00) La Paz (America/La_Paz)": La Paz
+"(GMT-04:00) Puerto Rico (America/Puerto_Rico)": Puerto Rico
+"(GMT-03:00) Santiago (America/Santiago)": Santiago
+"(GMT-02:30) Newfoundland (America/St_Johns)": Newfoundland
+"(GMT-03:00) Brasilia (America/Sao_Paulo)": Brasilia
+"(GMT-03:00) Buenos Aires (America/Argentina/Buenos_Aires)": Buenos Aires
+"(GMT-03:00) Montevideo (America/Montevideo)": Montevideo
+"(GMT-01:00) Greenland (America/Godthab)": Greenland
+"(GMT-02:00) Mid-Atlantic (Atlantic/South_Georgia)": Mid-Atlantic
+"(GMT+00:00) Azores (Atlantic/Azores)": Azores
+"(GMT-01:00) Cape Verde Is. (Atlantic/Cape_Verde)": Cape Verde Is.
+"(GMT+01:00) Casablanca (Africa/Casablanca)": Casablanca
+"(GMT+01:00) Dublin (Europe/Dublin)": Dublin
+"(GMT+01:00) Edinburgh (Europe/London)": Edinburgh
+"(GMT+01:00) Lisbon (Europe/Lisbon)": Lisbon
+"(GMT+01:00) London (Europe/London)": London
+"(GMT+00:00) Monrovia (Africa/Monrovia)": Monrovia
+"(GMT+00:00) UTC (Etc/UTC)": UTC
+"(GMT+02:00) Amsterdam (Europe/Amsterdam)": Amsterdam
+"(GMT+02:00) Belgrade (Europe/Belgrade)": Belgrade
+"(GMT+02:00) Berlin (Europe/Berlin)": Berlin
+"(GMT+02:00) Bern (Europe/Zurich)": Bern
+"(GMT+02:00) Bratislava (Europe/Bratislava)": Bratislava
+"(GMT+02:00) Brussels (Europe/Brussels)": Brussels
+"(GMT+02:00) Budapest (Europe/Budapest)": Budapest
+"(GMT+02:00) Copenhagen (Europe/Copenhagen)": Copenhagen
+"(GMT+02:00) Ljubljana (Europe/Ljubljana)": Ljubljana
+"(GMT+02:00) Madrid (Europe/Madrid)": Madrid
+"(GMT+02:00) Paris (Europe/Paris)": Paris
+"(GMT+02:00) Prague (Europe/Prague)": Prague
+"(GMT+02:00) Rome (Europe/Rome)": Rome
+"(GMT+02:00) Sarajevo (Europe/Sarajevo)": Sarajevo
+"(GMT+02:00) Skopje (Europe/Skopje)": Skopje
+"(GMT+02:00) Stockholm (Europe/Stockholm)": Stockholm
+"(GMT+02:00) Vienna (Europe/Vienna)": Vienna
+"(GMT+02:00) Warsaw (Europe/Warsaw)": Warsaw
+"(GMT+01:00) West Central Africa (Africa/Algiers)": West Central Africa
+"(GMT+02:00) Zagreb (Europe/Zagreb)": Zagreb
+"(GMT+02:00) Zurich (Europe/Zurich)": Zurich
+"(GMT+03:00) Athens (Europe/Athens)": Athens
+"(GMT+03:00) Bucharest (Europe/Bucharest)": Bucharest
+"(GMT+03:00) Cairo (Africa/Cairo)": Cairo
+"(GMT+02:00) Harare (Africa/Harare)": Harare
+"(GMT+03:00) Helsinki (Europe/Helsinki)": Helsinki
+"(GMT+03:00) Jerusalem (Asia/Jerusalem)": Jerusalem
+"(GMT+02:00) Kaliningrad (Europe/Kaliningrad)": Kaliningrad
+"(GMT+03:00) Kyiv (Europe/Kiev)": Kyiv
+"(GMT+02:00) Pretoria (Africa/Johannesburg)": Pretoria
+"(GMT+03:00) Riga (Europe/Riga)": Riga
+"(GMT+03:00) Sofia (Europe/Sofia)": Sofia
+"(GMT+03:00) Tallinn (Europe/Tallinn)": Tallinn
+"(GMT+03:00) Vilnius (Europe/Vilnius)": Vilnius
+"(GMT+03:00) Baghdad (Asia/Baghdad)": Baghdad
+"(GMT+03:00) Istanbul (Europe/Istanbul)": Istanbul
+"(GMT+03:00) Kuwait (Asia/Kuwait)": Kuwait
+"(GMT+03:00) Minsk (Europe/Minsk)": Minsk
+"(GMT+03:00) Moscow (Europe/Moscow)": Moscow
+"(GMT+03:00) Nairobi (Africa/Nairobi)": Nairobi
+"(GMT+03:00) Riyadh (Asia/Riyadh)": Riyadh
+"(GMT+03:00) St. Petersburg (Europe/Moscow)": St. Petersburg
+"(GMT+03:00) Volgograd (Europe/Volgograd)": Volgograd
+"(GMT+03:30) Tehran (Asia/Tehran)": Tehran
+"(GMT+04:00) Abu Dhabi (Asia/Muscat)": Abu Dhabi
+"(GMT+04:00) Baku (Asia/Baku)": Baku
+"(GMT+04:00) Muscat (Asia/Muscat)": Muscat
+"(GMT+04:00) Samara (Europe/Samara)": Samara
+"(GMT+04:00) Tbilisi (Asia/Tbilisi)": Tbilisi
+"(GMT+04:00) Yerevan (Asia/Yerevan)": Yerevan
+"(GMT+04:30) Kabul (Asia/Kabul)": Kabul
+"(GMT+05:00) Almaty (Asia/Almaty)": Almaty
+"(GMT+05:00) Ekaterinburg (Asia/Yekaterinburg)": Ekaterinburg
+"(GMT+05:00) Islamabad (Asia/Karachi)": Islamabad
+"(GMT+05:00) Karachi (Asia/Karachi)": Karachi
+"(GMT+05:00) Tashkent (Asia/Tashkent)": Tashkent
+"(GMT+05:30) Chennai (Asia/Kolkata)": Chennai
+"(GMT+05:30) Kolkata (Asia/Kolkata)": Kolkata
+"(GMT+05:30) Mumbai (Asia/Kolkata)": Mumbai
+"(GMT+05:30) New Delhi (Asia/Kolkata)": New Delhi
+"(GMT+05:30) Sri Jayawardenepura (Asia/Colombo)": Sri Jayawardenepura
+"(GMT+05:45) Kathmandu (Asia/Kathmandu)": Kathmandu
+"(GMT+06:00) Astana (Asia/Dhaka)": Astana
+"(GMT+06:00) Dhaka (Asia/Dhaka)": Dhaka
+"(GMT+06:00) Urumqi (Asia/Urumqi)": Urumqi
+"(GMT+06:30) Rangoon (Asia/Rangoon)": Rangoon
+"(GMT+07:00) Bangkok (Asia/Bangkok)": Bangkok
+"(GMT+07:00) Hanoi (Asia/Bangkok)": Hanoi
+"(GMT+07:00) Jakarta (Asia/Jakarta)": Jakarta
+"(GMT+07:00) Krasnoyarsk (Asia/Krasnoyarsk)": Krasnoyarsk
+"(GMT+07:00) Novosibirsk (Asia/Novosibirsk)": Novosibirsk
+"(GMT+08:00) Beijing (Asia/Shanghai)": Beijing
+"(GMT+08:00) Chongqing (Asia/Chongqing)": Chongqing
+"(GMT+08:00) Hong Kong (Asia/Hong_Kong)": Hong Kong
+"(GMT+08:00) Irkutsk (Asia/Irkutsk)": Irkutsk
+"(GMT+08:00) Kuala Lumpur (Asia/Kuala_Lumpur)": Kuala Lumpur
+"(GMT+08:00) Perth (Australia/Perth)": Perth
+"(GMT+08:00) Singapore (Asia/Singapore)": Singapore
+"(GMT+08:00) Taipei (Asia/Taipei)": Taipei
+"(GMT+08:00) Ulaanbaatar (Asia/Ulaanbaatar)": Ulaanbaatar
+"(GMT+09:00) Osaka (Asia/Tokyo)": Osaka
+"(GMT+09:00) Sapporo (Asia/Tokyo)": Sapporo
+"(GMT+09:00) Seoul (Asia/Seoul)": Seoul
+"(GMT+09:00) Tokyo (Asia/Tokyo)": Tokyo
+"(GMT+09:00) Yakutsk (Asia/Yakutsk)": Yakutsk
+"(GMT+09:30) Adelaide (Australia/Adelaide)": Adelaide
+"(GMT+09:30) Darwin (Australia/Darwin)": Darwin
+"(GMT+10:00) Brisbane (Australia/Brisbane)": Brisbane
+"(GMT+10:00) Canberra (Australia/Melbourne)": Canberra
+"(GMT+10:00) Guam (Pacific/Guam)": Guam
+"(GMT+10:00) Hobart (Australia/Hobart)": Hobart
+"(GMT+10:00) Melbourne (Australia/Melbourne)": Melbourne
+"(GMT+10:00) Port Moresby (Pacific/Port_Moresby)": Port Moresby
+"(GMT+10:00) Sydney (Australia/Sydney)": Sydney
+"(GMT+10:00) Vladivostok (Asia/Vladivostok)": Vladivostok
+"(GMT+11:00) Magadan (Asia/Magadan)": Magadan
+"(GMT+11:00) New Caledonia (Pacific/Noumea)": New Caledonia
+"(GMT+11:00) Solomon Is. (Pacific/Guadalcanal)": Solomon Is.
+"(GMT+11:00) Srednekolymsk (Asia/Srednekolymsk)": Srednekolymsk
+"(GMT+12:00) Auckland (Pacific/Auckland)": Auckland
+"(GMT+12:00) Fiji (Pacific/Fiji)": Fiji
+"(GMT+12:00) Kamchatka (Asia/Kamchatka)": Kamchatka
+"(GMT+12:00) Marshall Is. (Pacific/Majuro)": Marshall Is.
+"(GMT+12:00) Wellington (Pacific/Auckland)": Wellington
+"(GMT+12:45) Chatham Is. (Pacific/Chatham)": Chatham Is.
+"(GMT+13:00) Nuku'alofa (Pacific/Tongatapu)": Nuku'alofa
+"(GMT+13:00) Samoa (Pacific/Apia)": Samoa
+"(GMT+13:00) Tokelau Is. (Pacific/Fakaofo)": Tokelau Is.

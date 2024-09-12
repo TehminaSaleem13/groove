@@ -144,12 +144,15 @@ class SettingsController < ApplicationController
     rescue StandardError
       false
     end
-    @result['time_zone'] = Groovepacks::Application.config.time_zones
-    all_zones = {}
-    ActiveSupport::TimeZone.all.map do |e|
-      all_zones["(GMT#{e.now.formatted_offset}) #{e.name} (#{e.tzinfo.identifier})"] = e.name
-    end
-    @result['new_time_zones'] = all_zones
+
+    # TODO: Deprecate in favour or new_time_zones
+    @result['time_zone'] = {} # Groovepacks::Application.config.time_zones
+    # all_zones = {}
+    # ActiveSupport::TimeZone.all.map do |e|
+    #   all_zones["(GMT#{e.now.formatted_offset}) #{e.name} (#{e.tzinfo.identifier})"] = e.name
+    # end
+
+    @result['new_time_zones'] = Groovepacks::Application.config.time_zones_list
     @result['user_sign_in_count'] = current_user.sign_in_count
     general_setting = GeneralSetting.all.first
     offset = general_setting.try(:time_zone).to_i

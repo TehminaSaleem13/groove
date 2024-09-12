@@ -44,6 +44,9 @@ module Groovepacks
         resource '*', headers: :any, methods: %i[get post delete put patch options]
       end
     end
+
+    # TODO: Cleanup redundant except time_zones_list
+    config.time_zones_list = YAML.safe_load(File.open(Rails.root.join('config/time_zones_list.yml')))
     config.time_zones = YAML.safe_load(File.open(Rails.root.join('config/time_zones.yml')))
     config.time_zone_names = YAML.safe_load(File.open(Rails.root.join('config/time_zone_names.yml')))
     config.tz_abbreviations = YAML.safe_load(File.open(Rails.root.join('config/tz_abbreviations.yml')))
