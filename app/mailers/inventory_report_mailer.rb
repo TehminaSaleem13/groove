@@ -53,13 +53,12 @@ class InventoryReportMailer < ActionMailer::Base
   end
 
   def get_products(report)
-    products = if (report.name == 'All_Products_Report') && report.is_locked
-                 Product.all
-               elsif (report.name == 'Active_Products_Report') && report.is_locked
-                 Product.where(status: 'active')
-               else
-                 report.products
-                end
-    products
+    if (report.name == 'All_Products_Report') && report.is_locked
+      Product.includes(:product_inventory_warehousess)
+    elsif (report.name == 'Active_Products_Report') && report.is_locked
+      Product.includes(:product_inventory_warehousess).where(status: 'active')
+    else
+      report.products.includes(:product_inventory_warehousess)
+    end
   end
 end
