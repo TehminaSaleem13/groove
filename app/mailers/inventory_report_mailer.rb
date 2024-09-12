@@ -6,7 +6,7 @@ class InventoryReportMailer < ActionMailer::Base
   def manual_inventory_report(id, tenant)
     Apartment::Tenant.switch! tenant
     @product_inv_setting = InventoryReportsSetting.last
-    selected_reports = ProductInventoryReport.where(id: id)
+    selected_reports = ProductInventoryReport.where(id:)
     return if selected_reports.blank?
 
     selected_reports.each do |report|
@@ -24,7 +24,7 @@ class InventoryReportMailer < ActionMailer::Base
     subject = 'Inventory Projection Report [' + tenant + ']'
     email = @product_inv_setting.report_email
     # mail to: email, subject: subject
-    mail(to: email, subject: subject)
+    mail(to: email, subject:)
   end
 
   def auto_inventory_report(flag, report = nil, report_ids = nil, tenant)
@@ -49,7 +49,7 @@ class InventoryReportMailer < ActionMailer::Base
     subject = "Inventory Projection Report [ #{tenant || Apartment::Tenant.current} ]"
     email = @product_inv_setting.report_email
     # mail to: email, subject: subject
-    mail(to: email, subject: subject)
+    mail(to: email, subject:)
   end
 
   def get_products(report)
