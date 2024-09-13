@@ -9,6 +9,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
   end
 
   def add_tags
+    GroovRealtime.emit('pnotif', { type: 'groove_bulk_tags_actions', data: 10 }, :tenant)
     if @tag_name.present?
       tag = OrderTag.find_by(name: @tag_name)
       if tag
@@ -42,6 +43,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
   end
 
   def remove_tags
+    GroovRealtime.emit('pnotif', { type: 'groove_bulk_tags_actions', data: 10 }, :tenant)
     if @tag_name.present?
       tags = OrderTag.where(name: @tag_name)
       if tags.any?
