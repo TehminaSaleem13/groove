@@ -85,15 +85,15 @@ module TenantsHelper
             subsc_data = stripe_subsc['data'][0]
             trial_end = subsc_data.trial_end
             trial_period_days = begin
-              Time.zone.at(trial_end).to_datetime < Time.current ? 0 : DateTime.parse(Time.at(trial_end).strftime('%d-%m-%Y')).in_time_zone.to_datetime.mjd - Time.current.to_datetime.mjd
+              Time.zone.at(trial_end).to_datetime < Time.current ? 0 : DateTime.parse(Time.zone.at(trial_end).strftime('%d-%m-%Y')).in_time_zone.to_datetime.mjd - Time.current.to_datetime.mjd
             rescue StandardError
               0
             end
             subsc_data.delete
           end
           begin
-            Stripe::Plan.create(amount: 0, interval: 'month', name: new_plan.tr('-', ' ').capitalize, currency: 'usd',
-                                id: new_plan)
+            Stripe::Plan.create(amount: 0, interval: 'month', nickname: new_plan.tr('-', ' ').capitalize,
+                                product: { name: new_plan.tr('-', ' ').capitalize }, currency: 'usd', id: new_plan)
           rescue StandardError
             nil
           end
@@ -209,11 +209,11 @@ module TenantsHelper
 
   def get_search_activity_logs(offset, limit, result)
     ahoy_events = Ahoy::Event.version_2.where(
-                    "LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.title'))) LIKE :query OR
+      "LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.title'))) LIKE :query OR
                      LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.username'))) LIKE :query OR
                      LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.changes'))) LIKE :query",
-                    query: "%#{params[:search].downcase}%"
-                  )
+      query: "%#{params[:search].downcase}%"
+    )
 
     result['tenant']['total_activity_log'] = ahoy_events.count
     ahoy_event_records = ahoy_events.offset(offset).limit(limit).pluck(:time, :properties)
@@ -230,12 +230,12 @@ module TenantsHelper
   def selected_activity_log(ahoy_event_records)
     ahoy_event_records.map do |time, properties|
       {
-        timestamp: Time.zone.at(time).strftime("%d %b %Y, %H:%M"),
+        timestamp: Time.zone.at(time).strftime('%d %b %Y, %H:%M'),
         event: properties['title'],
         user: properties['username'],
         saved_changes: properties['changes']
       }
-    end    
+    end
   end
 
   def list_selected_tenants
@@ -248,15 +248,16 @@ module TenantsHelper
   end
 
   def check_permission(action_type)
-    if action_type == 'orders'
+    case action_type
+    when 'orders'
       return current_user.can?('delete_orders')
-    elsif action_type == 'products'
+    when 'products'
       return current_user.can?('delete_products')
-    elsif action_type == 'both'
+    when 'both'
       return current_user.can?('delete_products') && current_user.can?('delete_orders')
-    elsif action_type == 'inventory'
+    when 'inventory'
       return current_user.can?('reset_inventory')
-    elsif action_type == 'all'
+    when 'all'
       return true
     end
 
@@ -287,8 +288,8 @@ module TenantsHelper
     time_now = Time.current.strftime('%y-%m-%d-%H-%M')
     feature = feature.tr('_', '-')
     {
-      'plan_id' => time_now + '-' + tenant.name + '-' + feature,
-      'plan_name' => time_now + ' ' + tenant.name + ' ' + feature
+      'plan_id' => "#{time_now}-#{tenant.name}-#{feature}",
+      'plan_name' => "#{time_now} #{tenant.name} #{feature}"
     }
   end
 
@@ -296,7 +297,10 @@ module TenantsHelper
     Stripe::Plan.create(
       amount:,
       interval:,
-      name:,
+      nickname: name,
+      product: {
+        name:
+      },
       currency: 'usd',
       id:,
       trial_period_days: nil
