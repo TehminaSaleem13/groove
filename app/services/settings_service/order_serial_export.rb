@@ -23,8 +23,9 @@ module SettingsService
         address2: '', city: '', state: '', zip: '', packing_user: '',
         ordered_qty: '', scanned_date: '', warehouse_name: ''
       }
-      @serials = OrderSerial.where(updated_at:
-        Time.parse(params[:start])..Time.parse(params[:end]))
+      @serials = OrderSerial.includes({ order: %i[packing_user],
+                                        product: %i[product_skus product_barcodes
+                                                    product_inventory_warehousess] }).where(updated_at: Time.zone.parse(params[:start])..Time.zone.parse(params[:end]))
     end
 
     def call

@@ -8,7 +8,7 @@ module ProductMethodsHelper
     @activity.username = username
     @activity.activitytime = current_time_from_proper_timezone
     @activity.activity_type = activity_type
-    user_id = User.find_by_username(username)&.id || User.find_by_name(username)&.id
+    user_id = user_id = User.where('username = :username OR name = :username', username: username).pick(:id)
     @activity.user_id = user_id
     @activity.save
   end
@@ -180,7 +180,7 @@ module ProductMethodsHelper
   end
 
   def primary_warehouse
-    default_inv_id = InventoryWarehouse.where(is_default: true).first.try :id
+    default_inv_id = InventoryWarehouse.where(is_default: true).pick(:id)
     product_inventory_warehousess.find do |p_inv|
       p_inv.inventory_warehouse_id.eql?(default_inv_id)
     end
