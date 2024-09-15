@@ -14,75 +14,38 @@ default: &default
   pool: 5
 
 development:
-  write_database:
-    <<: *default
-    reconnect: false
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_development') %>
-    host: <%= ENV['DB_HOST'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-  read_database:
-    <<: *default
-    reconnect: false
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_development') %>
-    host: <%= ENV['DB_HOST_READING'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-    replica: true
+  <<: *default
+  reconnect: false
+  database: <%= ENV.fetch('DB_NAME', 'groovepacks_development') %>
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
 
 # Warning: The database defined as "test" will be erased and
 # re-generated from your development database when you run "rake".
 # Do not set this db to the same as development or production.
 test:
-  write_database:
-    <<: *default
-    reconnect: false
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_test') %>
-    host: <%= ENV['DB_HOST'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-  read_database:
-    <<: *default
-    reconnect: false
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_test') %>
-    host: <%= ENV['DB_HOST'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
+  <<: *default
+  reconnect: false
+  database: <%= ENV.fetch('DB_NAME', 'groovepacks_test') %>
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
 
 production:
-  write_database:
-    <<: *default
-    reconnect: true
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_production_split') %>
-    host: <%= ENV['DB_HOST'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-    port: 3306
-  read_database:
-    <<: *default
-    reconnect: true
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_production_split') %>
-    host: <%= ENV['DB_HOST_READING'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-    port: 3306
-    replica: true
+  <<: *default
+  reconnect: true
+  database: <%= ENV.fetch('DB_NAME', 'groovepacks_production_split') %>
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  port: 3306
 
 staging:
-  write_database:
-    <<: *default
-    reconnect: true
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_staging') %>
-    host: <%= ENV['DB_HOST'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-    port: 3306
-  read_database:
-    <<: *default
-    reconnect: true
-    database: <%= ENV.fetch('DB_NAME', 'groovepacks_staging') %>
-    host: <%= ENV['DB_HOST_READING'] %>
-    username: <%= ENV['DB_USERNAME'] %>
-    password: <%= ENV['DB_PASSWORD'] %>
-    port: 3306
-    replica: true
+  <<: *default
+  reconnect: true
+  database: <%= ENV.fetch('DB_NAME', 'groovepacks_staging') %>
+  host: <%= ENV['DB_HOST'] %>
+  username: <%= ENV['DB_USERNAME'] %>
+  password: <%= ENV['DB_PASSWORD'] %>
+  port: 3306
