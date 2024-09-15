@@ -74,7 +74,7 @@ module Groovepacker
         rec_subscription(@tenant, subscription_result)
         begin
           if state == 'show'
-            subscriptions = Stripe::Customer.retrieve(@tenant.subscription.stripe_customer_id).subscriptions
+            subscriptions = Stripe::Subscription.list(customer: @tenant.subscription.stripe_customer_id)
             subscription_ids = subscriptions.data.map(&:id)
             subscription_result['verified_stripe_account'] = subscription_ids.include? @tenant.subscription.customer_subscription_id
           end
