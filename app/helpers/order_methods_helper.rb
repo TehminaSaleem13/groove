@@ -292,7 +292,9 @@ module OrderMethodsHelper
   def get_scanned_items(order_item_status: %w[scanned partially_scanned], limit: 10, offset: 0, is_reload: false)
     scanned_list = []
     order_items_with_eger_load_and_cache(order_item_status, limit, offset).each do |order_item|
-      update_scanned_list(order_item, scanned_list)
+      if(!order_item.cached_product.nil?)
+        update_scanned_list(order_item, scanned_list)
+      end
     end
 
     # transform scanned_list to move all child items into displaying as individual items
