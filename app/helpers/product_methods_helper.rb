@@ -180,7 +180,7 @@ module ProductMethodsHelper
   end
 
   def primary_warehouse
-    default_inv_id = InventoryWarehouse.where(is_default: true).pick(:id)
+    default_inv_id = Rails.cache.fetch("#{Apartment::Tenant.current}-default-inv-warehouse-id", expires_in: 1.hour) { InventoryWarehouse.where(is_default: true).pick(:id) }
     product_inventory_warehousess.find do |p_inv|
       p_inv.inventory_warehouse_id.eql?(default_inv_id)
     end

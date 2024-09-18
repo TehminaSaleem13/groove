@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_09_124851) do
+ActiveRecord::Schema.define(version: 2024_09_18_023250) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -851,6 +851,7 @@ ActiveRecord::Schema.define(version: 2024_09_09_124851) do
     t.bigint "product_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.index ["category"], name: "index_product_cats_on_category"
     t.index ["product_id"], name: "index_product_cats_on_product_id"
   end
 
@@ -900,6 +901,9 @@ ActiveRecord::Schema.define(version: 2024_09_09_124851) do
     t.integer "location_quaternary_qty"
     t.integer "product_inv_target_level", default: 1
     t.index ["inventory_warehouse_id"], name: "index_product_inventory_warehouses_on_inventory_warehouse_id"
+    t.index ["location_primary"], name: "index_product_inventory_warehouses_on_location_primary"
+    t.index ["location_secondary"], name: "index_product_inventory_warehouses_on_location_secondary"
+    t.index ["location_tertiary"], name: "index_product_inventory_warehouses_on_location_tertiary"
     t.index ["product_id"], name: "index_product_inventory_warehouses_on_product_id"
   end
 
@@ -987,8 +991,10 @@ ActiveRecord::Schema.define(version: 2024_09_09_124851) do
     t.decimal "avg_cost", precision: 10, scale: 2
     t.string "count_group", limit: 1
     t.integer "restock_lead_time", default: 0
+    t.index ["name"], name: "index_products_on_name_255", length: 255
     t.index ["status"], name: "index_products_on_status"
     t.index ["store_id"], name: "index_products_on_store_id"
+    t.index ["updated_at"], name: "index_products_on_updated_at"
   end
 
   create_table "products_product_inventory_reports", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
