@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_18_023250) do
+ActiveRecord::Schema.define(version: 2024_09_19_075610) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1000,6 +1000,16 @@ ActiveRecord::Schema.define(version: 2024_09_18_023250) do
   create_table "products_product_inventory_reports", id: false, charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.bigint "product_inventory_report_id"
     t.bigint "product_id"
+  end
+
+  create_table "request_logs", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "request_method"
+    t.string "request_path"
+    t.text "request_body", size: :long
+    t.boolean "completed", default: false
+    t.float "duration"
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
   end
 
   create_table "roles", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

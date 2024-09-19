@@ -1,8 +1,13 @@
 # frozen_string_literal: true
 
 class ApplicationController < ActionController::Base
+  include Encryptable
+
   before_action :set_current_user_id, :check_request_from_gpx
-  around_action :set_time_zone
+  before_action :log_request
+
+  around_action :set_time_zone_and_process_request
+
   protect_from_forgery with: :null_session
 
   respond_to :html, :json
@@ -35,8 +40,13 @@ class ApplicationController < ActionController::Base
     GroovRealtime.current_user_id = current_user ? current_user.id : 0
   end
 
-  def set_time_zone(&block)
+  def set_time_zone_and_process_request(&block)
     Time.use_zone(GeneralSetting.new_time_zone, &block)
+  ensure
+    if @incoming_log_request
+      duration = Time.current - @incoming_log_request.created_at
+      @incoming_log_request.update_columns(duration:, completed: true)
+    end
   end
 
   def after_sign_in_path_for(resource_or_scope)
@@ -86,7 +96,7 @@ class ApplicationController < ActionController::Base
     params['data'].each do |item|
       item.merge!({ on_ex: request.headers['HTTP_ON_GPX'] })
     end
-  rescue StandardError => e
+  rescue StandardError
   end
 
   def save_bc_auth_if_present
@@ -120,14 +130,24 @@ class ApplicationController < ActionController::Base
   end
 
   def get_host_url
-    url = ''
     current_tenant = Apartment::Tenant.current
-    if Rails.env.producttion?
+    if Rails.env.production?
       "https://#{current_tenant}.groovepacker.com"
     elsif Rails.env.staging?
       "https://#{current_tenant}.barcodepacker.com"
     else
       "https://#{request.host}"
     end
+  end
+
+  def log_request
+    @incoming_log_request = RequestLog.create(
+      request_method: request.method,
+      request_path: request.path,
+      request_body: compress_and_encrypt(params.to_json)
+    )
+  rescue StandardError
+    Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'log-request-failures',
+                                   { request_method: request.method, request_path: request.path, params: })
   end
 end

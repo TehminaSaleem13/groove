@@ -35,6 +35,8 @@ RSpec.describe PrintController, type: :controller do
     let(:mocked_key) { instance_double(OpenSSL::PKey::PKey, sign: 'signed data') }
 
     before do
+      allow(controller).to receive(:log_request)
+
       allow(OpenSSL::PKey).to receive(:read)
         .and_return(mocked_key)
 
