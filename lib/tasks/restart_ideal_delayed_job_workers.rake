@@ -6,7 +6,7 @@ namespace :delayed_job do
   task restart_workers: :environment do
     worker_process = `ps aux  | awk '{print $6/1024 " MB " $11}'  | sort -n | grep delayed`.split(/\n/)
 
-    return if worker_process.empty?
+    next if worker_process.empty?
 
     worker_process.each do |process|
       /(?<memory>\d+).*(?<worker_name>delayed\_job\.\d+)/ =~ process
