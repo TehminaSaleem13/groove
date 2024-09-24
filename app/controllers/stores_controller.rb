@@ -127,6 +127,13 @@ class StoresController < ApplicationController
     render json: result
   end
 
+  def create_update_screct_key_ss
+    @result = { 'status' => true, 'store_id' => 0, 'messages' => []}
+    create_screct_key_ss if current_user.can? 'add_edit_stores'
+
+    render json: @result
+  end
+
   def create_update_store
     @result = { 'status' => true, 'store_id' => 0, 'csv_import' => false, 'messages' => [] }
     create_store if current_user.can? 'add_edit_stores'

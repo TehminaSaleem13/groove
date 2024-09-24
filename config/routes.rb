@@ -245,6 +245,7 @@ Rails.application.routes.draw do
       post 'update_shopify_token'
       post 'update_shopline_token'
       post 'fetch_label_related_data'
+      post 'create_update_screct_key_ss'
     end
     member do
       get 'verify_tags'

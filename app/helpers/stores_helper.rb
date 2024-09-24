@@ -311,6 +311,19 @@ module StoresHelper
     end
   end
 
+  def create_screct_key_ss
+    @store = Store.find(params[:id])
+    if params[:id].present? && params[:create].to_boolean
+      gen_key = SecureRandom.hex(10)
+      @store.shipstation_rest_credential.update(webhook_secret: gen_key)
+      @result['message'] = 'Successfully Created'
+    else
+      @store.shipstation_rest_credential.update(webhook_secret: "")
+      @result['message'] = 'Successfully Deleted'
+    end
+    @result['store_id'] = @store.id
+  end
+
   def create_store
     if params[:id].nil?
       if Store.can_create_new?

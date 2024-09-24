@@ -337,6 +337,18 @@ RSpec.describe StoresController, type: :controller do
       expect(shipstation.first.gen_barcode_from_sku).to eq(true)
     end
 
+    it 'Create Screct Key Shipstation' do
+      post :create_update_screct_key_ss, params: { id: @ship_store.id, create: 'true' }
+      expect(response.status).to eq(200)
+      expect(@ship_store.shipstation_rest_credential.webhook_secret).to be_truthy
+    end
+
+    it 'Delete Screct Key Shipstation' do
+      post :create_update_screct_key_ss, params: { id: @ship_store.id, create: 'false' }
+      expect(response.status).to eq(200)
+      expect(@ship_store.shipstation_rest_credential.webhook_secret).to eq('')
+    end
+
     it 'Fetch Label Related Data' do
       order = FactoryBot.create(:order, increment_id: 'SS_3453', store_id: @ship_store.id,
                                         store_order_id: '1660160213', shipstation_label_data: FactoryBot.build(:shipstation_label_data, content: { 'orderId' => 785_164_401, 'carrierCode' => 'stamps_com', 'serviceCode' => 'usps_first_class_mail', 'packageCode' => 'package', 'confirmation' => 'delivery', 'shipDate' => '2023-01-09', 'weight' => { 'value' => 1.4, 'units' => 'ounces', 'WeightUnits' => 1 }, 'dimensions' => nil, 'insuranceOptions' => { 'provider' => nil, 'insureShipment' => false, 'insuredValue' => 0.0 }, 'internationalOptions' => { 'contents' => 'merchandise', 'customsItems' => nil, 'nonDelivery' => 'return_to_sender' }, 'advancedOptions' => { 'warehouseId' => 16_188, 'nonMachinable' => false, 'saturdayDelivery' => false, 'containsAlcohol' => false, 'mergedOrSplit' => false, 'mergedIds' => [], 'parentId' => nil, 'storeId' => 104_291, 'customField1' => '153491951039-2338405566005', 'customField2' => '10051435535311', 'customField3' => '', 'source' => 'ebay_v2', 'billToParty' => nil, 'billToAccount' => nil, 'billToPostalCode' => nil, 'billToCountryCode' => nil, 'billToMyOtherAccount' => nil } }))
