@@ -26,7 +26,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
 
             perform_now(tag.id, order_ids, 'add')
           else
-            OrderTaggingJob.perform_later(tag.id, order_ids, 'add', total_batches)
+            OrderTaggingJob.set(priority: 95, queue: "add_tags_to_orders_#{Apartment::Tenant.current}").perform_later(tag.id, order_ids, 'add', total_batches)
           end
 
         end
@@ -57,7 +57,7 @@ class OrderTagManager < Groovepacker::Utilities::Base
 
             perform_now(tags.pluck(:id), order_ids, 'remove')
           else
-            OrderTaggingJob.perform_later(tags.pluck(:id), order_ids, 'remove', total_batches)
+            OrderTaggingJob.set(priority: 95, queue: "remove_tags_to_orders_#{Apartment::Tenant.current}").perform_later(tags.pluck(:id), order_ids, 'remove', total_batches)
           end
 
         end

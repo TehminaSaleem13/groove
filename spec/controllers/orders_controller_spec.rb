@@ -1421,6 +1421,76 @@ RSpec.describe OrdersController, type: :controller do
       result = JSON.parse(response.body)
       expect(result['status']).to eq(true)
     end
+
+    it 'tag update should be working with bulk orders' do
+      @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
+      store = FactoryBot.create(:store,name: "store", store_type: "system",inventory_warehouse: @inv_wh, status: true)
+      order =
+        Order.create(
+          increment_id: '9151',
+          order_placed_time: Time.current,
+          store_id: store.id,
+          firstname: 'BIKE',
+          lastname: 'ACTIONGmbH',
+          email: 'east@raceface.com',
+          address_1: 'WEISKIRCHER STR. 102',
+          city: 'RODGAU',
+          postcode: '63110',
+          country: 'GERMANY',
+          status: 'scanned',
+          scanned_on: Time.current,
+          packing_user_id: 2,
+          total_scan_time: 1720,
+          total_scan_count: 20,
+          packing_score: 14
+        )
+
+      orderArray = '[{"id":9151}, {"id":9152}, {"id":17938}, {"id":17964}, {"id":17983}, {"id":18238}]'
+
+      request.accept = 'application/json'
+      get :check_orders_tags, params: {filter: 'all', tags: tags, filters: filterValue.to_json, orderArray: orderArray, select_all: true }
+
+      expect(response).to have_http_status(:success)
+      result = JSON.parse(response.body)
+      expect(result['tags']['partially_present']).to be_empty
+
+      post :add_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+
+      post :remove_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+
+      1002.times do |i|
+        Order.create(
+          increment_id: (9151 + i).to_s,
+          order_placed_time: Time.current,
+          store_id: store.id,
+          firstname: 'BIKE',
+          lastname: 'ACTIONGmbH',
+          email: "east+#{i}@raceface.com", # Unique email for each order
+          address_1: 'WEISKIRCHER STR. 102',
+          city: 'RODGAU',
+          postcode: '63110',
+          country: 'GERMANY',
+          status: 'scanned',
+          scanned_on: Time.current,
+          packing_user_id: 2,
+          total_scan_time: 1720,
+          total_scan_count: 20,
+          packing_score: 14
+        )
+      end
+      allow($redis).to receive(:get).and_return("true")
+      post :add_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+
+      post :remove_tags, params: {filter: 'all', tag_name: tag1.name,  filters: emptyfilterValue.to_json, orderArray: orderArray, select_all: true }
+      result = JSON.parse(response.body)
+      expect(result['status']).to eq(true)
+    end
   end
 
   describe 'Order Items Export Report' do
