@@ -9,7 +9,7 @@ namespace :doo do
       failed_tenant = []
       tenants = Tenant.order(:name)
       import_orders_obj = ImportOrders.new
-      tenants.each do |tenant|
+      tenants.find_each do |tenant|
         import_orders_obj.reschedule_job('inv_report', tenant.name)
       rescue StandardError => e
         puts e

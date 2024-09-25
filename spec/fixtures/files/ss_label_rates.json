@@ -1,0 +1,9 @@
+[{"serviceName": "USPS Priority Mail - Package", "serviceCode": "usps_priority_mail", "shipmentCost": 6.9, "otherCost": 0.0},
+ {"serviceName": "USPS Priority Mail - Medium Flat Rate Box", "serviceCode": "usps_priority_mail", "shipmentCost": 15.19, "otherCost": 0.0},
+ {"serviceName": "USPS Priority Mail - Large Flat Rate Box", "serviceCode": "usps_priority_mail", "shipmentCost": 20.69, "otherCost": 0.0},
+ {"serviceName": "USPS Priority Mail - Flat Rate Envelope", "serviceCode": "usps_priority_mail", "shipmentCost": 8.18, "otherCost": 0.0},
+ {"serviceName": "USPS Priority Mail - Flat Rate Padded Envelope",
+  "serviceCode": "usps_priority_mail",
+  "shipmentCost": 8.95,
+  "otherCost": 0.0},
+ {"serviceName": "USPS Ground Advantage - Package", "serviceCode": "usps_ground_advantage", "shipmentCost": 4.38, "otherCost": 0.0}]

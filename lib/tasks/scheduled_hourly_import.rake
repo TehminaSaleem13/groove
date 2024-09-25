@@ -7,7 +7,7 @@ namespace :doo do
       $redis.set('schedule_hourly_import', true)
       $redis.expire('schedule_hourly_import', 1800)
       tenants = Tenant.where(scheduled_import_toggle: true, is_cf: true)
-      tenants.each do |tenant|
+      tenants.find_each do |tenant|
         Apartment::Tenant.switch! tenant.name
         Time.use_zone(GeneralSetting.new_time_zone) do
           setting = GeneralSetting.last

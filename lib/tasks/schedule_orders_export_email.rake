@@ -9,7 +9,7 @@ namespace :doo do
       failed_tenant = []
       scheduled_tenants = []
       tenants = Tenant.order(:name)
-      tenants.each do |tenant|
+      tenants.find_each do |tenant|
         scheduled = ImportOrders.new.reschedule_job('export_order', tenant.name)
         Apartment::Tenant.switch! tenant.name
         Time.use_zone(GeneralSetting.new_time_zone) do

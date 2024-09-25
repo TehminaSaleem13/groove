@@ -3,7 +3,11 @@
 namespace :doo do
   desc 'delete ftp files older than 90 days'
   task delete_older_ftp_files: :environment do
-    Tenant.all.each do |tenant|
+    next if $redis.get('delete_ftp_files_older_than_90_days')
+
+    $redis.set('delete_ftp_files_older_than_90_days', true)
+    $redis.expire('delete_ftp_files_older_than_90_days', 180)
+    Tenant.find_each do |tenant|
       Apartment::Tenant.switch! tenant.name.to_s
 
       Store.where(store_type: "CSV", status: true).each do |store|

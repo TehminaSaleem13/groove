@@ -981,13 +981,16 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Get Real Time Rates' do
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:list_carriers).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_list_carriers.json'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_ss_label_rates).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_label_rates.json')), ok?: true))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:list_services).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_list_services.json'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:list_packages).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_list_packages.json'))))
+
       @inv_wh = FactoryBot.create(:inventory_warehouse, name: 'ss_inventory_warehouse')
-      store = FactoryBot.create(:store, name: 'ss_store', store_type: 'Shipstation API 2', inventory_warehouse: @inv_wh,
-                                        status: true)
+      store = FactoryBot.create(:store, name: 'ss_store', store_type: 'Shipstation API 2', inventory_warehouse: @inv_wh, status: true)
       ss_credential = FactoryBot.create(:shipstation_rest_credential, store_id: store.id)
-      order = FactoryBot.create :order, store_id: @store.id
-      params = { credential_id: ss_credential.id, carrier_code: '',
-                 post_data: { weight: '10', fromPostalCode: '10005', toState: 'South Carolina', toCountry: 'US', toPostalCode: '25918-2743', confirmation_code: 'none' } }
+      order = FactoryBot.create(:order, increment_id: '113-5739664-0875452', store_id: @store.id, store_order_id: '887321785')
+      params = { credential_id: ss_credential.id, carrier_code: '', post_data: { weight: '10', fromPostalCode: '10005', toState: 'South Carolina', toCountry: 'US', toPostalCode: '25918-2743', confirmation_code: 'none' } }
 
       post(:get_realtime_rates, params:)
       expect(response.status).to eq(200)

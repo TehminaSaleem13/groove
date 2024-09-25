@@ -8,7 +8,7 @@ namespace :doo do
       $redis.expire('email_send', 500)
       time = Time.current - 5.minutes
       not_started_jobs = Delayed::Job.where('attempts=0 and locked_at IS NULL and locked_by IS NULL and run_at<? and updated_at>=?', time + 4.minutes + 40.seconds, time)
-      DelayedJobMailer.waiting_jobs(not_started_jobs).deliver unless not_started_jobs.blank?
+      DelayedJobMailer.waiting_jobs(not_started_jobs).deliver unless not_started_jobs.empty?
       puts 'task complete'
       exit(1)
     end

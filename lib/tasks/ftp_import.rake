@@ -3,12 +3,16 @@
 namespace :ftp_csv_file_import do
   desc 'import file from server'
   task ftp_import: :environment do
+    next if $redis.get('import_file_from_server')
+
+    $redis.set('import_file_from_server', true)
+    $redis.expire('import_file_from_server', 180)
     # current_time = Time.now.in_time_zone('Eastern Time (US & Canada)').strftime("%I:%M")
-    Tenant.order(:name).each do |tenant|
+    Tenant.order(:name).find_each do |tenant|
       Apartment::Tenant.switch! tenant.name.to_s
       Time.use_zone(GeneralSetting.new_time_zone) do
-        import_no_inprogress = OrderImportSummary.where('status in (?) and updated_at >= ?', %w[in_progress not_started], (DateTime.now.in_time_zone - 1.hour)).blank?
-        item = !ImportItem.joins(:store).where(stores: { store_type: 'CSV' }).map(&:status).include?('in_progress')
+        import_no_inprogress = OrderImportSummary.where('status in (?) and updated_at >= ?', %w[in_progress not_started], (DateTime.now.in_time_zone - 1.hour)).none?
+        item = ImportItem.joins(:store).where(stores: { store_type: 'CSV' }).where(status: 'in_progress').none?
         puts "====================FTP import for #{tenant.name}======================"
         # cred = !Store.where("csv_beta = ? and status = ?", true, true).map(&:ftp_credential).map(&:use_ftp_import).include?(true) rescue true
         if import_no_inprogress && item

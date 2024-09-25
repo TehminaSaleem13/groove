@@ -8,7 +8,7 @@ namespace :doo do
       $redis.expire('schedule_inventory_email', 54)
       tenants = Tenant.order(:name)
       import_orders_obj = ImportOrders.new
-      tenants.each do |tenant|
+      tenants.find_each do |tenant|
         import_orders_obj.reschedule_job('low_inventory_email', tenant.name)
       rescue StandardError
         nil

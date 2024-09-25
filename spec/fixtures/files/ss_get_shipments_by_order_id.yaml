@@ -1,0 +1,58 @@
+---
+- shipmentId: 667098938
+  orderId: 887321785
+  orderKey: 113-5739664-0875452
+  userId: e0a34082-a113-4a3c-a942-0de53ecd4321
+  customerEmail: yxgglgrf0w9m7zx@marketplace.amazon.com
+  orderNumber: 113-5739664-0875452
+  createDate: Fri, 20 Sep 2024 14:59:41.637000000 EDT -04:00
+  shipDate: '2024-09-21'
+  shipmentCost: 4.38
+  insuranceCost: 0
+  trackingNumber: '9400111105501227644665'
+  isReturnLabel: false
+  batchNumber: 
+  carrierCode: stamps_com
+  serviceCode: usps_ground_advantage
+  packageCode: thick_envelope
+  confirmation: delivery
+  warehouseId: 16188
+  voided: false
+  voidDate: 
+  marketplaceNotified: true
+  notifyErrorMessage: 
+  shipTo:
+    name: Charlene Jones
+    company: ''
+    street1: 133 S BULOVA DR
+    street2: ''
+    street3: 
+    city: APOPKA
+    state: FL
+    postalCode: 32703-4677
+    country: US
+    phone: "+1 346-307-9643 ext. 26541"
+    residential: 
+    addressVerified: 
+  weight:
+    value: 5
+    units: ounces
+    WeightUnits: 1
+  dimensions:
+    units: inches
+    length: 2.5
+    width: 2.5
+    height: 2.75
+  insuranceOptions:
+    provider: 
+    insureShipment: false
+    insuredValue: 0
+  advancedOptions:
+    billToParty: '4'
+    billToAccount: 
+    billToPostalCode: 
+    billToCountryCode: 
+    storeId: 74084
+  shipmentItems: 
+  labelData: 
+  formData: 

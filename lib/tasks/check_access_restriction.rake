@@ -6,7 +6,7 @@ namespace :doo do
     if $redis.get('send_email').blank?
       $redis.set('send_email', true)
       $redis.expire('send_email', 500)
-      Tenant.where(is_cf: true).each do |tenant|
+      Tenant.where(is_cf: true).find_each do |tenant|
         Apartment::Tenant.switch! tenant.name
         access_restriction = AccessRestriction.order('created_at').last
         if (Date.today - Date.parse(access_restriction.created_at.strftime('%F'))).to_i > 31

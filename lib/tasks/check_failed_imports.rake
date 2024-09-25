@@ -3,7 +3,11 @@
 namespace :check do
   desc 'check failed imports'
   task failed_imports: :environment do
-    Tenant.order(:name).each do |tenant|
+    next if $redis.get('check_failed_imports')
+
+    $redis.set('check_failed_imports', true)
+    $redis.expire('check_failed_imports', 180)
+    Tenant.order(:name).find_each do |tenant|
       Apartment::Tenant.switch! tenant.name
       import_items = ImportItem.joins(:store).where("stores.status=1 and (import_items.status='in_progress' OR import_items.status='not_started')").readonly(false)
       next unless import_items.any?

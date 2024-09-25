@@ -1,0 +1,32 @@
+[
+  {
+    "name": "Stamps.com",
+    "code": "stamps_com",
+    "accountNumber": "dreadhead",
+    "requiresFundedAccount": true,
+    "balance": 336.9800,
+    "nickname": "dreadhead",
+    "shippingProviderId": 33469,
+    "primary": true
+  },
+  {
+    "name": "UPS by ShipStation",
+    "code": "ups_walleted",
+    "accountNumber": "CK2548",
+    "requiresFundedAccount": true,
+    "balance": 336.9800,
+    "nickname": "dreadhead",
+    "shippingProviderId": 549121,
+    "primary": true
+  },
+  {
+    "name": "GlobalPost",
+    "code": "globalpost",
+    "accountNumber": "0f80f6de-2965-44ec-8c5a-b41e60d1f5ff",
+    "requiresFundedAccount": true,
+    "balance": 336.9800,
+    "nickname": "dreadhead",
+    "shippingProviderId": 549122,
+    "primary": true
+  }
+]

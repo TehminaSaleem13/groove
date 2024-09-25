@@ -322,6 +322,8 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Verify Shipstation Tags' do
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_tag_id).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_order_tags.yaml'))))
+
       post :verify_tags, params: { id: @ship_store.id }
       expect(response.status).to eq(200)
       res = JSON.parse(response.body)
@@ -350,8 +352,15 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Fetch Label Related Data' do
-      order = FactoryBot.create(:order, increment_id: 'SS_3453', store_id: @ship_store.id,
-                                        store_order_id: '1660160213', shipstation_label_data: FactoryBot.build(:shipstation_label_data, content: { 'orderId' => 785_164_401, 'carrierCode' => 'stamps_com', 'serviceCode' => 'usps_first_class_mail', 'packageCode' => 'package', 'confirmation' => 'delivery', 'shipDate' => '2023-01-09', 'weight' => { 'value' => 1.4, 'units' => 'ounces', 'WeightUnits' => 1 }, 'dimensions' => nil, 'insuranceOptions' => { 'provider' => nil, 'insureShipment' => false, 'insuredValue' => 0.0 }, 'internationalOptions' => { 'contents' => 'merchandise', 'customsItems' => nil, 'nonDelivery' => 'return_to_sender' }, 'advancedOptions' => { 'warehouseId' => 16_188, 'nonMachinable' => false, 'saturdayDelivery' => false, 'containsAlcohol' => false, 'mergedOrSplit' => false, 'mergedIds' => [], 'parentId' => nil, 'storeId' => 104_291, 'customField1' => '153491951039-2338405566005', 'customField2' => '10051435535311', 'customField3' => '', 'source' => 'ebay_v2', 'billToParty' => nil, 'billToAccount' => nil, 'billToPostalCode' => nil, 'billToCountryCode' => nil, 'billToMyOtherAccount' => nil } }))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_order).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_get_order.yaml'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_shipments_by_order_id).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_get_shipments_by_order_id.yaml'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:list_carriers).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_list_carriers.json'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_ss_label_rates).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_label_rates.json')), ok?: true))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:list_services).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_list_services.json'))))
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:list_packages).and_return( double(body: File.read(Rails.root.join('spec/fixtures/files/ss_list_packages.json'))))
+
+      order = FactoryBot.create(:order, increment_id: '113-5739664-0875452', store_id: @ship_store.id,
+                                        store_order_id: '887321785', shipstation_label_data: FactoryBot.build(:shipstation_label_data, content: { 'orderId' => 887321785, 'carrierCode' => 'stamps_com', 'serviceCode' => 'usps_first_class_mail', 'packageCode' => 'package', 'confirmation' => 'delivery', 'shipDate' => '2023-01-09', 'weight' => { 'value' => 1.4, 'units' => 'ounces', 'WeightUnits' => 1 }, 'dimensions' => nil, 'insuranceOptions' => { 'provider' => nil, 'insureShipment' => false, 'insuredValue' => 0.0 }, 'internationalOptions' => { 'contents' => 'merchandise', 'customsItems' => nil, 'nonDelivery' => 'return_to_sender' }, 'advancedOptions' => { 'warehouseId' => 16_188, 'nonMachinable' => false, 'saturdayDelivery' => false, 'containsAlcohol' => false, 'mergedOrSplit' => false, 'mergedIds' => [], 'parentId' => nil, 'storeId' => 104_291, 'customField1' => '153491951039-2338405566005', 'customField2' => '10051435535311', 'customField3' => '', 'source' => 'ebay_v2', 'billToParty' => nil, 'billToAccount' => nil, 'billToPostalCode' => nil, 'billToCountryCode' => nil, 'billToMyOtherAccount' => nil } }))
 
       post :fetch_label_related_data, params: { id: order.id, 'app' => true }
       expect(response.status).to eq(200)

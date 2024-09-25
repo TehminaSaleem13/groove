@@ -3,11 +3,15 @@
 namespace :check do
   desc 'check failed product imports'
   task failed_product_imports: :environment do
-    Tenant.where(is_cf: true).each do |tenant|
+    next if $redis.get('check_failed_product_imports')
+
+    $redis.set('check_failed_product_imports', true)
+    $redis.expire('check_failed_product_imports', 180)
+    Tenant.where(is_cf: true).find_each do |tenant|
       Apartment::Tenant.switch! tenant.name
       in_progress_items = StoreProductImport.where(status: 'in_progress')
       not_started_items = StoreProductImport.where(status: 'not_started')
-      next if (not_started_items + in_progress_items).blank?
+      next if (not_started_items + in_progress_items).none?
 
       begin
         failed_import_items = []

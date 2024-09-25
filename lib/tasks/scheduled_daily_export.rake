@@ -6,7 +6,7 @@ namespace :doo do
     if $redis.get('scheduled_daily_export').blank?
       $redis.set('scheduled_daily_export', true)
       $redis.expire('scheduled_daily_export', 5400)
-      Tenant.all.each do |tenant|
+      Tenant.find_each do |tenant|
         Apartment::Tenant.switch! tenant.name
         Time.use_zone(GeneralSetting.new_time_zone) do
           export_setting = ExportSetting.last
