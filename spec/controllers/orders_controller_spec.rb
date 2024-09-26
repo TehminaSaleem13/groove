@@ -130,6 +130,42 @@ RSpec.describe OrdersController, type: :controller do
 
       expect(response.status).to eq(200)
     end
+
+    it 'Assign Bulk Order to Users' do
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      FactoryBot.create(:product_sku, product:, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product:, barcode: 'PRODUCT1')
+
+      order1 = FactoryBot.create(:order, increment_id: 'ORDER1', status: 'awaiting', store: @store,
+                                         prime_order_id: '1660160213', store_order_id: '1660160213')
+      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order1,
+                                     name: product.name)
+
+      request.accept = 'application/json'
+
+      order = FactoryBot.create :order, store_id: @store.id
+
+      post :assign_orders_to_users, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'true', export_type: '', users: [@user.username]}
+      expect(response.status).to eq(200)
+    end
+
+    it 'Un-Assign Bulk Order to Users' do
+      product = FactoryBot.create(:product, name: 'PRODUCT1')
+      FactoryBot.create(:product_sku, product:, sku: 'PRODUCT1')
+      FactoryBot.create(:product_barcode, product:, barcode: 'PRODUCT1')
+
+      order1 = FactoryBot.create(:order, increment_id: 'ORDER1', status: 'awaiting', store: @store,
+                                         prime_order_id: '1660160213', store_order_id: '1660160213')
+      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order1,
+                                     name: product.name)
+
+      request.accept = 'application/json'
+
+      order = FactoryBot.create :order, store_id: @store.id
+
+      post :deassign_orders_from_users, as: :json, params:{sort: '', order: 'DESC', filter: 'awaiting', search: '', select_all: false, inverted: false, limit: 20, offset: 0, status: '', reallocate_inventory: false, orderArray: [{id: order.id}], product_search_toggle: 'true', export_type: '', users: [@user.username]}
+      expect(response.status).to eq(200)
+    end
   end
 
   describe 'Shipworks Imports' do

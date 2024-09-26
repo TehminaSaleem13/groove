@@ -41,8 +41,9 @@ module Groovepacker
           final_order = Order.find_by_sql(final_order)
         end
         tags = calculate_tags_count(data.flatten)
+        users = User.users_with_unique_order_count
 
-        [final_order, filtered_count, tags]
+        [final_order, filtered_count, tags, users]
       end
 
 

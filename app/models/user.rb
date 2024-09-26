@@ -105,4 +105,11 @@ class User < ApplicationRecord
     login_time = last_sign_in_at
     scan_time.to_i > login_time.to_i ? scan_time : login_time
   end
+
+  def self.users_with_unique_order_count
+    self.joins(order_activities: :order)
+        .group('users.id')
+        .select('users.username, COUNT(DISTINCT orders.id) AS unique_order_count')
+        .map { |user| { username: user.username, unique_order_count: user.unique_order_count } }
+  end
 end

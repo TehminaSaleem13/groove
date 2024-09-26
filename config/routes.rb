@@ -126,6 +126,8 @@ Rails.application.routes.draw do
       post 'delete_orders'
       post 'duplicate_orders'
       post 'change_orders_status'
+      post 'assign_orders_to_users'
+      post 'deassign_orders_from_users'
       post 'clear_assigned_tote'
       post 'update_order_list'
       post 'save_by_passed_log'

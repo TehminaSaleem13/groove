@@ -158,6 +158,58 @@ module Groovepacker
         $redis.del("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}")
       end
 
+      def assign_orders_to_users(current_tenant, bulkaction_id, user_id, users)
+        Apartment::Tenant.switch!(current_tenant)
+        bulk_action = GrooveBulkActions.find(bulkaction_id)
+        
+        orders = $redis.get("bulk_action_assign_orders_to_users_#{current_tenant}_#{bulkaction_id}")
+        orders = Marshal.load(orders)
+        order_ids = orders.pluck(:id)
+        
+        init_results
+        bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
+      
+        user_list = User.where(username: users)
+        
+        if user_list.size > 1
+          orders.each_with_index do |order, index|
+            user = user_list[index % user_list.size]
+            OrderActivity.where(order_id: order.id).update_all(user_id: user.id)
+          end
+        else
+          user = user_list.first
+          OrderActivity.where(order_id: orders.pluck(:id)).update_all(user_id: user.id)
+        end
+      
+        bulk_action.update(completed: orders.count)
+        check_bulk_action_completed_or_not(bulk_action)
+      
+        $redis.del("bulk_action_assign_orders_to_users_#{current_tenant}_#{bulkaction_id}")
+      end
+      
+      def deassign_orders_from_users(current_tenant, bulkaction_id, user_id, users)
+        Apartment::Tenant.switch!(current_tenant)
+      
+        bulk_action = GrooveBulkActions.find(bulkaction_id)
+        orders = $redis.get("bulk_action_deassign_orders_to_users_#{current_tenant}_#{bulkaction_id}")
+        orders = Marshal.load(orders)
+        order_ids = orders.pluck(:id)
+      
+        init_results
+        bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
+      
+        order_activities = OrderActivity.where(order_id: order_ids)
+      
+        order_activities.update_all(user_id: nil)
+      
+        puts "Successfully deassigned users from the orders."
+      
+        bulk_action.update(completed: orders.count)
+        check_bulk_action_completed_or_not(bulk_action)
+      
+        $redis.del("bulk_action_deassign_orders_to_users_#{current_tenant}_#{bulkaction_id}")
+      end
+
       def delete(current_tenant, bulkaction_id, params)
         Apartment::Tenant.switch!(current_tenant)
         bulk_action = GrooveBulkActions.find(bulkaction_id)

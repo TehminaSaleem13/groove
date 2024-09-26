@@ -81,14 +81,15 @@ class OrdersController < ApplicationController
   def sorted_and_filtered_data
     @result ||= {}
     @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
-    @orders, filter_length, tags = gp_orders_filter.filter_orders(@searched_orders)
+    @orders, filter_length, tags, users = gp_orders_filter.filter_orders(@searched_orders)
     @result['orders_count'] = params[:search].present? ? get_filter_orders_count(@searched_orders["orders"]) : get_orders_count
     @result['orders_count'].merge!('filtered_count' => filter_length)
     @result['orders'] = make_orders_list(@orders)
 
     # Calculate tag counts
     @result['tags'] = tags
-
+    @result['users'] = users
+    
     render json: @result
   end
 
@@ -241,6 +242,17 @@ class OrdersController < ApplicationController
     end
     render json: @result
   end
+
+  def assign_orders_to_users
+    GrooveBulkActions.execute_groove_bulk_action('assign_orders_to_users', params, current_user, list_selected_orders)
+    render json: @result
+  end
+
+  def deassign_orders_from_users
+    GrooveBulkActions.execute_groove_bulk_action('deassign_orders_from_users', params, current_user, list_selected_orders)
+    render json: @result
+  end
+  
 
   def clear_assigned_tote
     execute_groove_bulk_action('clear_assigned_tote')
