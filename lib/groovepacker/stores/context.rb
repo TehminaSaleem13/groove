@@ -90,8 +90,8 @@ module Groovepacker
         handler.import_single_order_from(order_no, user_id)
       end
 
-      def process_ss_webhook_import_order(url)
-        handler.process_webhook_import_order(url)
+      def process_ss_webhook_import_order(url, type)
+        handler.process_webhook_import_order(url, type)
       end
 
       def import_single_order_from_ss_rest(order_no, user_id, on_demand_quickfix = nil, controller = nil)

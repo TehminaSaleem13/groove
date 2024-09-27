@@ -143,15 +143,23 @@ module Groovepacker
           [response, get_shipments_by_orderno(orderno)]
         end
 
-        def get_webhook_order(url, import_item)
-          response = @service.query("/orders?#{url}", nil, 'get')
-          begin
-            import_item.update(status: 'completed', current_increment_id: response['orders']&.first&.[]('orderNumber'),
-                               updated_orders_import: response['orders'].count)
-          rescue StandardError
-            nil
+        def get_webhook_order(url, type, import_item)
+          case type
+          when "ORDER_NOTIFY", "ITEM_ORDER_NOTIFY"
+            order_response = @service.query("/orders?#{url}", nil, 'get')
+          when "SHIP_NOTIFY", "ITEM_SHIP_NOTIFY"
+            shipment_response = @service.query("/shipments?#{url}", nil, 'get')
+            order_number = shipment_response.dig('shipments', 0, 'orderNumber')
+            order_response = @service.query("/orders?orderNumber=#{order_number}", nil, 'get')
           end
-          response
+
+          import_item.update(
+            status: 'completed',
+            current_increment_id: order_response.dig('orders', 0, 'orderNumber'),
+            updated_orders_import: order_response['orders']&.count
+          ) rescue nil
+
+          [order_response, shipment_response || []]
         end
 
         def update_product_bin_locations(products)

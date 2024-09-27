@@ -219,13 +219,13 @@ module Groovepacker
                                                                                                                                                                                                      end)
           end
 
-          def process_webhook_import_order(url)
+          def process_webhook_import_order(url, type)
             @import_webhook_order = true
             init_common_objects
             initialize_import_item
             @scan_settings = ScanPackSetting.last
-            response = @client.get_webhook_order(url, @import_item)
-            import_orders_from_response(response, [])
+            response, shipments_response = @client.get_webhook_order(url, type, @import_item)
+            import_orders_from_response(response, shipments_response) if response.present?
             @import_item.destroy
             destroy_nil_import_items
           end
@@ -558,7 +558,7 @@ module Groovepacker
             @order_to_update = shipstation_order.present?
             return if shipstation_order.present? && (shipstation_order.status == 'scanned' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
 
-            if @import_item.import_type == 'quick' && shipstation_order
+            if shipstation_order
               shipstation_order.destroy
               shipstation_order = nil
             end

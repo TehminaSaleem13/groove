@@ -17,7 +17,17 @@ RSpec.describe Webhooks::ShipstationController, type: :controller do
     it 'imports order via webhook' do
       allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml'))))
 
-      get :import, params: { resource_url: resource_url, credential_id:  ss_credential.id}
+      get :import, params: { resource_url: resource_url, credential_id:  ss_credential.id, resource_type: "ORDER_NOTIFY"}
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(1)
+      expect(Product.count).to eq(1)
+    end
+
+    it 'imports shipped order via webhook' do
+      order = create(:order, increment_id: 'SSTestOrder', store_id: store.id, store_order_id: '727657309')
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml'))))
+
+      get :import, params: { resource_url: resource_url, credential_id:  ss_credential.id, resource_type: "SHIP_NOTIFY"}
       expect(response.status).to eq(200)
       expect(Order.count).to eq(1)
       expect(Product.count).to eq(1)
