@@ -107,9 +107,10 @@ class User < ApplicationRecord
   end
 
   def self.users_with_unique_order_count
-    self.joins(order_activities: :order)
+    self.left_joins(order_activities: :order)
+        .where(is_deleted: false) 
         .group('users.id')
-        .select('users.username, COUNT(DISTINCT orders.id) AS unique_order_count')
-        .map { |user| { username: user.username, unique_order_count: user.unique_order_count } }
-  end
+        .select('users.username, COALESCE(COUNT(DISTINCT orders.id), 0) AS unique_order_count')
+        .map { |user| { username: user.username, unique_order_count: user.unique_order_count.to_i } }
+  end   
 end
