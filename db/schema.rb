@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_09_19_075610) do
+ActiveRecord::Schema.define(version: 2024_09_30_141143) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1144,7 +1144,7 @@ ActiveRecord::Schema.define(version: 2024_09_19_075610) do
     t.string "add_next_barcode", default: "ADDNEXT"
     t.boolean "send_external_logs", default: false
     t.boolean "scan_all_option", default: false
-    t.boolean "capture_image_option", default: true
+    t.string "capture_image_option", default: "do_not_take_image"
     t.string "email_reply"
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
