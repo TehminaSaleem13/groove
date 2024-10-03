@@ -147,6 +147,7 @@ pipelines:
             - aws s3 cp s3://groove-code-deploy/groovepacker/production/remove-import.sh remove.sh
             - aws s3 cp s3://groove-code-deploy/groovepacker/production/deploy-import-ruby-3.1.5.sh deploy.sh
             - aws s3 cp s3://groove-code-deploy/groovepacker/production/.env.production .env.production
+            - aws s3 cp s3://groove-code-deploy/groovepacker/production/health-check.conf .
             - ls -al
             - zip -r ../groovepacker-import.zip ./ -x '*.git*' -x 'tmp*' -x 'log/*' -x 'vendor/bundle/*' -x 'groovepacker.tgz'
           artifacts:
