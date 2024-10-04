@@ -122,7 +122,7 @@ module ScanPack
           @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the REMOVE-ALL barcode", @current_user.try(:username), @on_ex)
         end
       elsif code_type == 'REMOVE'
-        item = @on_ex.blank? ? @single_order.get_unscanned_items(limit: nil).first : @single_order.get_unscanned_items(limit: nil).find { |itm| itm['product_id'] == @extras[:product_id]}
+        item = @on_ex.blank? ? @single_order.get_unscanned_items(limit: 1).first : @single_order.get_unscanned_items(limit: nil).find { |itm| itm['product_id'] == @extras[:product_id]}
         child_item = @on_ex.blank? ? item['child_items'].first : item['child_items'].find{ |kit| kit['product_id'] == @extras[:kit_product_id]} if item['product_type'] == 'individual'
 
         qty = item['product_type'] == 'individual' ? remove_kit_product_item_from_order(child_item) : remove_skippable_product(item)

@@ -28,7 +28,7 @@ module ScanPack
         @result[:scan_tote_to_complete] = true
         tote = can_complete_orders.map(&:tote).min_by(&:number)
         order = tote.order
-        order_item = OrderItem.find(order.get_unscanned_items(limit: nil).first['order_item_id'])
+        order_item = OrderItem.find(order.get_unscanned_items(limit: 1).first['order_item_id'])
         @result[:tote] = tote
         @result[:tote_identifier] = tote_identifier
         @result[:product] = product

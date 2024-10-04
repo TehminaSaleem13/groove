@@ -64,7 +64,7 @@ module Expo
           @single_order.addactivity("QTY #{qty} of SKU #{item['sku']} was removed using the PARTIAL barcode", @current_user.try(:username))
         end
       elsif code_type == 'REMOVE'
-        item = @single_order.get_unscanned_items(limit: nil).first
+        item = @single_order.get_unscanned_items(limit: 1).first
         qty = item['product_type'] == 'individual' ? remove_kit_product_item_from_order(item['child_items'].first) : remove_skippable_product(item)
         @single_order.addactivity("QTY #{qty} of SKU #{item['product_type'] == 'individual' ? item['child_items'].first['sku'] : item['sku']} was removed using the REMOVE barcode", @current_user.try(:username))
       end
