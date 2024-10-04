@@ -368,7 +368,7 @@ Rails.application.routes.draw do
       end
     end
   end
-  
+
 
   resources :shopify do
     member do

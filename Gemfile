@@ -129,3 +129,6 @@ gem 'net-ssh', '~> 7.2'
 
 # Parser Gem for Scout APM
 gem 'parser', '~> 3.3'
+
+# Rack middleware for blocking & throttling abusive requests
+gem 'rack-attack', '~> 6.7'
