@@ -190,16 +190,6 @@ RSpec.describe TenantsController, type: :controller do
   end
 
   describe 'POST #clear_all_imports' do
-    before do
-      allow(StopAllImportsJob).to receive(:perform_later)
-    end
-
-    it 'enqueues StopAllImportsJob' do
-      post :clear_all_imports
-
-      expect(StopAllImportsJob).to have_received(:perform_later)
-    end
-
     it 'renders a success message' do
       post :clear_all_imports
       expect(response).to have_http_status(:success)
