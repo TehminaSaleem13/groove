@@ -141,6 +141,8 @@ class ApplicationController < ActionController::Base
   end
 
   def log_request
+    return if %w[scadmintools admintools].include?(Apartment::Tenant.current)
+
     @incoming_log_request = RequestLog.create(
       request_method: request.method,
       request_path: request.path,
