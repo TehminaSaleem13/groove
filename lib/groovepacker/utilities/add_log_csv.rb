@@ -144,7 +144,7 @@ class AddLogCsv
                        nil
                        end
           subscription = begin
-                             customer.subscriptions.retrieve(sub.customer_subscription_id.to_s)
+                             Stripe::Subscription.retrieve(sub.customer_subscription_id.to_s)
                          rescue StandardError
                            nil
                            end
@@ -154,12 +154,12 @@ class AddLogCsv
                             nil
                              end
           invoice = begin
-                        Stripe::Invoice.retrieve(customer.subscriptions.data.first.latest_invoice.to_s)
+                        Stripe::Invoice.retrieve(subscription.latest_invoice)
                     rescue StandardError
                       nil
                       end
           if customer.present?
-            subscription_data = customer.subscriptions.data.first
+            subscription_data = subscription
             last_stripe_amount = begin
                                      if subscription_data.plan
                                        subscription_data.plan.amount / 100
