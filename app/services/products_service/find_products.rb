@@ -44,73 +44,62 @@ module ProductsService
     private
 
     def generate_base_query(product_report)
-      %(\
-        SELECT  report_products.id as id, report_products.name as name, \
-                report_products.type_scan_enabled as type_scan_enabled, \
-                report_products.base_sku as base_sku, \
-                report_products.click_scan_enabled as click_scan_enabled, \
-                report_products.status as status, report_products.custom_product_1 as custom_product_1, report_products.custom_product_2 as custom_product_2, report_products.custom_product_3 as custom_product_3, report_products.updated_at as updated_at, \
-                product_skus.sku as sku, product_barcodes.barcode as barcode, \
-                product_cats.category as cat, \
-                product_inventory_warehouses.location_primary, \
-                product_inventory_warehouses.location_secondary, \
-                product_inventory_warehouses.location_tertiary, \
-                product_inventory_warehouses.available_inv as qty, \
-                inventory_warehouses.name as location_name, \
-                stores.name as store_type, report_products.store_id as store_id \
+      join_product_cats = @category_filter || @sort_key == 'cat'    # Condition for product categories
+      join_product_skus = @sku_filter || @sort_key == 'sku'         # Condition for product SKUs
+
+      %(
+        SELECT  MAX(report_products.id) as id, MAX(report_products.name) as name, \
+                MAX(report_products.type_scan_enabled) as type_scan_enabled, \
+                MAX(report_products.base_sku) as base_sku, \
+                MAX(report_products.click_scan_enabled) as click_scan_enabled, \
+                MAX(report_products.status) as status, \
+                MAX(report_products.custom_product_1) as custom_product_1, \
+                MAX(report_products.custom_product_2) as custom_product_2, \
+                MAX(report_products.custom_product_3) as custom_product_3, \
+                MAX(report_products.updated_at) as updated_at, \
+                MAX(product_barcodes.barcode) as barcode, \
+                #{'MAX(product_skus.sku) as sku,' if join_product_skus} \
+                #{'MAX(product_cats.category) as cat,' if join_product_cats} \
+                MAX(product_inventory_warehouses.location_primary) as location_primary, \
+                MAX(product_inventory_warehouses.location_secondary) as location_secondary, \
+                MAX(product_inventory_warehouses.location_tertiary) as location_tertiary, \
+                MAX(product_inventory_warehouses.available_inv) as qty, \
+                MAX(inventory_warehouses.name) as location_name, \
+                MAX(stores.name) as store_type, MAX(report_products.store_id) as store_id \
         FROM \
-          \(
+          ( \
             SELECT products.* \
             FROM products \
             LEFT JOIN products_product_inventory_reports ON \
             (products.id = products_product_inventory_reports.product_id) \
             WHERE \
-            products_product_inventory_reports.product_inventory_report_id = #{product_report.id}
-          \) AS report_products
-        LEFT JOIN product_skus ON (report_products.id = product_skus.product_id) \
-        \
-        LEFT JOIN product_barcodes ON \
-          (product_barcodes.product_id = report_products.id) \
-        \
-        LEFT JOIN product_cats ON (report_products.id = product_cats.product_id) \
-        \
-        LEFT JOIN product_inventory_warehouses ON \
-          (product_inventory_warehouses.product_id = report_products.id) \
-        \
-        LEFT JOIN inventory_warehouses ON \
-          ( \
-            product_inventory_warehouses.inventory_warehouse_id = \
-              inventory_warehouses.id\
-          ) \
-        \
+            products_product_inventory_reports.product_inventory_report_id = #{product_report.id} \
+          ) AS report_products \
+        #{'LEFT JOIN product_skus ON (report_products.id = product_skus.product_id)' if join_product_skus} \
+        LEFT JOIN product_barcodes ON (product_barcodes.product_id = report_products.id) \
+        #{'LEFT JOIN product_cats ON (report_products.id = product_cats.product_id)' if join_product_cats} \
+        LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = report_products.id) \
+        LEFT JOIN inventory_warehouses ON (product_inventory_warehouses.inventory_warehouse_id = inventory_warehouses.id) \
         LEFT JOIN stores ON (report_products.store_id = stores.id) \
-        \
-        LEFT JOIN products_product_inventory_reports ON \
-          (report_products.id = products_product_inventory_reports.product_id) \
-        \
+        LEFT JOIN products_product_inventory_reports ON (report_products.id = products_product_inventory_reports.product_id) \
         WHERE \
-        \(\
-            report_products.name \
-              like #{@search} OR product_barcodes.barcode \
-              like #{@search} OR report_products.custom_product_1 \
-              like #{@search} OR report_products.custom_product_2 \
-              like #{@search} OR report_products.custom_product_3 \
-              like #{@search} OR product_skus.sku \
-              like #{@search} OR product_cats.category \
-              like #{@search} OR \
-              \(\
-                  product_inventory_warehouses.location_primary like \
-                    #{@search} \
-                  OR \
-                  product_inventory_warehouses.location_secondary like \
-                    #{@search} \
-                  OR \
-                  product_inventory_warehouses.location_tertiary like \
-                    #{@search} \
-              \) \
-          \) \
-          #{@kit_query}\
-        GROUP BY report_products.id ORDER BY #{@sort_key} #{@sort_order}
+        ( \
+            report_products.name LIKE #{@search} OR \
+            product_barcodes.barcode LIKE #{@search} OR \
+            report_products.custom_product_1 LIKE #{@search} OR \
+            report_products.custom_product_2 LIKE #{@search} OR \
+            report_products.custom_product_3 LIKE #{@search} OR \
+            #{'product_skus.sku LIKE ' + @search + ' OR' if join_product_skus} \
+            #{'product_cats.category LIKE ' + @search + ' OR' if join_product_cats} \
+            ( \
+                product_inventory_warehouses.location_primary LIKE #{@search} OR \
+                product_inventory_warehouses.location_secondary LIKE #{@search} OR \
+                product_inventory_warehouses.location_tertiary LIKE #{@search} \
+            ) \
+        ) \
+        #{@kit_query} \
+        GROUP BY report_products.id \
+        ORDER BY #{@sort_key} #{@sort_order}
       )
     end
 
@@ -126,6 +115,10 @@ module ProductsService
       set_query_add
       set_status_filter_text
       set_search_query
+
+      # Additional Filters
+      @category_filter = params[:search_by_categories].to_s == 'true'
+      @sku_filter = params[:search_by_skus].to_s == 'true'
     end
 
     def set_search_query
