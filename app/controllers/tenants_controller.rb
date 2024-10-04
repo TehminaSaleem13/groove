@@ -242,7 +242,7 @@ class TenantsController < ApplicationController
   end
 
   def clear_all_imports
-    StopAllImportsJob.perform_later
+    StopAllImportsJob.set(priority: 95).perform_later
 
     render json: { status: 'All import jobs will be stopped shortly' }
   end
