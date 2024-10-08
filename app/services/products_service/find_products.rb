@@ -45,7 +45,6 @@ module ProductsService
 
     def generate_base_query(product_report)
       join_product_cats = @category_filter || @sort_key == 'cat'    # Condition for product categories
-      join_product_skus = @sku_filter || @sort_key == 'sku'         # Condition for product SKUs
 
       %(
         SELECT  MAX(report_products.id) as id, MAX(report_products.name) as name, \
@@ -58,7 +57,7 @@ module ProductsService
                 MAX(report_products.custom_product_3) as custom_product_3, \
                 MAX(report_products.updated_at) as updated_at, \
                 MAX(product_barcodes.barcode) as barcode, \
-                #{'MAX(product_skus.sku) as sku,' if join_product_skus} \
+                MAX(product_skus.sku) as sku, \
                 #{'MAX(product_cats.category) as cat,' if join_product_cats} \
                 MAX(product_inventory_warehouses.location_primary) as location_primary, \
                 MAX(product_inventory_warehouses.location_secondary) as location_secondary, \
@@ -75,7 +74,7 @@ module ProductsService
             WHERE \
             products_product_inventory_reports.product_inventory_report_id = #{product_report.id} \
           ) AS report_products \
-        #{'LEFT JOIN product_skus ON (report_products.id = product_skus.product_id)' if join_product_skus} \
+        LEFT JOIN product_skus ON (report_products.id = product_skus.product_id) \
         LEFT JOIN product_barcodes ON (product_barcodes.product_id = report_products.id) \
         #{'LEFT JOIN product_cats ON (report_products.id = product_cats.product_id)' if join_product_cats} \
         LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = report_products.id) \
@@ -89,7 +88,7 @@ module ProductsService
             report_products.custom_product_1 LIKE #{@search} OR \
             report_products.custom_product_2 LIKE #{@search} OR \
             report_products.custom_product_3 LIKE #{@search} OR \
-            #{'product_skus.sku LIKE ' + @search + ' OR' if join_product_skus} \
+            product_skus.sku LIKE #{@search} OR \
             #{'product_cats.category LIKE ' + @search + ' OR' if join_product_cats} \
             ( \
                 product_inventory_warehouses.location_primary LIKE #{@search} OR \
@@ -117,8 +116,7 @@ module ProductsService
       set_search_query
 
       # Additional Filters
-      @category_filter = params[:search_by_categories].to_s == 'true'
-      @sku_filter = params[:search_by_skus].to_s == 'true'
+      @category_filter = params[:advanced_search].to_s == 'true'
     end
 
     def set_search_query

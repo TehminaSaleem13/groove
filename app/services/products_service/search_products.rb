@@ -41,8 +41,7 @@ module ProductsService
       set_query_add
 
       # Additional Filters
-      @category_filter = params[:search_by_categories].to_s == 'true'
-      @sku_filter = params[:search_by_skus].to_s == 'true'
+      @category_filter = params[:advanced_search].to_s == 'true'
     end
 
     def set_sort_key
@@ -115,7 +114,6 @@ module ProductsService
 
     def generate_base_query
       join_product_cats = @category_filter || @sort_key == 'cat'    # Condition for product categories
-      join_product_skus = @sku_filter || @sort_key == 'sku'         # Condition for product SKUs
 
       %(\
         SELECT  MAX(products.id) as id, MAX(products.name) as name, \
@@ -125,7 +123,7 @@ module ProductsService
                 MAX(products.status) as status, MAX(products.custom_product_1) as custom_product_1, \
                 MAX(products.custom_product_2) as custom_product_2, MAX(products.custom_product_3) as custom_product_3, \
                 MAX(products.updated_at) as updated_at, \
-                #{'MAX(product_skus.sku) as sku,' if join_product_skus} \
+                MAX(product_skus.sku) as sku, \
                 MAX(product_barcodes.barcode) as barcode, \
                 #{'MAX(product_cats.category) as cat,' if join_product_cats} \
                 MAX(product_inventory_warehouses.location_primary), \
@@ -135,7 +133,7 @@ module ProductsService
                 MAX(inventory_warehouses.name) as location_name, \
                 MAX(stores.name) as store_type, MAX(products.store_id) as store_id \
         FROM products \
-          #{'LEFT JOIN product_skus ON (products.id = product_skus.product_id)' if join_product_skus} \
+          LEFT JOIN product_skus ON (products.id = product_skus.product_id) \
           LEFT JOIN product_barcodes ON (product_barcodes.product_id = products.id) \
           #{'LEFT JOIN product_cats ON (products.id = product_cats.product_id)' if join_product_cats} \
           LEFT JOIN product_inventory_warehouses ON (product_inventory_warehouses.product_id = products.id) \
@@ -152,7 +150,7 @@ module ProductsService
               product_barcodes.barcode LIKE #{@search} OR \
               products.custom_product_1 LIKE #{@search} OR products.custom_product_2 LIKE #{@search} OR \
               products.custom_product_3 LIKE #{@search} OR \
-              #{'product_skus.sku LIKE ' + @search + ' OR' if join_product_skus} \
+              product_skus.sku LIKE #{@search} OR \
               #{'product_cats.category LIKE ' + @search + ' OR' if join_product_cats} \
               ( \
                 product_inventory_warehouses.location_primary LIKE #{@search} OR \
