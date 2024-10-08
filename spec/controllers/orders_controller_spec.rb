@@ -790,7 +790,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'find order search by tracking number ending' do
-      post :search, params: { search: '837', order: 'DESC', limit: 20, offset: 0, product_search_toggle: true }
+      post :search, params: { search: '613423837', order: 'DESC', limit: 20, offset: 0, product_search_toggle: true }
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
