@@ -31,7 +31,7 @@ class Subscription < ApplicationRecord
       end
       unless shopify_customer
         plan = create_subscribed_plan_if_not_exist
-        customer = create_customer(one_time_payment, plan)
+        customer = create_customer_and_subscription(one_time_payment, plan)
       end
 
       if customer
@@ -71,6 +71,7 @@ class Subscription < ApplicationRecord
     begin
       create_plan(subsc_amount, interval, name, currency, subsc_plan_id, 30)
     rescue Stripe::InvalidRequestError => e
+      Rollbar.error(e, e.message, Apartment::Tenant.current)
     end
   end
 
@@ -124,13 +125,21 @@ class Subscription < ApplicationRecord
     update_progress('transaction_complete')
   end
 
-  def create_customer(one_time_payment, plan)
-    Stripe::Customer.create(
-      card: stripe_user_token,
+  def create_customer_and_subscription(balance, plan)
+    customer = Stripe::Customer.create(
       email:,
-      plan:,
-      balance: one_time_payment
+      balance:,
+      source: stripe_user_token
     )
+
+    trial_end_timestamp = (Time.current + plan.trial_period_days.days).to_i
+    Stripe::Subscription.create(
+      customer: customer.id,
+      items: [{ plan: }],
+      trial_end: trial_end_timestamp
+    )
+
+    customer
   end
 
   def create_transaction(customer)
