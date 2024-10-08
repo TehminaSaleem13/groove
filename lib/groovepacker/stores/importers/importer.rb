@@ -99,6 +99,12 @@ module Groovepacker
           end
         end
 
+        def destroy_nil_import_items
+          ImportItem.where(store_id: @store.id, order_import_summary_id: nil).destroy_all
+        rescue StandardError
+          nil
+        end
+
         def init_common_objects
           handler = get_handler
           @credential = handler[:credential]
@@ -191,6 +197,17 @@ module Groovepacker
           import_item_id = @import_item.id
           @import_item = @import_item.dup
           @import_item.id = import_item_id
+          @import_item.save
+        end
+
+        def set_status_and_msg_for_skipping_import
+          Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id)
+
+          @result[:status] = false
+          @result[:messages].push(
+            'All import statuses is disabled. Import skipped.'
+          )
+          @import_item.message = 'All import statuses is disabled. Import skipped.'
           @import_item.save
         end
 

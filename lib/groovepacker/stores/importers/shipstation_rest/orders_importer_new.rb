@@ -650,14 +650,6 @@ module Groovepacker
             )
           end
 
-          def destroy_nil_import_items
-            ImportItem.where(store_id: @store.id, order_import_summary_id: nil).destroy_all
-          rescue StandardError
-            nil
-
-            # ImportItem.where("status IS NULL").destroy_all
-          end
-
           def create_import_summary(log)
             summary = CsvImportSummary.find_or_create_by(log_record: log.to_json)
             summary.file_name = ''

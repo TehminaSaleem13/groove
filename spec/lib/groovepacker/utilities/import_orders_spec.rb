@@ -64,8 +64,8 @@ RSpec.describe ImportOrders do
       Apartment::Tenant.switch!(tenant.to_s)
       @tenant = create(:tenant, name: tenant.to_s)
       @shopify_store = create(:store, :shopify, status: true, inventory_warehouse: inv_wh) do |store|
-        store.shopify_credential.update(webhook_order_import: true)
-      end      
+        store.shopify_credential.update(webhook_order_import: true, shipped_status: true)
+      end    
     end
 
     it 'imports Shopify orders for each tenant' do

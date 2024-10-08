@@ -8,7 +8,19 @@ module Groovepacker
 
         def import
           @import_webhook_order = $redis.get("webhook_import_started_#{Apartment::Tenant.current}").to_b
-          initialize_import_objects
+          init_common_objects
+          if @store.store_credential.get_status.empty?
+            set_status_and_msg_for_skipping_import
+          else
+            initialize_orders_import
+          end
+          $redis.del("webhook_import_started_#{Apartment::Tenant.current}")
+          update_orders_status
+          destroy_nil_import_items
+          @result
+        end
+
+        def initialize_orders_import
           begin
             OrderImportSummary.top_summary.emit_data_to_user(true)
           rescue StandardError
@@ -45,9 +57,6 @@ module Groovepacker
               nil
             end
           end
-          $redis.del("webhook_import_started_#{Apartment::Tenant.current}")
-          update_orders_status
-          @result
         end
 
         def ondemand_import_single_order(order_number, user_id)
@@ -65,16 +74,6 @@ module Groovepacker
         end
 
         private
-
-        def initialize_import_objects
-          handler = get_handler
-          @credential = handler[:credential]
-          @store = @credential.store
-          @client = handler[:store_handle]
-          @import_item = handler[:import_item]
-          @result = build_result
-          @worker_id = 'worker_' + SecureRandom.hex
-        end
 
         def import_single_order(order)
           @import_item.update(current_increment_id: order['id'], current_order_items: -1, current_order_imported_item: -1)

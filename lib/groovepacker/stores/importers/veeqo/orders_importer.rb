@@ -179,17 +179,6 @@ module Groovepacker
             nil
           end
 
-          # def set_status_and_msg_for_skipping_import
-          #   Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id) if statuses.blank?
-
-          #   @result[:status] = false
-          #   @result[:messages].push(
-          #     'All import statuses is disabled. Import skipped.'
-          #   )
-          #   @import_item.message = 'All import statuses is disabled. Import skipped.'
-          #   @import_item.save
-          # end
-
           def import_order(veeqo_order, order)
             # veeqo_order.tags = order['tags']
             veeqo_order.increment_id = set_order_number(order)

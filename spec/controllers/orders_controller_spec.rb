@@ -405,8 +405,25 @@ RSpec.describe OrdersController, type: :controller do
                                                              access_token: 'shopifytestshopifytestshopifytestshopi', store_id: shopline_store.id, shopline_status: 'open', shipped_status: false, unshipped_status: false, partial_status: false, modified_barcode_handling: 'add_to_existing', generating_barcodes: 'do_not_generate', import_inventory_qoh: false)
     end
 
+    it 'Import Orders when all import switches are off' do
+      shopline_store = Store.where(store_type: 'Shopline').last
+
+      $redis.del("importing_orders_#{Apartment::Tenant.current}")
+      @tenant.uniq_shopify_import = true
+      @tenant.save
+
+      get :import_all
+      expect(response.status).to eq(200)
+      expect(Order.count).to eq(0)
+      expect(Product.count).to eq(0)
+
+      shopify_import_item = ImportItem.find_by_store_id(shopline_store.id)
+      expect(shopify_import_item.status).to eq('failed')
+    end
+
     it 'Import Orders' do
       shopline_store = Store.where(store_type: 'Shopline').last
+      shopline_store.shopline_credential.update(shipped_status: true)
 
       expect_any_instance_of(Groovepacker::ShoplineRuby::Client).to receive(:orders).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_order.yaml'))))
       expect_any_instance_of(Groovepacker::ShoplineRuby::Client).to receive(:product).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/shopline_test_product.yaml'))))
