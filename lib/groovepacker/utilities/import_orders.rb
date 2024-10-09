@@ -114,6 +114,15 @@ class ImportOrders < Groovepacker::Utilities::Base
     end
   end
 
+  def import_ss_webhook_order(url, type, store_id, tenant_name)
+    Apartment::Tenant.switch!(tenant_name)
+    store = Store.find_by_id(store_id)
+    import_item = ImportItem.create(store_id: store.id, status: 'webhook')
+    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+    context = Groovepacker::Stores::Context.new(handler)
+    context.process_ss_webhook_import_order(url, type)
+  end
+
   def run_import_for_single_store(params)
     Apartment::Tenant.switch!(params[:tenant])
     Time.use_zone(GeneralSetting.new_time_zone) do

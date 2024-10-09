@@ -566,9 +566,9 @@ module Groovepacker
                  nil
                end
         if @customer
-          subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
+          subscription = Stripe::Subscription.retrieve(@subscription.customer_subscription_id)
           @trial_end_time = subscription.trial_end
-          customer_subscription = @customer.subscriptions.first
+          customer_subscription = subscription
           if @trial_end_time && (@trial_end_time > Time.current.to_i)
             begin
               Stripe::Subscription.update(customer_subscription.id, plan: plan, trial_end: @trial_end_time, prorate: false)
@@ -614,7 +614,7 @@ module Groovepacker
       def update_subscription_item(plan_id, existing_plan)
         @customer = get_stripe_customer(@subscription.stripe_customer_id)
         if @customer
-          subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
+          subscription = Stripe::Subscription.retrieve(@subscription.customer_subscription_id)
           if subscription.items.count >= 2
             @trial_end_time = subscription.trial_end
             subscription.items.data.each do |item|
@@ -635,7 +635,7 @@ module Groovepacker
 
       def update_annual_subscription(plan_id)
         if @customer
-          subscription = @customer.subscriptions.retrieve(@subscription.customer_subscription_id)
+          subscription = Stripe::Subscription.retrieve(@subscription.customer_subscription_id)
           if @customer.subscriptions.count >= 2 && subscription.plan.interval == 'year'
             if @trial_end_time && (@trial_end_time > Time.current.to_i)
               begin

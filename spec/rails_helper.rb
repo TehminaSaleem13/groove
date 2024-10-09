@@ -27,6 +27,7 @@ Test::Unit.run = true if defined?(Test::Unit) && Test::Unit.respond_to?(:run=)
 # require only the support files necessary.
 #
 Dir[Rails.root.join('spec/support/**/*.rb')].each { |f| require f }
+Dir[Rails.root.join('lib/**/*.rb')].each { |f| require f }
 
 RSpec.configure do |config|
   config.include ActiveJob::TestHelper

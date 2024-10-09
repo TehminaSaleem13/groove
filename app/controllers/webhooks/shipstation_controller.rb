@@ -3,12 +3,8 @@ class Webhooks::ShipstationController < ApplicationController
 
   def import
     end_point = URI.parse(params['resource_url']).query
-
-    import_item = ImportItem.create(store_id: @store.id, status: 'webhook')
-    handler = Groovepacker::Utilities::Base.new.get_handler(@store.store_type, @store, import_item)
-    context = Groovepacker::Stores::Context.new(handler)
-
-    context.delay(queue: 'process_ss_webhook_import_order', priority: 95).process_ss_webhook_import_order(end_point, params['resource_type']) if end_point.present?
+    import_orders = ImportOrders.new
+    import_orders.delay(priority: 95, queue: "process_ss_webhook_import_order_#{Apartment::Tenant.current}").import_ss_webhook_order(end_point, params['resource_type'], @store.id, Apartment::Tenant.current) if end_point.present?
 
     head :ok
   end

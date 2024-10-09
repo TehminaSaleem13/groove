@@ -201,8 +201,6 @@ module Groovepacker
         end
 
         def set_status_and_msg_for_skipping_import
-          Order.emit_notification_all_status_disabled(@import_item.order_import_summary.user_id)
-
           @result[:status] = false
           @result[:messages].push(
             'All import statuses is disabled. Import skipped.'

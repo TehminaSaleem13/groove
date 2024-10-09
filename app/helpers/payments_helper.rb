@@ -157,8 +157,7 @@ module PaymentsHelper
   end
 
   def update_subcription_plan(subscription, plan_id)
-    customer = get_stripe_customer(subscription.stripe_customer_id)
-    customer_subscription = customer.subscriptions.retrieve(subscription.customer_subscription_id)
+    customer_subscription = Stripe::Subscription.retrieve(subscription.customer_subscription_id)
     customer_subscription.plan = plan_id
     customer_subscription.save
   end
@@ -214,6 +213,6 @@ module PaymentsHelper
 
   def get_subscription(customer_id, subscription_id)
     @customer = get_stripe_customer(customer_id)
-    return @customer.subscriptions.retrieve(subscription_id) if @customer
+    return Stripe::Subscription.retrieve(subscription_id) if @customer
   end
 end
