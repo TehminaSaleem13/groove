@@ -116,7 +116,8 @@ module ProductsService
       join_product_cats = @category_filter || @sort_key == 'cat'    # Condition for product categories
 
       %(\
-        SELECT  MAX(products.id) as id, MAX(products.name) as name, \
+        SELECT subquery.*, COUNT(subquery.id) OVER() AS total_count FROM \
+        (SELECT MAX(products.id) as id, MAX(products.name) as name, \
                 MAX(products.type_scan_enabled) as type_scan_enabled, \
                 MAX(products.base_sku) as base_sku, \
                 MAX(products.click_scan_enabled) as click_scan_enabled, \
@@ -160,7 +161,7 @@ module ProductsService
             ) \
           ) \
           #{@kit_query} \
-        GROUP BY products.id ORDER BY #{@sort_key} #{@sort_order}
+        GROUP BY products.id ORDER BY #{@sort_key} #{@sort_order}) AS subquery
       )
     end
 
@@ -170,10 +171,8 @@ module ProductsService
         'count' => if select_all_or_inverted
                      result_rows.length
                    else
-                     Product.count_by_sql(
-                       %(SELECT count(*) as count from\(#{base_query}\) as tmp)
-                     )
-                    end
+                    result_rows.first&.total_count.to_i
+                   end
       }
     end
   end
