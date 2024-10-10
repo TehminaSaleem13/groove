@@ -10,6 +10,6 @@ ENV['REDIS_URL'] = redis_url
 Rack::Attack.cache.store = ActiveSupport::Cache::MemoryStore.new if !ENV['REDIS_URL'] || Rails.env.test?
 
 # Allow 5 request per minute for Shipstation Webhooks
-Rack::Attack.throttle('shipstation webhooks', limit: 5, period: 1.minute) do |req|
-  req.ip if req.path.include?('/webhooks/shipstation/')
+Rack::Attack.throttle('shipstation-webhooks', limit: 60, period: 1.minute) do |req|
+  Apartment::Tenant.current if req.path.include?('/webhooks/shipstation/')
 end
