@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_10_07_170706) do
+ActiveRecord::Schema.define(version: 2024_10_08_075345) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -817,6 +817,18 @@ ActiveRecord::Schema.define(version: 2024_10_07_170706) do
     t.string "product_barcode_label_size", default: "3 x 1"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+  end
+
+  create_table "priority_cards", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "priority_name", default: "regular", null: false
+    t.string "assigned_tag", default: ""
+    t.integer "order_tagged_count", default: 0
+    t.string "tag_color", default: "#587493", null: false
+    t.boolean "is_card_disabled", default: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["assigned_tag"], name: "index_priority_cards_on_assigned_tag", unique: true
+    t.index ["priority_name"], name: "index_priority_cards_on_priority_name", unique: true
   end
 
   create_table "product_activities", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

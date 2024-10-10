@@ -368,7 +368,10 @@ Rails.application.routes.draw do
       end
     end
   end
-
+  
+  Rails.application.routes.draw do
+    resources :priority_cards
+  end
 
   resources :shopify do
     member do
