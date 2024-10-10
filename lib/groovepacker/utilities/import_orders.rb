@@ -117,6 +117,12 @@ class ImportOrders < Groovepacker::Utilities::Base
   def import_ss_webhook_order(url, type, store_id, tenant_name)
     Apartment::Tenant.switch!(tenant_name)
     store = Store.find_by_id(store_id)
+    credential = store.shipstation_rest_credential
+    client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
+    response, shipments_response = client.get_webhook_order(url, type, nil)
+    order_number = response.dig('orders', 0, 'orderNumber')
+    shipstation_order = Order.find_by_store_id_and_increment_id(store.id, order_number)
+    shipstation_order.destroy if shipstation_order.present?
     import_item = ImportItem.create(store_id: store.id, status: 'webhook')
     handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
     context = Groovepacker::Stores::Context.new(handler)

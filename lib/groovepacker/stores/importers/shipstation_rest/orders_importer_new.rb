@@ -558,7 +558,7 @@ module Groovepacker
             @order_to_update = shipstation_order.present?
             return if shipstation_order.present? && (shipstation_order.status == 'scanned' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
 
-            if shipstation_order
+            if @import_item.import_type == 'quick' && shipstation_order
               shipstation_order.destroy
               shipstation_order = nil
             end
