@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_10_08_075345) do
+ActiveRecord::Schema.define(version: 2024_10_11_094958) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -827,6 +827,7 @@ ActiveRecord::Schema.define(version: 2024_10_08_075345) do
     t.boolean "is_card_disabled", default: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.boolean "is_stand_by", default: false
     t.index ["assigned_tag"], name: "index_priority_cards_on_assigned_tag", unique: true
     t.index ["priority_name"], name: "index_priority_cards_on_priority_name", unique: true
   end

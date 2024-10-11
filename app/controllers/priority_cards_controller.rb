@@ -81,6 +81,6 @@ class PriorityCardsController < ApplicationController
     end
 
     def priority_card_params
-        params.require(:priority_card).permit(:priority_name, :tag_color, :is_card_disabled, :assigned_tag)
+        params.require(:priority_card).permit(:priority_name, :tag_color, :is_card_disabled, :assigned_tag, :is_stand_by)
     end
 end
