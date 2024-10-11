@@ -121,12 +121,21 @@ class ImportOrders < Groovepacker::Utilities::Base
     client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
     response, shipments_response = client.get_webhook_order(url, type, nil)
     order_number = response.dig('orders', 0, 'orderNumber')
-    shipstation_order = Order.find_by_store_id_and_increment_id(store.id, order_number)
-    shipstation_order.destroy if shipstation_order.present?
-    import_item = ImportItem.create(store_id: store.id, status: 'webhook')
-    handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
-    context = Groovepacker::Stores::Context.new(handler)
-    context.process_ss_webhook_import_order(url, type)
+
+    lock_key = "process_order_#{store.id}_#{order_number}"
+    
+    if $redis.set(lock_key, true, nx: true, ex: 30)
+      shipstation_order = Order.find_by(store_id: store.id, increment_id: order_number)
+      shipstation_order.destroy if shipstation_order.present?
+    
+      import_item = ImportItem.create(store_id: store.id, status: 'webhook')
+      handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
+      context = Groovepacker::Stores::Context.new(handler)
+      context.process_ss_webhook_import_order(url, type)
+    else
+      Rails.logger.info "Another process is already handling Order #{order_number} for Store #{store.id}. Skipping creation."
+      return
+    end
   end
 
   def run_import_for_single_store(params)
