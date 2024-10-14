@@ -123,8 +123,11 @@ class ImportOrders < Groovepacker::Utilities::Base
     order_number = response.dig('orders', 0, 'orderNumber')
 
     lock_key = "process_order_#{store.id}_#{order_number}"
-    
-    if $redis.set(lock_key, true, nx: true, ex: 30)
+
+    if $redis.get(lock_key).blank?
+      $redis.set(lock_key, true)
+      $redis.expire(lock_key, 20)
+      
       shipstation_order = Order.find_by(store_id: store.id, increment_id: order_number)
       shipstation_order.destroy if shipstation_order.present?
     
@@ -134,7 +137,6 @@ class ImportOrders < Groovepacker::Utilities::Base
       context.process_ss_webhook_import_order(url, type)
     else
       Rails.logger.info "Another process is already handling Order #{order_number} for Store #{store.id}. Skipping creation."
-      return
     end
   end
 
