@@ -81,7 +81,7 @@ class OrdersController < ApplicationController
   def sorted_and_filtered_data
     @result ||= {}
     @searched_orders = gp_orders_search.do_search(false, true) if params[:search].present?
-    @orders, filter_length, tags, users = gp_orders_filter.filter_orders(@searched_orders)
+    @orders, filter_length, tags, users,  assigned_users = gp_orders_filter.filter_orders(@searched_orders)
     @result['orders_count'] = params[:search].present? ? get_filter_orders_count(@searched_orders["orders"]) : get_orders_count
     @result['orders_count'].merge!('filtered_count' => filter_length)
     @result['orders'] = make_orders_list(@orders)
@@ -89,6 +89,7 @@ class OrdersController < ApplicationController
     # Calculate tag counts
     @result['tags'] = tags
     @result['users'] = users
+    @result['assigned_users'] = assigned_users
     
     render json: @result
   end

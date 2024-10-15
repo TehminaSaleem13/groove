@@ -139,6 +139,12 @@ class Order < ApplicationRecord
     joins(:order_tags).where.not(order_tags: { name: tag_names }).distinct if tag_names.present? && !shouldFilterIncludeTags.to_b
   }
 
+  scope :by_packing_user_name, ->(usernames) {
+    if usernames.present?
+      usernames_array = usernames.split(',')
+      joins(:packing_user).where(users: { username: usernames_array })
+    end
+  }
 
   scope :filter_by_last_days, lambda { |days|
     if days.present? && days != 'all_day'

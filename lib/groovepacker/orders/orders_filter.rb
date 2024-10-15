@@ -42,8 +42,9 @@ module Groovepacker
         end
         tags = calculate_tags_count(data.flatten)
         users = User.users_with_unique_order_count
+        assigned_users = order_count_per_user(data.flatten)
 
-        [final_order, filtered_count, tags, users]
+        [final_order, filtered_count, tags, users, assigned_users]
       end
 
 
@@ -80,6 +81,17 @@ module Groovepacker
         }
       end
 
+      def order_count_per_user(data)
+        order_ids = Order.where(id: data)
+        user_order_counts = order_ids.joins(:packing_user)
+                                 .group('users.username')
+                                 .count
+      
+        User.pluck(:name).each_with_object({}) do |username, result|
+          result[username] = user_order_counts[username] || 0
+        end
+      end
+
       def filtered_order(filtered_filters, filters)
         sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add = get_parameters
 
@@ -104,6 +116,7 @@ module Groovepacker
              .without_tags(@params[:tags_name], @params[:filterIncludedTags])
              .check_date_range(@params[:dateRange])
              .filter_by_last_days(@params[:dateValue])
+             .by_packing_user_name(@params[:username])
       end
       
       def get_parameters
