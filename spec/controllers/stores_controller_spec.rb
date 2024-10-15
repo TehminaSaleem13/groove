@@ -369,8 +369,12 @@ RSpec.describe StoresController, type: :controller do
     end
 
     it 'Shipstation On Demand Import' do
-      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml'))))
-      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_order_on_demand).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml'))))
+      hash = OpenStruct.new(
+        code: 200, 
+        orders: YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml')))
+      )
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(hash)
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_order_on_demand).and_return(hash)
 
       get :get_order_details, params: { order_no: 'SSTestOrder', store_id: @ship_store.id }
       expect(response.status).to eq(200)
