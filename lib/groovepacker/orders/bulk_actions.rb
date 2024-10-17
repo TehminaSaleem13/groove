@@ -174,11 +174,11 @@ module Groovepacker
         if user_list.size > 1
           orders.each_with_index do |order, index|
             user = user_list[index % user_list.size]
-            OrderActivity.where(order_id: order.id).update_all(user_id: user.id)
+            Order.where(id: order.id).update_all(packing_user_id: user.id)
           end
         else
           user = user_list.first
-          OrderActivity.where(order_id: orders.pluck(:id)).update_all(user_id: user.id)
+          Order.where(id: orders.pluck(:id)).update_all(packing_user_id: user.id)
         end
       
         bulk_action.update(completed: orders.count)
@@ -198,9 +198,7 @@ module Groovepacker
         init_results
         bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
       
-        order_activities = OrderActivity.where(order_id: order_ids)
-      
-        order_activities.update_all(user_id: nil)
+        Order.where(id: order_ids).update_all(packing_user_id: nil)
       
         puts "Successfully deassigned users from the orders."
       

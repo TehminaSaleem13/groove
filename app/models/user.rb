@@ -106,11 +106,18 @@ class User < ApplicationRecord
     scan_time.to_i > login_time.to_i ? scan_time : login_time
   end
 
-  def self.users_with_unique_order_count
-    self.left_joins(order_activities: :order)
-        .where(is_deleted: false) 
-        .group('users.id')
-        .select('users.username, COALESCE(COUNT(DISTINCT orders.id), 0) AS unique_order_count')
-        .map { |user| { username: user.username, unique_order_count: user.unique_order_count.to_i } }
-  end   
+  def self.users_with_unique_filtered_order_count
+   self.left_outer_joins(:order_activities)
+    .where(is_deleted: false)
+    .distinct
+    .pluck(:username)
+    .map do |username|
+      {
+        username: username,
+        unique_order_count: Order.joins(:packing_user)
+                                 .where(users: { username: username })
+                                 .count.to_s || "0"
+      }
+    end
+  end
 end

@@ -41,7 +41,7 @@ module Groovepacker
           final_order = Order.find_by_sql(final_order)
         end
         tags = calculate_tags_count(data.flatten)
-        users = User.users_with_unique_order_count
+        users = User.users_with_unique_filtered_order_count
         assigned_users = order_count_per_user(data.flatten)
 
         [final_order, filtered_count, tags, users, assigned_users]
@@ -82,14 +82,26 @@ module Groovepacker
       end
 
       def order_count_per_user(data)
+        assigned_count = 0
+
         order_ids = Order.where(id: data)
-        user_order_counts = order_ids.joins(:packing_user)
-                                 .group('users.username')
-                                 .count
-      
-        User.pluck(:name).each_with_object({}) do |username, result|
-          result[username] = user_order_counts[username] || 0
-        end
+        result = User.left_outer_joins(:order_activities)
+                            .where(is_deleted: false)
+                            .distinct
+                            .pluck(:username)
+                            .map do |username|
+                              unique_order_count = order_ids.joins(:packing_user)
+                                             .where(users: { username: username })
+                                             .count || 0
+                                             if unique_order_count > 0
+                                                assigned_count += unique_order_count
+                                                { username: username, unique_order_count: unique_order_count.to_s }
+                                             end
+                                          end.compact
+
+        result.unshift( { username: "unassigned", unique_order_count: (order_ids.count-assigned_count).to_s } )
+
+        result
       end
 
       def filtered_order(filtered_filters, filters)

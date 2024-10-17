@@ -142,7 +142,13 @@ class Order < ApplicationRecord
   scope :by_packing_user_name, ->(usernames) {
     if usernames.present?
       usernames_array = usernames.split(',')
-      joins(:packing_user).where(users: { username: usernames_array })
+
+      if usernames_array.include?('unassigned')
+        left_outer_joins(:packing_user)
+          .where('users.username IN (?) OR users.id IS NULL', usernames_array.reject { |u| u == 'unassigned' })
+      else
+        joins(:packing_user).where(users: { username: usernames_array })
+      end
     end
   }
 
