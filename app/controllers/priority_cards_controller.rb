@@ -19,6 +19,7 @@ class PriorityCardsController < ApplicationController
     def create
         @priority_card = PriorityCard.new(priority_card_params)
         @priority_card.order_tagged_count = calculate_tagged_count(@priority_card.assigned_tag)
+        @priority_card.oldest_order = get_oldest_order(@priority_card.assigned_tag)
 
         if @priority_card.save
         render json: @priority_card, status: :created
@@ -33,6 +34,7 @@ class PriorityCardsController < ApplicationController
             @priority_card = PriorityCard.find(params[:id])
         
             @priority_card.order_tagged_count = calculate_tagged_count(@priority_card.assigned_tag)
+            @priority_card.oldest_order = get_oldest_order(@priority_card.assigned_tag)
         
             if @priority_card.update(priority_card_params)
                 render json: @priority_card, notice: 'Priority card was successfully updated.'
@@ -58,18 +60,34 @@ class PriorityCardsController < ApplicationController
         OrderTag.where(name: assigned_tag_name).joins(:orders).where(orders: { status: 'awaiting' }).count
     end
 
+    def get_oldest_order(assigned_tag_name)
+        oldest_order = Order.joins(:order_tags)
+                      .where(order_tags: { name: assigned_tag_name }, status: 'awaiting')
+                      .order('created_at ASC')
+                      .first
+                      
+        oldest_order ? oldest_order.created_at : ""
+    end
+
     def ensure_regular_card
         awaiting_orders_count = count_awaiting_orders
 
         regular_card = PriorityCard.find_or_create_by(priority_name: 'regular') do |card|
             card.order_tagged_count = awaiting_orders_count
         end
+        regular_card.position = '0' if regular_card.position.blank?
 
         update_order_count_if_needed(regular_card, awaiting_orders_count)
     end
 
     def count_awaiting_orders
-        Order.where(status: 'awaiting').count
+        Order.joins(:order_tags)
+        .joins('LEFT JOIN priority_cards ON priority_cards.assigned_tag = order_tags.name')
+        .where(status: 'awaiting')
+        .where(priority_cards: { id: nil })
+        .where('orders.created_at >= ?', 7.days.ago)
+        .distinct
+        .count   
     end
 
     def update_order_count_if_needed(card, current_count)
@@ -81,6 +99,6 @@ class PriorityCardsController < ApplicationController
     end
 
     def priority_card_params
-        params.require(:priority_card).permit(:priority_name, :tag_color, :is_card_disabled, :assigned_tag, :is_stand_by, :position)
+        params.require(:priority_card).permit(:priority_name, :tag_color, :is_card_disabled, :assigned_tag, :is_stand_by, :position, :oldest_order)
     end
 end
