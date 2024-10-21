@@ -78,6 +78,7 @@ class PriorityCardsController < ApplicationController
         regular_card.position = '0' if regular_card.position.blank?
 
         update_order_count_if_needed(regular_card, awaiting_orders_count)
+        regular_card.save!
     end
 
     def count_awaiting_orders

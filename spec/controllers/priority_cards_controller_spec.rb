@@ -45,7 +45,7 @@ RSpec.describe PriorityCardsController, type: :controller do
       priority_card
       get :index
       expect(response).to be_successful
-      expect(JSON.parse(response.body).length).to eq(1)
+      expect(JSON.parse(response.body).length).to eq(2)
     end
 
     it 'ensures the regular card exists' do
