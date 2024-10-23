@@ -116,8 +116,8 @@ class ImportOrders < Groovepacker::Utilities::Base
 
   def import_ss_webhook_order(url, type, store_id, tenant_name)
     Apartment::Tenant.switch!(tenant_name)
-    store = Store.find_by_id(store_id)
-    credential = store.shipstation_rest_credential
+    @store = Store.find_by_id(store_id)
+    credential = @store.shipstation_rest_credential
     client = Groovepacker::ShipstationRuby::Rest::Client.new(credential.api_key, credential.api_secret)
 
     max_retries = 3
@@ -126,47 +126,45 @@ class ImportOrders < Groovepacker::Utilities::Base
     
     begin
       response, shipments_response = client.get_webhook_order(url, type, nil)
-  
-      if response.code == 200
-        order_number = response.dig('orders', 0, 'orderNumber')
-        lock_key = "process_order_#{store.id}_#{order_number}"
-
-        if $redis.get(lock_key).blank?
-          $redis.set(lock_key, true)
-          $redis.expire(lock_key, 20)
-          
-          if order_number
-            shipstation_order = Order.find_by(store_id: store.id, increment_id: order_number)
-            shipstation_order.destroy if shipstation_order.present?
-          end
-        
-          import_item = ImportItem.create(store_id: store.id, status: 'webhook')
-          handler = Groovepacker::Utilities::Base.new.get_handler(store.store_type, store, import_item)
-          context = Groovepacker::Stores::Context.new(handler)
-          context.process_ss_webhook_import_order(url, type)
-        else
-          Rails.logger.info "Another process is already handling Order #{order_number} for Store #{store.id}. Skipping creation."
-        end
-      elsif response.code == 429
-        raise "Too Many Requests"
-      else
-        Rails.logger.error "Received unexpected response: #{response.code} - #{response.message}"
-      end
+      process_order(response, url, type) 
     rescue => e
-      if response&.code == 429
-        retries += 1
-        if retries <= max_retries
-          reset_time = response.headers['x-rate-limit-reset'] || 5
-          wait_time = reset_time.to_i + 1
-          Rails.logger.warn "Rate limit hit (429), retrying in #{wait_time} seconds... (Attempt #{retries})"
-          sleep wait_time
-          retry
-        else
-          Rails.logger.error "Max retries reached for Order processing. Aborting due to rate limit."
-        end
+      retries += 1
+      if response&.code == 429 && retries <= max_retries
+        reset_time = response.headers['x-rate-limit-reset'] || 5
+        wait_time = reset_time.to_i + 1
+        Rails.logger.warn "Rate limit hit (429), retrying in #{wait_time} seconds... (Attempt #{retries})"
+        sleep wait_time
+        retry
       else
-        Rails.logger.error "An error occurred: #{e.message}"
+        Rails.logger.error "Max retries reached or an error occurred: #{e.message}"
       end
+    end
+  end
+
+  def process_order(response, url, type)
+    if response.code == 200
+      order_number = response.dig('orders', 0, 'orderNumber')
+      lock_key = "process_order_#{@store.id}_#{order_number}"
+
+      if $redis.get(lock_key).blank?
+        $redis.set(lock_key, true)
+        $redis.expire(lock_key, 20)
+        
+        shipstation_order = Order.find_by(store_id: @store.id, increment_id: order_number)
+        return if shipstation_order.present? && (shipstation_order.status == 'scanned' || shipstation_order.order_items.map(&:scanned_status).include?('partially_scanned') || shipstation_order.order_items.map(&:scanned_status).include?('scanned'))
+        shipstation_order.destroy if shipstation_order.present?
+        
+        import_item = ImportItem.create(store_id: @store.id, status: 'webhook')
+        handler = Groovepacker::Utilities::Base.new.get_handler(@store.store_type, @store, import_item)
+        context = Groovepacker::Stores::Context.new(handler)
+        context.process_ss_webhook_import_order(url, type)
+      else
+        Rails.logger.info "Another process is already handling Order #{order_number} for Store #{@store.id}. Skipping creation."
+      end
+    elsif response.code == 429
+      raise "Too Many Requests"
+    else
+      Rails.logger.error "Received unexpected response: #{response.code} - #{response.message}"
     end
   end
 
