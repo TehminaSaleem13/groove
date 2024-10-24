@@ -370,7 +370,11 @@ Rails.application.routes.draw do
   end
   
   Rails.application.routes.draw do
-    resources :priority_cards
+    resources :priority_cards do
+      collection do
+        post :update_positions
+      end
+    end
   end
 
   resources :shopify do

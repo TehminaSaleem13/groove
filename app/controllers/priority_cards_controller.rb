@@ -49,6 +49,38 @@ class PriorityCardsController < ApplicationController
         end
     end
 
+    def update_positions
+        begin
+          updates = params[:updates]
+          
+          if updates.blank? || !updates.is_a?(Array)
+            return render json: { error: 'Invalid update data' }, status: :unprocessable_entity
+          end
+      
+          updated_priority_cards = []
+      
+          updates.each do |update_data|
+            priority_card = PriorityCard.find(update_data[:id])
+            
+            priority_card.position = update_data[:new_position]
+            if priority_card.save
+              updated_priority_cards << priority_card
+            else
+              return render json: { error: "Failed to update priority card with ID #{priority_card.id}", messages: priority_card.errors.full_messages }, status: :unprocessable_entity
+            end
+          end
+      
+          render json: updated_priority_cards, notice: 'Priority cards were successfully updated.'
+          
+        rescue ActiveRecord::RecordNotFound => e
+          render json: { error: 'One or more priority cards not found' }, status: :not_found
+        rescue StandardError => e
+          Rails.logger.error("Error updating priority cards: #{e.message}")
+          render json: { error: "An error occurred while updating the priority cards: #{e.message}" }, status: :internal_server_error
+        end
+      end
+      
+
     # DELETE /priority_cards/:id
     def destroy
         @priority_card.destroy

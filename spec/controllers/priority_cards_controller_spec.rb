@@ -10,9 +10,14 @@ RSpec.describe PriorityCardsController, type: :controller do
 
   let!(:order_tag1) { OrderTag.create(name: 'Tag1') }
   let!(:order_tag2) { OrderTag.create(name: 'Tag2') }
+  let!(:order_tag3) { OrderTag.create(name: 'Tag3') }
+  let!(:order_tag4) { OrderTag.create(name: 'Tag4') }
   let!(:duplicate_tag) { OrderTag.create(name: 'Tag1') }
   let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
   let(:origin_store) { create(:origin_store, store: @store) }
+  let!(:priority_card1) { PriorityCard.create(priority_name: 'High1', assigned_tag: 'Tag3', position: 1) }
+  let!(:priority_card2) { PriorityCard.create(priority_name: 'Medium1', assigned_tag: 'Tag4', position: 2) }
+  
 
   let(:valid_attributes) do
     {
@@ -45,7 +50,7 @@ RSpec.describe PriorityCardsController, type: :controller do
       priority_card
       get :index
       expect(response).to be_successful
-      expect(JSON.parse(response.body).length).to eq(2)
+      expect(JSON.parse(response.body).length).to eq(4)
     end
 
     it 'ensures the regular card exists' do
@@ -173,6 +178,74 @@ RSpec.describe PriorityCardsController, type: :controller do
     it 'calculates the correct count of awaiting orders for a tag' do
       order_tag = OrderTag.create!(name: 'BATCHED')
       expect(controller.send(:calculate_tagged_count, 'BATCHED')).to eq(0)
+    end
+  end
+
+  describe 'POST #update_positions' do
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+
+    context 'with valid parameters' do
+      let(:valid_updates) do
+        [
+          { id: priority_card1.id, new_position: 2 },
+          { id: priority_card2.id, new_position: 1 }
+        ]
+      end
+
+      it 'updates the positions of the priority cards' do
+        post :update_positions, params: { updates: valid_updates }
+
+        expect(response).to have_http_status(:success)
+
+        # Reload the cards from the database to check updated positions
+        priority_card1.reload
+        priority_card2.reload
+
+        expect(priority_card1.position).to eq(2)
+        expect(priority_card2.position).to eq(1)
+      end
+
+      it 'returns the updated priority cards' do
+        post :update_positions, params: { updates: valid_updates }
+
+        json_response = JSON.parse(response.body)
+        expect(json_response.size).to eq(2)
+        expect(json_response[0]['id']).to eq(priority_card1.id)
+        expect(json_response[1]['id']).to eq(priority_card2.id)
+      end
+    end
+
+    context 'with invalid parameters' do
+      it 'returns an error if the updates parameter is missing' do
+        post :update_positions, params: {}
+
+        expect(response).to have_http_status(:unprocessable_entity)
+        expect(JSON.parse(response.body)['error']).to eq('Invalid update data')
+      end
+
+      it 'returns an error if a priority card is not found' do
+        invalid_updates = [{ id: -1, new_position: 3 }] # Assuming -1 does not exist
+
+        post :update_positions, params: { updates: invalid_updates }
+
+        expect(response).to have_http_status(:not_found)
+        expect(JSON.parse(response.body)['error']).to eq('One or more priority cards not found')
+      end
+
+      it 'returns an error if a position update fails' do
+        # Create a card with a validation that would fail
+        priority_card_invalid = PriorityCard.create(priority_name: nil, assigned_tag: 'BATCHED', position: 3)
+
+        invalid_updates = [{ id: priority_card_invalid.id, new_position: 4 }]
+
+        post :update_positions, params: { updates: invalid_updates }
+
+        expect(response).to have_http_status(:not_found)
+      end
     end
   end
 end
