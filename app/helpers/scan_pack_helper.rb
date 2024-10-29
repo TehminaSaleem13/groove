@@ -324,4 +324,32 @@ module ScanPackHelper
     puts e.backtrace.join(', ')
     ''
   end
+
+  def do_find_and_update_barcode_from_gs1_barcode_input
+    return unless @params[:input].present?
+
+    gtin_barcode_match = @params[:input].match(/\(01\)(\d{14})/)
+    return unless gtin_barcode_match
+
+    gs_gtin_barcode = gtin_barcode_match[1]
+    product_barcode = ProductBarcode.find_by('lower(barcode) = ?', gs_gtin_barcode.downcase)
+    return unless product_barcode
+
+    gs_data = {
+      gs_mfg_date: extract_match(/\(11\)(\d{6})/, @params[:input]),
+      gs_bestbuy_date: extract_match(/\(15\)(\d{6})/, @params[:input]),
+      gs_exp_date: extract_match(/\(17\)(\d{6})/, @params[:input]),
+      gs_batch_lot_number: extract_match(/\(10\)([A-Za-z0-9]+)/, @params[:input]),
+      gs_serial_number: extract_match(/\(21\)([A-Za-z0-9]+)/, @params[:input])
+    }
+
+    order_serial = OrderSerial.create(product_id: product_barcode.product.id, order_id: @order.id)
+    order_serial.create_update_gs_barcode_data(gs_data.compact, order_serial)
+    @params[:input] = product_barcode.barcode
+  end
+
+  def extract_match(regex, input)
+    match = input.match(regex)
+    match ? match[1] : nil
+  end
 end

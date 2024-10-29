@@ -21,6 +21,7 @@ module ScanPack
 
     def scan_barcode
       do_find_and_update_barcode_from_case_insensitive_input
+      do_find_and_update_barcode_from_gs1_barcode_input
       do_find_and_remove_order_prefix_from_input
       do_set_state_matcher
       do_check_state_and_status_to_add_activity
