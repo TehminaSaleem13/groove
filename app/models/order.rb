@@ -49,6 +49,7 @@ class Order < ApplicationRecord
   ALLOCATE_STATUSES = %w[awaiting onhold serviceissue].freeze
   UNALLOCATE_STATUSES = ['cancelled'].freeze
   SOLD_STATUSES = ['scanned'].freeze
+  RECENT_ORDERS_CONDITION = "orders.created_at >= ?".freeze
 
   scope :awaiting, -> { where(status: 'awaiting') }
   scope :partially_scanned, -> { awaiting.joins(:order_items).where.not(order_items: { scanned_qty: 0 }).distinct }

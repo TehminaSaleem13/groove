@@ -373,6 +373,7 @@ Rails.application.routes.draw do
     resources :priority_cards do
       collection do
         post :update_positions
+        post :create_with_user
       end
     end
   end

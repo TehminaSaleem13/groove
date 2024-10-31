@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_10_15_080557) do
+ActiveRecord::Schema.define(version: 2024_10_30_100804) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -665,6 +665,10 @@ ActiveRecord::Schema.define(version: 2024_10_15_080557) do
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
     t.string "second_serial"
+    t.string "lot"
+    t.datetime "exp_date"
+    t.datetime "bestbuy_date"
+    t.datetime "mfg_date"
     t.index ["order_id"], name: "index_order_serials_on_order_id"
     t.index ["product_id"], name: "index_order_serials_on_product_id"
   end
@@ -830,6 +834,8 @@ ActiveRecord::Schema.define(version: 2024_10_15_080557) do
     t.boolean "is_stand_by", default: false
     t.integer "position"
     t.datetime "oldest_order"
+    t.boolean "is_favourite", default: false
+    t.boolean "is_user_card", default: false
     t.index ["assigned_tag"], name: "index_priority_cards_on_assigned_tag", unique: true
     t.index ["priority_name"], name: "index_priority_cards_on_priority_name", unique: true
   end

@@ -28,6 +28,18 @@ RSpec.describe PriorityCardsController, type: :controller do
     }
   end
 
+  let(:valid_users_attributes) do
+    {
+      username: "scan_pack_spec_user",
+      priority_card: {
+        priority_name: 'scan_pack_spec_user',
+        tag_color: '#FF0000',
+        is_card_disabled: false,
+        assigned_tag: 'scan_pack_spec_user'
+      }
+    }
+  end
+
   let(:invalid_attributes) do
     {
       priority_name: '',
@@ -57,6 +69,20 @@ RSpec.describe PriorityCardsController, type: :controller do
       allow(controller).to receive(:ensure_regular_card).and_call_original
       get :index
       expect(controller).to have_received(:ensure_regular_card)
+    end
+  end
+  
+  describe 'Create User Cards' do
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
+    
+    it 'returns a success response' do
+      priority_card
+      post :create_with_user, params: valid_users_attributes
+      expect(response).to be_successful
     end
   end
 
