@@ -5,8 +5,17 @@ class PriorityCardsController < ApplicationController
     # GET /priority_cards
     def index
         ensure_regular_card
-
-        @priority_cards = PriorityCard.all
+        
+        regular_cards = PriorityCard.where(priority_name: "regular")
+        
+        priority_cards = PriorityCard.where.not(priority_name: "regular").map do |priority_card|
+            priority_card.order_tagged_count = calculate_tagged_count(priority_card.assigned_tag)
+            priority_card.oldest_order = get_oldest_order(priority_card.assigned_tag)
+            priority_card
+        end
+        
+        @priority_cards = regular_cards + priority_cards
+        
         render json: @priority_cards
     end
 
@@ -55,7 +64,7 @@ class PriorityCardsController < ApplicationController
         
         tagged_orders = Order.joins(:packing_user)
                                 .where(users: { username: user.username })
-                                .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+                                .where(Order::RECENT_ORDERS_CONDITION, 15.days.ago)
                                 .where(status: 'awaiting')
         @priority_card = PriorityCard.new(priority_card_params).tap do |card|
             card.order_tagged_count = tagged_orders.count.to_s
@@ -114,13 +123,13 @@ class PriorityCardsController < ApplicationController
     private
 
     def calculate_tagged_count(assigned_tag_name)
-        OrderTag.where(name: assigned_tag_name).joins(:orders).where(orders: { status: 'awaiting' }).count
+        OrderTag.where(name: assigned_tag_name).joins(:orders).where(orders: { status: 'awaiting' }).where(Order::RECENT_ORDERS_CONDITION, 15.days.ago).count
     end
 
     def get_oldest_order(assigned_tag_name)
         oldest_order = Order.joins(:order_tags)
                       .where(order_tags: { name: assigned_tag_name }, status: 'awaiting')
-                      .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+                      .where(Order::RECENT_ORDERS_CONDITION, 15.days.ago)
                       .order('created_at ASC')
                       .first
                       
@@ -140,11 +149,8 @@ class PriorityCardsController < ApplicationController
     end
 
     def count_awaiting_orders
-        Order.joins(:order_tags)
-            .joins('LEFT JOIN priority_cards ON priority_cards.assigned_tag = order_tags.name')
-            .where(status: 'awaiting')
-            .where(priority_cards: { id: nil })
-            .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+        Order.where(status: 'awaiting')
+            .where(Order::RECENT_ORDERS_CONDITION, 15.days.ago)
             .distinct
             .count   
     end
