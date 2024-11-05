@@ -328,28 +328,23 @@ module ScanPackHelper
   def do_find_and_update_barcode_from_gs1_barcode_input
     return unless @params[:input].present?
 
-    gtin_barcode_match = @params[:input].match(/\(01\)(\d{14})/)
-    return unless gtin_barcode_match
+    gs_match = @params[:input].match(/01(\d{14})(15\d{6})?(21\w{1,20})?(11\d{6})?(17\d{6})?(10\w{1,20})?/)
+    return unless gs_match
 
-    gs_gtin_barcode = gtin_barcode_match[1]
+    gs_gtin_barcode = gs_match[1]
     product_barcode = ProductBarcode.find_by('lower(barcode) = ?', gs_gtin_barcode.downcase)
     return unless product_barcode
 
     gs_data = {
-      gs_mfg_date: extract_match(/\(11\)(\d{6})/, @params[:input]),
-      gs_bestbuy_date: extract_match(/\(15\)(\d{6})/, @params[:input]),
-      gs_exp_date: extract_match(/\(17\)(\d{6})/, @params[:input]),
-      gs_batch_lot_number: extract_match(/\(10\)([A-Za-z0-9]+)/, @params[:input]),
-      gs_serial_number: extract_match(/\(21\)([A-Za-z0-9]+)/, @params[:input])
-    }
+      gs_bestbuy_date: gs_match[2]&.[](2..),
+      gs_serial_number: gs_match[3]&.[](2..),
+      gs_mfg_date: gs_match[4]&.[](2..),
+      gs_exp_date: gs_match[5]&.[](2..),
+      gs_batch_lot_number: gs_match[6]&.[](2..)
+    }.compact
 
     order_serial = OrderSerial.create(product_id: product_barcode.product.id, order_id: @order.id)
-    order_serial.create_update_gs_barcode_data(gs_data.compact, order_serial)
+    order_serial.create_update_gs_barcode_data(gs_data, order_serial)
     @params[:input] = product_barcode.barcode
-  end
-
-  def extract_match(regex, input)
-    match = input.match(regex)
-    match ? match[1] : nil
   end
 end

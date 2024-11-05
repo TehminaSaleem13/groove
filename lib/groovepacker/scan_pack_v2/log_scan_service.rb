@@ -14,7 +14,6 @@ module Groovepacker
         @params[:data] = JSON.parse(Net::HTTP.get(URI.parse(params[:data]))).map(&:with_indifferent_access) if params[:delayed_log_process]
         (@params[:data] || []).each do |scn_params|
           if scn_params[:event] == 'regular'
-            do_find_and_update_barcode_from_gs1_barcode_input
             scan_barcode_obj = ScanPack::ScanBarcodeService.new(
               current_user, session, scn_params
             )

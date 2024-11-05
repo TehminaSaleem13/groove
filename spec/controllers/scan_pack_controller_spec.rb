@@ -955,7 +955,7 @@ RSpec.describe ScanPackController, type: :controller do
       order = create(:order, increment_id: 'GS1-128', status: 'awaiting')
       create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order, name: product.name)
       
-      post :scan_barcode, params: { input: "(01)40614141006364(11)220101(10)A1B2C3D4", state: "scanpack.rfp.default", id: order.id, box_id: nil, store_order_id: nil, order_by_number: nil, scan_pack: { input: "(01)40614141006364(11)220101(10)A1B2C3D4", state: "scanpack.rfp.default", id: order.id, box_id: nil, store_order_id: nil, order_by_number: nil} }
+      post :scan_barcode, params: { input: "01406141410063641122010110A1B2C3D4", state: "scanpack.rfp.default", id: order.id, box_id: nil, store_order_id: nil, order_by_number: nil, scan_pack: { input: "(01)40614141006364(11)220101(10)A1B2C3D4", state: "scanpack.rfp.default", id: order.id, box_id: nil, store_order_id: nil, order_by_number: nil} }
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
       expect(result['data']['order_complete']).to eq(true)

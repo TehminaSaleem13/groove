@@ -12,14 +12,18 @@ class OrderSerial < ApplicationRecord
   DATE_FORMAT = '%y%m%d'
 
   def create_update_gs_barcode_data(gs_data, order_serial)
-    update_attributes = {}
+    update_attributes = {
+      mfg_date: parse_date(gs_data[:gs_mfg_date]),
+      bestbuy_date: parse_date(gs_data[:gs_bestbuy_date]),
+      exp_date: parse_date(gs_data[:gs_exp_date]),
+      lot: gs_data[:gs_batch_lot_number],
+      serial: gs_data[:gs_serial_number]
+    }.compact
 
-    update_attributes[:mfg_date] = DateTime.strptime(gs_data[:gs_mfg_date], DATE_FORMAT)rescue nil if gs_data[:gs_mfg_date]
-    update_attributes[:bestbuy_date] = DateTime.strptime(gs_data[:gs_bestbuy_date], DATE_FORMAT)rescue nil if gs_data[:gs_bestbuy_date]
-    update_attributes[:exp_date] = DateTime.strptime(gs_data[:gs_exp_date], DATE_FORMAT)rescue nil if gs_data[:gs_exp_date]
-    update_attributes[:lot] = gs_data[:gs_batch_lot_number] if gs_data[:gs_batch_lot_number]
-    update_attributes[:serial] = gs_data[:gs_serial_number] if gs_data[:gs_serial_number]
+    order_serial.update(update_attributes) if update_attributes.present?
+  end
 
-    order_serial.update(update_attributes) unless update_attributes.empty?
+  def parse_date(date_string)
+    DateTime.strptime(date_string, DATE_FORMAT) rescue nil if date_string
   end
 end
