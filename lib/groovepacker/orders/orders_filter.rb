@@ -88,14 +88,14 @@ module Groovepacker
         result = User.left_outer_joins(:order_activities)
                             .where(is_deleted: false)
                             .distinct
-                            .pluck(:username)
-                            .map do |username|
+                            .pluck(:id, :username)
+                            .map do |id, username|
                               unique_order_count = order_ids.joins(:packing_user)
                                              .where(users: { username: username })
                                              .count || 0
                                              if unique_order_count > 0
                                                 assigned_count += unique_order_count
-                                                { username: username, unique_order_count: unique_order_count.to_s }
+                                                { id: id, username: username, unique_order_count: unique_order_count.to_s }
                                              end
                                           end.compact
 

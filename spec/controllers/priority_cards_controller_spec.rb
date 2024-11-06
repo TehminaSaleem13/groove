@@ -6,6 +6,7 @@ RSpec.describe PriorityCardsController, type: :controller do
     inv_wh = FactoryBot.create(:inventory_warehouse, is_default: true)
     @store = FactoryBot.create(:store, inventory_warehouse_id: inv_wh.id)
     @user = FactoryBot.create(:user, username: 'scan_pack_spec_user', name: 'Scan Pack user', role: Role.find_by_name('Scan & Pack User'))
+    @user = FactoryBot.create(:user, username: 'scan_pack_spec_user2', name: 'Scan Pack user2', role: Role.find_by_name('Scan & Pack User'))
   end
 
   let!(:order_tag1) { OrderTag.create(name: 'Tag1') }
@@ -15,7 +16,7 @@ RSpec.describe PriorityCardsController, type: :controller do
   let!(:duplicate_tag) { OrderTag.create(name: 'Tag1') }
   let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
   let(:origin_store) { create(:origin_store, store: @store) }
-  let!(:priority_card1) { PriorityCard.create(priority_name: 'High1', assigned_tag: 'Tag3', position: 1) }
+  let!(:priority_card1) { PriorityCard.create(priority_name: 'High1', assigned_tag: 'scan_pack_spec_user2', position: 1, is_user_card: true) }
   let!(:priority_card2) { PriorityCard.create(priority_name: 'Medium1', assigned_tag: 'Tag4', position: 2) }
   
 
