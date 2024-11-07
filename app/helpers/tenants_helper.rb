@@ -234,7 +234,7 @@ module TenantsHelper
         timestamp: Time.zone.at(time).strftime('%d %b %Y, %H:%M'),
         event: properties['title'],
         user: properties['username'],
-        saved_changes: properties['changes']
+        saved_changes: properties['changes'] || properties['objects_involved']
       }
     end
   end
