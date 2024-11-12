@@ -483,8 +483,6 @@ module Groovepacker
             return unless import_order_form_response(shipstation_order, order, shipments_response)
 
             if order['tagIds'].present?
-              tags_list  = @client.get_all_tags_list
-
               order['tagIds'].each do |tag_id|
                 tag = tags_list.select { |tag| tag["tagId"] == tag_id }
                 shipstation_order.add_tag(tag.first) if tag.present?
@@ -516,6 +514,10 @@ module Groovepacker
               response = get_orders_from_union(response, status_response)
             end
             response
+          end
+
+          def tags_list
+            @tags_list ||= @client.get_all_tags_list
           end
 
           def fetch_tagged_orders(response)
