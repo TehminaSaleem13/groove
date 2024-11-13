@@ -298,6 +298,7 @@ class Order < ApplicationRecord
     addactivity('Order Scanning Complete', username, on_ex) unless ScanPackSetting.last.order_verification
     self.packing_score = compute_packing_score
     self.post_scanning_flag = nil
+    self.packing_user_id = nil
     # Remove tote assignment
     Tote.where(order_id: id).update_all(order_id: nil, pending_order: false)
     save
