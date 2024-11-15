@@ -209,6 +209,14 @@ module Groovepacker
           @import_item.save
         end
 
+        def update_import_summary_to_in_progress
+          OrderImportSummary.top_summary&.update(status: 'in_progress')
+        end
+
+        def update_import_summary_to_fetch_api_response
+          OrderImportSummary.top_summary&.update(status: 'fetch_api_response')
+        end
+
         def update_orders_status
           result = { 'status' => true, 'messages' => [], 'error_messages' => [], 'success_messages' => [],
                      'notice_messages' => [] }

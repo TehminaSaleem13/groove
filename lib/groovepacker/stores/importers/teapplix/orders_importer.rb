@@ -9,7 +9,9 @@ module Groovepacker
 
           def import
             init_common_objects
+            update_import_summary_to_fetch_api_response
             response = @client.orders(@import_item)
+            update_import_summary_to_in_progress
             last_imported_date = Time.current
 
             @result[:total_imported] = response['orders'].nil? ? 0 : response['orders'].length

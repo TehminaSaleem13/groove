@@ -70,11 +70,12 @@ module Groovepacker
       end
 
       def get_order_import_summary
-        return nil unless OrderImportSummary.where(status: 'in_progress').empty?
+        return nil unless OrderImportSummary.where(status: 'import_initiate').empty?
         return nil if order_import_summaries.empty?
 
         @order_import_summary = order_import_summaries.first
-        @order_import_summary.update(status: 'in_progress')
+        @order_import_summary.update(status: 'import_initiate')
+        sleep(3)
         @order_import_summary.reload
       end
 

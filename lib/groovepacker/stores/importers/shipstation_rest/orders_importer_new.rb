@@ -39,7 +39,9 @@ module Groovepacker
             return @result unless @import_item.present?
 
             @import_item.update_column(:importer_id, @worker_id)
+            update_import_summary_to_fetch_api_response
             response = get_orders_response
+            update_import_summary_to_in_progress
             response['orders'] = begin
                                    response['orders'].sort_by { |h| h['modifyDate'].split('-') }
                                  rescue StandardError
@@ -241,7 +243,6 @@ module Groovepacker
             response['orders'].each do |order|
               import_item_fix
               ImportItem.where(store_id: @store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
-
               break if import_should_be_cancelled
 
               begin

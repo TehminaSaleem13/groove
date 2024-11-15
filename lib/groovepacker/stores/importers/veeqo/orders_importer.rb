@@ -26,8 +26,9 @@ module Groovepacker
             return @result unless @import_item.present?
 
             @import_item.update_column(:importer_id, @worker_id)
+            update_import_summary_to_fetch_api_response
             response = get_orders_response
-
+            update_import_summary_to_in_progress
             response_orders = response['orders'].select { |o| o['allocations'].count <= 1 }
             multi_allocation_orders = response['orders'].select { |o| o['allocations'].count > 1 }
             split_orders_by_allocation(response_orders, multi_allocation_orders)

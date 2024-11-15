@@ -21,7 +21,9 @@ module Groovepacker
             return @result unless @import_item.present?
 
             @import_item.update_column(:importer_id, @worker_id)
+            update_import_summary_to_fetch_api_response
             response = @client.orders(@statuses, importing_time, @import_item)  
+            update_import_summary_to_in_progress
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)
             return @result if response['orders'].nil?
