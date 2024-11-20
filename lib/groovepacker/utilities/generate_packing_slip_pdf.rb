@@ -3,8 +3,11 @@
 class GeneratePackingSlipPdf
   def self.generate_packing_slip_pdf(orders, tenant_name, result, page_height, page_width, orientation, file_name, size, header, gen_barcode_id, boxes, is_custom_pdf = false)
     Apartment::Tenant.switch!(tenant_name)
-    packing_slip_obj =
-      Groovepacker::PackingSlip::PdfMerger.new
+    unless orders.present?
+      orders = $redis.get("generate_packing_slip#{Apartment::Tenant.current}_#{gen_barcode_id}")
+      orders = Marshal.load(orders)
+    end
+    packing_slip_obj = Groovepacker::PackingSlip::PdfMerger.new
     generate_barcode = GenerateBarcode.find_by_id(gen_barcode_id)
     boxes = Box.where(id: boxes) unless boxes.blank?
 
@@ -54,6 +57,7 @@ class GeneratePackingSlipPdf
       generate_barcode.url = ENV['S3_BASE_URL'] + '/' + tenant_name + '/pdf/' + base_file_name
       generate_barcode.status = 'completed'
       generate_barcode.save
+      $redis.del("generate_packing_slip#{Apartment::Tenant.current}_#{gen_barcode_id}") unless orders.present?
     end
   rescue Exception => e
     generate_barcode.status = 'failed'

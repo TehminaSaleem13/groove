@@ -38,7 +38,7 @@ module SettingsHelper
   end
 
   def update_bulk_action(bulk_action_id, result)
-    bulk_action = GrooveBulkActions.find_by_id(bulk_action_id)
+    bulk_action = GrooveBulkActions.find_by_id(bulk_action_id) || GenerateBarcode.find_by_id(params[:id])
     if bulk_action.present?
       bulk_action.cancel = true
       bulk_action.status = 'cancelled'

@@ -356,20 +356,24 @@ class OrdersController < ApplicationController
   end
 
   def generate_pick_list
-    @result, @pick_list, @depends_pick_list =
-      gp_orders_module.generate_pick_list(list_selected_orders)
+    @result, @pick_list, @depends_pick_list = gp_orders_module.generate_pick_list(list_selected_orders)
 
-    file_name = 'pick_list_' + Time.current.strftime('%d_%b_%Y_%H_%M_%S_%p')
-    @result['data'] =
-      { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list,
-        'pick_list_file_paths' => "/pdfs/#{file_name}.pdf" }
-    render_pdf(file_name)
-    pdf_file = File.open(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"), 'rb')
-    base_file_name = File.basename(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"))
-    tenant_name = Apartment::Tenant.current
-    GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
-    pdf_file.close
-    @result['url'] = ENV['S3_BASE_URL'] + '/' + tenant_name + '/pdf/' + base_file_name
+    if @pick_list.blank?
+      set_status_and_message(false, 'No orders selected', ['push'])
+    else
+      file_name = 'pick_list_' + Time.current.strftime('%d_%b_%Y_%H_%M_%S_%p')
+      @result['data'] =
+        { 'pick_list' => @pick_list, 'depends_pick_list' => @depends_pick_list,
+          'pick_list_file_paths' => "/pdfs/#{file_name}.pdf" }
+      render_pdf(file_name)
+      pdf_file = File.open(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"), 'rb')
+      base_file_name = File.basename(Rails.root.join('public', 'pdfs', "#{file_name}.pdf"))
+      tenant_name = Apartment::Tenant.current
+      GroovS3.create_pdf(tenant_name, base_file_name, pdf_file.read)
+      pdf_file.close
+      @result['url'] = ENV['S3_BASE_URL'] + '/' + tenant_name + '/pdf/' + base_file_name
+    end
+
     respond_to do |format|
       format.html {}
       format.pdf {}
@@ -386,7 +390,9 @@ class OrdersController < ApplicationController
     @orders = []
     list_selected_orders.each { |order| @orders.push(id: order.id, increment_id: order.increment_id) }
 
-    unless @orders.empty?
+    if @orders.blank?
+      set_status_and_message(false, 'No orders selected', ['push'])
+    else
       generate_barcode_for_packingslip
       @result['status'] = true
     end

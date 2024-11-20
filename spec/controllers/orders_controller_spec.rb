@@ -918,6 +918,14 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    it 'Print Packing Slip wothout order' do
+      post :generate_packing_slip, params: { orderArray: [] }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(res['status']).to eq(false)
+      expect(res['messages']).to eq(['No orders selected'])
+    end
+
     it 'Print all Packing Slip' do
       order = FactoryBot.create :order, store_id: @store.id
 
@@ -1081,6 +1089,16 @@ RSpec.describe OrdersController, type: :controller do
 
       post :generate_pick_list, params: { orderArray: [{ id: order.id }] }
       expect(response.status).to eq(200)
+    end
+
+    it 'Generate pick list without order' do
+      request.accept = 'application/json'
+
+      post :generate_pick_list, params: { orderArray: [] }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(res['status']).to eq(false)
+      expect(res['messages']).to eq(['No orders selected'])
     end
 
     it 'prints activity log' do
