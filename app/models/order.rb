@@ -157,15 +157,17 @@ class Order < ApplicationRecord
     if days.present? && days != 'all_day'
       case days
       when 'today'
-        where('order_placed_time >= ?', DateTime.now.beginning_of_day)
+        where(order_placed_time: time_range_for(:today))
+      when 'yesterday'
+        where(order_placed_time: time_range_for(:yesterday))
       when 'this_week'
-        where('order_placed_time >= ?', DateTime.now.beginning_of_week)
+        where(order_placed_time: time_range_for(:this_week))
       when 'last_week'
-        where('order_placed_time >= ? AND order_placed_time < ?', DateTime.now.beginning_of_week - 1.week, DateTime.now.beginning_of_week)
+        where(order_placed_time: time_range_for(:last_week))
       when 'this_month'
-        where('order_placed_time >= ?', DateTime.now.beginning_of_month)
+        where(order_placed_time: time_range_for(:this_month))
       when 'last_month'
-        where('order_placed_time >= ? AND order_placed_time < ?', DateTime.now.beginning_of_month - 1.month, DateTime.now.beginning_of_month)
+        where(order_placed_time: time_range_for(:last_month))
       else
         where('order_placed_time >= ?', DateTime.now - days.to_i.days)
       end
@@ -691,5 +693,24 @@ class Order < ApplicationRecord
                                        recent_order_details:, store_name: "Store-#{origin_store_id}")
     end
     update(origin_store_id: orig_store&.id)
+  end
+
+  def self.time_range_for(period)
+    case period
+    when :today
+      Time.zone.now.beginning_of_day..Time.zone.now.end_of_day
+    when :yesterday
+      (Time.zone.now - 1.day).beginning_of_day..(Time.zone.now - 1.day).end_of_day
+    when :this_week
+      Time.zone.now.beginning_of_week..Time.zone.now.end_of_week
+    when :last_week
+      (Time.zone.now - 1.week).beginning_of_week..(Time.zone.now - 1.week).end_of_week
+    when :this_month
+      Time.zone.now.beginning_of_month..Time.zone.now.end_of_month
+    when :last_month
+      (Time.zone.now - 1.month).beginning_of_month..(Time.zone.now - 1.month).end_of_month
+    else
+      raise ArgumentError, "Invalid period: #{period}"
+    end
   end
 end
