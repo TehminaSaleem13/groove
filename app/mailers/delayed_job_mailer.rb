@@ -5,7 +5,7 @@ class DelayedJobMailer < ActionMailer::Base
 
   def waiting_jobs(jobs)
     @jobs = jobs
-    subject = "Groovepacker [#{Rails.env}] - List of the jobs waiting for worker to be assigned"
+    subject = "Groovepacker [#{Rails.env}] - [#{jobs.size}] jobs waiting for worker to be assigned"
     mail to: ENV['FAILED_IMPORT_NOTIFICATION_EMAILS'], subject: subject
   end
 end
