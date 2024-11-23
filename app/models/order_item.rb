@@ -293,7 +293,7 @@ class OrderItem < ApplicationRecord
     save
     tenant = Apartment::Tenant.current
     if !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat && order.has_unscanned_items && ExportSetting.first.include_partially_scanned_orders_user_stats
-      SendStatStream.new.delay(run_at: 1.second.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 91).build_send_stream(
+      SendStatStream.new.delay(run_at: 1.second.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(
         tenant, order.id
       )
     end

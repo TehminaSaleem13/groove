@@ -43,7 +43,7 @@ module Groovepacker
         Tote.where(order_id: order.id).update_all(order_id: nil, pending_order: false)
         order.save
         order.update_access_restriction
-        SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant_name, priority: 91).build_send_stream(tenant_name, order.id) if !Rails.env.test? && tenant.groovelytic_stat
+        SendStatStream.new.delay(run_at: 1.seconds.from_now, queue: 'export_stat_stream_scheduled_' + tenant_name, priority: 95).build_send_stream(tenant_name, order.id) if !Rails.env.test? && tenant.groovelytic_stat
       end
     end
   end

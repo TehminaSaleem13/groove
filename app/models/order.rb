@@ -308,7 +308,7 @@ class Order < ApplicationRecord
     tenant = Apartment::Tenant.current
     return unless !Rails.env.test? && Tenant.where(name: tenant).last.groovelytic_stat
 
-    SendStatStream.new.delay(run_at: 1.second.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 91).build_send_stream(
+    SendStatStream.new.delay(run_at: 1.second.from_now, queue: 'export_stat_stream_scheduled_' + tenant, priority: 95).build_send_stream(
       tenant, id
     )
   end
