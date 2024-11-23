@@ -278,11 +278,11 @@ module OrdersHelper
   end
 
   def generate_order_hash_v2(order, itemslength)
-    store_name = if !order.store.nil? 
+    store_name = if !order.store.nil?
                    order.store&.display_origin_store_name ? order.origin_store&.store_name : order.store&.name
                  else
                    ''
-                 end 
+                 end
     order_data = { 'id' => order.id,
                    'ordernum' => order.increment_id,
                    'itemslength' => itemslength }
@@ -348,7 +348,7 @@ module OrdersHelper
   def update_access_restriction
     tenant = Apartment::Tenant.current
     stat_stream_obj = SendStatStream.new
-    stat_stream_obj.delay(priority: 95).update_restriction(tenant)
+    stat_stream_obj.delay(priority: 95, queue: "update_access_restriction_#{tenant}").update_restriction(tenant)
   end
 
   def add_new_product_for_item(item, result)
@@ -473,7 +473,7 @@ module OrdersHelper
       end
     end
   end
-  
+
   # def se_duplicate_orders(order)
   #   return [] unless order.store.store_type == 'ShippingEasy'
 
