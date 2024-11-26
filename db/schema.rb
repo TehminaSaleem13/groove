@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_10_30_100804) do
+ActiveRecord::Schema.define(version: 2024_11_25_080756) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1333,6 +1333,7 @@ ActiveRecord::Schema.define(version: 2024_10_30_100804) do
     t.bigint "pull_inv_location_id"
     t.boolean "pull_combined_qoh", default: false
     t.integer "order_import_range_days", default: 30
+    t.boolean "open_shopify_create_shipping_label", default: false
   end
 
   create_table "shopline_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

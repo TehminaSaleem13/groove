@@ -514,6 +514,14 @@ module OrderMethodsHelper
     store&.store_type == 'CSV' && store&.order_cup_direct_shipping && Tenant.find_by_name(Apartment::Tenant.current)&.order_cup_direct_shipping
   end
 
+  def open_shopify_create_shipping_label
+    store&.store_type == 'Shopify' && store&.shopify_credential&.open_shopify_create_shipping_label
+  end
+
+  def shopify_store_name
+    store&.store_type == 'Shopify' && store&.shopify_credential&.shop_name
+  end
+
   def print_ss_label?
     return false unless Tenant.find_by_name(Apartment::Tenant.current)&.ss_api_create_label
 

@@ -36,6 +36,8 @@ module ScanPack
         @result['data']['order']['popup_shipping_label'] = order.store.shipping_easy_credential.popup_shipping_label if @result['data']['order']['store_type'] == 'ShippingEasy' && order.store.shipping_easy_credential.present?
         @result['data']['order']['large_popup'] = order.store.shipping_easy_credential.large_popup if @result['data']['order']['store_type'] == 'ShippingEasy' && order.store.shipping_easy_credential.present?
         @result['data']['order']['order_cup_direct_shipping'] = order.order_cup_direct_shipping
+        @result['data']['order']['open_shopify_create_shipping_label'] = order.open_shopify_create_shipping_label
+        @result['data']['order']['shopify_store_name'] = order.shopify_store_name
         @result['data']['order']['multiple_lines_per_sku_accepted'] = order.store.shipping_easy_credential.multiple_lines_per_sku_accepted if @result['data']['order']['store_type'] == 'ShippingEasy' && order.store.shipping_easy_credential.present?
         @result['data']['order']['store_order_idea'] = begin
                                                          order.store_order_id
