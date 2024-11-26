@@ -81,6 +81,8 @@ class Order < ApplicationRecord
         .select('orders.*, (SELECT SUM(order_items.qty) FROM order_items WHERE order_items.order_id = orders.id) AS count').group('orders.id').order("count #{sort_order}")
     when 'tote'
       joins(:tote).order("totes.name #{sort_order}")
+    when 'user'
+      joins(:packing_user).order("users.username #{sort_order}")
     else
       includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
     end

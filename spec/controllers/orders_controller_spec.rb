@@ -1362,6 +1362,9 @@ RSpec.describe OrdersController, type: :controller do
       post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'store_name', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => '7' }
       expect(response.status).to eq(200)
 
+      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'user', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => '7' }
+      expect(response.status).to eq(200)
+
       post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, tags_name: 'Contains Inactive', filterIncludedTags: false, username: 'Manager User' }
       expect(response.status).to eq(200)
 
