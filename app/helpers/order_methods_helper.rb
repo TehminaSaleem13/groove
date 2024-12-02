@@ -18,6 +18,11 @@ module OrderMethodsHelper
     shopify_credential.class.delay(run_at: 1.seconds.from_now, queue: "add_gp_scanned_tag_shopify_#{Apartment::Tenant.current}", priority: 95).add_tag_to_order(Apartment::Tenant.current, shopify_credential.id, store_order_id)
   end
 
+  def mark_order_items_fulfilled_in_shopify
+    shopify_client = Groovepacker::ShopifyRuby::Client.new(store&.shopify_credential)
+    shopify_client.delay(run_at: 1.seconds.from_now, queue: "mark_order_items_fulfilled_shopify#{Apartment::Tenant.current}", priority: 95).mark_order_items_fulfilled(store_order_id)
+  end
+
   def get_se_old_shipments(result_order)
     return result_order unless store.store_type == 'ShippingEasy'
 

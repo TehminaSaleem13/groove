@@ -165,6 +165,33 @@ module Groovepacker
         update_order(store_order_id, attrs)
       end
 
+      def mark_order_items_fulfilled(store_order_id)
+        begin
+          fulfillment_order = fetch_from_shopify { ShopifyAPI::FulfillmentOrder.all(session: session, order_id: store_order_id).last }
+          shopify_fulfillment_order = fulfillment_order.response
+        
+          line_items_hash = shopify_fulfillment_order.line_items.map do |line_item|
+            { id: line_item['id'], quantity: line_item['quantity'] }
+          end
+
+          return if line_items_hash.blank?
+
+          fulfillment = ShopifyAPI::Fulfillment.new(session: session)
+          fulfillment.order_id = shopify_fulfillment_order.order_id
+          fulfillment.location_id = shopify_fulfillment_order.assigned_location_id
+          fulfillment.line_items_by_fulfillment_order = [
+            {
+              fulfillment_order_id: shopify_fulfillment_order.id,
+              fulfillment_order_line_items: line_items_hash
+            }
+          ]
+
+          fulfillment.save!
+        rescue => e
+          puts e
+        end
+      end
+
       def update_order(store_order_id, attrs)
         HTTParty.put("https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders/#{store_order_id}.json",
                      body: attrs.to_json, headers:)

@@ -675,6 +675,7 @@ class Order < ApplicationRecord
     end
 
     add_gp_scanned_tag_in_shopify if store&.store_type == 'Shopify' && store&.shopify_credential&.add_gp_scanned_tag
+    mark_order_items_fulfilled_in_shopify if store&.store_type == 'Shopify' && store&.shopify_credential&.mark_shopify_order_fulfilled
   end
 
   def create_origin_store

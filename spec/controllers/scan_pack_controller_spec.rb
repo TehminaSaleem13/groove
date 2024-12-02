@@ -960,6 +960,23 @@ RSpec.describe ScanPackController, type: :controller do
       result = JSON.parse(response.body)
       expect(result['data']['order_complete']).to eq(true)
     end
+
+    it 'Scan order and mark fulfilled order in shopify' do
+      shopify_store = create(:store, name: 'Shopify', status: true, store_type: 'Shopify', inventory_warehouse: inv_wh, on_demand_import: true)
+      create(:shopify_credential, store_id: shopify_store.id, shop_name: 'test_shop', mark_shopify_order_fulfilled: true)
+
+      product = create(:product)
+      create(:product_sku, product: product, sku: 'PRODUCTTEST')
+      create(:product_barcode, product: product, barcode: '40614141006364')
+
+      order = create(:order, increment_id: 'GS1-128', status: 'awaiting', store_id: shopify_store.id)
+      create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order: order, name: product.name)
+      
+      post :scan_barcode, params: { input: "01406141410063641122010110A1B2C3D4", state: "scanpack.rfp.default", id: order.id, box_id: nil, store_order_id: nil, order_by_number: nil, scan_pack: { input: "(01)40614141006364(11)220101(10)A1B2C3D4", state: "scanpack.rfp.default", id: order.id, box_id: nil, store_order_id: nil, order_by_number: nil} }
+      expect(response.status).to eq(200)
+      result = JSON.parse(response.body)
+      expect(result['data']['order_complete']).to eq(true)
+    end
   end
 
   describe 'Expo Logs Process' do
