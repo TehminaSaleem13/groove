@@ -52,7 +52,7 @@ module Groovepacker
           $redis.expire("importing_orders_#{Apartment::Tenant.current}", 8)
         end
 
-        order_summary = OrderImportSummary.where(status: 'in_progress')
+        order_summary = OrderImportSummary.where(status: 'import_initiate')
 
         if order_summary.present?
           set_status_and_message(false, 'Import is in progress', %w[push error_messages])

@@ -261,7 +261,7 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     it 'Import All shows import Running' do
-      OrderImportSummary.create(status: 'in_progress')
+      OrderImportSummary.create(status: 'import_initiate')
 
       request.accept = 'application/json'
 

@@ -70,6 +70,8 @@ module Groovepacker
       end
 
       def get_order_import_summary
+        OrderImportSummary.where(status: 'import_initiate').where('updated_at <= ?', 2.minutes.ago).update_all(status: 'cancelled')
+
         return nil unless OrderImportSummary.where(status: 'import_initiate').empty?
         return nil if order_import_summaries.empty?
 
