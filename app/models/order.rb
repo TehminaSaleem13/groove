@@ -82,7 +82,8 @@ class Order < ApplicationRecord
     when 'tote'
       joins(:tote).order("totes.name #{sort_order}")
     when 'user'
-      joins(:packing_user).order("users.username #{sort_order}")
+      left_joins(:packing_user)
+        .order(Arel.sql("CASE WHEN users.username IS NULL THEN 1 ELSE 0 END, users.username #{sort_order}"))
     else
       includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
     end
