@@ -85,7 +85,7 @@ module SettingsHelper
         remove_barcode remove_skipped display_location2 display_location3 camera_option
         packing_option resolution packing_cam_enabled email_customer_option email_subject
         email_insert_dropdown email_message customer_page_dropdown customer_page_message scanning_log capture_image_option email_reply
-        order_num_esc_str_removal order_num_esc_str_enabled
+        order_num_esc_str_removal order_num_esc_str_enabled requires_assigned_orders
       ]
     )
   end
