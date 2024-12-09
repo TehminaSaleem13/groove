@@ -40,6 +40,12 @@ class GeneralSetting < ApplicationRecord
   after_commit :log_events
   after_commit :update_user_packing_slip_sizes
   before_save :validate_barcode_length_and_starting_value
+
+  before_validation do
+    # Set Abbreviated Time Zone Name
+    self.abbreviated_time_zone = ActiveSupport::TimeZone[new_time_zone]&.tzinfo&.abbreviation if new_time_zone
+  end
+
   @@all_tenants_settings = {}
 
   def validate_barcode_length_and_starting_value
