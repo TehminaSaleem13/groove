@@ -253,6 +253,7 @@ module OrdersHelper
                  else
                    ''
                  end
+
     order_data = { 'id' => order.id,
                    'store_name' => store_name,
                    'notes' => order.notes_internal,
@@ -271,7 +272,8 @@ module OrdersHelper
                    'custom_field_one' => order.custom_field_one,
                    'custom_field_two' => order.custom_field_two,
                    'store_order_id' => order.store_order_id,
-                   'last_modified' => order.last_modified }
+                   'last_modified' => order.last_modified,
+                   'scanning_user' => order.packing_user&.username }
     tote = order.tote
     order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
     @orders_result.push(order_data)
@@ -305,7 +307,8 @@ module OrdersHelper
                                 'custom_field_one' => order.custom_field_one,
                                 'custom_field_two' => order.custom_field_two,
                                 'store_order_id' => order.store_order_id,
-                                'last_modified' => order.last_modified }
+                                'last_modified' => order.last_modified,
+                                'scanning_user' => order.packing_user&.username}
     tote = order.tote
     order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote
     order_data[:scan_hash] = {

@@ -23,7 +23,7 @@ module OrderConcern
     result_rows = create_results_row(result)
     result_rows = result_rows.blank? ? [] : result_rows
     ids = result_rows.map { |p| p['id'] }
-    orders = Order.where('id IN (?)', ids)
+    orders = Order.where('orders.id IN (?)', ids).includes(:packing_user)
     orders = params[:sort] == 'custom_field_one' || params[:sort] == 'custom_field_two' || params['sort'] == 'order_date' || params['sort'] == 'ordernum' || params['sort'] == 'status' ? sort_order(params, orders) : orders
   end
 

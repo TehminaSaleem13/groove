@@ -110,7 +110,8 @@ module Groovepacker
           tracking_num: '',
           scanned_count: '',
           unscanned_count: '',
-          removed_count: ''
+          removed_count: '',
+          scanning_user: ''
         }
 
         if @current_workflow == 'product_first_scan_to_put_wall'

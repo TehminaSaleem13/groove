@@ -68,7 +68,6 @@ module Groovepacker
         unless order.store.nil? || order.store.inventory_warehouse.nil?
           @inv_warehouse_id = order.store.inventory_warehouse_id
         end
-
         order.order_items.each do |single_item|
           add_single_item_in_items_list(order, single_item) unless single_item.product.nil?
         end
@@ -159,10 +158,12 @@ module Groovepacker
           customer_comments: order.customer_comments,
           tags: order.tags,
           internal_notes: order.notes_internal,
+          scanning_user: order.packing_user&.username,
           tracking_num: order.tracking_num,
           scanned_count: scanned_count,
           unscanned_count: single_item.qty - scanned_count,
           removed_count: type == 'kit_item' ? 0 : single_item.removed_qty
+
         )
 
         if @current_workflow == 'product_first_scan_to_put_wall'
