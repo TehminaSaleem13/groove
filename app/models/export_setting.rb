@@ -213,7 +213,7 @@ class ExportSetting < ApplicationRecord
     single_row[:scanned_count] = order_item.scanned_qty
     single_row[:unscanned_count] = order_item.qty - order_item.scanned_qty
     single_row[:removed_count] = order_item.removed_qty
-    single_row[:scanning_user] = order.packing_user&.username
+    single_row[:scanning_user] = order_item.order.packing_user&.username
   end
 
   def update_partially_scanned_kit(single_row, order_item, product, kit_product)
@@ -232,7 +232,7 @@ class ExportSetting < ApplicationRecord
     single_row[:unscanned_count] = kit_product.order_item.qty - kit_product.scanned_qty
     single_row[:clicked_scanned_qty] = kit_product.clicked_qty
     single_row[:removed_count] = order_item.removed_qty
-    single_row[:scanning_user] = order.packing_user&.username
+    single_row[:scanning_user] = order_item.order.packing_user&.username
   end
 
   def set_start_and_end_time
