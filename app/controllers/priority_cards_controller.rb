@@ -4,15 +4,7 @@ class PriorityCardsController < ApplicationController
   before_action :empty_order_count, :get_priority_cards, :last_14_days_orders
 
   def index
-    ensure_regular_card
-
-    @regular_cards = PriorityCard.where(priority_name: 'regular')
-
-    @priority_cards_with_count = calculate_priority_cards_order_count
-
-    calculate_regular_order
-
-    @priority_cards = @regular_cards + @priority_cards_with_count
+    @priority_cards = recalculate_priority_cards_count
 
     render json: @priority_cards
   end
@@ -36,10 +28,9 @@ class PriorityCardsController < ApplicationController
   def update
     @priority_card = PriorityCard.find(params[:id])
 
-    @priority_card.order_tagged_count = calculate_tagged_count(@priority_card.assigned_tag)
-    @priority_card.oldest_order = get_oldest_order(@priority_card.assigned_tag)
-
     if @priority_card.update(priority_card_params)
+      @priority_cards = recalculate_priority_cards_count
+      @priority_card = PriorityCard.find(params[:id])
       render json: @priority_card, notice: 'Priority card was successfully updated.'
     else
       render json: { error: 'Failed to update priority card', messages: @priority_card.errors.full_messages },
@@ -74,7 +65,11 @@ class PriorityCardsController < ApplicationController
       end
     end
 
-    render json: updated_priority_cards, notice: 'Priority cards were successfully updated.'
+    get_priority_cards
+
+    @priority_cards = recalculate_priority_cards_count
+
+    render json: @priority_cards, notice: 'Priority cards were successfully updated.'
   rescue ActiveRecord::RecordNotFound => e
     render json: { error: 'One or more priority cards not found' }, status: :not_found
   rescue StandardError => e
@@ -109,6 +104,20 @@ class PriorityCardsController < ApplicationController
     regular_count = @recent_orders.count - @counted_order_ids.count
     regular_card.order_tagged_count = regular_count
     regular_card.save
+  end
+
+  def recalculate_priority_cards_count
+    ensure_regular_card
+
+    @regular_cards = PriorityCard.where(priority_name: 'regular')
+
+    @priority_cards_with_count = calculate_priority_cards_order_count
+
+    calculate_regular_order
+
+    @priority_cards = @regular_cards + @priority_cards_with_count
+
+    @priority_cards
   end
 
   def get_priority_cards
