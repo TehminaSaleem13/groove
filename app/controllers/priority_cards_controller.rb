@@ -180,32 +180,7 @@ class PriorityCardsController < ApplicationController
   end
 
   def ensure_regular_card
-    awaiting_orders_count = count_awaiting_orders
-
-    regular_card = PriorityCard.find_or_create_by(priority_name: 'regular') do |card|
-      card.order_tagged_count = awaiting_orders_count
-    end
-    regular_card.position = '0' if regular_card.position.blank?
-
-    update_order_count_if_needed(regular_card, awaiting_orders_count)
-    regular_card.save!
-  end
-
-  def count_awaiting_orders
-    Order
-      .where(status: 'awaiting')
-      .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
-      .left_joins(:order_tags) # Includes orders without tags
-      .where(
-        'order_tags.name IS NULL OR order_tags.name NOT IN (?)',
-        PriorityCard.select(:assigned_tag)
-      )
-      .distinct
-      .count
-  end
-
-  def update_order_count_if_needed(card, current_count)
-    card.update(order_tagged_count: current_count) if card.order_tagged_count != current_count
+    PriorityCard.find_or_create_by(priority_name: 'regular')
   end
 
   def set_priority_card
