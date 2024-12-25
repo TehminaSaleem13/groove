@@ -20,6 +20,7 @@ class GrooveBulkActions < ApplicationRecord
     $redis.set("bulk_action_data_#{current_tenant}_#{bulkaction_id}", Marshal.dump(orders)) if params['action'] == 'change_orders_status'
     $redis.set("bulk_action_clear_assigned_tote_data_#{current_tenant}_#{bulkaction_id}", Marshal.dump(orders)) if params['action'] == 'clear_assigned_tote'
     $redis.set("bulk_action_assign_orders_to_users_#{current_tenant}_#{bulkaction_id}", Marshal.dump(orders)) if params['action'] == 'assign_orders_to_users'
+    $redis.set("bulk_action_assign_rfo_orders_#{current_tenant}_#{bulkaction_id}", Marshal.dump(orders)) if params['action'] == 'assign_rfo_orders'
     $redis.set("bulk_action_deassign_orders_to_users_#{current_tenant}_#{bulkaction_id}", Marshal.dump(orders)) if params['action'] == 'deassign_orders_from_users'
     delay(run_at: 1.seconds.from_now, queue: 'do_bulk_action', priority: 95).execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
     # self.execute_relevant_action(activity, current_tenant, params, bulkaction_id, username)
@@ -56,6 +57,8 @@ class GrooveBulkActions < ApplicationRecord
       bulk_actions.clear_assigned_tote(current_tenant, bulkaction_id, params[:user_id])
     when activity == 'assign_orders_to_users' && params['controller'] == 'orders'
       bulk_actions.assign_orders_to_users(current_tenant, bulkaction_id, params[:user_id], params[:users])
+    when activity == 'assign_rfo_orders' && params['controller'] == 'orders'
+      bulk_actions.assign_rfo_orders(current_tenant, bulkaction_id, username, params[:no_of_orders])
     when activity == 'deassign_orders_from_users' && params['controller'] == 'orders'
       bulk_actions.deassign_orders_from_users(current_tenant, bulkaction_id, params[:user_id], params[:users])
     end

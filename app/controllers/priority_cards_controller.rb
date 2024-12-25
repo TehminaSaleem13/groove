@@ -173,10 +173,10 @@ class PriorityCardsController < ApplicationController
     oldest_order = Order.joins(:order_tags)
                         .where(order_tags: { name: assigned_tag_name }, status: 'awaiting')
                         .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
-                        .order('created_at ASC')
+                        .order('order_placed_time ASC')
                         .first
 
-    oldest_order ? oldest_order.created_at : ''
+    oldest_order ? oldest_order.order_placed_time : ''
   end
 
   def ensure_regular_card

@@ -149,6 +149,32 @@ RSpec.describe OrdersController, type: :controller do
       expect(response.status).to eq(200)
     end
 
+    describe '#assign_rfo_orders' do
+      let(:user) { create(:user) }
+      let!(:priority_card1) { PriorityCard.create(priority_name: 'High12', assigned_tag: 'scan_pack_spec_user2', position: 1, is_stand_by: false) }
+      let!(:order) { create(:order, status: 'awaiting', packing_user_id: nil) }
+      let(:params) { { 'no_of_orders' => '5' } }
+
+      before do
+        allow(controller).to receive(:current_user).and_return(user)
+      end
+
+      it 'fetches the priority oldest orders' do
+        expect(controller).to receive(:fetch_priority_oldest_orders).and_call_original
+        post :assign_rfo_orders, params: params
+      end
+
+      it 'executes the groove bulk action' do
+        post :assign_rfo_orders, params: params
+        expect(response.status).to eq(200)
+      end
+
+      it 'renders the json response with updated orders count' do
+        post :assign_rfo_orders, params: params
+        expect(response.body).to eq({ updated_orders_count: 0 }.to_json)
+      end
+    end
+
     it 'Un-Assign Bulk Order to Users' do
       product = FactoryBot.create(:product, name: 'PRODUCT1')
       FactoryBot.create(:product_sku, product:, sku: 'PRODUCT1')

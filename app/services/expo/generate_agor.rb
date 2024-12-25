@@ -44,7 +44,7 @@ module Expo
     end
 
     def filter_order_info
-      @order_info.slice('id', 'store_name', 'notes', 'ordernum', 'order_date', 'itemslength', 'status', 'tracking_num', 'custom_field_one', 'custom_field_two', 'tags','recipient', 'country', 'city', 'email')
+      @order_info.slice('id', 'store_name', 'notes', 'ordernum', 'order_date', 'itemslength', 'status', 'tracking_num', 'custom_field_one', 'custom_field_two', 'tags','recipient', 'country', 'city', 'email', 'last_modified')
     end
 
     def filter_scanned_items

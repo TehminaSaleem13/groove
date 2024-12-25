@@ -241,7 +241,7 @@ RSpec.describe PriorityCardsController, type: :controller do
 
         json_response = JSON.parse(response.body)
         expect(json_response.first["order_tagged_count"]).to eq(0)
-        expect(json_response[0]['id']).to eq(50)
+        expect(json_response[0]['priority_name']).to eq("regular")
         expect(json_response[1]['id']).to eq(priority_card2.id)
       end
     end

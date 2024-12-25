@@ -186,7 +186,27 @@ module Groovepacker
       
         $redis.del("bulk_action_assign_orders_to_users_#{current_tenant}_#{bulkaction_id}")
       end
-      
+
+      def assign_rfo_orders(current_tenant, bulkaction_id, username, no_of_orders)
+        Apartment::Tenant.switch!(current_tenant)
+        bulk_action = GrooveBulkActions.find(bulkaction_id)
+        orders = $redis.get("bulk_action_assign_rfo_orders_#{current_tenant}_#{bulkaction_id}")
+
+        orders = Marshal.load(orders)
+        order_ids = orders.pluck(:id)
+
+        init_results
+        bulk_action.update(total: orders.count, completed: 0, status: 'in_progress')
+
+        user = User.where(username: username).first
+        Order.where(id: order_ids).update_all(packing_user_id: user.id)
+
+        bulk_action.update(completed: orders.count)
+        check_bulk_action_completed_or_not(bulk_action)
+
+        $redis.del("bulk_action_assign_rfo_orders_#{current_tenant}_#{bulkaction_id}")
+      end
+
       def deassign_orders_from_users(current_tenant, bulkaction_id, user_id, users)
         Apartment::Tenant.switch!(current_tenant)
       

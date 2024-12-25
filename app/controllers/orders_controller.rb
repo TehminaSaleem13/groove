@@ -253,7 +253,12 @@ class OrdersController < ApplicationController
     GrooveBulkActions.execute_groove_bulk_action('deassign_orders_from_users', params, current_user, list_selected_orders)
     render json: @result
   end
-  
+
+  def assign_rfo_orders
+    unassigned_orders = fetch_priority_oldest_orders.first(params['no_of_orders'].to_i)
+    GrooveBulkActions.execute_groove_bulk_action('assign_rfo_orders', params, current_user, unassigned_orders)
+    render json: { updated_orders_count: unassigned_orders.count}
+  end
 
   def clear_assigned_tote
     execute_groove_bulk_action('clear_assigned_tote')
@@ -787,6 +792,31 @@ class OrdersController < ApplicationController
   end
 
   private
+
+  def fetch_priority_oldest_orders
+    @counted_order_ids = Order.none
+    @priority_cards = PriorityCard.where(is_stand_by: false).order(:position)
+    @priority_cards.map do |priority_card|
+      unless priority_card.is_user_card && priority_card.is_card_disabled &&  @counted_order_ids
+        priority_card_orders_with_unassigned_user(priority_card.assigned_tag)
+      end
+    end
+    @counted_order_ids
+  end
+
+  def priority_card_orders_with_unassigned_user(assigned_tag_name)
+    orders_with_tag = Order
+    .where(status: 'awaiting', packing_user_id: nil)
+    .joins(:order_tags)
+    .where(order_tags: { name: assigned_tag_name })
+    .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+    .where.not(id: @counted_order_ids.map(&:id))
+    .group('orders.id')
+    .order(:order_placed_time)
+
+    @counted_order_ids += orders_with_tag
+  end
+
 
   def execute_groove_bulk_action(activity)
     params[:user_id] = current_user.id
