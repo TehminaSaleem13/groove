@@ -103,6 +103,8 @@ class PriorityCardsController < ApplicationController
     regular_card = @regular_cards.first
     regular_count = @recent_orders.count - @counted_order_ids.count
     regular_card.order_tagged_count = regular_count
+    regular_order_ids = @recent_orders.pluck(:id) - @counted_order_ids
+    regular_card.oldest_order = oldest_regular_card_order(regular_order_ids)
     regular_card.save
   end
 
@@ -167,6 +169,11 @@ class PriorityCardsController < ApplicationController
     @counted_order_ids += order_ids
 
     order_count
+  end
+
+  def oldest_regular_card_order(order_ids)
+    oldest_order = Order.where(id: order_ids).order(:order_placed_time).first
+    oldest_order ? oldest_order.order_placed_time : ''
   end
 
   def get_oldest_order(assigned_tag_name)
