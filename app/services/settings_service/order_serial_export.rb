@@ -21,7 +21,7 @@ module SettingsService
         primary_barcode: '', product_name: '', item_sale_price: '',
         kit_name: '', scan_order: 0, customer_name: '', address1: '',
         address2: '', city: '', state: '', zip: '', packing_user: '',
-        ordered_qty: '', scanned_date: '', warehouse_name: ''
+        ordered_qty: '', scanned_date: '', warehouse_name: '', lot: '', exp_date: '', bestbuy_date: '', mfg_date: ''
       }
       @serials = OrderSerial.includes({ order: %i[packing_user],
                                         product: %i[product_skus product_barcodes
@@ -125,6 +125,10 @@ module SettingsService
       single_row[:customer_name] = [order.firstname, order.lastname].join(' ')
       single_row[:primary_sku] = product.primary_sku
       single_row[:primary_barcode] = product.primary_barcode
+      single_row[:lot] = serial.lot
+      single_row[:exp_date] = serial.exp_date
+      single_row[:bestbuy_date] = serial.bestbuy_date
+      single_row[:mfg_date] = serial.mfg_date
     end
   end
 end
