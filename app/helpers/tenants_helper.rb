@@ -265,10 +265,16 @@ module TenantsHelper
     false
   end
 
-  def add_plan_to_subscription(amount, tenant, feature)
+  def add_plan_to_subscription(amount, tenant, feature, checked)
     plan_info = new_plan_info_for_feature(tenant, feature)
     plan_id = plan_info['plan_id']
-    amount = amount.to_i * 100
+    amount = if ["multi_box_feature", "amazon_fba_feature", "allow_Real_time_feature", "product_ftp_import", "inventory_report_option_feature", "groovelytic_stat_feature", "enable_developer_tools_feature", "daily_packed_feature", "packing_cam_feature"].include?(feature) && checked
+      access_info = Groovepacker::Dashboard::Stats::ShipmentStats.new
+      user_count = access_info.get_shipment_stats(tenant.name)["max_users"]
+      amount.to_i * 100 * user_count
+    else
+      amount.to_i * 100
+    end
     subscription = tenant.subscription
     create_plan_for_feature(amount, subscription.interval, plan_info['plan_name'], plan_id)
     response = Stripe::SubscriptionItem.create(

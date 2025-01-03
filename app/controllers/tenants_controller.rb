@@ -82,6 +82,7 @@ class TenantsController < ApplicationController
     feature = params['feature']
     toggle =  params['value']['toggle']
     amount =  params['value']['amount']
+    checked = params['value']['is_checked']
     db_price = begin
                   tenant.price.with_indifferent_access
                rescue StandardError
@@ -102,7 +103,7 @@ class TenantsController < ApplicationController
     end
     tenant.price = db_price
     tenant.save
-    add_plan_to_subscription(amount, tenant, feature) if toggle == true
+    add_plan_to_subscription(amount, tenant, feature, checked) if toggle == true
     remove_plan_to_subscription(tenant, feature) if toggle == false
     render json: {}
   end

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_12_09_111934) do
+ActiveRecord::Schema.define(version: 2024_12_18_081918) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1493,10 +1493,10 @@ ActiveRecord::Schema.define(version: 2024_12_09_111934) do
     t.boolean "allow_rts", default: false
     t.text "activity_log"
     t.boolean "test_tenant_toggle", default: false
-    t.boolean "product_activity_switch", default: false
+    t.boolean "product_activity_switch", default: true
     t.datetime "last_charge_in_stripe"
     t.boolean "packing_cam", default: false
-    t.boolean "custom_product_fields", default: false
+    t.boolean "custom_product_fields", default: true
     t.text "price"
     t.boolean "groovelytic_stat", default: false
     t.boolean "is_delay", default: false
@@ -1507,8 +1507,8 @@ ActiveRecord::Schema.define(version: 2024_12_09_111934) do
     t.boolean "delayed_inventory_update", default: false
     t.boolean "daily_packed_toggle", default: false
     t.boolean "is_cf", default: true
-    t.boolean "ss_api_create_label", default: false
-    t.boolean "direct_printing_options", default: false
+    t.boolean "ss_api_create_label", default: true
+    t.boolean "direct_printing_options", default: true
     t.boolean "expo_logs_delay", default: false
     t.boolean "gdpr_shipstation", default: false
     t.boolean "uniq_shopify_import", default: false
