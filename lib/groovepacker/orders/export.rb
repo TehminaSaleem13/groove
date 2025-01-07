@@ -158,7 +158,7 @@ module Groovepacker
           customer_comments: order.customer_comments,
           tags: order.tags,
           internal_notes: order.notes_internal,
-          scanning_user: order.packing_user&.username,
+          scanning_user: order.packing_user&.username || order.order_activities&.last&.username,
           tracking_num: order.tracking_num,
           scanned_count: scanned_count,
           unscanned_count: single_item.qty - scanned_count,
