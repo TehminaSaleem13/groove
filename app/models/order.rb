@@ -81,6 +81,8 @@ class Order < ApplicationRecord
         .select('orders.*, (SELECT SUM(order_items.qty) FROM order_items WHERE order_items.order_id = orders.id) AS count').group('orders.id').order("count #{sort_order}")
     when 'tote'
       joins(:tote).order("totes.name #{sort_order}")
+    when 'tags'
+      joins(:order_tags).order("order_tags.name #{sort_order}")
     when 'user'
       left_joins(:packing_user)
         .order(Arel.sql("CASE WHEN users.username IS NULL THEN 1 ELSE 0 END, users.username #{sort_order}"))
@@ -109,7 +111,7 @@ class Order < ApplicationRecord
     where("CONCAT(firstname, '', lastname) #{operator} ?", value) if value.present?
   }
   scope :filter_by_store, lambda { |operator, value|
-    joins(:store).where('stores.name LIKE ?', value) if value.present?
+    joins(:store).where("stores.name  #{operator} ?", value) if value.present?
   }
   scope :filter_by_custom_field_one, lambda { |operator, value|
     where("custom_field_one #{operator} ?", value) if value.present?
@@ -130,29 +132,78 @@ class Order < ApplicationRecord
     where("email #{operator} ?", value) if value.present?
   }
   scope :filter_by_tote, lambda { |operator, value|
-    joins(:tote).where('tote.name LIKE ?', value) if value.present?
+    joins(:tote).where("totes.name  #{operator} ?", value) if value.present?
   }
   scope :filter_by_date, lambda { |operator, value|
     value = DateTime.strptime(value, '%m-%d-%Y') if value.is_a?(String)
     where("DATE(order_placed_time) #{operator} ?", value) if value.present? && operator.present?
   }
-  scope :with_tags, ->(tag_names, shouldFilterIncludeTags) {
-    joins(:order_tags).where(order_tags: { name: tag_names }).distinct if tag_names.present? && shouldFilterIncludeTags.to_b
-  }
-  scope :without_tags, ->(tag_names, shouldFilterIncludeTags) {
-    joins(:order_tags).where.not(order_tags: { name: tag_names }).distinct if tag_names.present? && !shouldFilterIncludeTags.to_b
-  }
 
-  scope :by_packing_user_name, ->(usernames) {
-    if usernames.present?
-      usernames_array = usernames.split(',')
-
-      if usernames_array.include?('unassigned')
-        left_outer_joins(:packing_user)
-          .where('users.username IN (?) OR users.id IS NULL', usernames_array.reject { |u| u == 'unassigned' })
-      else
-        joins(:packing_user).where(users: { username: usernames_array })
+  scope :filter_by_oslmt, lambda { |operator, value|
+    if value.is_a?(String)
+      begin
+        value = DateTime.strptime(value, "%a %m/%d/%Y %I:%M%p")
+      rescue ArgumentError, TypeError => e
+        Rails.logger.error("Invalid date format for value: #{value}. Error: #{e.message}")
+        value = nil
       end
+    end
+    where("DATE(last_modified) #{operator} ?", value.to_date) if value.present? && operator.present?
+  }
+
+  scope :with_tags, lambda { |tag_names, should_filter_include_tags, operator = nil, value = nil|
+    query = joins(:order_tags)
+
+    if tag_names.present? && should_filter_include_tags.to_s.downcase == 'true'
+      query = query.where(order_tags: { name: value })
+    end
+
+    if value.present? && operator.present?
+      query = query.where("order_tags.name #{operator} ?", value)
+    end
+
+    query
+  }
+
+  scope :without_tags, lambda { |tag_names, should_filter_include_tags, operator = nil, value = nil|
+    query = joins(:order_tags)
+
+    if tag_names.present? && !should_filter_include_tags.to_s.downcase == 'true'
+      query = query.where.not(order_tags: { name: value })
+    end
+
+    if value.present? && operator.present?
+      query = query.where("order_tags.name #{operator} ?", value)
+    end
+
+    query
+  }
+
+  scope :by_packing_user_name, lambda { |operator = '=', value = nil|
+    return all unless value.present?
+
+    usernames_array = value.split(',').map(&:strip)
+
+    if usernames_array.include?('unassigned')
+      unassigned_usernames = usernames_array.reject { |u| u == 'unassigned' }
+      query = left_outer_joins(:packing_user)
+
+      if unassigned_usernames.any?
+        query = query.where(
+          "(users.username #{operator} ?) OR users.id IS NULL",
+          unassigned_usernames
+        )
+      else
+        query = query.where("users.id IS NULL")
+      end
+
+      query
+    else
+      joins(:packing_user)
+        .where(
+          usernames_array.map { "users.username #{operator} ?" }.join(' OR '),
+          *usernames_array
+        )
     end
   }
 
