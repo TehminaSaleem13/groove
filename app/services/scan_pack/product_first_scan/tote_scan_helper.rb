@@ -12,8 +12,8 @@ module ScanPack
             order.touch(:last_suggested_at)
             order_item.process_item(nil, current_user.username, 1, nil)
             order.order_activities.last.destroy if order.order_activities.last.present? && (order.order_activities.last.action.include? 'setting the order PENDING')
-            order.addactivity("#{tote_identifier} #{tote.name} assignment confirmed with #{tote_identifier} scan.", current_user.name)
-            order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", current_user.name)
+            order.addactivity("#{tote_identifier} #{tote.name} assignment confirmed with #{tote_identifier} scan.", current_user.username)
+            order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", current_user.username)
             tote.reset_pending_order
             @result[:success_messages] = "#{order.increment_id} is successfully assigned to #{tote_identifier}: #{tote.name}"
           end
@@ -27,7 +27,7 @@ module ScanPack
           order.touch(:last_suggested_at)
           order_item.process_item(nil, current_user.username, 1, nil)
           order.order_activities.last.destroy if order.order_activities.last.present? && (order.order_activities.last.action.include? 'setting the order PENDING')
-          order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", current_user.name)
+          order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", current_user.username)
           tote.reset_pending_order
           @result[:success_messages] = "#{order_item.product.name} is successfully scanned to #{tote_identifier}: #{tote.name}"
         else
@@ -42,7 +42,7 @@ module ScanPack
         elsif valid_tote
           order_item.process_item(nil, current_user.username, 1, nil)
           order.order_activities.last.destroy if order.order_activities.last.present? && (order.order_activities.last.action.include? 'setting the order PENDING')
-          order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", current_user.name)
+          order.addactivity("Product with barcode: #{params[:barcode_input]} and sku: #{order_item.product.primary_sku} scanned", current_user.username)
           order.set_order_to_scanned_state(current_user.username)
           order.touch(:last_suggested_at)
           @result[:success_messages] = "#{order.increment_id} is successfully scanned"

@@ -348,7 +348,7 @@ class ExportSetting < ApplicationRecord
     single_row[:scanned_count] = order.order_items.sum(:scanned_qty)
     single_row[:unscanned_count] = order.order_items.sum(:qty) - order.order_items.sum(:scanned_qty)
     single_row[:removed_count] = order.order_items.sum(:removed_qty)
-    single_row[:scanning_user] = order.packing_user&.username || order.order_activities&.last&.username
+    single_row[:scanning_user] = order.packing_user&.username 
     single_row
   end
 

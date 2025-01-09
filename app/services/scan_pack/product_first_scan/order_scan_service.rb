@@ -11,7 +11,6 @@ module ScanPack
 
       def run
         @result[:status] = false
-
         unless product.present?
           @result[:notice_messages] = 'Sorry, no new orders can be found that require that item. Please check that all orders have been imported. If this is a new item that may not have the barcode saved you can search for the item by SKU in the products section and add it.'
           @result[:product_error] = true
@@ -37,10 +36,12 @@ module ScanPack
           end
           return @result
         end
-
         # If the item is not required in any toted orders, the oldest multi-item order requiring the item is found in our DB.
         order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }.first
-        available_tote = Tote.where(order_id: order.id, pending_order: false).first if order.present?
+        if order
+          order.update(packing_user_id: current_user.id)   
+          available_tote = Tote.where(order_id: order.id, pending_order: false).first
+        end
         available_tote = Tote.order('number ASC').where(order_id: nil, pending_order: false).first unless available_tote.try(:present?)
         tote_set = ToteSet.last || ToteSet.create(name: 'T')
         available_tote = tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1) if Tote.all.count < tote_set.max_totes && !available_tote
@@ -61,6 +62,7 @@ module ScanPack
         else
           pending_order = Order.includes(%i[tote order_items]).where("orders.id IN (?) AND status = 'awaiting'", tote_set.totes.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? tote_set.totes.where(pending_order: false).pluck(:order_id).compact }.first
           if pending_order
+            pending_order.update(packing_user_id: current_user.id)
             run_if_pending_order(pending_order, product)
             @result[:unscanned_items] = pending_order.get_unscanned_items if params['app'].present?
           else

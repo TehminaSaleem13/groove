@@ -5,9 +5,9 @@ module ScanPack
     module OrderScanHelper
       def run_if_single_item_order_found(order, product)
         order_item = order.order_items.where(product_id: product.id).first
-        order.update(last_suggested_at: DateTime.now.in_time_zone)
+        order.update(last_suggested_at: DateTime.now.in_time_zone, packing_user_id: current_user.id)
         order_item.process_item(nil, current_user.username, 1, nil)
-        order.addactivity("Product with barcode: #{input} and sku: #{order_item.product.primary_sku} scanned", current_user.name)
+        order.addactivity("Product with barcode: #{input} and sku: #{order_item.product.primary_sku} scanned", current_user.username)
         order.set_order_to_scanned_state(current_user.username)
         @result[:single_item_order] = true
         @result[:status] = true
@@ -28,6 +28,7 @@ module ScanPack
         @result[:scan_tote_to_complete] = true
         tote = can_complete_orders.map(&:tote).min_by(&:number)
         order = tote.order
+        order.update(packing_user_id: current_user.id)
         order_item = OrderItem.find(order.get_unscanned_items(limit: 1).first['order_item_id'])
         @result[:tote] = tote
         @result[:tote_identifier] = tote_identifier
@@ -60,6 +61,7 @@ module ScanPack
         tote = orders.map(&:tote).min_by(&:number)
         @result[:put_in_tote] = true
         order = tote.order
+        order.update(packing_user_id: current_user.id)
         order_item = order.order_items.where(product_id: product.id).first
         @result[:tote] = tote
         @result[:tote_identifier] = tote_identifier
