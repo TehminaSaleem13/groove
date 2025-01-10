@@ -1194,18 +1194,17 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'Store', operator: 'contains', type: 'string', value: '123' },
         { name: 'Notes', operator: 'contains', type: 'string', value: '123' },
         { name: 'OrderDate', operator: 'inrange', type: 'date', value: { start: '12-2-2022', end: '12-2-2022' } },
-        { name: 'OSLMT', operator: 'inrange', type: 'date', value: { start: 'Sat, 12 Feb 2022 00:00:00.000000000 UTC +00:00', end: 'Sat, 12 Feb 2022 00:00:00.000000000 UTC +00:00' } },
         { name: 'Items', operator: 'inrange', type: 'number', value: { start: 1, end: 2 } },
-        { name: 'Tags', operator: 'contains', type: 'string', value: 'Manual Hold' },
         { name: 'Recipient', operator: 'contains', type: 'string', value: '123' },
+        { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting'] },
         { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting' },
         { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123' },
         { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123' },
         { name: 'trackingNumber', operator: 'contains', type: 'string', value: '123' },
         { name: 'country', operator: 'contains', type: 'string', value: '123' },
         { name: 'city', operator: 'contains', type: 'string', value: '123' },
-        { name: 'email', operator: 'notContains', type: 'string', value: '123' },
-        { name: 'tote', operator: 'notContains', type: 'string', value: '123' }
+        { name: 'email', operator: 'noContains', type: 'string', value: '123' },
+        { name: 'tote', operator: 'noContains', type: 'string', value: '123' }
       ]
 
       post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, tags_name: 'Contains Inactive', filterIncludedTags: false }
@@ -1299,19 +1298,18 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'OrderNumber', operator: 'contains', type: 'string', value: '123' },
         { name: 'Store', operator: 'contains', type: 'string', value: '123' },
         { name: 'Notes', operator: 'contains', type: 'string', value: '123' },
-        { name: 'OrderDate', operator: 'inrange', type: 'date', value: { start: '12-2-2022', end: '12-2-2022' } },
-        { name: 'OSLMT', operator: 'inrange', type: 'date', value: { start: 'Sat, 12 Feb 2022 00:00:00.000000000 UTC +00:00', end: 'Sat, 12 Feb 2022 00:00:00.000000000 UTC +00:00' } },
+        { name: 'OrderDate', operator: 'notinrange', type: 'date', value: { start: '12-2-2022', end: '12-2-2022' } },
         { name: 'Items', operator: 'inrange', type: 'number', value: { start: 1, end: 2 } },
-        { name: 'Tags', operator: 'contains', type: 'string', value: 'Manual Hold' },
         { name: 'Recipient', operator: 'contains', type: 'string', value: '123' },
+        { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting'] },
         { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting' },
         { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123' },
         { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123' },
         { name: 'trackingNumber', operator: 'contains', type: 'string', value: '123' },
         { name: 'country', operator: 'contains', type: 'string', value: '123' },
         { name: 'city', operator: 'contains', type: 'string', value: '123' },
-        { name: 'email', operator: 'notContains', type: 'string', value: '123' },
-        { name: 'tote', operator: 'notContains', type: 'string', value: '123' }
+        { name: 'email', operator: 'noContains', type: 'string', value: '123' },
+        { name: 'tote', operator: 'noContains', type: 'string', value: '123' }
       ]
       post :sorted_and_filtered_data, params: {
         'filter' => 'awaiting',
@@ -1324,20 +1322,6 @@ RSpec.describe OrdersController, type: :controller do
         'app' => true,
         'filters' => filterValue.to_json,
         'dateValue' => 'today'
-      }
-      expect(response.status).to eq(200)
-
-      post :sorted_and_filtered_data, params: {
-        'filter' => 'awaiting',
-        'shouldFilter' => 'true',
-        'sort' => '',
-        'order' => 'DESC',
-        'limit' => '20',
-        'offset' => '0',
-        'product_search_toggle' => 'undefined',
-        'app' => true,
-        'filters' => filterValue.to_json,
-        'dateValue' => 'yesterday'
       }
       expect(response.status).to eq(200)
 
@@ -1371,46 +1355,8 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'OrderNumber', operator: 'contains', type: 'string', value: '' },
         { name: 'Store', operator: 'contains', type: 'string', value: '' },
         { name: 'Notes', operator: 'contains', type: 'string', value: '' },
-        { name: 'OSLMT', operator: 'inrange', type: 'date', value: { start: '', end: '' } },
         { name: 'OrderDate', operator: 'notinrange', type: 'date', value: { start: '', end: '' } },
         { name: 'Items', operator: 'inrange', type: 'number', value: { start: '', end: '' } },
-        { name: 'User', operator: 'contains', type: 'string', value: 'Manager User' },
-        { name: 'Tags', operator: 'eq', type: 'string', value: 'Manual Hold' },
-        { name: 'Recipient', operator: 'contains', type: 'string', value: '' },
-        { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting'] },
-        { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '' },
-        { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '' },
-        { name: 'trackingNumber', operator: 'contains', type: 'string', value: '' },
-        { name: 'country', operator: 'contains', type: 'string', value: '' },
-        { name: 'city', operator: 'contains', type: 'string', value: '' },
-        { name: 'email', operator: 'noContains', type: 'string', value: '' },
-        { name: 'tote', operator: 'noContains', type: 'string', value: '' }
-      ]
-      post :sorted_and_filtered_data, params: {
-        'filter' => 'awaiting',
-        'shouldFilter' => 'true',
-        'sort' => '',
-        'order' => 'DESC',
-        'limit' => '20',
-        'offset' => '0',
-        'product_search_toggle' => 'undefined',
-        'app' => true,
-        'filters' => filterValue.to_json,
-        'dateValue' => 'this_month',
-        'dateRange' => {"start_date":"07-01-2024","end_date":"07-07-2024"}
-      }
-      expect(response.status).to eq(200)
-
-      request.accept = 'application/json'
-      filterValue = [
-        { name: 'OrderNumber', operator: 'contains', type: 'string', value: '' },
-        { name: 'Store', operator: 'contains', type: 'string', value: '' },
-        { name: 'Notes', operator: 'contains', type: 'string', value: '' },
-        { name: 'OSLMT', operator: 'inrange', type: 'date', value: { start: '', end: '' } },
-        { name: 'OrderDate', operator: 'notinrange', type: 'date', value: { start: '', end: '' } },
-        { name: 'Items', operator: 'inrange', type: 'number', value: { start: '', end: '' } },
-        { name: 'User', operator: 'contains', type: 'string', value: 'unassigned' },
-        { name: 'Tags', operator: 'contains', type: 'string', value: 'Manual Hold' },
         { name: 'Recipient', operator: 'contains', type: 'string', value: '' },
         { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting'] },
         { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '' },
@@ -1445,13 +1391,7 @@ RSpec.describe OrdersController, type: :controller do
       post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'user', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => '7' }
       expect(response.status).to eq(200)
 
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => 'tags', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => '7' }
-      expect(response.status).to eq(200)
-
-      post :sorted_and_filtered_data, params: { 'filter' => 'all', 'sort' => '', 'order' => 'DESC', 'limit' => '20', 'offset' => '0', 'product_search_toggle' => 'undefined', 'app' => true, 'count' => '1', 'filters' => filterValue.to_json, 'dateValue' => '7' }
-      expect(response.status).to eq(200)
-
-      post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, tags_name: 'Contains Inactive', filterIncludedTags: true }
+      post :change_orders_status, as: :json, params: {id: @user.id, confirmation_code: @user.confirmation_code, 'filter'=>'awaiting, scanned', 'inverted'=>false, 'limit'=>20, 'offset'=>0, 'order'=>'DESC', 'orderArray'=>[{'id'=>order.id}], 'product_search_toggle'=>true, 'reallocate_inventory'=>false, 'search'=>'', 'select_all'=>true, 'sort'=>'', 'status'=>'awaiting', 'pull_inv'=>true, 'on_ex'=>'on GPX',  'filters' => filterValue.to_json, tags_name: 'Contains Inactive', filterIncludedTags: false, username: 'Manager User' }
       expect(response.status).to eq(200)
 
       post :sorted_and_filtered_data,
@@ -1474,31 +1414,28 @@ RSpec.describe OrdersController, type: :controller do
     end
 
     filterValue = [
-      { name: 'OrderNumber', operator: 'contains', type: 'string', value: '123' },
-      { name: 'Store', operator: 'contains', type: 'string', value: '123' },
-      { name: 'Notes', operator: 'contains', type: 'string', value: '123' },
-      { name: 'OrderDate', operator: 'inrange', type: 'date', value: { start: '12-2-2022', end: '12-2-2022' } },
-      { name: 'OSLMT', operator: 'inrange', type: 'date', value: { start: 'Sat, 12 Feb 2022 00:00:00.000000000 UTC +00:00', end: 'Sat, 12 Feb 2022 00:00:00.000000000 UTC +00:00' } },
-      { name: 'Items', operator: 'inrange', type: 'number', value: { start: 1, end: 2 } },
-      { name: 'Tags', operator: 'contains', type: 'string', value: 'Manual Hold' },
-      { name: 'Recipient', operator: 'contains', type: 'string', value: '123' },
-      { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting' },
-      { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123' },
-      { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123' },
-      { name: 'trackingNumber', operator: 'contains', type: 'string', value: '123' },
-      { name: 'country', operator: 'contains', type: 'string', value: '123' },
-      { name: 'city', operator: 'contains', type: 'string', value: '123' },
-      { name: 'email', operator: 'notContains', type: 'string', value: '123' },
-      { name: 'tote', operator: 'notContains', type: 'string', value: '123' }
-    ]
+        { name: 'OrderNumber', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Store', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Notes', operator: 'contains', type: 'string', value: '123'},
+        { name: 'OrderDate', operator: 'inrange', type: 'date', value: {start: '12-2-2022', end: '12-2-2022'}},
+        { name: 'Items', operator: 'inrange', type: 'number', value: {start: 1, end: 2}},
+        { name: 'Recipient', operator: 'contains', type: 'string', value: '123'},
+        { name: 'Status', operator: 'eq', type: 'string', value: ['Awaiting']},
+        { name: 'Status', operator: 'eq', type: 'string', value: 'Awaiting'},
+        { name: 'customFieldOne', operator: 'startsWith', type: 'string', value: '123'},
+        { name: 'customFieldTwo', operator: 'endsWith', type: 'string', value: '123'},
+        { name: 'trackingNumber', operator: 'contains', type: 'string', value: '123'},
+        { name: 'country', operator: 'contains', type: 'string', value: '123'},
+        { name: 'city', operator: 'contains', type: 'string', value: '123'},
+        { name: 'email', operator: 'noContains', type: 'string', value: '123'},
+        { name: 'tote', operator: 'noContains', type: 'string', value: '123'},
+      ]
 
     emptyfilterValue = [
         { name: 'OrderNumber', operator: 'contains', type: 'string', value: ''},
         { name: 'Store', operator: 'contains', type: 'string', value: ''},
         { name: 'Notes', operator: 'contains', type: 'string', value: ''},
         { name: 'OrderDate', operator: 'inrange', type: 'date', value: {}},
-        { name: 'OSLMT', operator: 'inrange', type: 'date', value: { start: '', end: '' } },
-        { name: 'Tags', operator: 'contains', type: 'string', value: '' },
         { name: 'Items', operator: 'inrange', type: 'number', value: {}},
         { name: 'Recipient', operator: 'contains', type: 'string', value: ''},
         { name: 'Status', operator: 'eq', type: 'string', value: []},
@@ -1508,8 +1445,8 @@ RSpec.describe OrdersController, type: :controller do
         { name: 'trackingNumber', operator: 'contains', type: 'string', value: ''},
         { name: 'country', operator: 'contains', type: 'string', value: ''},
         { name: 'city', operator: 'contains', type: 'string', value: ''},
-        { name: 'email', operator: 'notContains', type: 'string', value: ''},
-        { name: 'tote', operator: 'notContains', type: 'string', value: ''},
+        { name: 'email', operator: 'noContains', type: 'string', value: ''},
+        { name: 'tote', operator: 'noContains', type: 'string', value: ''},
       ]
 
     tags = "[{\"id\":1,\"name\":\"Contains New\",\"color\":\"#FF0000\",\"mark_place\":\"0\",\"created_at\":\"2023-12-27T17:00:44.000-05:00\",\"updated_at\":\"2023-12-27T17:00:44.000-05:00\",\"predefined\":true,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":2,\"name\":\"Contains Inactive\",\"color\":\"#00FF00\",\"mark_place\":\"0\",\"created_at\":\"2023-12-27T17:00:44.000-05:00\",\"updated_at\":\"2023-12-27T17:00:44.000-05:00\",\"predefined\":true,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":3,\"name\":\"Manual Hold\",\"color\":\"#0000FF\",\"mark_place\":\"0\",\"created_at\":\"2023-12-27T17:00:44.000-05:00\",\"updated_at\":\"2023-12-27T17:00:44.000-05:00\",\"predefined\":true,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":4,\"name\":\"Simple Bundles - Bundle O\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-19T09:10:12.000-04:00\",\"updated_at\":\"2024-05-19T09:10:12.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":73,\"name\":\"Loox - Photo/Video Review\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-19T09:20:18.000-04:00\",\"updated_at\":\"2024-05-19T09:20:18.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":261,\"name\":\"contentcreator\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-21T21:10:11.000-04:00\",\"updated_at\":\"2024-05-21T21:10:11.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":262,\"name\":\"influencer\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-21T21:10:11.000-04:00\",\"updated_at\":\"2024-05-21T21:10:11.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":null,\"source_id\":null},{\"id\":263,\"name\":\"Exchange\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-05-26T21:50:09.000-04:00\",\"updated_at\":\"2024-05-26T21:50:09.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":264,\"name\":\"Simple Bundles - Bundle Order\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-06-02T18:00:18.000-04:00\",\"updated_at\":\"2024-06-02T18:00:18.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":265,\"name\":\"Loox - Photo/Video Review Discount\",\"color\":\"#95BF47\",\"mark_place\":\"0\",\"created_at\":\"2024-06-02T20:00:22.000-04:00\",\"updated_at\":\"2024-06-02T20:00:22.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"SHOPIFY\",\"source_id\":null},{\"id\":266,\"name\":\"GP Imported\",\"color\":\"#008000\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:05:54.000-04:00\",\"updated_at\":\"2024-06-14T05:05:54.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"48785\"},{\"id\":267,\"name\":\"GP SCANNED\",\"color\":\"#B7B7B7\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:05:54.000-04:00\",\"updated_at\":\"2024-06-14T05:05:54.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"116428\"},{\"id\":268,\"name\":\"GPA-stickles\",\"color\":\"#FF9900\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:09:33.000-04:00\",\"updated_at\":\"2024-06-14T05:09:33.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"126725\"},{\"id\":269,\"name\":\"SSTAG-001\",\"color\":\"#00FFFF\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:18:17.000-04:00\",\"updated_at\":\"2024-06-14T05:18:17.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"128275\"},{\"id\":270,\"name\":\"SS-TAG-002\",\"color\":\"#FFFF00\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:18:17.000-04:00\",\"updated_at\":\"2024-06-14T05:18:17.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"128276\"},{\"id\":271,\"name\":\"SS-TAG-003\",\"color\":\"#FF00FF\",\"mark_place\":\"0\",\"created_at\":\"2024-06-14T05:18:17.000-04:00\",\"updated_at\":\"2024-06-14T05:18:17.000-04:00\",\"predefined\":false,\"groovepacker_tag_origin\":\"STATION\",\"source_id\":\"128277\"}]"

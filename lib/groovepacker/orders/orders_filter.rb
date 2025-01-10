@@ -108,30 +108,29 @@ module Groovepacker
         sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add = get_parameters
 
         Order.filtered_sorted_orders(@params[:sort], sort_order, limit, offset, status_filter, status_filter_text, query_add, @params)
-        .filter_all_status(filters)
-        .filter_by_qty(OPERATORS_MAP[get_operator_from_filter_by_name('Items', filtered_filters)], find_and_map_value('Items', filtered_filters))
-        .filter_by_increment_id(OPERATORS_MAP[get_operator_from_filter_by_name('OrderNumber', filtered_filters)], find_and_map_value('OrderNumber', filtered_filters))
-        .filter_by_store(OPERATORS_MAP[get_operator_from_filter_by_name('Store', filtered_filters)], find_and_map_value('Store', filtered_filters))
-        .filter_by_notes_internal(OPERATORS_MAP[get_operator_from_filter_by_name('Notes', filtered_filters)], find_and_map_value('Notes', filtered_filters))
-        .filter_by_date(OPERATORS_MAP[get_operator_from_filter_by_name('OrderDate', filtered_filters)], find_and_map_value('OrderDate', filtered_filters))
-        .filter_by_recipient(OPERATORS_MAP[get_operator_from_filter_by_name('Recipient', filtered_filters)], find_and_map_value('Recipient', filtered_filters))
-        .filter_by_custom_field_one(OPERATORS_MAP[get_operator_from_filter_by_name('customFieldOne', filtered_filters)], find_and_map_value('customFieldOne', filtered_filters))
-        .filter_by_custom_field_two(OPERATORS_MAP[get_operator_from_filter_by_name('customFieldTwo', filtered_filters)], find_and_map_value('customFieldTwo', filtered_filters))
-        .filter_by_tracking_num(OPERATORS_MAP[get_operator_from_filter_by_name('trackingNumber', filtered_filters)], find_and_map_value('trackingNumber', filtered_filters))
-        .filter_by_country(OPERATORS_MAP[get_operator_from_filter_by_name('country', filtered_filters)], find_and_map_value('country', filtered_filters))
-        .filter_by_city(OPERATORS_MAP[get_operator_from_filter_by_name('city', filtered_filters)], find_and_map_value('city', filtered_filters))
-        .filter_by_email(OPERATORS_MAP[get_operator_from_filter_by_name('email', filtered_filters)], find_and_map_value('email', filtered_filters))
-        .filter_by_tote(OPERATORS_MAP[get_operator_from_filter_by_name('tote', filtered_filters)], find_and_map_value('tote', filtered_filters))
-        .filter_by_oslmt(OPERATORS_MAP[get_operator_from_filter_by_name('OSLMT', filtered_filters)], find_and_map_value('OSLMT', filtered_filters))
-        .within_date_range(date_range(filtered_filters), get_operator_from_filter_by_name('OrderDate', filtered_filters))
-        .within_number_range(number_range(filtered_filters), @params[:sort])
-        .with_tags(@params[:tags_name], @params[:filterIncludedTags], OPERATORS_MAP[get_operator_from_filter_by_name('Tags', filtered_filters)], find_and_map_value('Tags', filtered_filters))
-        .without_tags(@params[:tags_name], @params[:filterIncludedTags])
-        .check_date_range(@params[:dateRange])
-        .filter_by_last_days(@params[:dateValue])
-        .by_packing_user_name(OPERATORS_MAP[get_operator_from_filter_by_name('User', filtered_filters)], @params[:username])
+             .filter_all_status(filters)
+             .filter_by_qty(OPERATORS_MAP[get_operator_from_filter(4, filtered_filters)], filtered_filters[4]["value"])
+             .filter_by_increment_id(OPERATORS_MAP[get_operator_from_filter(0, filtered_filters)], map_value(filtered_filters[0]["operator"], filtered_filters[0]["value"]))
+             .filter_by_store(OPERATORS_MAP[get_operator_from_filter(1, filtered_filters)], map_value(filtered_filters[1]["operator"], filtered_filters[1]["value"]))
+             .filter_by_notes_internal(OPERATORS_MAP[get_operator_from_filter(2, filtered_filters)], map_value(filtered_filters[2]["operator"], filtered_filters[2]["value"]))
+             .filter_by_date(OPERATORS_MAP[get_operator_from_filter(3, filtered_filters)], map_value(filtered_filters[3]["operator"], filtered_filters[3]["value"]))
+             .filter_by_recipient(OPERATORS_MAP[get_operator_from_filter(5, filtered_filters)], map_value(filtered_filters[5]["operator"], filtered_filters[5]["value"]))
+             .filter_by_custom_field_one(OPERATORS_MAP[get_operator_from_filter(6, filtered_filters)], map_value(filtered_filters[6]["operator"], filtered_filters[6]["value"]))
+             .filter_by_custom_field_two(OPERATORS_MAP[get_operator_from_filter(7, filtered_filters)], map_value(filtered_filters[7]["operator"], filtered_filters[7]["value"]))
+             .filter_by_tracking_num(OPERATORS_MAP[get_operator_from_filter(8, filtered_filters)], map_value(filtered_filters[8]["operator"], filtered_filters[8]["value"]))
+             .filter_by_country(OPERATORS_MAP[get_operator_from_filter(9, filtered_filters)], map_value(filtered_filters[9]["operator"], filtered_filters[9]["value"]))
+             .filter_by_city(OPERATORS_MAP[get_operator_from_filter(10, filtered_filters)], map_value(filtered_filters[10]["operator"], filtered_filters[10]["value"]))
+             .filter_by_email(OPERATORS_MAP[get_operator_from_filter(11, filtered_filters)], map_value(filtered_filters[11]["operator"], filtered_filters[11]["value"]))
+             .filter_by_tote(OPERATORS_MAP[get_operator_from_filter(12, filtered_filters)], map_value(filtered_filters[12]["operator"], filtered_filters[12]["value"]))
+             .within_date_range(date_range(filtered_filters), filtered_filters[3]["operator"])
+             .within_number_range(number_range(filtered_filters), @params[:sort])
+             .with_tags(@params[:tags_name], @params[:filterIncludedTags])
+             .without_tags(@params[:tags_name], @params[:filterIncludedTags])
+             .check_date_range(@params[:dateRange])
+             .filter_by_last_days(@params[:dateValue])
+             .by_packing_user_name(@params[:username])
       end
-
+      
       def get_parameters
         sort_key = get('sort_key', 'updated_at')
         sort_order = get('sort_order', 'DESC')
@@ -166,43 +165,26 @@ module Groovepacker
         filter ? filter["operator"] : nil
       end
 
-      def get_operator_from_filter_by_name(name, filters)
-        filter = filters.find { |f| f['name'] == name }
-        filter.present? ? filter['operator'] : nil
-      end
-
-      def find_and_map_value(name, filters)
-        return nil if filters.nil? || name.nil?
-
-        filter = filters.find { |f| f['name'] == name }
-        if filter.nil?
-          raise "Filter with name '#{name}' not found in filters: #{filters.inspect}"
-        end
-
-        return nil unless filter['operator'] && filter['value']
-
-        map_value(filter['operator'], filter['value'])
-      end
-
-      def map_value(operator, value)
-        return nil if value.blank?
-
+      def map_value(key, value)
+        return nil if value.blank? || !value
         value_map = {
-          'contains' => ->(v) { "%#{v}%" },
-          'notContains' => ->(v) { "%#{v}%" },
-          'eq' => ->(v) { v },
-          'afterOrOn' => ->(v) { v },
-          'beforeOrOn' => ->(v) { v },
-          'neq' => ->(v) { v },
-          'after' => ->(v) { v },
-          'before' => ->(v) { v },
-          'inrange' => ->(v) { v },
-          'notinrange' => ->(v) { v },
-          'startsWith' => ->(v) { "#{v}%" },
-          'endsWith' => ->(v) { "%#{v}" }
-        }
-        value_map[operator]&.call(value) || value
+          'contains' => "%#{value}%",
+          'notContains' => "%#{value}%",
+          'eq' => value,
+          'afterOrOn' => value,
+          'beforeOrOn' => value,
+          'neq' => value,
+          'after' => value,
+          'before' => value,
+          'inrange' => value,
+          'notinrange' => value,
+          'startsWith' => "#{value}%", 
+          'endsWith' => "%#{value}"
+        } 
+      
+        value_map[key]
       end
+      
     end
   end
 end
