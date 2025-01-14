@@ -5,12 +5,12 @@ class PaymentsController < ApplicationController
   include PaymentsHelper
 
   def index
-    card_list(@current_tenant) unless @current_tenant.nil?
+    card_bank_list(@current_tenant) unless @current_tenant.nil?
     render json: @result
   end
 
   def create
-    add_card(params[:payment], @current_tenant) unless @current_tenant.nil?
+    add_card_bank_details(params[:payment], @current_tenant) unless @current_tenant.nil?
     render json: @result
   end
 
