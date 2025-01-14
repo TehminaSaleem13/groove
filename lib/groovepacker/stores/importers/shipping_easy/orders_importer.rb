@@ -22,7 +22,7 @@ module Groovepacker
 
             @import_item.update_column(:importer_id, @worker_id)
             update_import_summary_to_fetch_api_response
-            response = @client.orders(@statuses, importing_time, @import_item)  
+            response = @client.orders(@statuses, importing_time, @import_item)
             update_import_summary_to_in_progress
             update_error_msg_if_any(response)
             destroy_cleared_orders(response)
@@ -182,7 +182,7 @@ module Groovepacker
               order = order_copy unless order_copy.blank?
               @order_to_update = false
               import_item_fix
-              ImportItem.where(store_id: @import_item.store.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
+              ImportItem.where(store_id: @import_item.store.id).where.not(id: @import_item.id).where.not(status: %w[failed completed]).order(:created_at).drop(1).each { |item| item.update_column(:status, 'cancelled') }
 
               break if import_should_be_cancelled
               import_single_order(order)
@@ -513,7 +513,7 @@ module Groovepacker
             end
 
             shiping_easy_order.reload
-            
+
             if check_for_replace_product
               add_order_activity_for_gp_coupon(shiping_easy_order, order['recipients'][0]['line_items'])
             else
@@ -661,7 +661,7 @@ module Groovepacker
           end
 
           def skip_the_order?(order)
-            # return false if @credential.import_shipped_having_tracking 
+            # return false if @credential.import_shipped_having_tracking
 
             @credential.import_shipped_having_tracking && order['order_status'] == 'shipped' && order_tracking_number(order).nil?
           end
