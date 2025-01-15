@@ -571,7 +571,7 @@ module Groovepacker
           customer_subscription = subscription
           if @trial_end_time && (@trial_end_time > Time.current.to_i)
             begin
-              Stripe::Subscription.update(customer_subscription.id, plan: plan, trial_end: @trial_end_time, prorate: false)
+              Stripe::Subscription.update(customer_subscription.id, plan: plan, trial_end: @trial_end_time, proration_behavior: 'none')
               @updated_in_stripe = true
             rescue Exception => e
               Rollbar.error(e, e.message, Apartment::Tenant.current)
@@ -580,10 +580,10 @@ module Groovepacker
           else
             begin
               if customer_subscription.items.count > 1
-                Stripe::SubscriptionItem.create(subscription: customer_subscription.id, plan: plan, prorate: true)
+                Stripe::SubscriptionItem.create(subscription: customer_subscription.id, plan: plan, proration_behavior: 'create_prorations')
                 remove_existing_plans(customer_subscription, plan_id)
               else
-                Stripe::Subscription.update(customer_subscription.id, plan: plan, prorate: true)
+                Stripe::Subscription.update(customer_subscription.id, plan: plan, proration_behavior: 'create_prorations')
               end
               @updated_in_stripe = true
             rescue Exception => e
@@ -620,9 +620,9 @@ module Groovepacker
             subscription.items.data.each do |item|
               next unless item.plan['id'] == existing_plan.id
 
-              prorate = @trial_end_time && (@trial_end_time > Time.current.to_i) ? false : true
+              proration_behavior = @trial_end_time && (@trial_end_time > Time.current.to_i) ? 'none' : 'create_prorations'
               begin
-                Stripe::SubscriptionItem.update(item.id, plan: plan_id, prorate: prorate)
+                Stripe::SubscriptionItem.update(item.id, plan: plan_id, proration_behavior: proration_behavior)
                 @updated_in_stripe = true
               rescue Exception => e
                 Rollbar.error(e, e.message, Apartment::Tenant.current)
@@ -639,7 +639,7 @@ module Groovepacker
           if @customer.subscriptions.count >= 2 && subscription.plan.interval == 'year'
             if @trial_end_time && (@trial_end_time > Time.current.to_i)
               begin
-                Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, prorate: false)
+                Stripe::Subscription.update(subscription.id, plan: plan_id, trial_end: @trial_end_time, proration_behavior: 'none')
                 @updated_in_stripe = true
               rescue Exception => e
                 Rollbar.error(e, e.message, Apartment::Tenant.current)
@@ -647,7 +647,7 @@ module Groovepacker
               end
             else
               begin
-                Stripe::Subscription.update(subscription.id, plan: plan_id, prorate: true)
+                Stripe::Subscription.update(subscription.id, plan: plan_id, proration_behavior: 'create_prorations')
                 @updated_in_stripe = true
               rescue Exception => e
                 Rollbar.error(e, e.message, Apartment::Tenant.current)
