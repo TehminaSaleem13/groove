@@ -83,7 +83,7 @@ class Order < ApplicationRecord
     when 'tote'
       joins(:tote).order("totes.name #{sort_order}")
     when 'user'
-      left_joins(:packing_user)
+      left_joins(:assigned_user)
         .order(Arel.sql("CASE WHEN users.username IS NULL THEN 1 ELSE 0 END, users.username #{sort_order}"))
     else
       includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")
@@ -144,15 +144,15 @@ class Order < ApplicationRecord
     joins(:order_tags).where.not(order_tags: { name: tag_names }).distinct if tag_names.present? && !shouldFilterIncludeTags.to_b
   }
 
-  scope :by_packing_user_name, ->(usernames) {
+  scope :by_assigned_user_name, ->(usernames) {
     if usernames.present?
       usernames_array = usernames.split(',')
 
       if usernames_array.include?('unassigned')
-        left_outer_joins(:packing_user)
+        left_outer_joins(:assigned_user)
           .where('users.username IN (?) OR users.id IS NULL', usernames_array.reject { |u| u == 'unassigned' })
       else
-        joins(:packing_user).where(users: { username: usernames_array })
+        joins(:assigned_user).where(users: { username: usernames_array })
       end
     end
   }

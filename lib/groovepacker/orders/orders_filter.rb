@@ -128,7 +128,7 @@ module Groovepacker
              .without_tags(@params[:tags_name], @params[:filterIncludedTags])
              .check_date_range(@params[:dateRange])
              .filter_by_last_days(@params[:dateValue])
-             .by_packing_user_name(@params[:username])
+             .by_assigned_user_name(@params[:username])
       end
       
       def get_parameters
