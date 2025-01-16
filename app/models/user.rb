@@ -114,7 +114,7 @@ class User < ApplicationRecord
     .map do |username|
       {
         username: username,
-        unique_order_count: Order.joins(:packing_user)
+        unique_order_count: Order.joins(:assigned_user)
                                  .where(users: { username: username })
                                  .count.to_s || "0"
       }

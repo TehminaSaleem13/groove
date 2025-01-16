@@ -308,6 +308,7 @@ module OrdersHelper
                                 'custom_field_two' => order.custom_field_two,
                                 'store_order_id' => order.store_order_id,
                                 'last_modified' => order.last_modified,
+                                'assigned_user_id' => order.assigned_user_id,
                                 'scanning_user' => order.packing_user&.username}
     tote = order.tote
     order_data['tote'] = tote.pending_order ? tote.name + '-PENDING' : tote.name if tote

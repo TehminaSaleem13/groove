@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2024_12_18_081918) do
+ActiveRecord::Schema.define(version: 2025_01_13_122038) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -777,6 +777,7 @@ ActiveRecord::Schema.define(version: 2024_12_18_081918) do
     t.string "post_scanning_flag"
     t.integer "origin_store_id"
     t.string "veeqo_allocation_id"
+    t.integer "assigned_user_id"
     t.index ["id"], name: "index_orders_on_id"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
@@ -1170,7 +1171,6 @@ ActiveRecord::Schema.define(version: 2024_12_18_081918) do
     t.string "email_reply"
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
-    t.boolean "assigned_orders", default: false
     t.boolean "requires_assigned_orders", default: false
   end
 

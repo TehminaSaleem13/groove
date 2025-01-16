@@ -90,7 +90,7 @@ module Groovepacker
                             .distinct
                             .pluck(:id, :username)
                             .map do |id, username|
-                              unique_order_count = order_ids.joins(:packing_user)
+                              unique_order_count = order_ids.joins(:assigned_user)
                                              .where(users: { username: username })
                                              .count || 0
                                              if unique_order_count > 0

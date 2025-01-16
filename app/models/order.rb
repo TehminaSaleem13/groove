@@ -21,6 +21,7 @@ class Order < ApplicationRecord
   has_many :shipping_labels, dependent: :destroy
   has_and_belongs_to_many :order_tags
   belongs_to :packing_user, class_name: 'User', optional: true
+  belongs_to :assigned_user, class_name: 'User', optional: true
 
   before_save :assign_increment_id
   after_update :update_inventory_levels_for_items
@@ -303,6 +304,7 @@ class Order < ApplicationRecord
     addactivity('Order Scanning Complete', username, on_ex) unless ScanPackSetting.last.order_verification
     self.packing_score = compute_packing_score
     self.post_scanning_flag = nil
+    self.assigned_user_id = nil
     # Remove tote assignment
     Tote.where(order_id: id).update_all(order_id: nil, pending_order: false)
     save

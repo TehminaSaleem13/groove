@@ -208,7 +208,7 @@ class PriorityCardsController < ApplicationController
   end
 
   def fetch_tagged_orders(user)
-    Order.joins(:packing_user)
+    Order.joins(:assigned_user)
          .where(users: { username: user.username })
          .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
          .where(status: 'awaiting')
