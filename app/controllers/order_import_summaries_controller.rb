@@ -100,9 +100,8 @@ class OrderImportSummariesController < ApplicationController
   end
 
   def delete_import_summary
-    store = Store.find_by_id(params['store_id'])
-    i = ImportItem.where(store_id: store.id).last
-    i.order_import_summary&.destroy
+    OrderImportSummary.joins(:import_items).where(store_id: params['store_id']).destroy_all
+    ImportItem.where(store_id: params['store_id']).destroy_all
     render json: { status: true }
   end
 
