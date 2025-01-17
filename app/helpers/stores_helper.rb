@@ -405,7 +405,7 @@ module StoresHelper
         result_createDate_tz = Time.zone.parse(response['orders'].last['ordered_at']) + time_zone
 
         result.merge!(createDate: result_createDate_tz, modifyDate: result_modifyDate,
-                      orderStatus: response['orders'].last['order_status'].titleize)
+                      orderStatus: response['orders'].last['order_status'].titleize, increment_id: response['orders'].last['external_order_identifier'])
 
         result.merge!(return_range_dates_hash(store, response['orders'].last['external_order_identifier'],
                                               result_modifyDate, result_createDate))
@@ -425,7 +425,7 @@ module StoresHelper
         # result_createDate_tz = Time.zone.parse(response['orders'].first["created_at"])
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
-                      orderStatus: response['orders'].first['fulfillment_status']&.titleize)
+                      orderStatus: response['orders'].first['fulfillment_status']&.titleize, increment_id: response['orders'].first['name'])
       elsif store.store_type == 'Shopline'
         credential = store.shopline_credential
         client = Groovepacker::ShoplineRuby::Client.new(credential)
@@ -438,7 +438,7 @@ module StoresHelper
         result_createDate = Time.zone.parse(response['orders'].first['created_at'])
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
-                      orderStatus: response['orders'].first['fulfillment_status']&.titleize)
+                      orderStatus: response['orders'].first['fulfillment_status']&.titleize, increment_id: response['orders'].first['name'])
         result[:ss_similar_order_found] = true if response['orders'].count > 1
       elsif store.store_type == 'Shipstation API 2'
         credential = store.shipstation_rest_credential
@@ -459,7 +459,8 @@ module StoresHelper
                                          'No'
                                        else
                                          (response.last['tagIds'].include?(48_826) ? 'Yes' : 'No')
-                                       end)
+                                       end,
+                      increment_id: response.last['orderNumber'])
 
         result.merge!(return_range_dates_hash(store, response.last['orderNumber'], result_modifyDate,
                                               result_createDate))
@@ -474,7 +475,7 @@ module StoresHelper
         result_modifyDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['updated_at']).to_time
         result_createDate = ActiveSupport::TimeZone['Pacific Time (US & Canada)'].parse(response.last['created_at']).to_time
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
-                      orderStatus: response.last['status'].titleize)
+                      orderStatus: response.last['status'].titleize, increment_id: response.last['number'])
       elsif store.store_type == 'Shippo'
         credential = store.shippo_credential
         client = Groovepacker::ShippoRuby::Client.new(credential)
@@ -487,7 +488,7 @@ module StoresHelper
         result_createDate = Time.zone.parse(response['placed_at'])
 
         result.merge!(createDate: result_createDate, modifyDate: result_modifyDate,
-                      orderStatus: response['order_status']&.titleize)
+                      orderStatus: response['order_status']&.titleize, increment_id: response['order_number'])
       end
       result[:ss_similar_order_found] = true if store.store_type != 'Shopline' && response.count > 1
       params[:current_user] = current_user.id
