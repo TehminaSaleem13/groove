@@ -360,6 +360,8 @@ class Order < ApplicationRecord
     result &= false unless unacknowledged_activities.empty?
     status = result ? 'awaiting' : 'onhold'
 
+    status = 'serviceissue' if Tenant.find_by_name(Apartment::Tenant.current).try(:scan_pack_workflow) == "product_first_scan_to_put_wall" && ScanPackSetting.last.enable_service_issue_status
+
     if id.present?
       update_column(:status, status)
       update_column(:scan_start_time, nil)

@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_01_13_122038) do
+ActiveRecord::Schema.define(version: 2025_01_17_085135) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1172,6 +1172,7 @@ ActiveRecord::Schema.define(version: 2025_01_13_122038) do
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
     t.boolean "requires_assigned_orders", default: false
+    t.boolean "enable_service_issue_status", default: true, null: false
   end
 
   create_table "shipping_easy_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
