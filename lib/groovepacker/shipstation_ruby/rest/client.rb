@@ -279,11 +279,27 @@ module Groovepacker
             response['shipments'].select do |shipment|
               shipment['orderNumber'] == orderno
             end
+          else
+            # Fallback to Fulfillments
+            return get_fulfillments_by_orderno(orderno)
           end
           Tenant.save_se_import_data(
             "========Shipstation Shipments By Order Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response
           )
           response['shipments']
+        end
+
+        def get_fulfillments_by_orderno(orderno)
+          response = @service.query("/fulfillments?orderNumber=#{CGI.escape(orderno)}", nil, 'get')
+          if response['fulfillments'].present?
+            response['fulfillments'].select! do |fulfilment|
+              fulfilment['orderNumber'] == orderno
+            end
+          end
+          Tenant.save_se_import_data(
+            "========Shipstation Fulfillments By Order Number UTC: #{Time.current.utc} TZ: #{Time.current}", '==Order Number', orderno, '==Response', response
+          )
+          response['fulfillments']
         end
 
         def get_shipments_by_order_id(order_id)

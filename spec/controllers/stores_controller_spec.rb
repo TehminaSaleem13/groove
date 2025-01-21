@@ -395,6 +395,20 @@ RSpec.describe StoresController, type: :controller do
       expect(Product.last.primary_warehouse.location_primary).not_to be_nil
       expect(res['status']).to be true
     end
+
+    it 'returns the correct fulfillments for a given order number' do
+      hash = OpenStruct.new(
+        code: 200, 
+        orders: YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_test_single_order.yaml')))     
+      )
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Service).to receive(:query).and_return(hash)
+      allow_any_instance_of(Groovepacker::ShipstationRuby::Rest::Client).to receive(:get_fulfillments_by_orderno).and_return(YAML.safe_load(IO.read(Rails.root.join('spec/fixtures/files/ss_fullfillment_data.yaml'))))
+      get :get_order_details, params: { order_no: 'SSTestOrder', store_id: @ship_store.id }
+      expect(response.status).to eq(200)
+      res = JSON.parse(response.body)
+      expect(res['status']).to be true
+    end
+    
   end
 
   describe 'Veeqo Store' do
