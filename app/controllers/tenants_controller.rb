@@ -180,7 +180,7 @@ class TenantsController < ApplicationController
 
   def create_duplicate
     result = create_single_duplicate
-
+    ExportSetting.first.update(auto_email_export: false , auto_stat_email_export: false )
     respond_to do |format|
       format.html # show.html.erb
       format.json { render json: result }
