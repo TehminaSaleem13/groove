@@ -211,7 +211,7 @@ module Groovepacker
             duplicate_product.save!
             @success_updated += 1
 
-            if !mapping['inv_wh1'].nil? || !mapping['location_primary'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?
+            # if !mapping['inv_wh1'].nil? || !mapping['location_primary'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?
               default_inventory = ProductInventoryWarehouses.find_or_create_by(inventory_warehouse_id: @default_inventory_warehouse_id, product_id: duplicate_product.id)
               updatable_record = record[:inventory].first
               if !mapping['inv_wh1'].nil? && updatable_record[:quantity_on_hand] != '[DELETE]' # && self.mapping['inv_wh1'][:action] =='overwrite'
@@ -243,7 +243,7 @@ module Groovepacker
               #   default_inventory.location_tertiary = updatable_record[:location_tertiary]
               # end
               default_inventory.save
-            end
+            # end
 
             if !mapping['category_name'].nil? && !record[:cats].empty?
               # if self.mapping['category_name'][:action] == 'overwrite'
