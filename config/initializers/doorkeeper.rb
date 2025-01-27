@@ -9,8 +9,8 @@ Doorkeeper.configure do
   end
 
   resource_owner_from_credentials do |_routes|
-    u = User.find_for_database_authentication(username: params[:username])
-    u if u&.valid_password?(params[:password])
+    user = User.find_by('confirmation_code = :value OR username = :value', value: params[:username])
+    user if user && (user.confirmation_code == params[:username] || user.valid_password?(params[:password]))
   end
 
   admin_authenticator do
