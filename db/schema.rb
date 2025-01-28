@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_01_17_085135) do
+ActiveRecord::Schema.define(version: 2025_01_27_071941) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -350,6 +350,7 @@ ActiveRecord::Schema.define(version: 2025_01_17_085135) do
     t.boolean "is_haptics_option", default: false
     t.string "email_address_for_report_out_of_stock", default: ""
     t.string "abbreviated_time_zone"
+  t.boolean "delete_import_summary", default: false
   end
 
   create_table "generate_barcodes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1171,6 +1172,7 @@ ActiveRecord::Schema.define(version: 2025_01_17_085135) do
     t.string "email_reply"
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
+    t.boolean "assigned_orders", default: false
     t.boolean "requires_assigned_orders", default: false
     t.boolean "enable_service_issue_status", default: true, null: false
   end

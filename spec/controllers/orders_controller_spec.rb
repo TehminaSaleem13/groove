@@ -295,7 +295,7 @@ RSpec.describe OrdersController, type: :controller do
 
       expect(response.status).to eq(200)
       result = JSON.parse(response.body)
-      expect(result['error_messages']).to include('Import is in progress')
+      expect(result['error_messages']).to include('Import is in progress. If you want to import again, delete the import summary from General Settings.')
     end
 
     it 'Import for single store shows import Running' do

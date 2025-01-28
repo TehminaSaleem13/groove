@@ -24,8 +24,7 @@ module Groovepacker
         tenant = Tenant.where(name: tenant.to_s).first
         if tenant.uniq_shopify_import && !Store.where("status = '1' AND store_type != 'system'").where(store_type: 'Shopify').empty?
           if !uniq_job_detail.nil? && ((@job_timestamp.to_time.to_f - Time.current.strftime('%Y-%m-%d %H:%M:%S.%L').to_time.to_f).abs < 3)
-            set_status_and_message(false, 'Import is already in progress', %w[push error_messages])
-
+            set_status_and_message(false, 'Import is already in progress. If you want to import again, delete the import summary from General Settings.', %w[push error_messages])
             on_demand_logger = Logger.new("#{Rails.root.join("log/shopify_import#{Apartment::Tenant.current}.log")}")
             log = { message: 'Terminate import because of two worker working on same job' }
             on_demand_logger.info(log)
@@ -35,8 +34,7 @@ module Groovepacker
           update_uniq_job_table
           sleep 1 unless Rails.env.test?
           if @job_id.present? && (UniqJobTable.where(job_id: @job_id.to_s).group_by(&:created_at).count >= 2)
-            set_status_and_message(false, 'Import is already in progress', %w[push error_messages])
-
+            set_status_and_message(false, 'Import is already in progress. If you want to import again, delete the import summary from General Settings.', %w[push error_messages])
             on_demand_logger = Logger.new("#{Rails.root.join("log/shopify_import#{Apartment::Tenant.current}.log")}")
             log = { message: 'Terminate import because of two worker working on same job' }
             on_demand_logger.info(log)
@@ -45,7 +43,7 @@ module Groovepacker
         end
 
         if $redis.get("importing_orders_#{Apartment::Tenant.current}")
-          set_status_and_message(false, 'Import is in progress', %w[push error_messages])
+          set_status_and_message(false, 'Import is in progress. If you want to import again, delete the import summary from General Settings.', %w[push error_messages])
           return @result
         else
           $redis.set("importing_orders_#{Apartment::Tenant.current}", true)
@@ -55,7 +53,7 @@ module Groovepacker
         order_summary = OrderImportSummary.where(status: 'import_initiate')
 
         if order_summary.present?
-          set_status_and_message(false, 'Import is in progress', %w[push error_messages])
+          set_status_and_message(false, 'Import is in progress. If you want to import again, delete the import summary from General Settings.', %w[push error_messages])
           return @result
         end
 
