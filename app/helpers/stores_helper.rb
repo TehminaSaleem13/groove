@@ -494,8 +494,9 @@ module StoresHelper
       params[:current_user] = current_user.id
       params[:tenant] = Apartment::Tenant.current
       import_orders = ImportOrders.new.delay(queue: "import_missing_order_#{Apartment::Tenant.current}", priority: 95)
-      import_orders.import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
+      import_order =  import_orders.import_missing_order(params) unless Order.where(increment_id: params[:order_no]).any?
       import_orders.import_missing_order(params) if params[:same_order_found]
+      Groovepacker::Stores::Importers::LogglyLog.log_orders_response(response['orders'], store, import_order) if current_tenant_object&.loggly_shopify_imports
 
       result[:store_type] = store.store_type
     end
