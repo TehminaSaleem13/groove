@@ -138,7 +138,7 @@ class TenantsController < ApplicationController
 
   def update_scan_workflow
     tenant = Tenant.find(params['tenant_id'])
-    tenant.scan_pack_workflow = params['workflow'] if params['workflow'].in? %w[default product_first_scan_to_put_wall]
+    tenant.scan_pack_workflow = params['workflow'] if params['workflow'].in? %w[default product_first_scan_to_put_wall scan_to_cart]
     Apartment::Tenant.switch! tenant.name
     ToteSet.last || ToteSet.create(name: 'T')
     Apartment::Tenant.switch!

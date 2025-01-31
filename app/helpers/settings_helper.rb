@@ -86,6 +86,7 @@ module SettingsHelper
         packing_option resolution packing_cam_enabled email_customer_option email_subject
         email_insert_dropdown email_message customer_page_dropdown customer_page_message scanning_log capture_image_option email_reply
         order_num_esc_str_removal order_num_esc_str_enabled requires_assigned_orders enable_service_issue_status
+        scan_to_cart_option
       ]
     )
   end

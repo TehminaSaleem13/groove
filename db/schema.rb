@@ -1175,6 +1175,7 @@ ActiveRecord::Schema.define(version: 2025_01_27_071941) do
     t.boolean "assigned_orders", default: false
     t.boolean "requires_assigned_orders", default: false
     t.boolean "enable_service_issue_status", default: true, null: false
+    t.boolean "scan_to_cart_option", default: false
   end
 
   create_table "shipping_easy_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1667,5 +1668,4 @@ ActiveRecord::Schema.define(version: 2025_01_27_071941) do
     t.index ["user_id"], name: "index_visits_on_user_id"
     t.index ["visit_token"], name: "index_visits_on_visit_token", unique: true
   end
-
 end
