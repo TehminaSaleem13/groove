@@ -175,7 +175,7 @@ module Groovepacker
         else
           orders = if @params[:oldest_unscanned]
             base_orders = Order.awaiting_without_partially_scanned.includes(:tote, :store, :order_tags)
-            filtered_orders = ScanPackSetting.first.requires_assigned_orders ? base_orders.joins(:packing_user).where(users: { username: @current_user.username }) : base_orders
+            filtered_orders = ScanPackSetting.first.requires_assigned_orders ? base_orders.joins(:assigned_user).where(users: { username: @current_user.username }) : base_orders
             filtered_orders.order("#{sort_key} #{sort_order}")
           else
             Order.includes(:tote, :store, :order_tags).order("#{sort_key} #{sort_order}")

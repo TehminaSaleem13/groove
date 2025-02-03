@@ -533,6 +533,13 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :carts, defaults: { format: :json } do
+    member do
+      get 'print_tote_labels', defaults: { format: :pdf }
+    end
+  end
+  
+
   get '*path' => redirect('/')
   post '*path' => redirect('/')
 end

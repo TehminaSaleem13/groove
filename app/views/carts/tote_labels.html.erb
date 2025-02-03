@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <style>
+    .label {
+      border: 1px solid black;
+      padding: 20px;
+      margin: 10px;
+      width: 200px;
+      text-align: center;
+    }
+    .barcode {
+      margin: 10px auto;
+    }
+  </style>
+</head>
+<body>
+  <% tote_labels.each do |label| %>
+    <div class="label">
+      <h1><%= label[:tote_id] %></h1>
+      <div class="barcode">
+        <%= image_tag "data:image/png;base64,#{Base64.encode64(Barby::Code128B.new(label[:tote_barcode_value]).to_png)}" %>
+      </div>
+      <p><%= label[:tote_barcode_value] %></p>
+      <h2><%= label[:cart_name] %></h2>
+    </div>
+  <% end %>
+</body>
+</html>
