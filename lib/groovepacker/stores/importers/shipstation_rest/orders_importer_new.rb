@@ -239,6 +239,7 @@ module Groovepacker
             @bulk_ss_import = 0
             @is_download_image = @store.shipstation_rest_credential.download_ss_image
             emit_data_for_range_or_quickfix
+            fetch_ss_and_gp_user_list if @store.import_user_assignments
 
             response['orders'].each do |order|
               import_item_fix
@@ -246,7 +247,7 @@ module Groovepacker
               break if import_should_be_cancelled
 
               begin
-                update_import_item_and_import_order(order, shipments_response)
+                update_import_item_and_import_order(order, shipments_response, @ss_user_list)
                 @credential.update(quick_import_last_modified_v2: Time.zone.parse(order['modifyDate'])) if @regular_import_triggered
               rescue Exception => e
                 Rollbar.error(e, e.message, Apartment::Tenant.current)
@@ -260,10 +261,11 @@ module Groovepacker
             cred.save
           end
 
-          def import_order_form_response(shipstation_order, order, shipments_response)
+          def import_order_form_response(shipstation_order, order, shipments_response, gp_user_id = nil)
             if shipstation_order.present? && !shipstation_order.persisted? && order['orderStatus'] != 'cancelled'
               import_order(shipstation_order, order)
               shipstation_order = Order.find_by_id(shipstation_order.id) if shipstation_order.frozen?
+              shipstation_order.assigned_user_id = gp_user_id if gp_user_id.present?
               shipstation_order.tracking_num = begin
                                                  order_tracking_number(order, shipments_response)
                                                rescue StandardError
@@ -352,6 +354,36 @@ module Groovepacker
           end
 
           private
+
+          def fetch_ss_and_gp_user_list
+            ss_service = Groovepacker::ShipstationRuby::Rest::Service.new(@credential.api_key, @credential.api_secret)
+            response = ss_service.query("/users?showInactive=false", nil, 'get')
+            @ss_user_list = response.parsed_response
+
+            tenant = Apartment::Tenant.current
+            Apartment::Tenant.switch!(tenant)
+            @gp_user_list = User.order(:username).map do |user|
+              {
+                id: user.id,
+                username: user.username,
+              }
+            end
+            add_gp_user_id_in_ss_user_list
+          end
+
+          def add_gp_user_id_in_ss_user_list
+            @ss_user_list&.each do |user|
+              gp_user = @gp_user_list&.select { |gp_user| gp_user[:username] == user['userName'] }&.first
+              user['gp_user_id'] = gp_user.present? ? gp_user[:id] : nil
+            end
+          end
+
+          def map_gp_user_id(order, ss_user_list)
+            ss_user_id = order["userId"]
+            return unless ss_user_list.present?
+            user = ss_user_list.find { |u| u["userId"] == ss_user_id }
+            return user["gp_user_id"]
+          end
 
           def statuses
             @statuses ||= @credential.get_active_statuses
@@ -472,7 +504,7 @@ module Groovepacker
             status_set_in_gp
           end
 
-          def update_import_item_and_import_order(order, shipments_response)
+          def update_import_item_and_import_order(order, shipments_response, ss_user_list = nil)
             return if skip_the_order?(shipments_response, order)
 
             @import_item.update(current_increment_id: order['orderNumber'], current_order_items: -1, current_order_imported_item: -1)
@@ -480,8 +512,9 @@ module Groovepacker
             Order.last.try(:last_modified).to_s == Time.zone.parse(order['modifyDate']).to_s ? @bulk_ss_import += 1 : @bulk_ss_import = 0
             return if check_order_is_cancelled(order)
             shipstation_order = find_or_init_new_order(order)
+            gp_user_id = map_gp_user_id(order, ss_user_list)
 
-            return unless import_order_form_response(shipstation_order, order, shipments_response)
+            return unless import_order_form_response(shipstation_order, order, shipments_response, gp_user_id)
 
             if order['tagIds'].present?
               order['tagIds'].each do |tag_id|

@@ -51,6 +51,7 @@ module StoresHelper
     @store.update_inv = params[:update_inv]
     @store.split_order = params[:split_order]
     @store.on_demand_import_v2 = params[:on_demand_import_v2].to_boolean
+    @store.import_user_assignments = params[:import_user_assignments].to_boolean
     @store.regular_import_v2 = params[:regular_import_v2].to_boolean
     @store.quick_fix = params[:quick_fix].to_boolean
     @store.troubleshooter_option = params[:troubleshooter_option].to_boolean

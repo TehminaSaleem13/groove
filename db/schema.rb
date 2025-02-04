@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_01_27_122154) do
+ActiveRecord::Schema.define(version: 2025_01_29_140553) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1423,6 +1423,7 @@ ActiveRecord::Schema.define(version: 2025_01_27_122154) do
     t.boolean "order_cup_direct_shipping", default: false
     t.boolean "display_origin_store_name", default: false
     t.boolean "disable_packing_cam", default: false
+    t.boolean "import_user_assignments", default: false
     t.index ["name"], name: "index_stores_on_name"
   end
 
