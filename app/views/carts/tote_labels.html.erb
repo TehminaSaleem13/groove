@@ -3,27 +3,113 @@
 <head>
   <meta charset="UTF-8">
   <style>
+    body {
+      margin: 0;
+      padding: 0;
+      font-family: Poppins, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen-Sans, Ubuntu, Cantarell, sans-serif;
+      width: 4in;
+      height: 6in;
+      background: white;
+    }
+
     .label {
       border: 1px solid black;
-      padding: 20px;
-      margin: 10px;
-      width: 200px;
+      box-sizing: border-box;
+      padding: 0.20in;
       text-align: center;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: space-between;
+      height: 2.95in;
+      background: white;
+      position: relative;
+    }
+    .cart-name {
+      font-size: 36px;
+      font-weight: semi-bold;
+      letter-spacing: 1px;
+      line-height: 1.2;
+      text-align: center;
+      width: 100%;
+      position: absolute;
+      bottom: 0.20in;
+      left: 0;
+      padding: 0 0.20in;
+      box-sizing: border-box;
+    }
+    .divider {
+      height: 0.1in;
+      border-top: 2px dotted black;
+      width: 100%;
+      margin: 0.15in 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+    .tote-id {
+      font-size: 72px;
+      font-weight: semi-bold;
+      letter-spacing: 2px;
+      line-height: 1;
     }
     .barcode {
-      margin: 10px auto;
+      height: 1in;
+      width: 100%;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      margin: 0 auto;
+    }
+    .barcode img {
+      height: 100%;
+      width: 3in;
+      object-fit: contain;
+      display: block;
+      margin: 0 auto;
+    }
+    .barcode-text {
+      font-size: 18px;
+      letter-spacing: 1px;
+      color: #333;
+      text-align: center;
+    }
+
+    .page {
+      page-break-after: always;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      padding: 0.15in;
+      box-sizing: border-box;
+      height: 6in;
+      gap: 0.15in;
     }
   </style>
 </head>
 <body>
-  <% tote_labels.each do |label| %>
-    <div class="label">
-      <h1><%= label[:tote_id] %></h1>
-      <div class="barcode">
-        <%= image_tag "data:image/png;base64,#{Base64.encode64(Barby::Code128B.new(label[:tote_barcode_value]).to_png)}" %>
+  <% tote_labels.each_slice(2) do |pair| %>
+    <div class="page">
+      <div class="label">
+        <div class="tote-id"><%= pair.first[:tote_id] %></div>
+        <div class="barcode">
+          <%= image_tag "data:image/png;base64,#{Base64.encode64(Barby::Code128B.new(pair.first[:tote_barcode_value]).to_png)}" %>
+        </div>
+        <div class="barcode-text"><%= pair.first[:tote_barcode_value] %></div>
+        <div class="cart-name"><%= pair.first[:cart_name] %></div>
       </div>
-      <p><%= label[:tote_barcode_value] %></p>
-      <h2><%= label[:cart_name] %></h2>
+      
+      <div class="divider"></div>
+      
+      <% if pair.second.present? %>
+        <div class="label">
+          <div class="tote-id"><%= pair.second[:tote_id] %></div>
+          <div class="barcode">
+            <%= image_tag "data:image/png;base64,#{Base64.encode64(Barby::Code128B.new(pair.second[:tote_barcode_value]).to_png)}" %>
+          </div>
+          <div class="barcode-text"><%= pair.second[:tote_barcode_value] %></div>
+          <div class="cart-name"><%= pair.second[:cart_name] %></div>
+        </div>
+      <% end %>
     </div>
   <% end %>
 </body>

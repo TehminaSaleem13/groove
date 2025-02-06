@@ -45,6 +45,7 @@ class CartsController < ApplicationController
     render pdf: "tote_labels_#{@cart.id}",
        template: "carts/tote_labels",
        formats: [:html],
+       :page_height => '6in', :page_width => '4in',
        locals: { tote_labels: tote_labels }
   end
   
