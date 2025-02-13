@@ -116,12 +116,15 @@ class GeneralSetting < ApplicationRecord
       groove_bulk_actions.save
 
       bulk_actions.delay(run_at: 2.seconds.from_now, queue: 'inventory_process', priority: 95).process_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'inventory_process',{ message: 'inventory_process'})
     else
       groove_bulk_actions.activity = 'disable'
       groove_bulk_actions.save
 
       bulk_actions.delay(run_at: 2.seconds.from_now, queue: 'inventory_unprocess', priority: 95).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
+      Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'inventory_unprocess',{ message: 'inventory_unprocess'})
     end
+                                  
     true
   end
 

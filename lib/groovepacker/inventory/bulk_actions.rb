@@ -141,6 +141,7 @@ module Groovepacker
       def do_unprocess_all
         ProductInventoryWarehouses.update_all(available_inv: 0, allocated_inv: 0, sold_inv: 0)
         OrderItem.update_all(inv_status: OrderItem::DEFAULT_INV_STATUS)
+        Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'Check unprocess log',{ message: 'Check unprocess log'})
         true
       end
 
