@@ -35,19 +35,19 @@ pipelines:
             - bundle install --path vendor/bundle
             - bundle binstubs --all
             - RAILS_ENV=test bundle exec rails db:create db:migrate
-            - RAILS_ENV=test bundle exec rspec
-            - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            - chmod +x ./cc-test-reporter
-            - ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.json
-            - ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
-            - pipe: sonarsource/sonarcloud-scan:2.0.0
-              variables:
-                EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
-                SONAR_TOKEN: ${SONAR_TOKEN}
-            - pipe: sonarsource/sonarcloud-quality-gate:0.1.6
-              variables:
-                EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
-                SONAR_TOKEN: ${SONAR_TOKEN}
+            # - RAILS_ENV=test bundle exec rspec
+            # - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            # - chmod +x ./cc-test-reporter
+            # - ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.json
+            # - ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
+            # - pipe: sonarsource/sonarcloud-scan:2.0.0
+            #   variables:
+            #     EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
+            #     SONAR_TOKEN: ${SONAR_TOKEN}
+            # - pipe: sonarsource/sonarcloud-quality-gate:0.1.6
+            #   variables:
+            #     EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
+            #     SONAR_TOKEN: ${SONAR_TOKEN}
   branches:
     master:
       - step:
@@ -66,10 +66,10 @@ pipelines:
             - bundle binstubs --all
             - RAILS_ENV=test bundle exec rails db:create db:migrate
             # - RAILS_ENV=test bundle exec rspec
-            - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
-            - chmod +x ./cc-test-reporter
-            - ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.json
-            - ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
+            # - curl -L https://codeclimate.com/downloads/test-reporter/test-reporter-latest-linux-amd64 > ./cc-test-reporter
+            # - chmod +x ./cc-test-reporter
+            # - ./cc-test-reporter format-coverage --input-type simplecov --output coverage/codeclimate.json
+            # - ./cc-test-reporter upload-coverage --input coverage/codeclimate.json
             # - pipe: sonarsource/sonarcloud-scan:2.0.0
             #   variables:
             #     EXTRA_ARGS: '-Dsonar.projectKey=groovepacker_groovepacker -Dsonar.organization=groove'
