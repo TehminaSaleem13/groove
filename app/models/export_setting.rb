@@ -224,15 +224,15 @@ class ExportSetting < ApplicationRecord
 
     single_row[:product_name] = product&.name
     single_row[:kit_name] = kit_product_name&.name
-    single_row[:primary_sku] = product_sku.sku
-    single_row[:barcode] = product_barcode.barcode
-    single_row[:scanned_count] = kit_product.scanned_qty
-    single_row[:item_sale_price] = order_item.price
-    single_row[:ordered_qty] = kit_product.order_item.qty * kit_product_sku.qty
-    single_row[:unscanned_count] = kit_product.order_item.qty - kit_product.scanned_qty
-    single_row[:clicked_scanned_qty] = kit_product.clicked_qty
-    single_row[:removed_count] = order_item.removed_qty
-    single_row[:scanning_user] = order_item.order.packing_user&.username || order_item.order&.order_activities&.last&.username
+    single_row[:primary_sku] = product_sku&.sku
+    single_row[:barcode] = product_barcode&.barcode
+    single_row[:scanned_count] = kit_product&.scanned_qty
+    single_row[:item_sale_price] = order_item&.price
+    single_row[:ordered_qty] = kit_product&.order_item.qty * kit_product_sku&.qty
+    single_row[:unscanned_count] = kit_product&.order_item.qty - kit_product&.scanned_qty
+    single_row[:clicked_scanned_qty] = kit_product&.clicked_qty
+    single_row[:removed_count] = order_item&.removed_qty
+    single_row[:scanning_user] = order_item&.order.packing_user&.username || order_item&.order&.order_activities&.last&.username
   end
 
   def set_start_and_end_time
