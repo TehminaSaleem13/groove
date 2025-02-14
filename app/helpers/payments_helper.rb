@@ -6,8 +6,8 @@ module PaymentsHelper
     @result['cards'] = []
     @result['bank_accounts'] = []
     customer = get_current_customer(current_tenant)
-    @result['cards'] = Stripe::Customer.list_sources(customer.id, object: 'card') if customer
-    @result['bank_accounts'] = Stripe::Customer.list_sources(customer.id, object: 'bank_account') if customer
+    @result['cards'] = Stripe::PaymentMethod.list(customer: customer.id, type: 'card') if customer
+    @result['bank_accounts'] = Stripe::PaymentMethod.list(customer: customer.id, type: 'us_bank_account') if customer
   end
 
   def add_card_bank_details(info, current_tenant)
@@ -82,7 +82,7 @@ module PaymentsHelper
     create_result_hash
     customer = get_current_customer(current_tenant)
     if customer
-      customer.default_card = card
+      customer.invoice_settings.default_payment_method = card
       customer.save
     end
   end
@@ -91,14 +91,14 @@ module PaymentsHelper
     create_result_hash
     @result['default_card'] = nil
     customer = get_current_customer(current_tenant)
-    @result['default_card'] = customer.default_source if customer&.default_source
+    @result['default_card'] = customer&.invoice_settings&.default_payment_method || customer&.default_source
   end
 
   def delete_a_card(card, current_tenant)
     create_result_hash
     customer = get_current_customer(current_tenant)
-    card = Stripe::Customer.retrieve_source(customer.id, card)
-    card.delete if card
+    retrieved_card = Stripe::PaymentMethod.retrieve(card)
+    Stripe::PaymentMethod.detach(card) if retrieved_card&.customer == customer.id
   end
 
   def get_current_customer(current_tenant)

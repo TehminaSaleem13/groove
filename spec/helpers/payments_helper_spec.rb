@@ -5,18 +5,20 @@ require 'rails_helper'
 RSpec.describe PaymentsHelper do
   let(:current_tenant) { 'tenant_1' }
   let(:customer) { instance_double("Customer", default_card: nil, id: 'cus_123') }
-  let(:card_source) { double('CardSource', id: 'card_123', object: 'card') }
-  let(:bank_account_source) { double('BankAccountSource', id: 'bank_123', object: 'bank_account') }
+  let(:card_source) { double('CardSource', id: 'card_123', type: 'card') }
+  let(:bank_account_source) { double('BankAccountSource', id: 'bank_123', type: 'us_bank_account') }
   let(:card_info) { { last4: '4242', exp_month: 12, exp_year: 2025, cvc: '123' } }
   let(:bank_info) { { account_holder_name: 'John Doe', account_holder_type: 'individual', routing_number: '110000000', account_number: '1234567890', country: 'US' } }
   let(:token) { double('Token', id: 'tok_123') }
   let(:source) { double('Source', id: 'src_123', cvc_check: 'pass', status: 'verified') }
+  let(:invoice_settings) { instance_double("InvoiceSettings", default_payment_method: nil) }
 
   before do
     allow(helper).to receive(:get_current_customer).with(current_tenant).and_return(customer)
-    allow(Stripe::Customer).to receive(:list_sources).with(customer.id, object: 'card').and_return([card_source])
-    allow(Stripe::Customer).to receive(:list_sources).with(customer.id, object: 'bank_account').and_return([bank_account_source])
+    allow(Stripe::PaymentMethod).to receive(:list).with(customer: customer.id, type: 'card').and_return([card_source])
+    allow(Stripe::PaymentMethod).to receive(:list).with(customer: customer.id, type: 'us_bank_account').and_return([bank_account_source])
     allow(Stripe::Customer).to receive(:create_source).with(customer.id, source: token.id).and_return(source)
+    allow(customer).to receive(:invoice_settings).and_return(invoice_settings)
   end
 
   describe '#card_bank_list' do
@@ -28,8 +30,8 @@ RSpec.describe PaymentsHelper do
     end
 
     it 'returns an empty array if there are no card or bank account sources' do
-      allow(Stripe::Customer).to receive(:list_sources).with(customer.id, object: 'card').and_return([])
-      allow(Stripe::Customer).to receive(:list_sources).with(customer.id, object: 'bank_account').and_return([])
+      allow(Stripe::PaymentMethod).to receive(:list).with(customer: customer.id, type: 'card').and_return([])
+      allow(Stripe::PaymentMethod).to receive(:list).with(customer: customer.id, type: 'us_bank_account').and_return([])
 
       helper.card_bank_list(current_tenant)
 
@@ -88,40 +90,74 @@ RSpec.describe PaymentsHelper do
     end
   end
 
+
   describe '#get_default_card' do
-    it 'returns the default card if one exists' do
-      allow(customer).to receive(:default_source).and_return(card_source)
+    context 'when a default payment method exists in invoice settings' do
+      it 'returns the default payment method' do
+        allow(invoice_settings).to receive(:default_payment_method).and_return('pm_123')
 
-      helper.get_default_card(current_tenant)
+        helper.get_default_card(current_tenant)
 
-      expect(helper.instance_variable_get('@result')['default_card']).to eq(card_source)
+        expect(helper.instance_variable_get('@result')['default_card']).to eq('pm_123')
+      end
     end
 
-    it 'returns nil if no default card exists' do
-      allow(customer).to receive(:default_source).and_return(nil)
+    context 'when invoice settings do not have a default payment method but default source exists' do
+      it 'returns the default source' do
+        allow(invoice_settings).to receive(:default_payment_method).and_return(nil)
+        allow(customer).to receive(:default_source).and_return('card_123')
 
-      helper.get_default_card(current_tenant)
+        helper.get_default_card(current_tenant)
 
-      expect(helper.instance_variable_get('@result')['default_card']).to be_nil
+        expect(helper.instance_variable_get('@result')['default_card']).to eq('card_123')
+      end
+    end
+
+    context 'when no default payment method or source exists' do
+      it 'returns nil' do
+        allow(invoice_settings).to receive(:default_payment_method).and_return(nil)
+        allow(customer).to receive(:default_source).and_return(nil)
+
+        helper.get_default_card(current_tenant)
+
+        expect(helper.instance_variable_get('@result')['default_card']).to be_nil
+      end
     end
   end
 
   describe '#delete_a_card' do
-    it 'deletes an existing card' do
-      allow(Stripe::Customer).to receive(:retrieve_source).and_return(card_source)
-      allow(card_source).to receive(:delete).and_return(true)
+    context 'when the card belongs to the customer' do
+      it 'deletes the card' do
+        allow(card_source).to receive(:customer).and_return('cus_123')
+        allow(Stripe::PaymentMethod).to receive(:retrieve).with(card_source.id).and_return(card_source)
+        allow(Stripe::PaymentMethod).to receive(:detach).with(card_source.id).and_return(true)
 
-      helper.delete_a_card(card_source.id, current_tenant)
+        helper.delete_a_card(card_source.id, current_tenant)
 
-      expect(card_source).to have_received(:delete)
+        expect(Stripe::PaymentMethod).to have_received(:detach).with(card_source.id)
+      end
     end
 
-    it 'does nothing if the card is not found' do
-      allow(Stripe::Customer).to receive(:retrieve_source).and_return(nil)
+    context 'when the card does not belong to the customer' do
+      it 'does not delete the card' do
+        allow(card_source).to receive(:customer).and_return('another_cus_456')
+        allow(Stripe::PaymentMethod).to receive(:retrieve).with(card_source.id).and_return(card_source)
+        allow(Stripe::PaymentMethod).to receive(:detach)
 
-      helper.delete_a_card(card_source.id, current_tenant)
+        helper.delete_a_card(card_source.id, current_tenant)
 
-      expect(helper.instance_variable_get('@result')['status']).to eq(true)
+        expect(Stripe::PaymentMethod).not_to have_received(:detach)
+      end
+    end
+
+    context 'when the card is not found' do
+      it 'does nothing' do
+        allow(Stripe::PaymentMethod).to receive(:retrieve).with(card_source.id).and_return(nil)
+
+        helper.delete_a_card(card_source.id, current_tenant)
+
+        expect(helper.instance_variable_get('@result')['status']).to eq(true)
+      end
     end
   end
 
