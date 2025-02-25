@@ -815,7 +815,7 @@ class OrdersController < ApplicationController
 
   def priority_card_orders_with_unassigned_user(assigned_tag_name)
     orders_with_tag = Order
-    .where(status: 'awaiting', packing_user_id: nil)
+    .where(status: 'awaiting', assigned_user_id: nil)
     .joins(:order_tags)
     .where(order_tags: { name: assigned_tag_name })
     .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)

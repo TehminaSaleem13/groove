@@ -3,6 +3,72 @@
 require 'rails_helper'
 
 RSpec.describe ScanPackController, type: :controller do
+  include AuthHelper
+
+  before(:each) do
+    setup_authentication
+  end
+
+  describe '#scan_barcode' do
+    context 'when scan_to_cart is enabled' do
+      let(:cart) { FactoryBot.create(:cart, cart_id: 'C01') }
+      let(:cart_scan_service) { instance_double(ScanPack::CartScanService) }
+      let(:service_result) { { 'status' => true } }
+
+      before do
+        allow(ScanPack::CartScanService).to receive(:new).and_return(cart_scan_service)
+        allow(cart_scan_service).to receive(:run).and_return(service_result)
+        allow(Order).to receive(:where).and_return(double(first: nil, count: 5))
+      end
+
+      it 'uses CartScanService when valid cart is found' do
+        get :scan_barcode, params: { scan_to_cart_enabled: true, input: 'A-1-C01', state: 'scanpack.rfo' }
+
+        expect(response).to have_http_status(:ok)
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response).to include('status' => true, 'awaiting' => 5)
+      end
+
+      it 'falls back to ScanBarcodeService when cart is not found' do
+        barcode_service = instance_double(ScanPack::ScanBarcodeService)
+        allow(ScanPack::ScanBarcodeService).to receive(:new).and_return(barcode_service)
+        allow(barcode_service).to receive(:run).and_return(service_result)
+
+        get :scan_barcode, params: { scan_to_cart_enabled: true, input: 'A-1-INVALID' }
+
+        expect(response).to have_http_status(:ok)
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response).to include('status' => true, 'awaiting' => 5)
+      end
+    end
+
+    context 'when scan_to_cart is disabled' do
+      let(:barcode_service) { instance_double(ScanPack::ScanBarcodeService) }
+      let(:service_result) { { 'status' => true } }
+      let(:user) { FactoryBot.create(:user) }
+      let(:token) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: user.id) }
+
+      before do
+        allow(controller).to receive(:doorkeeper_token) { token }
+        allow(controller).to receive(:current_user) { user }
+        header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: user.id).token }
+        @request.headers.merge! header
+        User.current = user
+        
+        allow(ScanPack::ScanBarcodeService).to receive(:new).and_return(barcode_service)
+        allow(barcode_service).to receive(:run).and_return(service_result)
+        allow(Order).to receive(:where).and_return(double(first: nil, count: 5))
+      end
+
+      it 'uses ScanBarcodeService' do
+        get :scan_barcode, params: { scan_to_cart_enabled: false, input: 'BARCODE123' }
+
+        expect(response).to have_http_status(:ok)
+        parsed_response = JSON.parse(response.body)
+        expect(parsed_response).to include('status' => true, 'awaiting' => 5)
+      end
+    end
+  end
   let(:inv_wh) { FactoryBot.create(:inventory_warehouse, name: 'scan_pack_inventory_warehouse') }
   let!(:store) do
     FactoryBot.create(:store, name: 'csv_store', store_type: 'CSV', inventory_warehouse: inv_wh, status: true)
@@ -10,14 +76,13 @@ RSpec.describe ScanPackController, type: :controller do
 
   before do
     Groovepacker::SeedTenant.new.seed
-    generalsetting = GeneralSetting.all.first
-    generalsetting.update_column(:inventory_tracking, true)
-    generalsetting.update_column(:hold_orders_due_to_inventory, true)
+    generalsetting = GeneralSetting.first_or_create
+    generalsetting.update_columns(inventory_tracking: true, hold_orders_due_to_inventory: true)
     @user = FactoryBot.create(:user, username: 'scan_pack_spec_user', name: 'Scan Pack user',
-                                     role: Role.find_by_name('Scan & Pack User'))
+                                     role: Role.find_or_create_by(name: 'Scan & Pack User'))
     access_restriction = FactoryBot.create(:access_restriction)
     csv_mapping = FactoryBot.create(:csv_mapping, store_id: store.id)
-    Tenant.create(name: Apartment::Tenant.current, scan_pack_workflow: 'product_first_scan_to_put_wall')
+    Tenant.first_or_create(name: Apartment::Tenant.current, scan_pack_workflow: 'product_first_scan_to_put_wall')
 
     @products = {}
     skus = %w[ACTION NEW DIGI-RED DIGI-BLU]
@@ -31,23 +96,27 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Check Tracking Number Validation' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
-    before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
+      before do
       Tenant.find_by_name(Apartment::Tenant.current).update(scan_pack_workflow: 'default')
-      ScanPackSetting.last.update(tracking_number_validation_enabled: true,
-                                  tracking_number_validation_prefixes: 'VERIFY TRACKING, CUSTOM TRACKING', post_scanning_option: 'Record')
+      ScanPackSetting.last.update(
+        tracking_number_validation_enabled: true,
+        tracking_number_validation_prefixes: 'VERIFY TRACKING, CUSTOM TRACKING',
+        post_scanning_option: 'Record'
+      )
 
       product = FactoryBot.create(:product)
-      FactoryBot.create(:product_sku, product:, sku: 'TRACKING')
-      FactoryBot.create(:product_barcode, product:, barcode: 'TRACKING')
+      FactoryBot.create(:product_sku, product: product, sku: 'TRACKING')
+      FactoryBot.create(:product_barcode, product: product, barcode: 'TRACKING')
 
-      order = FactoryBot.create(:order, status: 'awaiting', store:)
-      FactoryBot.create(:order_item, product_id: product.id, qty: 1, price: '10', row_total: '10', order:,
-                                     name: product.name)
+      order = FactoryBot.create(:order, status: 'awaiting', store: store)
+      FactoryBot.create(:order_item,
+        product_id: product.id,
+        qty: 1,
+        price: '10',
+        row_total: '10',
+        order: order,
+        name: product.name
+      )
     end
 
     it 'Show Invalid Tracking Number Entered' do
@@ -86,12 +155,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'POST #send_out_of_stock_mail' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
 
       GeneralSetting.last.update(email_address_for_report_out_of_stock: 'kcpatel006@gmail.com')
     end
@@ -133,12 +197,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Product First Scan to Put Wall' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
 
       @tote_set = ToteSet.create(name: 'T')
 
@@ -299,12 +358,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Get Order For Scan' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
 
       product = FactoryBot.create(:product)
       FactoryBot.create(:product_sku, product:, sku: 'PRODUCTTEST')
@@ -595,12 +649,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Order Scan' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
       ScanPackSetting.last.update(partial: true, remove_enabled: true)
     end
 
@@ -980,13 +1029,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Expo Logs Process' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token,
-                 'HTTP_ON_GPX' => 'on GPX' }
-      @request.headers.merge! header
 
       ScanPackSetting.last.update(partial: true, remove_enabled: true)
       @order = Order.create(increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil,
@@ -1330,13 +1373,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Order scanning Discrepancy' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token,
-                 'HTTP_ON_GPX' => 'on GPX' }
-      @request.headers.merge! header
 
       @order = Order.create(
         increment_id: 'C000209814-B(Duplicate-2)', order_placed_time: Time.current, sku: nil,
@@ -1384,12 +1421,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Image Upload' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
 
       @order = FactoryBot.create(:order, store_id: store.id, status: 'scanned', email: 'testemail@yopmail.com')
 
@@ -1506,12 +1538,7 @@ RSpec.describe ScanPackController, type: :controller do
   end
 
   describe 'Order Status' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
 
       product = FactoryBot.create(:product, :with_sku_barcode)
 
@@ -1526,19 +1553,80 @@ RSpec.describe ScanPackController, type: :controller do
     end
   end
 
-  describe 'POST #scan_pack_bug_report' do
-    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
-
+  describe '#scan_pack_bug_report' do
     before do
-      allow(controller).to receive(:doorkeeper_token) { token1 }
-      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
-      @request.headers.merge! header
     end
 
-    it 'creates a bug report and renders a JSON response' do
-      post :scan_pack_bug_report, params: { logs: 'Some logs', other_param: 'Other data' }
+    it 'processes bug report and returns success status' do
+      allow(BugReportMailer).to receive_message_chain(:delay, :report_bug)
+
+      post :scan_pack_bug_report, params: { message: 'Test bug report' }
 
       expect(response).to have_http_status(:ok)
+      parsed_response = JSON.parse(response.body)
+      expect(parsed_response).to include('status' => 'OK')
+    end
+  end
+
+  describe '#detect_discrepancy' do
+    let(:user) { FactoryBot.create(:user) }
+    let(:token) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: user.id) }
+    let(:order) { FactoryBot.create(:order, status: 'pending') }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token }
+      allow(controller).to receive(:current_user) { user }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: user.id).token }
+      @request.headers.merge! header
+      User.current = user
+    end
+
+    it 'detects discrepancy in order status' do
+      orders_data = [{ order_id: order.id, status: '0' }]
+      allow(Groovepacker::SlackNotifications::OrderScanDiscrepancy).to receive_message_chain(:new, :delay, :call)
+
+      post :detect_discrepancy, params: { data: orders_data }
+
+      expect(response).to have_http_status(:ok)
+      parsed_response = JSON.parse(response.body)
+      expect(parsed_response['status']).to eq('OK')
+      expect(parsed_response['result'].first['discrepancy']).to be true
+    end
+  end
+
+  describe '#reset_order_scan' do
+    let(:user) { FactoryBot.create(:user) }
+    let(:token) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: user.id) }
+    let(:order) { FactoryBot.create(:order, status: 'pending') }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token }
+      allow(controller).to receive(:current_user) { user }
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: user.id).token }
+      @request.headers.merge! header
+      User.current = user
+    end
+
+    it 'resets scan status for non-scanned order' do
+      allow_any_instance_of(Order).to receive(:reset_scanned_status)
+      allow_any_instance_of(Order).to receive(:destroy_boxes)
+
+      post :reset_order_scan, params: { order_id: order.id }
+
+      expect(response).to have_http_status(:ok)
+      parsed_response = JSON.parse(response.body)
+      expect(parsed_response['data']['next_state']).to eq('scanpack.rfo')
+    end
+
+    it 'returns error for already scanned order' do
+      scanned_order = FactoryBot.create(:order, status: 'scanned')
+
+      post :reset_order_scan, params: { order_id: scanned_order.id }
+
+      expect(response).to have_http_status(:ok)
+      parsed_response = JSON.parse(response.body)
+      expect(parsed_response['status']).to be false
+      expect(parsed_response['error_messages']).to include("Order with id: #{scanned_order.id} is already in scanned state")
     end
   end
 end

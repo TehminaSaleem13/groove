@@ -44,6 +44,7 @@ class Order < ApplicationRecord
   include OrdersHelper
   include OrderMethodsHelper
   include ApplicationHelper
+  include OrderScanToCart
 
   serialize :ss_label_data, JSON
 
@@ -55,6 +56,7 @@ class Order < ApplicationRecord
   scope :awaiting, -> { where(status: 'awaiting') }
   scope :partially_scanned, -> { awaiting.joins(:order_items).where.not(order_items: { scanned_qty: 0 }).distinct }
   scope :awaiting_without_partially_scanned, -> { awaiting.where.not(id: partially_scanned.ids) }
+  scope :ready_for_picking, -> { awaiting.where(assigned_cart_tote_id: nil) }
   scope :filtered_by_status, lambda { |statuses|
     return all if statuses.include?('all')
 

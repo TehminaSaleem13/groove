@@ -12,10 +12,23 @@ class ScanPackController < ApplicationController
   end
 
   def scan_barcode
-    scan_barcode_obj = ScanPack::ScanBarcodeService.new(
-      current_user, session, params
-    )
-    render json: scan_barcode_obj.run.merge('awaiting' => get_awaiting_orders_count)
+    scan_barcode_service = if params[:scan_to_cart_enabled]
+                           handle_cart_scan
+                         else
+                           ScanPack::ScanBarcodeService.new(current_user, session, params)
+                         end
+
+    render json: scan_barcode_service.run.merge('awaiting' => get_awaiting_orders_count)
+  end
+
+  def handle_cart_scan
+    cart_number = params[:input].split('-').last
+    return ScanPack::ScanBarcodeService.new(current_user, session, params) unless cart_number
+
+    cart = Cart.find_by(cart_id: cart_number)
+    return ScanPack::ScanBarcodeService.new(current_user, session, params) unless cart
+
+    ScanPack::CartScanService.new(cart, current_user, params)
   end
 
   def scan_pack_v2
