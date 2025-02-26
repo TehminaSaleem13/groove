@@ -367,7 +367,8 @@ ActiveRecord::Schema.define(version: 2025_01_29_140553) do
     t.boolean "is_haptics_option", default: false
     t.string "email_address_for_report_out_of_stock", default: ""
     t.string "abbreviated_time_zone"
-  t.boolean "delete_import_summary", default: false
+    t.boolean "delete_import_summary", default: false
+    t.integer "slidShowTime", default: 15
   end
 
   create_table "generate_barcodes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
