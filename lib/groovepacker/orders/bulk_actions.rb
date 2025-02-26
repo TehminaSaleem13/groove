@@ -268,8 +268,7 @@ module Groovepacker
         temp_increment_id = ''
         orders.each do |order|
           index = 1
-          return if check_bulk_cancel(bulk_action)
-
+          return if check_bulk_cancel(bulk_action)    
           neworder = order.dup
           begin
             temp_increment_id = order.increment_id.split(/[(]Duplicate|&|\+/).first + '(Duplicate-' + index.to_s + ')'
@@ -286,13 +285,18 @@ module Groovepacker
             neworder.split_from_order_id = ''
             neworder.store_order_id = ''
           end
+          if order.shipstation_label_data.present?
+            copy_shipstation_label_data = order.shipstation_label_data.dup
+            copy_shipstation_label_data.order = neworder
+            copy_shipstation_label_data.save
+          end
+      
           neworder.save(validate: false)
           neworder.persisted? ? Order.add_activity_to_new_order(neworder, order.order_items, username) : @result['status'] = false
         end
         check_bulk_action_completed_or_not(bulk_action)
         $redis.del("bulk_action_duplicate_data_#{tenant}_#{bulk_actions_id}")
-      end
-
+      end     
       def check_bulk_cancel(bulk_action)
         bulk_action.reload
         if bulk_action.cancel?
