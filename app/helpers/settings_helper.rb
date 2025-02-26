@@ -215,7 +215,8 @@ module SettingsHelper
       if current_user.can? 'edit_general_prefs'
         general_setting.attributes = permit_general_setting_params
         printing_setting.attributes = permit_printing_setting_params
-
+        general_setting.slidShowTime = params[:slidShowTime] if params[:slidShowTime].present?
+        
         if general_setting.save &&  printing_setting.save
           @result['success_messages'] = ['Settings updated successfully.']
         else

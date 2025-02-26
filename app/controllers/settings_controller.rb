@@ -210,9 +210,11 @@ class SettingsController < ApplicationController
       @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
       @result['data']['general_setting'] =
         @result['data']['general_setting'].as_json.merge(
-          'packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"), 'time_zone_offset' => current_time_in_gp.formatted_offset
+          'slidShowTime' => general_setting.slidShowTime, # Add this line to include slidShowTime in the response
+          'packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"),
+          'time_zone_offset' => current_time_in_gp.formatted_offset
         ).merge(GeneralSetting.last.per_tenant_settings)
-      scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
+        scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']['scanpack_setting'] =
         scan_pack_setting.as_json.merge!(
           'scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select('id, name, max_totes')
