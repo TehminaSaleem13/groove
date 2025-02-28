@@ -157,34 +157,35 @@ class GroovS3
       obj.public_url
     end
     
-    def create_sound_from_system(tenant, file_names, sound_type, content_type = 'audio/mpeg', privacy = :public_read)
+    def create_sound_from_system(tenant, file_paths, sound_type, content_type = 'audio/mpeg', privacy = :public_read)
       valid_types = ['correct_scan', 'error_scan', 'order_done']
+      
       unless valid_types.include?(sound_type)
         raise ArgumentError, "Invalid sound type. Must be one of: #{valid_types.join(', ')}"
       end
-      file_names = Array(file_names)
-      
+      file_paths = Array(file_paths)
       public_urls = []
+      file_paths.each do |file|
+        raise "File not found: #{file.original_filename}" unless file.tempfile && File.exist?(file.tempfile.path)
+        object_key = File.join("sounds", sound_type, file.original_filename)  # Correct S3 object path
     
-      file_names.each do |file_name|
-        file_path = "public/sounds/#{file_name}" 
-        raise "File #{file_name} not found in system folder at #{file_path}" unless File.exist?(file_path)
-      
-        file_data = File.read(file_path)
-        object = create(tenant, "sounds/#{sound_type}/#{file_name}", content_type, privacy)
+        file_data = File.read(file.tempfile.path)
+
+        object = create(tenant, object_key)  
         save(object, file_data)
-      
+    
         bucket_name = ENV['S3_BUCKET_NAME']
         region = ENV['S3_BUCKET_REGION']
-        public_url = "https://#{bucket_name}.s3.#{region}.amazonaws.com/#{tenant}/sounds/#{sound_type}/#{file_name}"
         
+        public_url = "https://#{bucket_name}.s3.#{region}.amazonaws.com/#{object_key}"
+    
         public_urls << public_url
       end
     
       public_urls
     end
     
-      
+    
     def get_sounds_export
       valid_types = ['correct_scan', 'error_scan', 'order_done']
       
@@ -195,9 +196,11 @@ class GroovS3
     
       bucket_name = ENV['S3_BUCKET_NAME']
       content_types = {}  
-    
+      
+      tenant = Apartment::Tenant.current
+      
       valid_types.each do |sound_type|
-        prefix = "tenant123/sounds/#{sound_type}/"
+        prefix = "#{tenant}/sounds/#{sound_type}/"
         puts "Using prefix: #{prefix}"
     
         objects = s3.bucket(bucket_name).objects(prefix: prefix)
@@ -227,7 +230,6 @@ class GroovS3
     
       return content_types
     end
-    
 
     def delete_object_sound(tenant, sound_type, file_name)
       s3 = Aws::S3::Resource.new(

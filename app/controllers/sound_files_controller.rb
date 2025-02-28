@@ -2,12 +2,12 @@ class SoundFilesController < ApplicationController
   
     def create_sounds
       sound_type = params[:sound_type]
-      file_names = params[:file_names]
+      file_paths = params[:file_paths]
       content_type = params[:content_type] || 'audio/mpeg' 
       privacy = params[:privacy] || :public_read  
       tenant = Apartment::Tenant.current
       begin
-        public_urls = GroovS3.create_sound_from_system(tenant, file_names, sound_type, content_type, privacy)
+        public_urls = GroovS3.create_sound_from_system(tenant, file_paths, sound_type, content_type, privacy)
         render json: { status: 'success', urls: public_urls }, status: :ok
       rescue => e
         render json: { status: 'error', message: e.message }, status: :unprocessable_entity
@@ -25,7 +25,6 @@ class SoundFilesController < ApplicationController
 
     def remove_sounds
         result = { status: true, failed_files: [] }
-    
         file_names = params[:file_names]
         sound_type = params[:sound_type]
         tenant = Apartment::Tenant.current
