@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_02_27_091500) do
+ActiveRecord::Schema.define(version: 2025_02_28_130324) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -368,7 +368,7 @@ ActiveRecord::Schema.define(version: 2025_02_27_091500) do
     t.string "email_address_for_report_out_of_stock", default: ""
     t.string "abbreviated_time_zone"
     t.boolean "delete_import_summary", default: false
-    t.integer "slideShowTime", default: 15
+    t.integer "slide_show_time", default: 15
     t.json "select_types", null: false
   end
 
@@ -966,10 +966,9 @@ ActiveRecord::Schema.define(version: 2025_02_27_091500) do
     t.bigint "product_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.bigint "option_product_id"
+    t.integer "option_product_id"
     t.integer "qty", default: 0
     t.integer "packing_order", default: 50
-    t.index ["option_product_id"], name: "fk_rails_a1f5b75a40"
     t.index ["product_id"], name: "index_product_kit_skus_on_product_id"
   end
 
@@ -1692,5 +1691,4 @@ ActiveRecord::Schema.define(version: 2025_02_27_091500) do
   end
 
   add_foreign_key "cart_rows", "carts"
-  add_foreign_key "product_kit_skus", "products", column: "option_product_id", on_delete: :nullify
 end

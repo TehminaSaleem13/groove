@@ -68,7 +68,7 @@ module SettingsHelper
         restart_code_enabled restart_code
         type_scan_code_enabled type_scan_code post_scanning_option
         escape_string_enabled escape_string record_lot_number
-        show_customer_notes show_internal_notes send_external_logs 
+        show_customer_notes show_internal_notes send_external_logs
         show_tags scan_by_shipping_label intangible_setting_enabled
         intangible_string intangible_setting_gen_barcode_from_sku
         post_scan_pause_enabled post_scan_pause_time
@@ -215,7 +215,7 @@ module SettingsHelper
       if current_user.can? 'edit_general_prefs'
         general_setting.attributes = permit_general_setting_params
         printing_setting.attributes = permit_printing_setting_params
-        general_setting.slideShowTime = params[:slideShowTime] if params[:slideShowTime].present?
+        general_setting.slide_show_time = params[:slide_show_time] if params[:slide_show_time].present?
         general_setting.select_types = ['correct_scan', 'error_scan', 'order_done'].map do |select_type|
           { select_type: select_type, url: params[select_type] } if params[:select_type].present?
         end.compact

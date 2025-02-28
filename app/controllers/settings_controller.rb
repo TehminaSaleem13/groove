@@ -210,13 +210,13 @@ class SettingsController < ApplicationController
       @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
       @result['data']['general_setting'] =
         @result['data']['general_setting'].as_json.merge(
-          'slideShowTime' => general_setting.slideShowTime,
+          'slide_show_time' => general_setting.slide_show_time,
           'packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"),
           'time_zone_offset' => current_time_in_gp.formatted_offset
         ).merge(GeneralSetting.last.per_tenant_settings)
-  
+
       @result['data']['select_types'] = general_setting.select_types
-  
+
       scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']['scanpack_setting'] =
         scan_pack_setting.as_json.merge!(
