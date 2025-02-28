@@ -40,6 +40,7 @@ class GeneralSetting < ApplicationRecord
   after_commit :log_events
   after_commit :update_user_packing_slip_sizes
   before_save :validate_barcode_length_and_starting_value
+  before_validation :set_default_select_types, on: :create
 
   before_validation do
     # Set Abbreviated Time Zone Name
@@ -326,6 +327,14 @@ class GeneralSetting < ApplicationRecord
   end
 
   private
+
+  def set_default_select_types
+    self.select_types ||= {
+      "select_correct_scan" => nil,
+      "select_error_scan" => nil,
+      "select_order_done" => nil
+    }
+  end
 
   def update_user_packing_slip_sizes
     return unless saved_change_to_packing_slip_size?

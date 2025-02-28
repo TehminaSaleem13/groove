@@ -210,11 +210,14 @@ class SettingsController < ApplicationController
       @result['data']['general_setting'] = GeneralSetting.last.attributes.slice(*filter_general_settings)
       @result['data']['general_setting'] =
         @result['data']['general_setting'].as_json.merge(
-          'slidShowTime' => general_setting.slidShowTime, # Add this line to include slidShowTime in the response
+          'slideShowTime' => general_setting.slideShowTime,
           'packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"),
           'time_zone_offset' => current_time_in_gp.formatted_offset
         ).merge(GeneralSetting.last.per_tenant_settings)
-        scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
+  
+      @result['data']['select_types'] = general_setting.select_types
+  
+      scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']['scanpack_setting'] =
         scan_pack_setting.as_json.merge!(
           'scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select('id, name, max_totes')
@@ -224,7 +227,6 @@ class SettingsController < ApplicationController
       @result['error_messages'] =
         ['No general settings Or Scan Pack settings  available for the system. Contact administrator.']
     end
-
     render json: @result
   end
 
@@ -244,6 +246,8 @@ class SettingsController < ApplicationController
     printing_setting = PrintingSetting.create if printing_setting.nil?
     @result = upadate_setting_attributes(general_setting, current_user, printing_setting)
     customer = find_stripe_customer
+    select_types = ['select_correct_scan', 'select_error_scan', 'select_order_done']
+
     if general_setting.email_address_for_billing_notification != params[:email_address_for_billing_notification] && !general_setting.email_address_for_billing_notification.nil?
       update_with_stripe_customer(customer)
     end

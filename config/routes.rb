@@ -211,6 +211,14 @@ Rails.application.routes.draw do
     end
   end
 
+  resources :sound_files, only: [] do
+    collection do
+      delete 'remove_sounds', to: 'sound_files#remove_sounds'
+      post 'create_sounds', to: 'sound_files#create_sounds'
+      get 'get_sounds_files', to: 'sound_files#get_sounds_files'
+    end
+  end
+  
   resources :settings do
     collection do
       get 'get_settings'

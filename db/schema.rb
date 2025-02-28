@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_01_29_140553) do
+ActiveRecord::Schema.define(version: 2025_02_27_091500) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -368,7 +368,8 @@ ActiveRecord::Schema.define(version: 2025_01_29_140553) do
     t.string "email_address_for_report_out_of_stock", default: ""
     t.string "abbreviated_time_zone"
     t.boolean "delete_import_summary", default: false
-    t.integer "slidShowTime", default: 15
+    t.integer "slideShowTime", default: 15
+    t.json "select_types", null: false
   end
 
   create_table "generate_barcodes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -797,6 +798,8 @@ ActiveRecord::Schema.define(version: 2025_01_29_140553) do
     t.integer "origin_store_id"
     t.string "veeqo_allocation_id"
     t.integer "assigned_user_id"
+    t.string "assigned_cart_tote_id"
+    t.index ["assigned_cart_tote_id"], name: "index_orders_on_assigned_cart_tote_id"
     t.index ["id"], name: "index_orders_on_id"
     t.index ["increment_id"], name: "index_orders_on_increment_id"
     t.index ["non_hyphen_increment_id"], name: "index_orders_on_non_hyphen_increment_id"
@@ -963,9 +966,10 @@ ActiveRecord::Schema.define(version: 2025_01_29_140553) do
     t.bigint "product_id"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
-    t.integer "option_product_id"
+    t.bigint "option_product_id"
     t.integer "qty", default: 0
     t.integer "packing_order", default: 50
+    t.index ["option_product_id"], name: "fk_rails_a1f5b75a40"
     t.index ["product_id"], name: "index_product_kit_skus_on_product_id"
   end
 
@@ -1190,7 +1194,6 @@ ActiveRecord::Schema.define(version: 2025_01_29_140553) do
     t.string "email_reply"
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
-    t.boolean "assigned_orders", default: false
     t.boolean "requires_assigned_orders", default: false
     t.boolean "enable_service_issue_status", default: true, null: false
     t.boolean "scan_to_cart_option", default: false
@@ -1689,4 +1692,5 @@ ActiveRecord::Schema.define(version: 2025_01_29_140553) do
   end
 
   add_foreign_key "cart_rows", "carts"
+  add_foreign_key "product_kit_skus", "products", column: "option_product_id", on_delete: :nullify
 end
