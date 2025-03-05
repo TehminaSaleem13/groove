@@ -107,6 +107,14 @@ module Groovepacker
       def filtered_order(filtered_filters, filters)
         sort_key, sort_order, limit, offset, status_filter, status_filter_text, query_add = get_parameters
 
+        tags_array = if @params[:tags_name].present?
+          @params[:tags_name].is_a?(String) ? @params[:tags_name].split(',').map(&:strip) : @params[:tags_name]
+        else
+          nil
+        end
+
+        match_all = @params[:match_option] == "All"
+
         Order.filtered_sorted_orders(@params[:sort], sort_order, limit, offset, status_filter, status_filter_text, query_add, @params)
              .filter_all_status(filters)
              .filter_by_qty(OPERATORS_MAP[get_operator_from_filter(4, filtered_filters)], filtered_filters[4]["value"])
@@ -124,8 +132,8 @@ module Groovepacker
              .filter_by_tote(OPERATORS_MAP[get_operator_from_filter(12, filtered_filters)], map_value(filtered_filters[12]["operator"], filtered_filters[12]["value"]))
              .within_date_range(date_range(filtered_filters), filtered_filters[3]["operator"])
              .within_number_range(number_range(filtered_filters), @params[:sort])
-             .with_tags(@params[:tags_name], @params[:filterIncludedTags])
-             .without_tags(@params[:tags_name], @params[:filterIncludedTags])
+             .with_tags(tags_array, @params[:filterIncludedTags], match_all)
+             .without_tags(tags_array, @params[:filterIncludedTags], match_all)
              .check_date_range(@params[:dateRange])
              .filter_by_last_days(@params[:dateValue])
              .by_assigned_user_name(@params[:username])

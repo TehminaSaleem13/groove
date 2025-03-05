@@ -139,11 +139,33 @@ class Order < ApplicationRecord
     value = DateTime.strptime(value, '%m-%d-%Y') if value.is_a?(String)
     where("DATE(order_placed_time) #{operator} ?", value) if value.present? && operator.present?
   }
-  scope :with_tags, ->(tag_names, shouldFilterIncludeTags) {
-    joins(:order_tags).where(order_tags: { name: tag_names }).distinct if tag_names.present? && shouldFilterIncludeTags.to_b
+  scope :with_tags, ->(tag_names, shouldFilterIncludeTags, match_all = true) {
+    if tag_names.present? && shouldFilterIncludeTags.to_b
+      if match_all
+        joins(:order_tags)
+          .where(order_tags: { name: tag_names })
+          .group(:id)
+          .having("COUNT(DISTINCT order_tags.name) = ?", tag_names.length)
+      else
+        joins(:order_tags).where(order_tags: { name: tag_names }).distinct
+      end
+    end
   }
-  scope :without_tags, ->(tag_names, shouldFilterIncludeTags) {
-    joins(:order_tags).where.not(order_tags: { name: tag_names }).distinct if tag_names.present? && !shouldFilterIncludeTags.to_b
+
+  scope :without_tags, ->(tag_names, shouldFilterIncludeTags, match_all = true) {
+    if tag_names.present? && !shouldFilterIncludeTags.to_b
+      subquery = if match_all
+        OrderTag.select("order_id")
+                .where(name: tag_names)
+                .group(:order_id)
+                .having("COUNT(DISTINCT name) = ?", tag_names.length)
+      else
+        OrderTag.select("order_id").where(name: tag_names)
+      end
+      where("orders.id NOT IN (#{subquery.to_sql})")
+    else
+      all
+    end
   }
 
   scope :by_assigned_user_name, ->(usernames) {

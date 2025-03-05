@@ -47,10 +47,22 @@
       box-sizing: border-box;
     }
     .tote-id {
-      font-size: 72px;
       font-weight: semi-bold;
       letter-spacing: 2px;
       line-height: 1;
+      font-size: 72px;
+    }
+
+    .tote-id.length-5-7 {
+      font-size: 60px;
+    }
+    
+    .tote-id.length-8-10 {
+      font-size: 48px;
+    }
+    
+    .tote-id.length-over-10 {
+      font-size: 36px;
     }
     .barcode {
       height: 1in;
@@ -90,7 +102,19 @@
   <% tote_labels.each_slice(2) do |pair| %>
     <div class="page">
       <div class="label">
-        <div class="tote-id"><%= pair.first[:tote_id] %></div>
+        <% tote_id = pair.first[:tote_id] %>
+        <% id_length_class = 
+          if tote_id.length > 10
+            "length-over-10"
+          elsif tote_id.length >= 8
+            "length-8-10"
+          elsif tote_id.length >= 5
+            "length-5-7"
+          else
+            ""
+          end 
+        %>
+        <div class="tote-id <%= id_length_class %>"><%= tote_id %></div>
         <div class="barcode">
           <%= image_tag "data:image/png;base64,#{Base64.encode64(Barby::Code128B.new(pair.first[:tote_barcode_value]).to_png)}" %>
         </div>
@@ -102,7 +126,19 @@
       
       <% if pair.second.present? %>
         <div class="label">
-          <div class="tote-id"><%= pair.second[:tote_id] %></div>
+          <% tote_id = pair.second[:tote_id] %>
+          <% id_length_class = 
+            if tote_id.length > 10
+              "length-over-10"
+            elsif tote_id.length >= 8
+              "length-8-10"
+            elsif tote_id.length >= 5
+              "length-5-7"
+            else
+              ""
+            end 
+          %>
+          <div class="tote-id <%= id_length_class %>"><%= tote_id %></div>
           <div class="barcode">
             <%= image_tag "data:image/png;base64,#{Base64.encode64(Barby::Code128B.new(pair.second[:tote_barcode_value]).to_png)}" %>
           </div>

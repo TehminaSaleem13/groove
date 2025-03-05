@@ -808,7 +808,7 @@ class OrdersController < ApplicationController
   def regular_priority_orders
     order_ids = Order.where(status: 'awaiting')
     .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
-    .where(packing_user_id: nil)
+    .where(assigned_user_id: nil)
     .where.not(id: @counted_order_ids.map(&:id)).order(:order_placed_time)
     @counted_order_ids += order_ids
   end
