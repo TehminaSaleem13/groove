@@ -177,7 +177,7 @@ class GroovS3
         bucket_name = ENV['S3_BUCKET_NAME']
         region = ENV['S3_BUCKET_REGION']
         
-        public_url = "https://#{bucket_name}.s3.#{region}.amazonaws.com/#{object_key}"
+        public_url = "https://#{bucket_name}.s3.#{region}.amazonaws.com/#{tenant}/#{object_key}"
     
         public_urls << public_url
       end
@@ -236,16 +236,19 @@ class GroovS3
         credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
         region: ENV['S3_BUCKET_REGION']
       )
-  
       bucket_name = ENV['S3_BUCKET_NAME']
       s3_object_key = "#{tenant}/sounds/#{sound_type}/#{file_name}"
       object = s3.bucket(bucket_name).object(s3_object_key)
-  
-      begin
-        object.delete
-        return true
-      rescue Aws::S3::Errors::NoSuchKey
-        return false  
+    
+      if object.exists?
+        begin
+          object.delete
+          return { status: 'success', message: "File '#{file_name}' deleted successfully from '#{sound_type}'." }
+        rescue Aws::S3::Errors::ServiceError => e
+          return { status: 'error', message: "Failed to delete file '#{file_name}': #{e.message}" }
+        end
+      else
+        return { status: 'error', message: "The file '#{file_name}' was not found in '#{sound_type}'." }
       end
     end
     

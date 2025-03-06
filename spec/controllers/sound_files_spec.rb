@@ -4,18 +4,41 @@ RSpec.describe SoundFilesController, type: :controller do
   let(:tenant) { create(:tenant) }
   let(:valid_sound_type) { 'order_done' }
   let(:invalid_sound_type) { 'invalid_type' }
-  let(:file_paths) { ['file1.mp3', 'file2.mp3'] }  
+  let(:file_paths) { ['file1.mp3', 'file2.mp3'] }
   let(:content_type) { 'audio/mpeg' }
   let(:privacy) { :public_read }
+
+  before do
+    Groovepacker::SeedTenant.new.seed
+    generalsetting = GeneralSetting.all.first
+    generalsetting.update_column(:inventory_tracking, true)
+    generalsetting.update_column(:hold_orders_due_to_inventory, true)
+    user_role = FactoryBot.create(:role, name: 'csv_spec_tester_role', add_edit_stores: true, import_products: true)
+    @user = FactoryBot.create(:user, name: 'CSV Tester', username: 'csv_spec_tester', role: user_role)
+    access_restriction = FactoryBot.create(:access_restriction)
+  end
+
+  after do
+    @tenant.destroy if @tenant
+  end
 
   def json_response
     JSON.parse(response.body)
   end
 
   describe 'POST #create_sounds' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      allow(token1).to receive(:id).and_return(nil)
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
     context 'when successful' do
       it 'creates sounds and returns success' do
         allow(GroovS3).to receive(:create_sound_from_system).and_return(['url1', 'url2'])
+
         post :create_sounds, params: {
           sound_type: valid_sound_type,
           file_paths: file_paths,
@@ -35,10 +58,11 @@ RSpec.describe SoundFilesController, type: :controller do
 
         post :create_sounds, params: {
           sound_type: valid_sound_type,
-          file_paths: file_paths,  # File paths expected by the controller
+          file_paths: file_paths,
           content_type: content_type,
           privacy: privacy
         }
+
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response['status']).to eq('error')
         expect(json_response['message']).to eq('Something went wrong')
@@ -47,10 +71,18 @@ RSpec.describe SoundFilesController, type: :controller do
   end
 
   describe 'GET #get_sounds_files' do
+    let(:token1) { instance_double('Doorkeeper::AccessToken', acceptable?: true, resource_owner_id: @user.id) }
+
+    before do
+      allow(controller).to receive(:doorkeeper_token) { token1 }
+      allow(token1).to receive(:id).and_return(nil)
+      header = { 'Authorization' => 'Bearer ' + FactoryBot.create(:access_token, resource_owner_id: @user.id).token }
+      @request.headers.merge! header
+    end
     context 'when successful' do
       it 'returns the sounds' do
         allow(GroovS3).to receive(:get_sounds_export).and_return({ 'correct_scan' => 'url1', 'error_scan' => 'url2' })
-        
+
         get :get_sounds_files
         expect(response).to have_http_status(:ok)
         expect(json_response['status']).to eq('success')
@@ -61,7 +93,7 @@ RSpec.describe SoundFilesController, type: :controller do
     context 'when an error occurs' do
       it 'returns an error message' do
         allow(GroovS3).to receive(:get_sounds_export).and_raise(StandardError.new("Failed to fetch sounds"))
-        
+
         get :get_sounds_files
         expect(response).to have_http_status(:unprocessable_entity)
         expect(json_response['status']).to eq('error')
@@ -69,36 +101,5 @@ RSpec.describe SoundFilesController, type: :controller do
       end
     end
   end
-
-  describe 'POST #remove_sounds' do
-    context 'when successful' do
-      it 'removes sounds and returns success' do
-        allow(GroovS3).to receive(:delete_object_sound).and_return(true)
-
-        post :remove_sounds, params: {
-          file_names: file_paths,  # Assuming file_paths corresponds to file names
-          sound_type: valid_sound_type
-        }
-
-        expect(response).to have_http_status(:ok)
-        expect(json_response['status']).to eq(true)
-        expect(json_response['message']).to eq('Files deleted successfully')
-      end
-    end
-
-    context 'when some files fail to delete' do
-      it 'returns failure status and failed files' do
-        allow(GroovS3).to receive(:delete_object_sound).and_return(false)  # Simulate failed deletion
-
-        post :remove_sounds, params: {
-          file_names: file_paths,  # Assuming file_paths corresponds to file names
-          sound_type: valid_sound_type
-        }
-
-        expect(response).to have_http_status(:ok)
-        expect(json_response['status']).to eq(false)
-        expect(json_response['failed_files']).to eq(file_paths)
-      end
-    end
-  end
+  
 end

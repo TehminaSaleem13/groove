@@ -1,5 +1,5 @@
 class SoundFilesController < ApplicationController
-  
+  before_action :groovepacker_authorize!
     def create_sounds
       sound_type = params[:sound_type]
       file_paths = params[:file_paths]
@@ -25,8 +25,10 @@ class SoundFilesController < ApplicationController
 
     def remove_sounds
         result = { status: true, failed_files: [] }
-        file_names = params[:file_names]
-        sound_type = params[:sound_type]
+        json_params = JSON.parse(request.body.read)
+
+        sound_type = json_params["sound_type"]
+        file_names = json_params["file_names"]
         tenant = Apartment::Tenant.current
     
         file_names = Array(file_names)
