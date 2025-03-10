@@ -213,8 +213,9 @@ class ImportCsv
           # result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
           import_product = Groovepacker::Stores::Importers::CSV::ProductsImporter.new(params, final_record, mapping,
                                                                                        params[:import_action])
-          log_qoh_activity(final_record,qty_on_hand_index, params)
-          result = import_product.import
+                                                                                       
+         log_qoh_activity(final_record,qty_on_hand_index, params) if qty_on_hand_index                                                                             
+         result = import_product.import
         elsif params[:type] == 'kit'
           import_kit = Groovepacker::Stores::Importers::CSV::KitsImporter.new(params, final_record, mapping,
                                                                               params[:bulk_action_id])
