@@ -212,16 +212,35 @@ module Groovepacker
             @success_updated += 1
 
             # if !mapping['inv_wh1'].nil? || !mapping['location_primary'].nil? || !mapping['location_secondary'].nil? || !mapping['location_tertiary'].nil?
-              default_inventory = ProductInventoryWarehouses.find_or_create_by(inventory_warehouse_id: @default_inventory_warehouse_id, product_id: duplicate_product.id)
-              updatable_record = record[:inventory].first
-              if !mapping['inv_wh1'].nil? && updatable_record[:quantity_on_hand] != '[DELETE]' # && self.mapping['inv_wh1'][:action] =='overwrite'
-                default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
+            default_inventory = ProductInventoryWarehouses.find_or_create_by(inventory_warehouse_id: @default_inventory_warehouse_id, product_id: duplicate_product.id)
+            updatable_record = record[:inventory].first
+            if !mapping['inv_wh1'].nil? && updatable_record[:quantity_on_hand] != '[DELETE]'
+              current_qoh = default_inventory.quantity_on_hand
+              new_qoh = updatable_record[:quantity_on_hand].to_i
+              product = default_inventory.product
+              if current_qoh != new_qoh
+                product.add_product_activity(
+                  "The QOH has changed from #{current_qoh} to #{new_qoh} — product CSV import by",
+                  product.store.try(:name).to_s
+                )
               end
-
-              attributes_location = %w[location_primary location_secondary location_tertiary location_quaternary]
-              attributes_location.each do |location|
-                default_inventory.send(location + '=', updatable_record[location.to_sym]) if !mapping[location].nil? && updatable_record[location.to_sym] != '[DELETE]'
+            default_inventory.quantity_on_hand = updatable_record[:quantity_on_hand]
+            end
+          
+            attributes_location = %w[location_primary location_secondary location_tertiary location_quaternary]
+            attributes_location.each do |location|
+              current_value = default_inventory.send(location)
+              new_value = updatable_record[location.to_sym]
+              product = default_inventory.product
+              
+              if !mapping[location].nil? && new_value != '[DELETE]' && current_value != new_value
+                product.add_product_activity(
+                  "The #{ProductsService::UpdateList.new.location_name(location)} has changed from #{current_value} to #{new_value} — updated by ",
+                  product.store.try(:name).to_s
+                )
               end
+             default_inventory.send(location + '=', updatable_record[location.to_sym]) if !mapping[location].nil? && updatable_record[location.to_sym] != '[DELETE]'
+            end
 
               attributes_location_qty = %w[location_primary_qty location_secondary_qty location_tertiary_qty location_quaternary_qty]
               attributes_location_qty.each do |location_qty|

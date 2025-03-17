@@ -182,7 +182,6 @@ class ImportCsv
                            end
                          end
         end
-        qty_on_hand_index = final_record.first.index { |value| value.strip == "Qty On Hand" }
         final_record.shift(params[:rows].to_i - 1) if params[:rows].to_i && params[:rows].to_i > 1
         delete_index = 0
         params[:map].each do |map_out|
@@ -214,7 +213,6 @@ class ImportCsv
           import_product = Groovepacker::Stores::Importers::CSV::ProductsImporter.new(params, final_record, mapping,
                                                                                        params[:import_action])
                                                                                        
-         log_qoh_activity(final_record,qty_on_hand_index, params) if qty_on_hand_index                                                                             
          result = import_product.import
         elsif params[:type] == 'kit'
           import_kit = Groovepacker::Stores::Importers::CSV::KitsImporter.new(params, final_record, mapping,
@@ -238,33 +236,6 @@ class ImportCsv
     end
     track_user(tenant, params, 'Import Finished', "#{params[:type].capitalize} Import Finished")
     result
-  end
-  
-
-  def log_qoh_activity(final_record, qty_on_hand_index, params)
-    current_user = User.find(params[:user_id])
-    final_record.each do |record|
-      product_id = record[0] 
-      product = Product.find(product_id)
-      if product && record[qty_on_hand_index]  
-        updated_qoh = record[qty_on_hand_index].to_i 
-        product_location = product.primary_warehouse
-  
-        if product_location.nil?
-          product_location = ProductInventoryWarehouses.new
-          product_location.product_id = product.id
-          product_location.inventory_warehouse_id = current_user.inventory_warehouse_id
-        end
-  
-        if product_location.quantity_on_hand != updated_qoh
-          product.add_product_activity(
-            "The QOH has changed from #{product_location.quantity_on_hand} to #{updated_qoh} — product CSV import by #{current_user.name}"
-          )
-        end
-        product_location.quantity_on_hand = updated_qoh
-        product_location.save
-      end
-    end
   end
 
   def rename_ftp_file(store, result, response, type)

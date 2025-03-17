@@ -63,6 +63,16 @@ module ProductsService
       ].include?(@var)
     end
 
+    def location_name(var)
+      location_names = {
+        "location_primary" => "Primary Location",
+        "location_secondary" => "Secondary Location",
+        "location_tertiary" => "Tertiary Location"
+      }
+      location_names[var]
+    end
+
+
     def find_or_create_product_location
       product_location = @product.primary_warehouse
       unless product_location.present?
@@ -76,7 +86,13 @@ module ProductsService
     def update_product_location
       product_location = find_or_create_product_location
       if @var.in? %w[location_primary location_secondary location_tertiary]
-        product_location[@var] = @value
+        current_location_value = product_location[@var]
+        if current_location_value != @value
+          product_location[@var] = @value
+          @product.add_product_activity(
+            "The #{location_name(@var)} was changed from #{current_location_value} to #{@value} — updated", @current_user
+          )
+        end
       elsif @var == 'location_name'
         product_location.name = @value
       elsif @var == 'qty_on_hand'
