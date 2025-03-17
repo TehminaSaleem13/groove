@@ -20,6 +20,8 @@ module ScanPack
       return handle_validation if pending_orders?
 
       case @params[:cart_action]
+      when 'take_assignment'
+        take_assignment
       when 'restart'
         reset_cart
         assign_orders
@@ -53,6 +55,11 @@ module ScanPack
     def assign_orders
       assignment_service = OrderAssignmentService.new(@cart, @current_user)
       assignment_service.assign_orders
+    end
+
+    def take_assignment
+      assignment_service = OrderAssignmentService.new(@cart, @current_user)
+      assignment_service.assigned_cart_orders_to_current_user
     end
 
     def handle_cancel

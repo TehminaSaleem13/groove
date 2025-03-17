@@ -24,12 +24,30 @@ module ScanPack
     end
 
     def cart_has_assigned_totes?
-      if Order.where(assigned_cart_tote_id: @cart.cart_rows.map { |row| "#{row.row_name}-%-#{@cart.cart_id}" }).exists?
+      if Order.where("assigned_cart_tote_id LIKE ?", "%-%-#{@cart.cart_id}").exists?
         @result['status'] = false
         @result['error_messages'] << 'Cart has totes that are already assigned to orders'
         true
       else
         false
+      end
+    end
+
+    def assigned_cart_orders_to_current_user
+      orders = Order.where("assigned_cart_tote_id LIKE ?", "%-%-#{@cart.cart_id}")
+      if orders.exists?
+        orders.update_all(assigned_user_id: @current_user.id)
+        {
+          'status' => true,
+          'success_messages' => ['Orders successfully assigned to you'],
+          'data' => {}
+        }
+      else
+        {
+          'status' => false,
+          'error_messages' => ['No orders found for this cart'],
+          'data' => {}
+        }
       end
     end
 

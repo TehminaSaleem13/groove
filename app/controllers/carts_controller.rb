@@ -1,6 +1,7 @@
 class CartsController < ApplicationController
   before_action  :groovepacker_authorize!
   before_action :set_cart, only: [:show, :update, :destroy]
+  before_action :prevent_action_if_cart_in_use, only: [:update, :destroy]
 
   def index
     @carts = Cart.includes(:cart_rows).all
@@ -51,6 +52,13 @@ class CartsController < ApplicationController
   
 
   private
+
+  def prevent_action_if_cart_in_use
+    orders = Order.where("assigned_cart_tote_id LIKE ?", "%-%-#{@cart.cart_id}")
+    if orders.any?
+      render json: { error: "Cart is in use by orders" }, status: :unprocessable_entity
+    end
+  end
 
   def set_cart
     @cart = Cart.find(params[:id])

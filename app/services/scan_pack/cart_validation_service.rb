@@ -24,8 +24,8 @@ module ScanPack
     private
 
     def check_pending_orders
-      pending_orders = Order.where(assigned_cart_tote_id: @cart_id)
-                           .where.not(status: ['scanned', 'completed'])
+      pending_orders = Order.where("assigned_cart_tote_id LIKE ?", "%-%-#{@cart_id}")
+      .where.not(status: ['scanned', 'completed'])
 
       if pending_orders.exists?
         @result['data']['has_pending_orders'] = true
