@@ -5,6 +5,7 @@ class ProductInventoryWarehouses < ApplicationRecord
   # attr_accessible :qty, :alert, :location_primary, :location_secondary, :location_tertiary, :location_quaternary, :location_primary_qty, :location_secondary_qty, :location_tertiary_qty, :location_quaternary_qty, :available_inv, :allocated_inv, :inventory_warehouse_id
 
   belongs_to :inventory_warehouse
+  around_update :create_activity#, if: :is_create_activity?
 
   def quantity_on_hand
     available_inv + allocated_inv
@@ -112,4 +113,41 @@ class ProductInventoryWarehouses < ApplicationRecord
     self.allocated_inv = 0
     save!
   end
+
+
+  def create_activity
+    old_data = { 
+      allocated_inv: allocated_inv_was, 
+      available_inv: available_inv_was, 
+    }
+  
+    yield
+    
+    new_data = { 
+      allocated_inv: allocated_inv, 
+      available_inv: available_inv, 
+    }
+  
+    old_data.each do |key, old_value|
+      new_value = new_data[key]
+      
+      if old_value != new_value
+        key_name = key == :allocated_inv ? "Allocated Inv" : "Available Inv"
+        
+        product.add_product_activity(
+          "The #{key_name} has changed from #{old_value} to #{new_value}"
+        )
+      end
+    end
+  end
+  
+  
+  
+
+  private
+
+  def is_create_activity?
+    saved_change_to_available_inv || saved_change_to_allocated_inv 
+  end
+
 end
