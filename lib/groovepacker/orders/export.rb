@@ -140,8 +140,8 @@ module Groovepacker
         single_row_list = order_export_row_map.dup
         single_row_list = single_row_list.merge(
           order_number: order.increment_id,
-          store_name: order.store.name,
-          order_date_time: order.order_placed_time.strftime('%Y-%m-%d %H:%M:%S'),
+          store_name: order.store&.name,
+          order_date_time: order.order_placed_time&.strftime('%Y-%m-%d %H:%M:%S'),
           sku: product_sku.sku,
           product_name: @product.name,
           barcode: product_barcodes[0].try(:barcode),
