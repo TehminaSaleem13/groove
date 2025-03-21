@@ -49,11 +49,11 @@ class Product < ApplicationRecord
   has_many :product_inventory_warehousess, class_name: 'ProductInventoryWarehouses', dependent: :destroy
   has_many :order_serial
   has_many :order_items
-  has_many :product_kit_activities, dependent: :destroy
+  has_many :product_kit_activities, -> { order(created_at: :desc) }, dependent: :destroy
   has_many :product_lots
   has_and_belongs_to_many :product_inventory_reports, join_table: :products_product_inventory_reports
   has_one :sync_option, dependent: :destroy
-  has_many :product_activities, dependent: :destroy
+  has_many :product_activities, -> { order(activitytime: :desc) }, dependent: :destroy
 
   after_save :check_inventory_warehouses
   after_save :gen_barcode_from_sku_if_intangible

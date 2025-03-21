@@ -211,22 +211,24 @@ module TenantsHelper
   def get_search_activity_logs(offset, limit, result)
     ahoy_events = Ahoy::Event.version_2.where(
       "LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.title'))) LIKE :query OR
-                     LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.username'))) LIKE :query OR
-                     LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.changes'))) LIKE :query",
+       LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.username'))) LIKE :query OR
+       LOWER(JSON_UNQUOTE(JSON_EXTRACT(properties, '$.changes'))) LIKE :query",
       query: "%#{params[:search].downcase}%"
-    )
-
+    )&.order(time: :desc) 
+  
     result['tenant']['total_activity_log'] = ahoy_events.count
     ahoy_event_records = ahoy_events.offset(offset).limit(limit).pluck(:time, :properties)
     result['tenant']['activity_log_v2'] = selected_activity_log(ahoy_event_records)
   end
-
+  
   def get_list_activity_logs(offset, limit, result)
-    ahoy_events = Ahoy::Event.version_2.where('time > ?', 7.days.ago)
+    ahoy_events = Ahoy::Event.version_2.where('time > ?', 7.days.ago)&.order(time: :desc) 
+  
     result['tenant']['total_activity_log'] = ahoy_events.count
     ahoy_event_records = ahoy_events.offset(offset).limit(limit).pluck(:time, :properties)
     result['tenant']['activity_log_v2'] = selected_activity_log(ahoy_event_records)
   end
+  
 
   def selected_activity_log(ahoy_event_records)
     ahoy_event_records.map do |time, properties|

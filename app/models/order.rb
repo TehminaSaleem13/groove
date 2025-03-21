@@ -15,7 +15,7 @@ class Order < ApplicationRecord
   has_one :tote, dependent: :nullify
   has_one :order_exception, dependent: :destroy
   has_one :shipstation_label_data, dependent: :delete
-  has_many :order_activities, dependent: :destroy
+  has_many :order_activities, -> { order(activitytime: :desc) },  dependent: :destroy
   has_many :order_serials, dependent: :destroy
   has_many :packing_cams, dependent: :destroy
   has_many :shipping_labels, dependent: :destroy
