@@ -24,7 +24,6 @@ module ScanPack
         take_assignment
       when 'restart'
         reset_cart
-        assign_orders
       when 'cancel'
         handle_cancel
       else
@@ -45,7 +44,7 @@ module ScanPack
     end
 
     def reset_cart
-      Order.where(assigned_cart_tote_id: @cart.id).update_all(
+      Order.where('assigned_cart_tote_id LIKE ?', "%-%-#{@cart.cart_id}").update_all(
         assigned_cart_tote_id: nil,
         assigned_user_id: nil,
         status: 'awaiting'

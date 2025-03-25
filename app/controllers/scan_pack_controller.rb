@@ -18,7 +18,10 @@ class ScanPackController < ApplicationController
                            ScanPack::ScanBarcodeService.new(current_user, session, params)
                          end
 
-    render json: scan_barcode_service.run.merge('awaiting' => get_awaiting_orders_count)
+    result = scan_barcode_service.run
+    result = { status: result } if result.is_a?(Integer)
+
+    render json: result.merge('awaiting' => get_awaiting_orders_count)
   end
 
   def handle_cart_scan
