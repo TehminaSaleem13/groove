@@ -1,5 +1,4 @@
 # frozen_string_literal: true
-
 class GroovS3
   class << self
     require 's3'
@@ -134,6 +133,30 @@ class GroovS3
     def create_image(tenant, file_name, data, content_type)
       object = create(tenant, "image/#{file_name}", content_type, :public_read)
       save(object, data)
+    end
+
+    def upload_images_to_s3(folder_path, s3_folder = "gp55/image/")
+      s3 = Aws::S3::Resource.new(
+        credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
+        region: ENV['S3_BUCKET_REGION']
+      )
+    
+      bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
+      public_urls = []
+      allowed_extensions = ["png", "jpg", "jpeg", "gif"]
+    
+      Dir.glob("#{folder_path}/**/*.{#{allowed_extensions.join(',')}}").each do |file_path|
+        file_name = File.basename(file_path)
+        s3_key = File.join(s3_folder, file_name)  
+    
+        obj = bucket.object(s3_key)
+        obj.upload_file(file_path, acl: 'public-read')
+  
+        public_urls << obj.public_url
+        puts "✅ Uploaded #{file_name} → #{obj.public_url}"
+      end
+  
+      public_urls
     end
 
     # This method will generate the URL for the export CSV files and also upload the generated file in S3.
