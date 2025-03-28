@@ -2,6 +2,10 @@
 class GroovS3
   class << self
     require 's3'
+    require 'csv'
+    require 'time'
+    require 'aws-sdk-s3'
+
     @bucket = nil
 
     def create(tenant, file, content_type = 'application/octet-stream', privacy = :public_read)
@@ -133,29 +137,59 @@ class GroovS3
     def create_image(tenant, file_name, data, content_type)
       object = create(tenant, "image/#{file_name}", content_type, :public_read)
       save(object, data)
-    end
-
-    def upload_images_to_s3(folder_path, s3_folder = "gp55/image/")
+    end  
+    def upload_images_to_s3(folder_path, s3_folder = "gp55copy")
       s3 = Aws::S3::Resource.new(
         credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
         region: ENV['S3_BUCKET_REGION']
       )
-    
+      
       bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
       public_urls = []
       allowed_extensions = ["png", "jpg", "jpeg", "gif"]
+      csv_data = [["SKU", "Image URL"]]  # CSV Header
+    
+      timestamp = Time.now.strftime("%d_%b_%Y_%I_%M_%S_%Z")
+      csv_filename = "images_#{s3_folder}_#{timestamp}.csv"
     
       Dir.glob("#{folder_path}/**/*.{#{allowed_extensions.join(',')}}").each do |file_path|
         file_name = File.basename(file_path)
-        s3_key = File.join(s3_folder, file_name)  
+        sku = File.basename(file_name, ".*") 
+        s3_key = "#{s3_folder}/image/#{file_name}"  
     
         obj = bucket.object(s3_key)
+    
+        # Skip upload if file already exists in S3
+        begin
+          exists = obj.exists?
+        rescue Aws::S3::Errors::BadRequest => e
+          puts "⚠️ Error checking existence for #{s3_key}: #{e.message}. Assuming it does not exist."
+          exists = false
+        end
+    
+        if exists
+          puts "⚠️ Skipping #{file_name} (Already exists in S3)"
+          next
+        end
         obj.upload_file(file_path, acl: 'public-read')
-  
-        public_urls << obj.public_url
-        puts "✅ Uploaded #{file_name} → #{obj.public_url}"
+        image_url = obj.public_url
+        public_urls << image_url
+        csv_data << [sku, image_url]  # Append SKU and URL to CSV data
+    
+        puts "✅ Uploaded #{file_name} → #{image_url}"
       end
-  
+    
+      csv_file_path = File.join(folder_path, csv_filename)
+      CSV.open(csv_file_path, "w") do |csv|
+        csv_data.each { |row| csv << row }
+      end
+      puts "📄 CSV file created: #{csv_file_path}"
+    
+      # Force CSV upload to the tenant's csv folder:
+      csv_s3_key = "#{s3_folder}/csv/#{csv_filename}"
+      bucket.object(csv_s3_key).upload_file(csv_file_path, acl: 'public-read')
+      puts "📤 CSV uploaded to S3: s3://#{bucket.name}/#{csv_s3_key}"
+    
       public_urls
     end
 
@@ -207,8 +241,50 @@ class GroovS3
     
       public_urls
     end
+
+    def upload_sounds_to_s3(local_folder_path)
+      s3 = Aws::S3::Resource.new(
+        credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
+        region: ENV['S3_BUCKET_REGION']
+      )
+      bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
     
+      response = bucket.client.list_objects_v2(bucket: bucket.name, delimiter: '/')
+      folders = response.common_prefixes.map { |prefix| prefix.prefix.chomp('/') } if response.common_prefixes
     
+      return puts "❌ No folders found in the bucket!" unless folders&.any?
+    
+      Dir.glob("#{local_folder_path}/*.mp3").each do |file_path|
+        file_name = File.basename(file_path)
+        
+        case file_name
+        when /^correct/
+          sound_type = "correct_scan"
+        when /^error/
+          sound_type = "error_scan"
+        when /^done/
+          sound_type = "order_done"
+        else
+          puts "⚠️ Skipping #{file_name} (Unknown prefix)"
+          next
+        end
+    
+        folders.each do |folder|
+          s3_key = "#{folder}/sounds/#{sound_type}/#{file_name}"
+          obj = bucket.object(s3_key)
+    
+          if obj.exists?
+            puts "⏩ Skipping #{file_name} (Already uploaded at s3://#{bucket.name}/#{s3_key})"
+            next
+          end
+    
+          obj.upload_file(file_path, acl: 'public-read')
+    
+          puts "✅ Uploaded #{file_name} to s3://#{bucket.name}/#{s3_key}"
+        end
+      end
+    end
+
     def get_sounds_export
       valid_types = ['correct_scan', 'error_scan', 'order_done']
       
