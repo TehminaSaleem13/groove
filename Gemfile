@@ -102,7 +102,6 @@ gem 'ruby_odata'
 gem 'rubyzip'
 gem 's3'
 gem 'savon', '~> 2.13'
-gem 'scout_apm'
 gem 'shipping_easy', '>= 0.7.1'
 gem 'shopify_api', '> 12.2'
 gem 'simple_form', '>= 4.0.0'
@@ -132,3 +131,7 @@ gem 'parser', '~> 3.3'
 
 # Rack middleware for blocking & throttling abusive requests
 gem 'rack-attack', '~> 6.7'
+
+# Monitoring
+gem 'scout_apm'
+gem "scout_apm_logging", "~> 1.1"

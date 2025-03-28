@@ -25,6 +25,8 @@ common: &defaults
 production:
   <<: *defaults
   auto_instruments: true
+  logs_monitor: true
+  logs_ingest_key: e71f08e4-3d2e-45d3-b8e6-d2a4209ff784:1d36eb00-f643-453b-9923-660ee21f5bd1:5985860
 
 development:
   <<: *defaults
