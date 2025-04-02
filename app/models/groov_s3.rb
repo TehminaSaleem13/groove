@@ -3,8 +3,6 @@ class GroovS3
   class << self
     require 's3'
     require 'csv'
-    require 'time'
-    require 'aws-sdk-s3'
 
     @bucket = nil
 
@@ -137,61 +135,52 @@ class GroovS3
     def create_image(tenant, file_name, data, content_type)
       object = create(tenant, "image/#{file_name}", content_type, :public_read)
       save(object, data)
-    end  
-    def upload_images_to_s3(folder_path, s3_folder = "gp55copy")
-      s3 = Aws::S3::Resource.new(
-        credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
-        region: ENV['S3_BUCKET_REGION']
-      )
-      
-      bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
-      public_urls = []
-      allowed_extensions = ["png", "jpg", "jpeg", "gif"]
-      csv_data = [["SKU", "Image URL"]]  # CSV Header
-    
-      timestamp = Time.now.strftime("%d_%b_%Y_%I_%M_%S_%Z")
-      csv_filename = "images_#{s3_folder}_#{timestamp}.csv"
-    
-      Dir.glob("#{folder_path}/**/*.{#{allowed_extensions.join(',')}}").each do |file_path|
-        file_name = File.basename(file_path)
-        sku = File.basename(file_name, ".*") 
-        s3_key = "#{s3_folder}/image/#{file_name}"  
-    
-        obj = bucket.object(s3_key)
-    
-        # Skip upload if file already exists in S3
-        begin
-          exists = obj.exists?
-        rescue Aws::S3::Errors::BadRequest => e
-          puts "⚠️ Error checking existence for #{s3_key}: #{e.message}. Assuming it does not exist."
-          exists = false
-        end
-    
-        if exists
-          puts "⚠️ Skipping #{file_name} (Already exists in S3)"
-          next
-        end
-        obj.upload_file(file_path, acl: 'public-read')
-        image_url = obj.public_url
-        public_urls << image_url
-        csv_data << [sku, image_url]  # Append SKU and URL to CSV data
-    
-        puts "✅ Uploaded #{file_name} → #{image_url}"
-      end
-    
-      csv_file_path = File.join(folder_path, csv_filename)
-      CSV.open(csv_file_path, "w") do |csv|
-        csv_data.each { |row| csv << row }
-      end
-      puts "📄 CSV file created: #{csv_file_path}"
-    
-      # Force CSV upload to the tenant's csv folder:
-      csv_s3_key = "#{s3_folder}/csv/#{csv_filename}"
-      bucket.object(csv_s3_key).upload_file(csv_file_path, acl: 'public-read')
-      puts "📤 CSV uploaded to S3: s3://#{bucket.name}/#{csv_s3_key}"
-    
-      public_urls
     end
+
+def upload_images_to_s3(folder_path, s3_folder = "ferroconcepts/image/")
+  s3 = Aws::S3::Resource.new(
+    credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
+    region: ENV['S3_BUCKET_REGION']
+  )
+
+  bucket = s3.bucket(ENV['S3_BUCKET_NAME'])
+  public_urls = []
+  allowed_extensions = ["png", "jpg", "jpeg", "gif"]
+  csv_data = [["File Name", "Image URL"]]  # CSV Header
+
+  Dir.glob("#{folder_path}/**/*.{#{allowed_extensions.join(',')}}").each do |file_path|
+    file_name = File.basename(file_path)
+    s3_key = "#{s3_folder}#{file_name}"  
+
+    obj = bucket.object(s3_key)
+    obj.upload_file(file_path, acl: 'public-read')
+
+    # Construct correct public URL
+    image_url = "https://#{bucket.name}.s3.amazonaws.com/#{s3_key}"
+    public_urls << image_url
+    csv_data << [file_name, image_url]
+
+    puts "✅ Uploaded #{file_name} → #{image_url}"
+  end
+
+  timestamp = Time.now.strftime("%d_%b_%Y_%I_%M_%S_%Z")
+  csv_filename = "gp55_#{timestamp}.csv"
+  csv_file_path = File.join(folder_path, csv_filename)
+
+  CSV.open(csv_file_path, "w") do |csv|
+    csv_data.each { |row| csv << row }
+  end
+
+  puts "📄 CSV file created: #{csv_file_path}"
+
+  csv_s3_key = "ferroconcepts/csv/#{csv_filename}"
+  bucket.object(csv_s3_key).upload_file(csv_file_path, acl: 'public-read')
+  puts "📤 CSV uploaded to S3: s3://#{bucket.name}/#{csv_s3_key}"
+
+  public_urls
+end
+
+    
 
     # This method will generate the URL for the export CSV files and also upload the generated file in S3.
     def get_csv_export(file_name)
