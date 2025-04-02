@@ -5,7 +5,7 @@ class AccessRestriction < ApplicationRecord
   include AhoyEvent
 
   has_one :tenant
-
+  before_save :update_regular_users, :update_administrative_users
   after_save :remove_from_new_customers_if_scanned_30
   after_commit :log_events
 
@@ -26,5 +26,14 @@ class AccessRestriction < ApplicationRecord
     current_tenant = Apartment::Tenant.current
     subscription = Subscription.find_by_tenant_name(current_tenant)
     @cm = Groovepacker::CampaignMonitor::CampaignMonitor.new(subscriber: subscription)
+  end
+  
+  private
+
+  def update_regular_users
+    self.regular_users = self.num_users - self.administrative_users if will_save_change_to_administrative_users?
+  end
+  def update_administrative_users
+    self.administrative_users = self.num_users - self.regular_users
   end
 end

@@ -41,6 +41,8 @@ class ApplyAccessRestrictions
   def create_restriction(init_access)
     AccessRestriction.create(
       num_users: init_access[:access_restrictions_info][:max_users],
+      num_administrative_users: init_access[:access_restrictions_info][:max_administrative_users],
+      regular_users: init_access[:access_restrictions_info][:regular_users],
       num_shipments: init_access[:access_restrictions_info][:max_allowed],
       num_import_sources: init_access[:access_restrictions_info][:max_import_sources],
       total_scanned_shipments: 0

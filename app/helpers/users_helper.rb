@@ -185,8 +185,18 @@ module UsersHelper
     end
   end
 
-  def set_user_dashboard(params, result, user_role)
-    # Make sure we have at least one super admin
+  def set_user_dashboard(params, result, user_role)  
+    max_administrative_users = AccessRestriction.last&.administrative_users || 0
+  
+    current_administrative_users = User.where(is_deleted: false)
+                                       .eager_load(:role)
+                                       .where("roles.name = ?", "Administrative").count
+  
+    if params[:role]['name'] == 'Administrative' && current_administrative_users >= max_administrative_users
+      result['status'] = false
+      result['messages'].push('You have reached the maximum limit of administrative users.')
+    end
+  
     if current_user.can?('make_super_admin') && !params[:role]['make_super_admin'] &&
        User.where(is_deleted: false).eager_load(:role).where('roles.make_super_admin = 1').length <= 2 && !@user.role.nil? && @user.role.make_super_admin
       result['status'] = false
@@ -272,8 +282,8 @@ module UsersHelper
       else
         set_user_dashboard(params, result, user_role)
         role = @user.role
-        role.import_orders = params[:role][:import_orders]
-        role.save
+        role&.import_orders = params[:role][:import_orders]
+        role&.save
       end
       set_and_return_user_info(result)
     end

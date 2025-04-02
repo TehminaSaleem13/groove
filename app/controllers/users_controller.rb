@@ -8,14 +8,21 @@ class UsersController < ApplicationController
     @users = User.includes(%i[role last_order_activity last_product_activity]).where(
       'username != ? and is_deleted = ?', 'gpadmin', false
     )
-    # respond_to do |format|
-    #   format.html # show.html.erb
-    #   format.json { render json: @users, :only => [:id, :username, :last_sign_in_at, :active], :include => :role }
-    #  #format.json { render json: user_info }
-    # end
-    render json: @users.as_json(only: %i[id username active], include: { role: { only: %i[id name] } },
-                                methods: %i[last_activity role])
+  
+    max_administrative_users = AccessRestriction.last&.administrative_users || 0
+  
+    current_administrative_users = @users.count { |user| user.role && user.role['name'].include?('Administrative') }
+  
+    render json: @users.as_json(
+      only: %i[id username active], 
+      include: { role: { only: %i[id name] } }, 
+      methods: %i[last_activity role]
+    ).map { |user| user.merge(
+      max_administrative_users: max_administrative_users,
+      current_administrative_users: current_administrative_users
+    )}
   end
+  
 
   def modify_plan
     result = {}

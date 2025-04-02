@@ -286,7 +286,9 @@ module Groovepacker
 
       def retrieve_and_save_restrictions(access_restriction, access_restrictions_info)
         access_restriction.num_shipments = access_restrictions_info['max_allowed']
-        access_restriction.num_users = access_restrictions_info['max_users']
+        access_restriction.num_users = access_restrictions_info['max_users'] 
+        access_restriction.regular_users = access_restrictions_info['regular_users'] 
+        access_restriction.administrative_users = access_restrictions_info['max_administrative_users']
         access_restriction.num_import_sources = access_restrictions_info['max_import_sources']
         access_restriction.allow_bc_inv_push = access_restrictions_info['allow_bc_inv_push']
         access_restriction.allow_mg_rest_inv_push = access_restrictions_info['allow_mg_rest_inv_push']

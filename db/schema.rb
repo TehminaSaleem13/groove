@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_02_28_130324) do
+ActiveRecord::Schema.define(version: 2025_04_01_125618) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -26,6 +26,8 @@ ActiveRecord::Schema.define(version: 2025_02_28_130324) do
     t.boolean "allow_magento_soap_tracking_no_push", default: false
     t.integer "added_through_ui", default: 0
     t.boolean "allow_shopline_inv_push", default: false
+    t.integer "administrative_users", default: 0, null: false
+    t.integer "regular_users", default: 0, null: false
   end
 
   create_table "ahoy_events", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
