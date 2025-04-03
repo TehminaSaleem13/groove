@@ -212,7 +212,7 @@ class ImportCsv
           # result = Groovepacker::Stores::Importers::CSV::ProductsImporter.new.import_old(params,final_record,mapping)
           import_product = Groovepacker::Stores::Importers::CSV::ProductsImporter.new(params, final_record, mapping,
                                                                                        params[:import_action])
-                                                                                       
+
          result = import_product.import
         elsif params[:type] == 'kit'
           import_kit = Groovepacker::Stores::Importers::CSV::KitsImporter.new(params, final_record, mapping,
@@ -241,6 +241,9 @@ class ImportCsv
   def rename_ftp_file(store, result, response, type)
     import_item = ImportItem.where(store_id: store.id).last
     return result if import_item && import_item.status == 'cancelled' && type != 'product'
+
+    # Do not rename FTP files in Development environment
+    return result if Rails.env.development?
 
     groove_ftp = FTP::FtpConnectionManager.get_instance(store, type)
     response = groove_ftp.update(response[:file_info][:ftp_file_name])
