@@ -203,28 +203,40 @@ end
       obj.public_url
     end
     
-    def create_sound_from_system(tenant, file_paths, sound_type, content_type = 'audio/mpeg', privacy = :public_read)
+    def create_sound_from_system(tenant, file_paths, user_name, sound_type, content_type = 'audio/mpeg', privacy = :public_read)
       valid_types = ['correct_scan', 'error_scan', 'order_done']
-      
+    
       unless valid_types.include?(sound_type)
         raise ArgumentError, "Invalid sound type. Must be one of: #{valid_types.join(', ')}"
       end
+    
       file_paths = Array(file_paths)
       public_urls = []
+    
+      s3 = Aws::S3::Client.new(
+        access_key_id: ENV['S3_ACCESS_KEY_ID'],
+        secret_access_key: ENV['S3_ACCESS_KEY_SECRET'],
+        region: ENV['S3_BUCKET_REGION']
+      )
+    
+      bucket_name = ENV['S3_BUCKET_NAME']
+      region = ENV['S3_BUCKET_REGION']
+    
       file_paths.each do |file|
         raise "File not found: #{file.original_filename}" unless file.tempfile && File.exist?(file.tempfile.path)
-        object_key = File.join("sounds", sound_type, file.original_filename)  # Correct S3 object path
     
-        file_data = File.read(file.tempfile.path)
-
-        object = create(tenant, object_key)  
-        save(object, file_data)
-    
-        bucket_name = ENV['S3_BUCKET_NAME']
-        region = ENV['S3_BUCKET_REGION']
+        object_key = File.join(user_name.to_s, "sounds", sound_type, file.original_filename)
+        s3_key = "#{tenant}/#{object_key}"  # Full key in S3
         
-        public_url = "https://#{bucket_name}.s3.#{region}.amazonaws.com/#{tenant}/#{object_key}"
+          file_data = File.read(file.tempfile.path)
+          object = create(tenant, object_key)
+          if object.exists?
+            puts "⏩ Skipping #{file.original_filename} (Already uploaded at s3://#{tenant}/#{object_key})"
+            return { status: false, message: "File already exists" }
+          end
+          save(object, file_data)
     
+        public_url = "https://#{bucket_name}.s3.#{region}.amazonaws.com/#{tenant}/#{object_key}"
         public_urls << public_url
       end
     
@@ -274,58 +286,51 @@ end
       end
     end
 
-    def get_sounds_export
+    def get_sounds_export(user_name)
       valid_types = ['correct_scan', 'error_scan', 'order_done']
-      
+    
       s3 = Aws::S3::Resource.new(
         credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
         region: ENV['S3_BUCKET_REGION']
       )
     
       bucket_name = ENV['S3_BUCKET_NAME']
-      content_types = {}  
-      
-      tenant = Apartment::Tenant.current
-      
+      tenant = Apartment::Tenant.current 
+      content_types = {}
+    
       valid_types.each do |sound_type|
-        prefix = "#{tenant}/sounds/#{sound_type}/"
-        puts "Using prefix: #{prefix}"
+        prefix = "#{tenant}/#{user_name}/sounds/#{sound_type}/"
+        puts "Scanning S3 under exact prefix: #{prefix}"
     
         objects = s3.bucket(bucket_name).objects(prefix: prefix)
-    
-        next if objects.count == 0
+        next if objects.none?
     
         content_types[sound_type] = []
     
         objects.each do |obj_summary|
           obj = s3.bucket(bucket_name).object(obj_summary.key)
     
-          content_type = obj.content_type || 'unknown' 
-          public_url = obj.public_url
-    
-          filename = obj_summary.key.split('/').last
-    
-          tenant_name = obj_summary.key.split('/')[0] 
-          
           content_types[sound_type] << {
-            content_type: content_type,
-            url: public_url,
-            filename: filename,     
-            tenant_name: tenant_name 
+            content_type: obj.content_type || 'unknown',
+            url: obj.public_url,
+            filename: File.basename(obj_summary.key),
+            tenant_name: tenant,
+            user_name: user_name
           }
         end
       end
     
-      return content_types
+      content_types
     end
-
-    def delete_object_sound(tenant, sound_type, file_name)
+    
+    def delete_object_sound(tenant, sound_type, file_name, user_name)
       s3 = Aws::S3::Resource.new(
         credentials: Aws::Credentials.new(ENV['S3_ACCESS_KEY_ID'], ENV['S3_ACCESS_KEY_SECRET']),
         region: ENV['S3_BUCKET_REGION']
       )
+    
       bucket_name = ENV['S3_BUCKET_NAME']
-      s3_object_key = "#{tenant}/sounds/#{sound_type}/#{file_name}"
+      s3_object_key = "#{tenant}/#{user_name}/sounds/#{sound_type}/#{file_name}" # ✅ Corrected path
       object = s3.bucket(bucket_name).object(s3_object_key)
     
       if object.exists?
@@ -339,6 +344,7 @@ end
         return { status: 'error', message: "The file '#{file_name}' was not found in '#{sound_type}'." }
       end
     end
+    
     
     def bucket
       if @bucket.nil?
