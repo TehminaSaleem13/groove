@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_01_125618) do
+ActiveRecord::Schema.define(version: 2025_04_14_092808) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1550,6 +1550,7 @@ ActiveRecord::Schema.define(version: 2025_04_01_125618) do
     t.boolean "loggly_shipstation_imports", default: false
     t.text "settings"
     t.boolean "loggly_veeqo_imports", default: false
+    t.boolean "voice_packing", default: false
   end
 
   create_table "tote_sets", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

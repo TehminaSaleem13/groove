@@ -139,6 +139,11 @@ class SettingsController < ApplicationController
     rescue StandardError
       false
     end
+    @result['voice_packing'] = begin
+      current_tenant.voice_packing
+    rescue StandardError
+      false
+    end
     @result['product_activity'] = begin
       current_tenant.product_activity_switch
     rescue StandardError
