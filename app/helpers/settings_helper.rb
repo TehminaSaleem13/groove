@@ -216,10 +216,20 @@ module SettingsHelper
         general_setting.attributes = permit_general_setting_params
         printing_setting.attributes = permit_printing_setting_params
         general_setting.slide_show_time = params[:slide_show_time] if params[:slide_show_time].present?
+  
+        old_select_types = general_setting.select_types || []
+  
         general_setting.select_types = ['correct_scan', 'error_scan', 'order_done'].map do |select_type|
-          { select_type: select_type, url: params[select_type] } if params[:select_type].present?
+          if params[select_type].present?
+            { select_type: select_type, url: params[select_type] }
+          else
+            old_select_types.find do |item|
+              item['select_type'] == select_type || item[:select_type] == select_type
+            end
+          end
         end.compact
-        if general_setting.save &&  printing_setting.save
+  
+        if general_setting.save && printing_setting.save
           @result['success_messages'] = ['Settings updated successfully.']
         else
           @result['status'] &= false

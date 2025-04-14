@@ -214,9 +214,16 @@ class SettingsController < ApplicationController
           'packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"),
           'time_zone_offset' => current_time_in_gp.formatted_offset
         ).merge(GeneralSetting.last.per_tenant_settings)
+           
+        existing_select_types = general_setting.select_types || []
 
-      @result['data']['select_types'] = general_setting.select_types
-
+        @result['data']['select_types'] = ['correct_scan', 'error_scan', 'order_done'].map do |type|
+          existing = existing_select_types.find { |item| item['select_type'] == type || item[:select_type] == type }
+          {
+            'select_type' => type,
+            'url' => existing ? existing['url'] || existing[:url] : ''
+          }
+        end
       scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']['scanpack_setting'] =
         scan_pack_setting.as_json.merge!(
