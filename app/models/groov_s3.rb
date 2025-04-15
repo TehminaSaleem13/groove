@@ -299,29 +299,36 @@ end
       content_types = {}
     
       valid_types.each do |sound_type|
-        prefix = "#{tenant}/#{user_name}/sounds/#{sound_type}/"
-        puts "Scanning S3 under exact prefix: #{prefix}"
+        prefixes = [
+          "#{tenant}/#{user_name}/sounds/#{sound_type}/",
+          "#{tenant}/sounds/#{sound_type}/"
+        ]
     
-        objects = s3.bucket(bucket_name).objects(prefix: prefix)
-        next if objects.none?
+        prefixes.each do |prefix|
+          puts "Scanning S3 under prefix: #{prefix}"
     
-        content_types[sound_type] = []
+          objects = s3.bucket(bucket_name).objects(prefix: prefix)
+          next if objects.none?
     
-        objects.each do |obj_summary|
-          obj = s3.bucket(bucket_name).object(obj_summary.key)
+          content_types[sound_type] ||= []
     
-          content_types[sound_type] << {
-            content_type: obj.content_type || 'unknown',
-            url: obj.public_url,
-            filename: File.basename(obj_summary.key),
-            tenant_name: tenant,
-            user_name: user_name
-          }
+          objects.each do |obj_summary|
+            obj = s3.bucket(bucket_name).object(obj_summary.key)
+    
+            content_types[sound_type] << {
+              content_type: obj.content_type || 'unknown',
+              url: obj.public_url,
+              filename: File.basename(obj_summary.key),
+              tenant_name: tenant,
+              user_name: user_name,
+              source: prefix.include?(user_name) ? 'user' : 'global'
+            }
+          end
         end
       end
     
       content_types
-    end
+    end   
     
     def delete_object_sound(tenant, sound_type, file_name, user_name)
       s3 = Aws::S3::Resource.new(

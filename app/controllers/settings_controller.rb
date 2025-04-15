@@ -219,16 +219,15 @@ class SettingsController < ApplicationController
           'packing_type' => $redis.get("#{Apartment::Tenant.current}_packing_type"),
           'time_zone_offset' => current_time_in_gp.formatted_offset
         ).merge(GeneralSetting.last.per_tenant_settings)
-           
-        existing_select_types = general_setting.select_types || []
+      existing_select_types = current_user.sound_selected_types || []
 
-        @result['data']['select_types'] = ['correct_scan', 'error_scan', 'order_done'].map do |type|
-          existing = existing_select_types.find { |item| item['select_type'] == type || item[:select_type] == type }
-          {
-            'select_type' => type,
-            'url' => existing ? existing['url'] || existing[:url] : ''
-          }
-        end
+      @result['data']['select_types'] = ['correct_scan', 'error_scan', 'order_done'].map do |type|
+        existing = existing_select_types&.find { |item| item['select_type'] == type || item[:select_type] == type }
+        {
+          'select_type' => type,
+          'url' => existing ? existing['url'] || existing[:url] : ''
+        }
+      end
       scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']['scanpack_setting'] =
         scan_pack_setting.as_json.merge!(
@@ -259,7 +258,6 @@ class SettingsController < ApplicationController
     @result = upadate_setting_attributes(general_setting, current_user, printing_setting)
     customer = find_stripe_customer
     select_types = ['select_correct_scan', 'select_error_scan', 'select_order_done']
-
     if general_setting.email_address_for_billing_notification != params[:email_address_for_billing_notification] && !general_setting.email_address_for_billing_notification.nil?
       update_with_stripe_customer(customer)
     end

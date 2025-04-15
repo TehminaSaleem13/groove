@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_14_092808) do
+ActiveRecord::Schema.define(version: 2025_04_14_183604) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1633,6 +1633,7 @@ ActiveRecord::Schema.define(version: 2025_04_14_092808) do
     t.string "warehouse_postcode", default: ""
     t.string "packing_slip_size", default: "4 x 6"
     t.boolean "override_pass_scanning", default: false
+    t.json "sound_selected_types"
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
