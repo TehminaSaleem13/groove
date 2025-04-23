@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_14_183604) do
+ActiveRecord::Schema.define(version: 2025_04_21_090205) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1195,6 +1195,7 @@ ActiveRecord::Schema.define(version: 2025_04_14_183604) do
     t.string "email_reply"
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
+    t.boolean "assigned_orders", default: false
     t.boolean "requires_assigned_orders", default: false
     t.boolean "enable_service_issue_status", default: true, null: false
     t.boolean "scan_to_cart_option", default: false
@@ -1228,6 +1229,7 @@ ActiveRecord::Schema.define(version: 2025_04_14_183604) do
     t.text "url"
     t.datetime "created_at", null: false
     t.datetime "updated_at", null: false
+    t.integer "user_id"
   end
 
   create_table "shippo_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1633,10 +1635,15 @@ ActiveRecord::Schema.define(version: 2025_04_14_183604) do
     t.string "warehouse_postcode", default: ""
     t.string "packing_slip_size", default: "4 x 6"
     t.boolean "override_pass_scanning", default: false
+    t.datetime "last_purchased_at"
+    t.integer "last_purchased_by"
+    t.integer "total_purchases"
+    t.string "token"
     t.json "sound_selected_types"
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
+    t.index ["token"], name: "index_users_on_token", unique: true
   end
 
   create_table "veeqo_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

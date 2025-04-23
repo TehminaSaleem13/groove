@@ -363,7 +363,7 @@ module OrderMethodsHelper
     ss_client = Groovepacker::ShipstationRuby::Rest::Client.new(ss_rest_credential.api_key, ss_rest_credential.api_secret)
     general_settings = GeneralSetting.last
     order = ss_client.get_order(order_ss_label_data["orderId"].to_s)
-    direct_print_data = try_creating_label if !skip_trying && ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
+    direct_print_data = try_creating_label(params[:user_id]) if !skip_trying && ss_rest_credential.skip_ss_label_confirmation && (!Box.where(order_id: id).many? || general_settings.per_box_shipping_label_creation == 'per_box_shipping_label_creation_none')
     if direct_print_data[:status]
       order_ss_label_data['direct_printed'] = true
       order_ss_label_data['direct_printed_url'] = direct_print_data[:url]
@@ -454,7 +454,7 @@ module OrderMethodsHelper
     puts e
   end
 
-  def try_creating_label
+  def try_creating_label(user_id)
     return { status: false } unless check_valid_label_data
 
     default_ship_date = Time.current.in_time_zone('Pacific Time (US & Canada)').strftime('%a, %d %b %Y')
@@ -476,14 +476,14 @@ module OrderMethodsHelper
       'weight' => { 'value' => label_data['weight']['value'], 'units' => label_data['weight']['units'] }
     }
     post_data['dimensions'] = label_data['dimensions'] if label_data['dimensions'].present? && label_data['dimensions']['units'].present? && label_data['dimensions']['length'].present? && label_data['dimensions']['width'].present? && label_data['dimensions']['height'].present?
-    create_label(store.shipstation_rest_credential.id, post_data)
+    create_label(store.shipstation_rest_credential.id, post_data, user_id)
   end
 
   def check_valid_label_data
     label_data['orderId'].present? && label_data['packageCode'].present? && label_data['weight'].present? && label_data['carrierCode'].present? && label_data['serviceCode'].present? && label_data['confirmation'].present? && label_data['weight']['value'].present? && label_data['weight']['units'].present?
   end
 
-  def create_label(credential_id, post_data)
+  def create_label(credential_id, post_data, user_id)
     begin
       result = { status: true }
       ss_credential = ShipstationRestCredential.find(credential_id)
@@ -496,7 +496,7 @@ module OrderMethodsHelper
         GroovS3.create_pdf(Apartment::Tenant.current, file_name, label_data)
         result[:dimensions] = '4x6'
         label_url = ENV['S3_BASE_URL'] + '/' + Apartment::Tenant.current + '/pdf/' + file_name
-        store_shipping_label_data(post_data['orderId'], label_url, response['shipmentId'])
+        store_shipping_label_data(post_data['orderId'], label_url, response['shipmentId'], user_id)
         result[:url] = label_url
       else
         result[:status] = false
@@ -543,10 +543,10 @@ module OrderMethodsHelper
     !!carrier_data['visible']
   end
 
-  def store_shipping_label_data(store_order_id, url, shipment_id)
+  def store_shipping_label_data(store_order_id, url, shipment_id, user_id)
     return if shipment_id == -1
 
     associated_order = Order.find_by(store_order_id: store_order_id)
-    associated_order&.shipping_labels&.create(url: url, shipment_id: shipment_id)
+    associated_order&.shipping_labels&.create(url: url, shipment_id: shipment_id, user_id: user_id)
   end
 end

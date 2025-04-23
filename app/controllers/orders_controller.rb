@@ -608,7 +608,7 @@ class OrdersController < ApplicationController
   # end
 
   def create_ss_label
-    render json: Order.new.create_label(params[:credential_id], params[:post_data].permit!.to_h)
+    render json: Order.new.create_label(params[:credential_id], params[:post_data].permit!.to_h, current_user.id)
   end
 
   def get_realtime_rates
@@ -734,7 +734,7 @@ class OrdersController < ApplicationController
       order = Order.includes(:store).find(params[:id])
       if order.store.store_type == 'Shipstation API 2' && order.store.shipstation_rest_credential&.use_api_create_label
         try_creating_label = order.store.shipstation_rest_credential.skip_ss_label_confirmation
-        result = order.try_creating_label if try_creating_label
+        result = order.try_creating_label(current_user.id) if try_creating_label
         if try_creating_label == false || !result[:status]
           result[:ss_label_order_data] = order.ss_label_order_data(skip_trying: true, params:)
           if try_creating_label && !result[:error_messages].present?
