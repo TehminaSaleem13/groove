@@ -354,6 +354,9 @@ class OrderItem < ApplicationRecord
   end
 
   def update_inventory_levels
+    product_inventory_warehouse = ProductInventoryWarehouses.find_by(product_id: self.product_id)
+    product_inventory_warehouse.order_id = self.order_id
+    product_inventory_warehouse.save!
     result = true
     changed_hash = saved_changes
     if !changed_hash.nil? && !changed_hash['qty'].nil?

@@ -1,9 +1,10 @@
 # frozen_string_literal: true
 
 class ProductInventoryWarehouses < ApplicationRecord
+  @@set_order_id = nil
   belongs_to :product
   # attr_accessible :qty, :alert, :location_primary, :location_secondary, :location_tertiary, :location_quaternary, :location_primary_qty, :location_secondary_qty, :location_tertiary_qty, :location_quaternary_qty, :available_inv, :allocated_inv, :inventory_warehouse_id
-
+  attr_accessor :order_id
   belongs_to :inventory_warehouse
   around_update :create_activity#, if: :is_create_activity?
 
@@ -129,13 +130,16 @@ class ProductInventoryWarehouses < ApplicationRecord
     }
   
     old_data.each do |key, old_value|
-      new_value = new_data[key]
+      new_value = new_data[key]    
+      if self.order_id
+        @@set_order_id  = self.order_id  
+      end
+      order_number = Order.find_by(id: @@set_order_id)&.increment_id || nil
       
       if old_value != new_value
         key_name = key == :allocated_inv ? "Allocated Inv" : "Available Inv"
-        
         product.add_product_activity(
-          "The #{key_name} has changed from #{old_value} to #{new_value}"
+          "The #{key_name} has changed from #{old_value} to #{new_value}" + ( @@set_order_id ? " by scanning order #{order_number}" : "")
         )
       end
     end

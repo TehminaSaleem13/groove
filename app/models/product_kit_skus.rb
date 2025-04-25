@@ -8,6 +8,8 @@ class ProductKitSkus < ApplicationRecord
   after_save :add_product_in_order_items
   after_save :update_inventory_levels
   # after_destroy :remove_product_from_order_items
+  around_update :create_kit_activity#, if: :is_create_activity?
+
 
   cached_methods :option_product
   after_save :delete_cache
@@ -32,6 +34,29 @@ class ProductKitSkus < ApplicationRecord
     # end
     true
   end
+
+  def create_kit_activity
+    old_qty = self.attribute_in_database('qty')
+    old_packing_order = self.attribute_in_database('packing_order')
+  
+    yield
+  
+    new_qty = self.qty
+    new_packing_order = self.packing_order
+  
+    if old_qty != new_qty
+      product.add_product_activity(
+        "The Quantity of kit has changed from #{old_qty} to #{new_qty}"
+      )
+    end
+  
+    if old_packing_order != new_packing_order
+      product.add_product_activity(
+        "The Packing Order of kit has changed from #{old_packing_order} to #{new_packing_order}"
+      )
+    end
+  end  
+    
 
   def update_inventory_levels
     changed_hash = saved_changes

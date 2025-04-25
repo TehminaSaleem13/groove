@@ -496,6 +496,7 @@ module Groovepacker
           end
           product_location.quantity_on_hand = @params[:inventory_warehouses][0][:info][:quantity_on_hand]
         end
+        ProductInventoryWarehouses.class_variable_set(:@@set_order_id, nil)
         product_location.save
       end
     end
