@@ -144,6 +144,11 @@ class SettingsController < ApplicationController
     rescue StandardError
       false
     end
+    @result['scan_to_score'] = begin
+      current_tenant.scan_to_score
+    rescue StandardError
+      false
+    end
     @result['product_activity'] = begin
       current_tenant.product_activity_switch
     rescue StandardError

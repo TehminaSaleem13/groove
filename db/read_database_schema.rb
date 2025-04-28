@@ -1480,6 +1480,7 @@ ActiveRecord::Schema.define(version: 2024_07_26_113055) do
     t.text "settings"
     t.boolean "loggly_veeqo_imports", default: false
     t.boolean "voice_packing", default: false
+    t.boolean "scan_to_score", default: false
   end
 
   create_table "tote_sets", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
