@@ -18,6 +18,7 @@ class User < ApplicationRecord
   # attr_accessible :title, :body
   belongs_to :inventory_warehouse, optional: true
   belongs_to :role, optional: true
+  belongs_to :tote_set
   has_many :user_inventory_permissions, dependent: :destroy
   has_many :order_activities , -> { order(activitytime: :desc) }
   has_many :product_activities, -> { order(activitytime: :desc) }

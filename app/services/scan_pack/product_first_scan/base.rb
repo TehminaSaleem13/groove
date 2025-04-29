@@ -5,8 +5,8 @@ module ScanPack
     class Base < ScanPack::Base
       attr_accessor :params, :current_user, :scanpack_setting
 
-      def initialize(current_user, session, params)
-        set_scan_pack_action_instances(current_user, session, params)
+      def initialize(current_user, session, params, user_tote_set)
+        set_scan_pack_action_instances(current_user, session, params, user_tote_set)
         @scanpack_setting = ScanPackSetting.last
       end
 

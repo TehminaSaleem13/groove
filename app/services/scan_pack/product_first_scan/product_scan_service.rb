@@ -30,7 +30,7 @@ module ScanPack
 
       def tote
         @tote ||= if params[:tote][:id].present?
-                    Tote.find(params[:tote][:id])
+                    @user_tote_set.totes.find(params[:tote][:id])
                   else
                     tote_params = params[:tote].slice(:id, :name, :number, :order_id, :tote_set_id,
                                                       :pending_order).permit!

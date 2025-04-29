@@ -159,7 +159,7 @@ module Groovepacker
       end
 
       def delete_all_product_data
-        %w[products product_activities product_cats product_images products_product_inventory_reports product_inventory_warehouses product_kit_activities product_kit_skus product_lots product_skus product_barcodes].each do |table|
+        %w[products product_activities product_cats product_images products_product_inventory_reports product_inventory_warehouses product_kit_activities product_kit_skus product_lots product_skus product_barcodes totes tote_sets].each do |table|
           ActiveRecord::Base.connection.execute("TRUNCATE #{table}")
         end
       end

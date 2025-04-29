@@ -4,10 +4,11 @@ module ScanPack
   class Base
     include ScanPack::Utilities::OrderDetailsAndNextItem
     include ProductsHelper
-    def set_scan_pack_action_instances(current_user, session, params)
+    def set_scan_pack_action_instances(current_user, session, params, user_tote_set = nil)
       @current_user = current_user
       @params = params
       @session = session
+      @user_tote_set = user_tote_set
       @result = {
         'status' => true, 'error_messages' => [], 'success_messages' => [],
         'notice_messages' => [], 'data' => {}

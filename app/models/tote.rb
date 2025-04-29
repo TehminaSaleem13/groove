@@ -3,7 +3,7 @@
 class Tote < ApplicationRecord
   # attr_accessible :name, :order_id, :number, :pending_order
 
-  belongs_to :order
+  belongs_to :order, optional: true
   belongs_to :tote_set
   validates :name, presence: true, uniqueness: true
 

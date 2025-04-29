@@ -167,15 +167,14 @@ module SettingsHelper
 
   def update_tote_sets
     params[:tote_sets].each do |set|
-      tote_set = ToteSet.find_by_id(params[:id])
-      next unless tote_set.present?
 
+      tote_set = ToteSet.find_by(id: set[:id])
       tote_set.update(max_totes: set[:max_totes])
       if tote_set.totes.count > tote_set.max_totes
         (tote_set.totes.order('number ASC').all - tote_set.totes.order('number ASC').first(tote_set.max_totes)).each(&:destroy)
       elsif tote_set.totes.count < tote_set.max_totes
         Range.new(1, (tote_set.max_totes - tote_set.totes.count)).to_a.each do
-          tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1)
+          tote_set.totes.create(name: "#{tote_set.name}-#{tote_set.totes.all.count + 1}", number: tote_set.totes.all.count + 1)
         end
       end
     end

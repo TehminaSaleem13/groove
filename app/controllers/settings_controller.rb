@@ -19,6 +19,27 @@ class SettingsController < ApplicationController
     end
   end
 
+  def delete_tote_set
+    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'settings'=> {}}
+    ToteSet.find(params[:id]).destroy
+    render json: @result
+  end
+
+  def create_tote_set
+    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'settings'=> {}}
+
+    tote_name = (("A".."AZ").to_a - ToteSet.pluck(:name)).first
+
+    @result['tote'] = ToteSet.create(name: tote_name)
+    render json: @result
+  end
+
+  def reset_totes
+    @result = {'status' => true, 'error_messages'=> [], 'success_messages'=> [], 'notice_messages' => [], 'settings'=> {}}
+    ToteSet.all.each { |tote_set| tote_set.totes.destroy; tote_set.create_totes }
+    render json: @result
+  end
+
   def export_csv
     puts 'export_csv'
     @result = { 'status' => true, 'messages' => [] }
@@ -236,7 +257,7 @@ class SettingsController < ApplicationController
       scan_pack_setting = ScanPackSetting.last.attributes.slice(*filter_scan_pack_settings) if params[:app]
       @result['data']['scanpack_setting'] =
         scan_pack_setting.as_json.merge!(
-          'scan_pack_workflow' => Tenant.find_by_name(Apartment::Tenant.current).scan_pack_workflow, 'tote_sets' => ToteSet.select('id, name, max_totes')
+          'scan_pack_workflow' => true, 'tote_sets' => ToteSet.select('id, name, max_totes')
         )
     else
       @result['status'] &= false

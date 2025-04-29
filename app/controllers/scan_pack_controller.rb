@@ -2,6 +2,7 @@
 
 class ScanPackController < ApplicationController
   before_action :groovepacker_authorize!, :set_result_instance
+  before_action :set_user_tote_set, only: %i[product_first_scan scan_to_tote]
   include ScanPackHelper
 
   def scan_pack_bug_report
@@ -199,17 +200,45 @@ class ScanPackController < ApplicationController
   end
 
   def product_first_scan
-    product_first_scan = ScanPack::ProductFirstScan::OrderScanService.new(
-      current_user, session, params
-    )
-    render json: product_first_scan.run
+    if @user_tote_set
+      product_first_scan = ScanPack::ProductFirstScan::OrderScanService.new(
+        current_user, session, params, @user_tote_set
+      )
+      @result = product_first_scan.run
+    else
+      @result[:status] = false
+      @result[:product_error] = true
+      @result[:notice_messages] = 'Tote Set is not assigned'
+    end
+    render json: @result
   end
 
+  def assign_user_tote_set
+    tote_set = Tote.find_by(name: params[:input]).try(:tote_set)
+
+    if tote_set
+      current_user.update(tote_set: tote_set)
+      @result['status'] = true
+      @result['tote_set'] = tote_set
+    else
+      @result['status'] = false
+    end
+    render json: @result
+  end
+
+
   def scan_to_tote
-    product_first_scan = ScanPack::ProductFirstScan::ProductScanService.new(
-      current_user, session, params
-    )
-    render json: product_first_scan.run
+    if @user_tote_set
+      product_first_scan = ScanPack::ProductFirstScan::ProductScanService.new(
+        current_user, session, params, @user_tote_set
+      )
+      @result = product_first_scan.run
+    else
+      @result[:status] = false
+      @result[:product_error] = true
+      @result[:notice_messages] = 'Tote Set is not assigned'
+    end
+    render json: @result
   end
 
   def confirmation_code
@@ -312,5 +341,9 @@ class ScanPackController < ApplicationController
 
   def get_awaiting_orders_count
     Order.where(status: 'awaiting').count
+  end
+
+  def set_user_tote_set
+    @user_tote_set = current_user.tote_set
   end
 end

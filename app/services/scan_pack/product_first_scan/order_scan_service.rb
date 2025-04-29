@@ -24,7 +24,8 @@ module ScanPack
         return @result if order.present? && run_if_single_item_order_found(order, product)
 
         # If no single item orders are found with that item then all orders that have been assigned to a tote are searched to see if the item is required. If any toted orders require that item a check is done to see if that item completes any of the orders.
-        orders = Order.includes([:tote]).where("orders.id IN (?) AND status = 'awaiting'", Tote.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }
+        orders = Order.includes([:tote]).where("orders.id IN (?) AND status = 'awaiting'", @user_tote_set.totes.all.map(&:order_id).compact).joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).reject { |o| o.id.in? @user_tote_set.totes.where(pending_order: true).pluck(:order_id).compact }
+
         if orders.any?
           can_complete_orders = orders.select { |o| o.get_unscanned_items(limit: nil).count == 1 && o.get_unscanned_items[0]['qty_remaining'] == 1 }
           if can_complete_orders.any?
@@ -37,14 +38,11 @@ module ScanPack
           return @result
         end
         # If the item is not required in any toted orders, the oldest multi-item order requiring the item is found in our DB.
-        order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').reject { |o| o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact }.first
-        if order
-          order.update(packing_user_id: current_user.id)   
-          available_tote = Tote.where(order_id: order.id, pending_order: false).first
-        end
-        available_tote = Tote.order('number ASC').where(order_id: nil, pending_order: false).first unless available_tote.try(:present?)
-        tote_set = ToteSet.last || ToteSet.create(name: 'T')
-        available_tote = tote_set.totes.create(name: "T-#{Tote.all.count + 1}", number: Tote.all.count + 1) if Tote.all.count < tote_set.max_totes && !available_tote
+        order = Order.where("status = 'awaiting'").joins(:order_items).where("order_items.scanned_status != 'scanned' AND order_items.product_id = ?", product.id).order('order_placed_time ASC').reject { |o| (o.id.in? Tote.where(pending_order: true).pluck(:order_id).compact) || (o.id.in? Tote.where('order_id IS NOT NULL').pluck(:order_id).compact) }.first
+        available_tote = @user_tote_set.totes.where(order_id: order.id, pending_order: false).first if order.present?
+        available_tote = @user_tote_set.totes.order('number ASC').where(order_id: nil, pending_order: false).first unless available_tote.try(:present?)
+        tote_set = @user_tote_set
+        available_tote = @user_tote_set.totes.create(name: "#{tote_set.name}-#{@user_tote_set.totes.all.count + 1}", number: @user_tote_set.totes.all.count + 1) if @user_tote_set.totes.all.count < tote_set.max_totes && !available_tote
 
         if order.present? && available_tote.present?
           # The lowest available open tote number is displayed and we wait for the user to scan the number. Once scanned, the order is assigned to that tote and we record that the item is scanned into that tote.
