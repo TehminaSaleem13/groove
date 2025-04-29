@@ -14,7 +14,7 @@
   <br/>
   <% barcode_string = generate_barcode(@action_code) %>
   <center style="margin-top: 15px"><%= pdf_image_tag(barcode_string+".png", {:width => 255, :height => 42}) %></center>
-  <span style="font-size: 12px; display: block; text-align: center; margin-top: 5px; max-width: 255px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: auto; margin-right: auto; line-height: 1.5; font-family: 'Poppins';"><%= @action_code %></span>
+  <span style="font-size: 20px; display: block; text-align: center; margin-top: 5px; max-width: 255px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-left: auto; margin-right: auto; line-height: 1.5; font-family: 'Poppins';"><%= @action_code %></span>
 
 <% else %>
   <br/>
