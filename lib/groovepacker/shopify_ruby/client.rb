@@ -64,7 +64,7 @@ module Groovepacker
       def get_single_order(order_number)
         query = { limit: 5 }.as_json
         response = HTTParty.get(
-          "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?name=#{order_number}", query:, headers:
+          "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?name=#{order_number}&status=any", query:, headers:
         )
         Tenant.save_se_import_data(
           "========Shopify On Demand Import Started UTC: #{Time.current.utc} TZ: #{Time.current}", '==Number', order_number, '==Response', response
