@@ -141,7 +141,7 @@ class UsersController < ApplicationController
       format.html # show.html.erb
       format.json { render json: result }
     end
-  end
+  end  
 
   def update_user_status
     if current_user.can? 'add_edit_users'
@@ -340,9 +340,36 @@ class UsersController < ApplicationController
     if user.present?
       user.current_sign_in_at = DateTime.now.in_time_zone
       user.last_sign_in_at = DateTime.now.in_time_zone
+      user.last_login_time = DateTime.now.in_time_zone
       user.save
+      begin
+        HTTParty.post("#{ENV['GROOV_ANALYTIC_URL']}/users/update_login",
+                      query: {packing_user_id: user.id, active: user.active,  current_sign_in_at: user.last_login_time, last_sign_in_at: user.last_logout_time, sign_in_count: user.total_login_time,
+                               time_zone: GeneralSetting.last&.new_time_zone },
+                      headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
+      rescue StandardError
+        nil
+      end
     end
     render json: {}
+  end
+
+  def update_logout_time
+    if current_user.present?
+      current_user.update(last_logout_time: params[:logout_time])
+      current_user.save
+      begin
+        HTTParty.post("#{ENV['GROOV_ANALYTIC_URL']}/users/update_logout",
+          query: {packing_user_id: current_user.id, active: current_user.active, last_sign_in_at: current_user.last_logout_time, sign_in_count: current_user.total_login_time,
+                   time_zone: GeneralSetting.last&.new_time_zone },
+          headers: { 'Content-Type' => 'application/json', 'tenant' => Apartment::Tenant.current })
+      rescue StandardError
+        nil
+      end
+          head :no_content
+    else
+      render json: { error: 'User not found' }, status: :unauthorized
+    end
   end
 
   def get_super_admin_email

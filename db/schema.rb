@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_24_095332) do
+ActiveRecord::Schema.define(version: 2025_04_28_062042) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -1642,6 +1642,9 @@ ActiveRecord::Schema.define(version: 2025_04_24_095332) do
     t.string "token"
     t.json "sound_selected_types"
     t.integer "tote_set_id"
+    t.datetime "last_login_time"
+    t.datetime "last_logout_time"
+    t.integer "total_login_time", default: 0
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"

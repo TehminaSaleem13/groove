@@ -303,6 +303,7 @@ Rails.application.routes.draw do
       get 'modify_plan'
       get 'get_subscription_info'
       get 'invoices'
+      post 'update_logout_time'
     end
     member do
       put 'create_role'

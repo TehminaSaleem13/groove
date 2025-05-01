@@ -31,6 +31,8 @@ class User < ApplicationRecord
   after_save :check_fix_permissions
   # before_create 'User.can_create_new?'
   before_validation :assign_confirmation_code
+  before_save :update_total_login_time
+
 
   def self.current
     Thread.current[:user]
@@ -119,6 +121,24 @@ class User < ApplicationRecord
                                  .where(users: { username: username })
                                  .count.to_s || "0"
       }
+    end
+  end
+    
+  def update_total_login_time
+    # return if last_login_time.blank?
+    end_time = last_logout_time 
+    today = Time.current.beginning_of_day..Time.current.end_of_day
+    if today.cover?(last_login_time) && today.cover?(end_time) 
+      if last_login_time < end_time
+        duration_in_seconds = end_time - last_login_time
+        minutes_today = (duration_in_seconds / 60).to_i
+    
+        self.total_login_time ||= 0
+        self.total_login_time += minutes_today
+      end
+    else
+      # If the login time is not today, reset the total login time
+      self.total_login_time = 0
     end
   end
 end
