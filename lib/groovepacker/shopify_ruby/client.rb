@@ -40,7 +40,9 @@ module Groovepacker
         response = HTTParty.get(
           "https://#{shopify_credential.shop_name}.myshopify.com/admin/api/#{ENV['SHOPIFY_API_VERSION']}/orders?status=#{shopify_credential.shopify_status}&fulfillment_status=#{fulfillment_status}", query:, headers:
         )
-        combined_response['orders'] << response['orders']
+        orders = JSON.parse(response.body)['orders']
+        orders.reject! { |order| order['cancelled_at'].present? } if shopify_credential.shopify_status == 'any'
+        combined_response['orders'] << orders
 
         while response.headers['link'].present? && (response.headers['link'].include? 'next')
           page_index += 1
