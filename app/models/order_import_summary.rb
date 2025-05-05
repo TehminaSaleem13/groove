@@ -41,6 +41,7 @@ class OrderImportSummary < ApplicationRecord
                                     show_update: show_update(import_item.store), progress: (import_item.status == 'in_progress' && with_progress ? import_item.get_import_item_info(import_item.store&.id) : nil))
       end
     end
+    result['all_import_completed'] = true if import_summary.status == 'completed'
     result
   end
 
