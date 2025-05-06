@@ -80,6 +80,7 @@ module Groovepacker
           set_status_and_message(false, 'You currently have no Active Stores in your Store List',
                                  %w[push error_messages])
         end
+        @result['last_store_id'] = Store.where("status = '1' AND store_type != 'system'").last.id
         @result
       end
 
