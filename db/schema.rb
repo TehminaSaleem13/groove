@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_04_28_062042) do
+ActiveRecord::Schema.define(version: 2025_05_05_131559) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -97,7 +97,22 @@ ActiveRecord::Schema.define(version: 2025_04_28_062042) do
     t.bigint "cart_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
+    t.float "default_width", default: 0.0
+    t.float "default_height", default: 0.0
+    t.float "default_weight", default: 0.0
     t.index ["cart_id"], name: "index_cart_rows_on_cart_id"
+  end
+
+  create_table "cart_totes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
+    t.string "tote_id"
+    t.float "width"
+    t.float "height"
+    t.float "weight"
+    t.boolean "use_default_dimensions", default: true
+    t.bigint "cart_row_id", null: false
+    t.datetime "created_at", precision: 6, null: false
+    t.datetime "updated_at", precision: 6, null: false
+    t.index ["cart_row_id"], name: "index_cart_totes_on_cart_row_id"
   end
 
   create_table "carts", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -372,6 +387,7 @@ ActiveRecord::Schema.define(version: 2025_04_28_062042) do
     t.boolean "delete_import_summary", default: false
     t.integer "slide_show_time", default: 15
     t.json "select_types", null: false
+    t.string "product_dimension_unit", default: "inches"
   end
 
   create_table "generate_barcodes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1706,4 +1722,5 @@ ActiveRecord::Schema.define(version: 2025_04_28_062042) do
     t.index ["visit_token"], name: "index_visits_on_visit_token", unique: true
   end
 
+  add_foreign_key "cart_rows", "carts"
 end

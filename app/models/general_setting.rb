@@ -125,7 +125,7 @@ class GeneralSetting < ApplicationRecord
       bulk_actions.delay(run_at: 2.seconds.from_now, queue: 'inventory_unprocess', priority: 95).unprocess_all(Apartment::Tenant.current, groove_bulk_actions.id)
       Groovepacker::LogglyLogger.log(Apartment::Tenant.current, 'inventory_unprocess',{ message: 'inventory_unprocess'})
     end
-                                  
+
     true
   end
 
@@ -199,6 +199,10 @@ class GeneralSetting < ApplicationRecord
 
   def self.get_product_weight_format
     all.first.product_weight_format
+  end
+
+  def self.get_product_dimension_unit
+    all.first.product_dimension_unit
   end
 
   def self.get_packing_slip_size

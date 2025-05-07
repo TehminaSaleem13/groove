@@ -103,7 +103,7 @@ module SettingsHelper
   def permit_general_setting_params
     params.as_json(
       only: %i[
-        packing_slip_message_to_customer product_weight_format
+        packing_slip_message_to_customer product_weight_format product_dimension_unit
         packing_slip_size packing_slip_orientation
         conf_req_on_notes_to_packer conf_req_on_notes_to_packer
         strict_cc conf_code_product_instruction
@@ -231,7 +231,7 @@ module SettingsHelper
         end
         
         current_user.sound_selected_types = new_select_types.compact
-        current_user.save        
+        current_user.save
   
         if general_setting.save &&  printing_setting.save
           @result['success_messages'] = ['Settings updated successfully.']
