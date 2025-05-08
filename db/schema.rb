@@ -10,7 +10,7 @@
 #
 # It's strongly recommended that you check this file into your version control system.
 
-ActiveRecord::Schema.define(version: 2025_05_05_131559) do
+ActiveRecord::Schema.define(version: 2025_05_07_090009) do
 
   create_table "access_restrictions", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
     t.integer "num_users", default: 0, null: false
@@ -97,9 +97,9 @@ ActiveRecord::Schema.define(version: 2025_05_05_131559) do
     t.bigint "cart_id", null: false
     t.datetime "created_at", precision: 6, null: false
     t.datetime "updated_at", precision: 6, null: false
-    t.float "default_width", default: 0.0
-    t.float "default_height", default: 0.0
-    t.float "default_weight", default: 0.0
+    t.float "default_width"
+    t.float "default_height"
+    t.float "default_length"
     t.index ["cart_id"], name: "index_cart_rows_on_cart_id"
   end
 
@@ -107,7 +107,7 @@ ActiveRecord::Schema.define(version: 2025_05_05_131559) do
     t.string "tote_id"
     t.float "width"
     t.float "height"
-    t.float "weight"
+    t.float "length"
     t.boolean "use_default_dimensions", default: true
     t.bigint "cart_row_id", null: false
     t.datetime "created_at", precision: 6, null: false
@@ -387,7 +387,7 @@ ActiveRecord::Schema.define(version: 2025_05_05_131559) do
     t.boolean "delete_import_summary", default: false
     t.integer "slide_show_time", default: 15
     t.json "select_types", null: false
-    t.string "product_dimension_unit", default: "inches"
+    t.string "product_dimension_format"
   end
 
   create_table "generate_barcodes", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1211,10 +1211,10 @@ ActiveRecord::Schema.define(version: 2025_05_05_131559) do
     t.string "email_reply"
     t.string "order_num_esc_str_removal", default: ""
     t.boolean "order_num_esc_str_enabled", default: false
-    t.boolean "assigned_orders", default: false
     t.boolean "requires_assigned_orders", default: false
     t.boolean "enable_service_issue_status", default: true, null: false
     t.boolean "scan_to_cart_option", default: false
+    t.string "scan_to_cart_dimension", default: "inches"
   end
 
   create_table "shipping_easy_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|
@@ -1652,10 +1652,6 @@ ActiveRecord::Schema.define(version: 2025_05_05_131559) do
     t.string "warehouse_postcode", default: ""
     t.string "packing_slip_size", default: "4 x 6"
     t.boolean "override_pass_scanning", default: false
-    t.datetime "last_purchased_at"
-    t.integer "last_purchased_by"
-    t.integer "total_purchases"
-    t.string "token"
     t.json "sound_selected_types"
     t.integer "tote_set_id"
     t.datetime "last_login_time"
@@ -1664,7 +1660,6 @@ ActiveRecord::Schema.define(version: 2025_05_05_131559) do
     t.index ["inventory_warehouse_id"], name: "index_users_on_inventory_warehouse_id"
     t.index ["reset_password_token"], name: "index_users_on_reset_password_token", unique: true
     t.index ["role_id"], name: "index_users_on_role_id"
-    t.index ["token"], name: "index_users_on_token", unique: true
   end
 
   create_table "veeqo_credentials", charset: "utf8mb4", collation: "utf8mb4_0900_ai_ci", force: :cascade do |t|

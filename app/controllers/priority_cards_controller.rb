@@ -1,7 +1,8 @@
 class PriorityCardsController < ApplicationController
   before_action :groovepacker_authorize!
   before_action :set_priority_card, only: %i[show update edit destroy]
-  before_action :empty_order_count, :get_priority_cards, :last_14_days_orders
+  before_action :empty_order_count, :get_priority_cards
+  # before_action :last_14_days_orders # Remove or comment out this line
 
   def index
     @priority_cards = recalculate_priority_cards_count
@@ -127,9 +128,9 @@ class PriorityCardsController < ApplicationController
   end
 
   def last_14_days_orders
-    @recent_orders = Order.where(status: 'awaiting').where(
-        Order::RECENT_ORDERS_CONDITION, 14.days.ago
-    )
+    @recent_orders = Order.where(status: 'awaiting')
+    # Remove the date filter
+    # .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
   end
 
   def empty_order_count
@@ -159,7 +160,8 @@ class PriorityCardsController < ApplicationController
     .where(status: 'awaiting')
     .joins(:order_tags)
     .where(order_tags: { name: assigned_tag_name })
-    .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+    # Remove the date filter
+    # .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
     .where.not(id: @counted_order_ids)
     .distinct
     order_count = orders_with_tag.count
@@ -179,7 +181,8 @@ class PriorityCardsController < ApplicationController
   def get_oldest_order(assigned_tag_name)
     oldest_order = Order.joins(:order_tags)
                         .where(order_tags: { name: assigned_tag_name }, status: 'awaiting')
-                        .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+                        # Remove the date filter
+                        # .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
                         .order('order_placed_time ASC')
                         .first
 
@@ -210,7 +213,8 @@ class PriorityCardsController < ApplicationController
   def fetch_tagged_orders(user)
     Order.joins(:assigned_user)
          .where(users: { username: user.username })
-         .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
+         # Remove the date filter
+         # .where(Order::RECENT_ORDERS_CONDITION, 14.days.ago)
          .where(status: 'awaiting')
   end
 

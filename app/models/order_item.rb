@@ -5,7 +5,7 @@ class OrderItem < ApplicationRecord
   belongs_to :product, optional: true
   has_many :order_item_boxes, dependent: :destroy
   has_many :boxes, through: :order_item_boxes
-
+ 
   has_many :order_item_kit_products, dependent: :destroy
   has_many :order_item_order_serial_product_lots
   has_many :order_item_scan_times, dependent: :destroy
@@ -46,6 +46,40 @@ class OrderItem < ApplicationRecord
 
   scope :not_scanned, -> { where.not(scanned_status: SCANNED_STATUS) }
 
+  def order_item_volume
+    default_dimensions = { width: 4, height: 4, length: 4 }
+    order_item_unit = get_dimension_unit
+    tote_unit = get_dimension_unit # Assuming the same unit for simplicity
+
+    # Use default dimensions if not specified
+    width = product.width || default_dimensions[:width]
+    height = product.height || default_dimensions[:height]
+    length = product.length || default_dimensions[:length]
+
+    # Convert dimensions to the same unit if necessary
+    if order_item_unit != tote_unit
+      width = convert_dimensions(width, order_item_unit, tote_unit)
+      height = convert_dimensions(height, order_item_unit, tote_unit)
+      length = convert_dimensions(length, order_item_unit, tote_unit)
+    end
+
+    width * height * length
+  end
+
+  def get_dimension_unit
+    GeneralSetting.setting.dimension_unit # Assuming this returns 'inches' or 'centimeters'
+  end
+
+  def convert_dimensions(value, from_unit, to_unit)
+    if from_unit == 'inches' && to_unit == 'centimeters'
+      value * 2.54
+    elsif from_unit == 'centimeters' && to_unit == 'inches'
+      value / 2.54
+    else
+      value
+    end
+  end
+  
   def has_unscanned_kit_items
     result = false
     order_item_kit_products.each do |kit_product|

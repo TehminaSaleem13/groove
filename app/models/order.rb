@@ -36,6 +36,7 @@ class Order < ApplicationRecord
 
   # validates :increment_id, :uniqueness => { :scope => :increment_id}, :if => :check_for_duplicate
   validates :increment_id, uniqueness: { unless: :check_for_duplicate }
+  validate :one_order_per_tote
 
   attr_accessor :scan_pack_v2, :pull_inv
 
@@ -65,6 +66,10 @@ class Order < ApplicationRecord
     statuses = [statuses] unless statuses.is_a?(Array)
     where(status: statuses.map(&:to_s)) if statuses.present?
   }
+
+  def total_order_volume
+    order_items.sum { |order_item| order_item.order_item_volume }
+  end
 
   scope :filter_partially_scanned, lambda { |statuses|
     if statuses.include?('partiallyscanned') && !statuses.include?('awaiting')

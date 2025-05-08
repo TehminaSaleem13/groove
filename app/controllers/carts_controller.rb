@@ -90,7 +90,7 @@ class CartsController < ApplicationController
         row_count: row_count,
         default_width: row[:default_width] || 0.0,
         default_height: row[:default_height] || 0.0,
-        default_weight: row[:default_weight] || 0.0
+        default_length: row[:default_length] || 0.0
       )
 
       row_count.times do |index|
@@ -99,7 +99,7 @@ class CartsController < ApplicationController
           tote_id: tote_id,
           width: cart_row.default_width,
           height: cart_row.default_height,
-          weight: cart_row.default_weight
+          length: cart_row.default_length
         )
       end
 
@@ -118,7 +118,7 @@ class CartsController < ApplicationController
           tote_id: tote_id,
           width: cart_row.default_width,
           height: cart_row.default_height,
-          weight: cart_row.default_weight,
+          length: cart_row.default_length,
           use_default_dimensions: true
         )
       end
@@ -130,7 +130,7 @@ class CartsController < ApplicationController
   
   def cart_params
     params.permit(:cart_name, :cart_id, :number_of_totes,
-                  cart_rows: [:row_name, :row_count, :default_width, :default_height, :default_weight])
+                  cart_rows: [:row_name, :row_count, :default_width, :default_height, :default_length])
   end
 end
 

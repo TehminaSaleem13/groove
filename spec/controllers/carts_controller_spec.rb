@@ -12,7 +12,7 @@ RSpec.describe CartsController, type: :controller do
           row_count: 5,
           default_width: 10.0,
           default_height: 8.0,
-          default_weight: 2.0
+          default_length: 2.0
         }
       ]
     }
@@ -106,7 +106,7 @@ RSpec.describe CartsController, type: :controller do
         
         expect(tote.width).to eq(10.0)
         expect(tote.height).to eq(8.0)
-        expect(tote.weight).to eq(2.0)
+        expect(tote.length).to eq(2.0)
       end
 
       it "returns the created cart with rows" do
@@ -146,7 +146,7 @@ RSpec.describe CartsController, type: :controller do
           tote_id: "#{cart_row.row_name}-#{i+1}",
           width: 5.0,
           height: 5.0,
-          weight: 1.0
+          length: 1.0
         )
       end
     end
@@ -164,7 +164,7 @@ RSpec.describe CartsController, type: :controller do
               row_count: 6,
               default_width: 12.0,
               default_height: 10.0,
-              default_weight: 3.0
+              default_length: 3.0
             }
           ]
         }
@@ -198,7 +198,7 @@ RSpec.describe CartsController, type: :controller do
         tote = cart.cart_rows.first.cart_totes.first
         expect(tote.width).to eq(12.0)
         expect(tote.height).to eq(10.0)
-        expect(tote.weight).to eq(3.0)
+        expect(tote.length).to eq(3.0)
       end
 
       it "updates the total number of totes" do

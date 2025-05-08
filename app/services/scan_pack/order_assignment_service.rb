@@ -57,7 +57,7 @@ module ScanPack
       @counted_order_ids = Order.none
       @priority_cards = PriorityCard.where(is_stand_by: false).order(:position)
       @priority_cards.map do |priority_card|
-        unless priority_card.is_user_card && priority_card.is_card_disabled &&  @counted_order_ids
+        unless priority_card.is_user_card && priority_card.is_card_disabled && @counted_order_ids
           priority_card_orders_with_unassigned_user(priority_card.assigned_tag)
         end
       end
@@ -93,14 +93,14 @@ module ScanPack
       fetch_priority_oldest_orders.first(total_totes)
     end
 
-    def assign_to_totes(orders)
-      sorted_items = sort_order_items(orders)
-      sorted_orders = sort_orders_by_items(orders, sorted_items)
+   def assign_to_totes(orders)
+  sorted_items = sort_order_items(orders)
+  sorted_orders = sort_orders_by_items(orders, sorted_items)
 
-      sorted_orders.each_with_index do |order, index|
-        assign_order_to_tote(order, index + 1)
-      end
-    end
+  sorted_orders.each_with_index do |order, index|
+    assign_order_to_tote(order, index + 1)
+  end
+end
 
     def sort_order_items(orders)
       items = OrderItem.includes(:product)
@@ -193,16 +193,22 @@ module ScanPack
       position_in_row = (total_position - current_row_position) + 1
       tote_id = "#{current_row.row_name}-#{position_in_row}-#{@cart.cart_id}"
 
-      order.update(
-        assigned_cart_tote_id: tote_id,
-        assigned_user_id: @current_user.id,
-        status: 'pick_in_progress'
-      )
+      tote = CartTote.find_by(tote_id: tote_id)
+      if tote.assign_order(order)
+        order.update(
+          assigned_cart_tote_id: tote_id,
+          assigned_user_id: @current_user.id,
+          status: 'pick_in_progress'
+        )
 
-      @result['data']['assigned_orders'] << {
-        order_id: order.id,
-        tote_position: position
-      }
+        @result['data']['assigned_orders'] << {
+          order_id: order.id,
+          tote_position: position
+        }
+      else
+        @result['status'] = false
+        @result['error_messages'] << "Order #{order.id} does not fit in any tote"
+      end
     end
   end
 end
